@@ -1,11 +1,11 @@
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import { assertIsUser } from "../convex/auth";
+import { assertIsUser } from "../convex/shared/auth";
 import type {
 	AuthorizedUser,
 	CanEditServer,
 	IsAuthenticated,
-} from "../convex/permissions";
+} from "../convex/shared/permissions";
 import { DatabaseTestLayer } from "./database-test";
 
 // Mock auth context for testing

@@ -142,9 +142,12 @@ export default function ChannelsPage() {
 		[selectedChannelIds, setSelectedChannelIdsParam],
 	);
 
-	const dashboardData = useQuery(api.dashboard_queries.getDashboardData, {
-		serverId,
-	});
+	const dashboardData = useQuery(
+		api.public.dashboard_queries.getDashboardData,
+		{
+			serverId,
+		},
+	);
 
 	// Filter channels based on search query and channel type - must be before conditional return
 	const filteredChannels = React.useMemo(() => {
@@ -155,7 +158,7 @@ export default function ChannelsPage() {
 
 		// Filter by channel type
 		if (channelTypeFilter && channelTypeFilter.size > 0) {
-			filtered = filtered.filter((channel: { type: number }) =>
+			filtered = filtered.filter((channel) =>
 				channelTypeFilter.has(channel.type),
 			);
 		}
@@ -164,7 +167,7 @@ export default function ChannelsPage() {
 		const searchQuery = channelSearchQuery ?? "";
 		if (searchQuery.trim()) {
 			const query = searchQuery.toLowerCase();
-			filtered = filtered.filter((channel: { name: string }) =>
+			filtered = filtered.filter((channel) =>
 				channel.name.toLowerCase().includes(query),
 			);
 		}
@@ -175,7 +178,7 @@ export default function ChannelsPage() {
 	// Determine select all checkbox state - must be before conditional return
 	const selectAllState = React.useMemo(() => {
 		if (filteredChannels.length === 0) return false;
-		const selectedCount = filteredChannels.filter((c: { id: string }) =>
+		const selectedCount = filteredChannels.filter((c) =>
 			selectedChannelIds.has(c.id),
 		).length;
 		if (selectedCount === 0) return false;
@@ -187,17 +190,15 @@ export default function ChannelsPage() {
 	const toggleSelectAll = React.useCallback(() => {
 		setSelectedChannelIds((prev) => {
 			const next = new Set(prev);
-			const allSelected = filteredChannels.every((c: { id: string }) =>
-				next.has(c.id),
-			);
+			const allSelected = filteredChannels.every((c) => next.has(c.id));
 			if (allSelected) {
 				// Deselect all filtered channels
-				filteredChannels.forEach((c: { id: string }) => {
+				filteredChannels.forEach((c) => {
 					next.delete(c.id);
 				});
 			} else {
 				// Select all filtered channels
-				filteredChannels.forEach((c: { id: string }) => {
+				filteredChannels.forEach((c) => {
 					next.add(c.id);
 				});
 			}
@@ -209,12 +210,12 @@ export default function ChannelsPage() {
 		api.dashboard_mutations.updateChannelSettingsFlags,
 	).withOptimisticUpdate((localStore, args) => {
 		const currentData = localStore.getQuery(
-			api.dashboard_queries.getDashboardData,
+			api.public.dashboard_queries.getDashboardData,
 			{ serverId },
 		);
 		if (currentData !== undefined) {
 			localStore.setQuery(
-				api.dashboard_queries.getDashboardData,
+				api.public.dashboard_queries.getDashboardData,
 				{ serverId },
 				{
 					...currentData,
@@ -241,9 +242,7 @@ export default function ChannelsPage() {
 	}
 
 	const { channels } = dashboardData;
-	const selectedChannels = channels.filter((c: { id: string }) =>
-		selectedChannelIds.has(c.id),
-	);
+	const selectedChannels = channels.filter((c) => selectedChannelIds.has(c.id));
 
 	// Helper function to get channel icon and type name
 	const getChannelInfo = (type: number) => {
@@ -289,7 +288,7 @@ export default function ChannelsPage() {
 		if (selectedChannels.length === 0) return false;
 		const values = selectedChannels.map((c) => c.flags[flagKey]);
 		const firstValue = values[0];
-		if (values.every((v) => v === firstValue)) {
+		if (values.every((v: boolean | undefined) => v === firstValue)) {
 			return firstValue ?? false;
 		}
 		return "mixed";
@@ -308,7 +307,7 @@ export default function ChannelsPage() {
 			return getFlagValue("markSolutionEnabled") !== true;
 		}
 		if (flagKey === "forumGuidelinesConsentEnabled") {
-			return !selectedChannels.some((c) => c.type === 15);
+			return !selectedChannels.some((c: { type: number }) => c.type === 15);
 		}
 		return false;
 	};
@@ -338,7 +337,7 @@ export default function ChannelsPage() {
 		try {
 			// Update all selected channels
 			await Promise.all(
-				selectedChannels.map((channel) =>
+				selectedChannels.map((channel: { id: string }) =>
 					updateChannelSettings({
 						channelId: channel.id,
 						flags: {
@@ -427,36 +426,34 @@ export default function ChannelsPage() {
 												: "No channels available"}
 										</div>
 									) : (
-										filteredChannels.map(
-											(channel: { id: string; name: string; type: number }) => {
-												const { Icon, typeName } = getChannelInfo(channel.type);
-												const isSelected = selectedChannelIds.has(channel.id);
-												return (
-													<label
-														key={channel.id}
-														className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors"
-													>
-														<Checkbox
-															checked={isSelected}
-															onCheckedChange={() =>
-																toggleChannelSelection(channel.id)
-															}
-														/>
-														<Icon className="size-4 shrink-0 text-muted-foreground" />
-														<div className="flex-1 min-w-0">
-															<div className="flex items-center gap-2">
-																<span className="font-medium truncate text-sm">
-																	{channel.name}
-																</span>
-																<span className="text-xs text-muted-foreground shrink-0">
-																	{typeName}
-																</span>
-															</div>
+										filteredChannels.map((channel) => {
+											const { Icon, typeName } = getChannelInfo(channel.type);
+											const isSelected = selectedChannelIds.has(channel.id);
+											return (
+												<label
+													key={channel.id}
+													className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors"
+												>
+													<Checkbox
+														checked={isSelected}
+														onCheckedChange={() =>
+															toggleChannelSelection(channel.id)
+														}
+													/>
+													<Icon className="size-4 shrink-0 text-muted-foreground" />
+													<div className="flex-1 min-w-0">
+														<div className="flex items-center gap-2">
+															<span className="font-medium truncate text-sm">
+																{channel.name}
+															</span>
+															<span className="text-xs text-muted-foreground shrink-0">
+																{typeName}
+															</span>
 														</div>
-													</label>
-												);
-											},
-										)
+													</div>
+												</label>
+											);
+										})
 									)}
 								</div>
 							</div>
@@ -476,12 +473,12 @@ export default function ChannelsPage() {
 												<span className="flex items-center gap-2">
 													{selectedChannels.length === 0 ? (
 														<>Select channels</>
-													) : selectedChannels.length === 1 ? (
+													) : selectedChannels.length === 1 &&
+														selectedChannels[0] ? (
 														<>
 															{(() => {
-																const { Icon } = getChannelInfo(
-																	selectedChannels[0].type,
-																);
+																const channel = selectedChannels[0];
+																const { Icon } = getChannelInfo(channel.type);
 																return (
 																	<Icon className="size-4 text-muted-foreground" />
 																);
@@ -559,40 +556,32 @@ export default function ChannelsPage() {
 														: "No channels available"}
 												</div>
 											) : (
-												filteredChannels.map(
-													(channel: {
-														id: string;
-														name: string;
-														type: number;
-													}) => {
-														const { Icon, typeName } = getChannelInfo(
-															channel.type,
-														);
-														const isSelected = selectedChannelIds.has(
-															channel.id,
-														);
-														return (
-															<DropdownMenuCheckboxItem
-																key={channel.id}
-																checked={isSelected}
-																onCheckedChange={() =>
-																	toggleChannelSelection(channel.id)
-																}
-																onSelect={(e) => e.preventDefault()}
-															>
-																<div className="flex items-center gap-2 flex-1 min-w-0">
-																	<Icon className="size-4 shrink-0 text-muted-foreground" />
-																	<span className="truncate font-medium">
-																		{channel.name}
-																	</span>
-																	<span className="text-xs text-muted-foreground shrink-0 ml-auto">
-																		{typeName}
-																	</span>
-																</div>
-															</DropdownMenuCheckboxItem>
-														);
-													},
-												)
+												filteredChannels.map((channel) => {
+													const { Icon, typeName } = getChannelInfo(
+														channel.type,
+													);
+													const isSelected = selectedChannelIds.has(channel.id);
+													return (
+														<DropdownMenuCheckboxItem
+															key={channel.id}
+															checked={isSelected}
+															onCheckedChange={() =>
+																toggleChannelSelection(channel.id)
+															}
+															onSelect={(e) => e.preventDefault()}
+														>
+															<div className="flex items-center gap-2 flex-1 min-w-0">
+																<Icon className="size-4 shrink-0 text-muted-foreground" />
+																<span className="truncate font-medium">
+																	{channel.name}
+																</span>
+																<span className="text-xs text-muted-foreground shrink-0 ml-auto">
+																	{typeName}
+																</span>
+															</div>
+														</DropdownMenuCheckboxItem>
+													);
+												})
 											)}
 										</DropdownMenuContent>
 									</DropdownMenu>
@@ -700,7 +689,9 @@ export default function ChannelsPage() {
 												disabledReason="This option is only available if mark solution is enabled for all selected channels."
 											/>
 
-											{selectedChannels.some((c) => c.type === 15) && (
+											{selectedChannels.some(
+												(c: { type: number }) => c.type === 15,
+											) && (
 												<ToggleChannelFlag
 													title="Forum Guidelines Consent Enabled"
 													description="Marks all posts as public, and disables Username Anonymization for the selected channel. If enabled, add a public message disclaimer to your forum guidelines."

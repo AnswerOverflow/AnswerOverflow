@@ -7,17 +7,17 @@ import {
 } from "@effect/platform";
 import { make } from "@packages/discord-api/generated";
 import { Effect } from "effect";
-import { api, components } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
-import { authenticatedAction } from "./shared/auth";
-import { authComponent } from "./shared/betterAuth";
-import { getOrSetCache } from "./shared/cache";
+import { api, components } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
+import { authenticatedAction } from "../shared/auth";
+import { authComponent } from "../shared/betterAuth";
+import { getOrSetCache } from "../shared/cache";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
 	hasPermission,
 	sortServersByBotAndRole,
-} from "./shared/shared";
+} from "../shared/shared";
 
 const discordApi = (token: string) =>
 	Effect.gen(function* () {

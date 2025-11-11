@@ -38,65 +38,71 @@ export const service = Effect.gen(function* () {
 	});
 
 	const upsertServer = (data: Server) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.servers.upsertServerExternal, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.servers.upsertServerExternal,
+				{
 					backendAccessToken,
 					data,
-				}),
+				},
+			),
 		);
 
 	const createServer = (data: Server) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.servers.createServerExternal, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.servers.createServerExternal,
+				{
 					backendAccessToken,
 					data,
-				}),
+				},
+			),
 		);
 
 	const updateServer = (id: Id<"servers">, data: Server) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.servers.updateServerExternal, {
+		convexClient.use((client, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.servers.updateServerExternal,
+				{
 					backendAccessToken,
 					id,
 					data,
-				}),
+				},
+			),
 		);
 
 	const getServerById = (id: Id<"servers">) =>
-		watchQueryToLiveData(({ api }) => api.servers.publicGetServerById, {
+		watchQueryToLiveData(({ api }) => api.public.servers.publicGetServerById, {
 			id,
 		});
 
 	const getServerByDiscordId = (discordId: string) =>
-		watchQueryToLiveData(({ api }) => api.servers.publicGetServerByDiscordId, {
-			discordId,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.public.servers.publicGetServerByDiscordId,
+			{
+				discordId,
+			},
+		);
 
 	const findServerByAlias = (alias: string) =>
-		watchQueryToLiveData(({ api }) => api.servers.publicFindServerByAlias, {
-			alias,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.public.servers.publicFindServerByAlias,
+			{
+				alias,
+			},
+		);
 
 	const findServerByAliasOrId = (aliasOrId: string) =>
-		watchQueryToLiveData(({ api }) => api.servers.publicFindServerByAliasOrId, {
-			aliasOrId,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.public.servers.publicFindServerByAliasOrId,
+			{
+				aliasOrId,
+			},
+		);
 
 	const findServerByCustomDomain = (domain: string) =>
 		watchQueryToLiveData(
-			({ api }) => api.servers.publicFindServerByCustomDomain,
+			({ api }) => api.public.servers.publicFindServerByCustomDomain,
 			{
 				domain,
 			},
@@ -104,7 +110,7 @@ export const service = Effect.gen(function* () {
 
 	const findServerByStripeCustomerId = (stripeCustomerId: string) =>
 		watchQueryToLiveData(
-			({ api }) => api.servers.publicFindServerByStripeCustomerId,
+			({ api }) => api.public.servers.publicFindServerByStripeCustomerId,
 			{
 				stripeCustomerId,
 			},
@@ -112,109 +118,134 @@ export const service = Effect.gen(function* () {
 
 	const findServerByStripeSubscriptionId = (stripeSubscriptionId: string) =>
 		watchQueryToLiveData(
-			({ api }) => api.servers.publicFindServerByStripeSubscriptionId,
+			({ api }) => api.public.servers.publicFindServerByStripeSubscriptionId,
 			{
 				stripeSubscriptionId,
 			},
 		);
 
 	const findManyServersById = (ids: Id<"servers">[]) =>
-		watchQueryToLiveData(({ api }) => api.servers.publicFindManyServersById, {
-			ids,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.public.servers.publicFindManyServersById,
+			{
+				ids,
+			},
+		);
 
 	const getBiggestServers = (take: number) =>
-		watchQueryToLiveData(({ api }) => api.servers.publicGetBiggestServers, {
-			take,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.public.servers.publicGetBiggestServers,
+			{
+				take,
+			},
+		);
 
 	const findServerByIdWithChannels = (id: Id<"servers">) =>
 		watchQueryToLiveData(
-			({ api }) => api.servers.publicFindServerByIdWithChannels,
+			({ api }) => api.public.servers.publicFindServerByIdWithChannels,
 			{
 				id,
 			},
 		);
 
 	const publicGetAllServers = () =>
-		watchQueryToLiveData(({ api }) => api.servers.publicGetAllServers, {});
+		watchQueryToLiveData(
+			({ api }) => api.public.servers.publicGetAllServers,
+			{},
+		);
 
 	const getChannelByDiscordId = (discordId: string) =>
-		watchQueryToLiveData(({ api }) => api.channels.getChannelByDiscordId, {
-			discordId,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.public.channels.getChannelByDiscordId,
+			{
+				discordId,
+			},
+		);
 
 	const findChannelByInviteCode = (inviteCode: string) =>
-		watchQueryToLiveData(({ api }) => api.channels.findChannelByInviteCode, {
-			backendAccessToken,
-			inviteCode,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.channels.findChannelByInviteCode,
+			{
+				backendAccessToken,
+				inviteCode,
+			},
+		);
 
 	const findAllThreadsByParentId = (parentId: string, limit?: number) =>
-		watchQueryToLiveData(({ api }) => api.channels.findAllThreadsByParentId, {
-			backendAccessToken,
-			parentId,
-			limit,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.channels.findAllThreadsByParentId,
+			{
+				backendAccessToken,
+				parentId,
+				limit,
+			},
+		);
 
 	const findAllChannelsByServerId = (serverId: Id<"servers">) =>
-		watchQueryToLiveData(({ api }) => api.channels.findAllChannelsByServerId, {
-			backendAccessToken,
-			serverId,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.channels.findAllChannelsByServerId,
+			{
+				backendAccessToken,
+				serverId,
+			},
+		);
 
 	const findManyChannelsById = (ids: string[], includeMessageCount?: boolean) =>
-		watchQueryToLiveData(({ api }) => api.channels.findManyChannelsById, {
-			ids,
-			includeMessageCount,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.public.channels.findManyChannelsById,
+			{
+				ids,
+				includeMessageCount,
+			},
+		);
 
 	const findLatestThreads = (take: number) =>
-		watchQueryToLiveData(({ api }) => api.channels.findLatestThreads, {
-			backendAccessToken,
-			take,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.channels.findLatestThreads,
+			{
+				backendAccessToken,
+				take,
+			},
+		);
 
 	const findChannelsBeforeId = (
 		serverId: Id<"servers">,
 		id: string,
 		take?: number,
 	) =>
-		watchQueryToLiveData(({ api }) => api.channels.findChannelsBeforeId, {
-			backendAccessToken,
-			serverId,
-			id,
-			take,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.channels.findChannelsBeforeId,
+			{
+				backendAccessToken,
+				serverId,
+				id,
+				take,
+			},
+		);
 
 	const createChannel = (data: {
 		channel: Channel;
 		settings?: ChannelSettings;
 	}) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.channels.createChannel, {
-					backendAccessToken,
-					channel: data.channel,
-					settings: data.settings,
-				}),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(convexApi.api.publicInternal.channels.createChannel, {
+				backendAccessToken,
+				channel: data.channel,
+				settings: data.settings,
+			}),
 		);
 
 	const createManyChannels = (data: {
 		channels: Array<{ channel: Channel; settings?: ChannelSettings }>;
 	}) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.channels.createManyChannels, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.channels.createManyChannels,
+				{
 					backendAccessToken,
 					channels: data.channels,
-				}),
+				},
+			),
 		);
 
 	const updateChannel = (data: {
@@ -222,40 +253,32 @@ export const service = Effect.gen(function* () {
 		channel: Channel;
 		settings?: ChannelSettings;
 	}) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.channels.updateChannel, {
-					id: data.id,
-					channel: data.channel,
-					settings: data.settings,
-				}),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(convexApi.api.publicInternal.channels.updateChannel, {
+				backendAccessToken,
+				id: data.id,
+				channel: data.channel,
+				settings: data.settings,
+			}),
 		);
 
 	const updateManyChannels = (channels: Channel[]) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.channels.updateManyChannels, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.channels.updateManyChannels,
+				{
 					backendAccessToken,
 					channels,
-				}),
+				},
+			),
 		);
 
 	const deleteChannel = (id: string) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.channels.deleteChannel, {
-					backendAccessToken,
-					id,
-				}),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(convexApi.api.publicInternal.channels.deleteChannel, {
+				backendAccessToken,
+				id,
+			}),
 		);
 
 	const upsertManyChannels = (data: {
@@ -265,31 +288,29 @@ export const service = Effect.gen(function* () {
 			settings?: ChannelSettings;
 		}>;
 	}) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.channels.upsertManyChannels, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.channels.upsertManyChannels,
+				{
 					backendAccessToken,
 					channels: data.channels,
-				}),
+				},
+			),
 		);
 
 	const upsertChannelWithSettings = (data: {
 		channel: Channel;
 		settings?: ChannelSettings;
 	}) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.channels.upsertChannelWithSettings, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.channels.upsertChannelWithSettings,
+				{
 					backendAccessToken,
 					channel: data.channel,
 					settings: data.settings,
-				}),
+				},
+			),
 		);
 
 	const upsertMessage = (data: {
@@ -301,18 +322,14 @@ export const service = Effect.gen(function* () {
 		}>;
 		ignoreChecks?: boolean;
 	}) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.messages.upsertMessage, {
-					backendAccessToken,
-					message: data.message,
-					attachments: data.attachments,
-					reactions: data.reactions,
-					ignoreChecks: data.ignoreChecks,
-				}),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(convexApi.api.publicInternal.messages.upsertMessage, {
+				backendAccessToken,
+				message: data.message,
+				attachments: data.attachments,
+				reactions: data.reactions,
+				ignoreChecks: data.ignoreChecks,
+			}),
 		);
 
 	const upsertManyMessages = (data: {
@@ -326,20 +343,19 @@ export const service = Effect.gen(function* () {
 		}>;
 		ignoreChecks?: boolean;
 	}) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.messages.upsertManyMessages, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.messages.upsertManyMessages,
+				{
 					backendAccessToken,
 					messages: data.messages,
 					ignoreChecks: data.ignoreChecks,
-				}),
+				},
+			),
 		);
 
 	const getMessageById = (id: string) =>
-		watchQueryToLiveData(({ api }) => api.messages.getMessageById, {
+		watchQueryToLiveData(({ api }) => api.public.messages.getMessageById, {
 			id,
 		});
 
@@ -347,37 +363,49 @@ export const service = Effect.gen(function* () {
 		channelId: string,
 		options?: { limit?: number; after?: string },
 	) =>
-		watchQueryToLiveData(({ api }) => api.messages.findMessagesByChannelId, {
-			channelId,
-			limit: options?.limit,
-			after: options?.after,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.public.messages.findMessagesByChannelId,
+			{
+				channelId,
+				limit: options?.limit,
+				after: options?.after,
+			},
+		);
 
 	const findManyMessagesById = (ids: string[]) =>
-		watchQueryToLiveData(({ api }) => api.messages.findManyMessagesById, {
-			backendAccessToken,
-			ids,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.messages.findManyMessagesById,
+			{
+				backendAccessToken,
+				ids,
+			},
+		);
 
 	const findMessagesByAuthorId = (authorId: string, limit?: number) =>
-		watchQueryToLiveData(({ api }) => api.messages.findMessagesByAuthorId, {
-			authorId,
-			limit,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.public.messages.findMessagesByAuthorId,
+			{
+				authorId,
+				limit,
+			},
+		);
 
 	const findMessagesByServerId = (serverId: Id<"servers">, limit?: number) =>
-		watchQueryToLiveData(({ api }) => api.messages.findMessagesByServerId, {
-			backendAccessToken,
-			serverId,
-			limit,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.messages.findMessagesByServerId,
+			{
+				backendAccessToken,
+				serverId,
+				limit,
+			},
+		);
 
 	const findMessagesByParentChannelId = (
 		parentChannelId: string,
 		limit?: number,
 	) =>
 		watchQueryToLiveData(
-			({ api }) => api.messages.findMessagesByParentChannelId,
+			({ api }) => api.publicInternal.messages.findMessagesByParentChannelId,
 			{
 				backendAccessToken,
 				parentChannelId,
@@ -386,14 +414,18 @@ export const service = Effect.gen(function* () {
 		);
 
 	const findLatestMessageInChannel = (channelId: string) =>
-		watchQueryToLiveData(({ api }) => api.messages.findLatestMessageInChannel, {
-			backendAccessToken,
-			channelId,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.messages.findLatestMessageInChannel,
+			{
+				backendAccessToken,
+				channelId,
+			},
+		);
 
 	const findLatestMessageInChannelAndThreads = (channelId: string) =>
 		watchQueryToLiveData(
-			({ api }) => api.messages.findLatestMessageInChannelAndThreads,
+			({ api }) =>
+				api.publicInternal.messages.findLatestMessageInChannelAndThreads,
 			{
 				backendAccessToken,
 				channelId,
@@ -401,32 +433,44 @@ export const service = Effect.gen(function* () {
 		);
 
 	const findAttachmentsByMessageId = (messageId: string) =>
-		watchQueryToLiveData(({ api }) => api.messages.findAttachmentsByMessageId, {
-			backendAccessToken,
-			messageId,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.messages.findAttachmentsByMessageId,
+			{
+				backendAccessToken,
+				messageId,
+			},
+		);
 
 	const findReactionsByMessageId = (messageId: string) =>
-		watchQueryToLiveData(({ api }) => api.messages.findReactionsByMessageId, {
-			backendAccessToken,
-			messageId,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.messages.findReactionsByMessageId,
+			{
+				backendAccessToken,
+				messageId,
+			},
+		);
 
 	const findEmojiById = (id: string) =>
-		watchQueryToLiveData(({ api }) => api.messages.findEmojiById, {
-			backendAccessToken,
-			id,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.messages.findEmojiById,
+			{
+				backendAccessToken,
+				id,
+			},
+		);
 
 	const countMessagesInChannel = (channelId: string) =>
-		watchQueryToLiveData(({ api }) => api.messages.countMessagesInChannel, {
-			backendAccessToken,
-			channelId,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.messages.countMessagesInChannel,
+			{
+				backendAccessToken,
+				channelId,
+			},
+		);
 
 	const countMessagesInManyChannels = (channelIds: string[]) =>
 		watchQueryToLiveData(
-			({ api }) => api.messages.countMessagesInManyChannels,
+			({ api }) => api.publicInternal.messages.countMessagesInManyChannels,
 			{
 				backendAccessToken,
 				channelIds,
@@ -434,23 +478,29 @@ export const service = Effect.gen(function* () {
 		);
 
 	const getTotalMessageCount = () =>
-		watchQueryToLiveData(({ api }) => api.messages.getTotalMessageCount, {
-			backendAccessToken,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.messages.getTotalMessageCount,
+			{
+				backendAccessToken,
+			},
+		);
 
 	const findSolutionsByQuestionId = (questionId: string, limit?: number) =>
-		watchQueryToLiveData(({ api }) => api.messages.findSolutionsByQuestionId, {
-			backendAccessToken,
-			questionId,
-			limit,
-		});
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.messages.findSolutionsByQuestionId,
+			{
+				backendAccessToken,
+				questionId,
+				limit,
+			},
+		);
 
 	const getTopQuestionSolversByServerId = (
 		serverId: Id<"servers">,
 		limit?: number,
 	) =>
 		watchQueryToLiveData(
-			({ api }) => api.messages.getTopQuestionSolversByServerId,
+			({ api }) => api.publicInternal.messages.getTopQuestionSolversByServerId,
 			{
 				backendAccessToken,
 				serverId,
@@ -459,7 +509,7 @@ export const service = Effect.gen(function* () {
 		);
 
 	const getMessagePageData = (messageId: string) =>
-		watchQueryToLiveData(({ api }) => api.messages.getMessagePageData, {
+		watchQueryToLiveData(({ api }) => api.public.messages.getMessagePageData, {
 			messageId,
 		});
 
@@ -469,7 +519,7 @@ export const service = Effect.gen(function* () {
 		channelId?: string;
 		limit?: number;
 	}) =>
-		watchQueryToLiveData(({ api }) => api.messages.searchMessages, {
+		watchQueryToLiveData(({ api }) => api.public.messages.searchMessages, {
 			query: options.query,
 			serverId: options.serverId,
 			channelId: options.channelId,
@@ -477,51 +527,44 @@ export const service = Effect.gen(function* () {
 		});
 
 	const deleteMessage = (id: string) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.messages.deleteMessage, {
-					backendAccessToken,
-					id,
-				}),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(convexApi.api.publicInternal.messages.deleteMessage, {
+				backendAccessToken,
+				id,
+			}),
 		);
 
 	const deleteManyMessages = (ids: string[]) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.messages.deleteManyMessages, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.messages.deleteManyMessages,
+				{
 					backendAccessToken,
 					ids,
-				}),
+				},
+			),
 		);
 
 	const deleteManyMessagesByChannelId = (channelId: string) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.messages.deleteManyMessagesByChannelId, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.messages.deleteManyMessagesByChannelId,
+				{
 					backendAccessToken,
 					channelId,
-				}),
+				},
+			),
 		);
 
 	const deleteManyMessagesByUserId = (userId: string) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.messages.deleteManyMessagesByUserId, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.messages.deleteManyMessagesByUserId,
+				{
 					backendAccessToken,
 					userId,
-				}),
+				},
+			),
 		);
 
 	// Attachment methods
@@ -530,17 +573,16 @@ export const service = Effect.gen(function* () {
 		filename: string;
 		contentType?: string;
 	}) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.action(convexApi.api.attachments.uploadAttachmentFromUrl, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.action(
+				convexApi.api.publicInternal.attachments.uploadAttachmentFromUrl,
+				{
 					backendAccessToken,
 					url: options.url,
 					filename: options.filename,
 					contentType: options.contentType,
-				}),
+				},
+			),
 		);
 
 	const uploadManyAttachmentsFromUrls = (
@@ -551,32 +593,27 @@ export const service = Effect.gen(function* () {
 			contentType?: string;
 		}>,
 	) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.action(convexApi.api.attachments.uploadManyAttachmentsFromUrls, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.action(
+				convexApi.api.publicInternal.attachments.uploadManyAttachmentsFromUrls,
+				{
 					backendAccessToken,
 					attachments,
-				}),
+				},
+			),
 		);
 
 	const getAttachmentUrl = (storageId: Id<"_storage">) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.action(convexApi.api.attachments.getAttachmentUrl, {
-					backendAccessToken,
-					storageId,
-				}),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.action(convexApi.api.publicInternal.attachments.getAttachmentUrl, {
+				backendAccessToken,
+				storageId,
+			}),
 		);
 
 	const getDiscordAccountById = (id: string) =>
 		watchQueryToLiveData(
-			({ api }) => api.discord_accounts.getDiscordAccountById,
+			({ api }) => api.publicInternal.discord_accounts.getDiscordAccountById,
 			{
 				backendAccessToken,
 				id,
@@ -585,108 +622,94 @@ export const service = Effect.gen(function* () {
 
 	const findManyDiscordAccountsById = (ids: string[]) =>
 		watchQueryToLiveData(
-			({ api }) => api.discord_accounts.findManyDiscordAccountsById,
+			({ api }) => api.public.discord_accounts.findManyDiscordAccountsById,
 			{
 				ids,
 			},
 		);
 
 	const createDiscordAccount = (account: DiscordAccount) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.discord_accounts.createDiscordAccount, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.discord_accounts.createDiscordAccount,
+				{
 					backendAccessToken,
 					account,
-				}),
+				},
+			),
 		);
 
 	const createManyDiscordAccounts = (accounts: DiscordAccount[]) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.api.discord_accounts.createManyDiscordAccounts,
-					{
-						backendAccessToken,
-						accounts,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.discord_accounts.createManyDiscordAccounts,
+				{
+					backendAccessToken,
+					accounts,
+				},
+			),
 		);
 
 	const updateDiscordAccount = (account: DiscordAccount) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.discord_accounts.updateDiscordAccount, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.discord_accounts.updateDiscordAccount,
+				{
 					backendAccessToken,
 					account,
-				}),
+				},
+			),
 		);
 
 	const updateManyDiscordAccounts = (accounts: DiscordAccount[]) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.api.discord_accounts.updateManyDiscordAccounts,
-					{
-						backendAccessToken,
-						accounts,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.discord_accounts.updateManyDiscordAccounts,
+				{
+					backendAccessToken,
+					accounts,
+				},
+			),
 		);
 
 	const upsertDiscordAccount = (account: DiscordAccount) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.discord_accounts.upsertDiscordAccount, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.discord_accounts.upsertDiscordAccount,
+				{
 					backendAccessToken,
 					account,
-				}),
+				},
+			),
 		);
 
 	const upsertManyDiscordAccounts = (accounts: DiscordAccount[]) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.api.discord_accounts.upsertManyDiscordAccounts,
-					{
-						backendAccessToken,
-						accounts,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.discord_accounts.upsertManyDiscordAccounts,
+				{
+					backendAccessToken,
+					accounts,
+				},
+			),
 		);
 
 	const deleteDiscordAccount = (id: string) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(convexApi.api.discord_accounts.deleteDiscordAccount, {
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.discord_accounts.deleteDiscordAccount,
+				{
 					backendAccessToken,
 					id,
-				}),
+				},
+			),
 		);
 
 	const findIgnoredDiscordAccountById = (id: string) =>
 		watchQueryToLiveData(
-			({ api }) => api.ignored_discord_accounts.findIgnoredDiscordAccountById,
+			({ api }) =>
+				api.publicInternal.ignored_discord_accounts
+					.findIgnoredDiscordAccountById,
 			{
 				backendAccessToken,
 				id,
@@ -696,7 +719,8 @@ export const service = Effect.gen(function* () {
 	const findManyIgnoredDiscordAccountsById = (ids: string[]) =>
 		watchQueryToLiveData(
 			({ api }) =>
-				api.ignored_discord_accounts.findManyIgnoredDiscordAccountsById,
+				api.publicInternal.ignored_discord_accounts
+					.findManyIgnoredDiscordAccountsById,
 			{
 				backendAccessToken,
 				ids,
@@ -704,33 +728,27 @@ export const service = Effect.gen(function* () {
 		);
 
 	const upsertIgnoredDiscordAccount = (id: string) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.api.ignored_discord_accounts.upsertIgnoredDiscordAccount,
-					{
-						backendAccessToken,
-						id,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.ignored_discord_accounts
+					.upsertIgnoredDiscordAccount,
+				{
+					backendAccessToken,
+					id,
+				},
+			),
 		);
 
 	const deleteIgnoredDiscordAccount = (id: string) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.api.ignored_discord_accounts.deleteIgnoredDiscordAccount,
-					{
-						backendAccessToken,
-						id,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.ignored_discord_accounts
+					.deleteIgnoredDiscordAccount,
+				{
+					backendAccessToken,
+					id,
+				},
+			),
 		);
 
 	const checkIfIgnored = (id: string) =>
@@ -746,7 +764,8 @@ export const service = Effect.gen(function* () {
 		serverId: Id<"servers">,
 	) =>
 		watchQueryToLiveData(
-			({ api }) => api.user_server_settings.findUserServerSettingsById,
+			({ api }) =>
+				api.publicInternal.user_server_settings.findUserServerSettingsById,
 			{
 				backendAccessToken,
 				userId,
@@ -761,7 +780,8 @@ export const service = Effect.gen(function* () {
 		}>,
 	) =>
 		watchQueryToLiveData(
-			({ api }) => api.user_server_settings.findManyUserServerSettings,
+			({ api }) =>
+				api.publicInternal.user_server_settings.findManyUserServerSettings,
 			{
 				backendAccessToken,
 				settings,
@@ -770,79 +790,30 @@ export const service = Effect.gen(function* () {
 
 	const findUserServerSettingsByApiKey = (apiKey: string) =>
 		watchQueryToLiveData(
-			({ api }) => api.user_server_settings.findUserServerSettingsByApiKey,
+			({ api }) =>
+				api.publicInternal.user_server_settings.findUserServerSettingsByApiKey,
 			{
 				backendAccessToken,
 				apiKey,
 			},
 		);
 
-	const createUserServerSettings = (settings: UserServerSettings) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) => {
-				// In test mode, use internal mutations to bypass authentication
-				// The test client supports calling internal mutations
-				return client.mutation(
-					convexApi.internal.user_server_settings
-						.createUserServerSettingsInternal,
-					{
-						settings,
-					},
-				);
-			},
-		);
-
-	const updateUserServerSettings = (settings: UserServerSettings) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.internal.user_server_settings
-						.updateUserServerSettingsInternal,
-					{
-						settings,
-					},
-				),
-		);
-
 	const upsertUserServerSettings = (settings: UserServerSettings) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.internal.user_server_settings
-						.upsertUserServerSettingsInternal,
-					{
-						settings,
-					},
-				),
-		);
-
-	const increaseApiKeyUsage = (apiKey: string) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.api.user_server_settings.increaseApiKeyUsage,
-					{
-						backendAccessToken,
-						apiKey,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.user_server_settings
+					.upsertUserServerSettingsInternal,
+				{
+					backendAccessToken,
+					settings,
+				},
+			),
 		);
 
 	const countConsentingUsersInServer = (serverId: Id<"servers">) =>
 		watchQueryToLiveData(
-			({ api }) => api.user_server_settings.countConsentingUsersInServer,
+			({ api }) =>
+				api.publicInternal.user_server_settings.countConsentingUsersInServer,
 			{
 				backendAccessToken,
 				serverId,
@@ -851,7 +822,9 @@ export const service = Effect.gen(function* () {
 
 	const countConsentingUsersInManyServers = (serverIds: Id<"servers">[]) =>
 		watchQueryToLiveData(
-			({ api }) => api.user_server_settings.countConsentingUsersInManyServers,
+			({ api }) =>
+				api.publicInternal.user_server_settings
+					.countConsentingUsersInManyServers,
 			{
 				backendAccessToken,
 				serverIds,
@@ -860,7 +833,8 @@ export const service = Effect.gen(function* () {
 
 	const getServerPreferencesByServerId = (serverId: Id<"servers">) =>
 		watchQueryToLiveData(
-			({ api }) => api.server_preferences.getServerPreferencesByServerId,
+			({ api }) =>
+				api.publicInternal.server_preferences.getServerPreferencesByServerId,
 			{
 				backendAccessToken,
 				serverId,
@@ -868,60 +842,47 @@ export const service = Effect.gen(function* () {
 		);
 
 	const createServerPreferences = (preferences: ServerPreferences) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.internal.server_preferences.createServerPreferencesInternal,
-					{
-						preferences,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.server_preferences.createServerPreferences,
+				{
+					backendAccessToken,
+					preferences,
+				},
+			),
 		);
 
 	const updateServerPreferences = (preferences: ServerPreferences) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.internal.server_preferences.updateServerPreferencesInternal,
-					{
-						preferences,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.server_preferences.updateServerPreferences,
+				{
+					backendAccessToken,
+					preferences,
+				},
+			),
 		);
 
 	const upsertServerPreferences = (preferences: ServerPreferences) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.api.server_preferences.upsertServerPreferences,
-					{
-						backendAccessToken,
-						preferences,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.server_preferences.upsertServerPreferences,
+				{
+					backendAccessToken,
+					preferences,
+				},
+			),
 		);
 
 	const deleteServerPreferences = (serverId: Id<"servers">) =>
-		convexClient.use(
-			(
-				client: ConvexClientShared,
-				convexApi: { api: typeof api; internal: typeof internal },
-			) =>
-				client.mutation(
-					convexApi.internal.server_preferences.deleteServerPreferencesInternal,
-					{
-						serverId,
-					},
-				),
+		convexClient.use((client: ConvexClientShared, convexApi) =>
+			client.mutation(
+				convexApi.api.publicInternal.server_preferences.deleteServerPreferences,
+				{
+					backendAccessToken,
+					serverId,
+				},
+			),
 		);
 
 	return {
@@ -1010,10 +971,7 @@ export const service = Effect.gen(function* () {
 			findUserServerSettingsById,
 			findManyUserServerSettings,
 			findUserServerSettingsByApiKey,
-			createUserServerSettings,
-			updateUserServerSettings,
 			upsertUserServerSettings,
-			increaseApiKeyUsage,
 			countConsentingUsersInServer,
 			countConsentingUsersInManyServers,
 		},

@@ -1,8 +1,8 @@
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
-import { action, internalMutation } from "./_generated/server";
-import { publicInternalAction } from "./publicInternal";
-import { uploadAttachmentFromUrlLogic } from "./shared";
+import type { Id } from "../_generated/dataModel";
+import { internalMutation } from "../_generated/server";
+import { publicInternalAction } from "../publicInternal/publicInternal";
+import { uploadAttachmentFromUrlLogic } from "../shared/shared";
 
 /**
  * Downloads an attachment from a URL and uploads it to Convex storage

@@ -4,7 +4,7 @@ import {
 	customMutation,
 	customQuery,
 } from "convex-helpers/server/customFunctions";
-import { action, mutation, query } from "./_generated/server";
+import { action, mutation, query } from "../_generated/server";
 
 /**
  * Validates the BACKEND_ACCESS_TOKEN against the environment variable.

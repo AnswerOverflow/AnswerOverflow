@@ -53,7 +53,7 @@ export function UserPageClient(props: {
 }) {
 	// Fetch live updates for messages
 	const { data: liveMessages } = useQuery({
-		...convexQuery(api.messages.findMessagesByAuthorId, {
+		...convexQuery(api.public.messages.findMessagesByAuthorId, {
 			authorId: props.user.id,
 			limit: 50,
 		}),
@@ -73,14 +73,14 @@ export function UserPageClient(props: {
 
 	// Fetch servers and channels
 	const { data: servers } = useQuery({
-		...convexQuery(api.servers.publicFindManyServersById, {
+		...convexQuery(api.public.servers.publicFindManyServersById, {
 			ids: serverIds,
 		}),
 		enabled: serverIds.length > 0,
 	});
 
 	const { data: channels } = useQuery({
-		...convexQuery(api.channels.findManyChannelsById, {
+		...convexQuery(api.public.channels.findManyChannelsById, {
 			ids: channelIds,
 		}),
 		enabled: channelIds.length > 0,

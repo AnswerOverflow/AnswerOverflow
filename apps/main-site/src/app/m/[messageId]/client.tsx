@@ -171,7 +171,7 @@ function MessageEmbed({ embed }: { embed: Embed }) {
 
 export function MessagePageClient(props: { data: MessagePageData }) {
 	const { data: liveData } = useQuery({
-		...convexQuery(api.messages.getMessagePageData, {
+		...convexQuery(api.public.messages.getMessagePageData, {
 			messageId: props.data.messages[0]?.message.id ?? "",
 		}),
 	});

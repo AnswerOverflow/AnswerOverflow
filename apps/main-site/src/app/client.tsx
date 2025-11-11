@@ -15,7 +15,7 @@ export function HomePageClient(props: { featuredServers: Server[] }) {
 	const [searchQuery, setSearchQuery] = useState("");
 
 	const { data: liveServers } = useQuery({
-		...convexQuery(api.servers.publicGetBiggestServers, { take: 10 }),
+		...convexQuery(api.public.servers.publicGetBiggestServers, { take: 10 }),
 	});
 
 	const featuredServers = liveServers ?? props.featuredServers;

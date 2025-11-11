@@ -76,7 +76,7 @@ export function SearchPageClient(props: {
 
 	// Fetch live search results if query exists
 	const { data: liveResults } = useQuery({
-		...convexQuery(api.messages.searchMessages, {
+		...convexQuery(api.public.messages.searchMessages, {
 			query: props.query ?? "",
 			limit: 20,
 		}),
@@ -101,21 +101,21 @@ export function SearchPageClient(props: {
 
 	// Fetch authors, servers, and channels
 	const { data: authors } = useQuery({
-		...convexQuery(api.discord_accounts.findManyDiscordAccountsById, {
+		...convexQuery(api.public.discord_accounts.findManyDiscordAccountsById, {
 			ids: authorIds,
 		}),
 		enabled: authorIds.length > 0,
 	});
 
 	const { data: servers } = useQuery({
-		...convexQuery(api.servers.publicFindManyServersById, {
+		...convexQuery(api.public.servers.publicFindManyServersById, {
 			ids: serverIds,
 		}),
 		enabled: serverIds.length > 0,
 	});
 
 	const { data: channels } = useQuery({
-		...convexQuery(api.channels.findManyChannelsById, {
+		...convexQuery(api.public.channels.findManyChannelsById, {
 			ids: channelIds,
 		}),
 		enabled: channelIds.length > 0,

@@ -49,7 +49,7 @@ it.scoped(
 
 			// Verify that only 1 query was made despite 5 calls to getServerByDiscordId
 			const queryCallCount = convexClientTest.getQueryCallCount(
-				api.servers.publicGetServerByDiscordId,
+				api.public.servers.publicGetServerByDiscordId,
 				{ discordId: "123" },
 			);
 			expect(queryCallCount).toBe(1);

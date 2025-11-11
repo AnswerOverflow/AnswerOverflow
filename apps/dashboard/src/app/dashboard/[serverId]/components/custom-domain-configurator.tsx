@@ -23,9 +23,12 @@ export function CustomDomainConfigurator({
 	const [domain, setDomain] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const dashboardData = useQuery(api.dashboard_queries.getDashboardData, {
-		serverId,
-	});
+	const dashboardData = useQuery(
+		api.public.dashboard_queries.getDashboardData,
+		{
+			serverId,
+		},
+	);
 
 	const updateCustomDomain = useMutation(
 		api.dashboard_mutations.updateCustomDomain,

@@ -20,7 +20,7 @@ import { authClient } from "../../lib/auth-client";
 
 export default function DashboardHome() {
 	const { data: session, isPending } = authClient.useSession();
-	const getUserServers = useAction(api.dashboard.getUserServers);
+	const getUserServers = useAction(api.public.dashboard.getUserServers);
 	const [searchQuery, setSearchQuery] = useQueryState("search", {
 		defaultValue: "",
 	});

@@ -1,13 +1,13 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
-import { authenticatedQuery } from "./auth";
+import { query } from "../_generated/server";
+import { authenticatedQuery } from "../shared/auth";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
 	hasPermission,
 	isThreadType,
 	sortServersByBotAndRole,
-} from "./shared";
+} from "../shared/shared";
 
 // Query to get dashboard data for a server
 // Returns server with preferences and channels with settings

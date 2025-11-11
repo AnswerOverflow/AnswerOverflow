@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"exports": {
 		"./*": "./src/*.ts",
+		"./convex/shared/*": "./convex/shared/*.ts",
 		"./convex/*": {
 			"types": "./convex/*.d.js",
 			"default": "./convex/*.js"

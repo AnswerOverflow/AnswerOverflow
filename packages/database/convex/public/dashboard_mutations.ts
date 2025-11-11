@@ -1,8 +1,8 @@
 import { v } from "convex/values";
-import { authenticatedMutation } from "./shared/auth";
-import { assertCanEditServer } from "./shared/auth";
-import type { AuthorizedUser, CanEditServer } from "./shared/permissions";
-import { validateCustomDomain } from "./shared/shared";
+import { authenticatedMutation } from "../shared/auth";
+import { assertCanEditServer } from "../shared/auth";
+import type { AuthorizedUser, CanEditServer } from "../shared/permissions";
+import { validateCustomDomain } from "../shared/shared";
 
 /**
  * Update server preferences flags (for dashboard)

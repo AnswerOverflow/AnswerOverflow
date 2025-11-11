@@ -60,20 +60,23 @@ export default function SettingsPage() {
 	const params = useParams();
 	const serverId = params.serverId as Id<"servers">;
 
-	const dashboardData = useQuery(api.dashboard_queries.getDashboardData, {
-		serverId,
-	});
+	const dashboardData = useQuery(
+		api.public.dashboard_queries.getDashboardData,
+		{
+			serverId,
+		},
+	);
 
 	const updateServerPreferences = useMutation(
 		api.dashboard_mutations.updateServerPreferencesFlags,
 	).withOptimisticUpdate((localStore, args) => {
 		const currentData = localStore.getQuery(
-			api.dashboard_queries.getDashboardData,
+			api.public.dashboard_queries.getDashboardData,
 			{ serverId: args.serverId },
 		);
 		if (currentData !== undefined) {
 			localStore.setQuery(
-				api.dashboard_queries.getDashboardData,
+				api.public.dashboard_queries.getDashboardData,
 				{ serverId: args.serverId },
 				{
 					...currentData,

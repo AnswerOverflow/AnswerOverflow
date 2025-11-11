@@ -6,7 +6,7 @@ import type {
 	FunctionReturnType,
 } from "convex/server";
 import { Context, Data, type Effect } from "effect";
-import type { api, internal } from "../convex/_generated/api";
+import type { api } from "../convex/_generated/api";
 
 export class ConvexError extends Data.TaggedError("ConvexError")<{
 	cause: unknown;
@@ -31,7 +31,7 @@ export type WrappedUnifiedClient = Readonly<{
 	use: <A>(
 		fn: (
 			client: ConvexClientShared,
-			convexApi: { api: typeof api; internal: typeof internal },
+			convexApi: { api: typeof api },
 		) => A | Promise<A>,
 	) => Effect.Effect<Awaited<A>, ConvexError>;
 }>;

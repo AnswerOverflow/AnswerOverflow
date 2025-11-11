@@ -1,12 +1,12 @@
 import type { Infer } from "convex/values";
-import type { Id } from "./_generated/dataModel";
-import type { ActionCtx, MutationCtx, QueryCtx } from "./_generated/server";
+import type { Id } from "../_generated/dataModel";
+import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
 import type {
 	attachmentSchema,
 	emojiSchema,
 	messageSchema,
 	reactionSchema,
-} from "./schema";
+} from "../schema";
 
 type Message = Infer<typeof messageSchema>;
 type Attachment = Infer<typeof attachmentSchema>;

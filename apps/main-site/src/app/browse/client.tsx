@@ -47,7 +47,7 @@ export const ServerCard = (props: { server: Server }) => {
 
 export function ServerGrid(props: { servers: Server[] }) {
 	const { data: liveData } = useQuery({
-		...convexQuery(api.servers.publicGetAllServers, {}),
+		...convexQuery(api.public.servers.publicGetAllServers, {}),
 	});
 	const data = liveData ?? props.servers;
 	return (

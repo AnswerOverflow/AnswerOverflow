@@ -8,24 +8,30 @@
  * @module
  */
 
-import type * as attachments from "../attachments.js";
-import type * as auth from "../auth.js";
-import type * as betterAuth from "../betterAuth.js";
-import type * as cache from "../cache.js";
-import type * as channels from "../channels.js";
 import type * as dashboard from "../dashboard.js";
 import type * as dashboard_mutations from "../dashboard_mutations.js";
-import type * as dashboard_queries from "../dashboard_queries.js";
-import type * as discord_accounts from "../discord_accounts.js";
 import type * as http from "../http.js";
-import type * as ignored_discord_accounts from "../ignored_discord_accounts.js";
-import type * as messages from "../messages.js";
-import type * as permissions from "../permissions.js";
-import type * as publicInternal from "../publicInternal.js";
-import type * as server_preferences from "../server_preferences.js";
-import type * as servers from "../servers.js";
-import type * as shared from "../shared.js";
-import type * as user_server_settings from "../user_server_settings.js";
+import type * as public_channels from "../public/channels.js";
+import type * as public_dashboard from "../public/dashboard.js";
+import type * as public_dashboard_mutations from "../public/dashboard_mutations.js";
+import type * as public_dashboard_queries from "../public/dashboard_queries.js";
+import type * as public_discord_accounts from "../public/discord_accounts.js";
+import type * as public_messages from "../public/messages.js";
+import type * as public_servers from "../public/servers.js";
+import type * as publicInternal_attachments from "../publicInternal/attachments.js";
+import type * as publicInternal_channels from "../publicInternal/channels.js";
+import type * as publicInternal_discord_accounts from "../publicInternal/discord_accounts.js";
+import type * as publicInternal_ignored_discord_accounts from "../publicInternal/ignored_discord_accounts.js";
+import type * as publicInternal_messages from "../publicInternal/messages.js";
+import type * as publicInternal_publicInternal from "../publicInternal/publicInternal.js";
+import type * as publicInternal_server_preferences from "../publicInternal/server_preferences.js";
+import type * as publicInternal_servers from "../publicInternal/servers.js";
+import type * as publicInternal_user_server_settings from "../publicInternal/user_server_settings.js";
+import type * as shared_auth from "../shared/auth.js";
+import type * as shared_betterAuth from "../shared/betterAuth.js";
+import type * as shared_cache from "../shared/cache.js";
+import type * as shared_permissions from "../shared/permissions.js";
+import type * as shared_shared from "../shared/shared.js";
 
 import type {
   ApiFromModules,
@@ -34,24 +40,30 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  attachments: typeof attachments;
-  auth: typeof auth;
-  betterAuth: typeof betterAuth;
-  cache: typeof cache;
-  channels: typeof channels;
   dashboard: typeof dashboard;
   dashboard_mutations: typeof dashboard_mutations;
-  dashboard_queries: typeof dashboard_queries;
-  discord_accounts: typeof discord_accounts;
   http: typeof http;
-  ignored_discord_accounts: typeof ignored_discord_accounts;
-  messages: typeof messages;
-  permissions: typeof permissions;
-  publicInternal: typeof publicInternal;
-  server_preferences: typeof server_preferences;
-  servers: typeof servers;
-  shared: typeof shared;
-  user_server_settings: typeof user_server_settings;
+  "public/channels": typeof public_channels;
+  "public/dashboard": typeof public_dashboard;
+  "public/dashboard_mutations": typeof public_dashboard_mutations;
+  "public/dashboard_queries": typeof public_dashboard_queries;
+  "public/discord_accounts": typeof public_discord_accounts;
+  "public/messages": typeof public_messages;
+  "public/servers": typeof public_servers;
+  "publicInternal/attachments": typeof publicInternal_attachments;
+  "publicInternal/channels": typeof publicInternal_channels;
+  "publicInternal/discord_accounts": typeof publicInternal_discord_accounts;
+  "publicInternal/ignored_discord_accounts": typeof publicInternal_ignored_discord_accounts;
+  "publicInternal/messages": typeof publicInternal_messages;
+  "publicInternal/publicInternal": typeof publicInternal_publicInternal;
+  "publicInternal/server_preferences": typeof publicInternal_server_preferences;
+  "publicInternal/servers": typeof publicInternal_servers;
+  "publicInternal/user_server_settings": typeof publicInternal_user_server_settings;
+  "shared/auth": typeof shared_auth;
+  "shared/betterAuth": typeof shared_betterAuth;
+  "shared/cache": typeof shared_cache;
+  "shared/permissions": typeof shared_permissions;
+  "shared/shared": typeof shared_shared;
 }>;
 
 /**

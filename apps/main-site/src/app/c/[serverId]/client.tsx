@@ -23,7 +23,7 @@ type ServerWithChannels = {
 
 export function ServerPageClient(props: { serverData: ServerWithChannels }) {
 	const { data: liveData } = useQuery({
-		...convexQuery(api.servers.publicFindServerByIdWithChannels, {
+		...convexQuery(api.public.servers.publicFindServerByIdWithChannels, {
 			id: props.serverData._id,
 		}),
 	});

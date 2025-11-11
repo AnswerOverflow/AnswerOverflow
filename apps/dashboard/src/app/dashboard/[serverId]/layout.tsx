@@ -24,7 +24,7 @@ export default function DashboardServerLayout({
 
 	// Fetch servers for dropdown using reactive query based on user server settings
 	const servers = useQuery(
-		api.dashboard_queries.getUserServersForDropdown,
+		api.public.dashboard_queries.getUserServersForDropdown,
 		isSessionPending || !session?.user ? "skip" : {},
 	);
 

@@ -1,7 +1,10 @@
 import { v } from "convex/values";
-import { internalMutation } from "./_generated/server";
-import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
-import { validateCustomDomainUniqueness } from "./shared";
+import { internalMutation } from "../_generated/server";
+import {
+	publicInternalMutation,
+	publicInternalQuery,
+} from "../publicInternal/publicInternal";
+import { validateCustomDomainUniqueness } from "../shared/shared";
 
 const serverPreferencesSchema = v.object({
 	serverId: v.id("servers"),

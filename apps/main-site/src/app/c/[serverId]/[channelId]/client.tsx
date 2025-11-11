@@ -85,7 +85,7 @@ export function ChannelPageClient(props: {
 
 	// Fetch live updates for channel (to get indexing status)
 	const { data: liveChannel } = useQuery({
-		...convexQuery(api.channels.getChannelByDiscordId, {
+		...convexQuery(api.public.channels.getChannelByDiscordId, {
 			discordId: props.channel.id,
 		}),
 	});
@@ -94,7 +94,7 @@ export function ChannelPageClient(props: {
 
 	// Fetch live updates for messages
 	const { data: liveMessages } = useQuery({
-		...convexQuery(api.messages.findMessagesByChannelId, {
+		...convexQuery(api.public.messages.findMessagesByChannelId, {
 			channelId: props.channel.id,
 			limit: 50,
 		}),
@@ -103,36 +103,23 @@ export function ChannelPageClient(props: {
 	const messages = liveMessages ?? props.messages;
 
 	// Mutation to enable indexing
-	const updateChannel = useMutation(api.channels.updateChannel);
+	const updateChannelSettingsFlags = useMutation(
+		api.dashboard_mutations.updateChannelSettingsFlags,
+	);
 
 	const handleEnableIndexing = async () => {
 		setIsEnabling(true);
 		try {
-			// Use live channel data if available, otherwise use props
-			const channelToUpdate = liveChannel ?? props.channel;
-
-			await updateChannel({
-				id: props.channel.id,
-				channel: {
-					id: channelToUpdate.id,
-					serverId: channelToUpdate.serverId ?? props.server._id,
-					name: channelToUpdate.name,
-					type: channelToUpdate.type,
-					parentId: channelToUpdate.parentId,
-					inviteCode: channelToUpdate.inviteCode,
-					archivedTimestamp: channelToUpdate.archivedTimestamp,
-					solutionTagId: channelToUpdate.solutionTagId,
-					lastIndexedSnowflake: channelToUpdate.lastIndexedSnowflake,
-				},
-				settings: {
-					channelId: props.channel.id,
+			await updateChannelSettingsFlags({
+				channelId: props.channel.id,
+				flags: {
 					indexingEnabled: true,
-					markSolutionEnabled: channel.flags?.markSolutionEnabled ?? false,
+					markSolutionEnabled: channel.flags?.markSolutionEnabled,
 					sendMarkSolutionInstructionsInNewThreads:
-						channel.flags?.sendMarkSolutionInstructionsInNewThreads ?? false,
-					autoThreadEnabled: channel.flags?.autoThreadEnabled ?? false,
+						channel.flags?.sendMarkSolutionInstructionsInNewThreads,
+					autoThreadEnabled: channel.flags?.autoThreadEnabled,
 					forumGuidelinesConsentEnabled:
-						channel.flags?.forumGuidelinesConsentEnabled ?? false,
+						channel.flags?.forumGuidelinesConsentEnabled,
 				},
 			});
 
@@ -140,7 +127,7 @@ export function ChannelPageClient(props: {
 			queryClient.invalidateQueries({
 				queryKey: [
 					"convex",
-					api.channels.getChannelByDiscordId,
+					api.public.channels.getChannelByDiscordId,
 					{ discordId: props.channel.id },
 				],
 			});
@@ -166,7 +153,7 @@ export function ChannelPageClient(props: {
 
 	// Fetch all authors in a single query
 	const { data: authors } = useQuery({
-		...convexQuery(api.discord_accounts.findManyDiscordAccountsById, {
+		...convexQuery(api.public.discord_accounts.findManyDiscordAccountsById, {
 			ids: authorIds,
 		}),
 		enabled: authorIds.length > 0,

@@ -22,9 +22,12 @@ export function TierAccessOnly({
 	enabledFor: Plan[];
 	serverId: Id<"servers">;
 }) {
-	const dashboardData = useQuery(api.dashboard_queries.getDashboardData, {
-		serverId,
-	});
+	const dashboardData = useQuery(
+		api.public.dashboard_queries.getDashboardData,
+		{
+			serverId,
+		},
+	);
 
 	if (!dashboardData) {
 		return <div className="opacity-50">{children}</div>;

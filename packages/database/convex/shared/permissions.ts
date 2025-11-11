@@ -1,5 +1,5 @@
 import type { Brand } from "effect/Brand";
-import type { UserServerSettings } from "./schema";
+import type { UserServerSettings } from "../schema";
 
 /**
  * Permission brands for type-level permission enforcement.

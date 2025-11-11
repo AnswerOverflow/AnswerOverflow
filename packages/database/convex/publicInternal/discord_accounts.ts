@@ -1,13 +1,15 @@
 import { type Infer, v } from "convex/values";
-import { mutation, query } from "./_generated/server";
-import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
-import { discordAccountSchema } from "./schema";
+import {
+	publicInternalMutation,
+	publicInternalQuery,
+} from "../publicInternal/publicInternal";
+import { discordAccountSchema } from "../schema";
 import {
 	deleteMessageInternalLogic,
 	deleteUserServerSettingsByUserIdLogic,
 	getDiscordAccountById as getDiscordAccountByIdShared,
 	upsertIgnoredDiscordAccountInternalLogic,
-} from "./shared";
+} from "../shared/shared";
 
 type DiscordAccount = Infer<typeof discordAccountSchema>;
 
@@ -29,27 +31,6 @@ export const getDiscordAccountById = publicInternalQuery({
 	},
 	handler: async (ctx, args) => {
 		return await getDiscordAccountByIdShared(ctx, args.id);
-	},
-});
-
-export const findManyDiscordAccountsById = query({
-	args: {
-		ids: v.array(v.string()),
-	},
-	handler: async (ctx, args) => {
-		if (args.ids.length === 0) return [];
-
-		const accounts: DiscordAccount[] = [];
-		for (const id of args.ids) {
-			const account = await ctx.db
-				.query("discordAccounts")
-				.filter((q) => q.eq(q.field("id"), id))
-				.first();
-			if (account) {
-				accounts.push(account);
-			}
-		}
-		return accounts;
 	},
 });
 

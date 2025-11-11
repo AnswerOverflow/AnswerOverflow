@@ -8,6 +8,7 @@ alwaysApply: true
 
 - Never use `any`, `unknown`, or TypeScript type casting (`as` or angle bracket syntax)
 - Use proper types and type inference instead
+- **Prefer type inference over manual type annotations** - if TypeScript can infer the type, let it infer rather than adding explicit annotations
 - Access data through proper type-safe methods (e.g., `liveData?.data?.property`)
 
 ## Database Design
@@ -28,7 +29,8 @@ alwaysApply: true
 
 ## Code Quality
 
-- Prefer explicit types and clear separation of concerns
+- Prefer type inference; only add explicit types when necessary for clarity or when inference isn't sufficient
+- Prefer clear separation of concerns
 - Avoid test-specific workarounds or shortcuts
 - Keep test code clean and straightforward
 

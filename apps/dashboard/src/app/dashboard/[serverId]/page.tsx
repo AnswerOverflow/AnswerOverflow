@@ -16,9 +16,12 @@ export default function DashboardOverviewPage() {
 	const params = useParams();
 	const serverId = params.serverId as Id<"servers">;
 
-	const dashboardData = useQuery(api.dashboard_queries.getDashboardData, {
-		serverId,
-	});
+	const dashboardData = useQuery(
+		api.public.dashboard_queries.getDashboardData,
+		{
+			serverId,
+		},
+	);
 
 	if (!dashboardData) {
 		return <div className="text-muted-foreground">Loading dashboard...</div>;

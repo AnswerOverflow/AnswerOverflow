@@ -25,6 +25,7 @@ const projectRoot = resolve(__dirname, "..");
 const convexDir = join(projectRoot, "convex");
 
 // Recursively find all .ts and .js files in convex directory
+// Exclude test files and .d.ts files (only include .ts and .js implementation files)
 async function findConvexFiles(
 	dir: string,
 	basePath: string = "",
@@ -37,7 +38,12 @@ async function findConvexFiles(
 			const relativePath = join(basePath, entry.name);
 			if (entry.isDirectory()) {
 				files.push(...(await findConvexFiles(fullPath, relativePath)));
-			} else if (entry.isFile() && /\.(ts|js)$/.test(entry.name)) {
+			} else if (
+				entry.isFile() &&
+				/\.(ts|js)$/.test(entry.name) &&
+				!entry.name.endsWith(".d.ts") &&
+				!entry.name.endsWith(".test.ts")
+			) {
 				files.push(relativePath);
 			}
 		}

@@ -4,17 +4,20 @@ import {
 	customMutation,
 	customQuery,
 } from "convex-helpers/server/customFunctions";
-import { components } from "./_generated/api";
-import type { ActionCtx, MutationCtx, QueryCtx } from "./_generated/server";
-import { action, mutation, query } from "./_generated/server";
-import { authComponent } from "./betterAuth";
+import { components } from "../_generated/api";
+import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
+import { action, mutation, query } from "../_generated/server";
+import { authComponent } from "../shared/betterAuth";
 import type {
 	AuthorizedUser,
 	CanEditServer,
 	IsAdminOrOwner,
 	IsAuthenticated,
-} from "./permissions";
-import { findUserServerSettingsById, getServerByDiscordId } from "./shared";
+} from "../shared/permissions";
+import {
+	findUserServerSettingsById,
+	getServerByDiscordId,
+} from "../shared/shared";
 
 /**
  * Get the authenticated user's Discord account ID from their BetterAuth identity
