@@ -5,7 +5,7 @@ const isProtectedRoute = (pathname: string) => {
 	return pathname.startsWith("/dashboard");
 };
 
-export default function proxy(request: NextRequest, event: NextFetchEvent) {
+export default function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
 	if (isProtectedRoute(pathname)) {

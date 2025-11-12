@@ -472,7 +472,7 @@ export default function ChannelsPage() {
 											>
 												<span className="flex items-center gap-2">
 													{selectedChannels.length === 0 ? (
-														<>Select channels</>
+														"Select channels"
 													) : selectedChannels.length === 1 &&
 														selectedChannels[0] ? (
 														<>

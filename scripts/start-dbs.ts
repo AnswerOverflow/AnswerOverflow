@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { $ } from "bun";
-import { existsSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
 
 const ENV_PATH = join(process.cwd(), ".env");
 const VALKEY_CONTAINER = "valkey";

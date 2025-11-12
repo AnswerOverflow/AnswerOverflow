@@ -1,6 +1,4 @@
-import { PostHog as PostHogQueryClient } from "@typelytics/posthog";
-import { Config, Context, Effect, Layer } from "effect";
-import { events } from "./events";
+import { Context, Effect, Layer } from "effect";
 import {
 	PostHogClient,
 	PostHogClientLayer,

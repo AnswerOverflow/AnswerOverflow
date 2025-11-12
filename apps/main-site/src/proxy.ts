@@ -5,7 +5,7 @@ const isProtectedRoute = (pathname: string) => {
 	return pathname.startsWith("/notes");
 };
 
-export default function proxy(request: NextRequest, event: NextFetchEvent) {
+export default function proxy(request: NextRequest, _event: NextFetchEvent) {
 	const { pathname } = request.nextUrl;
 
 	if (isProtectedRoute(pathname)) {

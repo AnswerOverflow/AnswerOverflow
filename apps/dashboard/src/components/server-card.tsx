@@ -18,9 +18,6 @@ type ServerCardProps = {
 
 export function ServerCard({ server }: ServerCardProps) {
 	const discordClientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
-	const setupUrl = discordClientId
-		? `https://discord.com/oauth2/authorize?client_id=${discordClientId}&permissions=328565083201&scope=bot+applications.commands&guild_id=${server.discordId}&disable_guild_select=true`
-		: "#";
 
 	return (
 		<div className="flex max-w-md flex-col gap-3 rounded-lg bg-white dark:bg-black/40 pb-4 shadow-lg overflow-hidden">

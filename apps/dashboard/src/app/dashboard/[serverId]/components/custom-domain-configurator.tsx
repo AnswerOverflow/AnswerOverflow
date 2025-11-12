@@ -35,7 +35,6 @@ export function CustomDomainConfigurator({
 	);
 
 	const currentDomain = dashboardData?.server.customDomain ?? null;
-	const displayDomain = domain ?? currentDomain;
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();

@@ -2,7 +2,6 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import type { Id } from "@packages/database/convex/_generated/dataModel";
-import { BlueLink } from "@packages/ui/components/blue-link";
 import {
 	Card,
 	CardContent,

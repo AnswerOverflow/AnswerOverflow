@@ -17,7 +17,7 @@ function patchGuildFeatures(spec: any): void {
 	// Make GuildFeatures accept any string instead of strict enum
 	// This allows Discord API to return features not yet in their spec
 	const guildFeatures = spec.components?.schemas?.GuildFeatures;
-	if (guildFeatures && guildFeatures.oneOf) {
+	if (guildFeatures?.oneOf) {
 		// Change from strict enum to plain string type that accepts any value
 		// This ensures the generator creates S.String instead of a strict union
 		spec.components.schemas.GuildFeatures = {
