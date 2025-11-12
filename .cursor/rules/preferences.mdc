@@ -34,6 +34,19 @@ alwaysApply: true
 - Avoid test-specific workarounds or shortcuts
 - Keep test code clean and straightforward
 
+## UI Components
+
+- **Always prefer components from `@packages/ui` over native HTML elements**
+- Use `<Button />` instead of `<button />`
+- Use `<Input />` instead of `<input />`
+- Use `<Textarea />` instead of `<textarea />`
+- Use `<Label />` instead of `<label />`
+- Use `<Select />` instead of `<select />`
+- Use `<Checkbox />` instead of `<input type="checkbox" />`
+- Use `<Link />` instead of `<a />` for navigation
+- Import components from `@packages/ui/components/*` (e.g., `import { Button } from "@packages/ui/components/button"`)
+- Only use native HTML elements when there is no equivalent component in `@packages/ui`
+
 Do not create summary documents or markdown documents unless instructed
 
 Run commands with a timeout of 60 seconds unless instructed otherwise
