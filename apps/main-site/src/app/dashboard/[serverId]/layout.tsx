@@ -1,77 +1,21 @@
 "use client";
 
-import { api } from "@packages/database/convex/_generated/api";
-import type { Id } from "@packages/database/convex/_generated/dataModel";
-import {
-	DashboardNavbar,
-	DashboardSidebar,
-	type ServerSelectServer,
-} from "@packages/ui/components/navbar";
-import { useQuery } from "convex/react";
-import { useParams } from "next/navigation";
-import { authClient } from "../../../lib/auth-client";
+import { DashboardSidebar } from "@packages/ui/components/navbar";
 
 export default function DashboardServerLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	const params = useParams();
-	const serverId = params.serverId as Id<"servers"> | undefined;
-
-	const { data: session, isPending: isSessionPending } =
-		authClient.useSession();
-
-	// Fetch servers for dropdown using reactive query based on user server settings
-	const servers = useQuery(
-		api.public.dashboard_queries.getUserServersForDropdown,
-		isSessionPending || !session?.user ? "skip" : {},
-	);
-
-	const serversForDropdown: ServerSelectServer[] =
-		servers?.map((server) => ({
-			id: server.aoServerId ? String(server.aoServerId) : server.discordId,
-			name: server.name,
-			icon: server.icon,
-			hasBot: server.hasBot,
-			discordId: server.discordId, // Preserve Discord ID for icon fetching
-		})) ?? [];
-
-	const serverSelectProps = serverId
-		? {
-				currentServerId: serverId,
-				servers: serversForDropdown,
-				getServerHref: (id: string) => `/dashboard/${id}`,
-				addNewHref: "/dashboard/onboarding",
-				isLoading: isSessionPending || servers === undefined,
-			}
-		: undefined;
-
-	const userSectionProps = session?.user
-		? {
-				user: {
-					name: session.user.name ?? null,
-					image: session.user.image ?? null,
-					email: session.user.email ?? null,
-				},
-			}
-		: {
-				signInHref: "/api/auth/signin",
-			};
-
+	// The navbar is handled by the parent dashboard layout
+	// This layout only adds the sidebar for server-specific pages
 	return (
-		<DashboardNavbar
-			serverSelect={serverSelectProps}
-			userSection={userSectionProps}
-			homeHref="/dashboard"
-		>
-			<DashboardSidebar>
-				<main className="p-6 lg:p-8 mx-auto">
-					<div className="max-w-[2000px] w-full flex flex-col items-center">
-						{children}
-					</div>
-				</main>
-			</DashboardSidebar>
-		</DashboardNavbar>
+		<DashboardSidebar>
+			<main className="p-6 lg:p-8 mx-auto">
+				<div className="max-w-[2000px] w-full flex flex-col items-center">
+					{children}
+				</div>
+			</main>
+		</DashboardSidebar>
 	);
 }

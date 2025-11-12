@@ -96,7 +96,7 @@ export function BotPermissionsDisplay({
 	const [showPermissions, setShowPermissions] = useState(false);
 
 	return (
-		<div className="h-[600px] mt-[246px] flex flex-col items-start justify-start">
+		<div className="h-[600px] mt-[246px] flex flex-col items-center justify-start">
 			<div
 				className={cn(
 					"w-full max-w-md max-h-[600px] rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden flex flex-col",

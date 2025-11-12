@@ -71,7 +71,9 @@ export function DashboardNavbar({
 					</Link>
 
 					{/* Separator */}
-					<span className="hidden lg:inline text-muted-foreground">/</span>
+					{serverSelect && (
+						<span className="hidden lg:inline text-muted-foreground">/</span>
+					)}
 
 					{/* Server Select */}
 					<div className="flex-1">
