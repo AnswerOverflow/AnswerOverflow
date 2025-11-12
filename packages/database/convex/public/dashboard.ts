@@ -5,12 +5,17 @@ import {
 	HttpClient,
 	HttpClientRequest,
 } from "@effect/platform";
+import { Analytics, AnalyticsLayer } from "@packages/analytics/server/index";
 import { make } from "@packages/discord-api/generated";
+import { v } from "convex/values";
 import { Effect } from "effect";
-import { api, components } from "../_generated/api";
+import { api } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
-import { authenticatedAction } from "../shared/auth";
-import { authComponent } from "../shared/betterAuth";
+import type { ActionCtx } from "../_generated/server";
+import {
+	authenticatedAction,
+	getDiscordAccountWithToken,
+} from "../shared/auth";
 import { getOrSetCache } from "../shared/cache";
 import {
 	DISCORD_PERMISSIONS,
@@ -58,107 +63,13 @@ export const getUserServers = authenticatedAction({
 	handler: async (ctx, args): Promise<ServerWithMetadata[]> => {
 		const { discordAccountId } = args;
 
-		// Get user from auth to get userId for querying accounts
-		const user = await authComponent.getAuthUser(ctx);
-		if (!user || typeof user !== "object" || user === null) {
-			throw new Error("Invalid user object");
+		// Get Discord account with access token
+		const discordAccount = await getDiscordAccountWithToken(ctx);
+		if (!discordAccount || discordAccount.accountId !== discordAccountId) {
+			throw new Error("Discord account not linked or mismatch");
 		}
 
-		const userEmail =
-			"email" in user && typeof user.email === "string" ? user.email : null;
-
-		if (!userEmail) {
-			throw new Error("User email not found");
-		}
-
-		const betterAuthUser = await ctx.runQuery(
-			components.betterAuth.adapter.findOne,
-			{
-				model: "user",
-				where: [
-					{
-						field: "email",
-						operator: "eq",
-						value: userEmail,
-					},
-				],
-			},
-		);
-
-		if (!betterAuthUser || typeof betterAuthUser !== "object") {
-			throw new Error("User not found in database");
-		}
-
-		// Convex documents use _id as the ID field
-		const sessionUserId =
-			"_id" in betterAuthUser && typeof betterAuthUser._id === "string"
-				? betterAuthUser._id
-				: null;
-
-		if (!sessionUserId) {
-			throw new Error("User ID not found");
-		}
-
-		// Get Discord OAuth account from BetterAuth database
-		// Use the BetterAuth component's internal API to get accounts
-		const accountsResult = await ctx.runQuery(
-			components.betterAuth.adapter.findMany,
-			{
-				model: "account",
-				where: [
-					{
-						field: "userId",
-						operator: "eq",
-						value: sessionUserId,
-					},
-				],
-				paginationOpts: {
-					cursor: null,
-					numItems: 100,
-				},
-			},
-		);
-
-		// Handle paginated result - check if it's an array or has a page property
-		type AccountResult = {
-			providerId: string;
-			accessToken: string | null;
-			userId: string;
-			accountId?: string; // Discord user ID (provider account ID)
-		};
-
-		const accounts: AccountResult[] = Array.isArray(accountsResult)
-			? accountsResult
-			: "page" in accountsResult && Array.isArray(accountsResult.page)
-				? accountsResult.page
-				: [];
-
-		const discordAccount = accounts.find(
-			(account) => account.providerId === "discord",
-		);
-
-		if (!discordAccount) {
-			throw new Error("Discord account not linked");
-		}
-
-		// Verify the accountId matches what we got from the wrapper
-		if (
-			!("accountId" in discordAccount) ||
-			typeof discordAccount.accountId !== "string" ||
-			discordAccount.accountId !== discordAccountId
-		) {
-			throw new Error("Discord account ID mismatch");
-		}
-
-		// Get Discord OAuth token from BetterAuth
-		// BetterAuth stores OAuth tokens in the account
-		if (!("accessToken" in discordAccount)) {
-			throw new Error("Discord account missing access token");
-		}
 		const token = discordAccount.accessToken;
-		if (!token) {
-			throw new Error("Discord token not found");
-		}
 
 		// Fetch user's Discord servers using the API client
 		// Cache the result for 5 minutes to reduce API calls
@@ -267,5 +178,175 @@ export const getUserServers = authenticatedAction({
 
 		// Sort: has bot + owner/admin/manage, then no bot + owner/admin/manage
 		return sortServersByBotAndRole(serversWithMetadata);
+	},
+});
+
+/**
+ * Helper function to check if user has ManageGuild permission for a server
+ * Uses the same permission check as getUserServers
+ */
+async function checkManageGuildPermission(
+	ctx: ActionCtx,
+	discordAccountId: string,
+	serverId: Id<"servers">,
+): Promise<void> {
+	const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
+	if (!backendAccessToken) {
+		throw new Error("BACKEND_ACCESS_TOKEN not configured");
+	}
+
+	// Get user server settings to check permissions
+	const settings = await ctx.runQuery(
+		api.publicInternal.user_server_settings.findUserServerSettingsById,
+		{
+			backendAccessToken,
+			userId: discordAccountId,
+			serverId,
+		},
+	);
+
+	if (!settings) {
+		throw new Error(
+			"You are not a member of the server you are trying to view analytics for",
+		);
+	}
+
+	// Check if user has Administrator or ManageGuild permission
+	const hasAdminOrManageGuild =
+		hasPermission(settings.permissions, DISCORD_PERMISSIONS.Administrator) ||
+		hasPermission(settings.permissions, DISCORD_PERMISSIONS.ManageGuild);
+
+	if (!hasAdminOrManageGuild) {
+		throw new Error(
+			"You are missing the required permissions (Manage Guild or Administrator) to view analytics for this server",
+		);
+	}
+}
+
+export const getTopQuestionSolversForServer = authenticatedAction({
+	args: {
+		serverId: v.id("servers"),
+		from: v.optional(v.number()),
+		to: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const { discordAccountId, serverId, from, to } = args;
+
+		// Check permissions
+		await checkManageGuildPermission(ctx, discordAccountId, serverId);
+
+		// Call analytics service
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopQuestionSolversForServer({
+				serverId,
+				from: from ? new Date(from) : undefined,
+				to: to ? new Date(to) : undefined,
+			});
+		});
+
+		return await Effect.runPromise(
+			program.pipe(Effect.provide(AnalyticsLayer)),
+		);
+	},
+});
+
+export const getTopPages = authenticatedAction({
+	args: {
+		serverId: v.id("servers"),
+	},
+	handler: async (ctx, args) => {
+		const { discordAccountId, serverId } = args;
+
+		// Check permissions
+		await checkManageGuildPermission(ctx, discordAccountId, serverId);
+
+		// Call analytics service
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopPages({
+				serverId,
+			});
+		}).pipe(Effect.provide(AnalyticsLayer));
+
+		return await Effect.runPromise(program);
+	},
+});
+
+export const getPageViewsForServer = authenticatedAction({
+	args: {
+		serverId: v.id("servers"),
+		from: v.optional(v.number()),
+		to: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const { discordAccountId, serverId, from, to } = args;
+
+		// Check permissions
+		await checkManageGuildPermission(ctx, discordAccountId, serverId);
+
+		// Call analytics service
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getPageViewsForServer({
+				serverId,
+				from: from ? new Date(from) : undefined,
+				to: to ? new Date(to) : undefined,
+			});
+		}).pipe(Effect.provide(AnalyticsLayer));
+
+		return await Effect.runPromise(program);
+	},
+});
+
+export const getServerInvitesClicked = authenticatedAction({
+	args: {
+		serverId: v.id("servers"),
+		from: v.optional(v.number()),
+		to: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const { discordAccountId, serverId, from, to } = args;
+
+		// Check permissions
+		await checkManageGuildPermission(ctx, discordAccountId, serverId);
+
+		// Call analytics service
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getServerInvitesClicked({
+				serverId,
+				from: from ? new Date(from) : undefined,
+				to: to ? new Date(to) : undefined,
+			});
+		}).pipe(Effect.provide(AnalyticsLayer));
+
+		return await Effect.runPromise(program);
+	},
+});
+
+export const getQuestionsAndAnswers = authenticatedAction({
+	args: {
+		serverId: v.id("servers"),
+		from: v.optional(v.number()),
+		to: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const { discordAccountId, serverId, from, to } = args;
+
+		// Check permissions
+		await checkManageGuildPermission(ctx, discordAccountId, serverId);
+
+		// Call analytics service
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getQuestionsAndAnswers({
+				serverId,
+				from: from ? new Date(from) : undefined,
+				to: to ? new Date(to) : undefined,
+			});
+		}).pipe(Effect.provide(AnalyticsLayer));
+
+		return await Effect.runPromise(program);
 	},
 });

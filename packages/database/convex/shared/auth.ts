@@ -287,19 +287,18 @@ export async function requireAuth(
 }
 
 /**
- * Get the authenticated user's Discord account ID from their BetterAuth identity.
- * This is a helper function used by the authenticated wrappers.
+ * Get the authenticated user's Discord account with access token from BetterAuth.
  * Returns null if not authenticated or no Discord account linked.
  */
-async function getDiscordAccountIdForWrapper(
+export async function getDiscordAccountWithToken(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
-): Promise<string | null> {
+): Promise<{ accountId: string; accessToken: string } | null> {
 	const user = await authComponent.getAuthUser(ctx);
 	if (!user) {
 		return null;
 	}
 
-	// Get Discord account ID from BetterAuth
+	// Get Discord account from BetterAuth
 	const accountResult = await ctx.runQuery(
 		components.betterAuth.adapter.findOne,
 		{
@@ -319,17 +318,35 @@ async function getDiscordAccountIdForWrapper(
 		},
 	);
 
-	// Type guard to ensure we have a valid account object
+	// Type guard to ensure we have a valid account object with access token
 	if (
 		!accountResult ||
 		typeof accountResult !== "object" ||
 		!("accountId" in accountResult) ||
-		typeof accountResult.accountId !== "string"
+		typeof accountResult.accountId !== "string" ||
+		!("accessToken" in accountResult) ||
+		typeof accountResult.accessToken !== "string" ||
+		!accountResult.accessToken
 	) {
 		return null;
 	}
 
-	return accountResult.accountId;
+	return {
+		accountId: accountResult.accountId,
+		accessToken: accountResult.accessToken,
+	};
+}
+
+/**
+ * Get the authenticated user's Discord account ID from their BetterAuth identity.
+ * This is a helper function used by the authenticated wrappers.
+ * Returns null if not authenticated or no Discord account linked.
+ */
+async function getDiscordAccountIdForWrapper(
+	ctx: QueryCtx | MutationCtx | ActionCtx,
+): Promise<string | null> {
+	const account = await getDiscordAccountWithToken(ctx);
+	return account?.accountId ?? null;
 }
 
 /**

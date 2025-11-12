@@ -24,6 +24,7 @@
 		"convex": "^1.29.0",
 		"convex-helpers": "^0.1.104",
 		"effect": "^3.17.7",
+		"@packages/analytics": "workspace:*",
 		"ioredis": "^5.8.2",
 		"openai": "^4.45.0"
 	},
