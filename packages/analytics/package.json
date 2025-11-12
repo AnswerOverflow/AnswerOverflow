@@ -1,0 +1,12 @@
+{
+	"name": "@packages/analytics",
+	"version": "1.0.0",
+	"type": "module",
+	"exports": {
+		"./*": "./src/*.ts"
+	},
+	"dependencies": {
+		"@typelytics/posthog": "^0.1.5",
+		"effect": "^3.19.3"
+	}
+}
