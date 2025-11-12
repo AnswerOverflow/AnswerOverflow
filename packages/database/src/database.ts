@@ -171,6 +171,15 @@ export const service = Effect.gen(function* () {
 			},
 		);
 
+	const findChannelByDiscordId = (discordId: string) =>
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.channels.findChannelByDiscordId,
+			{
+				backendAccessToken,
+				discordId,
+			},
+		);
+
 	const findAllThreadsByParentId = (parentId: string, limit?: number) =>
 		watchQueryToLiveData(
 			({ api }) => api.publicInternal.channels.findAllThreadsByParentId,
@@ -905,6 +914,7 @@ export const service = Effect.gen(function* () {
 		channels: {
 			getChannelByDiscordId,
 			findChannelByInviteCode,
+			findChannelByDiscordId,
 			findAllThreadsByParentId,
 			findAllChannelsByServerId,
 			findManyChannelsById,

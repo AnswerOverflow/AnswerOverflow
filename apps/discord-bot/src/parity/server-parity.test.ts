@@ -15,23 +15,14 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 
 		// Create and seed guild
 		const guild = discordMock.utilities.createMockGuild({
-			id: "guild123",
-			name: "Test Guild",
 			description: "A test guild",
 			icon: "test_icon",
-			approximateMemberCount: 100,
 		});
 		discordMock.utilities.seedGuild(guild);
 
 		// Create channels
-		const textChannel = discordMock.utilities.createMockTextChannel(guild, {
-			id: "channel123",
-			name: "general",
-		});
-		const forumChannel = discordMock.utilities.createMockForumChannel(guild, {
-			id: "channel456",
-			name: "help-forum",
-		});
+		const textChannel = discordMock.utilities.createMockTextChannel(guild);
+		const forumChannel = discordMock.utilities.createMockForumChannel(guild);
 
 		// Seed channels in client cache
 		discordMock.utilities.seedChannel(textChannel);
@@ -41,14 +32,17 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 		yield* syncGuild(guild);
 
 		// Verify server was created
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("guild123");
+		const serverLiveData = yield* database.servers.getServerByDiscordId(
+			guild.id,
+		);
 		expect(serverLiveData?.data).not.toBeNull();
-		expect(serverLiveData?.data?.discordId).toBe("guild123");
-		expect(serverLiveData?.data?.name).toBe("Test Guild");
-		expect(serverLiveData?.data?.description).toBe("A test guild");
-		expect(serverLiveData?.data?.icon).toBe("test_icon");
-		expect(serverLiveData?.data?.approximateMemberCount).toBe(100);
+		expect(serverLiveData?.data?.discordId).toBe(guild.id);
+		expect(serverLiveData?.data?.name).toBe(guild.name);
+		expect(serverLiveData?.data?.description).toBe(guild.description);
+		expect(serverLiveData?.data?.icon).toBe(guild.icon);
+		expect(serverLiveData?.data?.approximateMemberCount).toBe(
+			guild.approximateMemberCount,
+		);
 
 		// Verify server preferences were created
 		if (serverLiveData?.data?._id) {
@@ -73,19 +67,18 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 		expect(channelsLiveData?.data?.length).toBe(2);
 
 		// Verify text channel
-		const textChannelData = channelsLiveData?.data?.find(
-			(ch) => ch.id === "channel123",
+		const textChannelLiveData = yield* database.channels.findChannelByDiscordId(
+			textChannel.id,
 		);
-		expect(textChannelData).not.toBeUndefined();
-		expect(textChannelData?.name).toBe("general");
-		expect(textChannelData?.type).toBe(0); // GuildText
+		expect(textChannelLiveData?.data).not.toBeNull();
+		expect(textChannelLiveData?.data?.name).toBe(textChannel.name);
+		expect(textChannelLiveData?.data?.type).toBe(0); // GuildText
 
 		// Verify forum channel
-		const forumChannelData = channelsLiveData?.data?.find(
-			(ch) => ch.id === "channel456",
-		);
-		expect(forumChannelData).not.toBeUndefined();
-		expect(forumChannelData?.name).toBe("help-forum");
-		expect(forumChannelData?.type).toBe(15); // GuildForum
+		const forumChannelLiveData =
+			yield* database.channels.findChannelByDiscordId(forumChannel.id);
+		expect(forumChannelLiveData?.data).not.toBeNull();
+		expect(forumChannelLiveData?.data?.name).toBe(forumChannel.name);
+		expect(forumChannelLiveData?.data?.type).toBe(15); // GuildForum
 	}).pipe(Effect.provide(TestLayer)),
 );

@@ -71,6 +71,15 @@ export const findChannelByInviteCode = publicInternalQuery({
 	},
 });
 
+export const findChannelByDiscordId = publicInternalQuery({
+	args: {
+		discordId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		return await getChannelWithSettings(ctx, args.discordId);
+	},
+});
+
 export const findAllThreadsByParentId = publicInternalQuery({
 	args: {
 		parentId: v.string(),
