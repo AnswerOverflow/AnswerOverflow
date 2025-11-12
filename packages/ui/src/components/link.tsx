@@ -1,20 +1,27 @@
+"use client";
+import NextLink from "next/link";
 import type React from "react";
 import { cn } from "../lib/utils";
 
-export interface LinkProps
-	extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-	href: string;
-	children: React.ReactNode;
-}
+export function Link(
+	props: React.ComponentPropsWithoutRef<typeof NextLink> & {
+		href: string;
+		icon?: React.ReactNode;
+	},
+) {
+	const { icon, className, ...rest } = props;
 
-export function Link({ className, ...props }: LinkProps) {
-	return (
-		<a
-			{...props}
-			className={cn(
-				"text-blue-600 hover:underline dark:text-blue-400",
-				className,
-			)}
-		/>
-	);
+	if (icon)
+		return (
+			<NextLink
+				prefetch={false}
+				{...rest}
+				href={rest.href}
+				className={cn("flex flex-row items-center gap-2", className)}
+			>
+				{props.icon}
+				{props.children}
+			</NextLink>
+		);
+	return <NextLink prefetch={false} {...props} href={rest.href} />;
 }

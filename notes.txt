@@ -11,6 +11,7 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 - rate limiting
 - richer use query
 - rls to enforce manage server permissions when updating server settings
+- https://www.convex.dev/components/workpool may be relevant
 
 
 

@@ -32,9 +32,73 @@
 				"noShadowRestrictedNames": "error",
 				"noExplicitAny": "error",
 				"noArrayIndexKey": "off"
+			},
+			"style": {
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"paths": {
+							"../../../../packages/database/convex/_generated/api": "Do not use relative paths across packages. Use '@packages/database/convex/_generated/api' instead.",
+							"../../../../../packages/database/convex/_generated/api": "Do not use relative paths across packages. Use '@packages/database/convex/_generated/api' instead."
+						}
+					}
+				}
 			}
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["packages/ui/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"paths": {
+									"@packages/ui": "Do not import from '@packages/ui' within the 'ui/' package. Use relative imports instead."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["packages/database/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"paths": {
+									"@packages/database": "Do not import from '@packages/database' within the 'database/' package. Use relative imports instead."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["packages/analytics/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"paths": {
+									"@packages/analytics": "Do not import from '@packages/analytics' within the 'analytics/' package. Use relative imports instead."
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	],
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"

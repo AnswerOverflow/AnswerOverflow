@@ -3,7 +3,7 @@ import { Database, DatabaseLayer } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/otel";
 import { Effect, Layer } from "effect";
 import { notFound } from "next/navigation";
-import { ServerPageClient } from "./client";
+import { ChannelPageClient } from "./client";
 
 const OtelLayer = createOtelLayer("main-site");
 
@@ -50,5 +50,7 @@ export default async function ServerPage(props: Props) {
 		return notFound();
 	}
 
-	return <ServerPageClient serverData={serverData} />;
+	return (
+		<ChannelPageClient server={serverData} channels={serverData.channels} />
+	);
 }

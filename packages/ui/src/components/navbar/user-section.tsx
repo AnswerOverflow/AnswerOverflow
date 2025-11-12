@@ -36,6 +36,7 @@ export interface UserSectionProps {
 	onSignIn?: () => void;
 	signInHref?: string;
 	showSignIn?: boolean;
+	onSignOut?: () => void | Promise<void>;
 }
 
 function ChangeThemeItem() {
@@ -54,7 +55,13 @@ function ChangeThemeItem() {
 	);
 }
 
-function UserAvatar({ user }: { user: User }) {
+function UserAvatar({
+	user,
+	onSignOut,
+}: {
+	user: User;
+	onSignOut?: () => void | Promise<void>;
+}) {
 	return (
 		<DropdownMenu modal={false}>
 			<DropdownMenuTrigger className="flex flex-row justify-center">
@@ -78,10 +85,14 @@ function UserAvatar({ user }: { user: User }) {
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<ChangeThemeItem />
-				<DropdownMenuItem>
-					<Link href="/api/auth/signout" className="w-full">
-						Sign Out
-					</Link>
+				<DropdownMenuItem
+					onClick={() => {
+						if (onSignOut) {
+							void onSignOut();
+						}
+					}}
+				>
+					Sign Out
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
@@ -117,6 +128,7 @@ export function UserSection({
 	onSignIn,
 	signInHref,
 	showSignIn = true,
+	onSignOut,
 }: UserSectionProps) {
 	if (!user && showSignIn) {
 		return <SignInButton onSignIn={onSignIn} href={signInHref} />;
@@ -126,7 +138,7 @@ export function UserSection({
 		return null;
 	}
 
-	return <UserAvatar user={user} />;
+	return <UserAvatar user={user} onSignOut={onSignOut} />;
 }
 
 export function UserSectionSkeleton() {

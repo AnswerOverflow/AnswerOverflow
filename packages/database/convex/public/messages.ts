@@ -15,6 +15,7 @@ import {
 	getChannelWithSettings,
 	getDiscordAccountById,
 	getMessageById as getMessageByIdShared,
+	isThreadType,
 } from "../shared/shared";
 
 type Message = Infer<typeof messageSchema>;
@@ -253,9 +254,13 @@ export const searchMessages = query({
 		}
 
 		// Filter by channel if provided
+		// Include both direct messages in the channel and messages in threads belonging to the channel
 		if (args.channelId) {
 			searchQuery = searchQuery.filter((q) =>
-				q.eq(q.field("channelId"), args.channelId),
+				q.or(
+					q.eq(q.field("channelId"), args.channelId),
+					q.eq(q.field("parentChannelId"), args.channelId),
+				),
 			);
 		}
 
@@ -268,8 +273,26 @@ export const searchMessages = query({
 			const isIgnored = await isIgnoredAccount(ctx, message.authorId);
 			if (!isIgnored) {
 				// Check if channel has indexing enabled
+				// For thread messages, check parent channel settings if thread doesn't have its own
 				const channel = await getChannelWithSettings(ctx, message.channelId);
-				if (channel?.flags.indexingEnabled) {
+				let indexingEnabled = channel?.flags.indexingEnabled ?? false;
+
+				// If message is in a thread and thread doesn't have indexing enabled,
+				// check the parent channel's settings
+				if (
+					!indexingEnabled &&
+					message.parentChannelId &&
+					channel &&
+					isThreadType(channel.type)
+				) {
+					const parentChannel = await getChannelWithSettings(
+						ctx,
+						message.parentChannelId,
+					);
+					indexingEnabled = parentChannel?.flags.indexingEnabled ?? false;
+				}
+
+				if (indexingEnabled) {
 					// For now, use a simple score based on position (Convex doesn't expose search scores directly)
 					// In a real implementation, you might want to use vector search for better scoring
 					filteredResults.push({

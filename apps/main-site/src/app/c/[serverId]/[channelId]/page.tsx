@@ -2,7 +2,7 @@ import { Database, DatabaseLayer } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/otel";
 import { Effect, Layer } from "effect";
 import { notFound } from "next/navigation";
-import { ChannelPageClient } from "./client";
+import { ChannelPageClient } from "../client";
 
 const OtelLayer = createOtelLayer("main-site");
 

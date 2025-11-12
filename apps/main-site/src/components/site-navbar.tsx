@@ -1,9 +1,9 @@
 "use client";
 
 import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo";
+import { authClient } from "@packages/ui/components/convex-client-provider";
 import { Input } from "@packages/ui/components/input";
 import { Navbar } from "@packages/ui/components/navbar";
-import { authClient } from "@packages/ui/components/convex-client-provider";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -56,6 +56,10 @@ export function SiteNavbar() {
 								name: session.user.name ?? null,
 								image: session.user.image ?? null,
 								email: session.user.email ?? null,
+							},
+							onSignOut: async () => {
+								await authClient.signOut();
+								router.push("/");
 							},
 						}
 					: {

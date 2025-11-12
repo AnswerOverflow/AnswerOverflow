@@ -65,6 +65,10 @@ export default function DashboardLayout({
 					image: session.user.image ?? null,
 					email: session.user.email ?? null,
 				},
+				onSignOut: async () => {
+					await authClient.signOut();
+					window.location.href = "/";
+				},
 			}
 		: {
 				signInHref: "/api/auth/signin",
