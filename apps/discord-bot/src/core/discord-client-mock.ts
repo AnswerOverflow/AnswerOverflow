@@ -5,7 +5,12 @@ import {
 	type GuildBasedChannel,
 } from "discord.js";
 import { Context, Effect, Layer } from "effect";
-import * as fc from "effect/FastCheck";
+import {
+	guildDataArb,
+	channelDataArb,
+	channelDataWithoutParentArb,
+	sampleOne,
+} from "./discord-mock-arbitraries";
 
 /**
  * Options for creating a mock Discord client service
@@ -69,32 +74,15 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				memberCount: number;
 			}> = {},
 		): Guild => {
-			// Generate default values using fast-check
-			const defaultGuildArb = fc.record({
-				id: fc.string({ minLength: 17, maxLength: 19 }),
-				name: fc.string({ minLength: 1, maxLength: 100 }),
-				icon: fc.oneof(fc.constant(null), fc.string()),
-				description: fc.oneof(
-					fc.constant(null),
-					fc.string({ maxLength: 4096 }),
-				),
-				vanityURLCode: fc.oneof(
-					fc.constant(null),
-					fc.string({ minLength: 1, maxLength: 20 }),
-				),
-				approximateMemberCount: fc.nat({ max: 1000000 }),
-				memberCount: fc.nat({ max: 1000000 }),
-			});
-
-			const generated = fc.sample(defaultGuildArb, 1)[0] ?? {
-				id: "0",
+			const generated = sampleOne(guildDataArb, {
+				id: "100000000000000000",
 				name: "Generated Guild",
 				icon: null,
 				description: null,
 				vanityURLCode: null,
 				approximateMemberCount: 0,
 				memberCount: 0,
-			};
+			});
 			const data = {
 				id: partialData.id ?? generated.id,
 				name: partialData.name ?? generated.name,
@@ -120,7 +108,7 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				features: [],
 				emojis: [],
 				banner: null,
-				owner_id: "0",
+				owner_id: "100000000000000000",
 				afk_channel_id: null,
 				afk_timeout: 0,
 				verification_level: 0,
@@ -155,21 +143,11 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				parentId: string | null;
 			}> = {},
 		) => {
-			// Generate default values using fast-check
-			const defaultChannelArb = fc.record({
-				id: fc.string({ minLength: 17, maxLength: 19 }),
-				name: fc.string({ minLength: 1, maxLength: 100 }),
-				parentId: fc.oneof(
-					fc.constant(null),
-					fc.string({ minLength: 17, maxLength: 19 }),
-				),
-			});
-
-			const generated = fc.sample(defaultChannelArb, 1)[0] ?? {
-				id: "0",
+			const generated = sampleOne(channelDataArb, {
+				id: "100000000000000000",
 				name: "Generated Channel",
 				parentId: null,
-			};
+			});
 			const data = {
 				id: partialData.id ?? generated.id,
 				name: partialData.name ?? generated.name,
@@ -209,16 +187,10 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				name: string;
 			}> = {},
 		) => {
-			// Generate default values using fast-check
-			const defaultChannelArb = fc.record({
-				id: fc.string({ minLength: 17, maxLength: 19 }),
-				name: fc.string({ minLength: 1, maxLength: 100 }),
-			});
-
-			const generated = fc.sample(defaultChannelArb, 1)[0] ?? {
-				id: "0",
+			const generated = sampleOne(channelDataWithoutParentArb, {
+				id: "100000000000000000",
 				name: "Generated Forum Channel",
-			};
+			});
 			const data = {
 				id: partialData.id ?? generated.id,
 				name: partialData.name ?? generated.name,
@@ -262,21 +234,11 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				parentId: string | null;
 			}> = {},
 		) => {
-			// Generate default values using fast-check
-			const defaultChannelArb = fc.record({
-				id: fc.string({ minLength: 17, maxLength: 19 }),
-				name: fc.string({ minLength: 1, maxLength: 100 }),
-				parentId: fc.oneof(
-					fc.constant(null),
-					fc.string({ minLength: 17, maxLength: 19 }),
-				),
-			});
-
-			const generated = fc.sample(defaultChannelArb, 1)[0] ?? {
-				id: "0",
+			const generated = sampleOne(channelDataArb, {
+				id: "100000000000000000",
 				name: "Generated Channel",
 				parentId: null,
-			};
+			});
 			const data = {
 				id: partialData.id ?? generated.id,
 				name: partialData.name ?? generated.name,
