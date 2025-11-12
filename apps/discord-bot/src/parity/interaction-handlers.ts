@@ -1,9 +1,9 @@
 import { DatabaseLayer } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { handleDismissButtonInteraction } from "../handlers/interactions/dismiss-button";
 import { handleLeaderboardCommand } from "../handlers/commands/leaderboard-command";
 import { handleManageAccountCommand } from "../handlers/commands/manage-account-command";
+import { handleDismissButtonInteraction } from "../handlers/interactions/dismiss-button";
 import { handleMarkSolutionCommand } from "../handlers/interactions/mark-solution-command";
 
 /**

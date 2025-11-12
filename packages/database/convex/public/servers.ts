@@ -1,16 +1,15 @@
-import { v } from "convex/values";
+import { type Infer, v } from "convex/values";
 import { query } from "../_generated/server";
+import type { channelSettingsSchema } from "../schema";
 import {
 	CHANNEL_TYPE,
 	getServerByDiscordId as getServerByDiscordIdShared,
 	ROOT_CHANNEL_TYPES,
 } from "../shared/shared";
-import type { channelSettingsSchema } from "../schema";
-import { type Infer } from "convex/values";
 
 type ChannelSettings = Infer<typeof channelSettingsSchema>;
 
-const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
+const _DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
 	channelId: "",
 	indexingEnabled: false,
 	markSolutionEnabled: false,
@@ -208,7 +207,7 @@ export const publicFindServerByIdWithChannels = query({
 		);
 
 		// Filter to only channels with indexing enabled
-		const indexedChannels = rootChannels.filter((channel, idx) => {
+		const indexedChannels = rootChannels.filter((_channel, idx) => {
 			const settings = allSettings[idx];
 			return settings?.indexingEnabled ?? false;
 		});

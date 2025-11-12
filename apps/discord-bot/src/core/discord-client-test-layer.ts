@@ -1,10 +1,10 @@
 import { ConfigProvider, Context, Effect, Layer } from "effect";
-import { DiscordClient } from "./discord-client-service";
-import { Discord, createDiscordService } from "./discord-service";
 import {
 	DiscordClientMock,
 	DiscordClientMockLayer,
 } from "./discord-client-mock";
+import { DiscordClient } from "./discord-client-service";
+import { createDiscordService, Discord } from "./discord-service";
 
 // Provide a dummy token for Effect Config system (not used in mock)
 const DiscordTokenLayer = Layer.setConfigProvider(

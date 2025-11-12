@@ -1,8 +1,6 @@
-import type { Server } from "@packages/database/convex/schema";
-import type { Channel } from "@packages/database/convex/schema";
-import { LinkButton } from "./link-button";
-import { ServerIcon } from "./server-icon";
+import type { Channel, Server } from "@packages/database/convex/schema";
 import { cn } from "../lib/utils";
+import { LinkButton } from "./link-button";
 
 export interface ServerInviteJoinButtonProps {
 	server: Pick<Server, "discordId" | "name" | "icon" | "vanityInviteCode">;

@@ -1,5 +1,4 @@
-import type { Channel } from "@packages/database/convex/schema";
-import type { Message } from "@packages/database/convex/schema";
+import type { Channel, Message } from "@packages/database/convex/schema";
 import Link from "next/link";
 import { cn } from "../lib/utils";
 import { DiscordMarkdown } from "../markdown/discord-markdown";
@@ -12,7 +11,7 @@ export interface LinkMessageProps {
 
 export function LinkMessage({ message, thread, className }: LinkMessageProps) {
 	const threadName =
-		thread.name || message.content?.slice(0, 20).trim() + "...";
+		thread.name || `${message.content?.slice(0, 20).trim()}...`;
 
 	return (
 		<div className={cn("flex w-full flex-col", className)}>
