@@ -15,7 +15,7 @@ import type {
 import { ConvexClientLiveUnifiedLayer } from "./convex-client-live";
 import type { ConvexClientShared } from "./convex-unified-client";
 import { ConvexClientUnified } from "./convex-unified-client";
-import { createWatchQueryToLiveData } from "./watch-query";
+import { createWatchQueryToLiveData } from "./watch-query-scoped";
 
 /**
  * Base message with relations - matches the old codebase interface
