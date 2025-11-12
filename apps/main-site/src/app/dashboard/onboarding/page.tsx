@@ -124,7 +124,7 @@ export default function OnboardingPage() {
 
 	if (isSessionPending || isServersLoading) {
 		return (
-			<main className="flex items-center justify-center p-8">
+			<main className="flex items-center justify-center p-4 md:p-8">
 				<div className="w-full max-w-2xl space-y-6">
 					<Skeleton className="h-12 w-64" />
 					<Skeleton className="h-96 w-full" />
@@ -136,7 +136,7 @@ export default function OnboardingPage() {
 	// Step 1: Authentication
 	if (step === "auth" || !session?.user) {
 		return (
-			<main className="flex items-center justify-center p-8">
+			<main className="flex items-center justify-center p-4 md:p-8">
 				<div className="w-full max-w-2xl">
 					<Card>
 						<CardHeader className="text-center">
@@ -177,7 +177,7 @@ export default function OnboardingPage() {
 	// If no server selected or server not found, redirect to dashboard
 	if (!serverId || !selectedServer) {
 		return (
-			<main className="flex items-center justify-center p-8">
+			<main className="flex items-center justify-center p-4 md:p-8">
 				<div className="w-full max-w-2xl">
 					<Card>
 						<CardHeader className="text-center">
@@ -205,7 +205,7 @@ export default function OnboardingPage() {
 			: "#";
 
 		return (
-			<main className="flex items-center justify-center p-8">
+			<main className="flex items-center justify-center p-4 md:p-8">
 				<div className="w-full max-w-2xl">
 					<BotPermissionsDisplay
 						server={{
@@ -228,7 +228,7 @@ export default function OnboardingPage() {
 		);
 
 		return (
-			<main className="flex items-center justify-center p-8">
+			<main className="flex items-center justify-center p-4 md:p-8">
 				<div className="w-full max-w-2xl space-y-6">
 					<Card>
 						<CardHeader className="text-center">

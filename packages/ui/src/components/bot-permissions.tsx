@@ -11,6 +11,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "./accordion";
+import { Button } from "./button";
 
 export interface BotPermission {
 	name: string;
@@ -99,7 +100,7 @@ export function BotPermissionsDisplay({
 	className?: string;
 }) {
 	return (
-		<div className="flex flex-col items-center  justify-center py-8">
+		<div className="flex flex-col items-center justify-center sm:py-8 mt-0 sm:mt-[max(-50px,calc((100vh-500px)/2-2rem))]">
 			<div className="flex flex-col items-center w-full max-w-md">
 				<div
 					className={cn(
@@ -151,21 +152,23 @@ export function BotPermissionsDisplay({
 						</div>
 					</div>
 
-					<div className="flex gap-2 px-5 pb-3 border-t border-border pt-3 shrink-0">
-						<button
+					<div className="flex flex-col sm:flex-row gap-2 px-5 pb-3 border-t border-border pt-3 shrink-0">
+						<Button
 							type="button"
 							onClick={onCancel}
-							className="flex-1 rounded px-4 py-2 text-sm font-medium bg-secondary text-secondary-foreground transition-colors hover:bg-secondary/80 active:scale-[0.98]"
+							variant="secondary"
+							className="flex-1"
 						>
 							Cancel
-						</button>
-						<button
+						</Button>
+						<Button
 							type="button"
 							onClick={onAdd}
-							className="flex-1 rounded px-4 py-2 text-sm font-medium bg-primary text-primary-foreground transition-colors hover:bg-primary/90 active:scale-[0.98]"
+							variant="default"
+							className="flex-1"
 						>
 							Add
-						</button>
+						</Button>
 					</div>
 				</div>
 
