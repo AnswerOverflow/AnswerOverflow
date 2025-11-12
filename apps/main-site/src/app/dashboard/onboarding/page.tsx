@@ -9,6 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { BotPermissionsDisplay } from "@packages/ui/components/bot-permissions";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
@@ -29,6 +30,7 @@ export default function OnboardingPage() {
 	const { data: session, isPending: isSessionPending } =
 		authClient.useSession();
 	const getUserServers = useAction(api.public.dashboard.getUserServers);
+	const trackBotAddClick = useAction(api.public.dashboard.trackBotAddClick);
 	const [step, setStep] = useState<OnboardingStep>("auth");
 	const [installingServerId, setInstallingServerId] = useState<string | null>(
 		null,
@@ -72,7 +74,6 @@ export default function OnboardingPage() {
 		// If authenticated and has serverId, go to install step
 		if (step === "auth" && serverId) {
 			setStep("install");
-			setInstallingServerId(serverId);
 		}
 	}, [session, isSessionPending, serverId, step, router]);
 
@@ -102,11 +103,20 @@ export default function OnboardingPage() {
 		}
 	}, [step, installingServerId, selectedServer, refetchServers]);
 
-	const handleInstallClick = (discordId: string) => {
+	const handleInstallClick = async (discordId: string) => {
 		const discordClientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
 		if (!discordClientId) {
 			return;
 		}
+
+		// Track that the user clicked the "Add to Server" button
+		try {
+			await trackBotAddClick({ serverDiscordId: discordId });
+		} catch (error) {
+			// Don't block the user if tracking fails
+			console.error("Failed to track bot add click:", error);
+		}
+
 		const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${discordClientId}&permissions=328565083201&scope=bot+applications.commands&guild_id=${discordId}&disable_guild_select=true`;
 		window.open(inviteUrl, "_blank", "noopener,noreferrer");
 		setInstallingServerId(discordId);
@@ -196,84 +206,16 @@ export default function OnboardingPage() {
 
 		return (
 			<main className="min-h-screen flex items-center justify-center p-8">
-				<div className="w-full max-w-2xl space-y-6">
-					<Card>
-						<CardHeader className="text-center">
-							<CardTitle className="text-2xl">
-								Install Answer Overflow
-							</CardTitle>
-							<CardDescription>
-								Add the bot to {selectedServer.name}
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-6">
-							<div className="flex items-center justify-center">
-								<div className="relative w-24 h-24">
-									{selectedServer.icon ? (
-										<Image
-											src={`https://cdn.discordapp.com/icons/${selectedServer.discordId}/${selectedServer.icon}.webp`}
-											alt={selectedServer.name}
-											fill
-											className="rounded-full"
-										/>
-									) : (
-										<ServerIcon
-											server={{
-												discordId: selectedServer.discordId,
-												name: selectedServer.name,
-												icon: selectedServer.icon ?? undefined,
-											}}
-											size={96}
-										/>
-									)}
-								</div>
-							</div>
-
-							<div className="space-y-4">
-								<div className="space-y-2">
-									<h3 className="font-semibold">Steps to install:</h3>
-									<ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-										<li>Click the button below to open Discord</li>
-										<li>Select the server: {selectedServer.name}</li>
-										<li>Authorize the bot with the requested permissions</li>
-										<li>Wait for the installation to complete</li>
-									</ol>
-								</div>
-
-								<div className="flex flex-col gap-3">
-									<Button
-										asChild
-										size="lg"
-										onClick={() => handleInstallClick(selectedServer.discordId)}
-									>
-										<a
-											href={inviteUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="flex items-center gap-2"
-										>
-											Add to {selectedServer.name}
-											<ExternalLink className="h-4 w-4" />
-										</a>
-									</Button>
-
-									<Button variant="ghost" asChild>
-										<Link href="/dashboard">Choose a different server</Link>
-									</Button>
-								</div>
-
-								{installingServerId && (
-									<div className="flex items-center gap-2 text-sm text-muted-foreground">
-										<Loader2 className="h-4 w-4 animate-spin" />
-										<span>
-											Waiting for installation... This page will update
-											automatically.
-										</span>
-									</div>
-								)}
-							</div>
-						</CardContent>
-					</Card>
+				<div className="w-full max-w-2xl">
+					<BotPermissionsDisplay
+						server={{
+							discordId: selectedServer.discordId,
+							name: selectedServer.name,
+							icon: selectedServer.icon,
+						}}
+						onCancel={() => router.push("/dashboard")}
+						onAdd={() => handleInstallClick(selectedServer.discordId)}
+					/>
 				</div>
 			</main>
 		);

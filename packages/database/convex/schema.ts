@@ -49,6 +49,7 @@ export const userServerSettingsSchema = v.object({
 	messageIndexingDisabled: v.boolean(),
 	apiKey: v.optional(v.string()),
 	apiCallsUsed: v.number(),
+	botAddedTimestamp: v.optional(v.number()), // Timestamp when user clicked "Add to Server" button
 });
 
 export const ignoredDiscordAccountSchema = v.object({

@@ -311,3 +311,66 @@ export const getQuestionsAndAnswers = authenticatedAction({
 		return await Effect.runPromise(program);
 	},
 });
+
+/**
+ * Track when a user clicks the "Add to Server" button
+ * Stores a timestamp on userServerSettings to track who initiated the bot addition
+ */
+export const trackBotAddClick = authenticatedAction({
+	args: {
+		serverDiscordId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const { discordAccountId, serverDiscordId } = args;
+
+		// Get the server by Discord ID
+		const server = await ctx.runQuery(
+			api.public.servers.publicGetServerByDiscordId,
+			{
+				discordId: serverDiscordId,
+			},
+		);
+
+		if (!server) {
+			// Server doesn't exist yet, that's okay - we'll create/update settings when it does
+			// For now, just return without error
+			return;
+		}
+
+		const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
+		if (!backendAccessToken) {
+			throw new Error("BACKEND_ACCESS_TOKEN not configured");
+		}
+
+		// Get existing user server settings
+		const existingSettings = await ctx.runQuery(
+			api.publicInternal.user_server_settings.findUserServerSettingsById,
+			{
+				backendAccessToken,
+				userId: discordAccountId,
+				serverId: server._id,
+			},
+		);
+
+		// Prepare settings - preserve existing values or use defaults
+		// Only set botAddedTimestamp if it doesn't already exist (track first click)
+		const settings = {
+			serverId: server._id,
+			userId: discordAccountId,
+			permissions: existingSettings?.permissions ?? 0,
+			canPubliclyDisplayMessages:
+				existingSettings?.canPubliclyDisplayMessages ?? false,
+			messageIndexingDisabled:
+				existingSettings?.messageIndexingDisabled ?? false,
+			apiKey: existingSettings?.apiKey,
+			apiCallsUsed: existingSettings?.apiCallsUsed ?? 0,
+			botAddedTimestamp: existingSettings?.botAddedTimestamp ?? Date.now(), // Set timestamp when button was clicked (only if not already set)
+		};
+
+		// Upsert user server settings with botAddedTimestamp
+		await ctx.runMutation(
+			api.publicInternal.user_server_settings.upsertUserServerSettings,
+			{ backendAccessToken, settings },
+		);
+	},
+});
