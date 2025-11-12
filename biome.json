@@ -10,6 +10,7 @@
 			"**",
 			"!**/convex/_generated/**",
 			"!**/*.css",
+			"!.context/**",
 			"!**/.context/**",
 			"!packages/convex-test/**",
 			"!packages/discord-api/src/generated.ts"

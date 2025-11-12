@@ -11,7 +11,6 @@
         "@biomejs/biome": "2.1.4",
         "husky": "^9.1.7",
         "lint-staged": "^16.2.6",
-        "prettier": "3.5.3",
         "turbo": "^2.6.0",
         "typescript": "catalog:",
       },

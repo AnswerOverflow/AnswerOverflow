@@ -7,10 +7,7 @@ import { cn } from "@packages/ui/lib/utils";
 
 export type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root>;
 
-function Avatar({
-	className,
-	...props
-}: AvatarProps) {
+function Avatar({ className, ...props }: AvatarProps) {
 	return (
 		<AvatarPrimitive.Root
 			data-slot="avatar"

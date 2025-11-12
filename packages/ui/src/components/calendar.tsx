@@ -6,7 +6,11 @@ import {
 	ChevronLeftIcon,
 	ChevronRightIcon,
 } from "lucide-react";
-import { type DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
+import {
+	type DayButton,
+	DayPicker,
+	getDefaultClassNames,
+} from "react-day-picker";
 
 import { cn } from "@packages/ui/lib/utils";
 import { Button, buttonVariants } from "@packages/ui/components/button";
@@ -130,13 +134,9 @@ function Calendar({
 			components={{
 				Root: ({ className, rootRef, ...props }) => {
 					const isRefObject = (
-						ref: unknown
+						ref: unknown,
 					): ref is { current: HTMLDivElement | null } => {
-						return (
-							ref !== null &&
-							typeof ref === "object" &&
-							"current" in ref
-						);
+						return ref !== null && typeof ref === "object" && "current" in ref;
 					};
 
 					const refCallback = React.useCallback(
@@ -148,7 +148,7 @@ function Calendar({
 								rootRef.current = element;
 							}
 						},
-						[rootRef]
+						[rootRef],
 					);
 					return (
 						<div
