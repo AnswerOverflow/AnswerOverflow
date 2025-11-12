@@ -138,7 +138,7 @@ export function SearchPageClient(props: {
 	);
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+		<div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
 			<div className="max-w-4xl mx-auto px-8 py-16">
 				{/* Search Bar */}
 				<form onSubmit={handleSearch} className="mb-8">

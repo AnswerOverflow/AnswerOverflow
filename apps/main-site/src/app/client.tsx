@@ -28,7 +28,7 @@ export function HomePageClient(props: { featuredServers: Server[] }) {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+		<div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
 			{/* Hero Section */}
 			<div className="max-w-6xl mx-auto px-8 py-16">
 				<div className="text-center mb-12">

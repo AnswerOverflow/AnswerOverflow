@@ -83,3 +83,21 @@ export const findManyChannelsById = query({
 		return channelsWithFlags;
 	},
 });
+
+export const findAllThreadsByParentId = query({
+	args: {
+		parentId: v.string(),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const query = ctx.db
+			.query("channels")
+			.filter((q) => q.eq(q.field("parentId"), args.parentId));
+
+		const channels = args.limit
+			? await query.take(args.limit)
+			: await query.collect();
+
+		return await addSettingsToChannels(ctx, channels);
+	},
+});

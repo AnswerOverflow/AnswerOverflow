@@ -894,6 +894,15 @@ export const service = Effect.gen(function* () {
 			),
 		);
 
+	const publicFindAllThreadsByParentId = (parentId: string, limit?: number) =>
+		watchQueryToLiveData(
+			({ api }) => api.public.channels.findAllThreadsByParentId,
+			{
+				parentId,
+				limit,
+			},
+		);
+
 	return {
 		servers: {
 			upsertServer,
@@ -916,6 +925,7 @@ export const service = Effect.gen(function* () {
 			findChannelByInviteCode,
 			findChannelByDiscordId,
 			findAllThreadsByParentId,
+			publicFindAllThreadsByParentId,
 			findAllChannelsByServerId,
 			findManyChannelsById,
 			findLatestThreads,

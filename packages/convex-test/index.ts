@@ -2111,7 +2111,7 @@ function withAuth(auth: AuthFake = new AuthFake()) {
 				a as unknown as {
 					invokeHttpAction: (request: Request) => Promise<Response>;
 				}
-			).invokeHttpAction(new Request(url, init));
+			).invokeHttpAction(new Request(url.toString(), init));
 			return response;
 		},
 

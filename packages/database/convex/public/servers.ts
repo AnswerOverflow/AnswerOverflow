@@ -5,6 +5,19 @@ import {
 	getServerByDiscordId as getServerByDiscordIdShared,
 	ROOT_CHANNEL_TYPES,
 } from "../shared/shared";
+import type { channelSettingsSchema } from "../schema";
+import { type Infer } from "convex/values";
+
+type ChannelSettings = Infer<typeof channelSettingsSchema>;
+
+const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
+	channelId: "",
+	indexingEnabled: false,
+	markSolutionEnabled: false,
+	sendMarkSolutionInstructionsInNewThreads: false,
+	autoThreadEnabled: false,
+	forumGuidelinesConsentEnabled: false,
+};
 
 /**
  * Public query: Get all servers
@@ -183,8 +196,25 @@ export const publicFindServerByIdWithChannels = query({
 			),
 		);
 
+		// Get channel settings for all root channels
+		const channelIds = rootChannels.map((c) => c.id);
+		const allSettings = await Promise.all(
+			channelIds.map((id) =>
+				ctx.db
+					.query("channelSettings")
+					.withIndex("by_channelId", (q) => q.eq("channelId", id))
+					.first(),
+			),
+		);
+
+		// Filter to only channels with indexing enabled
+		const indexedChannels = rootChannels.filter((channel, idx) => {
+			const settings = allSettings[idx];
+			return settings?.indexingEnabled ?? false;
+		});
+
 		// Sort: forums first, then announcements, then text
-		const sortedChannels = rootChannels.sort((a, b) => {
+		const sortedChannels = indexedChannels.sort((a, b) => {
 			if (a.type === CHANNEL_TYPE.GuildForum) return -1;
 			if (b.type === CHANNEL_TYPE.GuildForum) return 1;
 			if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;

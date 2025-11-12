@@ -28,6 +28,21 @@ export default async function ChannelPage(props: Props) {
 		return notFound();
 	}
 
+	// Get server with channels
+	const serverWithChannels = await Effect.gen(function* () {
+		const database = yield* Database;
+		const serverWithChannelsData = yield* Effect.scoped(
+			database.servers.findServerByIdWithChannels(serverData._id),
+		);
+		return serverWithChannelsData?.data;
+	})
+		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
+		.pipe(Effect.runPromise);
+
+	if (!serverWithChannels) {
+		return notFound();
+	}
+
 	// Get channel data
 	const channelData = await Effect.gen(function* () {
 		const database = yield* Database;
@@ -42,17 +57,39 @@ export default async function ChannelPage(props: Props) {
 			return null;
 		}
 
-		// Get messages (limit to 50 for initial load)
-		const messagesLiveData = yield* Effect.scoped(
-			database.messages.findMessagesByChannelId(params.channelId, {
-				limit: 50,
-			}),
+		// Get threads for this channel (forum posts)
+		const threadsLiveData = yield* Effect.scoped(
+			database.channels.publicFindAllThreadsByParentId(params.channelId, 50),
 		);
-		const messages = messagesLiveData?.data ?? [];
+		const threads = threadsLiveData?.data ?? [];
+
+		// Get first message for each thread
+		const threadMessages = yield* Effect.all(
+			threads.map((thread) =>
+				Effect.gen(function* () {
+					const messageLiveData = yield* Effect.scoped(
+						database.messages.findMessagesByChannelId(thread.id, {
+							limit: 1,
+						}),
+					);
+					return {
+						thread,
+						message: messageLiveData?.data?.[0] ?? null,
+					};
+				}),
+			),
+		);
 
 		return {
 			channel,
-			messages,
+			threads: threadMessages.filter(
+				(
+					tm,
+				): tm is {
+					thread: typeof tm.thread;
+					message: NonNullable<typeof tm.message>;
+				} => tm.message !== null,
+			),
 		};
 	})
 		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
@@ -65,8 +102,9 @@ export default async function ChannelPage(props: Props) {
 	return (
 		<ChannelPageClient
 			server={serverData}
-			channel={channelData.channel}
-			messages={channelData.messages}
+			channels={serverWithChannels.channels}
+			selectedChannel={channelData.channel}
+			threads={channelData.threads}
 		/>
 	);
 }

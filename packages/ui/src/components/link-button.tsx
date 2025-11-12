@@ -3,8 +3,7 @@
 import type { VariantProps } from "class-variance-authority";
 import { usePathname } from "next/navigation";
 import type * as React from "react";
-import { cn } from "../lib/utils";
-import { buttonVariants } from "./button";
+import { Button, type buttonVariants } from "./button";
 import { Link } from "./link";
 
 export interface LinkButtonProps
@@ -27,20 +26,17 @@ export function LinkButton({
 }: LinkButtonProps) {
 	const pathname = usePathname();
 	const isSelected = href === pathname && selectedVariant;
+	const finalVariant = isSelected ? selectedVariant : variant;
 
 	return (
-		<Link
-			href={href}
-			className={cn(
-				buttonVariants({
-					variant: isSelected ? selectedVariant : variant,
-					size,
-					className,
-				}),
-			)}
-			{...props}
-		>
-			{children}
-		</Link>
+		<Button asChild variant={finalVariant} size={size} className={className}>
+			<Link
+				href={href}
+				className="!text-current no-underline hover:no-underline"
+				{...props}
+			>
+				{children}
+			</Link>
+		</Button>
 	);
 }

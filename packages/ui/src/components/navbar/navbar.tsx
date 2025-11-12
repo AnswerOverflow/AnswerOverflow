@@ -3,12 +3,12 @@
 import type { Server } from "@packages/database/convex/schema";
 import { Github, Search } from "lucide-react";
 import type * as React from "react";
+import { cn } from "../../lib/utils";
 import { Link } from "../link";
 import { LinkButton } from "../link-button";
 import { ServerIcon } from "../server-icon";
 import { ThemeSwitcher } from "../theme-switcher";
 import { UserSection, type UserSectionProps } from "./user-section";
-
 export interface NavbarProps {
 	/** Logo or brand name to display on the left */
 	logo?: React.ReactNode;
@@ -54,7 +54,13 @@ export function Navbar({
 		<header className="fixed left-0 top-0 z-[1000] h-16 w-full bg-background px-4">
 			<nav className="relative z-10 flex size-full flex-1 items-center justify-between border-b-2 pb-2 md:py-2">
 				<div>
-					<Link href={homeHref} className={hideIcon ? "hidden" : ""}>
+					<Link
+						href={homeHref}
+						className={cn(
+							hideIcon ? "hidden" : "",
+							"text-foreground hover:text-foreground no-underline hover:no-underline",
+						)}
+					>
 						{server ? (
 							<div className="flex items-center space-x-2">
 								<ServerIcon server={server} size={48} />
