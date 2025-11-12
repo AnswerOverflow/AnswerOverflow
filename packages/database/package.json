@@ -19,11 +19,11 @@
 		"test:watch": "vitest"
 	},
 	"dependencies": {
-		"@convex-dev/better-auth": "^0.9.7",
-		"@effect/platform": "^0.93.0",
-		"convex": "^1.29.0",
+		"@convex-dev/better-auth": "catalog:",
+		"@effect/platform": "catalog:",
+		"convex": "catalog:",
 		"convex-helpers": "^0.1.104",
-		"effect": "^3.17.7",
+		"effect": "catalog:",
 		"@packages/analytics": "workspace:*",
 		"ioredis": "^5.8.2",
 		"openai": "^4.45.0"
@@ -33,6 +33,6 @@
 		"@effect/vitest": "^0.25.0",
 		"@packages/convex-test": "workspace:*",
 		"@packages/observability": "workspace:*",
-		"vitest": "^3.2.4"
+		"vitest": "catalog:"
 	}
 }

@@ -11,18 +11,18 @@
 		"test:watch": "vitest"
 	},
 	"dependencies": {
-		"@effect/platform": "^0.90.1",
+		"@effect/platform": "catalog:",
 		"@effect/platform-bun": "^0.78.0",
 		"@packages/database": "workspace:*",
 		"@packages/observability": "workspace:*",
 		"discord.js": "^14.22.1",
-		"effect": "^3.17.7"
+		"effect": "catalog:"
 	},
 	"devDependencies": {
 		"@effect/language-service": "^0.35.2",
 		"@effect/vitest": "^0.25.0",
 		"@packages/typescript-config": "workspace:*",
 		"@types/bun": "latest",
-		"vitest": "^3.2.4"
+		"vitest": "catalog:"
 	}
 }

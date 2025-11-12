@@ -7,6 +7,6 @@
 	},
 	"dependencies": {
 		"@typelytics/posthog": "^0.1.5",
-		"effect": "^3.19.3"
+		"effect": "catalog:"
 	}
 }

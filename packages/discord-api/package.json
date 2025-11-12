@@ -14,8 +14,8 @@
 		"update": "bun run sync && bun run gen"
 	},
 	"dependencies": {
-		"@effect/platform": "^0.93.0",
+		"@effect/platform": "catalog:",
 		"@tim-smart/openapi-gen": "^0.4.13",
-		"effect": "^3.17.7"
+		"effect": "catalog:"
 	}
 }
