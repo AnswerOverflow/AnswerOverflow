@@ -69,7 +69,7 @@ export function DashboardSidebar({ children }: DashboardSidebarProps) {
 	const { mobileSidebarOpen, setMobileSidebarOpen } = useDashboardNavbar();
 
 	return (
-		<div className="relative flex min-h-screen w-full">
+		<div className="relative flex w-full">
 			{/* Desktop Sidebar - Fixed on left */}
 			<aside className="hidden lg:flex fixed left-0 top-[60px] bottom-0 z-40 w-[255.44px] flex-col border-r bg-background">
 				<SidebarNavigation />
@@ -90,7 +90,7 @@ export function DashboardSidebar({ children }: DashboardSidebarProps) {
 			</Sheet>
 
 			{/* Main Content - Offset for sidebar */}
-			<div className="lg:ml-[255.44px] flex-1 overflow-auto">{children}</div>
+			<div className="lg:ml-[255.44px] flex-1">{children}</div>
 		</div>
 	);
 }

@@ -50,7 +50,7 @@ export function DashboardNavbar({
 		<DashboardNavbarContext.Provider
 			value={{ mobileSidebarOpen, setMobileSidebarOpen }}
 		>
-			<div className="relative flex min-h-screen w-full flex-col">
+			<div className="relative flex w-full flex-col">
 				{/* Header - Fixed at top */}
 				<header className="fixed top-0 left-0 right-0 z-50 flex h-[60px] items-center gap-4 border-b bg-background px-4">
 					{/* Mobile Menu Button */}
