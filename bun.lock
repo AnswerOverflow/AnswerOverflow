@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "convex-monorepo",
@@ -274,9 +275,6 @@
         "vitest": "catalog:",
       },
     },
-  },
-  "overrides": {
-    "@effect/platform": "^0.93.0",
   },
   "catalog": {
     "@convex-dev/better-auth": "^0.9.7",

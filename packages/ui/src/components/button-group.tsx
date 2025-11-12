@@ -1,3 +1,4 @@
+import type * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -41,7 +42,7 @@ function ButtonGroupText({
 	className,
 	asChild = false,
 	...props
-}: React.ComponentProps<"div"> & {
+}: React.ComponentPropsWithoutRef<"div"> & {
 	asChild?: boolean;
 }) {
 	const Comp = asChild ? Slot : "div";
