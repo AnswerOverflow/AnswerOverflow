@@ -17,7 +17,7 @@ export function ServerInviteJoinButton(
 			"href" | "children"
 		>,
 ) {
-	const { server, channel, location, className, ...rest } = props;
+	const { server, channel, className, ...rest } = props;
 	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
 
 	if (!inviteCode) {
