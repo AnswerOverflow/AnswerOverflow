@@ -1,8 +1,11 @@
 import type { Message } from "discord.js";
 import { MessageType } from "discord.js";
 import { Console, Effect } from "effect";
-import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from "../constants/channel-types";
-import { isHumanMessage, removeDiscordMarkdown } from "../utils/message-utils";
+import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from "../../constants/channel-types";
+import {
+	isHumanMessage,
+	removeDiscordMarkdown,
+} from "../../utils/message-utils";
 
 type ChannelWithFlags = {
 	flags: {

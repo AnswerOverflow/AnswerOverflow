@@ -1,10 +1,10 @@
 import { DatabaseLayer } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
-import { Discord } from "../discord-service";
-import { handleDismissButtonInteraction } from "../handlers/dismiss-button";
-import { handleLeaderboardCommand } from "../handlers/leaderboard-command";
-import { handleManageAccountCommand } from "../handlers/manage-account-command";
-import { handleMarkSolutionCommand } from "../handlers/mark-solution-command";
+import { Discord } from "../core/discord-service";
+import { handleDismissButtonInteraction } from "../handlers/interactions/dismiss-button";
+import { handleLeaderboardCommand } from "../handlers/commands/leaderboard-command";
+import { handleManageAccountCommand } from "../handlers/commands/manage-account-command";
+import { handleMarkSolutionCommand } from "../handlers/interactions/mark-solution-command";
 
 /**
  * Layer that sets up interaction event handlers (commands and buttons)

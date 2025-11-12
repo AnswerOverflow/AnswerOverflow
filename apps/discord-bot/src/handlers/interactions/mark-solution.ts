@@ -14,7 +14,7 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Console, Effect } from "effect";
-import { toAOMessage } from "../utils/conversions";
+import { toAOMessage } from "../../utils/conversions";
 
 // Allowed guild IDs for checkmark reaction mark solution (legacy feature)
 const ALLOWED_CHECKMARK_AS_REACTION_GUILD_IDS = new Set([

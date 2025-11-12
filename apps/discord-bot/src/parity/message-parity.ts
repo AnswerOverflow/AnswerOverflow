@@ -1,7 +1,7 @@
 import { Database, upsertMessage } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
-import { Discord } from "../discord-service";
-import { handleAutoThread } from "../handlers/auto-thread";
+import { Discord } from "../core/discord-service";
+import { handleAutoThread } from "../handlers/events/auto-thread";
 import { toAODiscordAccount, toAOMessage } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 

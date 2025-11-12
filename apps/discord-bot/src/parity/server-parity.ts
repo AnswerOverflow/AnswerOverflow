@@ -2,7 +2,7 @@ import { Database } from "@packages/database/database";
 import type { Guild, GuildChannel } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { registerCommands } from "../commands/register";
-import { Discord } from "../discord-service";
+import { Discord } from "../core/discord-service";
 import { startIndexingLoop } from "../services/indexing";
 import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
 

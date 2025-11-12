@@ -1,7 +1,7 @@
 import { Database } from "@packages/database/database";
 import type { AnyThreadChannel, GuildChannel } from "discord.js";
 import { Console, Effect, Layer } from "effect";
-import { Discord } from "../discord-service";
+import { Discord } from "../core/discord-service";
 import {
 	isAllowedRootChannel,
 	isAllowedThreadChannel,

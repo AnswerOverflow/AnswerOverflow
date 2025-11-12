@@ -2,8 +2,8 @@ import { expect, it } from "@effect/vitest";
 import { Database } from "@packages/database/database";
 import { DatabaseTestLayer } from "@packages/database/database-test";
 import { Effect, Layer } from "effect";
-import { DiscordClientMock } from "../discord-client-mock";
-import { DiscordClientTestLayer } from "../discord-client-test";
+import { DiscordClientMock } from "../core/discord-client-mock";
+import { DiscordClientTestLayer } from "../core/discord-client-test-layer";
 import { syncGuild } from "./server-parity";
 
 const TestLayer = Layer.mergeAll(DiscordClientTestLayer, DatabaseTestLayer);
