@@ -2,6 +2,7 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import type { Id } from "@packages/database/convex/_generated/dataModel";
+import { BlueLink } from "@packages/ui/components/blue-link";
 import {
 	Card,
 	CardContent,
@@ -11,12 +12,11 @@ import {
 } from "@packages/ui/components/card";
 import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
-import { BlueLink } from "@packages/ui/components/blue-link";
 import { useMutation, useQuery } from "convex/react";
 import { useParams } from "next/navigation";
-import { CurrentPlanCard } from "./components";
-import { TierAccessOnly } from "../components/tier-access-only";
 import { CustomDomainConfigurator } from "../components/custom-domain-configurator";
+import { TierAccessOnly } from "../components/tier-access-only";
+import { CurrentPlanCard } from "./components";
 
 function ToggleServerFlag({
 	title,

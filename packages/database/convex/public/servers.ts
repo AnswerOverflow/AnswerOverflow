@@ -1,9 +1,9 @@
 import { v } from "convex/values";
 import { query } from "../_generated/server";
 import {
+	CHANNEL_TYPE,
 	getServerByDiscordId as getServerByDiscordIdShared,
 	ROOT_CHANNEL_TYPES,
-	CHANNEL_TYPE,
 } from "../shared/shared";
 
 /**

@@ -1,9 +1,8 @@
 "use client";
 
-import type * as React from "react";
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
-
 import { cn } from "@packages/ui/lib/utils";
+import * as AvatarPrimitive from "@radix-ui/react-avatar";
+import type * as React from "react";
 
 export type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root>;
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { LoaderCircle } from "lucide-react";
+import { api } from "@packages/database/convex/_generated/api";
+import type { Id } from "@packages/database/convex/_generated/dataModel";
+import { Button } from "@packages/ui/components/button";
 import {
 	Card,
 	CardContent,
@@ -10,10 +11,9 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { Input } from "@packages/ui/components/input";
-import { Button } from "@packages/ui/components/button";
 import { useMutation, useQuery } from "convex/react";
-import { api } from "@packages/database/convex/_generated/api";
-import type { Id } from "@packages/database/convex/_generated/dataModel";
+import { LoaderCircle } from "lucide-react";
+import { useState } from "react";
 
 export function CustomDomainConfigurator({
 	serverId,

@@ -1,13 +1,13 @@
 "use client";
 
+import type { Server } from "@packages/database/convex/schema";
+import { Github, Search } from "lucide-react";
 import type * as React from "react";
-import { Search, Github } from "lucide-react";
 import { Link } from "../link";
 import { LinkButton } from "../link-button";
+import { ServerIcon } from "../server-icon";
 import { ThemeSwitcher } from "../theme-switcher";
 import { UserSection, type UserSectionProps } from "./user-section";
-import { ServerIcon } from "../server-icon";
-import type { Server } from "@packages/database/convex/schema";
 
 export interface NavbarProps {
 	/** Logo or brand name to display on the left */

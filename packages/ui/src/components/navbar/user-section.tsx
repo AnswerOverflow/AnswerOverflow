@@ -1,5 +1,7 @@
 "use client";
 
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import {
 	DropdownMenu,
@@ -13,8 +15,6 @@ import {
 import { Link } from "../link";
 import { LinkButton } from "../link-button";
 import { Skeleton } from "../skeleton";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 
 function getInitials(name: string) {
 	return name

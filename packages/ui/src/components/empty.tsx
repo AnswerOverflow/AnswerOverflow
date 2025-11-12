@@ -1,13 +1,12 @@
-import type * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-
-import { cn } from "@packages/ui/lib/utils";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { cn } from "@packages/ui/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
+import type * as React from "react";
 
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
 	return (

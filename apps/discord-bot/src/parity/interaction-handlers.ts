@@ -1,6 +1,5 @@
 import { DatabaseLayer } from "@packages/database/database";
-import { Effect, Layer } from "effect";
-import { Console } from "effect";
+import { Console, Effect, Layer } from "effect";
 import { Discord } from "../discord-client-real";
 import { handleDismissButtonInteraction } from "../handlers/dismiss-button";
 import { handleLeaderboardCommand } from "../handlers/leaderboard-command";

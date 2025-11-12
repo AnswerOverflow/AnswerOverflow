@@ -1,15 +1,3 @@
-export { Navbar, type NavbarProps } from "./navbar";
-export {
-	UserSection,
-	UserSectionSkeleton,
-	type UserSectionProps,
-	type User,
-} from "./user-section";
-export {
-	ServerSelectDropdown,
-	type ServerSelectDropdownProps,
-	type ServerSelectServer,
-} from "./server-select-dropdown";
 export {
 	DashboardNavbar,
 	type DashboardNavbarProps,
@@ -18,3 +6,15 @@ export {
 	DashboardSidebar,
 	type DashboardSidebarProps,
 } from "./dashboard-sidebar";
+export { Navbar, type NavbarProps } from "./navbar";
+export {
+	ServerSelectDropdown,
+	type ServerSelectDropdownProps,
+	type ServerSelectServer,
+} from "./server-select-dropdown";
+export {
+	type User,
+	UserSection,
+	type UserSectionProps,
+	UserSectionSkeleton,
+} from "./user-section";

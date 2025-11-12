@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "@packages/database/convex/_generated/api";
+import type { Id } from "@packages/database/convex/_generated/dataModel";
+import { BlueLink } from "@packages/ui/components/blue-link";
 import {
 	Card,
 	CardContent,
@@ -7,10 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
-import { BlueLink } from "@packages/ui/components/blue-link";
 import { useQuery } from "convex/react";
-import { api } from "@packages/database/convex/_generated/api";
-import type { Id } from "@packages/database/convex/_generated/dataModel";
 
 type Plan =
 	| "FREE"

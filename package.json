@@ -11,6 +11,8 @@
 		"test:watch": "turbo run test:watch",
 		"lint": "biome check .",
 		"lint:fix": "biome check . --write",
+		"fix:safe": "biome check . --write",
+		"fix:unsafe": "biome check . --write --unsafe",
 		"clean": "turbo run clean && rm -rf node_modules .turbo",
 		"format": "biome format --write .",
 		"prepare": "husky"

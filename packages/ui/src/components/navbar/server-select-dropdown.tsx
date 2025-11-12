@@ -1,8 +1,9 @@
 "use client";
 
-import * as React from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import Link from "next/link";
+import * as React from "react";
+import { cn } from "../../lib/utils";
 import { Button } from "../button";
 import {
 	DropdownMenu,
@@ -13,7 +14,6 @@ import {
 } from "../dropdown-menu";
 import { ServerIcon } from "../server-icon";
 import { Skeleton } from "../skeleton";
-import { cn } from "../../lib/utils";
 
 export interface ServerSelectServer {
 	id: string;

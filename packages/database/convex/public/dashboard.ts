@@ -10,6 +10,10 @@ import {
 	AnalyticsLayer,
 	ServerAnalyticsLayer,
 } from "@packages/analytics/server/index";
+import {
+	makeServerAnalyticsClient,
+	PostHogClientLayerForServer,
+} from "@packages/analytics/server/posthog-client";
 import { make } from "@packages/discord-api/generated";
 import { v } from "convex/values";
 import { Effect } from "effect";
@@ -27,10 +31,6 @@ import {
 	hasPermission,
 	sortServersByBotAndRole,
 } from "../shared/shared";
-import {
-	makeServerAnalyticsClient,
-	PostHogClientLayerForServer,
-} from "@packages/analytics/server/posthog-client";
 
 const discordApi = (token: string) =>
 	Effect.gen(function* () {
