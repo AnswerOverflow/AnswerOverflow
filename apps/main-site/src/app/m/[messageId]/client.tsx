@@ -265,7 +265,6 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 							{message.embeds && message.embeds.length > 0 && (
 								<div className="mb-3 space-y-2">
 									{message.embeds.map((embed, idx) => (
-										// biome-ignore lint/suspicious/noArrayIndexKey: Embeds don't have unique IDs
 										<MessageEmbed key={`embed-${idx}`} embed={embed} />
 									))}
 								</div>

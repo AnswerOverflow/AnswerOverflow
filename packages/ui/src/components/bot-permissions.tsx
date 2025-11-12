@@ -1,7 +1,5 @@
 "use client";
 
-import { AnswerOverflowIcon } from "./answer-overflow-icon";
-import { ServerIcon } from "./server-icon";
 import { Check } from "lucide-react";
 import Image from "next/image";
 import { cn } from "../lib/utils";
@@ -11,7 +9,9 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "./accordion";
+import { AnswerOverflowIcon } from "./answer-overflow-icon";
 import { Button } from "./button";
+import { ServerIcon } from "./server-icon";
 
 export interface BotPermission {
 	name: string;

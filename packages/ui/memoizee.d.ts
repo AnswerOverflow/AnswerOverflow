@@ -1,4 +1,5 @@
 declare module "memoizee" {
+	// biome-ignore lint/suspicious/noExplicitAny: old code, we need to update the markdown renderer
 	function memoize<T extends (...args: any[]) => any>(
 		fn: T,
 		options?: {

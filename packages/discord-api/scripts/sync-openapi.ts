@@ -13,6 +13,7 @@ const DISCORD_OPENAPI_URL =
 	"https://raw.githubusercontent.com/discord/discord-api-spec/main/specs/openapi.json";
 const OUTPUT_FILE = "./open-api.json";
 
+// biome-ignore lint/suspicious/noExplicitAny: i dont wanna fix this and not used at runtime
 function patchGuildFeatures(spec: any): void {
 	// Make GuildFeatures accept any string instead of strict enum
 	// This allows Discord API to return features not yet in their spec

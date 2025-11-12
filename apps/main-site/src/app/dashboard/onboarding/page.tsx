@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import { BotPermissionsDisplay } from "@packages/ui/components/bot-permissions";
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,
@@ -9,13 +10,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
-import { BotPermissionsDisplay } from "@packages/ui/components/bot-permissions";
-import { ServerIcon } from "@packages/ui/components/server-icon";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
-import { CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -199,11 +197,6 @@ export default function OnboardingPage() {
 
 	// Step 2: Installation
 	if (step === "install" && selectedServer) {
-		const discordClientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
-		const inviteUrl = discordClientId
-			? `https://discord.com/oauth2/authorize?client_id=${discordClientId}&permissions=328565083201&scope=bot+applications.commands&guild_id=${selectedServer.discordId}&disable_guild_select=true`
-			: "#";
-
 		return (
 			<main className="flex items-center justify-center p-4 md:p-8">
 				<div className="w-full max-w-2xl">

@@ -256,7 +256,7 @@ export const getPageViewsForServer = authenticatedAction({
 		to: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const { discordAccountId, serverId, from, to } = args;
+		const { discordAccountId, serverId } = args;
 
 		// Check permissions
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);

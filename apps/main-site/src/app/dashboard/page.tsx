@@ -148,8 +148,6 @@ export default function DashboardHome() {
 		);
 	}
 
-	const serversWithoutBot = servers.filter((server) => !server.hasBot);
-
 	return (
 		<main className="max-w-6xl mx-auto p-8">
 			<div className="flex items-center justify-between mb-6">

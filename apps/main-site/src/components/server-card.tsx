@@ -17,8 +17,6 @@ type ServerCardProps = {
 };
 
 export function ServerCard({ server }: ServerCardProps) {
-	const discordClientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
-
 	return (
 		<div className="flex max-w-md flex-col gap-3 rounded-lg bg-white dark:bg-black/40 pb-4 shadow-lg overflow-hidden">
 			{/* Hero section with background */}

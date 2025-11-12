@@ -21,7 +21,6 @@ import { CurrentPlanCard } from "./components";
 function ToggleServerFlag({
 	title,
 	description,
-	flagKey,
 	checked,
 	onChange,
 	disabled,

@@ -20,7 +20,7 @@ export function CustomDomainConfigurator({
 }: {
 	serverId: Id<"servers">;
 }) {
-	const [domain, setDomain] = useState<string | null>(null);
+	const [_domain, setDomain] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const dashboardData = useQuery(
