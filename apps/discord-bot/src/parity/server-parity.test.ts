@@ -4,9 +4,15 @@ import { DatabaseTestLayer } from "@packages/database/database-test";
 import { Effect, Layer } from "effect";
 import { DiscordClientMock } from "../core/discord-client-mock";
 import { DiscordClientTestLayer } from "../core/discord-client-test-layer";
-import { syncGuild } from "./server-parity";
+import { Discord } from "../core/discord-service";
+import { ServerParityLayer, syncGuild } from "./server-parity";
 
 const TestLayer = Layer.mergeAll(DiscordClientTestLayer, DatabaseTestLayer);
+
+const TestLayerWithParity = Layer.mergeAll(
+	TestLayer,
+	ServerParityLayer.pipe(Layer.provide(TestLayer)),
+);
 
 it.scoped("guild-parity: syncs data on guild join", () =>
 	Effect.gen(function* () {
@@ -81,4 +87,35 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 		expect(forumChannelLiveData?.data?.name).toBe(forumChannel.name);
 		expect(forumChannelLiveData?.data?.type).toBe(15); // GuildForum
 	}).pipe(Effect.provide(TestLayer)),
+);
+
+it.scoped.only("guild-parity: runs first on guildCreate", () =>
+	Effect.gen(function* () {
+		const database = yield* Database;
+		const discordMock = yield* DiscordClientMock;
+		const discord = yield* Discord;
+
+		const guild = discordMock.utilities.createMockGuild({
+			description: "A test guild",
+			icon: "test_icon",
+		});
+
+		discordMock.utilities.seedGuild(guild);
+
+		const textChannel = discordMock.utilities.createMockTextChannel(guild);
+		const forumChannel = discordMock.utilities.createMockForumChannel(guild);
+
+		discordMock.utilities.seedChannel(textChannel);
+		discordMock.utilities.seedChannel(forumChannel);
+
+		discordMock.utilities.emitGuildCreate(guild);
+
+		yield* discord.client.waitForHandlers("guildCreate");
+
+		const serverLiveData = yield* database.servers.getServerByDiscordId(
+			guild.id,
+		);
+		expect(serverLiveData?.data).not.toBeNull();
+		expect(serverLiveData?.data?.discordId).toBe(guild.id);
+	}).pipe(Effect.provide(TestLayerWithParity)),
 );

@@ -5,7 +5,11 @@ import {
 	Context,
 	Data,
 	Effect,
+	Fiber,
+	HashMap,
 	Layer,
+	Option,
+	Ref,
 	Runtime,
 } from "effect";
 import { DiscordClient, DiscordClientLayer } from "./discord-client-service";
@@ -18,6 +22,12 @@ export class DiscordError extends Data.TaggedError("DiscordError")<{
 export const createDiscordService = Effect.gen(function* () {
 	const client = yield* DiscordClient;
 	const token = yield* Config.string("DISCORD_BOT_TOKEN");
+
+	// Track active handler fibers for each event type
+	// This allows us to wait for all handlers to complete in tests
+	const activeHandlers = yield* Ref.make(
+		HashMap.empty<string, ReadonlyArray<Fiber.RuntimeFiber<void, unknown>>>(),
+	);
 
 	// Helper to wrap client operations in Effect
 	const use = <A>(
@@ -54,11 +64,48 @@ export const createDiscordService = Effect.gen(function* () {
 		Effect.gen(function* () {
 			// Capture the runtime - the type system ensures Req is available here
 			const runtime: Runtime.Runtime<Req> = yield* Effect.runtime<Req>();
+			const eventKey = String(event);
 
 			const listener = (...args: ClientEvents[E]) => {
 				// Run the handler Effect in a scoped context to handle resource cleanup
 				// Effect.scoped provides a Scope and removes it from the requirements
-				Runtime.runFork(runtime)(Effect.scoped(handler(...args)));
+				const handlerEffect = Effect.scoped(handler(...args));
+
+				// Fork the handler and track the fiber
+				const fiber = Runtime.runFork(runtime)(handlerEffect);
+
+				// Add fiber to tracking synchronously
+				Runtime.runSync(runtime)(
+					Ref.update(activeHandlers, (map) => {
+						const existingFibers = Option.getOrElse(
+							HashMap.get(map, eventKey),
+							(): ReadonlyArray<Fiber.RuntimeFiber<void, unknown>> => [],
+						);
+						return HashMap.set(map, eventKey, [...existingFibers, fiber]);
+					}),
+				);
+
+				// Remove fiber from tracking when handler completes
+				Runtime.runFork(runtime)(
+					Fiber.await(fiber).pipe(
+						Effect.flatMap(() =>
+							Ref.update(activeHandlers, (map) => {
+								const existingFibers = Option.getOrElse(
+									HashMap.get(map, eventKey),
+									(): ReadonlyArray<Fiber.RuntimeFiber<void, unknown>> => [],
+								);
+								const updatedFibers = existingFibers.filter(
+									(f) => f.id() !== fiber.id(),
+								);
+								if (updatedFibers.length === 0) {
+									return HashMap.remove(map, eventKey);
+								}
+								return HashMap.set(map, eventKey, updatedFibers);
+							}),
+						),
+						Effect.asVoid,
+					),
+				);
 			};
 
 			client.on(event, listener);
@@ -67,6 +114,29 @@ export const createDiscordService = Effect.gen(function* () {
 			return () => {
 				client.off(event, listener);
 			};
+		});
+
+	/**
+	 * Wait for all handlers of a specific event to complete.
+	 * Useful for testing when you need to ensure all event handlers have finished.
+	 */
+	const waitForHandlers = <E extends keyof ClientEvents>(
+		event: E,
+	): Effect.Effect<void, never, never> =>
+		Effect.gen(function* () {
+			const eventKey = String(event);
+			const handlers = yield* Ref.get(activeHandlers);
+			const fibers = Option.getOrElse(
+				HashMap.get(handlers, eventKey),
+				(): ReadonlyArray<Fiber.RuntimeFiber<void, unknown>> => [],
+			);
+
+			if (fibers.length === 0) {
+				return;
+			}
+
+			// Wait for all fibers to complete
+			yield* Fiber.awaitAll(fibers).pipe(Effect.asVoid);
 		});
 
 	// High-level operations using the raw client
@@ -163,6 +233,7 @@ export const createDiscordService = Effect.gen(function* () {
 		client: {
 			login,
 			on,
+			waitForHandlers,
 		},
 	};
 });

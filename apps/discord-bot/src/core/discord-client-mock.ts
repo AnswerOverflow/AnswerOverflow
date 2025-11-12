@@ -6,9 +6,9 @@ import {
 } from "discord.js";
 import { Context, Effect, Layer } from "effect";
 import {
-	guildDataArb,
 	channelDataArb,
 	channelDataWithoutParentArb,
+	guildDataArb,
 	sampleOne,
 } from "./discord-mock-arbitraries";
 
