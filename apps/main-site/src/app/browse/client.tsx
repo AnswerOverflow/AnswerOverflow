@@ -1,13 +1,13 @@
 "use client";
 
 import { convexQuery } from "@convex-dev/react-query";
+import { api } from "@packages/database/convex/_generated/api";
 import type { Server } from "@packages/database/convex/schema";
 import { Button } from "@packages/ui/components/button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import { api } from "../../../../../packages/database/convex/_generated/api";
 
 export const ServerCard = (props: { server: Server }) => {
 	const { server } = props;

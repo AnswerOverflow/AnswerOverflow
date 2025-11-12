@@ -1,6 +1,7 @@
 "use client";
 
 import { convexQuery } from "@convex-dev/react-query";
+import { api } from "@packages/database/convex/_generated/api";
 import type { Server } from "@packages/database/convex/schema";
 import { Button } from "@packages/ui/components/button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
@@ -8,7 +9,6 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { api } from "../../../../packages/database/convex/_generated/api";
 
 export function HomePageClient(props: { featuredServers: Server[] }) {
 	const router = useRouter();

@@ -1,6 +1,7 @@
 "use client";
 
 import { convexQuery } from "@convex-dev/react-query";
+import { api } from "@packages/database/convex/_generated/api";
 import type { Id } from "@packages/database/convex/_generated/dataModel";
 import type {
 	Channel,
@@ -18,7 +19,6 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { api } from "../../../../../packages/database/convex/_generated/api";
 
 type SearchResult = {
 	message: Message;
