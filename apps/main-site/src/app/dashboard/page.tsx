@@ -15,8 +15,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
-import { ServerCard } from "../../components/server-card";
-import { authClient } from "../../lib/auth-client";
+import { ServerCard } from "../../../components/server-card";
+import { authClient } from "../../../lib/auth-client";
 
 export default function DashboardHome() {
 	const { data: session, isPending } = authClient.useSession();
@@ -140,7 +140,7 @@ export default function DashboardHome() {
 					</CardHeader>
 					<CardContent>
 						<Button asChild>
-							<Link href="/onboarding">Get Started</Link>
+							<Link href="/dashboard/onboarding">Get Started</Link>
 						</Button>
 					</CardContent>
 				</Card>
@@ -156,7 +156,7 @@ export default function DashboardHome() {
 				<h1 className="text-3xl font-bold">Your Servers</h1>
 				{serversWithoutBot.length > 0 && (
 					<Button asChild variant="outline">
-						<Link href="/onboarding">Add to Server</Link>
+						<Link href="/dashboard/onboarding">Add to Server</Link>
 					</Button>
 				)}
 			</div>

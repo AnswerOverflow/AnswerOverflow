@@ -61,7 +61,7 @@ export function ServerCard({ server }: ServerCardProps) {
 						</Button>
 					) : (
 						<Button asChild variant="outline">
-							<Link href={`/onboarding?serverId=${server.discordId}`}>
+							<Link href={`/dashboard/onboarding?serverId=${server.discordId}`}>
 								Setup
 							</Link>
 						</Button>

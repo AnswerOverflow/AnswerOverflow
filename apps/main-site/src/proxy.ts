@@ -2,7 +2,7 @@ import type { NextFetchEvent, NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 const isProtectedRoute = (pathname: string) => {
-	return pathname.startsWith("/notes");
+	return pathname.startsWith("/dashboard") || pathname.startsWith("/notes");
 };
 
 export default function proxy(request: NextRequest, _event: NextFetchEvent) {

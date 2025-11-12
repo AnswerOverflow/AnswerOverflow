@@ -18,7 +18,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { authClient } from "../../lib/auth-client";
+import { authClient } from "../../../lib/auth-client";
 
 type OnboardingStep = "auth" | "install" | "complete";
 
@@ -146,7 +146,7 @@ export default function OnboardingPage() {
 							<Button
 								onClick={async () => {
 									const callbackUrl = serverId
-										? `/onboarding?serverId=${serverId}`
+										? `/dashboard/onboarding?serverId=${serverId}`
 										: "/dashboard";
 									await authClient.signIn.social({
 										provider: "discord",

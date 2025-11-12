@@ -9,7 +9,7 @@ import {
 } from "@packages/ui/components/navbar";
 import { useQuery } from "convex/react";
 import { useParams } from "next/navigation";
-import { authClient } from "../../../lib/auth-client";
+import { authClient } from "../../../../lib/auth-client";
 
 export default function DashboardServerLayout({
 	children,
@@ -42,7 +42,7 @@ export default function DashboardServerLayout({
 				currentServerId: serverId,
 				servers: serversForDropdown,
 				getServerHref: (id: string) => `/dashboard/${id}`,
-				addNewHref: "/onboarding",
+				addNewHref: "/dashboard/onboarding",
 				isLoading: isSessionPending || servers === undefined,
 			}
 		: undefined;
