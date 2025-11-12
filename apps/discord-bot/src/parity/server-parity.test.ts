@@ -13,7 +13,7 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 		const database = yield* Database;
 		const discordMock = yield* DiscordClientMock;
 
-		// Create a mock guild
+		// Create and seed guild
 		const guild = discordMock.utilities.createMockGuild({
 			id: "guild123",
 			name: "Test Guild",
@@ -21,65 +21,26 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 			icon: "test_icon",
 			approximateMemberCount: 100,
 		});
-
-		// Seed the guild first
 		discordMock.utilities.seedGuild(guild);
 
-		// Get the guild from cache to ensure we're working with the cached instance
-		const cachedGuild = discordMock.client.guilds.cache.get("guild123");
-		if (!cachedGuild) {
-			throw new Error("Guild not found in cache");
-		}
+		// Create channels
+		const textChannel = discordMock.utilities.createMockTextChannel(guild, {
+			id: "channel123",
+			name: "general",
+		});
+		const forumChannel = discordMock.utilities.createMockForumChannel(guild, {
+			id: "channel456",
+			name: "help-forum",
+		});
 
-		// Create channels using the cached guild instance - _add should add them to the guild's cache
-		const textChannel = discordMock.utilities.createMockTextChannel(
-			cachedGuild,
-			{
-				id: "channel123",
-				name: "general",
-			},
-		);
-
-		const forumChannel = discordMock.utilities.createMockForumChannel(
-			cachedGuild,
-			{
-				id: "channel456",
-				name: "help-forum",
-			},
-		);
-
-		// Ensure channels have guild property set (Discord.js _add should set this, but verify)
-		// Manually set guild property if not already set (needed for filtering in syncGuild)
-		if (!("guild" in textChannel) || !textChannel.guild) {
-			Object.defineProperty(textChannel, "guild", {
-				value: cachedGuild,
-				writable: false,
-				enumerable: true,
-				configurable: true,
-			});
-		}
-		if (!("guild" in forumChannel) || !forumChannel.guild) {
-			Object.defineProperty(forumChannel, "guild", {
-				value: cachedGuild,
-				writable: false,
-				enumerable: true,
-				configurable: true,
-			});
-		}
-
-		// Manually ensure channels are in the guild's cache (in case _add didn't work)
-		cachedGuild.channels.cache.set(textChannel.id, textChannel);
-		cachedGuild.channels.cache.set(forumChannel.id, forumChannel);
-
-		// Also seed channels in client cache (for getChannel calls)
+		// Seed channels in client cache
 		discordMock.utilities.seedChannel(textChannel);
 		discordMock.utilities.seedChannel(forumChannel);
 
-		// Call syncGuild directly - this tests the sync logic without relying on event timing
-		// Use cachedGuild to ensure we're syncing the same instance that has channels
-		yield* syncGuild(cachedGuild);
+		// Sync guild
+		yield* syncGuild(guild);
 
-		// Verify server was created in database
+		// Verify server was created
 		const serverLiveData =
 			yield* database.servers.getServerByDiscordId("guild123");
 		expect(serverLiveData?.data).not.toBeNull();

@@ -127,7 +127,15 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				default_auto_archive_duration: null,
 			};
 			// @ts-expect-error - _add is private but we need it for testing
-			return guild.channels._add(channelData);
+			const channel = guild.channels._add(channelData);
+			// Ensure channel has guild property (needed for filtering in syncGuild)
+			Object.defineProperty(channel, "guild", {
+				value: guild,
+				writable: false,
+				enumerable: true,
+				configurable: true,
+			});
+			return channel;
 		};
 
 		// Helper to create a mock forum channel
@@ -156,7 +164,15 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				default_forum_layout: 0,
 			};
 			// @ts-expect-error - _add is private but we need it for testing
-			return guild.channels._add(channelData);
+			const channel = guild.channels._add(channelData);
+			// Ensure channel has guild property (needed for filtering in syncGuild)
+			Object.defineProperty(channel, "guild", {
+				value: guild,
+				writable: false,
+				enumerable: true,
+				configurable: true,
+			});
+			return channel;
 		};
 
 		// Helper to create a mock news channel
@@ -182,7 +198,15 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				default_auto_archive_duration: null,
 			};
 			// @ts-expect-error - _add is private but we need it for testing
-			return guild.channels._add(channelData);
+			const channel = guild.channels._add(channelData);
+			// Ensure channel has guild property (needed for filtering in syncGuild)
+			Object.defineProperty(channel, "guild", {
+				value: guild,
+				writable: false,
+				enumerable: true,
+				configurable: true,
+			});
+			return channel;
 		};
 
 		// Emit events manually for testing
