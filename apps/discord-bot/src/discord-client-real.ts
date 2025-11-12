@@ -18,21 +18,24 @@ export class DiscordError extends Data.TaggedError("DiscordError")<{
 	cause: unknown;
 }> {}
 
-// Low-level Discord client service - provides raw Discord.js client access
-const createDiscordClientService = Effect.gen(function* () {
-	const token = yield* Config.string("DISCORD_BOT_TOKEN");
-
-	// Initialize Discord.js client with required intents
-	const client = new Client({
+// Low-level Discord client service - provides raw Discord.js client instance
+const createDiscordClientService = Effect.succeed(
+	new Client({
 		intents: [
 			GatewayIntentBits.Guilds,
 			GatewayIntentBits.GuildMessages,
 			GatewayIntentBits.MessageContent,
 			GatewayIntentBits.GuildMessageReactions,
 		],
-	});
+	}),
+);
 
-	// Create a .use pattern similar to database.ts
+// High-level Discord service - provides convenient operations + re-exports low-level API
+const createDiscordService = Effect.gen(function* () {
+	const client = yield* DiscordClient;
+	const token = yield* Config.string("DISCORD_BOT_TOKEN");
+
+	// Helper to wrap client operations in Effect
 	const use = <A>(
 		fn: (client: Client) => A | Promise<A>,
 	): Effect.Effect<Awaited<A>, DiscordError> =>
@@ -82,106 +85,20 @@ const createDiscordClientService = Effect.gen(function* () {
 			};
 		});
 
-	const clientService = {
-		login,
-		guilds: {
-			cache: {
-				get: (id: string) =>
-					use((c) => {
-						const guild = c.guilds.cache.get(id);
-						return guild ?? null;
-					}),
-				values: () => use((c) => Arr.fromIterable(c.guilds.cache.values())),
-			},
-		},
-		channels: {
-			cache: {
-				get: (id: string) =>
-					use((c) => {
-						const channel = c.channels.cache.get(id);
-						return channel ?? null;
-					}),
-			},
-			messages: {
-				fetch: (
-					channelId: string,
-					options: { limit: number; after?: string },
-				) =>
-					use(async (c) => {
-						const channel = c.channels.cache.get(channelId);
-						if (!channel) {
-							throw new Error(`Channel ${channelId} not found`);
-						}
+	// High-level operations using the raw client
+	const getGuild = (id: string) =>
+		use((c) => {
+			const guild = c.guilds.cache.get(id);
+			return guild ?? null;
+		});
 
-						if (
-							channel.type !== ChannelType.GuildText &&
-							channel.type !== ChannelType.GuildAnnouncement &&
-							channel.type !== ChannelType.PublicThread &&
-							channel.type !== ChannelType.AnnouncementThread
-						) {
-							throw new Error(
-								`Channel ${channelId} is not a text channel or thread`,
-							);
-						}
+	const getGuilds = () => use((c) => Arr.fromIterable(c.guilds.cache.values()));
 
-						return await channel.messages.fetch({
-							limit: options.limit,
-							after: options.after,
-						});
-					}),
-			},
-			threads: {
-				fetchActive: (forumChannelId: string) =>
-					use(async (c) => {
-						const channel = c.channels.cache.get(forumChannelId);
-						if (!channel) {
-							throw new Error(`Channel ${forumChannelId} not found`);
-						}
-
-						if (channel.type !== ChannelType.GuildForum) {
-							throw new Error(
-								`Channel ${forumChannelId} is not a forum channel`,
-							);
-						}
-
-						return await channel.threads.fetchActive();
-					}),
-				fetchArchived: (forumChannelId: string, options: { before?: string }) =>
-					use(async (c) => {
-						const channel = c.channels.cache.get(forumChannelId);
-						if (!channel) {
-							throw new Error(`Channel ${forumChannelId} not found`);
-						}
-
-						if (channel.type !== ChannelType.GuildForum) {
-							throw new Error(
-								`Channel ${forumChannelId} is not a forum channel`,
-							);
-						}
-
-						return await channel.threads.fetchArchived({
-							type: "public",
-							before: options.before,
-						});
-					}),
-			},
-		},
-		on,
-	};
-
-	return clientService;
-});
-
-// High-level Discord service - provides convenient operations + re-exports low-level API
-const createDiscordService = Effect.gen(function* () {
-	const client = yield* DiscordClient;
-
-	// High-level operations using the low-level client
-	const getGuild = (id: string) => client.guilds.cache.get(id);
-
-	const getGuilds = () => client.guilds.cache.values();
-
-	const getChannel = (id: string) => client.channels.cache.get(id);
+	const getChannel = (id: string) =>
+		use((c) => {
+			const channel = c.channels.cache.get(id);
+			return channel ?? null;
+		});
 
 	const getChannels = (guildId: string) =>
 		Effect.gen(function* () {
@@ -195,15 +112,61 @@ const createDiscordService = Effect.gen(function* () {
 	const fetchChannelMessages = (
 		channelId: string,
 		options: { limit: number; after?: string },
-	) => client.channels.messages.fetch(channelId, options);
+	) =>
+		use(async (c) => {
+			const channel = c.channels.cache.get(channelId);
+			if (!channel) {
+				throw new Error(`Channel ${channelId} not found`);
+			}
+
+			if (
+				channel.type !== ChannelType.GuildText &&
+				channel.type !== ChannelType.GuildAnnouncement &&
+				channel.type !== ChannelType.PublicThread &&
+				channel.type !== ChannelType.AnnouncementThread
+			) {
+				throw new Error(`Channel ${channelId} is not a text channel or thread`);
+			}
+
+			return await channel.messages.fetch({
+				limit: options.limit,
+				after: options.after,
+			});
+		});
 
 	const fetchActiveThreads = (forumChannelId: string) =>
-		client.channels.threads.fetchActive(forumChannelId);
+		use(async (c) => {
+			const channel = c.channels.cache.get(forumChannelId);
+			if (!channel) {
+				throw new Error(`Channel ${forumChannelId} not found`);
+			}
+
+			if (channel.type !== ChannelType.GuildForum) {
+				throw new Error(`Channel ${forumChannelId} is not a forum channel`);
+			}
+
+			return await channel.threads.fetchActive();
+		});
 
 	const fetchArchivedThreads = (
 		forumChannelId: string,
 		options: { before?: string },
-	) => client.channels.threads.fetchArchived(forumChannelId, options);
+	) =>
+		use(async (c) => {
+			const channel = c.channels.cache.get(forumChannelId);
+			if (!channel) {
+				throw new Error(`Channel ${forumChannelId} not found`);
+			}
+
+			if (channel.type !== ChannelType.GuildForum) {
+				throw new Error(`Channel ${forumChannelId} is not a forum channel`);
+			}
+
+			return await channel.threads.fetchArchived({
+				type: "public",
+				before: options.before,
+			});
+		});
 
 	return {
 		getGuild,
@@ -213,7 +176,10 @@ const createDiscordService = Effect.gen(function* () {
 		fetchChannelMessages,
 		fetchActiveThreads,
 		fetchArchivedThreads,
-		client,
+		client: {
+			login,
+			on,
+		},
 	};
 });
 
