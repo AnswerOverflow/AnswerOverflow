@@ -15,8 +15,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
-import { ServerCard } from "../../../components/server-card";
-import { authClient } from "../../../lib/auth-client";
+import { ServerCard } from "../../components/server-card";
+import { authClient } from "../../lib/auth-client";
 
 export default function DashboardHome() {
 	const { data: session, isPending } = authClient.useSession();
@@ -154,11 +154,6 @@ export default function DashboardHome() {
 		<main className="max-w-6xl mx-auto p-8">
 			<div className="flex items-center justify-between mb-6">
 				<h1 className="text-3xl font-bold">Your Servers</h1>
-				{serversWithoutBot.length > 0 && (
-					<Button asChild variant="outline">
-						<Link href="/dashboard/onboarding">Add to Server</Link>
-					</Button>
-				)}
 			</div>
 			<div className="mb-6">
 				<Input

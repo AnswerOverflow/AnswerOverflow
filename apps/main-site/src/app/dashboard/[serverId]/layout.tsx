@@ -9,7 +9,7 @@ import {
 } from "@packages/ui/components/navbar";
 import { useQuery } from "convex/react";
 import { useParams } from "next/navigation";
-import { authClient } from "../../../../lib/auth-client";
+import { authClient } from "../../../lib/auth-client";
 
 export default function DashboardServerLayout({
 	children,
