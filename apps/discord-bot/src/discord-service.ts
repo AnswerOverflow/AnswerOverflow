@@ -1,9 +1,4 @@
-import {
-	ChannelType,
-	Client,
-	type ClientEvents,
-	GatewayIntentBits,
-} from "discord.js";
+import { ChannelType, type Client, type ClientEvents } from "discord.js";
 import {
 	Array as Arr,
 	Config,
@@ -13,25 +8,14 @@ import {
 	Layer,
 	Runtime,
 } from "effect";
+import { DiscordClient, DiscordClientLayer } from "./discord-client-service";
 
 export class DiscordError extends Data.TaggedError("DiscordError")<{
 	cause: unknown;
 }> {}
 
-// Low-level Discord client service - provides raw Discord.js client instance
-const createDiscordClientService = Effect.succeed(
-	new Client({
-		intents: [
-			GatewayIntentBits.Guilds,
-			GatewayIntentBits.GuildMessages,
-			GatewayIntentBits.MessageContent,
-			GatewayIntentBits.GuildMessageReactions,
-		],
-	}),
-);
-
 // High-level Discord service - provides convenient operations + re-exports low-level API
-const createDiscordService = Effect.gen(function* () {
+export const createDiscordService = Effect.gen(function* () {
 	const client = yield* DiscordClient;
 	const token = yield* Config.string("DISCORD_BOT_TOKEN");
 
@@ -183,20 +167,10 @@ const createDiscordService = Effect.gen(function* () {
 	};
 });
 
-export class DiscordClient extends Context.Tag("DiscordClient")<
-	DiscordClient,
-	Effect.Effect.Success<typeof createDiscordClientService>
->() {}
-
 export class Discord extends Context.Tag("Discord")<
 	Discord,
 	Effect.Effect.Success<typeof createDiscordService>
 >() {}
-
-export const DiscordClientLayer = Layer.effect(
-	DiscordClient,
-	createDiscordClientService,
-);
 
 export const DiscordLayer = Layer.effect(Discord, createDiscordService).pipe(
 	Layer.provide(DiscordClientLayer),

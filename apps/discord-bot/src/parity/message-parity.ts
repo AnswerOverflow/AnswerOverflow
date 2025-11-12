@@ -1,6 +1,6 @@
 import { Database, upsertMessage } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
-import { Discord } from "../discord-client-real";
+import { Discord } from "../discord-service";
 import { handleAutoThread } from "../handlers/auto-thread";
 import { toAODiscordAccount, toAOMessage } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
@@ -33,7 +33,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				const serverLiveData = yield* database.servers.getServerByDiscordId(
 					newMessage.guildId ?? "",
 				);
-				yield* Effect.sleep("10 millis");
 				const server = serverLiveData?.data;
 
 				if (!server) {
@@ -47,7 +46,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				const messageLiveData = yield* database.messages.getMessageById(
 					newMessage.id,
 				);
-				yield* Effect.sleep("10 millis");
 				const existingMessage = messageLiveData?.data;
 
 				if (!existingMessage) {
@@ -87,7 +85,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				const messageLiveData = yield* database.messages.getMessageById(
 					message.id,
 				);
-				yield* Effect.sleep("10 millis");
 				const existingMessage = messageLiveData?.data;
 
 				if (!existingMessage) {
@@ -151,7 +148,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				const serverLiveData = yield* database.servers.getServerByDiscordId(
 					message.guildId ?? "",
 				);
-				yield* Effect.sleep("10 millis"); // Wait for LiveData
 				const server = serverLiveData?.data;
 
 				if (!server) {
@@ -234,9 +230,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				const channelLiveData = yield* database.channels.getChannelByDiscordId(
 					message.channel.id,
 				);
-
-				// Wait a bit for LiveData to potentially load
-				yield* Effect.sleep("10 millis");
 
 				const channelSettings = channelLiveData?.data ?? null;
 

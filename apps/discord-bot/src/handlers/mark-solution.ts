@@ -146,7 +146,6 @@ export function handleCheckmarkReactionMarkSolution(
 		const serverLiveData = yield* Effect.scoped(
 			database.servers.getServerByDiscordId(fullMessage.guildId),
 		);
-		yield* Effect.sleep("10 millis");
 		const server = serverLiveData?.data;
 
 		if (!server) {
@@ -172,7 +171,6 @@ export function handleCheckmarkReactionMarkSolution(
 		const channelLiveData = yield* Effect.scoped(
 			database.channels.getChannelByDiscordId(parentChannel.id),
 		);
-		yield* Effect.sleep("10 millis");
 		const channelSettings = channelLiveData?.data;
 
 		if (!channelSettings?.flags.markSolutionEnabled) {
@@ -288,7 +286,6 @@ export function handleCheckmarkReactionMarkSolution(
 		const serverPreferencesLiveData = yield* Effect.scoped(
 			database.serverPreferences.getServerPreferencesByServerId(server._id),
 		);
-		yield* Effect.sleep("10 millis");
 		const serverPreferences = serverPreferencesLiveData?.data ?? null;
 
 		// Mark as solved

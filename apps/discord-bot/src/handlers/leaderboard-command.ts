@@ -63,7 +63,7 @@ export function handleLeaderboardCommand(
 		const serverLiveData = yield* Effect.scoped(
 			database.servers.getServerByDiscordId(interaction.guildId),
 		);
-		yield* Effect.sleep("10 millis");
+
 		const server = serverLiveData?.data;
 
 		if (!server) {
@@ -81,7 +81,7 @@ export function handleLeaderboardCommand(
 		const topSolversLiveData = yield* Effect.scoped(
 			database.messages.getTopQuestionSolversByServerId(server._id, 10),
 		);
-		yield* Effect.sleep("10 millis");
+
 		const topSolvers = topSolversLiveData?.data ?? [];
 
 		// Build embed description

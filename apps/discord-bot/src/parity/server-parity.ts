@@ -2,7 +2,7 @@ import { Database } from "@packages/database/database";
 import type { Guild, GuildChannel } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { registerCommands } from "../commands/register";
-import { Discord } from "../discord-client-real";
+import { Discord } from "../discord-service";
 import { startIndexingLoop } from "../services/indexing";
 import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
 
@@ -26,7 +26,7 @@ function toAOServer(guild: Guild) {
  * Syncs a single guild (server) to the database
  * This includes upserting the server and maintaining channel parity
  */
-function syncGuild(guild: Guild) {
+export function syncGuild(guild: Guild) {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 		const database = yield* Database;

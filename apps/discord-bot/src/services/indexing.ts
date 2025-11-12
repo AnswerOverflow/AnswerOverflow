@@ -22,7 +22,7 @@ import {
 	Order,
 	Schedule,
 } from "effect";
-import { Discord } from "../discord-client-real";
+import { Discord } from "../discord-service";
 import {
 	toAOChannel,
 	toAODiscordAccount,

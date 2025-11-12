@@ -68,7 +68,7 @@ export function handleMarkSolutionCommand(
 		const serverLiveData = yield* Effect.scoped(
 			database.servers.getServerByDiscordId(targetMessage.guildId),
 		);
-		yield* Effect.sleep("10 millis");
+
 		const server = serverLiveData?.data;
 
 		if (!server) {
@@ -112,7 +112,7 @@ export function handleMarkSolutionCommand(
 		const channelLiveData = yield* Effect.scoped(
 			database.channels.getChannelByDiscordId(parentChannel.id),
 		);
-		yield* Effect.sleep("10 millis");
+
 		const channelSettings = channelLiveData?.data;
 
 		if (!channelSettings?.flags.markSolutionEnabled) {
@@ -220,7 +220,6 @@ export function handleMarkSolutionCommand(
 		const serverPreferencesLiveData = yield* Effect.scoped(
 			database.serverPreferences.getServerPreferencesByServerId(server._id),
 		);
-		yield* Effect.sleep("10 millis");
 		const serverPreferences = serverPreferencesLiveData?.data ?? null;
 
 		// Mark as solved

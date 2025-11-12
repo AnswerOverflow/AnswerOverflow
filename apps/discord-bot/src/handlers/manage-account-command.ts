@@ -163,7 +163,7 @@ export function handleManageAccountCommand(
 		const serverLiveData = yield* Effect.scoped(
 			database.servers.getServerByDiscordId(interaction.guildId),
 		);
-		yield* Effect.sleep("10 millis");
+
 		const server = serverLiveData?.data;
 
 		if (!server) {
@@ -185,7 +185,7 @@ export function handleManageAccountCommand(
 				server._id,
 			),
 		);
-		yield* Effect.sleep("10 millis");
+
 		const userServerSettingsRaw = userServerSettingsLiveData?.data;
 
 		const userServerSettings: UserServerSettingsWithFlags =
@@ -310,7 +310,7 @@ function handleManageAccountButtonPress(
 						serverId,
 					),
 				);
-				yield* Effect.sleep("10 millis");
+
 				const existingSettings = existingSettingsLiveData?.data;
 
 				const updatedSettings = existingSettings
@@ -351,7 +351,7 @@ function handleManageAccountButtonPress(
 						serverId,
 					),
 				);
-				yield* Effect.sleep("10 millis");
+
 				const existingSettings = existingSettingsLiveData?.data;
 
 				const updatedSettings = existingSettings
