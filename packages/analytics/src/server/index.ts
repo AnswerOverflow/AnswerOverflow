@@ -1,60 +1,26 @@
 import { PostHog as PostHogQueryClient } from "@typelytics/posthog";
 import { Config, Context, Effect, Layer } from "effect";
 import { events } from "./events";
-import { PostHogClient, PostHogClientLayer } from "./posthog-client";
-
-export type ServerAnalyticsOptions = {
-	serverId: string;
-	to?: Date;
-	from?: Date;
-};
+import {
+	PostHogClient,
+	PostHogClientLayer,
+	PostHogClientLayerForServer,
+} from "./posthog-client";
 
 export type BaseProps = {
 	"Answer Overflow Account Id": string;
 };
 
-const getPosthogQueryClientForDashboard = (
-	opts: ServerAnalyticsOptions,
-	apiKey: string,
-	projectId: string,
-) => {
-	return new PostHogQueryClient({
-		events,
-		apiKey,
-		projectId,
-		globalFilters: {
-			filters: {
-				compare: "exact",
-				property: "Server Id",
-				value: opts.serverId,
-			},
-		},
-		executionOptions: {
-			type: "line",
-			// @ts-expect-error
-			// biome-ignore lint/style/noNonNullAssertion: we know the date is not null
-			date_to: opts.to?.toISOString().split("T")[0]!,
-			// @ts-expect-error
-			// biome-ignore lint/style/noNonNullAssertion: we know the date is not null
-			date_from: opts.from?.toISOString().split("T")[0]!,
-		},
-	});
+export type ServerAnalyticsOptions = {
+	to?: Date;
+	from?: Date;
 };
 
 export const service = Effect.gen(function* () {
-	const posthogPersonalApiKey = yield* Config.string(
-		"POSTHOG_PERSONAL_API_KEY",
-	);
-	const posthogProjectId = yield* Config.string("POSTHOG_PROJECT_ID");
-	const posthogQueryClient = yield* PostHogClient;
+	const client = yield* PostHogClient;
 
-	const getTopQuestionSolversForServer = (opts: ServerAnalyticsOptions) =>
+	const getTopQuestionSolversForServer = () =>
 		Effect.gen(function* () {
-			const client = getPosthogQueryClientForDashboard(
-				opts,
-				posthogPersonalApiKey,
-				posthogProjectId,
-			);
 			const result = yield* Effect.promise(() =>
 				client
 					.query()
@@ -63,7 +29,7 @@ export const service = Effect.gen(function* () {
 					})
 					.execute({
 						type: "table",
-						date_from: opts.from && "All time",
+						date_from: "All time",
 						breakdown_hide_other_aggregation: true,
 						breakdown: "Question Solver Id",
 					}),
@@ -71,13 +37,8 @@ export const service = Effect.gen(function* () {
 			return result.results["Solved Question"];
 		});
 
-	const getTopPages = (opts: ServerAnalyticsOptions) =>
+	const getTopPages = () =>
 		Effect.gen(function* () {
-			const client = getPosthogQueryClientForDashboard(
-				opts,
-				posthogPersonalApiKey,
-				posthogProjectId,
-			);
 			const result = yield* Effect.promise(() =>
 				client
 					.query()
@@ -97,7 +58,7 @@ export const service = Effect.gen(function* () {
 	const getPopularPostPages = () =>
 		Effect.gen(function* () {
 			const result = yield* Effect.promise(() =>
-				posthogQueryClient
+				client
 					.query()
 					.addSeries("Message Page View", {
 						sampling: "total",
@@ -116,7 +77,7 @@ export const service = Effect.gen(function* () {
 	const getPopularServers = () =>
 		Effect.gen(function* () {
 			const result = yield* Effect.promise(() =>
-				posthogQueryClient
+				client
 					.query()
 					.addSeries("Message Page View", {
 						sampling: "total",
@@ -132,13 +93,8 @@ export const service = Effect.gen(function* () {
 			return result.results["Message Page View"];
 		});
 
-	const getPageViewsForServer = (opts: ServerAnalyticsOptions) =>
+	const getPageViewsForServer = () =>
 		Effect.gen(function* () {
-			const client = getPosthogQueryClientForDashboard(
-				opts,
-				posthogPersonalApiKey,
-				posthogProjectId,
-			);
 			return yield* Effect.promise(() =>
 				client
 					.query()
@@ -150,13 +106,8 @@ export const service = Effect.gen(function* () {
 			);
 		});
 
-	const getServerInvitesClicked = (opts: ServerAnalyticsOptions) =>
+	const getServerInvitesClicked = () =>
 		Effect.gen(function* () {
-			const client = getPosthogQueryClientForDashboard(
-				opts,
-				posthogPersonalApiKey,
-				posthogProjectId,
-			);
 			return yield* Effect.promise(() =>
 				client
 					.query()
@@ -168,13 +119,8 @@ export const service = Effect.gen(function* () {
 			);
 		});
 
-	const getQuestionsAndAnswers = (opts: ServerAnalyticsOptions) =>
+	const getQuestionsAndAnswers = () =>
 		Effect.gen(function* () {
-			const client = getPosthogQueryClientForDashboard(
-				opts,
-				posthogPersonalApiKey,
-				posthogProjectId,
-			);
 			return yield* Effect.promise(() =>
 				client
 					.query()
@@ -213,3 +159,12 @@ export class Analytics extends Context.Tag("Analytics")<
 export const AnalyticsLayer = Layer.effect(Analytics, service).pipe(
 	Layer.provide(PostHogClientLayer),
 );
+
+export const ServerAnalyticsLayer = (
+	opts: ServerAnalyticsOptions & {
+		serverId: string;
+	},
+) =>
+	Layer.effect(Analytics, service).pipe(
+		Layer.provide(PostHogClientLayerForServer(opts)),
+	);

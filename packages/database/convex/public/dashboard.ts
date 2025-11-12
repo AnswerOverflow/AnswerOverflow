@@ -5,7 +5,11 @@ import {
 	HttpClient,
 	HttpClientRequest,
 } from "@effect/platform";
-import { Analytics, AnalyticsLayer } from "@packages/analytics/server/index";
+import {
+	Analytics,
+	AnalyticsLayer,
+	ServerAnalyticsLayer,
+} from "@packages/analytics/server/index";
 import { make } from "@packages/discord-api/generated";
 import { v } from "convex/values";
 import { Effect } from "effect";
@@ -23,6 +27,10 @@ import {
 	hasPermission,
 	sortServersByBotAndRole,
 } from "../shared/shared";
+import {
+	makeServerAnalyticsClient,
+	PostHogClientLayerForServer,
+} from "@packages/analytics/server/posthog-client";
 
 const discordApi = (token: string) =>
 	Effect.gen(function* () {
@@ -226,34 +234,6 @@ async function checkManageGuildPermission(
 export const getTopQuestionSolversForServer = authenticatedAction({
 	args: {
 		serverId: v.id("servers"),
-		from: v.optional(v.number()),
-		to: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		const { discordAccountId, serverId, from, to } = args;
-
-		// Check permissions
-		await checkManageGuildPermission(ctx, discordAccountId, serverId);
-
-		// Call analytics service
-		const program = Effect.gen(function* () {
-			const analytics = yield* Analytics;
-			return yield* analytics.server.getTopQuestionSolversForServer({
-				serverId,
-				from: from ? new Date(from) : undefined,
-				to: to ? new Date(to) : undefined,
-			});
-		});
-
-		return await Effect.runPromise(
-			program.pipe(Effect.provide(AnalyticsLayer)),
-		);
-	},
-});
-
-export const getTopPages = authenticatedAction({
-	args: {
-		serverId: v.id("servers"),
 	},
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverId } = args;
@@ -264,12 +244,12 @@ export const getTopPages = authenticatedAction({
 		// Call analytics service
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
-			return yield* analytics.server.getTopPages({
-				serverId,
-			});
-		}).pipe(Effect.provide(AnalyticsLayer));
+			return yield* analytics.server.getTopQuestionSolversForServer();
+		});
 
-		return await Effect.runPromise(program);
+		return await Effect.runPromise(
+			program.pipe(Effect.provide(AnalyticsLayer)),
+		);
 	},
 });
 
@@ -288,11 +268,7 @@ export const getPageViewsForServer = authenticatedAction({
 		// Call analytics service
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
-			return yield* analytics.server.getPageViewsForServer({
-				serverId,
-				from: from ? new Date(from) : undefined,
-				to: to ? new Date(to) : undefined,
-			});
+			return yield* analytics.server.getPageViewsForServer();
 		}).pipe(Effect.provide(AnalyticsLayer));
 
 		return await Effect.runPromise(program);
@@ -302,11 +278,9 @@ export const getPageViewsForServer = authenticatedAction({
 export const getServerInvitesClicked = authenticatedAction({
 	args: {
 		serverId: v.id("servers"),
-		from: v.optional(v.number()),
-		to: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const { discordAccountId, serverId, from, to } = args;
+		const { discordAccountId, serverId } = args;
 
 		// Check permissions
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);
@@ -314,12 +288,8 @@ export const getServerInvitesClicked = authenticatedAction({
 		// Call analytics service
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
-			return yield* analytics.server.getServerInvitesClicked({
-				serverId,
-				from: from ? new Date(from) : undefined,
-				to: to ? new Date(to) : undefined,
-			});
-		}).pipe(Effect.provide(AnalyticsLayer));
+			return yield* analytics.server.getServerInvitesClicked();
+		}).pipe(Effect.provide(ServerAnalyticsLayer({ serverId })));
 
 		return await Effect.runPromise(program);
 	},
@@ -332,20 +302,15 @@ export const getQuestionsAndAnswers = authenticatedAction({
 		to: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const { discordAccountId, serverId, from, to } = args;
+		const { discordAccountId, serverId } = args;
 
 		// Check permissions
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);
 
-		// Call analytics service
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
-			return yield* analytics.server.getQuestionsAndAnswers({
-				serverId,
-				from: from ? new Date(from) : undefined,
-				to: to ? new Date(to) : undefined,
-			});
-		}).pipe(Effect.provide(AnalyticsLayer));
+			return yield* analytics.server.getQuestionsAndAnswers();
+		}).pipe(Effect.provide(ServerAnalyticsLayer({ serverId })));
 
 		return await Effect.runPromise(program);
 	},
