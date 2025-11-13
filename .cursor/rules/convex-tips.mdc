@@ -1,5 +1,6 @@
 ---
 alwaysApply: true
+globs: packages/database/convex/**/*.ts,packages/convex-test/convex/**/*.ts
 ---
 
 # Convex Function Architecture Rules
