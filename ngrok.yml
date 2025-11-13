@@ -1,0 +1,9 @@
+version: "2"
+
+tunnels:
+  redis:
+    proto: tcp
+    addr: 6379
+  web:
+    proto: http
+    addr: 3000

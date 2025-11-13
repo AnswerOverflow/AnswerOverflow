@@ -1,9 +1,11 @@
+import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { v } from "convex/values";
 import {
 	customAction,
 	customMutation,
 	customQuery,
 } from "convex-helpers/server/customFunctions";
+import { Effect, type Tracer } from "effect";
 import { components } from "../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
 import { action, mutation, query } from "../_generated/server";
@@ -289,9 +291,13 @@ export async function requireAuth(
 /**
  * Get the authenticated user's Discord account with access token from BetterAuth.
  * Returns null if not authenticated or no Discord account linked.
+ *
+ * @param parentSpan - Optional parent span context to inherit trace from. If provided,
+ * the span will be created as a child of this span, maintaining trace continuity.
  */
 export async function getDiscordAccountWithToken(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
+	parentSpan?: Tracer.AnySpan,
 ): Promise<{ accountId: string; accessToken: string } | null> {
 	const user = await authComponent.getAuthUser(ctx);
 	if (!user) {
@@ -299,24 +305,40 @@ export async function getDiscordAccountWithToken(
 	}
 
 	// Get Discord account from BetterAuth
-	const accountResult = await ctx.runQuery(
-		components.betterAuth.adapter.findOne,
-		{
-			model: "account",
-			where: [
-				{
-					field: "userId",
-					operator: "eq",
-					value: user._id,
-				},
-				{
-					field: "providerId",
-					operator: "eq",
-					value: "discord",
-				},
-			],
-		},
-	);
+	const accountResult = await Effect.gen(function* () {
+		return yield* Effect.withSpan(
+			"auth.getDiscordAccountWithToken.findAccount",
+			{
+				...(parentSpan ? { parent: parentSpan } : {}),
+			},
+		)(
+			Effect.gen(function* () {
+				yield* Effect.annotateCurrentSpan({
+					"auth.user.id": user._id,
+					"auth.provider": "discord",
+				});
+				return yield* Effect.tryPromise({
+					try: () =>
+						ctx.runQuery(components.betterAuth.adapter.findOne, {
+							model: "account",
+							where: [
+								{
+									field: "userId",
+									operator: "eq",
+									value: user._id,
+								},
+								{
+									field: "providerId",
+									operator: "eq",
+									value: "discord",
+								},
+							],
+						}),
+					catch: (error) => new Error(String(error)),
+				});
+			}),
+		);
+	}).pipe(Effect.provide(createConvexOtelLayer("database")), Effect.runPromise);
 
 	// Type guard to ensure we have a valid account object with access token
 	if (

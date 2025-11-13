@@ -3,7 +3,13 @@
 	"version": "1.0.0",
 	"type": "module",
 	"exports": {
-		"./*": "./src/*.ts"
+		"./*": "./src/*.ts",
+		"./effect-otel": "./src/effect-otel.ts",
+		"./convex-effect-otel": "./src/convex-effect-otel.ts"
+	},
+	"scripts": {
+		"test": "vitest run --no-watch",
+		"test:watch": "vitest"
 	},
 	"dependencies": {
 		"@effect/opentelemetry": "^0.59.0",
@@ -13,5 +19,9 @@
 		"@opentelemetry/sdk-trace-node": "^2.2.0",
 		"@opentelemetry/sdk-trace-web": "^2.2.0",
 		"effect": "catalog:"
+	},
+	"devDependencies": {
+		"@effect/vitest": "^0.25.0",
+		"vitest": "catalog:"
 	}
 }

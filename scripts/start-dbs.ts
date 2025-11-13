@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { $ } from "bun";
 
@@ -51,250 +51,37 @@ async function startDockerServices(): Promise<void> {
 	}
 }
 
-async function checkNgrokApi(): Promise<boolean> {
-	try {
-		await $`curl -s --connect-timeout 2 http://localhost:4040/api/tunnels`.quiet();
-		return true;
-	} catch {
-		return false;
-	}
-}
-
-async function getNgrokUrl(): Promise<{
-	url: string | null;
-	tunnels: unknown[];
-}> {
-	try {
-		// Check if ngrok is running and get the tunnel URL
-		const result =
-			await $`curl -s --connect-timeout 2 http://localhost:4040/api/tunnels`.quiet();
-		const response = result.stdout.toString();
-		if (!response || response.trim() === "") {
-			return { url: null, tunnels: [] };
-		}
-		const tunnels = JSON.parse(response);
-		const tunnelList = tunnels.tunnels || [];
-		// Look for TCP tunnel to localhost:6379 (Valkey uses TCP, not HTTP)
-		const tcpTunnel = tunnelList.find(
-			(t: { proto: string; config: { addr: string } }) =>
-				t.proto === "tcp" && t.config.addr === "localhost:6379",
-		);
-		return { url: tcpTunnel?.public_url || null, tunnels: tunnelList };
-	} catch {
-		return { url: null, tunnels: [] };
-	}
-}
-
-async function checkPortListening(port: number): Promise<boolean> {
-	try {
-		const result = await $`lsof -i :${port} 2>/dev/null || echo ""`.quiet();
-		return result.stdout.toString().trim() !== "";
-	} catch {
-		return false;
-	}
-}
-
-function isTunnelObject(
-	t: unknown,
-): t is { proto: string; config: { addr: string }; public_url: string } {
-	if (typeof t !== "object" || t === null) {
-		return false;
-	}
-
-	const proto = "proto" in t ? t.proto : undefined;
-	const config = "config" in t ? t.config : undefined;
-	const publicUrl = "public_url" in t ? t.public_url : undefined;
-
-	if (typeof proto !== "string" || typeof publicUrl !== "string") {
-		return false;
-	}
-
-	if (typeof config !== "object" || config === null) {
-		return false;
-	}
-
-	const addr = "addr" in config ? config.addr : undefined;
-	return typeof addr === "string";
-}
-
-async function startNgrok(): Promise<string> {
-	// Check if Valkey is listening on port 6379
-	const valkeyListening = await checkPortListening(6379);
-	if (!valkeyListening) {
+function getValkeyUrlFromEnv(): string {
+	if (!existsSync(ENV_PATH)) {
 		throw new Error(
-			"Valkey is not listening on port 6379. Make sure Docker services are running.\n" +
-				"  Try: docker compose up -d",
+			`.env file not found at ${ENV_PATH}\n` +
+				"  Please create a .env file with VALKEY_URL set.\n" +
+				"  Example: VALKEY_URL=redis://your-ngrok-host:port",
 		);
 	}
 
-	// Check if ngrok is already running
-	const { url: existingUrl, tunnels: existingTunnels } = await getNgrokUrl();
-	if (existingUrl) {
-		console.log(`✓ ngrok already running: ${existingUrl}`);
-		return existingUrl;
-	}
+	const envContent = readFileSync(ENV_PATH, "utf-8");
+	const lines = envContent.split("\n");
 
-	// Check if ngrok API is accessible (might be running but no tunnel)
-	const apiAccessible = await checkNgrokApi();
-	if (apiAccessible && existingTunnels.length > 0) {
-		console.log("⚠ ngrok is running but no tunnel to localhost:6379 found");
-		console.log(`  Existing tunnels: ${existingTunnels.length}`);
-		console.log("  Starting new tunnel...");
-	}
-
-	console.log("Starting ngrok TCP tunnel to Valkey (port 6379)...");
-
-	// Start ngrok as a background daemon process that persists
-	// Using TCP tunnel since Valkey uses Redis protocol (binary), not HTTP
-	// Use Bun.spawn to start ngrok in the background
-	try {
-		const ngrokProcess = Bun.spawn(["ngrok", "tcp", "6379"], {
-			stdout: "ignore",
-			stderr: "ignore",
-		});
-
-		// Detach the process so it can outlive the parent
-		// On Unix systems, we need to unref and potentially disown
-		ngrokProcess.unref();
-
-		// Give it a moment to start
-		await new Promise((resolve) => setTimeout(resolve, 500));
-
-		// Check if process is still running (if it exited immediately, there was an error)
-		if (ngrokProcess.exitCode !== null && ngrokProcess.exitCode !== 0) {
-			throw new Error(
-				`ngrok process exited with code ${ngrokProcess.exitCode}`,
-			);
-		}
-	} catch (error) {
-		// Check if ngrok is already running (might fail if process exists)
-		const isRunning = await checkNgrokApi();
-		if (!isRunning) {
-			throw new Error(
-				`ngrok failed to start\n` +
-					`  Error: ${error instanceof Error ? error.message : String(error)}\n` +
-					`  Make sure ngrok is properly installed and authenticated.\n` +
-					`  Get your auth token from: https://dashboard.ngrok.com/get-started/your-authtoken\n` +
-					`  Then run: ngrok config add-authtoken <your-token>`,
-			);
-		}
-	}
-
-	// Wait for ngrok to start and API to be accessible
-	console.log("  Waiting for ngrok to start...");
-	let apiReady = false;
-	let waitAttempts = 0;
-	while (!apiReady && waitAttempts < 15) {
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		apiReady = await checkNgrokApi();
-		waitAttempts++;
-		if (!apiReady && waitAttempts % 3 === 0) {
-			console.log(`  Still waiting... (${waitAttempts}s)`);
-		}
-	}
-
-	if (!apiReady) {
-		throw new Error(
-			"ngrok API did not become accessible after starting.\n" +
-				"  Troubleshooting:\n" +
-				"  1. Check if ngrok is running: ps aux | grep ngrok\n" +
-				"  2. Check ngrok logs for errors\n" +
-				"  3. Make sure port 4040 is not in use\n" +
-				"  4. Try running manually: ngrok tcp 6379",
-		);
-	}
-
-	console.log("  ngrok API is accessible, checking for tunnel...");
-
-	// Try to get the URL
-	let url: string | null = null;
-	let attempts = 0;
-	const maxAttempts = 15;
-	while (!url && attempts < maxAttempts) {
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		const result = await getNgrokUrl();
-		url = result.url;
-		attempts++;
-		if (!url && attempts % 3 === 0) {
-			console.log(`  Waiting for tunnel... (${attempts}s)`);
-			if (result.tunnels.length > 0) {
-				console.log(
-					`  Found ${result.tunnels.length} tunnel(s), but none match localhost:6379`,
+	for (const line of lines) {
+		if (line.startsWith("VALKEY_URL=")) {
+			const url = line.substring("VALKEY_URL=".length).trim();
+			if (!url) {
+				throw new Error(
+					"VALKEY_URL is set in .env but is empty.\n" +
+						"  Please set VALKEY_URL to your Valkey/Redis URL.\n" +
+						"  Example: VALKEY_URL=redis://your-ngrok-host:port",
 				);
 			}
+			return url;
 		}
 	}
 
-	if (!url) {
-		const { tunnels } = await getNgrokUrl();
-		let errorMsg =
-			"Failed to get ngrok tunnel URL after starting.\n" +
-			"  Troubleshooting:\n" +
-			"  1. Check ngrok web UI: http://localhost:4040\n";
-		if (tunnels.length > 0) {
-			errorMsg += `  2. Found ${tunnels.length} tunnel(s) but none match localhost:6379\n`;
-			const tunnelInfo = tunnels
-				.map((t) => {
-					if (isTunnelObject(t)) {
-						return `${t.proto}://${t.config.addr} -> ${t.public_url}`;
-					}
-					return String(t);
-				})
-				.join(", ");
-			errorMsg += `  3. Existing tunnels: ${tunnelInfo}\n`;
-		} else {
-			errorMsg +=
-				"  2. No tunnels found - ngrok may have failed to create tunnel\n";
-		}
-		errorMsg +=
-			"  4. Check if Valkey is running: docker ps | grep valkey\n" +
-			"  5. Try running manually: ngrok tcp 6379";
-		throw new Error(errorMsg);
-	}
-
-	console.log(`✓ ngrok tunnel started: ${url}`);
-	return url;
-}
-
-function hasValkeyUrl(): boolean {
-	if (!existsSync(ENV_PATH)) {
-		return false;
-	}
-	const envContent = readFileSync(ENV_PATH, "utf-8");
-	return envContent.includes("VALKEY_URL=");
-}
-
-function updateEnv(valkeyUrl: string): void {
-	let envContent = "";
-	if (existsSync(ENV_PATH)) {
-		envContent = readFileSync(ENV_PATH, "utf-8");
-	}
-
-	// Check if VALKEY_URL already exists - if so, update it (ngrok URLs change on restart)
-	if (hasValkeyUrl()) {
-		const lines = envContent.split("\n");
-		const updatedLines = lines.map((line) => {
-			if (line.startsWith("VALKEY_URL=")) {
-				return `VALKEY_URL=${valkeyUrl}`;
-			}
-			return line;
-		});
-		envContent = updatedLines.join("\n");
-		// Ensure trailing newline
-		if (!envContent.endsWith("\n")) {
-			envContent += "\n";
-		}
-		writeFileSync(ENV_PATH, envContent);
-		console.log(`✓ Updated VALKEY_URL in .env`);
-	} else {
-		// Add VALKEY_URL if it doesn't exist
-		if (envContent && !envContent.endsWith("\n")) {
-			envContent += "\n";
-		}
-		envContent += `VALKEY_URL=${valkeyUrl}\n`;
-		writeFileSync(ENV_PATH, envContent);
-		console.log(`✓ Added VALKEY_URL to .env`);
-	}
+	throw new Error(
+		"VALKEY_URL not found in .env file.\n" +
+			"  Please add VALKEY_URL to your .env file.\n" +
+			"  Example: VALKEY_URL=redis://your-ngrok-host:port",
+	);
 }
 
 async function updateConvexEnv(valkeyUrl: string): Promise<void> {
@@ -313,34 +100,14 @@ async function updateConvexEnv(valkeyUrl: string): Promise<void> {
 
 async function main() {
 	try {
-		// Check if ngrok is installed
-		try {
-			await $`which ngrok`.quiet();
-		} catch {
-			console.error("Error: ngrok is not installed. Please install it first:");
-			console.error("  brew install ngrok/ngrok/ngrok");
-			process.exit(1);
-		}
-
 		await startDockerServices();
-		const ngrokUrl = await startNgrok();
+		const valkeyUrl = getValkeyUrlFromEnv();
 
-		// Convert ngrok TCP URL to Redis URL format
-		// ngrok TCP gives us something like tcp://0.tcp.ngrok.io:12345
-		// We need to convert it to redis:// format
-		// Extract host and port from tcp://host:port
-		const urlMatch = ngrokUrl.match(/^tcp:\/\/(.+):(\d+)$/);
-		if (!urlMatch) {
-			throw new Error(`Invalid ngrok URL format: ${ngrokUrl}`);
-		}
-		const [, host, port] = urlMatch;
-		const redisUrl = `redis://${host}:${port}`;
-
-		updateEnv(redisUrl);
-		await updateConvexEnv(redisUrl);
+		console.log(`✓ Using VALKEY_URL from .env: ${valkeyUrl}`);
+		await updateConvexEnv(valkeyUrl);
 
 		console.log("\n✓ Database services are ready!");
-		console.log(`  Valkey URL: ${redisUrl}`);
+		console.log(`  Valkey URL: ${valkeyUrl}`);
 	} catch (error) {
 		console.error("\n❌ Error starting database services:");
 		if (error instanceof Error) {

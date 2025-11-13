@@ -11,8 +11,9 @@ import {
 	ServerAnalyticsLayer,
 } from "@packages/analytics/server/index";
 import { make } from "@packages/discord-api/generated";
+import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { v } from "convex/values";
-import { Effect } from "effect";
+import { Effect, type Tracer } from "effect";
 import { api } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx } from "../_generated/server";
@@ -67,121 +68,305 @@ export const getUserServers = authenticatedAction({
 	handler: async (ctx, args): Promise<ServerWithMetadata[]> => {
 		const { discordAccountId } = args;
 
-		// Get Discord account with access token
-		const discordAccount = await getDiscordAccountWithToken(ctx);
-		if (!discordAccount || discordAccount.accountId !== discordAccountId) {
-			throw new Error("Discord account not linked or mismatch");
-		}
+		const tracedEffect = Effect.gen(function* () {
+			return yield* Effect.withSpan("dashboard.getUserServers")(
+				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"discord.account.id": discordAccountId,
+						"convex.function": "getUserServers",
+					});
 
-		const token = discordAccount.accessToken;
+					// Get Discord account with access token
+					const discordAccount = yield* Effect.withSpan(
+						"dashboard.getUserServers.getDiscordAccount",
+					)(
+						Effect.gen(function* () {
+							yield* Effect.annotateCurrentSpan({
+								"discord.account.id": discordAccountId,
+							});
+							// Extract current span to pass as parent to getDiscordAccountWithToken
+							// so the span created there inherits the trace context
+							const currentSpan = yield* Effect.currentSpan;
+							return yield* Effect.tryPromise({
+								try: () =>
+									getDiscordAccountWithToken(
+										ctx,
+										currentSpan ? (currentSpan as Tracer.AnySpan) : undefined,
+									),
+								catch: (error) => new Error(String(error)),
+							});
+						}),
+					);
 
-		// Fetch user's Discord servers using the API client
-		// Cache the result for 5 minutes to reduce API calls
-		const cacheKey = `discord:guilds:${discordAccountId}`;
-		const client = await Effect.runPromise(discordApi(token));
-		const cachedGuildsEffect = getOrSetCache(
-			cacheKey,
-			() => client.listMyGuilds(),
-			300, // 5 minutes TTL
-		);
-		const discordGuilds = await Effect.runPromise(cachedGuildsEffect);
+					if (
+						!discordAccount ||
+						discordAccount.accountId !== discordAccountId
+					) {
+						throw new Error("Discord account not linked or mismatch");
+					}
 
-		// Filter to servers user can manage (ManageGuild, Administrator, or Owner)
-		const manageableServers = discordGuilds.filter((guild) => {
-			const permissions = BigInt(guild.permissions);
-			return (
-				guild.owner ||
-				hasPermission(permissions, DISCORD_PERMISSIONS.ManageGuild) ||
-				hasPermission(permissions, DISCORD_PERMISSIONS.Administrator)
+					const token = discordAccount.accessToken;
+
+					// Fetch user's Discord servers using the API client
+					// Cache the result for 5 minutes to reduce API calls
+					const cacheKey = `discord:guilds:${discordAccountId}`;
+					const client = yield* Effect.withSpan(
+						"dashboard.getUserServers.createDiscordClient",
+					)(discordApi(token));
+
+					const discordGuilds = yield* Effect.withSpan(
+						"dashboard.getUserServers.fetchDiscordGuilds",
+					)(
+						Effect.gen(function* () {
+							yield* Effect.annotateCurrentSpan({
+								"cache.key": cacheKey,
+							});
+							return yield* getOrSetCache(
+								cacheKey,
+								() =>
+									Effect.withSpan(
+										"dashboard.getUserServers.fetchDiscordGuilds.discordApi",
+									)(client.listMyGuilds()),
+								300, // 5 minutes TTL
+							);
+						}),
+					);
+
+					// Filter to servers user can manage (ManageGuild, Administrator, or Owner)
+					const manageableServers = yield* Effect.withSpan(
+						"dashboard.getUserServers.filterManageableServers",
+					)(
+						Effect.gen(function* () {
+							const filtered = discordGuilds.filter((guild) => {
+								const permissions = BigInt(guild.permissions);
+								return (
+									guild.owner ||
+									hasPermission(permissions, DISCORD_PERMISSIONS.ManageGuild) ||
+									hasPermission(permissions, DISCORD_PERMISSIONS.Administrator)
+								);
+							});
+							yield* Effect.annotateCurrentSpan({
+								"guilds.total": discordGuilds.length,
+								"guilds.manageable": filtered.length,
+							});
+							return filtered;
+						}),
+					);
+
+					// Match with Answer Overflow servers
+					const serverDiscordIds = manageableServers.map((g) => g.id);
+					const aoServers = yield* Effect.withSpan(
+						"dashboard.getUserServers.matchAOServers",
+					)(
+						Effect.gen(function* () {
+							yield* Effect.annotateCurrentSpan({
+								"servers.count": serverDiscordIds.length,
+							});
+							return yield* Effect.withSpan(
+								"dashboard.getUserServers.matchAOServers.query",
+							)(
+								Effect.tryPromise({
+									try: () =>
+										ctx.runQuery(
+											api.public.servers.publicFindManyServersByDiscordId,
+											{ discordIds: serverDiscordIds },
+										),
+									catch: (error) => new Error(String(error)),
+								}),
+							);
+						}),
+					);
+
+					// Create a map for quick lookup of servers by Discord ID
+					const aoServersByDiscordId = new Map(
+						aoServers.map((server) => [server.discordId, server]),
+					);
+
+					// Sync user server settings with permissions from Discord API
+					// This ensures the reactive query has data to work with
+					const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
+					if (!backendAccessToken) {
+						throw new Error("BACKEND_ACCESS_TOKEN not configured");
+					}
+
+					yield* Effect.withSpan(
+						"dashboard.getUserServers.syncUserServerSettings",
+					)(
+						Effect.gen(function* () {
+							// Filter to only servers that exist in AO
+							const serversToSync = manageableServers
+								.map((guild) => {
+									const aoServer = aoServersByDiscordId.get(guild.id);
+									return aoServer ? { guild, aoServer } : null;
+								})
+								.filter(
+									(
+										item,
+									): item is {
+										guild: (typeof manageableServers)[0];
+										aoServer: NonNullable<
+											ReturnType<typeof aoServersByDiscordId.get>
+										>;
+									} => item !== null,
+								);
+
+							yield* Effect.annotateCurrentSpan({
+								"servers.toSync": serversToSync.length,
+							});
+
+							// Batch fetch all existing user server settings
+							const existingSettingsArray = yield* Effect.withSpan(
+								"dashboard.getUserServers.syncUserServerSettings.fetchExisting",
+							)(
+								Effect.tryPromise({
+									try: () =>
+										ctx.runQuery(
+											api.publicInternal.user_server_settings
+												.findManyUserServerSettings,
+											{
+												backendAccessToken,
+												settings: serversToSync.map(({ aoServer }) => ({
+													userId: discordAccountId,
+													serverId: aoServer._id,
+												})),
+											},
+										),
+									catch: (error) => new Error(String(error)),
+								}),
+							);
+
+							// Create a map for quick lookup of settings by server ID
+							const existingSettingsByServerId = new Map(
+								existingSettingsArray.map((settings) => [
+									settings.serverId,
+									settings,
+								]),
+							);
+
+							// Upsert user server settings with synced permissions
+							// Only update if permissions changed to avoid redundant mutations
+							const settingsToUpdate: Array<{
+								serverId: Id<"servers">;
+								userId: string;
+								permissions: number;
+								canPubliclyDisplayMessages: boolean;
+								messageIndexingDisabled: boolean;
+								apiKey: string | undefined;
+								apiCallsUsed: number;
+							}> = [];
+
+							for (const { guild, aoServer } of serversToSync) {
+								// Convert permissions string to number (Discord API returns permissions as string)
+								const permissionsNumber = Number(guild.permissions);
+
+								// Get existing user server settings from the map
+								const existingSettings = existingSettingsByServerId.get(
+									aoServer._id,
+								);
+
+								// Skip if permissions haven't changed
+								if (
+									existingSettings &&
+									existingSettings.permissions === permissionsNumber
+								) {
+									continue;
+								}
+
+								// Prepare settings - preserve existing values or use defaults
+								settingsToUpdate.push({
+									serverId: aoServer._id,
+									userId: discordAccountId,
+									permissions: permissionsNumber, // Sync permissions from Discord API
+									canPubliclyDisplayMessages:
+										existingSettings?.canPubliclyDisplayMessages ?? false,
+									messageIndexingDisabled:
+										existingSettings?.messageIndexingDisabled ?? false,
+									apiKey: existingSettings?.apiKey,
+									apiCallsUsed: existingSettings?.apiCallsUsed ?? 0,
+								});
+							}
+
+							// Only run mutations for settings that actually need updating
+							if (settingsToUpdate.length > 0) {
+								yield* Effect.annotateCurrentSpan({
+									"mutations.count": settingsToUpdate.length,
+								});
+								return yield* Effect.withSpan(
+									"dashboard.getUserServers.syncUserServerSettings.runMutations",
+								)(
+									Effect.all(
+										settingsToUpdate.map((settings, index) =>
+											Effect.withSpan(
+												`dashboard.getUserServers.syncUserServerSettings.mutation.${index}`,
+											)(
+												Effect.tryPromise({
+													try: () =>
+														ctx.runMutation(
+															api.publicInternal.user_server_settings
+																.upsertUserServerSettings,
+															{ backendAccessToken, settings },
+														),
+													catch: (error) => new Error(String(error)),
+												}),
+											),
+										),
+									),
+								);
+							}
+
+							return [];
+						}),
+					);
+
+					// Combine Discord guild data with AO server data
+					const serversWithMetadata: ServerWithMetadata[] =
+						yield* Effect.withSpan(
+							"dashboard.getUserServers.combineServerData",
+						)(
+							Effect.gen(function* () {
+								const combined = manageableServers.map((guild) => {
+									const aoServer = aoServersByDiscordId.get(guild.id);
+									const permissions = BigInt(guild.permissions);
+
+									const highestRole = getHighestRoleFromPermissions(
+										permissions,
+										guild.owner,
+									);
+
+									return {
+										discordId: guild.id,
+										name: guild.name,
+										icon: guild.icon ?? null,
+										owner: guild.owner,
+										permissions: guild.permissions,
+										highestRole,
+										hasBot:
+											aoServer !== null &&
+											aoServer !== undefined &&
+											(aoServer.kickedTime === null ||
+												aoServer.kickedTime === undefined),
+										aoServerId: aoServer?._id,
+									};
+								});
+								yield* Effect.annotateCurrentSpan({
+									"servers.combined": combined.length,
+								});
+								return combined;
+							}),
+						);
+
+					// Sort: has bot + owner/admin/manage, then no bot + owner/admin/manage
+					return yield* Effect.withSpan("dashboard.getUserServers.sortServers")(
+						Effect.succeed(sortServersByBotAndRole(serversWithMetadata)),
+					);
+				}),
 			);
 		});
 
-		// Match with Answer Overflow servers
-		const serverDiscordIds = manageableServers.map((g) => g.id);
-		const aoServers = await Promise.all(
-			serverDiscordIds.map((discordId) =>
-				ctx.runQuery(api.public.servers.publicGetServerByDiscordId, {
-					discordId,
-				}),
-			),
-		);
-
-		// Sync user server settings with permissions from Discord API
-		// This ensures the reactive query has data to work with
-		const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
-		if (!backendAccessToken) {
-			throw new Error("BACKEND_ACCESS_TOKEN not configured");
-		}
-
-		await Promise.all(
-			manageableServers.map(async (guild, idx) => {
-				const aoServer = aoServers[idx];
-				if (!aoServer) return; // Skip if server doesn't exist in AO
-
-				// Convert permissions string to number (Discord API returns permissions as string)
-				const permissionsNumber = Number(guild.permissions);
-
-				// Get existing user server settings
-				const existingSettings = await ctx.runQuery(
-					api.publicInternal.user_server_settings.findUserServerSettingsById,
-					{
-						backendAccessToken,
-						userId: discordAccountId,
-						serverId: aoServer._id,
-					},
-				);
-
-				// Prepare settings - preserve existing values or use defaults
-				const settings = {
-					serverId: aoServer._id,
-					userId: discordAccountId,
-					permissions: permissionsNumber, // Sync permissions from Discord API
-					canPubliclyDisplayMessages:
-						existingSettings?.canPubliclyDisplayMessages ?? false,
-					messageIndexingDisabled:
-						existingSettings?.messageIndexingDisabled ?? false,
-					apiKey: existingSettings?.apiKey,
-					apiCallsUsed: existingSettings?.apiCallsUsed ?? 0,
-				};
-
-				// Upsert user server settings with synced permissions
-				// Use publicInternalMutation which requires backendAccessToken
-				await ctx.runMutation(
-					api.publicInternal.user_server_settings.upsertUserServerSettings,
-					{ backendAccessToken, settings },
-				);
-			}),
-		);
-
-		// Combine Discord guild data with AO server data
-		const serversWithMetadata: ServerWithMetadata[] = manageableServers.map(
-			(guild, idx) => {
-				const aoServer = aoServers[idx];
-				const permissions = BigInt(guild.permissions);
-
-				const highestRole = getHighestRoleFromPermissions(
-					permissions,
-					guild.owner,
-				);
-
-				return {
-					discordId: guild.id,
-					name: guild.name,
-					icon: guild.icon ?? null,
-					owner: guild.owner,
-					permissions: guild.permissions,
-					highestRole,
-					hasBot:
-						aoServer !== null &&
-						aoServer !== undefined &&
-						(aoServer.kickedTime === null || aoServer.kickedTime === undefined),
-					aoServerId: aoServer?._id,
-				};
-			},
-		);
-
-		// Sort: has bot + owner/admin/manage, then no bot + owner/admin/manage
-		return sortServersByBotAndRole(serversWithMetadata);
+		return await Effect.provide(
+			tracedEffect,
+			createConvexOtelLayer("database"),
+		).pipe(Effect.runPromise);
 	},
 });
 

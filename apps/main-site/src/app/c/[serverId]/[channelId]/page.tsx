@@ -1,5 +1,5 @@
 import { Database, DatabaseLayer } from "@packages/database/database";
-import { createOtelLayer } from "@packages/observability/otel";
+import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Effect, Layer } from "effect";
 import { notFound } from "next/navigation";
 import { ChannelPageClient } from "../client";

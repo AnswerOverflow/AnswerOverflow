@@ -1,4 +1,6 @@
+import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { type Infer, v } from "convex/values";
+import { Effect } from "effect";
 import { query } from "../_generated/server";
 import type { channelSettingsSchema } from "../schema";
 import {
@@ -38,7 +40,24 @@ export const publicGetServerByDiscordId = query({
 		discordId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		return await getServerByDiscordIdShared(ctx, args.discordId);
+		const tracedEffect = Effect.gen(function* () {
+			return yield* Effect.withSpan("servers.getServerByDiscordId")(
+				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"discord.id": args.discordId,
+						"convex.function": "publicGetServerByDiscordId",
+					});
+					return yield* Effect.tryPromise({
+						try: () => getServerByDiscordIdShared(ctx, args.discordId),
+						catch: (error) => new Error(String(error)),
+					});
+				}),
+			);
+		});
+		return await Effect.provide(
+			tracedEffect,
+			createConvexOtelLayer("database"),
+		).pipe(Effect.runPromise);
 	},
 });
 
@@ -147,18 +166,43 @@ export const publicFindManyServersByDiscordId = query({
 		discordIds: v.array(v.string()),
 	},
 	handler: async (ctx, args) => {
-		if (args.discordIds.length === 0) return [];
-		// Use the index to query each Discord ID efficiently
-		// This is still faster than multiple runQuery calls from an action
-		const results = await Promise.all(
-			args.discordIds.map((discordId) =>
-				ctx.db
-					.query("servers")
-					.withIndex("by_discordId", (q) => q.eq("discordId", discordId))
-					.first(),
-			),
-		);
-		return results.filter((server) => server !== null);
+		const tracedEffect = Effect.gen(function* () {
+			return yield* Effect.withSpan("servers.findManyServersByDiscordId")(
+				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"convex.function": "publicFindManyServersByDiscordId",
+						"servers.count": args.discordIds.length,
+					});
+					if (args.discordIds.length === 0) return [];
+					// Use the index to query each Discord ID efficiently
+					// This is still faster than multiple runQuery calls from an action
+					return yield* Effect.withSpan(
+						"servers.findManyServersByDiscordId.executeQueries",
+					)(
+						Effect.tryPromise({
+							try: async () => {
+								const results = await Promise.all(
+									args.discordIds.map((discordId) =>
+										ctx.db
+											.query("servers")
+											.withIndex("by_discordId", (q) =>
+												q.eq("discordId", discordId),
+											)
+											.first(),
+									),
+								);
+								return results.filter((server) => server !== null);
+							},
+							catch: (error) => new Error(String(error)),
+						}),
+					);
+				}),
+			);
+		});
+		return await Effect.provide(
+			tracedEffect,
+			createConvexOtelLayer("database"),
+		).pipe(Effect.runPromise);
 	},
 });
 
@@ -167,10 +211,32 @@ export const publicGetBiggestServers = query({
 		take: v.number(),
 	},
 	handler: async (ctx, args) => {
-		const allServers = await ctx.db.query("servers").collect();
-		return allServers
-			.sort((a, b) => b.approximateMemberCount - a.approximateMemberCount)
-			.slice(0, args.take);
+		const tracedEffect = Effect.gen(function* () {
+			return yield* Effect.withSpan("servers.getBiggestServers")(
+				Effect.gen(function* () {
+					console.log("annotating span");
+					yield* Effect.annotateCurrentSpan({
+						"convex.function": "publicGetBiggestServers",
+						"servers.take": args.take,
+					});
+					return yield* Effect.tryPromise({
+						try: async () => {
+							const allServers = await ctx.db.query("servers").collect();
+							return allServers
+								.sort(
+									(a, b) => b.approximateMemberCount - a.approximateMemberCount,
+								)
+								.slice(0, args.take);
+						},
+						catch: (error) => new Error(String(error)),
+					});
+				}),
+			);
+		});
+		return await Effect.provide(
+			tracedEffect,
+			createConvexOtelLayer("database"),
+		).pipe(Effect.runPromise);
 	},
 });
 

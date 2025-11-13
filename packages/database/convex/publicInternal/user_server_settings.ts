@@ -1,3 +1,5 @@
+import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
+import { Effect } from "effect";
 import { type Infer, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
@@ -40,20 +42,87 @@ export const findManyUserServerSettings = publicInternalQuery({
 		),
 	},
 	handler: async (ctx, args) => {
-		if (args.settings.length === 0) return [];
+		const tracedEffect = Effect.gen(function* () {
+			return yield* Effect.withSpan(
+				"user_server_settings.findManyUserServerSettings",
+			)(
+				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"convex.function": "findManyUserServerSettings",
+						"settings.count": args.settings.length,
+					});
+					if (args.settings.length === 0) return [];
 
-		const results: UserServerSettings[] = [];
-		for (const setting of args.settings) {
-			const found = await ctx.db
-				.query("userServerSettings")
-				.withIndex("by_userId", (q) => q.eq("userId", setting.userId))
-				.filter((q) => q.eq(q.field("serverId"), setting.serverId))
-				.first();
-			if (found) {
-				results.push(found);
-			}
-		}
-		return results;
+					// Optimization: If all settings have the same userId, we can query once and filter
+					// This reduces N queries to 1 query + filtering
+					const uniqueUserIds = new Set(args.settings.map((s) => s.userId));
+					const serverIds = new Set(args.settings.map((s) => s.serverId));
+
+					yield* Effect.annotateCurrentSpan({
+						"settings.uniqueUsers": uniqueUserIds.size,
+						"settings.uniqueServers": serverIds.size,
+						"settings.optimized": uniqueUserIds.size === 1,
+					});
+
+					// If we have multiple userIds, fall back to the original approach
+					// Otherwise, optimize by querying all settings for the user and filtering
+					if (uniqueUserIds.size === 1) {
+						const userId = Array.from(uniqueUserIds)[0];
+						// Query all settings for this user
+						const allUserSettings = yield* Effect.withSpan(
+							"user_server_settings.findManyUserServerSettings.queryOptimized",
+						)(
+							Effect.tryPromise({
+								try: () =>
+									ctx.db
+										.query("userServerSettings")
+										.withIndex("by_userId", (q) => q.eq("userId", userId))
+										.collect(),
+								catch: (error) => new Error(String(error)),
+							}),
+						);
+
+						// Filter to only the serverIds we need
+						const filtered = allUserSettings.filter((setting) =>
+							serverIds.has(setting.serverId),
+						);
+						yield* Effect.annotateCurrentSpan({
+							"settings.found": filtered.length,
+						});
+						return filtered;
+					}
+
+					// Fallback: multiple userIds, use original approach
+					return yield* Effect.withSpan(
+						"user_server_settings.findManyUserServerSettings.queryFallback",
+					)(
+						Effect.tryPromise({
+							try: async () => {
+								const results: UserServerSettings[] = [];
+								for (const setting of args.settings) {
+									const found = await ctx.db
+										.query("userServerSettings")
+										.withIndex("by_userId", (q) =>
+											q.eq("userId", setting.userId),
+										)
+										.filter((q) => q.eq(q.field("serverId"), setting.serverId))
+										.first();
+									if (found) {
+										results.push(found);
+									}
+								}
+								return results;
+							},
+							catch: (error) => new Error(String(error)),
+						}),
+					);
+				}),
+			);
+		});
+		return await Effect.provide(
+			tracedEffect,
+			createConvexOtelLayer("database"),
+		).pipe(Effect.runPromise);
 	},
 });
 

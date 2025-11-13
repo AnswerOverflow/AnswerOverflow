@@ -136,6 +136,10 @@
         "@opentelemetry/sdk-trace-web": "^2.2.0",
         "effect": "catalog:",
       },
+      "devDependencies": {
+        "@effect/vitest": "^0.25.0",
+        "vitest": "catalog:",
+      },
     },
     "packages/typescript-config": {
       "name": "@packages/typescript-config",

@@ -1,5 +1,5 @@
 import { DatabaseLayer } from "@packages/database/database";
-import { createOtelLayer } from "@packages/observability/otel";
+import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Console, Effect, Layer, Logger, LogLevel } from "effect";
 import { Discord, DiscordLayer } from "./src/core/discord-service";
 import { ChannelParityLayer } from "./src/parity/channel-parity";

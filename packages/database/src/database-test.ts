@@ -1,4 +1,4 @@
-import { createOtelTestLayer } from "@packages/observability/otel";
+import { createOtelTestLayer } from "@packages/observability/effect-otel";
 import { Clock, ConfigProvider, Layer } from "effect";
 import * as Duration from "effect/Duration";
 import {

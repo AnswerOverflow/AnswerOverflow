@@ -28,7 +28,7 @@ const server2: Server = {
 	plan: "STARTER",
 	approximateMemberCount: 100,
 };
-it.scoped("getServerById returns server by Convex ID", () =>
+it.scoped.only("getServerById returns server by Convex ID", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 

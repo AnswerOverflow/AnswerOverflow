@@ -1,4 +1,6 @@
+import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { type Infer, v } from "convex/values";
+import { Effect } from "effect";
 import { type MutationCtx, type QueryCtx, query } from "../_generated/server";
 import type { channelSchema, channelSettingsSchema } from "../schema";
 import {
@@ -117,106 +119,196 @@ export const getChannelPageData = query({
 		channelDiscordId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Get server by Discord ID
-		const server = await ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.serverDiscordId))
-			.first();
+		const tracedEffect = Effect.gen(function* () {
+			return yield* Effect.withSpan("channels.getChannelPageData")(
+				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"discord.server.id": args.serverDiscordId,
+						"discord.channel.id": args.channelDiscordId,
+						"convex.function": "getChannelPageData",
+					});
 
-		if (!server) return null;
+					// Get server by Discord ID
+					const server = yield* Effect.withSpan(
+						"channels.getChannelPageData.getServer",
+					)(
+						Effect.gen(function* () {
+							yield* Effect.annotateCurrentSpan({
+								"discord.server.id": args.serverDiscordId,
+							});
+							return yield* Effect.tryPromise({
+								try: () =>
+									ctx.db
+										.query("servers")
+										.withIndex("by_discordId", (q) =>
+											q.eq("discordId", args.serverDiscordId),
+										)
+										.first(),
+								catch: (error) => new Error(String(error)),
+							});
+						}),
+					);
 
-		// Parallelize independent operations: get channel and all channels simultaneously
-		const [channel, allChannels, threads] = await Promise.all([
-			getChannelWithSettings(ctx, args.channelDiscordId),
-			ctx.db
-				.query("channels")
-				.withIndex("by_serverId", (q) => q.eq("serverId", server._id))
-				.collect(),
-			ctx.db
-				.query("channels")
-				.withIndex("by_parentId", (q) =>
-					q.eq("parentId", args.channelDiscordId),
-				)
-				.collect(),
-		]);
+					if (!server) return null;
 
-		if (!channel || channel.serverId !== server._id) return null;
+					// Parallelize independent operations: get channel and all channels simultaneously
+					const [channel, allChannels, threads] = yield* Effect.all([
+						Effect.withSpan("channels.getChannelPageData.getChannel")(
+							Effect.gen(function* () {
+								yield* Effect.annotateCurrentSpan({
+									"discord.channel.id": args.channelDiscordId,
+								});
+								return yield* Effect.tryPromise({
+									try: () => getChannelWithSettings(ctx, args.channelDiscordId),
+									catch: (error) => new Error(String(error)),
+								});
+							}),
+						),
+						Effect.withSpan("channels.getChannelPageData.getAllChannels")(
+							Effect.gen(function* () {
+								yield* Effect.annotateCurrentSpan({
+									"convex.server.id": server._id,
+								});
+								return yield* Effect.tryPromise({
+									try: () =>
+										ctx.db
+											.query("channels")
+											.withIndex("by_serverId", (q) =>
+												q.eq("serverId", server._id),
+											)
+											.collect(),
+									catch: (error) => new Error(String(error)),
+								});
+							}),
+						),
+						Effect.withSpan("channels.getChannelPageData.getThreads")(
+							Effect.gen(function* () {
+								yield* Effect.annotateCurrentSpan({
+									"discord.channel.id": args.channelDiscordId,
+								});
+								return yield* Effect.tryPromise({
+									try: () =>
+										ctx.db
+											.query("channels")
+											.withIndex("by_parentId", (q) =>
+												q.eq("parentId", args.channelDiscordId),
+											)
+											.collect(),
+									catch: (error) => new Error(String(error)),
+								});
+							}),
+						),
+					]);
 
-		// Filter to root channels with indexing enabled
-		const ROOT_CHANNEL_TYPES = [10, 11, 12, 13, 15] as const; // Forum, Announcement, Text, etc.
-		const rootChannels = allChannels.filter((c) =>
-			ROOT_CHANNEL_TYPES.includes(
-				c.type as (typeof ROOT_CHANNEL_TYPES)[number],
-			),
-		);
+					if (!channel || channel.serverId !== server._id) return null;
 
-		const channelIds = rootChannels.map((c) => c.id);
-		const allSettings = await Promise.all(
-			channelIds.map((id) =>
-				ctx.db
-					.query("channelSettings")
-					.withIndex("by_channelId", (q) => q.eq("channelId", id))
-					.first(),
-			),
-		);
+					// Filter to root channels with indexing enabled
+					const ROOT_CHANNEL_TYPES = [10, 11, 12, 13, 15] as const; // Forum, Announcement, Text, etc.
+					const rootChannels = allChannels.filter((c) =>
+						ROOT_CHANNEL_TYPES.includes(
+							c.type as (typeof ROOT_CHANNEL_TYPES)[number],
+						),
+					);
 
-		const indexedChannels = rootChannels
-			.map((c, idx) => ({
-				...c,
-				flags: allSettings[idx] ?? {
-					...DEFAULT_CHANNEL_SETTINGS,
-					channelId: c.id,
-				},
-			}))
-			.filter((c) => c.flags.indexingEnabled)
-			.sort((a, b) => {
-				// Sort: forums first, then announcements, then text
-				if (a.type === 15) return -1; // GuildForum
-				if (b.type === 15) return 1;
-				if (a.type === 5) return -1; // GuildAnnouncement
-				if (b.type === 5) return 1;
-				return 0;
-			})
-			.map((c) => {
-				// Return full channel object without flags
-				const { flags: _flags, ...channel } = c;
-				return channel;
-			});
+					const channelIds = rootChannels.map((c) => c.id);
+					const allSettings = yield* Effect.withSpan(
+						"channels.getChannelPageData.getChannelSettings",
+					)(
+						Effect.gen(function* () {
+							yield* Effect.annotateCurrentSpan({
+								"channels.count": channelIds.length,
+							});
+							return yield* Effect.all(
+								channelIds.map((id) =>
+									Effect.tryPromise({
+										try: () =>
+											ctx.db
+												.query("channelSettings")
+												.withIndex("by_channelId", (q) => q.eq("channelId", id))
+												.first(),
+										catch: (error) => new Error(String(error)),
+									}),
+								),
+							);
+						}),
+					);
 
-		// Sort threads by ID (newest first) and limit to 50
-		const sortedThreads = threads
-			.sort((a, b) => {
-				return b.id > a.id ? 1 : b.id < a.id ? -1 : 0;
-			})
-			.slice(0, 50);
+					const indexedChannels = rootChannels
+						.map((c, idx) => ({
+							...c,
+							flags: allSettings[idx] ?? {
+								...DEFAULT_CHANNEL_SETTINGS,
+								channelId: c.id,
+							},
+						}))
+						.filter((c) => c.flags.indexingEnabled)
+						.sort((a, b) => {
+							// Sort: forums first, then announcements, then text
+							if (a.type === 15) return -1; // GuildForum
+							if (b.type === 15) return 1;
+							if (a.type === 5) return -1; // GuildAnnouncement
+							if (b.type === 5) return 1;
+							return 0;
+						})
+						.map((c) => {
+							// Return full channel object without flags
+							const { flags: _flags, ...channel } = c;
+							return channel;
+						});
 
-		// Get first message for each thread in one batch query
-		const threadIds = sortedThreads.map((t) => t.id);
-		const firstMessages = await getFirstMessagesInChannels(ctx, threadIds);
+					// Sort threads by ID (newest first) and limit to 50
+					const sortedThreads = threads
+						.sort((a, b) => {
+							return b.id > a.id ? 1 : b.id < a.id ? -1 : 0;
+						})
+						.slice(0, 50);
 
-		// Combine threads with their first messages
-		const threadsWithMessages = sortedThreads
-			.map((thread) => ({
-				thread,
-				message: firstMessages[thread.id] ?? null,
-			}))
-			.filter(
-				(
-					tm,
-				): tm is {
-					thread: typeof tm.thread;
-					message: NonNullable<typeof tm.message>;
-				} => tm.message !== null,
+					// Get first message for each thread in one batch query
+					const threadIds = sortedThreads.map((t) => t.id);
+					const firstMessages = yield* Effect.withSpan(
+						"channels.getChannelPageData.getFirstMessages",
+					)(
+						Effect.gen(function* () {
+							yield* Effect.annotateCurrentSpan({
+								"threads.count": threadIds.length,
+							});
+							return yield* Effect.tryPromise({
+								try: () => getFirstMessagesInChannels(ctx, threadIds),
+								catch: (error) => new Error(String(error)),
+							});
+						}),
+					);
+
+					// Combine threads with their first messages
+					const threadsWithMessages = sortedThreads
+						.map((thread) => ({
+							thread,
+							message: firstMessages[thread.id] ?? null,
+						}))
+						.filter(
+							(
+								tm,
+							): tm is {
+								thread: typeof tm.thread;
+								message: NonNullable<typeof tm.message>;
+							} => tm.message !== null,
+						);
+
+					return {
+						server: {
+							...server,
+							channels: indexedChannels,
+						},
+						channels: indexedChannels,
+						selectedChannel: channel,
+						threads: threadsWithMessages,
+					};
+				}),
 			);
-
-		return {
-			server: {
-				...server,
-				channels: indexedChannels,
-			},
-			channels: indexedChannels,
-			selectedChannel: channel,
-			threads: threadsWithMessages,
-		};
+		});
+		return await Effect.provide(
+			tracedEffect,
+			createConvexOtelLayer("database"),
+		).pipe(Effect.runPromise);
 	},
 });

@@ -7,3 +7,6 @@
 [submodule ".context/github-search-agent"]
 	path = .context/github-search-agent
 	url = https://github.com/RhysSullivan/github-search-agent.git
+[submodule ".context/better-auth"]
+	path = .context/better-auth
+	url = https://github.com/get-convex/better-auth.git

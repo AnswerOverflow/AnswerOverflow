@@ -19,3 +19,12 @@ We also include the AnswerOverflow production codebase as a git submodule under 
   - Or navigate to `.context/AnswerOverflow` and pull changes: `cd .context/AnswerOverflow && git pull`
 
 When I say 'the old answer overflow' i am referring to this codebase
+
+## Better Auth
+
+We include the Better Auth repository as a git submodule under `.context/better-auth/`.
+
+- **Context**: This is the Better Auth library for Convex. Use it as a reference for authentication patterns, implementations, and best practices when working with authentication in Convex.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/better-auth`
+  - Or navigate to `.context/better-auth` and pull changes: `cd .context/better-auth && git pull`
