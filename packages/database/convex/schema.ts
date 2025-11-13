@@ -215,7 +215,8 @@ export default defineSchema({
 	channels: defineTable(channelSchema)
 		.index("by_serverId", ["serverId"])
 		.index("by_type", ["type"])
-		.index("by_discordChannelId", ["id"]),
+		.index("by_discordChannelId", ["id"])
+		.index("by_parentId", ["parentId"]),
 	channelSettings: defineTable(channelSettingsSchema).index("by_channelId", [
 		"channelId",
 	]),

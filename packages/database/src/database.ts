@@ -162,6 +162,22 @@ export const service = Effect.gen(function* () {
 			},
 		);
 
+	const getChannelPageData = (
+		serverDiscordId: string,
+		channelDiscordId: string,
+	) =>
+		watchQueryToLiveData(({ api }) => api.public.channels.getChannelPageData, {
+			serverDiscordId,
+			channelDiscordId,
+		}).pipe(
+			Effect.withSpan("get_channel_page_data", {
+				attributes: {
+					serverId: serverDiscordId,
+					channelId: channelDiscordId,
+				},
+			}),
+		);
+
 	const findChannelByInviteCode = (inviteCode: string) =>
 		watchQueryToLiveData(
 			({ api }) => api.publicInternal.channels.findChannelByInviteCode,
@@ -199,12 +215,11 @@ export const service = Effect.gen(function* () {
 			},
 		);
 
-	const findManyChannelsById = (ids: string[], includeMessageCount?: boolean) =>
+	const findManyChannelsById = (ids: string[]) =>
 		watchQueryToLiveData(
 			({ api }) => api.public.channels.findManyChannelsById,
 			{
 				ids,
-				includeMessageCount,
 			},
 		);
 
@@ -378,6 +393,22 @@ export const service = Effect.gen(function* () {
 				channelId,
 				limit: options?.limit,
 				after: options?.after,
+			},
+		);
+
+	const getFirstMessageInChannel = (channelId: string) =>
+		watchQueryToLiveData(
+			({ api }) => api.public.messages.getFirstMessageInChannel,
+			{
+				channelId,
+			},
+		);
+
+	const getFirstMessagesInChannels = (channelIds: string[]) =>
+		watchQueryToLiveData(
+			({ api }) => api.public.messages.getFirstMessagesInChannels,
+			{
+				channelIds,
 			},
 		);
 
@@ -922,6 +953,7 @@ export const service = Effect.gen(function* () {
 		},
 		channels: {
 			getChannelByDiscordId,
+			getChannelPageData,
 			findChannelByInviteCode,
 			findChannelByDiscordId,
 			findAllThreadsByParentId,
@@ -943,6 +975,8 @@ export const service = Effect.gen(function* () {
 			upsertManyMessages,
 			getMessageById,
 			findMessagesByChannelId,
+			getFirstMessageInChannel,
+			getFirstMessagesInChannels,
 			findManyMessagesById,
 			findMessagesByAuthorId,
 			findMessagesByServerId,

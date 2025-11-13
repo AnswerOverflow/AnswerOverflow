@@ -88,7 +88,7 @@ export const findAllThreadsByParentId = publicInternalQuery({
 	handler: async (ctx, args) => {
 		const query = ctx.db
 			.query("channels")
-			.filter((q) => q.eq(q.field("parentId"), args.parentId));
+			.withIndex("by_parentId", (q) => q.eq("parentId", args.parentId));
 
 		const channels = args.limit
 			? await query.take(args.limit)

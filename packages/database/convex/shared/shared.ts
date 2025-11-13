@@ -287,7 +287,7 @@ export async function getChannelWithSettings(
 ) {
 	const channel = await ctx.db
 		.query("channels")
-		.filter((q) => q.eq(q.field("id"), channelId))
+		.withIndex("by_discordChannelId", (q) => q.eq("id", channelId))
 		.first();
 
 	if (!channel) {
@@ -312,7 +312,7 @@ export async function deleteChannelInternalLogic(
 	// Delete all threads first
 	const threads = await ctx.db
 		.query("channels")
-		.filter((q) => q.eq(q.field("parentId"), id))
+		.withIndex("by_parentId", (q) => q.eq("parentId", id))
 		.collect();
 
 	for (const thread of threads) {
@@ -383,8 +383,84 @@ export async function findMessagesByChannelId(
 		query = query.filter((q) => q.gt(q.field("id"), after));
 	}
 
-	const messages = await query.collect();
-	return messages.slice(0, limit ?? 100);
+	const effectiveLimit = limit ?? 100;
+	const messages = await query.take(effectiveLimit);
+	return messages;
+}
+
+export async function getFirstMessageInChannel(
+	ctx: QueryCtx | MutationCtx,
+	channelId: string,
+): Promise<Message | null> {
+	// Fetch a small number of messages ordered by creation time (ascending)
+	// Then sort by ID to get the chronologically first message
+	// This is more efficient than fetching all messages
+	const query = ctx.db
+		.query("messages")
+		.withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+		.order("asc");
+
+	// Fetch only 5 messages - Discord snowflakes encode timestamps, so messages are typically
+	// created in chronological order. Even with edge cases, 5 should be sufficient to find the first one.
+	const messages = await query.take(5);
+
+	if (messages.length === 0) {
+		return null;
+	}
+
+	// Sort by ID (snowflake) to get the chronologically first message
+	// Lower ID = earlier message
+	const sortedMessages = messages.sort((a, b) => {
+		return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+	});
+
+	return sortedMessages[0] ?? null;
+}
+
+export async function getFirstMessagesInChannels(
+	ctx: QueryCtx | MutationCtx,
+	channelIds: string[],
+): Promise<Record<string, Message | null>> {
+	// Initialize results with null for all channels
+	const results: Record<string, Message | null> = {};
+	for (const channelId of channelIds) {
+		results[channelId] = null;
+	}
+
+	if (channelIds.length === 0) {
+		return results;
+	}
+
+	// Fetch up to 5 messages per channel in a single efficient batch
+	// We query each channel and take the first 5 messages, then find the minimum ID
+	const channelMessages = await Promise.all(
+		channelIds.map(async (channelId) => {
+			const query = ctx.db
+				.query("messages")
+				.withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+				.order("asc");
+
+			const messages = await query.take(5);
+			return { channelId, messages };
+		}),
+	);
+
+	// Find the first message (lowest ID) for each channel
+	for (const { channelId, messages } of channelMessages) {
+		if (messages.length === 0) {
+			results[channelId] = null;
+			continue;
+		}
+
+		// Sort by ID (snowflake) to get the chronologically first message
+		const sortedMessages = messages.sort((a, b) => {
+			return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+		});
+
+		results[channelId] = sortedMessages[0] ?? null;
+	}
+
+	return results;
 }
 
 export async function findAttachmentsByMessageId(

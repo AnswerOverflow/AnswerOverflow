@@ -14,6 +14,8 @@ import {
 	findSolutionsByQuestionId as findSolutionsByQuestionIdShared,
 	getChannelWithSettings,
 	getDiscordAccountById,
+	getFirstMessageInChannel as getFirstMessageInChannelShared,
+	getFirstMessagesInChannels as getFirstMessagesInChannelsShared,
 	getMessageById as getMessageByIdShared,
 	isThreadType,
 } from "../shared/shared";
@@ -72,6 +74,24 @@ export const findMessagesByChannelId = query({
 			args.limit,
 			args.after,
 		);
+	},
+});
+
+export const getFirstMessageInChannel = query({
+	args: {
+		channelId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		return await getFirstMessageInChannelShared(ctx, args.channelId);
+	},
+});
+
+export const getFirstMessagesInChannels = query({
+	args: {
+		channelIds: v.array(v.string()),
+	},
+	handler: async (ctx, args) => {
+		return await getFirstMessagesInChannelsShared(ctx, args.channelIds);
 	},
 });
 
