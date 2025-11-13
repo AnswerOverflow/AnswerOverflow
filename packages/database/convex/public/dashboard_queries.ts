@@ -1,4 +1,6 @@
 import { v } from "convex/values";
+import { asyncMap } from "convex-helpers";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { query } from "../_generated/server";
 import { authenticatedQuery } from "../shared/auth";
 import {
@@ -8,8 +10,6 @@ import {
 	isThreadType,
 	sortServersByBotAndRole,
 } from "../shared/shared";
-import { getOneFrom } from "convex-helpers/server/relationships";
-import { asyncMap } from "convex-helpers";
 
 // Query to get dashboard data for a server
 // Returns server with preferences and channels with settings

@@ -196,7 +196,7 @@ export const createConvexOtelLayer = (
 					attribute(key, value) {
 						attributes.set(key, value);
 					},
-					event(name, startTime, attributes) {
+					event(_name, _startTime, _attributes) {
 						// Events can be added to attributes or handled separately
 					},
 					addLinks(newLinks) {
@@ -212,7 +212,7 @@ export const createConvexOtelLayer = (
 
 				return span;
 			},
-			context(f, fiber) {
+			context(f, _fiber) {
 				return f();
 			},
 		});

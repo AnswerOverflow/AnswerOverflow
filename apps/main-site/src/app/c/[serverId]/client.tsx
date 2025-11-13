@@ -15,13 +15,13 @@ import {
 	AvatarImage,
 } from "@packages/ui/components/avatar";
 import { BlueLink } from "@packages/ui/components/blue-link";
-import { DiscordMarkdown } from "@packages/ui/markdown";
 import { LinkMessage } from "@packages/ui/components/link-message";
 import { MessagesSearchBar } from "@packages/ui/components/messages-search-bar";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
 import { useDebounce } from "@packages/ui/hooks/use-debounce";
 import { cn } from "@packages/ui/lib/utils";
+import { DiscordMarkdown } from "@packages/ui/markdown";
 import { useQuery } from "@tanstack/react-query";
 import { Hash, MessageSquare } from "lucide-react";
 import Link from "next/link";
