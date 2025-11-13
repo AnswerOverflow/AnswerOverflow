@@ -1,6 +1,6 @@
 ---
 description: Use convex-helpers/server/relationships for Convex relationship queries instead of manual withIndex patterns
-globs: **/*.ts
+globs: packages/database/convex/**/*.ts,packages/convex-test/convex/**/*.ts
 ---
 
 # Convex Relationship Helpers
