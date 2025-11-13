@@ -1,6 +1,6 @@
 import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
-import { Effect } from "effect";
 import { type Infer, v } from "convex/values";
+import { Effect } from "effect";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 import {
@@ -67,7 +67,11 @@ export const findManyUserServerSettings = publicInternalQuery({
 					// If we have multiple userIds, fall back to the original approach
 					// Otherwise, optimize by querying all settings for the user and filtering
 					if (uniqueUserIds.size === 1) {
-						const userId = Array.from(uniqueUserIds)[0];
+						const userIdArray = Array.from(uniqueUserIds);
+						if (userIdArray.length === 0) {
+							return [];
+						}
+						const userId: string = userIdArray[0]!;
 						// Query all settings for this user
 						const allUserSettings = yield* Effect.withSpan(
 							"user_server_settings.findManyUserServerSettings.queryOptimized",

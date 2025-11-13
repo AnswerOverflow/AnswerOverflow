@@ -11,7 +11,7 @@ import { api, components } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { authenticatedAction } from "./shared/auth";
 import { authComponent } from "./shared/betterAuth";
-import { getOrSetCache } from "./shared/cache";
+
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
@@ -160,15 +160,8 @@ export const getUserServers = authenticatedAction({
 			throw new Error("Discord token not found");
 		}
 
-		// Fetch user's Discord servers using the API client
-		// Cache the result for 5 minutes to reduce API calls
-		const cacheKey = `discord:guilds:${discordAccountId}`;
 		const client = await Effect.runPromise(discordApi(token));
-		const cachedGuildsEffect = getOrSetCache(
-			cacheKey,
-			() => client.listMyGuilds(),
-			300, // 5 minutes TTL
-		);
+		const cachedGuildsEffect = await client.listMyGuilds();
 		const discordGuilds = await Effect.runPromise(cachedGuildsEffect);
 
 		// Filter to servers user can manage (ManageGuild, Administrator, or Owner)

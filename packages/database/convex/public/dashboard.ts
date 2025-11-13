@@ -14,7 +14,7 @@ import { createConvexOtelLayer } from "@packages/observability/convex-effect-ote
 import { v } from "convex/values";
 import { Effect, type Tracer } from "effect";
 import { api, components, internal } from "../_generated/api";
-import type { Id } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import { type ActionCtx, internalAction } from "../_generated/server";
 import {
 	authenticatedAction,
@@ -258,7 +258,7 @@ export const getUserServers = authenticatedAction({
 								// Schedule sync in background (delay 0 = run immediately but async)
 								return ctx.scheduler.runAfter(
 									0,
-									api.public.dashboard.syncUserServerSettingsBackground,
+									internal.public.dashboard.syncUserServerSettingsBackground,
 									{
 										discordAccountId,
 										manageableServers: manageableServers.map((guild) => ({
@@ -529,7 +529,8 @@ export const syncUserServerSettingsBackground = internalAction({
 		),
 		aoServerIds: v.array(v.id("servers")),
 	},
-	handler: async (ctx, args) => {
+	returns: v.null(),
+	handler: async (ctx, args): Promise<null> => {
 		const { discordAccountId, manageableServers, aoServerIds } = args;
 
 		const tracedEffect = Effect.gen(function* () {
@@ -546,20 +547,20 @@ export const syncUserServerSettingsBackground = internalAction({
 					const backendAccessToken = getBackendAccessToken();
 
 					// Fetch AO servers by IDs (more efficient than by Discord ID)
-					const aoServers = yield* Effect.withSpan(
+					const aoServers: Array<Doc<"servers">> = yield* Effect.withSpan(
 						"dashboard.syncUserServerSettingsBackground.fetchAOServers",
 					)(
 						Effect.tryPromise({
 							try: () =>
 								ctx.runQuery(api.public.servers.publicFindManyServersById, {
 									ids: aoServerIds,
-								}),
+								}) as Promise<Array<Doc<"servers">>>,
 							catch: (error) => new Error(String(error)),
 						}),
 					);
 
 					// Create a map for quick lookup of servers by Discord ID
-					const aoServersByDiscordId = new Map(
+					const aoServersByDiscordId = new Map<string, Doc<"servers">>(
 						aoServers.map((server) => [server.discordId, server]),
 					);
 
@@ -592,28 +593,41 @@ export const syncUserServerSettingsBackground = internalAction({
 					});
 
 					// Batch fetch all existing user server settings
-					const existingSettingsArray = yield* Effect.withSpan(
-						"dashboard.syncUserServerSettingsBackground.fetchExisting",
-					)(
-						Effect.tryPromise({
-							try: () =>
-								ctx.runQuery(
-									api.publicInternal.user_server_settings
-										.findManyUserServerSettings,
-									{
-										backendAccessToken,
-										settings: serversToSync.map(({ aoServer }) => ({
-											userId: discordAccountId,
-											serverId: aoServer._id,
-										})),
-									},
-								),
-							catch: (error) => new Error(String(error)),
-						}),
-					);
+					type UserServerSettings = {
+						serverId: Id<"servers">;
+						userId: string;
+						permissions: number;
+						canPubliclyDisplayMessages: boolean;
+						messageIndexingDisabled: boolean;
+						apiKey: string | undefined;
+						apiCallsUsed: number;
+					};
+					const existingSettingsArray: Array<UserServerSettings> =
+						yield* Effect.withSpan(
+							"dashboard.syncUserServerSettingsBackground.fetchExisting",
+						)(
+							Effect.tryPromise({
+								try: () =>
+									ctx.runQuery(
+										api.publicInternal.user_server_settings
+											.findManyUserServerSettings,
+										{
+											backendAccessToken,
+											settings: serversToSync.map(({ aoServer }) => ({
+												userId: discordAccountId,
+												serverId: aoServer._id,
+											})),
+										},
+									) as Promise<Array<UserServerSettings>>,
+								catch: (error) => new Error(String(error)),
+							}),
+						);
 
 					// Create a map for quick lookup of settings by server ID
-					const existingSettingsByServerId = new Map(
+					const existingSettingsByServerId = new Map<
+						Id<"servers">,
+						UserServerSettings
+					>(
 						existingSettingsArray.map((settings) => [
 							settings.serverId,
 							settings,
@@ -668,37 +682,41 @@ export const syncUserServerSettingsBackground = internalAction({
 						yield* Effect.annotateCurrentSpan({
 							"mutations.count": settingsToUpdate.length,
 						});
-						return yield* Effect.withSpan(
+						yield* Effect.withSpan(
 							"dashboard.syncUserServerSettingsBackground.runMutations",
 						)(
 							Effect.all(
-								settingsToUpdate.map((settings, index) =>
-									Effect.withSpan(
-										`dashboard.syncUserServerSettingsBackground.mutation.${index}`,
-									)(
-										Effect.tryPromise({
-											try: () =>
-												ctx.runMutation(
-													api.publicInternal.user_server_settings
-														.upsertUserServerSettings,
-													{ backendAccessToken, settings },
-												),
-											catch: (error) => new Error(String(error)),
-										}),
-									),
+								settingsToUpdate.map(
+									(settings, index): Effect.Effect<void, Error, never> =>
+										Effect.withSpan(
+											`dashboard.syncUserServerSettingsBackground.mutation.${index}`,
+										)(
+											Effect.tryPromise({
+												try: () =>
+													ctx
+														.runMutation(
+															api.publicInternal.user_server_settings
+																.upsertUserServerSettings,
+															{ backendAccessToken, settings },
+														)
+														.then(() => undefined),
+												catch: (error) => new Error(String(error)),
+											}),
+										),
 								),
 							),
 						);
 					}
 
-					return [];
+					return undefined;
 				}),
 			);
 		});
 
-		return await Effect.provide(
-			tracedEffect,
-			createConvexOtelLayer("database"),
-		).pipe(Effect.runPromise);
+		await Effect.provide(tracedEffect, createConvexOtelLayer("database")).pipe(
+			Effect.runPromise,
+		);
+
+		return null;
 	},
 });
