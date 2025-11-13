@@ -5,89 +5,16 @@ globs: packages/database/convex/**/*.ts,packages/convex-test/convex/**/*.ts
 
 # Convex Function Architecture Rules
 
-## No Cross-Function Calls
+**No Cross-Function Calls:** NEVER use `ctx.runQuery`, `ctx.runMutation`, or `ctx.runAction` between Convex functions.
 
-**NEVER use `ctx.runQuery`, `ctx.runMutation`, or `ctx.runAction` to call other Convex functions from queries, mutations, or actions.**
+**Instead:**
+1. Extract shared logic to `shared.ts` functions
+2. Call shared functions directly from Convex functions
+3. Public API endpoints call shared functions internally
 
-Instead:
+**Exception:** Actions MUST use `ctx.runQuery` for database access (Convex limitation).
 
-1. Extract shared logic into regular functions in `shared.ts`
-2. Have Convex functions (queries/mutations/actions) call these shared functions directly
-3. If a query/mutation/action needs to exist as a standalone API endpoint, it should call the shared function internally
-
-### Example Pattern
-
-**❌ Avoid:**
-
-```typescript
-// In messages.ts
-export const someMutation = mutation({
-  handler: async (ctx, args) => {
-    const server = await ctx.runQuery(api.servers.publicGetServerByDiscordId, {
-      discordId,
-    });
-    // ...
-  },
-});
-```
-
-**✅ Prefer:**
-
-```typescript
-// In shared.ts
-export async function getServerByDiscordId(
-  ctx: QueryCtx | MutationCtx,
-  discordId: string
-) {
-  return await ctx.db
-    .query("servers")
-    .filter((q) => q.eq(q.field("discordId"), discordId))
-    .first();
-}
-
-// In servers.ts
-export const publicGetServerByDiscordId = query({
-  args: { discordId: v.string() },
-  handler: async (ctx, args) => {
-    return await getServerByDiscordId(ctx, args.discordId);
-  },
-});
-
-// In messages.ts
-export const someMutation = mutation({
-  handler: async (ctx, args) => {
-    const server = await getServerByDiscordId(ctx, discordId);
-    // ...
-  },
-});
-```
-
-## Exception: Actions Calling Queries
-
-Actions **MUST** use `ctx.runQuery` to call queries when they need database access, since actions cannot access `ctx.db` directly. This is a Convex limitation, not a violation of the pattern.
-
-```typescript
-// In dashboard.ts (an action)
-export const getUserServers = action({
-  handler: async (ctx) => {
-    // Actions can't access ctx.db, so they must use ctx.runQuery
-    const server = await ctx.runQuery(api.servers.publicGetServerByDiscordId, {
-      discordId,
-    });
-    // ...
-  },
-});
-```
-
-## Shared Functions Location
-
-- All shared functions should be in `shared.ts`
-- Shared functions should accept `QueryCtx | MutationCtx` (or `ActionCtx` for action-specific logic)
-- Shared functions should be pure database operations without Convex function wrappers
-
-## Benefits
-
-- Reduces coupling between Convex functions
-- Makes code more testable and reusable
-- Prevents unnecessary function call overhead
-- Improves code organization and maintainability
+**Shared Functions:**
+- Location: `shared.ts`
+- Accept: `QueryCtx | MutationCtx` (or `ActionCtx`)
+- Pure database ops, no Convex wrappers

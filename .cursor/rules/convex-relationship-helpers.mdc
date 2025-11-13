@@ -5,130 +5,14 @@ globs: packages/database/convex/**/*.ts,packages/convex-test/convex/**/*.ts
 
 # Convex Relationship Helpers
 
-Always use `convex-helpers/server/relationships` for relationship queries instead of manual `.withIndex(...).eq(...)` patterns. The package is already installed and provides cleaner, more maintainable code.
+Use `convex-helpers/server/relationships` instead of manual `.withIndex(...).eq(...)` patterns.
 
-## One-to-Many Relationships
+**One-to-Many:** `getManyFrom(ctx.db, "table", "field", value)` (not `.withIndex().collect()`)
+**One-to-One:** `getOneFrom(ctx.db, "table", "field", value)` (not `.withIndex().first()`)
+**Async Arrays:** `asyncMap()` (not `Promise.all`)
 
-**Prefer `getManyFrom`** over `.withIndex("by_X", (q) => q.eq("X", value)).collect()`
-
-### ❌ Avoid
-
-```typescript
-return await ctx.db
-  .query("attachments")
-  .withIndex("by_messageId", (q) => q.eq("messageId", messageId))
-  .collect();
-```
-
-### ✅ Prefer
-
-```typescript
-import { getManyFrom } from "convex-helpers/server/relationships";
-
-return await getManyFrom(ctx.db, "attachments", "messageId", messageId);
-```
-
-## One-to-One Relationships
-
-**Prefer `getOneFrom`** over `.withIndex("by_X", (q) => q.eq("X", value)).first()`
-
-### ❌ Avoid
-
-```typescript
-const preferences = await ctx.db
-  .query("serverPreferences")
-  .withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-  .first();
-```
-
-### ✅ Prefer
-
-```typescript
-import { getOneFrom } from "convex-helpers/server/relationships";
-
-const preferences = await getOneFrom(
-  ctx.db,
-  "serverPreferences",
-  "serverId",
-  args.serverId
-);
-```
-
-## Promise.all Patterns
-
-**Prefer `asyncMap`** from `convex-helpers` over `Promise.all` for async array operations
-
-### ❌ Avoid
-
-```typescript
-const authors = await Promise.all(
-  Array.from(authorIds).map((id) => getDiscordAccountById(ctx, id))
-);
-```
-
-### ✅ Prefer
-
-```typescript
-import { asyncMap } from "convex-helpers";
-
-const authors = await asyncMap(Array.from(authorIds), (id) =>
-  getDiscordAccountById(ctx, id)
-);
-```
-
-## Combining Helpers
-
-When fetching related data for multiple items, combine `asyncMap` with relationship helpers:
-
-### ❌ Avoid
-
-```typescript
-const channelSettings = await Promise.all(
-  channels.map((channel) =>
-    ctx.db
-      .query("channelSettings")
-      .withIndex("by_channelId", (q) => q.eq("channelId", channel.id))
-      .first()
-  )
-);
-```
-
-### ✅ Prefer
-
-```typescript
-import { getOneFrom } from "convex-helpers/server/relationships";
-import { asyncMap } from "convex-helpers";
-
-const channelSettings = await asyncMap(channels, (channel) =>
-  getOneFrom(ctx.db, "channelSettings", "channelId", channel.id)
-);
-```
-
-## Important Notes
-
-1. **Field Names, Not Index Names**: Helpers use field names (e.g., `"messageId"`), not index names (e.g., `"by_messageId"`). They automatically find the correct index.
-
-2. **Effect Integration**: Helpers work with standard Convex `ctx.db`. When using Effect, wrap helpers in `Effect.tryPromise`:
-
-```typescript
-const preferences = yield * Effect.tryPromise({
-  try: () => getOneFrom(ctx.db, "serverPreferences", "serverId", args.serverId),
-  catch: (error) => new Error(String(error)),
-});
-```
-
-3. **Custom Logic**: Use helpers where they fit, but keep custom logic (pagination, filtering, limits) where needed. Helpers support limits via options.
-
-4. **Compound Indexes**: `getOneFrom` works with single-field indexes. For compound lookups (e.g., `userId` + `serverId`), you may need custom logic or a separate index.
-
-## Benefits
-
-- **Less boilerplate**: ~30-40% reduction in relationship query code
-- **Better type inference**: Helpers provide improved type safety
-- **Consistency**: Standardized patterns across the codebase
-- **Maintainability**: Changes happen in one place
-
-## Resources
-
-- https://stack.convex.dev/functional-relationships-helpers
-- https://stack.convex.dev/relationship-structures-let-s-talk-about-schemas
+**Key Points:**
+- Use field names, not index names
+- Helpers auto-find correct indexes
+- Wrap in `Effect.tryPromise` for Effect code
+- Use custom logic for compound indexes

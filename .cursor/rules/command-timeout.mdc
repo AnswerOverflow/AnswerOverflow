@@ -2,10 +2,7 @@
 alwaysApply: true
 ---
 
-Run commands with a timeout to prevent getting stuck. Use a timeout appropriate for the command:
-
-- Default timeout: 60 seconds for most commands (install, build, test, etc.)
-- Longer operations: Use 120-300 seconds for commands that are expected to take longer (e.g., full test suites, large builds)
-- Quick operations: Use 30 seconds for simple commands (e.g., linting, type checking)
-
-When running terminal commands, always specify a timeout that matches the expected duration of the operation. This prevents commands from hanging indefinitely and allows for better error handling and recovery.
+Set appropriate command timeouts:
+- Default: 60s (install, build, test)
+- Long operations: 120-300s (full test suites, large builds)
+- Quick operations: 30s (linting, type checking)

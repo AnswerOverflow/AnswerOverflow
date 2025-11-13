@@ -2,10 +2,7 @@
 alwaysApply: true
 ---
 
-Always use `bun` instead of `npm`, `yarn`, or `pnpm` for package management and script execution.
-
-When running commands:
-- Use `bun install` instead of `npm install`, `yarn install`, or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>`, `yarn <script>`, or `pnpm run <script>`
-- Use `bun run <script>` for all package.json scripts (e.g., `bun run test`, `bun run build`) as bun reserves some commands like `build` and `test` for its own internal uses
-- Use `bunx` instead of `npx` for executing packages
+Always use `bun` for package management:
+- `bun install` (not npm/yarn/pnpm install)
+- `bun run <script>` (not npm run/yarn/pnpm run)
+- `bunx` (not npx)
