@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 import { publicInternalAction } from "../publicInternal/publicInternal";
@@ -34,10 +35,13 @@ export const updateAttachmentStorageId = internalMutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		const attachment = await ctx.db
-			.query("attachments")
-			.withIndex("by_attachmentId", (q) => q.eq("id", args.attachmentDiscordId))
-			.first();
+		const attachment = await getOneFrom(
+			ctx.db,
+			"attachments",
+			"by_attachmentId",
+			args.attachmentDiscordId,
+			"id",
+		);
 
 		if (attachment) {
 			await ctx.db.patch(attachment._id, {

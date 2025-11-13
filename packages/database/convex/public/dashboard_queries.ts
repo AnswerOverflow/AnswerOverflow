@@ -8,6 +8,8 @@ import {
 	isThreadType,
 	sortServersByBotAndRole,
 } from "../shared/shared";
+import { getOneFrom } from "convex-helpers/server/relationships";
+import { asyncMap } from "convex-helpers";
 
 // Query to get dashboard data for a server
 // Returns server with preferences and channels with settings
@@ -21,10 +23,12 @@ export const getDashboardData = query({
 		}
 
 		// Get server preferences directly from database
-		const preferences = await ctx.db
-			.query("serverPreferences")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.first();
+		const preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+		);
 
 		// Get channels for the server directly from database
 		// Filter out threads (only show root channels: text, announcement, forum)
@@ -38,13 +42,8 @@ export const getDashboardData = query({
 		);
 
 		// Get channel settings for all channels
-		const channelSettings = await Promise.all(
-			channels.map((channel) =>
-				ctx.db
-					.query("channelSettings")
-					.withIndex("by_channelId", (q) => q.eq("channelId", channel.id))
-					.first(),
-			),
+		const channelSettings = await asyncMap(channels, (channel) =>
+			getOneFrom(ctx.db, "channelSettings", "by_channelId", channel.id),
 		);
 
 		// Map channels to the format expected by the dashboard
@@ -117,23 +116,21 @@ export const getUserServersForDropdown = authenticatedQuery({
 			);
 		});
 
-		const servers = await Promise.all(
-			manageableSettings.map(async (setting) => {
-				const server = await ctx.db.get(setting.serverId);
-				if (!server) return null;
+		const servers = await asyncMap(manageableSettings, async (setting) => {
+			const server = await ctx.db.get(setting.serverId);
+			if (!server) return null;
 
-				const highestRole = getHighestRoleFromPermissions(setting.permissions);
+			const highestRole = getHighestRoleFromPermissions(setting.permissions);
 
-				return {
-					discordId: server.discordId,
-					name: server.name,
-					icon: server.icon ?? null,
-					highestRole,
-					hasBot: server.kickedTime === null || server.kickedTime === undefined,
-					aoServerId: server._id,
-				};
-			}),
-		);
+			return {
+				discordId: server.discordId,
+				name: server.name,
+				icon: server.icon ?? null,
+				highestRole,
+				hasBot: server.kickedTime === null || server.kickedTime === undefined,
+				aoServerId: server._id,
+			};
+		});
 
 		const validServers = servers.filter(
 			(server): server is NonNullable<(typeof servers)[0]> => server !== null,

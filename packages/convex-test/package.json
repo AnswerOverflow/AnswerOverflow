@@ -8,11 +8,11 @@
     ".": "./index.ts"
   },
   "scripts": {
-    "test": "vitest run --no-watch",
+    "test": "vitest run --no-watch --pool=forks",
     "test:watch": "vitest",
-    "test:once": "vitest run --no-watch",
+    "test:once": "vitest run --no-watch --pool=forks",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage --pool=forks",
     "typecheck": "tsc --noEmit"
   },
   "license": "Apache-2.0",

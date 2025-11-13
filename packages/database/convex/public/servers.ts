@@ -1,5 +1,7 @@
 import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { type Infer, v } from "convex/values";
+import { asyncMap } from "convex-helpers";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Effect } from "effect";
 import { query } from "../_generated/server";
 import type { channelSettingsSchema } from "../schema";
@@ -95,10 +97,7 @@ export const publicFindServerByAliasOrId = query({
 		if (byAlias) return byAlias;
 
 		// Try as Discord ID
-		return await ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.aliasOrId))
-			.first();
+		return await getOneFrom(ctx.db, "servers", "by_discordId", args.aliasOrId);
 	},
 });
 
@@ -152,7 +151,7 @@ export const publicFindManyServersById = query({
 	},
 	handler: async (ctx, args) => {
 		if (args.ids.length === 0) return [];
-		const results = await Promise.all(args.ids.map((id) => ctx.db.get(id)));
+		const results = await asyncMap(args.ids, (id) => ctx.db.get(id));
 		return results.filter((server) => server !== null);
 	},
 });
@@ -183,12 +182,7 @@ export const publicFindManyServersByDiscordId = query({
 							try: async () => {
 								const results = await Promise.all(
 									args.discordIds.map((discordId) =>
-										ctx.db
-											.query("servers")
-											.withIndex("by_discordId", (q) =>
-												q.eq("discordId", discordId),
-											)
-											.first(),
+										getOneFrom(ctx.db, "servers", "by_discordId", discordId),
 									),
 								);
 								return results.filter((server) => server !== null);
@@ -265,10 +259,7 @@ export const publicFindServerByIdWithChannels = query({
 		const channelIds = rootChannels.map((c) => c.id);
 		const allSettings = await Promise.all(
 			channelIds.map((id) =>
-				ctx.db
-					.query("channelSettings")
-					.withIndex("by_channelId", (q) => q.eq("channelId", id))
-					.first(),
+				getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
 			),
 		);
 

@@ -1,6 +1,7 @@
 import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { type Infer, v } from "convex/values";
 import { Effect } from "effect";
+import { getManyFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation } from "../_generated/server";
 import {
@@ -78,10 +79,12 @@ export const findManyUserServerSettings = publicInternalQuery({
 						)(
 							Effect.tryPromise({
 								try: () =>
-									ctx.db
-										.query("userServerSettings")
-										.withIndex("by_userId", (q) => q.eq("userId", userId))
-										.collect(),
+									getManyFrom(
+										ctx.db,
+										"userServerSettings",
+										"by_userId",
+										userId,
+									),
 								catch: (error) => new Error(String(error)),
 							}),
 						);
@@ -104,13 +107,15 @@ export const findManyUserServerSettings = publicInternalQuery({
 							try: async () => {
 								const results: UserServerSettings[] = [];
 								for (const setting of args.settings) {
-									const found = await ctx.db
-										.query("userServerSettings")
-										.withIndex("by_userId", (q) =>
-											q.eq("userId", setting.userId),
-										)
-										.filter((q) => q.eq(q.field("serverId"), setting.serverId))
-										.first();
+									const userSettings = await getManyFrom(
+										ctx.db,
+										"userServerSettings",
+										"by_userId",
+										setting.userId,
+									);
+									const found = userSettings.find(
+										(s) => s.serverId === setting.serverId,
+									);
 									if (found) {
 										results.push(found);
 									}
@@ -155,11 +160,15 @@ export const updateUserServerSettings = publicInternalMutation({
 			args.settings.userId,
 		);
 
-		const existing = await ctx.db
-			.query("userServerSettings")
-			.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
-			.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-			.first();
+		const userSettings = await getManyFrom(
+			ctx.db,
+			"userServerSettings",
+			"by_userId",
+			args.settings.userId,
+		);
+		const existing = userSettings.find(
+			(s) => s.serverId === args.settings.serverId,
+		);
 
 		if (!existing) {
 			throw new Error("UserServerSettings not found");
@@ -186,11 +195,15 @@ export const updateUserServerSettings = publicInternalMutation({
 			updatedSettings.messageIndexingDisabled &&
 			!existing.messageIndexingDisabled
 		) {
-			const messages = await ctx.db
-				.query("messages")
-				.withIndex("by_authorId", (q) => q.eq("authorId", args.settings.userId))
-				.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-				.collect();
+			const allMessages = await getManyFrom(
+				ctx.db,
+				"messages",
+				"by_authorId",
+				args.settings.userId,
+			);
+			const messages = allMessages.filter(
+				(m) => m.serverId === args.settings.serverId,
+			);
 
 			for (const message of messages) {
 				await deleteMessageInternalLogic(ctx, message.id);
@@ -199,11 +212,16 @@ export const updateUserServerSettings = publicInternalMutation({
 
 		await ctx.db.patch(existing._id, updatedSettings);
 
-		const updated = await ctx.db
-			.query("userServerSettings")
-			.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
-			.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-			.first();
+		const updatedUserSettings = await getManyFrom(
+			ctx.db,
+			"userServerSettings",
+			"by_userId",
+			args.settings.userId,
+			"userId",
+		);
+		const updated = updatedUserSettings.find(
+			(s) => s.serverId === args.settings.serverId,
+		);
 
 		if (!updated) {
 			throw new Error("Failed to update user server settings");
@@ -226,11 +244,15 @@ export const upsertUserServerSettings = publicInternalMutation({
 			args.settings.userId,
 		);
 
-		const existing = await ctx.db
-			.query("userServerSettings")
-			.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
-			.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-			.first();
+		const userSettings = await getManyFrom(
+			ctx.db,
+			"userServerSettings",
+			"by_userId",
+			args.settings.userId,
+		);
+		const existing = userSettings.find(
+			(s) => s.serverId === args.settings.serverId,
+		);
 
 		if (existing) {
 			// Update existing
@@ -243,13 +265,15 @@ export const upsertUserServerSettings = publicInternalMutation({
 				updatedSettings.messageIndexingDisabled &&
 				!existing.messageIndexingDisabled
 			) {
-				const messages = await ctx.db
-					.query("messages")
-					.withIndex("by_authorId", (q) =>
-						q.eq("authorId", args.settings.userId),
-					)
-					.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-					.collect();
+				const allMessages = await getManyFrom(
+					ctx.db,
+					"messages",
+					"by_authorId",
+					args.settings.userId,
+				);
+				const messages = allMessages.filter(
+					(m) => m.serverId === args.settings.serverId,
+				);
 
 				for (const message of messages) {
 					await deleteMessageInternalLogic(ctx, message.id);
@@ -257,11 +281,15 @@ export const upsertUserServerSettings = publicInternalMutation({
 			}
 
 			await ctx.db.patch(existing._id, updatedSettings);
-			const updated = await ctx.db
-				.query("userServerSettings")
-				.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
-				.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-				.first();
+			const updatedUserSettings = await getManyFrom(
+				ctx.db,
+				"userServerSettings",
+				"by_userId",
+				args.settings.userId,
+			);
+			const updated = updatedUserSettings.find(
+				(s) => s.serverId === args.settings.serverId,
+			);
 			if (!updated) {
 				throw new Error("Failed to update user server settings");
 			}
@@ -274,11 +302,15 @@ export const upsertUserServerSettings = publicInternalMutation({
 			}
 
 			await ctx.db.insert("userServerSettings", newSettings);
-			const created = await ctx.db
-				.query("userServerSettings")
-				.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
-				.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-				.first();
+			const createdUserSettings = await getManyFrom(
+				ctx.db,
+				"userServerSettings",
+				"by_userId",
+				args.settings.userId,
+			);
+			const created = createdUserSettings.find(
+				(s) => s.serverId === args.settings.serverId,
+			);
 			if (!created) {
 				throw new Error("Failed to create user server settings");
 			}
@@ -300,10 +332,12 @@ export const deleteUserServerSettingsByUserId = publicInternalMutation({
 			args.userId,
 		);
 
-		const settings = await ctx.db
-			.query("userServerSettings")
-			.withIndex("by_userId", (q) => q.eq("userId", args.userId))
-			.collect();
+		const settings = await getManyFrom(
+			ctx.db,
+			"userServerSettings",
+			"by_userId",
+			args.userId,
+		);
 
 		for (const setting of settings) {
 			await ctx.db.delete(setting._id);
@@ -328,11 +362,15 @@ export const upsertUserServerSettingsInternal = publicInternalMutation({
 		settings: userServerSettingsSchema,
 	},
 	handler: async (ctx, args) => {
-		const existing = await ctx.db
-			.query("userServerSettings")
-			.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
-			.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-			.first();
+		const userSettings = await getManyFrom(
+			ctx.db,
+			"userServerSettings",
+			"by_userId",
+			args.settings.userId,
+		);
+		const existing = userSettings.find(
+			(s) => s.serverId === args.settings.serverId,
+		);
 
 		if (existing) {
 			// Update existing
@@ -345,13 +383,15 @@ export const upsertUserServerSettingsInternal = publicInternalMutation({
 				updatedSettings.messageIndexingDisabled &&
 				!existing.messageIndexingDisabled
 			) {
-				const messages = await ctx.db
-					.query("messages")
-					.withIndex("by_authorId", (q) =>
-						q.eq("authorId", args.settings.userId),
-					)
-					.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-					.collect();
+				const allMessages = await getManyFrom(
+					ctx.db,
+					"messages",
+					"by_authorId",
+					args.settings.userId,
+				);
+				const messages = allMessages.filter(
+					(m) => m.serverId === args.settings.serverId,
+				);
 
 				for (const message of messages) {
 					await deleteMessageInternalLogic(ctx, message.id);
@@ -359,11 +399,15 @@ export const upsertUserServerSettingsInternal = publicInternalMutation({
 			}
 
 			await ctx.db.patch(existing._id, updatedSettings);
-			const updated = await ctx.db
-				.query("userServerSettings")
-				.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
-				.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-				.first();
+			const updatedUserSettings = await getManyFrom(
+				ctx.db,
+				"userServerSettings",
+				"by_userId",
+				args.settings.userId,
+			);
+			const updated = updatedUserSettings.find(
+				(s) => s.serverId === args.settings.serverId,
+			);
 			if (!updated) {
 				throw new Error("Failed to update user server settings");
 			}
@@ -376,11 +420,15 @@ export const upsertUserServerSettingsInternal = publicInternalMutation({
 			}
 
 			await ctx.db.insert("userServerSettings", newSettings);
-			const created = await ctx.db
-				.query("userServerSettings")
-				.withIndex("by_userId", (q) => q.eq("userId", args.settings.userId))
-				.filter((q) => q.eq(q.field("serverId"), args.settings.serverId))
-				.first();
+			const createdUserSettings = await getManyFrom(
+				ctx.db,
+				"userServerSettings",
+				"by_userId",
+				args.settings.userId,
+			);
+			const created = createdUserSettings.find(
+				(s) => s.serverId === args.settings.serverId,
+			);
 			if (!created) {
 				throw new Error("Failed to create user server settings");
 			}
@@ -416,10 +464,12 @@ export const countConsentingUsersInManyServers = publicInternalQuery({
 		const results: Array<{ serverId: Id<"servers">; count: number }> = [];
 
 		for (const serverId of args.serverIds) {
-			const settings = await ctx.db
-				.query("userServerSettings")
-				.withIndex("by_serverId", (q) => q.eq("serverId", serverId))
-				.collect();
+			const settings = await getManyFrom(
+				ctx.db,
+				"userServerSettings",
+				"by_serverId",
+				serverId,
+			);
 
 			const count = settings.filter(
 				(setting) => setting.canPubliclyDisplayMessages === true,

@@ -1,4 +1,6 @@
 import { type Infer, v } from "convex/values";
+import { asyncMap } from "convex-helpers";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import {
 	internalMutation,
 	type MutationCtx,
@@ -35,13 +37,8 @@ async function addSettingsToChannels(
 	if (channels.length === 0) return [];
 
 	const channelIds = channels.map((c) => c.id);
-	const allSettings = await Promise.all(
-		channelIds.map((id) =>
-			ctx.db
-				.query("channelSettings")
-				.withIndex("by_channelId", (q) => q.eq("channelId", id))
-				.first(),
-		),
+	const allSettings = await asyncMap(channelIds, (id) =>
+		getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
 	);
 
 	return channels.map((channel, idx) => ({
@@ -86,13 +83,15 @@ export const findAllThreadsByParentId = publicInternalQuery({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const query = ctx.db
-			.query("channels")
-			.withIndex("by_parentId", (q) => q.eq("parentId", args.parentId));
-
+		const allChannels = await getManyFrom(
+			ctx.db,
+			"channels",
+			"by_parentId",
+			args.parentId,
+		);
 		const channels = args.limit
-			? await query.take(args.limit)
-			: await query.collect();
+			? allChannels.slice(0, args.limit)
+			: allChannels;
 
 		return await addSettingsToChannels(ctx, channels);
 	},
@@ -103,10 +102,12 @@ export const findAllChannelsByServerId = publicInternalQuery({
 		serverId: v.id("servers"),
 	},
 	handler: async (ctx, args) => {
-		const channels = await ctx.db
-			.query("channels")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.collect();
+		const channels = await getManyFrom(
+			ctx.db,
+			"channels",
+			"by_serverId",
+			args.serverId,
+		);
 
 		return await addSettingsToChannels(ctx, channels);
 	},
@@ -136,10 +137,12 @@ export const findChannelsBeforeId = publicInternalQuery({
 	handler: async (ctx, args) => {
 		// Get all channels for the server and filter manually
 		// Convex doesn't support lt() on string IDs directly, so we'll collect and filter
-		const allChannels = await ctx.db
-			.query("channels")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.collect();
+		const allChannels = await getManyFrom(
+			ctx.db,
+			"channels",
+			"by_serverId",
+			args.serverId,
+		);
 
 		// Filter channels where id < args.id (comparing as strings)
 		const filtered = allChannels
@@ -162,10 +165,12 @@ export const createChannel = publicInternalMutation({
 
 		if (args.settings) {
 			// Check for existing settings to prevent duplicates
-			const existingSettings = await ctx.db
-				.query("channelSettings")
-				.withIndex("by_channelId", (q) => q.eq("channelId", args.channel.id))
-				.first();
+			const existingSettings = await getOneFrom(
+				ctx.db,
+				"channelSettings",
+				"by_channelId",
+				args.channel.id,
+			);
 
 			if (!existingSettings) {
 				await ctx.db.insert("channelSettings", args.settings);
@@ -194,10 +199,12 @@ export const createManyChannels = publicInternalMutation({
 			await ctx.db.insert("channels", item.channel);
 			if (item.settings) {
 				// Check for existing settings to prevent duplicates
-				const existingSettings = await ctx.db
-					.query("channelSettings")
-					.withIndex("by_channelId", (q) => q.eq("channelId", item.channel.id))
-					.first();
+				const existingSettings = await getOneFrom(
+					ctx.db,
+					"channelSettings",
+					"by_channelId",
+					item.channel.id,
+				);
 
 				if (!existingSettings) {
 					await ctx.db.insert("channelSettings", item.settings);
@@ -237,10 +244,12 @@ export const updateChannel = publicInternalMutation({
 		});
 
 		if (args.settings) {
-			const existingSettings = await ctx.db
-				.query("channelSettings")
-				.withIndex("by_channelId", (q) => q.eq("channelId", args.id))
-				.first();
+			const existingSettings = await getOneFrom(
+				ctx.db,
+				"channelSettings",
+				"by_channelId",
+				args.id,
+			);
 
 			if (existingSettings) {
 				await ctx.db.patch(existingSettings._id, args.settings);
@@ -332,10 +341,12 @@ export const upsertManyChannels = publicInternalMutation({
 
 				// Update settings if provided
 				if (item.settings) {
-					const existingSettings = await ctx.db
-						.query("channelSettings")
-						.withIndex("by_channelId", (q) => q.eq("channelId", item.create.id))
-						.first();
+					const existingSettings = await getOneFrom(
+						ctx.db,
+						"channelSettings",
+						"by_channelId",
+						item.create.id,
+					);
 
 					if (existingSettings) {
 						await ctx.db.patch(existingSettings._id, item.settings);
@@ -348,10 +359,12 @@ export const upsertManyChannels = publicInternalMutation({
 				await ctx.db.insert("channels", item.create);
 				if (item.settings) {
 					// Check for existing settings to prevent duplicates
-					const existingSettings = await ctx.db
-						.query("channelSettings")
-						.withIndex("by_channelId", (q) => q.eq("channelId", item.create.id))
-						.first();
+					const existingSettings = await getOneFrom(
+						ctx.db,
+						"channelSettings",
+						"by_channelId",
+						item.create.id,
+					);
 
 					if (!existingSettings) {
 						await ctx.db.insert("channelSettings", item.settings);
@@ -390,10 +403,12 @@ export const upsertChannelWithSettings = publicInternalMutation({
 
 		// Upsert settings if provided
 		if (args.settings) {
-			const existingSettings = await ctx.db
-				.query("channelSettings")
-				.withIndex("by_channelId", (q) => q.eq("channelId", args.channel.id))
-				.first();
+			const existingSettings = await getOneFrom(
+				ctx.db,
+				"channelSettings",
+				"by_channelId",
+				args.channel.id,
+			);
 
 			if (existingSettings) {
 				await ctx.db.patch(existingSettings._id, args.settings);

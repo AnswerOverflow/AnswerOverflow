@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { publicInternalMutation } from "../publicInternal/publicInternal";
 import { serverSchema } from "../schema";
 
@@ -8,10 +9,12 @@ export const createServerExternal = publicInternalMutation({
 	},
 	handler: async (ctx, args) => {
 		// Check if server already exists
-		const existing = await ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.data.discordId))
-			.first();
+		const existing = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.data.discordId,
+		);
 
 		if (existing) {
 			throw new Error(
@@ -44,10 +47,12 @@ export const upsertServerExternal = publicInternalMutation({
 		data: serverSchema,
 	},
 	handler: async (ctx, args) => {
-		const existing = await ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.data.discordId))
-			.first();
+		const existing = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.data.discordId,
+		);
 
 		if (existing) {
 			// Check if we need to clear kickedTime

@@ -1,5 +1,7 @@
 import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { type Infer, v } from "convex/values";
+import { asyncMap } from "convex-helpers";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Effect } from "effect";
 import { type MutationCtx, type QueryCtx, query } from "../_generated/server";
 import type { channelSchema, channelSettingsSchema } from "../schema";
@@ -28,13 +30,8 @@ async function addSettingsToChannels(
 	if (channels.length === 0) return [];
 
 	const channelIds = channels.map((c) => c.id);
-	const allSettings = await Promise.all(
-		channelIds.map((id) =>
-			ctx.db
-				.query("channelSettings")
-				.withIndex("by_channelId", (q) => q.eq("channelId", id))
-				.first(),
-		),
+	const allSettings = await asyncMap(channelIds, (id) =>
+		getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
 	);
 
 	return channels.map((channel, idx) => ({
@@ -62,13 +59,8 @@ export const findManyChannelsById = query({
 	handler: async (ctx, args) => {
 		if (args.ids.length === 0) return [];
 
-		const channels = await Promise.all(
-			args.ids.map((id) =>
-				ctx.db
-					.query("channels")
-					.withIndex("by_discordChannelId", (q) => q.eq("id", id))
-					.first(),
-			),
+		const channels = await asyncMap(args.ids, (id) =>
+			getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
 		);
 
 		const validChannels = channels.filter(
@@ -101,13 +93,15 @@ export const findAllThreadsByParentId = query({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const query = ctx.db
-			.query("channels")
-			.withIndex("by_parentId", (q) => q.eq("parentId", args.parentId));
-
+		const allChannels = await getManyFrom(
+			ctx.db,
+			"channels",
+			"by_parentId",
+			args.parentId,
+		);
 		const channels = args.limit
-			? await query.take(args.limit)
-			: await query.collect();
+			? allChannels.slice(0, args.limit)
+			: allChannels;
 
 		return await addSettingsToChannels(ctx, channels);
 	},
@@ -138,12 +132,12 @@ export const getChannelPageData = query({
 							});
 							return yield* Effect.tryPromise({
 								try: () =>
-									ctx.db
-										.query("servers")
-										.withIndex("by_discordId", (q) =>
-											q.eq("discordId", args.serverDiscordId),
-										)
-										.first(),
+									getOneFrom(
+										ctx.db,
+										"servers",
+										"by_discordId",
+										args.serverDiscordId,
+									),
 								catch: (error) => new Error(String(error)),
 							});
 						}),
@@ -171,12 +165,7 @@ export const getChannelPageData = query({
 								});
 								return yield* Effect.tryPromise({
 									try: () =>
-										ctx.db
-											.query("channels")
-											.withIndex("by_serverId", (q) =>
-												q.eq("serverId", server._id),
-											)
-											.collect(),
+										getManyFrom(ctx.db, "channels", "by_serverId", server._id),
 									catch: (error) => new Error(String(error)),
 								});
 							}),
@@ -188,12 +177,12 @@ export const getChannelPageData = query({
 								});
 								return yield* Effect.tryPromise({
 									try: () =>
-										ctx.db
-											.query("channels")
-											.withIndex("by_parentId", (q) =>
-												q.eq("parentId", args.channelDiscordId),
-											)
-											.collect(),
+										getManyFrom(
+											ctx.db,
+											"channels",
+											"by_parentId",
+											args.channelDiscordId,
+										),
 									catch: (error) => new Error(String(error)),
 								});
 							}),
@@ -222,10 +211,7 @@ export const getChannelPageData = query({
 								channelIds.map((id) =>
 									Effect.tryPromise({
 										try: () =>
-											ctx.db
-												.query("channelSettings")
-												.withIndex("by_channelId", (q) => q.eq("channelId", id))
-												.first(),
+											getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
 										catch: (error) => new Error(String(error)),
 									}),
 								),

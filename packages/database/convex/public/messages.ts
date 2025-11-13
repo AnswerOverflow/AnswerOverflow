@@ -1,4 +1,5 @@
 import { type Infer, v } from "convex/values";
+import { asyncMap } from "convex-helpers";
 import type { Id } from "../_generated/dataModel";
 import { type MutationCtx, type QueryCtx, query } from "../_generated/server";
 import type {
@@ -189,8 +190,8 @@ export const getMessagePageData = query({
 		const authorIds = new Set(messagesToShow.map((m) => m.authorId));
 
 		// Get all Discord accounts
-		const authors = await Promise.all(
-			Array.from(authorIds).map((id) => getDiscordAccountById(ctx, id)),
+		const authors = await asyncMap(Array.from(authorIds), (id) =>
+			getDiscordAccountById(ctx, id),
 		);
 
 		const authorMap = new Map(

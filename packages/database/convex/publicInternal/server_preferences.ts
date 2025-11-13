@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { internalMutation } from "../_generated/server";
 import {
 	publicInternalMutation,
@@ -20,10 +21,12 @@ export const getServerPreferencesByServerId = publicInternalQuery({
 		serverId: v.id("servers"),
 	},
 	handler: async (ctx, args) => {
-		const preferences = await ctx.db
-			.query("serverPreferences")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.first();
+		const preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+		);
 
 		return preferences ?? null;
 	},
@@ -220,10 +223,12 @@ export const deleteServerPreferences = publicInternalMutation({
 		serverId: v.id("servers"),
 	},
 	handler: async (ctx, args) => {
-		const preferences = await ctx.db
-			.query("serverPreferences")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.first();
+		const preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+		);
 
 		if (preferences) {
 			// Remove reference from server
@@ -446,10 +451,12 @@ export const deleteServerPreferencesInternal = internalMutation({
 		serverId: v.id("servers"),
 	},
 	handler: async (ctx, args) => {
-		const preferences = await ctx.db
-			.query("serverPreferences")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.first();
+		const preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+		);
 
 		if (preferences) {
 			// Remove reference from server

@@ -1,4 +1,6 @@
 import { type Infer, v } from "convex/values";
+import { asyncMap } from "convex-helpers";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
 import {
 	internalMutation,
@@ -75,10 +77,13 @@ export const upsertMessage = publicInternalMutation({
 		const messageData = args.message;
 
 		// Upsert message - use index for efficient lookup
-		const existing = await ctx.db
-			.query("messages")
-			.withIndex("by_messageId", (q) => q.eq("id", messageData.id))
-			.first();
+		const existing = await getOneFrom(
+			ctx.db,
+			"messages",
+			"by_messageId",
+			messageData.id,
+			"id",
+		);
 
 		if (existing) {
 			await ctx.db.replace(existing._id, messageData);
@@ -89,10 +94,12 @@ export const upsertMessage = publicInternalMutation({
 		// Handle attachments
 		if (attachments !== undefined) {
 			// Delete existing attachments
-			const existingAttachments = await ctx.db
-				.query("attachments")
-				.withIndex("by_messageId", (q) => q.eq("messageId", messageData.id))
-				.collect();
+			const existingAttachments = await getManyFrom(
+				ctx.db,
+				"attachments",
+				"by_messageId",
+				messageData.id,
+			);
 
 			for (const attachment of existingAttachments) {
 				await ctx.db.delete(attachment._id);
@@ -109,10 +116,12 @@ export const upsertMessage = publicInternalMutation({
 		// Handle reactions
 		if (reactions !== undefined) {
 			// Delete existing reactions
-			const existingReactions = await ctx.db
-				.query("reactions")
-				.withIndex("by_messageId", (q) => q.eq("messageId", messageData.id))
-				.collect();
+			const existingReactions = await getManyFrom(
+				ctx.db,
+				"reactions",
+				"by_messageId",
+				messageData.id,
+			);
 
 			for (const reaction of existingReactions) {
 				await ctx.db.delete(reaction._id);
@@ -180,8 +189,8 @@ export const upsertManyMessages = publicInternalMutation({
 		// Check ignored accounts and indexing disabled if needed
 		if (!args.ignoreChecks) {
 			const authorIds = new Set(args.messages.map((m) => m.message.authorId));
-			const ignoredAccounts = await Promise.all(
-				Array.from(authorIds).map((id) => isIgnoredAccount(ctx, id)),
+			const ignoredAccounts = await asyncMap(Array.from(authorIds), (id) =>
+				isIgnoredAccount(ctx, id),
 			);
 
 			const ignoredAccountIds = new Set(
@@ -279,10 +288,12 @@ export const findMessagesByServerId = publicInternalQuery({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const messages = await ctx.db
-			.query("messages")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.collect();
+		const messages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_serverId",
+			args.serverId,
+		);
 
 		return messages.slice(0, args.limit ?? 100);
 	},
@@ -294,12 +305,12 @@ export const findMessagesByParentChannelId = publicInternalQuery({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const messages = await ctx.db
-			.query("messages")
-			.withIndex("by_parentChannelId", (q) =>
-				q.eq("parentChannelId", args.parentChannelId),
-			)
-			.collect();
+		const messages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_parentChannelId",
+			args.parentChannelId,
+		);
 
 		return messages.slice(0, args.limit ?? 100);
 	},
@@ -310,10 +321,12 @@ export const findLatestMessageInChannel = publicInternalQuery({
 		channelId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const messages = await ctx.db
-			.query("messages")
-			.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
-			.collect();
+		const messages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_channelId",
+			args.channelId,
+		);
 
 		if (messages.length === 0) return null;
 
@@ -332,18 +345,20 @@ export const findLatestMessageInChannelAndThreads = publicInternalQuery({
 	},
 	handler: async (ctx, args) => {
 		// Get messages in the channel
-		const channelMessages = await ctx.db
-			.query("messages")
-			.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
-			.collect();
+		const channelMessages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_channelId",
+			args.channelId,
+		);
 
 		// Get messages in threads (where parentChannelId matches)
-		const threadMessages = await ctx.db
-			.query("messages")
-			.withIndex("by_parentChannelId", (q) =>
-				q.eq("parentChannelId", args.channelId),
-			)
-			.collect();
+		const threadMessages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_parentChannelId",
+			args.channelId,
+		);
 
 		// Combine and find latest
 		const allMessages = [...channelMessages, ...threadMessages];
@@ -393,10 +408,12 @@ export const countMessagesInChannel = publicInternalQuery({
 		channelId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const messages = await ctx.db
-			.query("messages")
-			.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
-			.collect();
+		const messages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_channelId",
+			args.channelId,
+		);
 
 		return messages.length;
 	},
@@ -453,10 +470,12 @@ export const getTopQuestionSolversByServerId = publicInternalQuery({
 	},
 	handler: async (ctx, args) => {
 		// Get all messages in the server
-		const allMessages = await ctx.db
-			.query("messages")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.collect();
+		const allMessages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_serverId",
+			args.serverId,
+		);
 
 		// Filter to only solutions (messages with questionId)
 		const solutions = allMessages.filter((msg) => msg.questionId !== undefined);
@@ -505,10 +524,12 @@ export const deleteManyMessagesByChannelId = publicInternalMutation({
 		channelId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const messages = await ctx.db
-			.query("messages")
-			.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
-			.collect();
+		const messages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_channelId",
+			args.channelId,
+		);
 
 		for (const message of messages) {
 			await deleteMessageInternalLogic(ctx, message.id);
@@ -523,10 +544,12 @@ export const deleteManyMessagesByUserId = publicInternalMutation({
 		userId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const messages = await ctx.db
-			.query("messages")
-			.withIndex("by_authorId", (q) => q.eq("authorId", args.userId))
-			.collect();
+		const messages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_authorId",
+			args.userId,
+		);
 
 		for (const message of messages) {
 			await deleteMessageInternalLogic(ctx, message.id);

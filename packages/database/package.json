@@ -15,7 +15,7 @@
 		"dev": "convex dev",
 		"typecheck": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
 		"clean": "rm -rf node_modules .turbo",
-		"test": "vitest run --no-watch",
+		"test": "vitest run --no-watch --pool=forks",
 		"test:watch": "vitest"
 	},
 	"dependencies": {

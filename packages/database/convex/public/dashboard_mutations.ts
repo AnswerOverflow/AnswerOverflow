@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { assertCanEditServer, authenticatedMutation } from "../shared/auth";
 import type { AuthorizedUser, CanEditServer } from "../shared/permissions";
 import { validateCustomDomain } from "../shared/shared";
@@ -215,10 +216,12 @@ export const updateCustomDomain = authenticatedMutation({
 		}
 
 		// Get or create server preferences
-		let preferences = await ctx.db
-			.query("serverPreferences")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.first();
+		let preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+		);
 
 		if (!preferences) {
 			// Create new preferences with custom domain

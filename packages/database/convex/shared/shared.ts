@@ -1,7 +1,10 @@
 import type { Infer } from "convex/values";
+import { asyncMap } from "convex-helpers";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
 import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
+import { getOneFrom } from "convex-helpers/server/relationships";
+import { getManyFrom } from "convex-helpers/server/relationships";
 
 type Message = Infer<typeof messageSchema>;
 type Attachment = Infer<typeof attachmentSchema>;
@@ -294,10 +297,12 @@ export async function getChannelWithSettings(
 		return null;
 	}
 
-	const settings = await ctx.db
-		.query("channelSettings")
-		.withIndex("by_channelId", (q) => q.eq("channelId", channelId))
-		.first();
+	const settings = await getOneFrom(
+		ctx.db,
+		"channelSettings",
+		"by_channelId",
+		channelId,
+	);
 
 	return {
 		...channel,
@@ -375,42 +380,44 @@ export async function findMessagesByChannelId(
 	limit?: number,
 	after?: string,
 ) {
-	let query = ctx.db
-		.query("messages")
-		.withIndex("by_channelId", (q) => q.eq("channelId", channelId));
+	const allMessages = await getManyFrom(
+		ctx.db,
+		"messages",
+		"by_channelId",
+		channelId,
+		"channelId",
+	);
 
+	let messages = allMessages;
 	if (after) {
-		query = query.filter((q) => q.gt(q.field("id"), after));
+		messages = messages.filter((msg) => msg.id > after);
 	}
 
 	const effectiveLimit = limit ?? 100;
-	const messages = await query.take(effectiveLimit);
-	return messages;
+	return messages.slice(0, effectiveLimit);
 }
 
 export async function getFirstMessageInChannel(
 	ctx: QueryCtx | MutationCtx,
 	channelId: string,
 ): Promise<Message | null> {
-	// Fetch a small number of messages ordered by creation time (ascending)
+	// Fetch messages for the channel
 	// Then sort by ID to get the chronologically first message
-	// This is more efficient than fetching all messages
-	const query = ctx.db
-		.query("messages")
-		.withIndex("by_channelId", (q) => q.eq("channelId", channelId))
-		.order("asc");
+	const allMessages = await getManyFrom(
+		ctx.db,
+		"messages",
+		"by_channelId",
+		channelId,
+		"channelId",
+	);
 
-	// Fetch only 5 messages - Discord snowflakes encode timestamps, so messages are typically
-	// created in chronological order. Even with edge cases, 5 should be sufficient to find the first one.
-	const messages = await query.take(5);
-
-	if (messages.length === 0) {
+	if (allMessages.length === 0) {
 		return null;
 	}
 
 	// Sort by ID (snowflake) to get the chronologically first message
 	// Lower ID = earlier message
-	const sortedMessages = messages.sort((a, b) => {
+	const sortedMessages = allMessages.sort((a, b) => {
 		return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 	});
 
@@ -431,16 +438,16 @@ export async function getFirstMessagesInChannels(
 		return results;
 	}
 
-	// Fetch up to 5 messages per channel in a single efficient batch
-	// We query each channel and take the first 5 messages, then find the minimum ID
+	// Fetch messages for each channel in a single efficient batch
 	const channelMessages = await Promise.all(
 		channelIds.map(async (channelId) => {
-			const query = ctx.db
-				.query("messages")
-				.withIndex("by_channelId", (q) => q.eq("channelId", channelId))
-				.order("asc");
-
-			const messages = await query.take(5);
+			const messages = await getManyFrom(
+				ctx.db,
+				"messages",
+				"by_channelId",
+				channelId,
+				"channelId",
+			);
 			return { channelId, messages };
 		}),
 	);
@@ -467,20 +474,26 @@ export async function findAttachmentsByMessageId(
 	ctx: QueryCtx | MutationCtx,
 	messageId: string,
 ) {
-	return await ctx.db
-		.query("attachments")
-		.withIndex("by_messageId", (q) => q.eq("messageId", messageId))
-		.collect();
+	return await getManyFrom(
+		ctx.db,
+		"attachments",
+		"by_messageId",
+		messageId,
+		"messageId",
+	);
 }
 
 export async function findReactionsByMessageId(
 	ctx: QueryCtx | MutationCtx,
 	messageId: string,
 ) {
-	return await ctx.db
-		.query("reactions")
-		.withIndex("by_messageId", (q) => q.eq("messageId", messageId))
-		.collect();
+	return await getManyFrom(
+		ctx.db,
+		"reactions",
+		"by_messageId",
+		messageId,
+		"messageId",
+	);
 }
 
 export async function findSolutionsByQuestionId(
@@ -488,11 +501,13 @@ export async function findSolutionsByQuestionId(
 	questionId: string,
 	limit?: number,
 ) {
-	const messages = await ctx.db
-		.query("messages")
-		.withIndex("by_questionId", (q) => q.eq("questionId", questionId))
-		.collect();
-
+	const messages = await getManyFrom(
+		ctx.db,
+		"messages",
+		"by_questionId",
+		questionId,
+		"questionId",
+	);
 	return messages.slice(0, limit ?? 100);
 }
 
@@ -501,20 +516,26 @@ export async function deleteMessageInternalLogic(
 	id: string,
 ): Promise<void> {
 	// Delete attachments
-	const attachments = await ctx.db
-		.query("attachments")
-		.withIndex("by_messageId", (q) => q.eq("messageId", id))
-		.collect();
+	const attachments = await getManyFrom(
+		ctx.db,
+		"attachments",
+		"by_messageId",
+		id,
+		"messageId",
+	);
 
 	for (const attachment of attachments) {
 		await ctx.db.delete(attachment._id);
 	}
 
 	// Delete reactions
-	const reactions = await ctx.db
-		.query("reactions")
-		.withIndex("by_messageId", (q) => q.eq("messageId", id))
-		.collect();
+	const reactions = await getManyFrom(
+		ctx.db,
+		"reactions",
+		"by_messageId",
+		id,
+		"messageId",
+	);
 
 	for (const reaction of reactions) {
 		await ctx.db.delete(reaction._id);

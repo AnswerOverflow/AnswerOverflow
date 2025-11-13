@@ -1,4 +1,5 @@
 import { type Infer, v } from "convex/values";
+import { getManyFrom } from "convex-helpers/server/relationships";
 import {
 	publicInternalMutation,
 	publicInternalQuery,
@@ -351,10 +352,12 @@ export const deleteDiscordAccount = publicInternalMutation({
 		await upsertIgnoredDiscordAccountInternalLogic(ctx, args.id);
 
 		// Delete messages by user id
-		const messages = await ctx.db
-			.query("messages")
-			.withIndex("by_authorId", (q) => q.eq("authorId", args.id))
-			.collect();
+		const messages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_authorId",
+			args.id,
+		);
 
 		for (const message of messages) {
 			await deleteMessageInternalLogic(ctx, message.id);

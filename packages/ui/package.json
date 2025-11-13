@@ -6,7 +6,7 @@
 	"scripts": {
 		"clean": "rm -rf node_modules dist build .turbo",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
-		"test": "vitest run --passWithNoTests",
+		"test": "vitest run --passWithNoTests --pool=forks",
 		"test:watch": "vitest --watch"
 	},
 	"dependencies": {
