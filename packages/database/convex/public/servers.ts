@@ -166,33 +166,29 @@ export const publicFindManyServersByDiscordId = query({
 	},
 	handler: async (ctx, args) => {
 		const tracedEffect = Effect.gen(function* () {
-			return yield* Effect.withSpan("servers.findManyServersByDiscordId")(
-				Effect.gen(function* () {
-					yield* Effect.annotateCurrentSpan({
-						"convex.function": "publicFindManyServersByDiscordId",
-						"servers.count": args.discordIds.length,
-					});
-					if (args.discordIds.length === 0) return [];
-					// Use the index to query each Discord ID efficiently
-					// This is still faster than multiple runQuery calls from an action
-					return yield* Effect.withSpan(
-						"servers.findManyServersByDiscordId.executeQueries",
-					)(
-						Effect.tryPromise({
-							try: async () => {
-								const results = await Promise.all(
-									args.discordIds.map((discordId) =>
-										getOneFrom(ctx.db, "servers", "by_discordId", discordId),
-									),
-								);
-								return results.filter((server) => server !== null);
-							},
-							catch: (error) => new Error(String(error)),
-						}),
-					);
-				}),
+			yield* Effect.annotateCurrentSpan({
+				"convex.function": "publicFindManyServersByDiscordId",
+				"servers.count": args.discordIds.length,
+			});
+			if (args.discordIds.length === 0) return [];
+			// Use the index to query each Discord ID efficiently
+			// Execute queries in parallel using Effect.all for better Effect integration
+			const results = yield* Effect.all(
+				args.discordIds.map((discordId) =>
+					Effect.promise(() =>
+						getOneFrom(ctx.db, "servers", "by_discordId", discordId),
+					),
+				),
+				{ concurrency: "unbounded" },
 			);
-		});
+			return results.filter((server) => server !== null);
+		}).pipe(
+			Effect.withSpan("servers.findManyServersByDiscordId", {
+				attributes: {
+					"convex.function": "publicFindManyServersByDiscordId",
+				},
+			}),
+		);
 		return await Effect.provide(
 			tracedEffect,
 			createConvexOtelLayer("database"),
