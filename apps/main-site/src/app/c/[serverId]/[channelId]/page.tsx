@@ -59,9 +59,19 @@ export default async function ChannelPage(props: Props) {
 
 		// Get threads for this channel (forum posts)
 		const threadsLiveData = yield* Effect.scoped(
-			database.channels.publicFindAllThreadsByParentId(params.channelId, 50),
+			database.channels.publicFindAllThreadsByParentId(params.channelId),
 		);
-		const threads = threadsLiveData?.data ?? [];
+		let threads = threadsLiveData?.data ?? [];
+
+		// Sort threads by creation time (newest threads first)
+		// Use thread ID (snowflake) as a proxy for creation time since Discord snowflakes encode timestamp
+		threads = threads.sort((a, b) => {
+			// Higher snowflake ID = newer thread, so sort descending
+			return b.id > a.id ? 1 : b.id < a.id ? -1 : 0;
+		});
+
+		// Limit to 50 newest threads after sorting
+		threads = threads.slice(0, 50);
 
 		// Get first message for each thread
 		const threadMessages = yield* Effect.all(
@@ -69,12 +79,19 @@ export default async function ChannelPage(props: Props) {
 				Effect.gen(function* () {
 					const messageLiveData = yield* Effect.scoped(
 						database.messages.findMessagesByChannelId(thread.id, {
-							limit: 1,
+							limit: 100, // Get more messages to ensure we find the first one
 						}),
 					);
+					const messages = messageLiveData?.data ?? [];
+					// Sort by message ID (snowflake) to get the chronologically first message
+					const sortedMessages = messages.sort((a, b) => {
+						// Compare as strings since snowflakes are strings
+						// Lower ID = earlier message
+						return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+					});
 					return {
 						thread,
-						message: messageLiveData?.data?.[0] ?? null,
+						message: sortedMessages[0] ?? null,
 					};
 				}),
 			),

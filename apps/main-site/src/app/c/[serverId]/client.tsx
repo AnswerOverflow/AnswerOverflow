@@ -9,6 +9,13 @@ import type {
 	Message,
 	Server,
 } from "@packages/database/convex/schema";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@packages/ui/components/avatar";
+import { BlueLink } from "@packages/ui/components/blue-link";
+import { DiscordMarkdown } from "@packages/ui/markdown";
 import { LinkMessage } from "@packages/ui/components/link-message";
 import { MessagesSearchBar } from "@packages/ui/components/messages-search-bar";
 import { ServerIcon } from "@packages/ui/components/server-icon";
@@ -40,6 +47,60 @@ type SearchResult = {
 	score: number;
 };
 
+// Helper to get Discord avatar URL
+function getDiscordAvatarUrl(
+	userId: string,
+	avatar?: string,
+	size = 40,
+): string {
+	if (avatar) {
+		return `https://cdn.discordapp.com/avatars/${userId}/${avatar}.webp?size=${size}`;
+	}
+	// Default avatar based on user ID
+	const defaultAvatar = (parseInt(userId) % 5).toString();
+	return `/discord/${defaultAvatar}.png`;
+}
+
+// Helper to parse Discord snowflake ID to date
+function getSnowflakeDate(snowflake: string): Date {
+	const timestamp = BigInt(snowflake) >> 22n;
+	return new Date(Number(timestamp) + 1420070400000);
+}
+
+// Helper to format relative time
+function formatRelativeTime(date: Date): string {
+	const now = new Date();
+	const diffMs = now.getTime() - date.getTime();
+	const diffSecs = Math.floor(diffMs / 1000);
+	const diffMins = Math.floor(diffSecs / 60);
+	const diffHours = Math.floor(diffMins / 60);
+	const diffDays = Math.floor(diffHours / 24);
+	const diffWeeks = Math.floor(diffDays / 7);
+	const diffMonths = Math.floor(diffDays / 30);
+	const diffYears = Math.floor(diffDays / 365);
+
+	if (diffSecs < 60) return "just now";
+	if (diffMins < 60) return `${diffMins}m ago`;
+	if (diffHours < 24) return `${diffHours}h ago`;
+	if (diffDays < 7) return `${diffDays}d ago`;
+	if (diffWeeks < 4) return `${diffWeeks}w ago`;
+	if (diffMonths < 12) return `${diffMonths}mo ago`;
+	if (diffYears >= 1) {
+		// For very old messages, show formatted date
+		return date.toLocaleDateString(undefined, {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+		});
+	}
+	// Fallback (shouldn't reach here, but just in case)
+	return date.toLocaleDateString(undefined, {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
+}
+
 export function ChannelPageClient(props: {
 	server: ServerWithChannels;
 	channels: ChannelWithName[];
@@ -69,8 +130,8 @@ export function ChannelPageClient(props: {
 		enabled: hasSearchQuery,
 	});
 
-	// Get unique IDs for batch fetching search results
-	const authorIds = useMemo(
+	// Get unique author IDs for both search results and threads
+	const searchAuthorIds = useMemo(
 		() =>
 			searchResults
 				? [
@@ -81,6 +142,15 @@ export function ChannelPageClient(props: {
 				: [],
 		[searchResults],
 	);
+	const threadAuthorIds = useMemo(
+		() => (threads ? [...new Set(threads.map((t) => t.message.authorId))] : []),
+		[threads],
+	);
+	const allAuthorIds = useMemo(
+		() => [...new Set([...searchAuthorIds, ...threadAuthorIds])],
+		[searchAuthorIds, threadAuthorIds],
+	);
+
 	const channelIds = useMemo(
 		() =>
 			searchResults
@@ -93,12 +163,12 @@ export function ChannelPageClient(props: {
 		[searchResults],
 	);
 
-	// Fetch authors and channels for search results
+	// Fetch authors and channels for search results and threads
 	const { data: authors } = useQuery({
 		...convexQuery(api.public.discord_accounts.findManyDiscordAccountsById, {
-			ids: authorIds,
+			ids: allAuthorIds,
 		}),
-		enabled: authorIds.length > 0,
+		enabled: allAuthorIds.length > 0,
 	});
 
 	const { data: channels } = useQuery({
@@ -253,15 +323,22 @@ export function ChannelPageClient(props: {
 		}
 
 		return (
-			<div className="flex w-full flex-1 flex-col gap-3">
-				{threads.map(({ thread, message }) => (
-					<LinkMessage
-						key={thread.id}
-						message={message}
-						thread={thread}
-						className="rounded-lg"
-					/>
-				))}
+			<div className="flex w-full flex-1 flex-col gap-4">
+				{threads.map(({ thread, message }) => {
+					const author = authorMap.get(message.authorId);
+					const messageDate = getSnowflakeDate(message.id);
+					const formattedDate = formatRelativeTime(messageDate);
+
+					return (
+						<LinkMessage
+							key={thread.id}
+							message={message}
+							thread={thread}
+							author={author}
+							formattedDate={formattedDate}
+						/>
+					);
+				})}
 			</div>
 		);
 	};
@@ -285,8 +362,8 @@ export function ChannelPageClient(props: {
 		}
 
 		return (
-			<div className="flex w-full flex-1 flex-col gap-3">
-				<div className="mb-4">
+			<div className="flex w-full flex-1 flex-col gap-4">
+				<div className="mb-2">
 					<h2 className="text-lg font-semibold text-foreground">
 						{searchResults.length} result{searchResults.length === 1 ? "" : "s"}{" "}
 						for &quot;{debouncedQuery}&quot;
@@ -296,124 +373,138 @@ export function ChannelPageClient(props: {
 					const { message } = result;
 					const author = authorMap.get(message.authorId);
 					const channel = channelMap.get(message.channelId);
+					const messageDate = getSnowflakeDate(message.id);
 
 					return (
-						<div
+						<Link
 							key={message.id}
-							className="p-4 rounded-lg bg-card border border-border hover:border-sidebar-border transition-colors"
+							href={`/m/${message.id}`}
+							className="group flex items-start gap-4 rounded-lg border border-border bg-card p-5 text-card-foreground transition-all hover:border-sidebar-border hover:bg-accent/50 hover:shadow-sm"
 						>
-							<div className="flex items-start gap-3">
-								<div className="flex-1 min-w-0">
-									<div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
-										{author && (
+							{author && (
+								<Avatar className="size-10 shrink-0">
+									<AvatarImage
+										src={getDiscordAvatarUrl(author.id, author.avatar)}
+										alt={author.name}
+									/>
+									<AvatarFallback>
+										{author.name.charAt(0).toUpperCase()}
+									</AvatarFallback>
+								</Avatar>
+							)}
+							<div className="flex-1 min-w-0">
+								<div className="flex items-center gap-2 mb-2 text-sm">
+									{author && (
+										<BlueLink
+											href={`/u/${author.id}`}
+											className="font-semibold"
+											onClick={(e) => e.stopPropagation()}
+										>
+											{author.name}
+										</BlueLink>
+									)}
+									{channel && (
+										<>
+											<span className="text-muted-foreground">in</span>
 											<Link
-												href={`/u/${author.id}`}
-												className="font-semibold hover:underline text-foreground"
+												href={`/c/${props.server.discordId}/${channel.id}`}
+												className="text-muted-foreground hover:text-foreground hover:underline"
+												onClick={(e) => e.stopPropagation()}
 											>
-												{author.name}
+												#{channel.name}
 											</Link>
-										)}
-										{channel && (
-											<>
-												<span>in</span>
-												<Link
-													href={`/c/${props.server.discordId}/${channel.id}`}
-													className="hover:underline"
-												>
-													#{channel.name}
-												</Link>
-											</>
-										)}
-									</div>
-									<div className="text-foreground whitespace-pre-wrap break-words mb-2">
-										{message.content || (
-											<span className="italic text-muted-foreground">
-												(No content)
-											</span>
-										)}
-									</div>
-									<Link
-										href={`/m/${message.id}`}
-										className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-									>
-										View message →
-									</Link>
+										</>
+									)}
+									<span className="text-muted-foreground">•</span>
+									<span className="text-muted-foreground">
+										{formatRelativeTime(messageDate)}
+									</span>
+								</div>
+								<div className="text-sm text-card-foreground line-clamp-3 group-hover:text-accent-foreground">
+									{message.content ? (
+										<DiscordMarkdown content={message.content} />
+									) : (
+										<span className="italic text-muted-foreground">
+											(No content)
+										</span>
+									)}
 								</div>
 							</div>
-						</div>
+						</Link>
 					);
 				})}
 			</div>
 		);
 	};
 
-	const CommunityQuestionsSection = () => {
-		if (props.selectedChannel) {
-			return (
-				<div className="flex flex-1 min-h-0">
-					<ChannelSidebar />
-					<div className="flex flex-1 flex-col min-w-0">
-						<div className="border-b border-sidebar-border bg-background px-4 py-3 md:px-6">
-							<div className="flex items-center gap-2">
-								{(() => {
-									const Icon = getChannelIcon(props.selectedChannel.type);
-									return <Icon className="h-5 w-5 text-muted-foreground" />;
-								})()}
-								<h2 className="text-lg font-semibold text-foreground">
-									{props.selectedChannel.name}
-								</h2>
-							</div>
-						</div>
-						<div className="flex-1 overflow-y-auto">
-							<div className="px-4 py-6 md:px-6">
-								<MessagesSearchBar
-									placeholder={`Search ${props.selectedChannel.name}...`}
-									serverId={props.server.discordId}
-								/>
-								<div className="mt-6">
-									{hasSearchQuery ? (
-										<SearchResultsSection />
-									) : (
-										<ThreadsSection />
-									)}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			);
-		}
-
-		return (
-			<div className="flex flex-1 min-h-0">
-				<ChannelSidebar />
-				<div className="flex flex-1 flex-col min-w-0">
-					<div className="border-b border-sidebar-border bg-background px-4 py-3 md:px-6">
-						<h2 className="text-lg font-semibold text-foreground">
-							Browse Channels
-						</h2>
-					</div>
-					<div className="flex-1 overflow-y-auto">
-						<div className="px-4 py-6 md:px-6">
-							<MessagesSearchBar
-								placeholder={`Search the ${props.server.name} community`}
-								serverId={props.server.discordId}
-							/>
-							<div className="mt-6">
-								{hasSearchQuery ? <SearchResultsSection /> : <ChannelsGrid />}
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		);
-	};
+	// Compute search bar placeholder outside of render to keep it stable
+	const searchBarPlaceholder = props.selectedChannel
+		? `Search ${props.selectedChannel.name}...`
+		: `Search the ${props.server.name} community`;
 
 	return (
 		<div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-background">
 			<HeroArea />
 			<div className="flex flex-1 min-h-0">
-				<CommunityQuestionsSection />
+				{props.selectedChannel ? (
+					<div className="flex flex-1 min-h-0">
+						<ChannelSidebar />
+						<div className="flex flex-1 flex-col min-w-0">
+							<div className="border-b border-sidebar-border bg-background px-4 py-3 md:px-6">
+								<div className="flex items-center gap-2">
+									{(() => {
+										const Icon = getChannelIcon(props.selectedChannel.type);
+										return <Icon className="h-5 w-5 text-muted-foreground" />;
+									})()}
+									<h2 className="text-lg font-semibold text-foreground">
+										{props.selectedChannel.name}
+									</h2>
+								</div>
+							</div>
+							<div className="flex-1 overflow-y-auto">
+								<div className="px-4 py-6 md:px-6">
+									<MessagesSearchBar
+										placeholder={searchBarPlaceholder}
+										serverId={props.server.discordId}
+									/>
+									<div className="mt-6">
+										{hasSearchQuery ? (
+											<SearchResultsSection />
+										) : (
+											<ThreadsSection />
+										)}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				) : (
+					<div className="flex flex-1 min-h-0">
+						<ChannelSidebar />
+						<div className="flex flex-1 flex-col min-w-0">
+							<div className="border-b border-sidebar-border bg-background px-4 py-3 md:px-6">
+								<h2 className="text-lg font-semibold text-foreground">
+									Browse Channels
+								</h2>
+							</div>
+							<div className="flex-1 overflow-y-auto">
+								<div className="px-4 py-6 md:px-6">
+									<MessagesSearchBar
+										placeholder={searchBarPlaceholder}
+										serverId={props.server.discordId}
+									/>
+									<div className="mt-6">
+										{hasSearchQuery ? (
+											<SearchResultsSection />
+										) : (
+											<ChannelsGrid />
+										)}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);

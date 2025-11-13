@@ -1,39 +1,85 @@
-import type { Channel, Message } from "@packages/database/convex/schema";
-import Link from "next/link";
+import type {
+	Channel,
+	DiscordAccount,
+	Message,
+} from "@packages/database/convex/schema";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/avatar";
+import { BlueLink } from "../components/blue-link";
+import { Link } from "../components/link";
 import { cn } from "../lib/utils";
 import { DiscordMarkdown } from "../markdown/discord-markdown";
 
 export interface LinkMessageProps {
 	message: Message;
 	thread: Channel;
+	author?: DiscordAccount | null;
+	formattedDate?: string;
 	className?: string;
 }
 
-export function LinkMessage({ message, thread, className }: LinkMessageProps) {
+export function LinkMessage({
+	message,
+	thread,
+	author,
+	formattedDate,
+	className,
+}: LinkMessageProps) {
 	const threadName =
 		thread.name || `${message.content?.slice(0, 20).trim()}...`;
 
 	return (
-		<div className={cn("flex w-full flex-col", className)}>
-			<div
-				className={cn(
-					"discord-message w-full border-2 border-black/[.13] dark:border-white/[.13] rounded-lg bg-white dark:bg-gray-900",
-					className,
-				)}
-			>
-				<div className="flex flex-col p-6">
-					<Link href={`/m/${message.id}`} className="block w-fit mb-2">
-						<h3 className="py-2 pt-0 font-semibold text-xl text-blue-700 decoration-2 hover:text-blue-600 hover:underline dark:text-blue-400 hover:dark:text-blue-500">
-							{threadName}
-						</h3>
-					</Link>
-					{message.content && (
-						<div className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words">
-							<DiscordMarkdown content={message.content} />
-						</div>
-					)}
+		<Link
+			href={`/m/${message.id}`}
+			className={cn(
+				"group flex w-full items-start gap-4 rounded-lg border border-border bg-card p-5 text-card-foreground transition-all hover:border-sidebar-border hover:bg-accent/50 hover:shadow-sm",
+				className,
+			)}
+		>
+			{author && (
+				<Avatar className="size-10 shrink-0">
+					<AvatarImage
+						src={
+							author.avatar
+								? `https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.webp?size=40`
+								: `/discord/${(parseInt(author.id) % 5).toString()}.png`
+						}
+						alt={author.name}
+					/>
+					<AvatarFallback>{author.name.charAt(0).toUpperCase()}</AvatarFallback>
+				</Avatar>
+			)}
+			<div className="flex-1 min-w-0 flex flex-col gap-2">
+				<div className="flex items-center gap-2 flex-wrap">
+					<h3 className="font-semibold text-lg leading-tight text-card-foreground group-hover:text-accent-foreground">
+						{threadName}
+					</h3>
 				</div>
+				<div className="flex items-center gap-2 text-sm text-muted-foreground">
+					{author && (
+						<>
+							<BlueLink
+								href={`/u/${author.id}`}
+								className="font-semibold"
+								onClick={(e) => e.stopPropagation()}
+							>
+								{author.name}
+							</BlueLink>
+							{formattedDate && (
+								<>
+									<span>•</span>
+									<span>{formattedDate}</span>
+								</>
+							)}
+						</>
+					)}
+					{!author && formattedDate && <span>{formattedDate}</span>}
+				</div>
+				{message.content && (
+					<div className="text-sm text-muted-foreground line-clamp-3 group-hover:text-accent-foreground/80">
+						<DiscordMarkdown content={message.content} />
+					</div>
+				)}
 			</div>
-		</div>
+		</Link>
 	);
 }

@@ -1,4 +1,13 @@
 {
+	"files.exclude": {
+		"**/.context": true
+	},
+	"search.exclude": {
+		"**/.context": true
+	},
+	"files.watcherExclude": {
+		"**/.context/**": true
+	},
 	"tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
 	"typescript.tsdk": "node_modules/typescript/lib"
 }

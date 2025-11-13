@@ -30,7 +30,7 @@
 		"effect": "catalog:",
 		"lucide-react": "^0.378.0",
 		"next": "catalog:",
-		"nuqs": "^2.7.3",
+		"nuqs": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"shiki": "^3.15.0",

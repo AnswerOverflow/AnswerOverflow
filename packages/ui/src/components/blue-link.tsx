@@ -1,24 +1,20 @@
+import type React from "react";
 import { cn } from "../lib/utils";
-import { Link, type LinkProps } from "./link";
+import { Link } from "./link";
 
-export function BlueLink({
-	className,
-	...props
-}: LinkProps & {
-	href: string;
-	target?: string;
-	rel?: string;
-	title?: string;
-}) {
+export const BlueLink = (
+	props: React.ComponentPropsWithoutRef<typeof Link> & {
+		href: string;
+	},
+) => {
+	const { className, ...rest } = props;
 	return (
 		<Link
-			{...props}
-			target={props.target ?? "_blank"}
-			rel={props.rel ?? "noopener ugc nofollow"}
 			className={cn(
 				"text-blue-600 hover:underline dark:text-blue-400",
 				className,
 			)}
+			{...rest}
 		/>
 	);
-}
+};
