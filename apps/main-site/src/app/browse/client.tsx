@@ -1,11 +1,8 @@
 "use client";
 
-import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@packages/database/convex/_generated/api";
 import type { Server } from "@packages/database/convex/schema";
 import { Button } from "@packages/ui/components/button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -46,13 +43,9 @@ export const ServerCard = (props: { server: Server }) => {
 };
 
 export function ServerGrid(props: { servers: Server[] }) {
-	const { data: liveData } = useQuery({
-		...convexQuery(api.public.servers.publicGetAllServers, {}),
-	});
-	const data = liveData ?? props.servers;
 	return (
 		<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{data.map((server) => {
+			{props.servers.map((server) => {
 				return (
 					<div
 						key={`server-${server.discordId}-area`}

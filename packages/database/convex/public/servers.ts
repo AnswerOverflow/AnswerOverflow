@@ -23,17 +23,6 @@ const _DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
 };
 
 /**
- * Public query: Get all servers
- * No authentication required - returns public server data
- */
-export const publicGetAllServers = query({
-	args: {},
-	handler: async (ctx) => {
-		return await ctx.db.query("servers").collect();
-	},
-});
-
-/**
  * Public query: Get server by Discord ID
  * No authentication required - returns public server data
  */

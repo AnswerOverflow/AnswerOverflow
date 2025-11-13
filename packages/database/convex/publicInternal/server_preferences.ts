@@ -1,7 +1,10 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { internalMutation } from "../client";
-import { publicInternalMutation, publicInternalQuery } from "../client";
+import {
+	internalMutation,
+	publicInternalMutation,
+	publicInternalQuery,
+} from "../client";
 import { validateCustomDomainUniqueness } from "../shared/shared";
 
 const serverPreferencesSchema = v.object({

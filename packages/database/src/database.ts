@@ -150,8 +150,10 @@ export const service = Effect.gen(function* () {
 
 	const publicGetAllServers = () =>
 		watchQueryToLiveData(
-			({ api }) => api.public.servers.publicGetAllServers,
-			{},
+			({ api }) => api.publicInternal.servers.publicGetAllServers,
+			{
+				backendAccessToken,
+			},
 		);
 
 	const getChannelByDiscordId = (discordId: string) =>

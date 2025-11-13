@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { publicInternalMutation } from "../client";
+import { publicInternalMutation, publicInternalQuery } from "../client";
 import { serverSchema } from "../schema";
 
 export const createServerExternal = publicInternalMutation({
@@ -79,5 +79,16 @@ export const upsertServerExternal = publicInternalMutation({
 			return existing._id;
 		}
 		return await ctx.db.insert("servers", args.data);
+	},
+});
+
+/**
+ * Public internal query: Get all servers
+ * Requires backend access token - returns all server data
+ */
+export const publicGetAllServers = publicInternalQuery({
+	args: {},
+	handler: async (ctx) => {
+		return await ctx.db.query("servers").collect();
 	},
 });
