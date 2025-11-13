@@ -1,7 +1,7 @@
 import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
-import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { Effect } from "effect";
 import { query } from "../_generated/server";
 import type { channelSettingsSchema } from "../schema";
