@@ -1,8 +1,7 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
-import { internalMutation } from "../_generated/server";
-import { publicInternalAction } from "../publicInternal/publicInternal";
+import { internalMutation, publicInternalAction } from "../client";
 import { uploadAttachmentFromUrlLogic } from "../shared/shared";
 
 /**

@@ -1,6 +1,6 @@
 import { httpRouter } from "convex/server";
 import type { Id } from "./_generated/dataModel";
-import { httpAction } from "./_generated/server";
+import { httpAction } from "./client";
 import { authComponent, createAuth } from "./shared/betterAuth";
 
 const http = httpRouter();

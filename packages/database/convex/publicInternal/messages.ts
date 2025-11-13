@@ -5,8 +5,10 @@ import type { Id } from "../_generated/dataModel";
 import {
 	internalMutation,
 	type MutationCtx,
+	publicInternalMutation,
+	publicInternalQuery,
 	type QueryCtx,
-} from "../_generated/server";
+} from "../client";
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import {
 	deleteMessageInternalLogic,
@@ -17,7 +19,6 @@ import {
 	findUserServerSettingsById,
 	upsertMessageInternalLogic,
 } from "../shared/shared";
-import { publicInternalMutation, publicInternalQuery } from "./publicInternal";
 
 type Message = Infer<typeof messageSchema>;
 

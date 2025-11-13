@@ -3,11 +3,8 @@ import { type Infer, v } from "convex/values";
 import { getManyFrom } from "convex-helpers/server/relationships";
 import { Effect } from "effect";
 import type { Id } from "../_generated/dataModel";
-import { internalMutation } from "../_generated/server";
-import {
-	publicInternalMutation,
-	publicInternalQuery,
-} from "../publicInternal/publicInternal";
+import { internalMutation } from "../client";
+import { publicInternalMutation, publicInternalQuery } from "../client";
 import { userServerSettingsSchema } from "../schema";
 import { assertIsUser, getDiscordAccountIdFromAuth } from "../shared/auth";
 import type { AuthorizedUser, IsAuthenticated } from "../shared/permissions";

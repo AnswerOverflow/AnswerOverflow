@@ -1,9 +1,6 @@
 import { type Infer, v } from "convex/values";
-import { internalMutation } from "../_generated/server";
-import {
-	publicInternalMutation,
-	publicInternalQuery,
-} from "../publicInternal/publicInternal";
+import { internalMutation } from "../client";
+import { publicInternalMutation, publicInternalQuery } from "../client";
 import type { ignoredDiscordAccountSchema } from "../schema";
 import {
 	findIgnoredDiscordAccountById as findIgnoredDiscordAccountByIdShared,

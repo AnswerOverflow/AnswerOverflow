@@ -73,9 +73,23 @@
 							"level": "error",
 							"options": {
 								"paths": {
-									"@packages/database": "Do not import from '@packages/database' within the 'database/' package. Use relative imports instead."
+									"@packages/database": "Do not import from '@packages/database' within the 'database/' package. Use relative imports instead.",
+									"../_generated/server": "Do not import from '_generated/server' directly. Use '../client' instead for server types and functions (ActionCtx, MutationCtx, QueryCtx, internalQuery, internalMutation, internalAction, httpAction).",
+									"./_generated/server": "Do not import from '_generated/server' directly. Use './client' instead for server types and functions (ActionCtx, MutationCtx, QueryCtx, internalQuery, internalMutation, internalAction, httpAction)."
 								}
 							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["packages/database/convex/client/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "off"
 						}
 					}
 				}

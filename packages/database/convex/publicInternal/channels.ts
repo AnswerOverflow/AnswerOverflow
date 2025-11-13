@@ -1,15 +1,8 @@
 import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
-import {
-	internalMutation,
-	type MutationCtx,
-	type QueryCtx,
-} from "../_generated/server";
-import {
-	publicInternalMutation,
-	publicInternalQuery,
-} from "../publicInternal/publicInternal";
+import { internalMutation, type MutationCtx, type QueryCtx } from "../client";
+import { publicInternalMutation, publicInternalQuery } from "../client";
 import { channelSchema, channelSettingsSchema } from "../schema";
 import {
 	CHANNEL_TYPE,

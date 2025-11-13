@@ -1,9 +1,6 @@
 import { type Infer, v } from "convex/values";
 import { getManyFrom } from "convex-helpers/server/relationships";
-import {
-	publicInternalMutation,
-	publicInternalQuery,
-} from "../publicInternal/publicInternal";
+import { publicInternalMutation, publicInternalQuery } from "../client";
 import { discordAccountSchema } from "../schema";
 import {
 	deleteMessageInternalLogic,

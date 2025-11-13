@@ -3,7 +3,6 @@ import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
-import { query } from "../_generated/server";
 
 const siteUrl = process.env.SITE_URL!;
 
@@ -71,12 +70,3 @@ export const createAuth = (
 		],
 	});
 };
-
-// Example function for getting the current user
-// Feel free to edit, omit, etc.
-export const getCurrentUser = query({
-	args: {},
-	handler: async (ctx) => {
-		return authComponent.getAuthUser(ctx);
-	},
-});

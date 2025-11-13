@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { assertCanEditServer, authenticatedMutation } from "./shared/auth";
+import { authenticatedMutation } from "./client";
+import { assertCanEditServer } from "./shared/auth";
 import type { AuthorizedUser, CanEditServer } from "./shared/permissions";
 import { validateCustomDomain } from "./shared/shared";
 

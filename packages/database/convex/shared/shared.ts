@@ -1,7 +1,7 @@
 import type { Infer } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
-import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
+import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
 import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 
 type Message = Infer<typeof messageSchema>;

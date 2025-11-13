@@ -9,7 +9,7 @@ import { make } from "@packages/discord-api/generated";
 import { Effect } from "effect";
 import { api, components } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { authenticatedAction } from "./shared/auth";
+import { authenticatedAction } from "./client";
 import { authComponent } from "./shared/betterAuth";
 
 import {

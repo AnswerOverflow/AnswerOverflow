@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { publicInternalMutation } from "../publicInternal/publicInternal";
+import { publicInternalMutation } from "../client";
 import { serverSchema } from "../schema";
 
 export const createServerExternal = publicInternalMutation({

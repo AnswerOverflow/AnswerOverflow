@@ -15,11 +15,8 @@ import { v } from "convex/values";
 import { Effect, type Tracer } from "effect";
 import { api, components, internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
-import { type ActionCtx, internalAction } from "../_generated/server";
-import {
-	authenticatedAction,
-	getDiscordAccountWithToken,
-} from "../shared/auth";
+import { type ActionCtx, authenticatedAction, internalAction } from "../client";
+import { getDiscordAccountWithToken } from "../shared/auth";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,

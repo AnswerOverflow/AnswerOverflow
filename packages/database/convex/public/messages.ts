@@ -1,7 +1,8 @@
 import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import type { Id } from "../_generated/dataModel";
-import { type MutationCtx, type QueryCtx, query } from "../_generated/server";
+import { type MutationCtx, type QueryCtx } from "../client";
+import { query } from "../_generated/server";
 import type {
 	attachmentSchema,
 	messageSchema,

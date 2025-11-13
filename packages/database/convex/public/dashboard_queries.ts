@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { query } from "../_generated/server";
-import { authenticatedQuery } from "../shared/auth";
+import { authenticatedQuery } from "../client";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
