@@ -1,58 +1,46 @@
-"use node";
-
 import { Effect, Option } from "effect";
-import Redis from "ioredis";
 
-let redisClient: Redis | null = null;
+/**
+ * In-memory cache for V8 isolate runtime compatibility.
+ * Redis/Valkey requires TCP sockets which aren't available in V8 isolate.
+ * This provides a simple in-memory cache that works within the same function execution.
+ *
+ * Note: This cache is per-function-execution and doesn't persist across invocations.
+ * For persistent caching, use a Convex query/mutation with database storage,
+ * or keep the Redis-based cache in a separate file with "use node".
+ */
+const memoryCache = new Map<string, { value: unknown; expiresAt: number }>();
 
-function getRedisClient(): Effect.Effect<Redis, Error> {
-	return Effect.gen(function* () {
-		if (redisClient) {
-			return redisClient;
-		}
+function getCachedFromMemory<T>(key: string): Option.Option<T> {
+	const cached = memoryCache.get(key);
+	if (!cached) {
+		return Option.none();
+	}
 
-		const valkeyUrl = process.env.VALKEY_URL;
-		if (!valkeyUrl) {
-			return yield* Effect.fail(
-				new Error("VALKEY_URL environment variable is not set"),
-			);
-		}
+	if (Date.now() > cached.expiresAt) {
+		memoryCache.delete(key);
+		return Option.none();
+	}
 
-		const client = new Redis(valkeyUrl);
-		redisClient = client;
+	try {
+		return Option.some(cached.value as T);
+	} catch {
+		memoryCache.delete(key);
+		return Option.none();
+	}
+}
 
-		// Handle connection errors
-		client.on("error", (err) => {
-			console.error("Valkey connection error:", err);
-		});
-
-		return client;
+function setCachedInMemory<T>(key: string, value: T, ttlSeconds: number): void {
+	memoryCache.set(key, {
+		value,
+		expiresAt: Date.now() + ttlSeconds * 1000,
 	});
 }
 
 export function getCached<T>(
 	key: string,
 ): Effect.Effect<Option.Option<T>, Error> {
-	return Effect.gen(function* () {
-		const client = yield* getRedisClient();
-		const cached = yield* Effect.tryPromise({
-			try: () => client.get(key),
-			catch: (error) =>
-				error instanceof Error ? error : new Error(String(error)),
-		});
-
-		if (cached === null) {
-			return Option.none();
-		}
-
-		try {
-			const parsed = JSON.parse(cached) as T;
-			return Option.some(parsed);
-		} catch {
-			// If parsing fails, treat as cache miss
-			return Option.none();
-		}
-	});
+	return Effect.succeed(getCachedFromMemory<T>(key));
 }
 
 export function setCached<T>(
@@ -61,13 +49,7 @@ export function setCached<T>(
 	ttlSeconds: number = 300,
 ): Effect.Effect<void, Error> {
 	return Effect.gen(function* () {
-		const client = yield* getRedisClient();
-		const serialized = JSON.stringify(value);
-		yield* Effect.tryPromise({
-			try: () => client.setex(key, ttlSeconds, serialized),
-			catch: (error) =>
-				error instanceof Error ? error : new Error(String(error)),
-		});
+		setCachedInMemory(key, value, ttlSeconds);
 	});
 }
 

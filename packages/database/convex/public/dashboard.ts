@@ -1,5 +1,4 @@
-"use node";
-
+import { ActionCache } from "@convex-dev/action-cache";
 import {
 	FetchHttpClient,
 	HttpClient,
@@ -14,20 +13,31 @@ import { make } from "@packages/discord-api/generated";
 import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { v } from "convex/values";
 import { Effect, type Tracer } from "effect";
-import { api } from "../_generated/api";
+import { api, components, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
-import type { ActionCtx } from "../_generated/server";
+import { type ActionCtx, internalAction } from "../_generated/server";
 import {
 	authenticatedAction,
 	getDiscordAccountWithToken,
 } from "../shared/auth";
-import { getOrSetCache } from "../shared/cache";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
 	hasPermission,
 	sortServersByBotAndRole,
 } from "../shared/shared";
+
+/**
+ * Get the BACKEND_ACCESS_TOKEN from environment variables.
+ * This is accessed at module load time, so it works without "use node".
+ */
+function getBackendAccessToken(): string {
+	const token = process.env.BACKEND_ACCESS_TOKEN;
+	if (!token) {
+		throw new Error("BACKEND_ACCESS_TOKEN not configured");
+	}
+	return token;
+}
 
 const discordApi = (token: string) =>
 	Effect.gen(function* () {
@@ -51,6 +61,80 @@ const discordApi = (token: string) =>
 			},
 		});
 	}).pipe(Effect.provide(FetchHttpClient.layer));
+
+/**
+ * Internal action to fetch Discord guilds for a user.
+ * This is cached using ActionCache to reduce API calls.
+ */
+export const fetchDiscordGuilds = internalAction({
+	args: {
+		discordAccountId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const { discordAccountId } = args;
+
+		const tracedEffect = Effect.gen(function* () {
+			return yield* Effect.withSpan("dashboard.fetchDiscordGuilds")(
+				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"discord.account.id": discordAccountId,
+						"convex.function": "fetchDiscordGuilds",
+					});
+
+					// Get Discord account with access token
+					const currentSpan = yield* Effect.currentSpan;
+					const discordAccount = yield* Effect.tryPromise({
+						try: () =>
+							getDiscordAccountWithToken(
+								ctx,
+								currentSpan ? (currentSpan as Tracer.AnySpan) : undefined,
+							),
+						catch: (error) => new Error(String(error)),
+					});
+
+					if (
+						!discordAccount ||
+						discordAccount.accountId !== discordAccountId
+					) {
+						throw new Error("Discord account not linked or mismatch");
+					}
+
+					const token = discordAccount.accessToken;
+					const client = yield* discordApi(token);
+
+					const guilds = yield* Effect.withSpan(
+						"dashboard.fetchDiscordGuilds.discordApi",
+					)(client.listMyGuilds());
+
+					// Only cache the fields we actually use to ensure Convex serialization compatibility
+					// This avoids caching unnecessary fields like 'features' arrays that Convex can't serialize
+					return guilds.map((guild) => ({
+						id: guild.id,
+						name: guild.name,
+						icon: guild.icon ?? null,
+						owner: guild.owner,
+						permissions: guild.permissions,
+					}));
+				}),
+			);
+		});
+
+		return await Effect.provide(
+			tracedEffect,
+			createConvexOtelLayer("database"),
+		).pipe(Effect.runPromise);
+	},
+});
+
+/**
+ * ActionCache for Discord guilds.
+ * Caches results for 5 minutes (300 seconds) to reduce API calls.
+ */
+const discordGuildsCache = new ActionCache(components.actionCache, {
+	action: internal.public.dashboard.fetchDiscordGuilds,
+	name: "discordGuilds",
+	ttl: 300 * 1000, // 5 minutes in milliseconds
+});
 
 type ServerWithMetadata = {
 	discordId: string;
@@ -105,30 +189,17 @@ export const getUserServers = authenticatedAction({
 						throw new Error("Discord account not linked or mismatch");
 					}
 
-					const token = discordAccount.accessToken;
-
-					// Fetch user's Discord servers using the API client
+					// Fetch user's Discord servers using ActionCache
 					// Cache the result for 5 minutes to reduce API calls
-					const cacheKey = `discord:guilds:${discordAccountId}`;
-					const client = yield* Effect.withSpan(
-						"dashboard.getUserServers.createDiscordClient",
-					)(discordApi(token));
-
 					const discordGuilds = yield* Effect.withSpan(
 						"dashboard.getUserServers.fetchDiscordGuilds",
 					)(
-						Effect.gen(function* () {
-							yield* Effect.annotateCurrentSpan({
-								"cache.key": cacheKey,
-							});
-							return yield* getOrSetCache(
-								cacheKey,
-								() =>
-									Effect.withSpan(
-										"dashboard.getUserServers.fetchDiscordGuilds.discordApi",
-									)(client.listMyGuilds()),
-								300, // 5 minutes TTL
-							);
+						Effect.tryPromise({
+							try: () =>
+								discordGuildsCache.fetch(ctx, {
+									discordAccountId,
+								}),
+							catch: (error) => new Error(String(error)),
 						}),
 					);
 
@@ -177,145 +248,34 @@ export const getUserServers = authenticatedAction({
 						}),
 					);
 
+					// Schedule background sync - don't wait for it to complete
+					// This runs in the background so we can return immediately
+					yield* Effect.withSpan(
+						"dashboard.getUserServers.scheduleBackgroundSync",
+					)(
+						Effect.tryPromise({
+							try: () => {
+								// Schedule sync in background (delay 0 = run immediately but async)
+								return ctx.scheduler.runAfter(
+									0,
+									api.public.dashboard.syncUserServerSettingsBackground,
+									{
+										discordAccountId,
+										manageableServers: manageableServers.map((guild) => ({
+											id: guild.id,
+											permissions: guild.permissions,
+										})),
+										aoServerIds: aoServers.map((server) => server._id),
+									},
+								);
+							},
+							catch: (error) => new Error(String(error)),
+						}),
+					);
+
 					// Create a map for quick lookup of servers by Discord ID
 					const aoServersByDiscordId = new Map(
 						aoServers.map((server) => [server.discordId, server]),
-					);
-
-					// Sync user server settings with permissions from Discord API
-					// This ensures the reactive query has data to work with
-					const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
-					if (!backendAccessToken) {
-						throw new Error("BACKEND_ACCESS_TOKEN not configured");
-					}
-
-					yield* Effect.withSpan(
-						"dashboard.getUserServers.syncUserServerSettings",
-					)(
-						Effect.gen(function* () {
-							// Filter to only servers that exist in AO
-							const serversToSync = manageableServers
-								.map((guild) => {
-									const aoServer = aoServersByDiscordId.get(guild.id);
-									return aoServer ? { guild, aoServer } : null;
-								})
-								.filter(
-									(
-										item,
-									): item is {
-										guild: (typeof manageableServers)[0];
-										aoServer: NonNullable<
-											ReturnType<typeof aoServersByDiscordId.get>
-										>;
-									} => item !== null,
-								);
-
-							yield* Effect.annotateCurrentSpan({
-								"servers.toSync": serversToSync.length,
-							});
-
-							// Batch fetch all existing user server settings
-							const existingSettingsArray = yield* Effect.withSpan(
-								"dashboard.getUserServers.syncUserServerSettings.fetchExisting",
-							)(
-								Effect.tryPromise({
-									try: () =>
-										ctx.runQuery(
-											api.publicInternal.user_server_settings
-												.findManyUserServerSettings,
-											{
-												backendAccessToken,
-												settings: serversToSync.map(({ aoServer }) => ({
-													userId: discordAccountId,
-													serverId: aoServer._id,
-												})),
-											},
-										),
-									catch: (error) => new Error(String(error)),
-								}),
-							);
-
-							// Create a map for quick lookup of settings by server ID
-							const existingSettingsByServerId = new Map(
-								existingSettingsArray.map((settings) => [
-									settings.serverId,
-									settings,
-								]),
-							);
-
-							// Upsert user server settings with synced permissions
-							// Only update if permissions changed to avoid redundant mutations
-							const settingsToUpdate: Array<{
-								serverId: Id<"servers">;
-								userId: string;
-								permissions: number;
-								canPubliclyDisplayMessages: boolean;
-								messageIndexingDisabled: boolean;
-								apiKey: string | undefined;
-								apiCallsUsed: number;
-							}> = [];
-
-							for (const { guild, aoServer } of serversToSync) {
-								// Convert permissions string to number (Discord API returns permissions as string)
-								const permissionsNumber = Number(guild.permissions);
-
-								// Get existing user server settings from the map
-								const existingSettings = existingSettingsByServerId.get(
-									aoServer._id,
-								);
-
-								// Skip if permissions haven't changed
-								if (
-									existingSettings &&
-									existingSettings.permissions === permissionsNumber
-								) {
-									continue;
-								}
-
-								// Prepare settings - preserve existing values or use defaults
-								settingsToUpdate.push({
-									serverId: aoServer._id,
-									userId: discordAccountId,
-									permissions: permissionsNumber, // Sync permissions from Discord API
-									canPubliclyDisplayMessages:
-										existingSettings?.canPubliclyDisplayMessages ?? false,
-									messageIndexingDisabled:
-										existingSettings?.messageIndexingDisabled ?? false,
-									apiKey: existingSettings?.apiKey,
-									apiCallsUsed: existingSettings?.apiCallsUsed ?? 0,
-								});
-							}
-
-							// Only run mutations for settings that actually need updating
-							if (settingsToUpdate.length > 0) {
-								yield* Effect.annotateCurrentSpan({
-									"mutations.count": settingsToUpdate.length,
-								});
-								return yield* Effect.withSpan(
-									"dashboard.getUserServers.syncUserServerSettings.runMutations",
-								)(
-									Effect.all(
-										settingsToUpdate.map((settings, index) =>
-											Effect.withSpan(
-												`dashboard.getUserServers.syncUserServerSettings.mutation.${index}`,
-											)(
-												Effect.tryPromise({
-													try: () =>
-														ctx.runMutation(
-															api.publicInternal.user_server_settings
-																.upsertUserServerSettings,
-															{ backendAccessToken, settings },
-														),
-													catch: (error) => new Error(String(error)),
-												}),
-											),
-										),
-									),
-								);
-							}
-
-							return [];
-						}),
 					);
 
 					// Combine Discord guild data with AO server data
@@ -379,10 +339,7 @@ async function checkManageGuildPermission(
 	discordAccountId: string,
 	serverId: Id<"servers">,
 ): Promise<void> {
-	const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
-	if (!backendAccessToken) {
-		throw new Error("BACKEND_ACCESS_TOKEN not configured");
-	}
+	const backendAccessToken = getBackendAccessToken();
 
 	// Get user server settings to check permissions
 	const settings = await ctx.runQuery(
@@ -522,10 +479,7 @@ export const trackBotAddClick = authenticatedAction({
 			return;
 		}
 
-		const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
-		if (!backendAccessToken) {
-			throw new Error("BACKEND_ACCESS_TOKEN not configured");
-		}
+		const backendAccessToken = getBackendAccessToken();
 
 		// Get existing user server settings
 		const existingSettings = await ctx.runQuery(
@@ -557,5 +511,194 @@ export const trackBotAddClick = authenticatedAction({
 			api.publicInternal.user_server_settings.upsertUserServerSettings,
 			{ backendAccessToken, settings },
 		);
+	},
+});
+
+/**
+ * Background action to sync user server settings with permissions from Discord API
+ * This is scheduled from getUserServers to avoid blocking the response
+ */
+export const syncUserServerSettingsBackground = internalAction({
+	args: {
+		discordAccountId: v.string(),
+		manageableServers: v.array(
+			v.object({
+				id: v.string(),
+				permissions: v.string(),
+			}),
+		),
+		aoServerIds: v.array(v.id("servers")),
+	},
+	handler: async (ctx, args) => {
+		const { discordAccountId, manageableServers, aoServerIds } = args;
+
+		const tracedEffect = Effect.gen(function* () {
+			return yield* Effect.withSpan(
+				"dashboard.syncUserServerSettingsBackground",
+			)(
+				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"discord.account.id": discordAccountId,
+						"convex.function": "syncUserServerSettingsBackground",
+						"servers.count": manageableServers.length,
+					});
+
+					const backendAccessToken = getBackendAccessToken();
+
+					// Fetch AO servers by IDs (more efficient than by Discord ID)
+					const aoServers = yield* Effect.withSpan(
+						"dashboard.syncUserServerSettingsBackground.fetchAOServers",
+					)(
+						Effect.tryPromise({
+							try: () =>
+								ctx.runQuery(api.public.servers.publicFindManyServersById, {
+									ids: aoServerIds,
+								}),
+							catch: (error) => new Error(String(error)),
+						}),
+					);
+
+					// Create a map for quick lookup of servers by Discord ID
+					const aoServersByDiscordId = new Map(
+						aoServers.map((server) => [server.discordId, server]),
+					);
+
+					// Filter to only servers that exist in AO
+					const serversToSync = manageableServers
+						.map((guild) => {
+							const aoServer = aoServersByDiscordId.get(guild.id);
+							return aoServer ? { guild, aoServer } : null;
+						})
+						.filter(
+							(
+								item,
+							): item is {
+								guild: (typeof manageableServers)[0];
+								aoServer: NonNullable<
+									ReturnType<typeof aoServersByDiscordId.get>
+								>;
+							} => item !== null,
+						);
+
+					if (serversToSync.length === 0) {
+						yield* Effect.annotateCurrentSpan({
+							"servers.toSync": 0,
+						});
+						return;
+					}
+
+					yield* Effect.annotateCurrentSpan({
+						"servers.toSync": serversToSync.length,
+					});
+
+					// Batch fetch all existing user server settings
+					const existingSettingsArray = yield* Effect.withSpan(
+						"dashboard.syncUserServerSettingsBackground.fetchExisting",
+					)(
+						Effect.tryPromise({
+							try: () =>
+								ctx.runQuery(
+									api.publicInternal.user_server_settings
+										.findManyUserServerSettings,
+									{
+										backendAccessToken,
+										settings: serversToSync.map(({ aoServer }) => ({
+											userId: discordAccountId,
+											serverId: aoServer._id,
+										})),
+									},
+								),
+							catch: (error) => new Error(String(error)),
+						}),
+					);
+
+					// Create a map for quick lookup of settings by server ID
+					const existingSettingsByServerId = new Map(
+						existingSettingsArray.map((settings) => [
+							settings.serverId,
+							settings,
+						]),
+					);
+
+					// Upsert user server settings with synced permissions
+					// Only update if permissions changed to avoid redundant mutations
+					const settingsToUpdate: Array<{
+						serverId: Id<"servers">;
+						userId: string;
+						permissions: number;
+						canPubliclyDisplayMessages: boolean;
+						messageIndexingDisabled: boolean;
+						apiKey: string | undefined;
+						apiCallsUsed: number;
+					}> = [];
+
+					for (const { guild, aoServer } of serversToSync) {
+						// Convert permissions string to number (Discord API returns permissions as string)
+						const permissionsNumber = Number(guild.permissions);
+
+						// Get existing user server settings from the map
+						const existingSettings = existingSettingsByServerId.get(
+							aoServer._id,
+						);
+
+						// Skip if permissions haven't changed
+						if (
+							existingSettings &&
+							existingSettings.permissions === permissionsNumber
+						) {
+							continue;
+						}
+
+						// Prepare settings - preserve existing values or use defaults
+						settingsToUpdate.push({
+							serverId: aoServer._id,
+							userId: discordAccountId,
+							permissions: permissionsNumber, // Sync permissions from Discord API
+							canPubliclyDisplayMessages:
+								existingSettings?.canPubliclyDisplayMessages ?? false,
+							messageIndexingDisabled:
+								existingSettings?.messageIndexingDisabled ?? false,
+							apiKey: existingSettings?.apiKey,
+							apiCallsUsed: existingSettings?.apiCallsUsed ?? 0,
+						});
+					}
+
+					// Only run mutations for settings that actually need updating
+					if (settingsToUpdate.length > 0) {
+						yield* Effect.annotateCurrentSpan({
+							"mutations.count": settingsToUpdate.length,
+						});
+						return yield* Effect.withSpan(
+							"dashboard.syncUserServerSettingsBackground.runMutations",
+						)(
+							Effect.all(
+								settingsToUpdate.map((settings, index) =>
+									Effect.withSpan(
+										`dashboard.syncUserServerSettingsBackground.mutation.${index}`,
+									)(
+										Effect.tryPromise({
+											try: () =>
+												ctx.runMutation(
+													api.publicInternal.user_server_settings
+														.upsertUserServerSettings,
+													{ backendAccessToken, settings },
+												),
+											catch: (error) => new Error(String(error)),
+										}),
+									),
+								),
+							),
+						);
+					}
+
+					return [];
+				}),
+			);
+		});
+
+		return await Effect.provide(
+			tracedEffect,
+			createConvexOtelLayer("database"),
+		).pipe(Effect.runPromise);
 	},
 });

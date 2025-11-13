@@ -19,13 +19,13 @@
 		"test:watch": "vitest"
 	},
 	"dependencies": {
+		"@convex-dev/action-cache": "^0.3.0",
 		"@convex-dev/better-auth": "catalog:",
 		"@effect/platform": "catalog:",
+		"@packages/analytics": "workspace:*",
 		"convex": "catalog:",
 		"convex-helpers": "^0.1.104",
 		"effect": "catalog:",
-		"@packages/analytics": "workspace:*",
-		"ioredis": "^5.8.2",
 		"openai": "^4.45.0"
 	},
 	"devDependencies": {
