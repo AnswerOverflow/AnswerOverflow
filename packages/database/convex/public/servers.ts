@@ -193,7 +193,6 @@ export const publicGetBiggestServers = query({
 		const tracedEffect = Effect.gen(function* () {
 			return yield* Effect.withSpan("servers.getBiggestServers")(
 				Effect.gen(function* () {
-					console.log("annotating span");
 					yield* Effect.annotateCurrentSpan({
 						"convex.function": "publicGetBiggestServers",
 						"servers.take": args.take,

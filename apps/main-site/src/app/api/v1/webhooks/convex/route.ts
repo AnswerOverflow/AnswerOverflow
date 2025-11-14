@@ -1,142 +1,226 @@
-import { createOtelLayer } from "@packages/observability/effect-otel";
-import {
-	RemoteSpanIngest,
-	RemoteSpanIngestLive,
-} from "@packages/observability/remote-span-ingest";
-import {
-	type ConvexLogSpan,
-	decodeSpan,
-} from "@packages/observability/span-schema";
-import * as Effect from "effect/Effect";
-import * as Layer from "effect/Layer";
-import * as Schema from "effect/Schema";
+import { Effect } from "effect";
 import { type NextRequest, NextResponse } from "next/server";
 
-/**
- * Webhook endpoint to receive Convex log streams
- * This endpoint receives logs from Convex log streams and forwards them to an OTEL collector
- *
- * Configure this URL in your Convex dashboard under Log Streams:
- * http://localhost:3000/api/v1/webhooks/convex
- */
+const OTLP_ENDPOINT = "http://localhost:4318/v1/traces";
 
-/**
- * Schema for Convex log event structure
- */
-const ConvexLogEventSchema = Schema.Struct({
-	topic: Schema.String,
-	message: Schema.optional(Schema.String),
-});
+type ConvexWebhookEntry = {
+	timestamp: number;
+	topic: string;
+	message?: string;
+};
 
-/**
- * Sample payload:
- * [
- *   {
- *     "timestamp": 1763011475385,
- *     "topic": "console",
- *     "function": {
- *       "path": "public/servers:publicGetBiggestServers",
- *       "type": "query",
- *       "cached": false,
- *       "request_id": "b2539062a12f0eb2",
- *       "mutation_queue_length": null,
- *       "mutation_retry_count": null
- *     },
- *     "log_level": "LOG",
- *     "message": "{\"topic\":\"otel_span\",\"traceId\":\"356d97a4701baac5e399ad90e41f686e\",\"spanId\":\"1dc442f27661556a\",\"name\":\"servers.getBiggestServers\",\"startTime\":\"1763011475122000000\",\"endTime\":\"1763011475122000000\",\"duration\":\"0\",\"attributes\":{\"convex.function\":\"publicGetBiggestServers\",\"servers.take\":10},\"status\":{\"code\":1},\"events\":[],\"links\":[],\"kind\":0}",
- *     "is_truncated": false,
- *     "system_code": null,
- *     "convex": {
- *       "deployment_name": "ardent-monitor-56",
- *       "deployment_type": "dev",
- *       "project_name": "answeroverflow",
- *       "project_slug": "answeroverflow"
- *     }
- *   }
- * ]
- */
-export async function POST(request: NextRequest) {
-	try {
-		const rawBody = await request.json();
-		const otlpEndpoint =
-			process.env.OTLP_ENDPOINT ?? "http://localhost:4318/v1/traces";
+async function exportSpans(resourceSpans: { resourceSpans: unknown[] }) {
+	const payload = JSON.stringify(resourceSpans);
 
-		// Decode the array of log events synchronously
-		const decodedEvents = Schema.decodeUnknownSync(
-			Schema.Array(ConvexLogEventSchema),
-		)(rawBody);
-		const events = [...decodedEvents];
+	console.log("Exporting spans to OTLP", {
+		endpoint: OTLP_ENDPOINT,
+		resourceSpansCount: resourceSpans.resourceSpans.length,
+		payloadSize: payload.length,
+	});
 
-		// Extract and decode otel_span messages
-		const decodedSpans: Array<ConvexLogSpan> = [];
-		for (const evt of events) {
-			if (evt.topic !== "console" || !evt.message) {
-				continue;
-			}
+	const response = await fetch(OTLP_ENDPOINT, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: payload,
+	});
 
-			// Convex wraps console.log messages in single quotes, so we need to strip them
-			let messageToParse = evt.message;
-			if (messageToParse.startsWith("'") && messageToParse.endsWith("'")) {
-				messageToParse = messageToParse.slice(1, -1);
-			}
-
-			let parsed: unknown;
-			try {
-				parsed = JSON.parse(messageToParse);
-			} catch {
-				// Not JSON, skip this message
-				continue;
-			}
-
-			if (
-				typeof parsed !== "object" ||
-				parsed === null ||
-				!("topic" in parsed) ||
-				parsed.topic !== "otel_span"
-			) {
-				continue;
-			}
-
-			try {
-				const span = decodeSpan(parsed);
-				decodedSpans.push(span);
-			} catch (decodeError) {
-				console.error("Failed to decode span:", decodeError);
-			}
-		}
-
-		// Process spans using Effect if we have any
-		if (decodedSpans.length > 0) {
-			const serviceName = "database";
-			const program = Effect.gen(function* () {
-				const remoteSpanIngest = yield* RemoteSpanIngest;
-				yield* remoteSpanIngest.ingest(decodedSpans);
-			}).pipe(
-				Effect.provide(
-					Layer.mergeAll(
-						RemoteSpanIngestLive(otlpEndpoint),
-						createOtelLayer(serviceName, otlpEndpoint),
-					),
-				),
-			);
-
-			await Effect.runPromise(program).catch((error) => {
-				console.error("Error ingesting spans:", error);
-			});
-		}
-
-		return NextResponse.json(
-			{ success: true, message: "Webhook received and processed" },
-			{ status: 200 },
-		);
-	} catch (error) {
-		console.error("Error processing Convex webhook:", error);
-		return NextResponse.json(
-			{
-				success: false,
-				error: error instanceof Error ? error.message : "Unknown error",
-			},
-			{ status: 500 },
+	if (!response.ok) {
+		const errorText = await response.text().catch(() => "");
+		console.error("OTLP export failed:", {
+			status: response.status,
+			statusText: response.statusText,
+			error: errorText,
+		});
+		throw new Error(
+			`OTLP export failed: ${response.status} ${response.statusText} - ${errorText}`,
 		);
 	}
+}
+
+type OtlpAnyValue =
+	| { stringValue: string }
+	| { boolValue: boolean }
+	| { intValue: number }
+	| { doubleValue: number };
+
+type SpanData = {
+	resource: {
+		attributes: Record<string, string>;
+	};
+	instrumentationScope: {
+		name: string;
+		version?: string | null;
+		schemaUrl?: string | null;
+	};
+	traceId: string;
+	name: string;
+	id: string; // spanId
+	kind: number;
+	timestamp: number; // microseconds since epoch
+	duration: number; // microseconds
+	attributes: Record<string, unknown>;
+	status: { code: number };
+	events: unknown[];
+	links: unknown[];
+};
+
+function parseSpanFromMessage(message: string): SpanData | null {
+	let raw = message.trim();
+
+	// Only care about our OTEL payloads
+	const marker = "__OTEL_SPAN__";
+	const markerIndex = raw.indexOf(marker);
+	if (markerIndex === -1) return null;
+
+	raw = raw.slice(markerIndex + marker.length);
+	// remove the ' from the start and end of the string
+	raw = raw.slice(0, -1);
+
+	try {
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		const parsed = JSON.parse(raw) as any;
+		if (
+			parsed &&
+			typeof parsed === "object" &&
+			parsed.traceId &&
+			parsed.id &&
+			parsed.name
+		) {
+			return parsed as SpanData;
+		}
+	} catch (e) {
+		console.log("Raw", raw);
+		console.warn("Failed to parse OTEL span JSON:", e);
+		return null;
+	}
+
+	return null;
+}
+
+function toOtlpValue(value: unknown): OtlpAnyValue {
+	if (typeof value === "boolean") return { boolValue: value };
+	if (typeof value === "number" && Number.isInteger(value))
+		return { intValue: value };
+	if (typeof value === "number") return { doubleValue: value };
+	return { stringValue: String(value) };
+}
+
+function convertToResourceSpans(spans: SpanData[]) {
+	// group by (resource.attributes + instrumentationScope)
+	const groups = new Map<
+		string,
+		{
+			resource: SpanData["resource"];
+			scope: SpanData["instrumentationScope"];
+			spans: SpanData[];
+		}
+	>();
+
+	for (const span of spans) {
+		const key = JSON.stringify({
+			resource: span.resource.attributes,
+			scope: span.instrumentationScope,
+		});
+
+		const existing = groups.get(key);
+		if (existing) {
+			existing.spans.push(span);
+		} else {
+			groups.set(key, {
+				resource: span.resource,
+				scope: span.instrumentationScope,
+				spans: [span],
+			});
+		}
+	}
+
+	return {
+		resourceSpans: Array.from(groups.values()).map(
+			({ resource, scope, spans: scopeSpans }) => ({
+				resource: {
+					attributes: Object.entries(resource.attributes).map(
+						([key, value]) => ({
+							key,
+							value: { stringValue: String(value) },
+						}),
+					),
+				},
+				scopeSpans: [
+					{
+						scope: {
+							name: scope.name,
+							version: scope.version ?? undefined,
+						},
+						spans: scopeSpans.map((span) => {
+							// microseconds → nanoseconds using BigInt, then stringify (no Number() precision loss)
+							const startNs = BigInt(span.timestamp) * 1000n;
+							const durationUs = Math.max(span.duration, 1); // guard zero-duration
+							const endNs = startNs + BigInt(durationUs) * 1000n;
+
+							return {
+								traceId: span.traceId.toLowerCase().padStart(32, "0"),
+								spanId: span.id.toLowerCase().padStart(16, "0"),
+								// no parentSpanId: we don't try to infer it
+								name: span.name,
+								kind: span.kind,
+								startTimeUnixNano: startNs.toString(),
+								endTimeUnixNano: endNs.toString(),
+								attributes: Object.entries(span.attributes).map(([key, v]) => ({
+									key,
+									value: toOtlpValue(v),
+								})),
+								status: { code: span.status.code },
+							};
+						}),
+					},
+				],
+			}),
+		),
+	};
+}
+
+export async function POST(request: NextRequest) {
+	return Effect.gen(function* () {
+		const body = (yield* Effect.tryPromise({
+			try: () => request.json(),
+			catch: (error) => new Error(`Failed to parse request body: ${error}`),
+		})) as ConvexWebhookEntry[];
+		if (!Array.isArray(body)) {
+			return yield* Effect.fail(new Error("Expected array of log entries"));
+		}
+
+		const spans: SpanData[] = [];
+
+		for (const entry of body) {
+			if (!entry.message) continue;
+			const span = parseSpanFromMessage(entry.message);
+			if (span) spans.push(span);
+		}
+
+		console.log("Parsed OTEL spans", {
+			entries: body.length,
+			spans: spans.length,
+		});
+
+		if (!spans.length) {
+			return NextResponse.json({ message: "OK", spansProcessed: 0 });
+		}
+
+		const resourceSpans = convertToResourceSpans(spans);
+
+		yield* Effect.tryPromise({
+			try: () => exportSpans(resourceSpans),
+			catch: (error) => new Error(`Failed to export spans: ${error}`),
+		});
+
+		return NextResponse.json({ message: "OK", spansProcessed: spans.length });
+	})
+		.pipe(
+			Effect.catchAll((error) =>
+				Effect.succeed(
+					NextResponse.json({ error: error.message }, { status: 500 }),
+				),
+			),
+		)
+		.pipe(Effect.runPromise);
 }

@@ -18,7 +18,8 @@
 		"@opentelemetry/sdk-trace-base": "^2.2.0",
 		"@opentelemetry/sdk-trace-node": "^2.2.0",
 		"@opentelemetry/sdk-trace-web": "^2.2.0",
-		"effect": "catalog:"
+		"effect": "catalog:",
+		"superjson": "^2.2.5"
 	},
 	"devDependencies": {
 		"@effect/vitest": "^0.25.0",
