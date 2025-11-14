@@ -1,32 +1,156 @@
-import { Effect } from "effect";
+// app/api/convex-otel/route.ts
+/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
 import { type NextRequest, NextResponse } from "next/server";
 
-const OTLP_ENDPOINT = "http://localhost:4318/v1/traces";
+const OTLP_ENDPOINT =
+	process.env.OTLP_HTTP_ENDPOINT ?? "http://localhost:4318/v1/traces";
+
+const OTEL_CONSOLE_MARKER = "__OTEL_SPAN__";
 
 type ConvexWebhookEntry = {
 	timestamp: number;
 	topic: string;
 	message?: string;
+	// other fields exist but are ignored
 };
 
-async function exportSpans(resourceSpans: { resourceSpans: unknown[] }) {
-	const payload = JSON.stringify(resourceSpans);
+type SerializedSpan = {
+	traceId: string;
+	spanId: string;
+	parentSpanId: string | null;
+	name: string;
+	kind: number;
+	startTimeUnixNano: string;
+	endTimeUnixNano: string;
+	attributes: Record<string, unknown>;
+	status: { code: number; message?: string };
+	resource: Record<string, unknown>;
+	scope: { name: string; version?: string };
+};
 
-	console.log("Exporting spans to OTLP", {
-		endpoint: OTLP_ENDPOINT,
-		resourceSpansCount: resourceSpans.resourceSpans.length,
-		payloadSize: payload.length,
-	});
+type OtlpAnyValue =
+	| { stringValue: string }
+	| { boolValue: boolean }
+	| { intValue: number }
+	| { doubleValue: number };
+
+function toOtlpValue(value: unknown): OtlpAnyValue {
+	if (typeof value === "boolean") return { boolValue: value };
+	if (typeof value === "number" && Number.isInteger(value)) {
+		return { intValue: value };
+	}
+	if (typeof value === "number") return { doubleValue: value };
+	return { stringValue: String(value) };
+}
+
+function parseSpanFromMessage(message: string): SerializedSpan | null {
+	const idx = message.indexOf(OTEL_CONSOLE_MARKER);
+	if (idx === -1) return null;
+
+	const jsonPart = message
+		.slice(idx + OTEL_CONSOLE_MARKER.length)
+		.trim()
+		// remove the ' from the start and end of the string
+		.slice(0, -1);
+	if (!jsonPart) return null;
+
+	try {
+		const parsed = JSON.parse(jsonPart) as SerializedSpan;
+		if (!parsed.traceId || !parsed.spanId || !parsed.name) return null;
+		return parsed;
+	} catch (err) {
+		console.warn("Failed to parse OTEL span JSON from message", err);
+		return null;
+	}
+}
+
+function convertToResourceSpans(spans: SerializedSpan[]) {
+	const groups = new Map<
+		string,
+		{
+			resource: Record<string, unknown>;
+			scope: SerializedSpan["scope"];
+			spans: SerializedSpan[];
+		}
+	>();
+
+	for (const span of spans) {
+		const key = JSON.stringify({
+			resource: span.resource,
+			scope: span.scope,
+		});
+
+		const existing = groups.get(key);
+		if (existing) {
+			existing.spans.push(span);
+		} else {
+			groups.set(key, {
+				resource: span.resource,
+				scope: span.scope,
+				spans: [span],
+			});
+		}
+	}
+
+	return {
+		resourceSpans: Array.from(groups.values()).map(
+			({ resource, scope, spans }) => ({
+				resource: {
+					attributes: Object.entries(resource).map(([key, value]) => ({
+						key,
+						value: { stringValue: String(value) },
+					})),
+				},
+				scopeSpans: [
+					{
+						scope: {
+							name: scope.name,
+							...(scope.version ? { version: scope.version } : {}),
+						},
+						spans: spans.map((span) => ({
+							traceId: span.traceId.toLowerCase().padStart(32, "0"),
+							spanId: span.spanId.toLowerCase().padStart(16, "0"),
+							parentSpanId:
+								span.parentSpanId && span.parentSpanId.length > 0
+									? span.parentSpanId.toLowerCase().padStart(16, "0")
+									: undefined,
+							name: span.name,
+							kind: span.kind,
+							startTimeUnixNano: span.startTimeUnixNano,
+							endTimeUnixNano: span.endTimeUnixNano,
+							attributes: Object.entries(span.attributes).map(
+								([key, value]) => ({
+									key,
+									value: toOtlpValue(value),
+								}),
+							),
+							status: {
+								code: span.status.code,
+							},
+						})),
+					},
+				],
+			}),
+		),
+	};
+}
+
+async function exportSpansToCollector(resourceSpans: {
+	resourceSpans: unknown[];
+}) {
+	const payload = JSON.stringify(resourceSpans);
 
 	const response = await fetch(OTLP_ENDPOINT, {
 		method: "POST",
-		headers: { "Content-Type": "application/json" },
+		headers: {
+			"Content-Type": "application/json",
+		},
 		body: payload,
 	});
 
 	if (!response.ok) {
 		const errorText = await response.text().catch(() => "");
-		console.error("OTLP export failed:", {
+		console.error("OTLP export failed", {
 			status: response.status,
 			statusText: response.statusText,
 			error: errorText,
@@ -37,190 +161,41 @@ async function exportSpans(resourceSpans: { resourceSpans: unknown[] }) {
 	}
 }
 
-type OtlpAnyValue =
-	| { stringValue: string }
-	| { boolValue: boolean }
-	| { intValue: number }
-	| { doubleValue: number };
-
-type SpanData = {
-	resource: {
-		attributes: Record<string, string>;
-	};
-	instrumentationScope: {
-		name: string;
-		version?: string | null;
-		schemaUrl?: string | null;
-	};
-	traceId: string;
-	name: string;
-	id: string; // spanId
-	kind: number;
-	timestamp: number; // microseconds since epoch
-	duration: number; // microseconds
-	attributes: Record<string, unknown>;
-	status: { code: number };
-	events: unknown[];
-	links: unknown[];
-};
-
-function parseSpanFromMessage(message: string): SpanData | null {
-	let raw = message.trim();
-
-	// Only care about our OTEL payloads
-	const marker = "__OTEL_SPAN__";
-	const markerIndex = raw.indexOf(marker);
-	if (markerIndex === -1) return null;
-
-	raw = raw.slice(markerIndex + marker.length);
-	// remove the ' from the start and end of the string
-	raw = raw.slice(0, -1);
-
+export async function POST(req: NextRequest) {
 	try {
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		const parsed = JSON.parse(raw) as any;
-		if (
-			parsed &&
-			typeof parsed === "object" &&
-			parsed.traceId &&
-			parsed.id &&
-			parsed.name
-		) {
-			return parsed as SpanData;
-		}
-	} catch (e) {
-		console.log("Raw", raw);
-		console.warn("Failed to parse OTEL span JSON:", e);
-		return null;
-	}
+		const body = (await req.json()) as ConvexWebhookEntry[] | unknown;
 
-	return null;
-}
-
-function toOtlpValue(value: unknown): OtlpAnyValue {
-	if (typeof value === "boolean") return { boolValue: value };
-	if (typeof value === "number" && Number.isInteger(value))
-		return { intValue: value };
-	if (typeof value === "number") return { doubleValue: value };
-	return { stringValue: String(value) };
-}
-
-function convertToResourceSpans(spans: SpanData[]) {
-	// group by (resource.attributes + instrumentationScope)
-	const groups = new Map<
-		string,
-		{
-			resource: SpanData["resource"];
-			scope: SpanData["instrumentationScope"];
-			spans: SpanData[];
-		}
-	>();
-
-	for (const span of spans) {
-		const key = JSON.stringify({
-			resource: span.resource.attributes,
-			scope: span.instrumentationScope,
-		});
-
-		const existing = groups.get(key);
-		if (existing) {
-			existing.spans.push(span);
-		} else {
-			groups.set(key, {
-				resource: span.resource,
-				scope: span.instrumentationScope,
-				spans: [span],
-			});
-		}
-	}
-
-	return {
-		resourceSpans: Array.from(groups.values()).map(
-			({ resource, scope, spans: scopeSpans }) => ({
-				resource: {
-					attributes: Object.entries(resource.attributes).map(
-						([key, value]) => ({
-							key,
-							value: { stringValue: String(value) },
-						}),
-					),
-				},
-				scopeSpans: [
-					{
-						scope: {
-							name: scope.name,
-							version: scope.version ?? undefined,
-						},
-						spans: scopeSpans.map((span) => {
-							// microseconds → nanoseconds using BigInt, then stringify (no Number() precision loss)
-							const startNs = BigInt(span.timestamp) * 1000n;
-							const durationUs = Math.max(span.duration, 1); // guard zero-duration
-							const endNs = startNs + BigInt(durationUs) * 1000n;
-
-							return {
-								traceId: span.traceId.toLowerCase().padStart(32, "0"),
-								spanId: span.id.toLowerCase().padStart(16, "0"),
-								// no parentSpanId: we don't try to infer it
-								name: span.name,
-								kind: span.kind,
-								startTimeUnixNano: startNs.toString(),
-								endTimeUnixNano: endNs.toString(),
-								attributes: Object.entries(span.attributes).map(([key, v]) => ({
-									key,
-									value: toOtlpValue(v),
-								})),
-								status: { code: span.status.code },
-							};
-						}),
-					},
-				],
-			}),
-		),
-	};
-}
-
-export async function POST(request: NextRequest) {
-	return Effect.gen(function* () {
-		const body = (yield* Effect.tryPromise({
-			try: () => request.json(),
-			catch: (error) => new Error(`Failed to parse request body: ${error}`),
-		})) as ConvexWebhookEntry[];
 		if (!Array.isArray(body)) {
-			return yield* Effect.fail(new Error("Expected array of log entries"));
+			return NextResponse.json(
+				{ error: "Expected array of log entries" },
+				{ status: 400 },
+			);
 		}
 
-		const spans: SpanData[] = [];
+		const spans: SerializedSpan[] = [];
 
-		for (const entry of body) {
+		for (const entry of body as ConvexWebhookEntry[]) {
 			if (!entry.message) continue;
 			const span = parseSpanFromMessage(entry.message);
 			if (span) spans.push(span);
 		}
 
-		console.log("Parsed OTEL spans", {
-			entries: body.length,
-			spans: spans.length,
-		});
-
-		if (!spans.length) {
+		if (spans.length === 0) {
 			return NextResponse.json({ message: "OK", spansProcessed: 0 });
 		}
 
 		const resourceSpans = convertToResourceSpans(spans);
+		await exportSpansToCollector(resourceSpans);
 
-		yield* Effect.tryPromise({
-			try: () => exportSpans(resourceSpans),
-			catch: (error) => new Error(`Failed to export spans: ${error}`),
+		return NextResponse.json({
+			message: "OK",
+			spansProcessed: spans.length,
 		});
-
-		return NextResponse.json({ message: "OK", spansProcessed: spans.length });
-	})
-		.pipe(
-			Effect.catchAll((error) =>
-				Effect.succeed(
-					NextResponse.json({ error: error.message }, { status: 500 }),
-				),
-			),
-		)
-		.pipe(Effect.runPromise);
+	} catch (error: any) {
+		console.error("Error handling Convex OTEL webhook", error);
+		return NextResponse.json(
+			{ error: error?.message ?? "Unknown error" },
+			{ status: 500 },
+		);
+	}
 }

@@ -3,13 +3,13 @@ import * as Resource from "@effect/opentelemetry/Resource";
 import * as Tracer from "@effect/opentelemetry/Tracer";
 import {
 	BasicTracerProvider,
-	ConsoleSpanExporter,
 	SimpleSpanProcessor,
 } from "@opentelemetry/sdk-trace-base";
 import * as Clock from "effect/Clock";
 import * as Effect from "effect/Effect";
 import type * as LayerType from "effect/Layer";
 import * as Layer from "effect/Layer";
+import { JsonConsoleSpanExporter } from "./json-exporter";
 
 /**
  * Strongly typed service names used for OpenTelemetry instrumentation.
@@ -66,7 +66,7 @@ export const createConvexOtelLayer = (
 ): LayerType.Layer<Resource.Resource> => {
 	const ResourceLayer = Resource.layer({ serviceName });
 
-	const spanProcessor = new SimpleSpanProcessor(new ConsoleSpanExporter());
+	const spanProcessor = new SimpleSpanProcessor(new JsonConsoleSpanExporter());
 
 	const TracerProviderLayer = layerTracerProvider(spanProcessor);
 
