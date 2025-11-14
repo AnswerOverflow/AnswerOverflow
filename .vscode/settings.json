@@ -1,7 +1,7 @@
 {
-	"files.exclude": {
-		"**/.context": true
-	},
+	// "files.exclude": {
+	// 	"**/.context": true
+	// },
 	"search.exclude": {
 		"**/.context": true
 	},
