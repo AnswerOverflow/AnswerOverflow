@@ -8,8 +8,9 @@
  * @module
  */
 
-import type * as dashboard from "../dashboard.js";
-import type * as dashboard_mutations from "../dashboard_mutations.js";
+import type * as client_authenticated from "../client/authenticated.js";
+import type * as client_index from "../client/index.js";
+import type * as client_publicInternal from "../client/publicInternal.js";
 import type * as http from "../http.js";
 import type * as public_channels from "../public/channels.js";
 import type * as public_dashboard from "../public/dashboard.js";
@@ -23,7 +24,6 @@ import type * as publicInternal_channels from "../publicInternal/channels.js";
 import type * as publicInternal_discord_accounts from "../publicInternal/discord_accounts.js";
 import type * as publicInternal_ignored_discord_accounts from "../publicInternal/ignored_discord_accounts.js";
 import type * as publicInternal_messages from "../publicInternal/messages.js";
-import type * as publicInternal_publicInternal from "../publicInternal/publicInternal.js";
 import type * as publicInternal_server_preferences from "../publicInternal/server_preferences.js";
 import type * as publicInternal_servers from "../publicInternal/servers.js";
 import type * as publicInternal_user_server_settings from "../publicInternal/user_server_settings.js";
@@ -39,8 +39,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  dashboard: typeof dashboard;
-  dashboard_mutations: typeof dashboard_mutations;
+  "client/authenticated": typeof client_authenticated;
+  "client/index": typeof client_index;
+  "client/publicInternal": typeof client_publicInternal;
   http: typeof http;
   "public/channels": typeof public_channels;
   "public/dashboard": typeof public_dashboard;
@@ -54,7 +55,6 @@ declare const fullApi: ApiFromModules<{
   "publicInternal/discord_accounts": typeof publicInternal_discord_accounts;
   "publicInternal/ignored_discord_accounts": typeof publicInternal_ignored_discord_accounts;
   "publicInternal/messages": typeof publicInternal_messages;
-  "publicInternal/publicInternal": typeof publicInternal_publicInternal;
   "publicInternal/server_preferences": typeof publicInternal_server_preferences;
   "publicInternal/servers": typeof publicInternal_servers;
   "publicInternal/user_server_settings": typeof publicInternal_user_server_settings;
