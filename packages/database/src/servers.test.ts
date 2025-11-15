@@ -177,12 +177,15 @@ it.scoped("getBiggestServers updates when member counts change", () =>
 		yield* database.servers.upsertServer(serverB);
 
 		// Get biggest servers
-		const liveData = yield* database.servers.getBiggestServers({ take: 2 });
+		const liveData = yield* database.servers.getBiggestServers(
+			{ take: 2 },
+			{ subscribe: true },
+		);
 
 		// Should be ordered: B (200), A (100)
-		expect(liveData?.length).toBe(2);
-		expect(liveData?.[0]?.discordId).toBe("serverB");
-		expect(liveData?.[1]?.discordId).toBe("serverA");
+		expect(liveData?.data?.length).toBe(2);
+		expect(liveData?.data?.[0]?.discordId).toBe("serverB");
+		expect(liveData?.data?.[1]?.discordId).toBe("serverA");
 
 		// Update serverA to have more members
 		const serverALiveData = yield* database.servers.getServerByDiscordId({
@@ -204,8 +207,8 @@ it.scoped("getBiggestServers updates when member counts change", () =>
 		});
 
 		// Order should change: A (300), B (200)
-		expect(liveData?.[0]?.discordId).toBe("serverA");
-		expect(liveData?.[1]?.discordId).toBe("serverB");
+		expect(liveData?.data?.[0]?.discordId).toBe("serverA");
+		expect(liveData?.data?.[1]?.discordId).toBe("serverB");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -246,11 +249,14 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 		}
 
 		// Get many by IDs
-		const liveData = yield* database.servers.findManyServersById({
-			ids: [s1Id, s2Id, s3Id],
-		});
+		const liveData = yield* database.servers.findManyServersById(
+			{
+				ids: [s1Id, s2Id, s3Id],
+			},
+			{ subscribe: true },
+		);
 
-		expect(liveData?.length).toBe(3);
+		expect(liveData?.data?.length).toBe(3);
 
 		// Update one server
 		const updatedS1: Server = {
@@ -260,9 +266,9 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 		yield* database.servers.updateServer({ id: s1Id, data: updatedS1 });
 
 		// LiveData should reflect the update
-		const updatedServer = liveData?.find((s) => s._id === s1Id);
+		const updatedServer = liveData?.data?.find((s) => s._id === s1Id);
 		expect(updatedServer?.name).toBe("Updated Server 1");
-		expect(liveData?.length).toBe(3);
+		expect(liveData?.data?.length).toBe(3);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
