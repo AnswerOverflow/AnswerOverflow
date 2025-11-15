@@ -53,9 +53,11 @@ it.scoped(
 			);
 
 			// Verify that only 1 query was made despite 5 calls to getServerByDiscordId
+			// Note: The actual query args include backendAccessToken, but getQueryCallCount
+			// tracks calls by the args passed to onUpdate, which should match what we pass here
 			const queryCallCount = convexClientTest.getQueryCallCount(
 				api.public.servers.publicGetServerByDiscordId,
-				{ discordId: "123" },
+				{ discordId: "123", backendAccessToken: "test-backend-access-token" },
 			);
 			expect(queryCallCount).toBe(1);
 

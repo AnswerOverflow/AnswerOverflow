@@ -24,3 +24,5 @@ each of those get their own query functions, keep the default ones banned
 
 
 - we need to improve the way OTEL is done in convex/
+
+setup react grab
