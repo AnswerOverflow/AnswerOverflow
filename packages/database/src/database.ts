@@ -71,11 +71,6 @@ export const service = Effect.gen(function* () {
 			),
 		);
 
-	const getServerById = (id: Id<"servers">) =>
-		watchQueryToLiveData(({ api }) => api.public.servers.publicGetServerById, {
-			id,
-		});
-
 	const getServerByDiscordId = (discordId: string) =>
 		watchQueryToLiveData(
 			({ api }) => api.public.servers.publicGetServerByDiscordId,
@@ -84,67 +79,11 @@ export const service = Effect.gen(function* () {
 			},
 		);
 
-	const findServerByAlias = (alias: string) =>
-		watchQueryToLiveData(
-			({ api }) => api.public.servers.publicFindServerByAlias,
-			{
-				alias,
-			},
-		);
-
-	const findServerByAliasOrId = (aliasOrId: string) =>
-		watchQueryToLiveData(
-			({ api }) => api.public.servers.publicFindServerByAliasOrId,
-			{
-				aliasOrId,
-			},
-		);
-
-	const findServerByCustomDomain = (domain: string) =>
-		watchQueryToLiveData(
-			({ api }) => api.public.servers.publicFindServerByCustomDomain,
-			{
-				domain,
-			},
-		);
-
-	const findServerByStripeCustomerId = (stripeCustomerId: string) =>
-		watchQueryToLiveData(
-			({ api }) => api.public.servers.publicFindServerByStripeCustomerId,
-			{
-				stripeCustomerId,
-			},
-		);
-
-	const findServerByStripeSubscriptionId = (stripeSubscriptionId: string) =>
-		watchQueryToLiveData(
-			({ api }) => api.public.servers.publicFindServerByStripeSubscriptionId,
-			{
-				stripeSubscriptionId,
-			},
-		);
-
 	const findManyServersById = (ids: Id<"servers">[]) =>
 		watchQueryToLiveData(
 			({ api }) => api.public.servers.publicFindManyServersById,
 			{
 				ids,
-			},
-		);
-
-	const getBiggestServers = (take: number) =>
-		watchQueryToLiveData(
-			({ api }) => api.public.servers.publicGetBiggestServers,
-			{
-				take,
-			},
-		);
-
-	const findServerByIdWithChannels = (id: Id<"servers">) =>
-		watchQueryToLiveData(
-			({ api }) => api.public.servers.publicFindServerByIdWithChannels,
-			{
-				id,
 			},
 		);
 
@@ -941,16 +880,8 @@ export const service = Effect.gen(function* () {
 			upsertServer,
 			createServer,
 			updateServer,
-			getServerById,
 			getServerByDiscordId,
-			findServerByAlias,
-			findServerByAliasOrId,
-			findServerByCustomDomain,
-			findServerByStripeCustomerId,
-			findServerByStripeSubscriptionId,
 			findManyServersById,
-			getBiggestServers,
-			findServerByIdWithChannels,
 			publicGetAllServers,
 		},
 		channels: {
