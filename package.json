@@ -48,7 +48,6 @@
 			"tailwindcss": "^4.1.11",
 			"@tailwindcss/postcss": "^4.1.11",
 			"typescript": "^5.9.2",
-			"zod": "^4.1.12",
 			"nuqs": "2.7.3"
 		}
 	},

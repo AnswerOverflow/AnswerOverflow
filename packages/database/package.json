@@ -5,7 +5,7 @@
 		"./*": "./src/*.ts",
 		"./convex/shared/*": "./convex/shared/*.ts",
 		"./convex/*": {
-			"types": "./convex/*.d.js",
+			"types": "./convex/*.d.ts",
 			"default": "./convex/*.js"
 		}
 	},

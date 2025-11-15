@@ -190,8 +190,6 @@ export type UserServerSettings = Infer<typeof userServerSettingsSchema>;
 export type Message = Infer<typeof messageSchema>;
 export type Attachment = Infer<typeof attachmentSchema>;
 export type Emoji = Infer<typeof emojiSchema>;
-export type Reaction = Infer<typeof reactionSchema>;
-export type Embed = Infer<typeof embedSchema>;
 
 export default defineSchema({
 	servers: defineTable(serverSchema).index("by_discordId", ["discordId"]),

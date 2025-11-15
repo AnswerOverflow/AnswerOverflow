@@ -4,6 +4,13 @@
 		".context/**",
 		"packages/ui/src/components/**",
 		"packages/convex-test/**",
-		"**/_generated/**"
-	]
+		"**/_generated/**",
+		"packages/ui/src/styles/globals.css"
+	],
+	"ignoreBinaries": ["wait"],
+	"workspaces": {
+		"packages/database": {
+			"ignore": ["convex/**/*.d.js"]
+		}
+	}
 }

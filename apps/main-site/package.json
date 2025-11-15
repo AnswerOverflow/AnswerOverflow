@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"@convex-dev/better-auth": "catalog:",
-		"@convex-dev/react-query": "catalog:",
+		"@effect/language-service": "^0.56.0",
 		"@packages/database": "workspace:*",
 		"@packages/observability": "workspace:*",
 		"@packages/ui": "workspace:*",

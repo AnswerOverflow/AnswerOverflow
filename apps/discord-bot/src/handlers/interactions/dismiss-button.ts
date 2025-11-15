@@ -9,7 +9,7 @@ const DISMISS_OVERRIDE_PERMISSIONS = [
 	PermissionFlagsBits.Administrator,
 ];
 
-export class DismissError extends Error {
+class DismissError extends Error {
 	constructor(
 		public reason: string,
 		message: string,
