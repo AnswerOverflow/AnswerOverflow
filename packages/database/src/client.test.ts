@@ -56,11 +56,16 @@ it.scoped(
 			// Note: The actual query args include backendAccessToken, but getQueryCallCount
 			// tracks calls by the args passed to onUpdate, which should match what we pass here
 			const queryCallCount = convexClientTest.getQueryCallCount(
+				api.publicInternal.servers.getServerByDiscordId,
+				{ discordId: "123", backendAccessToken: "test-backend-access-token" },
+			);
+			const otherQueryCallCount = convexClientTest.getQueryCallCount(
 				api.public.servers.publicGetServerByDiscordId,
+				// @ts-expect-error - intentionally passing wrong args to verify functions are tracked separately
 				{ discordId: "123", backendAccessToken: "test-backend-access-token" },
 			);
 			expect(queryCallCount).toBe(1);
-
+			expect(otherQueryCallCount).toBe(0);
 			// Data should already be loaded due to defer mechanism
 			// Verify all results are correct
 			for (const result of results) {

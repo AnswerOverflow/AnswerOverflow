@@ -1884,8 +1884,11 @@ function withAuth(auth: AuthFake = new AuthFake()) {
 		args: FunctionArgs<Query>,
 	) => {
 		const argsKey = JSON.stringify(args);
-		const queryStr = JSON.stringify(query);
-		const key = `${queryStr}:${argsKey}`;
+		// Use getFunctionAddress to get a unique identifier for the function
+		// This ensures different functions (even with similar names) are tracked separately
+		const functionAddress = getFunctionAddress(query);
+		const functionIdentifier = JSON.stringify(functionAddress);
+		const key = `${functionIdentifier}:${argsKey}`;
 		return queryCallCounts.get(key) ?? 0;
 	};
 
@@ -2151,8 +2154,11 @@ function withAuth(auth: AuthFake = new AuthFake()) {
 		) => {
 			// Track query call - use string key matching getQueryCallCount
 			const argsKey = JSON.stringify(args);
-			const queryStr = JSON.stringify(query);
-			const queryKey = `${queryStr}:${argsKey}`;
+			// Use getFunctionAddress to get a unique identifier for the function
+			// This ensures different functions (even with similar names) are tracked separately
+			const functionAddress = getFunctionAddress(query);
+			const functionIdentifier = JSON.stringify(functionAddress);
+			const queryKey = `${functionIdentifier}:${argsKey}`;
 			queryCallCounts.set(queryKey, (queryCallCounts.get(queryKey) ?? 0) + 1);
 
 			// Create a refresh function that queries and calls callback

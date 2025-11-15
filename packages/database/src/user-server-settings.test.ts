@@ -61,7 +61,7 @@ it.scoped(
 );
 
 // TODO: Run this test as the authed user
-/ /  it; .scoped("upsertUserServerSettings creates or updates settings", () =>
+// it.scoped("upsertUserServerSettings creates or updates settings", () =>
 // 	Effect.gen(function* () {
 // 		const database = yield* Database;
 
