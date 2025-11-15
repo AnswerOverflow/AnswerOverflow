@@ -31,7 +31,7 @@ export function CustomDomainConfigurator({
 	);
 
 	const updateCustomDomain = useMutation(
-		api.dashboard_mutations.updateCustomDomain,
+		api.public.dashboard_mutations.updateCustomDomain,
 	);
 
 	const currentDomain = dashboardData?.server.customDomain ?? null;

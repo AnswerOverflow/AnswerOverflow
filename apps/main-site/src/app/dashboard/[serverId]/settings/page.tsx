@@ -67,7 +67,7 @@ export default function SettingsPage() {
 	);
 
 	const updateServerPreferences = useMutation(
-		api.dashboard_mutations.updateServerPreferencesFlags,
+		api.public.dashboard_mutations.updateServerPreferencesFlags,
 	).withOptimisticUpdate((localStore, args) => {
 		const currentData = localStore.getQuery(
 			api.public.dashboard_queries.getDashboardData,

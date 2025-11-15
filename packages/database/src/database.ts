@@ -87,9 +87,9 @@ export const service = Effect.gen(function* () {
 			},
 		);
 
-	const publicGetAllServers = () =>
+	const getAllServers = () =>
 		watchQueryToLiveData(
-			({ api }) => api.publicInternal.servers.publicGetAllServers,
+			({ api }) => api.publicInternal.servers.getAllServers,
 			{
 				backendAccessToken,
 			},
@@ -884,6 +884,15 @@ export const service = Effect.gen(function* () {
 			},
 		);
 
+	const getServerByDiscordIdWithChannels = (discordId: string) =>
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.servers.getServerByDiscordIdWithChannels,
+			{
+				backendAccessToken,
+				discordId,
+			},
+		);
+
 	return {
 		servers: {
 			upsertServer,
@@ -891,8 +900,9 @@ export const service = Effect.gen(function* () {
 			updateServer,
 			getServerByDiscordId,
 			findManyServersById,
-			publicGetAllServers,
+			getAllServers,
 			getBiggestServers,
+			getServerByDiscordIdWithChannels,
 		},
 		channels: {
 			getChannelByDiscordId,

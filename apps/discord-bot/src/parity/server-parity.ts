@@ -226,7 +226,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					),
 				);
 
-				const servers = yield* database.servers.publicGetAllServers();
+				const servers = yield* database.servers.getAllServers();
 				// LiveData might not have data immediately, so we handle undefined
 				const serverCount = servers?.data?.length ?? 0;
 				yield* Console.log(

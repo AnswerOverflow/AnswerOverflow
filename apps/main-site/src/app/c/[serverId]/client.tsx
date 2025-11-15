@@ -1,3 +1,5 @@
+/*
+
 "use client";
 
 import { convexQuery } from "@convex-dev/react-query";
@@ -28,10 +30,7 @@ import Link from "next/link";
 import { parseAsString, useQueryState } from "nuqs";
 import { useMemo } from "react";
 
-type ServerWithChannels = Server & {
-	_id: Id<"servers">;
-	channels: Channel[];
-};
+type ServerWithChannels = Server;
 
 type ChannelWithName = Pick<Channel, "id" | "name" | "type"> & {
 	inviteCode?: string;
@@ -107,86 +106,6 @@ export function ChannelPageClient(props: {
 	selectedChannel?: Channel;
 	threads?: ThreadWithMessage[];
 }) {
-	// For now, use initial threads data since we need messages for each thread
-	// TODO: Fetch messages for live threads when they update
-	const threads = props.threads;
-
-	// Read search query from URL (updates immediately)
-	const [searchQuery] = useQueryState("q", parseAsString.withDefault(""));
-
-	// Debounce the query for Convex requests
-	const trimmedQuery = searchQuery?.trim() ?? "";
-	const debouncedQuery = useDebounce(trimmedQuery, 300);
-
-	const hasSearchQuery = debouncedQuery.length > 0;
-
-	const { data: searchResults } = useQuery({
-		...convexQuery(api.public.messages.searchMessages, {
-			query: debouncedQuery,
-			serverId: props.server._id,
-			channelId: props.selectedChannel?.id,
-			limit: 20,
-		}),
-		enabled: hasSearchQuery,
-	});
-
-	// Get unique author IDs for both search results and threads
-	const searchAuthorIds = useMemo(
-		() =>
-			searchResults
-				? [
-						...new Set(
-							searchResults.map((r: SearchResult) => r.message.authorId),
-						),
-					]
-				: [],
-		[searchResults],
-	);
-	const threadAuthorIds = useMemo(
-		() => (threads ? [...new Set(threads.map((t) => t.message.authorId))] : []),
-		[threads],
-	);
-	const allAuthorIds = useMemo(
-		() => [...new Set([...searchAuthorIds, ...threadAuthorIds])],
-		[searchAuthorIds, threadAuthorIds],
-	);
-
-	const channelIds = useMemo(
-		() =>
-			searchResults
-				? [
-						...new Set(
-							searchResults.map((r: SearchResult) => r.message.channelId),
-						),
-					]
-				: [],
-		[searchResults],
-	);
-
-	// Fetch authors and channels for search results and threads
-	const { data: authors } = useQuery({
-		...convexQuery(api.public.discord_accounts.findManyDiscordAccountsById, {
-			ids: allAuthorIds,
-		}),
-		enabled: allAuthorIds.length > 0,
-	});
-
-	const { data: channels } = useQuery({
-		...convexQuery(api.public.channels.findManyChannelsById, {
-			ids: channelIds,
-		}),
-		enabled: channelIds.length > 0,
-	});
-
-	const authorMap = useMemo(
-		() => new Map((authors ?? []).map((a: DiscordAccount) => [a.id, a])),
-		[authors],
-	);
-	const channelMap = useMemo(
-		() => new Map((channels ?? []).map((c: Channel) => [c.id, c])),
-		[channels],
-	);
-
 	const HeroArea = () => {
 		return (
 			<div className="border-b border-sidebar-border bg-sidebar">
@@ -509,3 +428,4 @@ export function ChannelPageClient(props: {
 		</div>
 	);
 }
+*/

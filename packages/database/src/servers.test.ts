@@ -325,7 +325,7 @@ it.scoped("multiple queries update correctly when server data changes", () =>
 		// Set up multiple queries watching the same server
 		const byDiscordId = yield* database.servers.getServerByDiscordId("123");
 		const byAlias = yield* database.servers.findServerByAlias("test");
-		const allServers = yield* database.servers.publicGetAllServers();
+		const allServers = yield* database.servers.getAllServers();
 
 		// All should have initial data
 		expect(byDiscordId?.data?.name).toBe("Test Server");

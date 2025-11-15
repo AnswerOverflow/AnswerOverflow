@@ -86,7 +86,7 @@ export const upsertServerExternal = publicInternalMutation({
  * Public internal query: Get all servers
  * Requires backend access token - returns all server data
  */
-export const publicGetAllServers = publicInternalQuery({
+export const getAllServers = publicInternalQuery({
 	args: {},
 	handler: async (ctx) => {
 		return await ctx.db.query("servers").collect();
@@ -102,5 +102,28 @@ export const getBiggestServers = publicInternalQuery({
 		return allServers
 			.sort((a, b) => b.approximateMemberCount - a.approximateMemberCount)
 			.slice(0, args.take);
+	},
+});
+
+export const getServerByDiscordIdWithChannels = publicInternalQuery({
+	args: {
+		discordId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const server = await ctx.db
+			.query("servers")
+			.withIndex("by_discordId", (q) => q.eq("discordId", args.discordId))
+			.first();
+		if (!server) {
+			return null;
+		}
+		const channels = await ctx.db
+			.query("channels")
+			.withIndex("by_serverId", (q) => q.eq("serverId", server._id))
+			.collect();
+		return {
+			server,
+			channels,
+		};
 	},
 });

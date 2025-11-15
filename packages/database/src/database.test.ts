@@ -122,7 +122,7 @@ it.scoped("different queries create different LiveData instances", () =>
 
 		// Get live data from different queries
 		const liveData1 = yield* database.servers.getServerByDiscordId("123");
-		const liveData2 = yield* database.servers.publicGetAllServers();
+		const liveData2 = yield* database.servers.getAllServers();
 
 		// Should be different instances
 		expect(liveData1).not.toBe(liveData2);
@@ -285,7 +285,7 @@ it.scoped("LiveData can be reacquired after cleanup", () =>
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
-it.scoped("publicGetAllServers updates when any server changes", () =>
+it.scoped("getAllServers updates when any server changes", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
@@ -293,7 +293,7 @@ it.scoped("publicGetAllServers updates when any server changes", () =>
 		yield* database.servers.upsertServer(server);
 
 		// Get live data for all servers
-		const liveData = yield* database.servers.publicGetAllServers();
+		const liveData = yield* database.servers.getAllServers();
 
 		// Should have one server
 		expect(liveData?.data?.length).toBe(1);
@@ -329,8 +329,8 @@ it.scoped("LiveData handles queries with no args", () =>
 		yield* database.servers.upsertServer(server);
 
 		// Get live data for query with no args
-		const liveData1 = yield* database.servers.publicGetAllServers();
-		const liveData2 = yield* database.servers.publicGetAllServers();
+		const liveData1 = yield* database.servers.getAllServers();
+		const liveData2 = yield* database.servers.getAllServers();
 
 		// Should be the same instance (deduplication)
 		expect(liveData1).toBe(liveData2);
