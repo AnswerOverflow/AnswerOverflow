@@ -1,6 +1,5 @@
 "use client";
 
-import { convexQuery } from "@convex-dev/react-query";
 import type { Id } from "@packages/database/convex/_generated/dataModel";
 import type {
 	Attachment,
@@ -14,9 +13,7 @@ import {
 	AvatarImage,
 } from "@packages/ui/components/avatar";
 import { DiscordMarkdown } from "@packages/ui/markdown";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { api } from "../../../../../../packages/database/convex/_generated/api";
 
 type MessagePageData = {
 	messages: Array<{
@@ -170,13 +167,7 @@ function MessageEmbed({ embed }: { embed: Embed }) {
 }
 
 export function MessagePageClient(props: { data: MessagePageData }) {
-	const { data: liveData } = useQuery({
-		...convexQuery(api.public.messages.getMessagePageData, {
-			messageId: props.data.messages[0]?.message.id ?? "",
-		}),
-	});
-
-	const data = liveData ?? props.data;
+	const data = props.data;
 
 	if (!data) {
 		return (
