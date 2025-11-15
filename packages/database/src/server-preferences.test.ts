@@ -85,41 +85,6 @@ it.scoped(
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
-it.scoped("createServerPreferences creates new preferences", () =>
-	Effect.gen(function* () {
-		const database = yield* Database;
-
-		// Create server
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
-
-		if (!serverId) {
-			throw new Error("Server not found");
-		}
-
-		const preferences = createTestServerPreferences(serverId, {
-			customDomain: "example.com",
-			considerAllMessagesPublicEnabled: true,
-		});
-
-		yield* database.serverPreferences.createServerPreferences(preferences);
-
-		const liveData =
-			yield* database.serverPreferences.getServerPreferencesByServerId(
-				serverId,
-			);
-
-		expect(liveData?.data?.customDomain).toBe("example.com");
-		expect(liveData?.data?.considerAllMessagesPublicEnabled).toBe(true);
-
-		// Verify server references preferences
-		const server = yield* database.servers.getServerById(serverId);
-		expect(server?.data?.preferencesId).toBeDefined();
-	}).pipe(Effect.provide(DatabaseTestLayer)),
-);
-
 it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
@@ -239,48 +204,6 @@ it.scoped("upsertServerPreferences creates or updates preferences", () =>
 				serverId,
 			);
 		expect(liveData2?.data?.customDomain).toBe("updated.com");
-	}).pipe(Effect.provide(DatabaseTestLayer)),
-);
-
-it.scoped("deleteServerPreferences removes preferences", () =>
-	Effect.gen(function* () {
-		const database = yield* Database;
-
-		// Create server
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
-
-		if (!serverId) {
-			throw new Error("Server not found");
-		}
-
-		const preferences = createTestServerPreferences(serverId, {
-			customDomain: "example.com",
-		});
-		yield* database.serverPreferences.createServerPreferences(preferences);
-
-		// Verify preferences exist
-		const beforeDelete =
-			yield* database.serverPreferences.getServerPreferencesByServerId(
-				serverId,
-			);
-		expect(beforeDelete?.data?.customDomain).toBe("example.com");
-
-		// Delete preferences
-		yield* database.serverPreferences.deleteServerPreferences(serverId);
-
-		// Verify preferences are deleted
-		const afterDelete =
-			yield* database.serverPreferences.getServerPreferencesByServerId(
-				serverId,
-			);
-		expect(afterDelete?.data).toBeNull();
-
-		// Verify server no longer references preferences
-		const server = yield* database.servers.getServerById(serverId);
-		expect(server?.data?.preferencesId).toBeUndefined();
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 

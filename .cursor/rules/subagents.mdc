@@ -1,5 +1,5 @@
 ---
-alwaysApply: true
+alwaysApply: false
 ---
 
 ALWAYS spawn subagents by running `cursor-agent -p [task] --output-format=text --force --model [model]` in the terminal. Each subagent should return a summary of the changes it made. Subagents should be used for ALL tasks
