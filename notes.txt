@@ -14,88 +14,13 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 - https://www.convex.dev/components/workpool may be relevant
 
 
+organize as:
+    publicInternal/
+    authenticated/
+    public/
+    
+each of those get their own query functions, keep the default ones banned
 
 
 
-
-
-slop:
-
-### Discord Bot (High Priority)
-**Commands:**
-- Quick Action command — context menu to redirect messages to help channels
-- Consent command — slash command for managing consent
-
-**Handlers:**
-- Leave server button handler — handles leaving server interactions
-- Consent button handler — handles consent button interactions
-
-**Event Listeners:**
-- Forum post guidelines consent — handles forum post consent flow
-- On question ask — triggers when questions are asked
-- Read the rules consent — handles read-the-rules consent flow
-
-**Jobs/Scheduled Tasks:**
-- Sitemap generator — generates sitemaps for SEO
-- Stats reporter — reports status to Vestaboard
-- Status update — updates Discord bot status
-
-**Parity Listeners:**
-- Cache parity — syncs cache between systems
-- Channel parity — syncs channel data
-- Guild parity — syncs guild/server data
-- Message parity — syncs message data
-- User parity — syncs user data
-
-### Dashboard App
-
-**Pages:**
-- Integrations page — manage integrations
-- Settings page — full settings implementation
-- Onboarding flow — user onboarding pages
-
-**Components:**
-- Domain component — domain management
-- Home component — dashboard home
-- Navbar component — navigation bar
-- Tier access only component — access control
-- Loading spinner component — loading states
-
-**API Integration:**
-- TRPC routes — API routes (may need Convex adaptation)
-- Stripe webhook — payment processing
-
-### Main Site App
-
-**Pages:**
-- Contributors page
-- Cookies page
-- EULA page
-- Empty state page
-- Posts listing page
-- Pricing pages (with slug support)
-- Privacy policy page
-- Terms of Service page
-- About page
-- App-auth page (auto sign-in)
-
-**Features:**
-- Domain-specific routes — multi-tenant routing
-- Sitemap generation — XML sitemaps
-- OG image generation — Open Graph images
-- Robots.txt handling — SEO robots file
-
-### Packages
-
-** Analytics Package:**
-- Typelytics integration
-
-**Env Package:**
-- Environment variable schemas and validation
-- Shared client/server env configs
-
-**Utils Package:**
-- ID utilities (random ID generation)
-- Select utilities (pick/omit)
-- Sitemap utilities
-- Type utilities
+- we need to improve the way OTEL is done in convex/

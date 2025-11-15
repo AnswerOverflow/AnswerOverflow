@@ -92,3 +92,15 @@ export const publicGetAllServers = publicInternalQuery({
 		return await ctx.db.query("servers").collect();
 	},
 });
+
+export const getBiggestServers = publicInternalQuery({
+	args: {
+		take: v.number(),
+	},
+	handler: async (ctx, args) => {
+		const allServers = await ctx.db.query("servers").collect();
+		return allServers
+			.sort((a, b) => b.approximateMemberCount - a.approximateMemberCount)
+			.slice(0, args.take);
+	},
+});

@@ -653,6 +653,15 @@ export const service = Effect.gen(function* () {
 			),
 		);
 
+	const getBiggestServers = (take: number) =>
+		watchQueryToLiveData(
+			({ api }) => api.publicInternal.servers.getBiggestServers,
+			{
+				backendAccessToken,
+				take,
+			},
+		);
+
 	const upsertDiscordAccount = (account: DiscordAccount) =>
 		convexClient.use((client: ConvexClientShared, convexApi) =>
 			client.mutation(
@@ -883,6 +892,7 @@ export const service = Effect.gen(function* () {
 			getServerByDiscordId,
 			findManyServersById,
 			publicGetAllServers,
+			getBiggestServers,
 		},
 		channels: {
 			getChannelByDiscordId,
