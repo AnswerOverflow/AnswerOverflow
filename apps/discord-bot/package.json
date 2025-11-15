@@ -17,8 +17,8 @@
 		"effect": "catalog:"
 	},
 	"devDependencies": {
-		"@effect/language-service": "^0.35.2",
-		"@effect/vitest": "^0.25.0",
+		"@effect/language-service": "catalog:",
+		"@effect/vitest": "catalog:",
 		"@packages/typescript-config": "workspace:*",
 		"@types/bun": "latest",
 		"vitest": "catalog:"

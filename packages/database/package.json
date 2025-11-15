@@ -31,8 +31,8 @@
 		"effect": "catalog:"
 	},
 	"devDependencies": {
-		"@edge-runtime/vm": "^5.0.0",
-		"@effect/vitest": "^0.25.0",
+		"@edge-runtime/vm": "catalog:",
+		"@effect/vitest": "catalog:",
 		"@packages/convex-test": "workspace:*",
 		"@packages/observability": "workspace:*",
 		"glob": "^11.0.3",

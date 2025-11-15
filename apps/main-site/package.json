@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"@convex-dev/better-auth": "catalog:",
-		"@effect/language-service": "^0.56.0",
+		"@effect/language-service": "catalog:",
 		"@packages/database": "workspace:*",
 		"@packages/observability": "workspace:*",
 		"@packages/ui": "workspace:*",
@@ -21,7 +21,7 @@
 		"better-auth": "catalog:",
 		"convex": "catalog:",
 		"effect": "catalog:",
-		"lucide-react": "^0.378.0",
+		"lucide-react": "catalog:",
 		"next": "catalog:",
 		"nuqs": "catalog:",
 		"react": "catalog:",
@@ -30,9 +30,9 @@
 	"devDependencies": {
 		"@packages/typescript-config": "workspace:*",
 		"@tailwindcss/postcss": "catalog:",
-		"@types/node": "20.17.32",
-		"@types/react": "19.1.8",
-		"@types/react-dom": "19.1.6",
-		"postcss": "8.5.3"
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"postcss": "catalog:"
 	}
 }

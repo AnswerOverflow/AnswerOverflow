@@ -20,8 +20,8 @@
     "convex": "^1.16.4"
   },
 	"devDependencies": {
-		"@edge-runtime/vm": "^3.2.0",
-		"@types/node": "^20.12.11",
+		"@edge-runtime/vm": "catalog:",
+		"@types/node": "catalog:",
 		"typescript": "catalog:",
 		"vitest": "catalog:"
 	}

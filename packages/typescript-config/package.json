@@ -11,7 +11,7 @@
 		"typecheck": "echo \"No types to check\""
 	},
 	"devDependencies": {
-		"@effect/language-service": "^0.35.2",
+		"@effect/language-service": "catalog:",
 		"next": "^15.0.0"
 	}
 }
