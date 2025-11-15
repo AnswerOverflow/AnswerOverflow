@@ -11,8 +11,6 @@
 		"test:watch": "vitest"
 	},
 	"dependencies": {
-		"@effect/platform": "catalog:",
-		"@effect/platform-bun": "^0.78.0",
 		"@packages/database": "workspace:*",
 		"@packages/observability": "workspace:*",
 		"discord.js": "^14.22.1",

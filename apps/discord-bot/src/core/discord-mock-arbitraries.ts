@@ -10,14 +10,14 @@ const SNOWFLAKE_MAX = 999999999999999999n;
 /**
  * Arbitrary for generating Discord snowflake IDs as strings
  */
-export const snowflakeArb = fc
+const snowflakeArb = fc
 	.bigInt({ min: SNOWFLAKE_MIN, max: SNOWFLAKE_MAX })
 	.map((id) => id.toString());
 
 /**
  * Arbitrary for generating nullable Discord snowflake IDs
  */
-export const nullableSnowflakeArb = fc.oneof(fc.constant(null), snowflakeArb);
+const nullableSnowflakeArb = fc.oneof(fc.constant(null), snowflakeArb);
 
 /**
  * Arbitrary for generating guild data with defaults

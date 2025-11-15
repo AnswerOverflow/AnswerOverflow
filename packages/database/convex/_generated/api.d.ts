@@ -16,7 +16,6 @@ import type * as public_channels from "../public/channels.js";
 import type * as public_dashboard from "../public/dashboard.js";
 import type * as public_dashboard_mutations from "../public/dashboard_mutations.js";
 import type * as public_dashboard_queries from "../public/dashboard_queries.js";
-import type * as public_discord_accounts from "../public/discord_accounts.js";
 import type * as public_messages from "../public/messages.js";
 import type * as public_servers from "../public/servers.js";
 import type * as publicInternal_attachments from "../publicInternal/attachments.js";
@@ -47,7 +46,6 @@ declare const fullApi: ApiFromModules<{
   "public/dashboard": typeof public_dashboard;
   "public/dashboard_mutations": typeof public_dashboard_mutations;
   "public/dashboard_queries": typeof public_dashboard_queries;
-  "public/discord_accounts": typeof public_discord_accounts;
   "public/messages": typeof public_messages;
   "public/servers": typeof public_servers;
   "publicInternal/attachments": typeof publicInternal_attachments;

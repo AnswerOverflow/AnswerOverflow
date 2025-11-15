@@ -645,7 +645,7 @@ function indexGuild(guild: Guild) {
 /**
  * Main indexing function - indexes all guilds
  */
-export function runIndexing() {
+function runIndexing() {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 		const startTime = yield* Clock.currentTimeMillis;

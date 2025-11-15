@@ -10,7 +10,7 @@ import { Config, Console, Effect } from "effect";
 /**
  * Command definitions for the bot
  */
-export const commands = [
+const commands = [
 	// Mark Solution - Context Menu Command
 	new ContextMenuCommandBuilder()
 		.setName("✅ Mark Solution")

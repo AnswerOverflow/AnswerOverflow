@@ -21,7 +21,7 @@ type Components = Record<
 	}>
 >;
 
-export interface DiscordMarkdownProps {
+interface DiscordMarkdownProps {
 	content: string;
 	className?: string;
 }

@@ -25,10 +25,10 @@
 		"@convex-dev/better-auth": "catalog:",
 		"@effect/platform": "catalog:",
 		"@packages/analytics": "workspace:*",
+		"@packages/discord-api": "workspace:*",
 		"convex": "catalog:",
 		"convex-helpers": "^0.1.104",
-		"effect": "catalog:",
-		"openai": "^4.45.0"
+		"effect": "catalog:"
 	},
 	"devDependencies": {
 		"@edge-runtime/vm": "^5.0.0",

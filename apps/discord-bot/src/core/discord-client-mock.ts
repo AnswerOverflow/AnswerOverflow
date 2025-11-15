@@ -15,7 +15,7 @@ import {
 /**
  * Options for creating a mock Discord client service
  */
-export interface DiscordMockOptions {
+interface DiscordMockOptions {
 	/**
 	 * Optional client to use instead of creating a new one
 	 * Useful for overriding specific client behavior

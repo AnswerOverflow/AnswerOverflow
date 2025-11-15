@@ -11,15 +11,14 @@
 	"dependencies": {
 		"@effect/opentelemetry": "^0.59.0",
 		"@effect/platform": "catalog:",
+		"@opentelemetry/core": "^1.30.0",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
 		"@opentelemetry/sdk-trace-base": "^2.2.0",
 		"@opentelemetry/sdk-trace-node": "^2.2.0",
 		"@opentelemetry/sdk-trace-web": "^2.2.0",
-		"effect": "catalog:",
-		"superjson": "^2.2.5"
+		"effect": "catalog:"
 	},
 	"devDependencies": {
-		"@effect/vitest": "^0.25.0",
 		"vitest": "catalog:"
 	}
 }

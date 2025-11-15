@@ -6,7 +6,7 @@ import { ServerIcon } from "@packages/ui/components/server-icon";
 import Image from "next/image";
 import Link from "next/link";
 
-export const ServerCard = (props: { server: Server }) => {
+const ServerCard = (props: { server: Server }) => {
 	const { server } = props;
 	return (
 		<div className="flex max-w-md flex-col gap-3 rounded-lg">

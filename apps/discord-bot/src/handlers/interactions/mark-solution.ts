@@ -115,7 +115,7 @@ export function makeMarkSolutionResponse({
 /**
  * Handles marking a message as a solution via checkmark reaction
  */
-export function handleCheckmarkReactionMarkSolution(
+function handleCheckmarkReactionMarkSolution(
 	reaction: MessageReaction | PartialMessageReaction,
 	user: User | PartialUser,
 ): Effect.Effect<void, unknown, Database> {

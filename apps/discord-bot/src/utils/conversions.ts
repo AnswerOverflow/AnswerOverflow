@@ -44,7 +44,7 @@ export function isAllowedRootChannel(
 	return isAllowedRootChannelType(channel.type);
 }
 
-export function isAllowedThreadType(channelType: number): boolean {
+function isAllowedThreadType(channelType: number): boolean {
 	return ALLOWED_THREAD_TYPES.has(channelType);
 }
 
@@ -53,7 +53,7 @@ export function isAllowedThreadChannel(
 ): channel is PublicThreadChannel {
 	return isAllowedThreadType(channel.type);
 }
-export function isAllowedChannelType(channelType: number): boolean {
+function isAllowedChannelType(channelType: number): boolean {
 	return (
 		isAllowedRootChannelType(channelType) || isAllowedThreadType(channelType)
 	);

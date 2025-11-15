@@ -22,7 +22,7 @@ export class DismissError extends Error {
 /**
  * Parses a dismiss button customId to extract the allowed dismisser ID
  */
-export function parseDismissButtonId(customId: string): string {
+function parseDismissButtonId(customId: string): string {
 	const parts = customId.split(":");
 	if (parts.length !== 2 || parts[0] !== DISMISS_ACTION_PREFIX) {
 		throw new DismissError("invalid-format", "Invalid dismiss button format");
@@ -40,7 +40,7 @@ export function parseDismissButtonId(customId: string): string {
 /**
  * Handles dismissing a message via button interaction
  */
-export function handleDismissMessage({
+function handleDismissMessage({
 	messageToDismiss,
 	dismisser,
 	allowedToDismissId,

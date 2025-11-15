@@ -10,8 +10,6 @@ const serverPreferencesSchema = v.object({
 	subpath: v.optional(v.string()),
 });
 
-export { serverPreferencesSchema };
-
 export const serverSchema = v.object({
 	discordId: v.string(),
 	name: v.string(),
@@ -189,7 +187,6 @@ export type Channel = Infer<typeof channelSchema>;
 export type ChannelSettings = Infer<typeof channelSettingsSchema>;
 export type DiscordAccount = Infer<typeof discordAccountSchema>;
 export type UserServerSettings = Infer<typeof userServerSettingsSchema>;
-export type IgnoredDiscordAccount = Infer<typeof ignoredDiscordAccountSchema>;
 export type Message = Infer<typeof messageSchema>;
 export type Attachment = Infer<typeof attachmentSchema>;
 export type Emoji = Infer<typeof emojiSchema>;
