@@ -16,8 +16,6 @@ import {
 	findSolutionsByQuestionId as findSolutionsByQuestionIdShared,
 	getChannelWithSettings,
 	getDiscordAccountById,
-	getFirstMessageInChannel as getFirstMessageInChannelShared,
-	getFirstMessagesInChannels as getFirstMessagesInChannelsShared,
 	getMessageById as getMessageByIdShared,
 	isThreadType,
 } from "../shared/shared";
@@ -76,24 +74,6 @@ export const findMessagesByChannelId = query({
 			args.limit,
 			args.after,
 		);
-	},
-});
-
-export const getFirstMessageInChannel = query({
-	args: {
-		channelId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		return await getFirstMessageInChannelShared(ctx, args.channelId);
-	},
-});
-
-export const getFirstMessagesInChannels = query({
-	args: {
-		channelIds: v.array(v.string()),
-	},
-	handler: async (ctx, args) => {
-		return await getFirstMessagesInChannelsShared(ctx, args.channelIds);
 	},
 });
 
@@ -249,82 +229,5 @@ export const getMessagePageData = query({
 			},
 			thread,
 		};
-	},
-});
-
-export const searchMessages = query({
-	args: {
-		query: v.string(),
-		serverId: v.optional(v.id("servers")),
-		channelId: v.optional(v.string()),
-		limit: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		// Build search query - Convex search indexes only support searching on the searchField
-		// We'll filter by serverId/channelId after the search
-		let searchQuery = ctx.db
-			.query("messages")
-			.withSearchIndex("search_content", (q) =>
-				q.search("content", args.query),
-			);
-
-		// Filter by server if provided (using regular filter after search)
-		if (args.serverId) {
-			searchQuery = searchQuery.filter((q) =>
-				q.eq(q.field("serverId"), args.serverId),
-			);
-		}
-
-		// Filter by channel if provided
-		// Include both direct messages in the channel and messages in threads belonging to the channel
-		if (args.channelId) {
-			searchQuery = searchQuery.filter((q) =>
-				q.or(
-					q.eq(q.field("channelId"), args.channelId),
-					q.eq(q.field("parentChannelId"), args.channelId),
-				),
-			);
-		}
-
-		// Get results with limit
-		const results = await searchQuery.take(args.limit ?? 20);
-
-		// Filter out messages from ignored accounts and check indexing enabled
-		const filteredResults: Array<{ message: Message; score: number }> = [];
-		for (const message of results) {
-			const isIgnored = await isIgnoredAccount(ctx, message.authorId);
-			if (!isIgnored) {
-				// Check if channel has indexing enabled
-				// For thread messages, check parent channel settings if thread doesn't have its own
-				const channel = await getChannelWithSettings(ctx, message.channelId);
-				let indexingEnabled = channel?.flags.indexingEnabled ?? false;
-
-				// If message is in a thread and thread doesn't have indexing enabled,
-				// check the parent channel's settings
-				if (
-					!indexingEnabled &&
-					message.parentChannelId &&
-					channel &&
-					isThreadType(channel.type)
-				) {
-					const parentChannel = await getChannelWithSettings(
-						ctx,
-						message.parentChannelId,
-					);
-					indexingEnabled = parentChannel?.flags.indexingEnabled ?? false;
-				}
-
-				if (indexingEnabled) {
-					// For now, use a simple score based on position (Convex doesn't expose search scores directly)
-					// In a real implementation, you might want to use vector search for better scoring
-					filteredResults.push({
-						message,
-						score: 1.0 - filteredResults.length * 0.01, // Simple decreasing score
-					});
-				}
-			}
-		}
-
-		return filteredResults;
 	},
 });

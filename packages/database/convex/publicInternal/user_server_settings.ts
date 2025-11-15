@@ -347,16 +347,6 @@ export const deleteUserServerSettingsByUserId = publicInternalMutation({
 	},
 });
 
-export const deleteUserServerSettingsByUserIdInternal = internalMutation({
-	args: {
-		userId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		await deleteUserServerSettingsByUserIdLogic(ctx, args.userId);
-		return null;
-	},
-});
-
 export const upsertUserServerSettingsInternal = publicInternalMutation({
 	args: {
 		settings: userServerSettingsSchema,

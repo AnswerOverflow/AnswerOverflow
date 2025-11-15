@@ -1,14 +1,7 @@
 import { type Infer, v } from "convex/values";
-import {
-	internalMutation,
-	publicInternalMutation,
-	publicInternalQuery,
-} from "../client";
+import { publicInternalMutation, publicInternalQuery } from "../client";
 import type { ignoredDiscordAccountSchema } from "../schema";
-import {
-	findIgnoredDiscordAccountById as findIgnoredDiscordAccountByIdShared,
-	upsertIgnoredDiscordAccountInternalLogic,
-} from "../shared/shared";
+import { findIgnoredDiscordAccountById as findIgnoredDiscordAccountByIdShared } from "../shared/shared";
 
 type IgnoredDiscordAccount = Infer<typeof ignoredDiscordAccountSchema>;
 
@@ -79,15 +72,6 @@ export const upsertIgnoredDiscordAccount = publicInternalMutation({
 		}
 
 		return upserted;
-	},
-});
-
-export const upsertIgnoredDiscordAccountInternal = internalMutation({
-	args: {
-		id: v.string(),
-	},
-	handler: async (ctx, args) => {
-		return await upsertIgnoredDiscordAccountInternalLogic(ctx, args.id);
 	},
 });
 

@@ -28,7 +28,7 @@ function validateBackendAccessToken(token: string | undefined): void {
  *
  * Usage:
  * ```ts
- * export const myInternalQuery = publicInternalQuery({
+ * const myInternalQuery = publicInternalQuery({
  *   args: { someArg: v.string() },
  *   handler: async (ctx, args) => {
  *     // Your query logic here - args will only contain { someArg: string }
@@ -64,7 +64,7 @@ export const publicInternalQuery = customQuery(query, {
  *
  * Usage:
  * ```ts
- * export const myInternalMutation = publicInternalMutation({
+ * const myInternalMutation = publicInternalMutation({
  *   args: { someArg: v.string() },
  *   handler: async (ctx, args) => {
  *     // Your mutation logic here - args will only contain { someArg: string }
@@ -100,7 +100,7 @@ export const publicInternalMutation = customMutation(mutation, {
  *
  * Usage:
  * ```ts
- * export const myInternalAction = publicInternalAction({
+ * const myInternalAction = publicInternalAction({
  *   args: { someArg: v.string() },
  *   handler: async (ctx, args) => {
  *     // Your action logic here - args will only contain { someArg: string }

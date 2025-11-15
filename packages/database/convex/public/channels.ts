@@ -44,15 +44,6 @@ async function addSettingsToChannels(
 	}));
 }
 
-export const getChannelByDiscordId = query({
-	args: {
-		discordId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		return await getChannelWithSettings(ctx, args.discordId);
-	},
-});
-
 export const findAllThreadsByParentId = query({
 	args: {
 		parentId: v.string(),

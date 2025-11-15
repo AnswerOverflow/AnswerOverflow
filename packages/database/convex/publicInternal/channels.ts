@@ -2,7 +2,6 @@ import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import {
-	internalMutation,
 	type MutationCtx,
 	publicInternalMutation,
 	publicInternalQuery,
@@ -285,16 +284,6 @@ export const updateManyChannels = publicInternalMutation({
 });
 
 export const deleteChannel = publicInternalMutation({
-	args: {
-		id: v.string(),
-	},
-	handler: async (ctx, args) => {
-		await deleteChannelInternalLogic(ctx, args.id);
-		return null;
-	},
-});
-
-export const deleteChannelInternal = internalMutation({
 	args: {
 		id: v.string(),
 	},

@@ -3,7 +3,6 @@ import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
 import {
-	internalMutation,
 	type MutationCtx,
 	publicInternalMutation,
 	publicInternalQuery,
@@ -240,29 +239,6 @@ export const upsertManyMessages = publicInternalMutation({
 			}
 		}
 
-		return null;
-	},
-});
-
-export const upsertMessageInternal = internalMutation({
-	args: {
-		message: messageSchema,
-		attachments: v.optional(v.array(attachmentSchema)),
-		reactions: v.optional(
-			v.array(
-				v.object({
-					userId: v.string(),
-					emoji: emojiSchema,
-				}),
-			),
-		),
-	},
-	handler: async (ctx, args) => {
-		await upsertMessageInternalLogic(ctx, {
-			message: args.message,
-			attachments: args.attachments,
-			reactions: args.reactions,
-		});
 		return null;
 	},
 });
@@ -590,16 +566,6 @@ export const deleteManyMessagesByUserId = publicInternalMutation({
 			await deleteMessageInternalLogic(ctx, message.id);
 		}
 
-		return null;
-	},
-});
-
-export const deleteMessageInternal = internalMutation({
-	args: {
-		id: v.string(),
-	},
-	handler: async (ctx, args) => {
-		await deleteMessageInternalLogic(ctx, args.id);
 		return null;
 	},
 });

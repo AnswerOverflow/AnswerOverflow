@@ -15,6 +15,7 @@
 		"fix:unsafe": "biome check . --write --unsafe",
 		"clean": "turbo run clean && rm -rf node_modules .turbo",
 		"format": "biome format --write .",
+		"knip": "bunx knip",
 		"prepare": "husky"
 	},
 	"devDependencies": {

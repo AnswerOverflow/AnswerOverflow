@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
-import { internalMutation, publicInternalAction } from "../client";
+import { publicInternalAction } from "../client";
 import { uploadAttachmentFromUrlLogic } from "../shared/shared";
 
 /**
@@ -21,34 +21,6 @@ export const uploadAttachmentFromUrl = publicInternalAction({
 			filename: args.filename,
 			contentType: args.contentType,
 		});
-	},
-});
-
-/**
- * Updates an attachment record with its storage ID
- */
-export const updateAttachmentStorageId = internalMutation({
-	args: {
-		attachmentDiscordId: v.string(),
-		storageId: v.id("_storage"),
-	},
-	returns: v.null(),
-	handler: async (ctx, args) => {
-		const attachment = await getOneFrom(
-			ctx.db,
-			"attachments",
-			"by_attachmentId",
-			args.attachmentDiscordId,
-			"id",
-		);
-
-		if (attachment) {
-			await ctx.db.patch(attachment._id, {
-				storageId: args.storageId,
-			});
-		}
-
-		return null;
 	},
 });
 
