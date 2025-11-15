@@ -7,9 +7,9 @@
  * by searching for references in the codebase.
  */
 
-import { readFile } from "fs/promises";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { glob } from "glob";
-import { join } from "path";
 
 const PACKAGE_ROOT = join(import.meta.dir, "..");
 const CONVEX_DIR = join(PACKAGE_ROOT, "convex");

@@ -18,7 +18,7 @@ const testServer: Server = {
 	approximateMemberCount: 0,
 };
 
-const createTestUserServerSettings = (
+const _createTestUserServerSettings = (
 	userId: string,
 	serverId: Id<"servers">,
 	overrides?: Partial<UserServerSettings>,

@@ -1,6 +1,5 @@
 import { expect, it } from "@effect/vitest";
 import { Cause, Chunk, Effect, Exit, Layer, Scope } from "effect";
-import { api } from "../convex/_generated/api";
 import type { Server } from "../convex/schema";
 import { ConvexClientTest } from "./convex-client-test";
 import {
@@ -35,7 +34,7 @@ const server2: Server = {
 
 it.scoped("live data updates when server is modified", () =>
 	Effect.gen(function* () {
-		const database = yield* Database;
+		const _database = yield* Database;
 
 		// Initial upsert
 	}).pipe(Effect.provide(DatabaseTestLayer)),

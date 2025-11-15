@@ -7,9 +7,9 @@
  * are queries, mutations, or actions, and generates a runtime mapping.
  */
 
-import { readdir, readFile } from "fs/promises";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { readdir, readFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
