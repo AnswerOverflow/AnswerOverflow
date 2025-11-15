@@ -17,7 +17,8 @@
 		"typecheck": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
 		"clean": "rm -rf node_modules .turbo",
 		"test": "vitest run --no-watch --pool=forks",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"convex:knip": "bun scripts/find-unused-convex-functions.ts"
 	},
 	"dependencies": {
 		"@convex-dev/action-cache": "^0.3.0",
@@ -34,6 +35,7 @@
 		"@effect/vitest": "^0.25.0",
 		"@packages/convex-test": "workspace:*",
 		"@packages/observability": "workspace:*",
+		"glob": "^11.0.3",
 		"vitest": "catalog:"
 	}
 }
