@@ -158,7 +158,7 @@ function MessageEmbed({ embed }: { embed: Embed }) {
 				/>
 			)}
 			{embed.footer && (
-				<div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+				<div className="text-xs text-muted-foreground mt-2">
 					{embed.footer.text}
 				</div>
 			)}
@@ -172,7 +172,7 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 	if (!data) {
 		return (
 			<div className="max-w-4xl mx-auto p-8">
-				<div className="text-center text-gray-600 dark:text-gray-400">
+				<div className="text-center text-muted-foreground">
 					Message not found
 				</div>
 			</div>
@@ -182,8 +182,16 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 	return (
 		<div className="max-w-4xl mx-auto p-8">
 			{/* Header */}
-			<div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-800">
+			<div className="mb-6 pb-4 border-b border-border">
 				<div className="flex items-center gap-3 mb-2">
+					<Link
+						href={`/c/${data.server.discordId}`}
+						className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+					>
+						← Back to {data.server.name}
+					</Link>
+				</div>
+				<div className="flex items-center gap-3">
 					{data.server.icon && (
 						<img
 							src={`https://cdn.discordapp.com/icons/${data.server.discordId}/${data.server.icon}.webp?size=64`}
@@ -192,11 +200,23 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 						/>
 					)}
 					<div>
-						<h1 className="text-2xl font-bold">{data.server.name}</h1>
-						<p className="text-sm text-gray-600 dark:text-gray-400">
-							#{data.channel.name}
-							{data.thread && ` / ${data.thread.name}`}
-						</p>
+						<h1 className="text-2xl font-bold text-foreground">
+							{data.server.name}
+						</h1>
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+							<Link
+								href={`/c/${data.server.discordId}/${data.channel.id}`}
+								className="hover:text-foreground transition-colors"
+							>
+								#{data.channel.name}
+							</Link>
+							{data.thread && (
+								<>
+									<span>/</span>
+									<span>{data.thread.name}</span>
+								</>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -211,7 +231,7 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 					return (
 						<div
 							key={message.id}
-							className="p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm"
+							className="p-6 rounded-lg bg-card border border-border shadow-sm"
 						>
 							{/* Author header */}
 							<div className="flex items-center gap-3 mb-3">
@@ -229,17 +249,17 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 										<div className="flex-1 min-w-0">
 											<Link
 												href={`/u/${author.id}`}
-												className="font-semibold text-gray-900 dark:text-gray-100 hover:underline"
+												className="font-semibold text-card-foreground hover:underline"
 											>
 												{author.name}
 											</Link>
-											<div className="text-xs text-gray-500 dark:text-gray-400">
+											<div className="text-xs text-muted-foreground">
 												{formatRelativeTime(messageDate)}
 											</div>
 										</div>
 									</>
 								) : (
-									<div className="text-sm text-gray-500 dark:text-gray-400">
+									<div className="text-sm text-muted-foreground">
 										Unknown user
 									</div>
 								)}
@@ -312,14 +332,14 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 														href={attachmentUrl}
 														target="_blank"
 														rel="noopener noreferrer"
-														className="flex items-center gap-2 p-2 rounded bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+														className="flex items-center gap-2 p-2 rounded bg-muted hover:bg-accent transition-colors"
 													>
 														<span className="text-2xl">📎</span>
 														<div className="flex-1 min-w-0">
-															<div className="font-medium text-sm truncate">
+															<div className="font-medium text-sm truncate text-card-foreground">
 																{attachment.filename}
 															</div>
-															<div className="text-xs text-gray-500 dark:text-gray-400">
+															<div className="text-xs text-muted-foreground">
 																{(attachment.size / 1024).toFixed(1)} KB
 															</div>
 														</div>
@@ -340,7 +360,7 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 										return (
 											<div
 												key={`${emojiId}-${idx}`}
-												className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-sm"
+												className="flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-sm"
 											>
 												{emojiId && (
 													<img
@@ -349,9 +369,7 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 														className="w-4 h-4"
 													/>
 												)}
-												<span className="text-xs text-gray-600 dark:text-gray-400">
-													1
-												</span>
+												<span className="text-xs text-muted-foreground">1</span>
 											</div>
 										);
 									})}
@@ -360,7 +378,7 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 
 							{/* Solutions */}
 							{solutions.length > 0 && (
-								<div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+								<div className="mt-4 pt-4 border-t border-border">
 									<p className="text-sm font-semibold mb-3 text-green-600 dark:text-green-400">
 										✓ Solutions:
 									</p>
@@ -371,7 +389,7 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 												href={`/m/${solution.id}`}
 												className="block p-3 rounded bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
 											>
-												<div className="text-sm text-gray-900 dark:text-gray-100 line-clamp-2">
+												<div className="text-sm text-card-foreground line-clamp-2">
 													{solution.content}
 												</div>
 											</Link>

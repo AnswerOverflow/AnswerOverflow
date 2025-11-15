@@ -11,11 +11,3 @@ services:
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     restart: unless-stopped
-
-  valkey:
-    image: valkey/valkey:7.2-alpine
-    container_name: valkey
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
-    command: valkey-server --appendonly yes

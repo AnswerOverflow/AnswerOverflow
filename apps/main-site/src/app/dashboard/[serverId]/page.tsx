@@ -2,6 +2,7 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import type { Id } from "@packages/database/convex/_generated/dataModel";
+import { Button } from "@packages/ui/components/button";
 import {
 	Card,
 	CardContent,
@@ -10,6 +11,8 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { useQuery } from "convex/react";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 
 export default function DashboardOverviewPage() {
@@ -31,11 +34,23 @@ export default function DashboardOverviewPage() {
 
 	return (
 		<div className="w-full max-w-[1200px]">
-			<div className="mb-6">
-				<h1 className="text-3xl font-bold">{server.name}</h1>
-				<p className="text-muted-foreground mt-2">
-					Dashboard overview and analytics
-				</p>
+			<div className="mb-6 flex items-start justify-between">
+				<div>
+					<h1 className="text-3xl font-bold">{server.name}</h1>
+					<p className="text-muted-foreground mt-2">
+						Dashboard overview and analytics
+					</p>
+				</div>
+				<Button asChild variant="outline">
+					<Link
+						href={`/c/${server.discordId}`}
+						target="_blank"
+						className="flex items-center gap-2"
+					>
+						View Community
+						<ExternalLink className="h-4 w-4" />
+					</Link>
+				</Button>
 			</div>
 
 			{/* TODO: Add analytics dashboard components here */}

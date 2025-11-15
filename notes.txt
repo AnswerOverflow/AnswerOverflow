@@ -26,3 +26,10 @@ each of those get their own query functions, keep the default ones banned
 - we need to improve the way OTEL is done in convex/
 
 setup react grab
+
+we need to get construction urls to work with:
+- local dev
+- custom domains
+- custom subpaths
+- main site (answeroverflow.com)
+right from the beginning

@@ -13,6 +13,7 @@ import {
 	CHANNEL_TYPE,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
+	getFirstMessagesInChannels,
 } from "../shared/shared";
 
 type Channel = Infer<typeof channelSchema>;
@@ -451,5 +452,104 @@ export const findManyChannelsById = publicInternalQuery({
 		);
 
 		return channelsWithFlags;
+	},
+});
+
+export const getChannelPageData = publicInternalQuery({
+	args: {
+		serverDiscordId: v.string(),
+		channelDiscordId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		// Get server by Discord ID
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.serverDiscordId,
+		);
+
+		if (!server) return null;
+
+		// Get channel and all channels simultaneously
+		const [channel, allChannels, threads] = await Promise.all([
+			getChannelWithSettings(ctx, args.channelDiscordId),
+			getManyFrom(ctx.db, "channels", "by_serverId", server._id),
+			getManyFrom(ctx.db, "channels", "by_parentId", args.channelDiscordId),
+		]);
+
+		if (!channel || channel.serverId !== server._id) return null;
+
+		// Filter to root channels with indexing enabled
+		const ROOT_CHANNEL_TYPES = [10, 11, 12, 13, 15] as const; // Forum, Announcement, Text, etc.
+		const rootChannels = allChannels.filter((c) =>
+			ROOT_CHANNEL_TYPES.includes(
+				c.type as (typeof ROOT_CHANNEL_TYPES)[number],
+			),
+		);
+
+		const channelIds = rootChannels.map((c) => c.id);
+		const allSettings = await asyncMap(channelIds, (id) =>
+			getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
+		);
+
+		const indexedChannels = rootChannels
+			.map((c, idx) => ({
+				...c,
+				flags: allSettings[idx] ?? {
+					...DEFAULT_CHANNEL_SETTINGS,
+					channelId: c.id,
+				},
+			}))
+			.filter((c) => c.flags.indexingEnabled)
+			.sort((a, b) => {
+				// Sort: forums first, then announcements, then text
+				if (a.type === 15) return -1; // GuildForum
+				if (b.type === 15) return 1;
+				if (a.type === 5) return -1; // GuildAnnouncement
+				if (b.type === 5) return 1;
+				return 0;
+			})
+			.map((c) => {
+				// Return full channel object without flags
+				const { flags: _flags, ...channel } = c;
+				return channel;
+			});
+
+		// Sort threads by ID (newest first) and limit to 50
+		const sortedThreads = threads
+			.sort((a, b) => {
+				return b.id > a.id ? 1 : b.id < a.id ? -1 : 0;
+			})
+			.slice(0, 50);
+
+		// Get first message for each thread
+		const threadIds = sortedThreads.map((t) => t.id);
+		const firstMessages = await getFirstMessagesInChannels(ctx, threadIds);
+
+		// Combine threads with their first messages
+		const threadsWithMessages = sortedThreads
+			.map((thread) => ({
+				thread,
+				message: firstMessages[thread.id] ?? null,
+			}))
+			.filter(
+				(
+					tm,
+				): tm is {
+					thread: typeof tm.thread;
+					message: NonNullable<typeof tm.message>;
+				} => tm.message !== null,
+			);
+
+		return {
+			server: {
+				...server,
+				channels: indexedChannels,
+			},
+			channels: indexedChannels,
+			selectedChannel: channel,
+			threads: threadsWithMessages,
+		};
 	},
 });

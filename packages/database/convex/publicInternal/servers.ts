@@ -1,7 +1,17 @@
 import { v } from "convex/values";
-import { getOneFrom } from "convex-helpers/server/relationships";
+import { asyncMap } from "convex-helpers";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { publicInternalMutation, publicInternalQuery } from "../client";
 import { serverSchema } from "../schema";
+
+const DEFAULT_CHANNEL_SETTINGS = {
+	channelId: "",
+	indexingEnabled: false,
+	markSolutionEnabled: false,
+	sendMarkSolutionInstructionsInNewThreads: false,
+	autoThreadEnabled: false,
+	forumGuidelinesConsentEnabled: false,
+};
 
 export const createServerExternal = publicInternalMutation({
 	args: {
@@ -198,10 +208,32 @@ export const getServerByDiscordIdWithChannels = publicInternalQuery({
 		if (!server) {
 			return null;
 		}
-		const channels = await ctx.db
-			.query("channels")
-			.withIndex("by_serverId", (q) => q.eq("serverId", server._id))
-			.collect();
+		const allChannels = await getManyFrom(
+			ctx.db,
+			"channels",
+			"by_serverId",
+			server._id,
+		);
+
+		const channelIds = allChannels.map((c) => c.id);
+		const allSettings = await asyncMap(channelIds, (id) =>
+			getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
+		);
+
+		const channels = allChannels
+			.map((c, idx) => ({
+				...c,
+				flags: allSettings[idx] ?? {
+					...DEFAULT_CHANNEL_SETTINGS,
+					channelId: c.id,
+				},
+			}))
+			.filter((c) => c.flags.indexingEnabled)
+			.map((c) => {
+				// Return channel object without flags
+				const { flags: _flags, ...channel } = c;
+				return channel;
+			});
 		return {
 			server,
 			channels,

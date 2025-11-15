@@ -286,7 +286,7 @@ it.scoped(
 				);
 
 			expect(liveData?.length).toBe(3);
-			const ids = liveData?.map((a: any) => a.id) ?? [];
+			const ids = liveData?.map((a) => a.id) ?? [];
 			expect(ids).toContain("user1");
 			expect(ids).toContain("user2");
 			expect(ids).toContain("user3");
