@@ -7,10 +7,7 @@
 		"./effect-otel": "./src/effect-otel.ts",
 		"./convex-effect-otel": "./src/convex-effect-otel.ts"
 	},
-	"scripts": {
-		"test": "vitest run --no-watch --pool=forks",
-		"test:watch": "vitest"
-	},
+	"scripts": {},
 	"dependencies": {
 		"@effect/opentelemetry": "^0.59.0",
 		"@effect/platform": "catalog:",

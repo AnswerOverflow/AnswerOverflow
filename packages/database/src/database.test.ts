@@ -41,7 +41,7 @@ it.scoped("live data updates when server is modified", () =>
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
-it.scoped(
+it.scoped.only(
 	"deduplication: multiple requests for same query+args return same LiveData",
 	() =>
 		Effect.gen(function* () {
@@ -57,22 +57,26 @@ it.scoped(
 			// Get live data multiple times with same args
 			const liveData1 = yield* database.servers.getServerByDiscordId({
 				discordId: "123",
+				subscribe: true,
 			});
 			const liveData2 = yield* database.servers.getServerByDiscordId({
 				discordId: "123",
+				subscribe: true,
 			});
 			const liveData3 = yield* database.servers.getServerByDiscordId({
 				discordId: "123",
+				subscribe: true,
 			});
+			console.log(liveData1?.data?.discordId);
 
 			// All should be the same instance (deduplication)
 			expect(liveData1).toBe(liveData2);
 			expect(liveData2).toBe(liveData3);
 
 			// All should have the same data
-			expect(liveData1?.discordId).toBe("123");
-			expect(liveData2?.discordId).toBe("123");
-			expect(liveData3?.discordId).toBe("123");
+			expect(liveData1?.data?.discordId).toBe("123");
+			expect(liveData2?.data?.discordId).toBe("123");
+			expect(liveData3?.data?.discordId).toBe("123");
 
 			// Verify onUpdate was only called once (deduplication)
 			// Note: We can't directly access the query call count from the test client

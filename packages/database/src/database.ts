@@ -6,11 +6,13 @@ import type {
 	FunctionReturnType,
 } from "convex/server";
 import { Config, Context, Effect, Layer } from "effect";
-import { api } from "../convex/_generated/api";
+import { api, internal } from "../convex/_generated/api";
 import type { Attachment, Emoji, Message } from "../convex/schema";
 import { ConvexClientLiveUnifiedLayer } from "./convex-client-live";
 import { ConvexClientUnified, ConvexError } from "./convex-unified-client";
 import { FUNCTION_TYPE_MAP, isNamespace } from "./generated/function-types";
+import type { LiveData } from "./live-data";
+import { createWatchQueryToLiveData } from "./watch-query-cached";
 
 // Helper type to check if args are empty (only backendAccessToken)
 type IsEmptyArgs<Args> = Omit<Args, "backendAccessToken"> extends Record<
@@ -20,17 +22,42 @@ type IsEmptyArgs<Args> = Omit<Args, "backendAccessToken"> extends Record<
 	? true
 	: false;
 
+// Helper type to extract args without backendAccessToken
+type ArgsWithoutToken<Args> = Omit<Args, "backendAccessToken">;
+
+// Helper type to determine return type based on subscribe flag
+type QueryReturnType<
+	Ref extends FunctionReference<"query", any>,
+	Args extends { subscribe?: boolean } | undefined,
+> = Args extends { subscribe: true }
+	? LiveData<FunctionReturnType<Ref>>
+	: FunctionReturnType<Ref>;
+
 // Transform FunctionReference to function signature, omitting backendAccessToken
 // Returns an Effect instead of a Promise
 // If args are empty (only backendAccessToken), make args optional
+// For queries, supports subscribe option in the args object itself - when subscribe is true, returns LiveData
+// Uses conditional types with generic parameter to properly narrow return types
 type FunctionRefToFunction<Ref extends FunctionReference<any, any>> =
-	IsEmptyArgs<FunctionArgs<Ref>> extends true
-		? (
-				args?: Omit<FunctionArgs<Ref>, "backendAccessToken">,
-			) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>
-		: (
-				args: Omit<FunctionArgs<Ref>, "backendAccessToken">,
-			) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>;
+	Ref extends FunctionReference<"query", any>
+		? IsEmptyArgs<FunctionArgs<Ref>> extends true
+			? <Args extends { subscribe?: boolean } | undefined = undefined>(
+					args?: Args,
+				) => Effect.Effect<QueryReturnType<Ref, Args>, ConvexError>
+			: <
+					Args extends ArgsWithoutToken<FunctionArgs<Ref>> & {
+						subscribe?: boolean;
+					},
+				>(
+					args: Args,
+				) => Effect.Effect<QueryReturnType<Ref, Args>, ConvexError>
+		: IsEmptyArgs<FunctionArgs<Ref>> extends true
+			? (
+					args?: Omit<FunctionArgs<Ref>, "backendAccessToken">,
+				) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>
+			: (
+					args: Omit<FunctionArgs<Ref>, "backendAccessToken">,
+				) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>;
 
 // Helper type for recursively transforming nested objects
 type TransformToFunctions<T> = {
@@ -78,6 +105,12 @@ export const service = Effect.gen(function* () {
 	const backendAccessToken = yield* Config.string("BACKEND_ACCESS_TOKEN");
 	const convexClient = yield* ConvexClientUnified;
 
+	// Create watchQueryToLiveData helper for live queries
+	const watchQueryToLiveData = createWatchQueryToLiveData(convexClient, {
+		api,
+		internal,
+	});
+
 	// Use codegen-generated structure to simplify namespace/function detection
 	// Type the Proxy to preserve PublicInternalFunctions structure
 	const createProxy = <T extends Record<string, any>>(
@@ -121,6 +154,44 @@ export const service = Effect.gen(function* () {
 				}
 
 				const funcRef = value as FunctionReference<any, any>;
+
+				// For queries, support subscribe option in args object
+				if (funcType === "query") {
+					const wrappedFunction = ((args?: any) => {
+						// Extract subscribe flag from args if present
+						const { subscribe, ...queryArgs } = args ?? {};
+						const fullArgs = { ...queryArgs, backendAccessToken };
+
+						// If subscribe option is enabled, use watchQueryToLiveData
+						if (subscribe === true) {
+							return Effect.gen(function* () {
+								// watchQueryToLiveData expects a function that takes convexApi and returns the query
+								// We create a helper that always returns our query reference
+								const getQuery = () => funcRef;
+								// watchQueryToLiveData uses OptionalRestArgs, so pass args as rest parameter
+								// fullArgs always includes backendAccessToken, so pass it as [fullArgs]
+								const liveData = yield* watchQueryToLiveData(
+									getQuery,
+									fullArgs,
+								);
+								// Return the LiveData object
+								return liveData;
+							});
+						}
+
+						// Regular query
+						return callClientMethod(
+							funcType,
+							funcRef,
+							convexClient.client,
+							fullArgs,
+						);
+					}) as TransformToFunctions<T>[typeof prop];
+
+					return wrappedFunction;
+				}
+
+				// For mutations and actions, use regular call
 				const wrappedFunction = ((args?: any) => {
 					const fullArgs = { ...(args ?? {}), backendAccessToken };
 					return callClientMethod(
