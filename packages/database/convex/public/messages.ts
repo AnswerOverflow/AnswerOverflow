@@ -17,7 +17,6 @@ import {
 	getChannelWithSettings,
 	getDiscordAccountById,
 	getMessageById as getMessageByIdShared,
-	isThreadType,
 } from "../shared/shared";
 
 type Message = Infer<typeof messageSchema>;
@@ -44,7 +43,7 @@ function getParentChannelOfMessage(
 }
 
 // Helper function to check if an account is ignored
-async function isIgnoredAccount(
+async function _isIgnoredAccount(
 	ctx: QueryCtx | MutationCtx,
 	authorId: string,
 ): Promise<boolean> {

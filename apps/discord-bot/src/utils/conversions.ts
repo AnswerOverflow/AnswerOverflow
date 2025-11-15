@@ -53,7 +53,7 @@ export function isAllowedThreadChannel(
 ): channel is PublicThreadChannel {
 	return isAllowedThreadType(channel.type);
 }
-function isAllowedChannelType(channelType: number): boolean {
+function _isAllowedChannelType(channelType: number): boolean {
 	return (
 		isAllowedRootChannelType(channelType) || isAllowedThreadType(channelType)
 	);
