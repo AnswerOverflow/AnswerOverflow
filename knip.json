@@ -1,4 +1,9 @@
 {
 	"$schema": "https://unpkg.com/knip@latest/schema.json",
-	"ignore": [".context/**", "packages/ui/src/components/**"]
+	"ignore": [
+		".context/**",
+		"packages/ui/src/components/**",
+		"packages/convex-test/**",
+		"**/_generated/**"
+	]
 }
