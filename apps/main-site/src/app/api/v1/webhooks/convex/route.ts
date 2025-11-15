@@ -1,5 +1,4 @@
 // app/api/convex-otel/route.ts
-/** biome-ignore-all lint/suspicious/noExplicitAny: <explanation> */
 import { type NextRequest, NextResponse } from "next/server";
 
 const OTLP_ENDPOINT =
@@ -11,7 +10,6 @@ type ConvexWebhookEntry = {
 	timestamp: number;
 	topic: string;
 	message?: string;
-	// other fields exist but are ignored
 };
 
 type SerializedSpan = {
@@ -191,10 +189,10 @@ export async function POST(req: NextRequest) {
 			message: "OK",
 			spansProcessed: spans.length,
 		});
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("Error handling Convex OTEL webhook", error);
 		return NextResponse.json(
-			{ error: error?.message ?? "Unknown error" },
+			{ error: error instanceof Error ? error.message : "Unknown error" },
 			{ status: 500 },
 		);
 	}
