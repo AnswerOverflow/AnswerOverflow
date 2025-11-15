@@ -55,18 +55,24 @@ it.scoped.only(
 			yield* database.servers.upsertServer(server);
 
 			// Get live data multiple times with same args
-			const liveData1 = yield* database.servers.getServerByDiscordId({
-				discordId: "123",
-				subscribe: true,
-			});
-			const liveData2 = yield* database.servers.getServerByDiscordId({
-				discordId: "123",
-				subscribe: true,
-			});
-			const liveData3 = yield* database.servers.getServerByDiscordId({
-				discordId: "123",
-				subscribe: true,
-			});
+			const liveData1 = yield* database.servers.getServerByDiscordId(
+				{
+					discordId: "123",
+				},
+				{ subscribe: true },
+			);
+			const liveData2 = yield* database.servers.getServerByDiscordId(
+				{
+					discordId: "123",
+				},
+				{ subscribe: true },
+			);
+			const liveData3 = yield* database.servers.getServerByDiscordId(
+				{
+					discordId: "123",
+				},
+				{ subscribe: true },
+			);
 			console.log(liveData1?.data?.discordId);
 
 			// All should be the same instance (deduplication)

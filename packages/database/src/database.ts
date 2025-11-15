@@ -22,35 +22,35 @@ type IsEmptyArgs<Args> = Omit<Args, "backendAccessToken"> extends Record<
 	? true
 	: false;
 
-// Helper type to extract args without backendAccessToken
-type ArgsWithoutToken<Args> = Omit<Args, "backendAccessToken">;
+// Options for query functions
+type QueryOptions = {
+	subscribe?: boolean;
+};
 
-// Helper type to determine return type based on subscribe flag
+// Helper type to determine return type based on options parameter
 type QueryReturnType<
 	Ref extends FunctionReference<"query", any>,
-	Args extends { subscribe?: boolean } | undefined,
-> = Args extends { subscribe: true }
+	Opts extends QueryOptions | undefined,
+> = Opts extends { subscribe: true }
 	? LiveData<FunctionReturnType<Ref>>
 	: FunctionReturnType<Ref>;
 
 // Transform FunctionReference to function signature, omitting backendAccessToken
 // Returns an Effect instead of a Promise
 // If args are empty (only backendAccessToken), make args optional
-// For queries, supports subscribe option in the args object itself - when subscribe is true, returns LiveData
-// Uses conditional types with generic parameter to properly narrow return types
+// For queries, supports subscribe option as separate parameter - when subscribe is true, returns LiveData
+// Uses conditional types with generic parameter to check if options extends { subscribe: true }
 type FunctionRefToFunction<Ref extends FunctionReference<any, any>> =
 	Ref extends FunctionReference<"query", any>
 		? IsEmptyArgs<FunctionArgs<Ref>> extends true
-			? <Args extends { subscribe?: boolean } | undefined = undefined>(
-					args?: Args,
-				) => Effect.Effect<QueryReturnType<Ref, Args>, ConvexError>
-			: <
-					Args extends ArgsWithoutToken<FunctionArgs<Ref>> & {
-						subscribe?: boolean;
-					},
-				>(
-					args: Args,
-				) => Effect.Effect<QueryReturnType<Ref, Args>, ConvexError>
+			? <Opts extends QueryOptions | undefined = undefined>(
+					args?: Omit<FunctionArgs<Ref>, "backendAccessToken">,
+					options?: Opts,
+				) => Effect.Effect<QueryReturnType<Ref, Opts>, ConvexError>
+			: <Opts extends QueryOptions | undefined = undefined>(
+					args: Omit<FunctionArgs<Ref>, "backendAccessToken">,
+					options?: Opts,
+				) => Effect.Effect<QueryReturnType<Ref, Opts>, ConvexError>
 		: IsEmptyArgs<FunctionArgs<Ref>> extends true
 			? (
 					args?: Omit<FunctionArgs<Ref>, "backendAccessToken">,
@@ -155,15 +155,13 @@ export const service = Effect.gen(function* () {
 
 				const funcRef = value as FunctionReference<any, any>;
 
-				// For queries, support subscribe option in args object
+				// For queries, support subscribe option as separate parameter
 				if (funcType === "query") {
-					const wrappedFunction = ((args?: any) => {
-						// Extract subscribe flag from args if present
-						const { subscribe, ...queryArgs } = args ?? {};
-						const fullArgs = { ...queryArgs, backendAccessToken };
+					const wrappedFunction = ((args?: any, options: QueryOptions = {}) => {
+						const fullArgs = { ...(args ?? {}), backendAccessToken };
 
 						// If subscribe option is enabled, use watchQueryToLiveData
-						if (subscribe === true) {
+						if (options.subscribe === true) {
 							return Effect.gen(function* () {
 								// watchQueryToLiveData expects a function that takes convexApi and returns the query
 								// We create a helper that always returns our query reference
