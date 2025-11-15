@@ -207,7 +207,7 @@ export default function ChannelsPage() {
 	}, [filteredChannels, setSelectedChannelIds]);
 
 	const updateChannelSettings = useMutation(
-		api.dashboard_mutations.updateChannelSettingsFlags,
+		api.public.dashboard_mutations.updateChannelSettingsFlags,
 	).withOptimisticUpdate((localStore, args) => {
 		const currentData = localStore.getQuery(
 			api.public.dashboard_queries.getDashboardData,
