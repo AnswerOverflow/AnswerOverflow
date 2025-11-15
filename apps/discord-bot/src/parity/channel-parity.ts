@@ -22,10 +22,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(channel)) {
 					return;
 				}
-				const serverLiveData = yield* database.servers.getServerByDiscordId(
-					channel.guild.id,
-				);
-				const server = serverLiveData?.data;
+				const serverLiveData = yield* database.servers.getServerByDiscordId({
+					discordId: channel.guild.id,
+				});
+				const server = serverLiveData;
 				if (!server) {
 					// this should never happen
 					yield* Console.warn(
@@ -59,10 +59,12 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 				// Check if channel exists in database
-				const channelLiveData = yield* database.channels.getChannelByDiscordId(
-					newChannel.id,
+				const channelLiveData = yield* database.channels.findChannelByDiscordId(
+					{
+						discordId: newChannel.id,
+					},
 				);
-				const existingChannel = channelLiveData?.data;
+				const existingChannel = channelLiveData;
 
 				if (!existingChannel) {
 					// this should never happen
@@ -72,10 +74,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const serverLiveData = yield* database.servers.getServerByDiscordId(
-					newChannel.guild.id,
-				);
-				const server = serverLiveData?.data;
+				const serverLiveData = yield* database.servers.getServerByDiscordId({
+					discordId: newChannel.guild.id,
+				});
+				const server = serverLiveData;
 				if (!server) {
 					// this should never happen
 					yield* Console.warn(
@@ -103,7 +105,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(channel)) {
 					return;
 				}
-				yield* database.channels.deleteChannel(channel.id);
+				yield* database.channels.deleteChannel({ id: channel.id });
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error deleting channel ${channel.id}:`, error),
@@ -116,10 +118,12 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedThreadChannel(newThread)) {
 					return;
 				}
-				const channelLiveData = yield* database.channels.getChannelByDiscordId(
-					newThread.id,
+				const channelLiveData = yield* database.channels.findChannelByDiscordId(
+					{
+						discordId: newThread.id,
+					},
 				);
-				const existingChannel = channelLiveData?.data;
+				const existingChannel = channelLiveData;
 
 				if (!existingChannel) {
 					// this should never happen
@@ -129,11 +133,11 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const serverLiveData = yield* database.servers.getServerByDiscordId(
-					newThread.guild.id,
-				);
+				const serverLiveData = yield* database.servers.getServerByDiscordId({
+					discordId: newThread.guild.id,
+				});
 
-				const server = serverLiveData?.data;
+				const server = serverLiveData;
 
 				if (!server) {
 					yield* Console.warn(
@@ -160,10 +164,12 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedThreadChannel(thread)) {
 					return;
 				}
-				const channelLiveData = yield* database.channels.getChannelByDiscordId(
-					thread.id,
+				const channelLiveData = yield* database.channels.findChannelByDiscordId(
+					{
+						discordId: thread.id,
+					},
 				);
-				const existingChannel = channelLiveData?.data;
+				const existingChannel = channelLiveData;
 
 				if (!existingChannel) {
 					// this should never happen
@@ -174,7 +180,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 
 				// Delete thread from database
-				yield* database.channels.deleteChannel(thread.id);
+				yield* database.channels.deleteChannel({ id: thread.id });
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error deleting thread ${thread.id}:`, error),
@@ -185,8 +191,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("inviteDelete", (invite) =>
 			Effect.gen(function* () {
 				const channelLiveData =
-					yield* database.channels.findChannelByInviteCode(invite.code);
-				const channelWithSettings = channelLiveData?.data;
+					yield* database.channels.findChannelByInviteCode({
+						inviteCode: invite.code,
+					});
+				const channelWithSettings = channelLiveData;
 
 				if (!channelWithSettings) {
 					return;

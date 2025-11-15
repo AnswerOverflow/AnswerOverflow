@@ -82,6 +82,22 @@ export const upsertServerExternal = publicInternalMutation({
 	},
 });
 
+export const upsertServer = publicInternalMutation({
+	args: serverSchema,
+	handler: async (ctx, args) => {
+		const existing = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.discordId,
+		);
+		if (existing) {
+			return await ctx.db.patch(existing._id, args);
+		}
+		return await ctx.db.insert("servers", args);
+	},
+});
+
 /**
  * Public internal query: Get all servers
  * Requires backend access token - returns all server data
@@ -102,6 +118,71 @@ export const getBiggestServers = publicInternalQuery({
 		return allServers
 			.sort((a, b) => b.approximateMemberCount - a.approximateMemberCount)
 			.slice(0, args.take);
+	},
+});
+
+export const getServerByDiscordId = publicInternalQuery({
+	args: {
+		discordId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db
+			.query("servers")
+			.withIndex("by_discordId", (q) => q.eq("discordId", args.discordId))
+			.first();
+	},
+});
+
+export const findManyServersById = publicInternalQuery({
+	args: {
+		ids: v.array(v.id("servers")),
+	},
+	handler: async (ctx, args) => {
+		if (args.ids.length === 0) return [];
+
+		const servers = [];
+		for (const id of args.ids) {
+			const server = await ctx.db.get(id);
+			if (server) {
+				servers.push(server);
+			}
+		}
+		return servers;
+	},
+});
+
+export const createServer = publicInternalMutation({
+	args: serverSchema,
+	handler: async (ctx, args) => {
+		// Check if server already exists
+		const existing = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.discordId,
+		);
+
+		if (existing) {
+			throw new Error(`Server with discordId ${args.discordId} already exists`);
+		}
+
+		return await ctx.db.insert("servers", args);
+	},
+});
+
+export const updateServer = publicInternalMutation({
+	args: {
+		id: v.id("servers"),
+		data: serverSchema,
+	},
+	handler: async (ctx, args) => {
+		const existing = await ctx.db.get(args.id);
+		if (!existing) {
+			throw new Error(`Server with id ${args.id} not found`);
+		}
+
+		await ctx.db.patch(args.id, args.data);
+		return args.id;
 	},
 });
 

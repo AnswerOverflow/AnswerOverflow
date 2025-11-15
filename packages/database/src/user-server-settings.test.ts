@@ -41,21 +41,22 @@ it.scoped(
 
 			// Create server
 			yield* database.servers.upsertServer(testServer);
-			const serverLiveData =
-				yield* database.servers.getServerByDiscordId("server123");
-			const serverId = serverLiveData?.data?._id;
+			const serverLiveData = yield* database.servers.getServerByDiscordId({
+				discordId: "server123",
+			});
+			const serverId = serverLiveData?._id;
 
 			if (!serverId) {
 				throw new Error("Server not found");
 			}
 
 			const liveData =
-				yield* database.userServerSettings.findUserServerSettingsById(
-					"user123",
-					serverId,
-				);
+				yield* database.user_server_settings.findUserServerSettingsById({
+					userId: "user123",
+					serverId: serverId,
+				});
 
-			expect(liveData?.data).toBeNull();
+			expect(liveData).toBeNull();
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -65,9 +66,10 @@ it.scoped("upsertUserServerSettings creates or updates settings", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -75,26 +77,30 @@ it.scoped("upsertUserServerSettings creates or updates settings", () =>
 
 		// First upsert (create)
 		const settings1 = createTestUserServerSettings("user123", serverId);
-		yield* database.userServerSettings.upsertUserServerSettings(settings1);
+		yield* database.user_server_settings.upsertUserServerSettings({
+			settings: settings1,
+		});
 
 		const liveData1 =
-			yield* database.userServerSettings.findUserServerSettingsById(
-				"user123",
+			yield* database.user_server_settings.findUserServerSettingsById({
+				userId: "user123",
 				serverId,
-			);
-		expect(liveData1?.data?.userId).toBe("user123");
+			});
+		expect(liveData1?.userId).toBe("user123");
 
 		// Second upsert (update)
 		const settings2 = createTestUserServerSettings("user123", serverId, {
 			canPubliclyDisplayMessages: true,
 		});
-		yield* database.userServerSettings.upsertUserServerSettings(settings2);
+		yield* database.user_server_settings.upsertUserServerSettings({
+			settings: settings2,
+		});
 
 		const liveData2 =
-			yield* database.userServerSettings.findUserServerSettingsById(
-				"user123",
+			yield* database.user_server_settings.findUserServerSettingsById({
+				userId: "user123",
 				serverId,
-			);
-		expect(liveData2?.data?.canPubliclyDisplayMessages).toBe(true);
+			});
+		expect(liveData2?.canPubliclyDisplayMessages).toBe(true);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );

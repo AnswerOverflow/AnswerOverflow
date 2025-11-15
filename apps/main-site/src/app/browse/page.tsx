@@ -14,7 +14,7 @@ export default async function BrowsePage() {
 		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
 		.pipe(Effect.runPromise);
 
-	const servers = serversLiveData.data ?? [];
+	const servers = serversLiveData ?? [];
 
 	return (
 		<div>

@@ -10,9 +10,9 @@ export default async function HomePage() {
 	const featuredServersData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const featuredServers = yield* Effect.scoped(
-			database.servers.getBiggestServers(10),
+			database.servers.getBiggestServers({ take: 10 }),
 		);
-		return featuredServers?.data ?? [];
+		return featuredServers ?? [];
 	})
 		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
 		.pipe(Effect.runPromise);

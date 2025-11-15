@@ -30,10 +30,10 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				// Get server by Discord ID to get Convex ID
-				const serverLiveData = yield* database.servers.getServerByDiscordId(
-					newMessage.guildId ?? "",
-				);
-				const server = serverLiveData?.data;
+				const serverLiveData = yield* database.servers.getServerByDiscordId({
+					discordId: newMessage.guildId ?? "",
+				});
+				const server = serverLiveData;
 
 				if (!server) {
 					yield* Console.warn(
@@ -43,10 +43,10 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				// Check if message exists in database
-				const messageLiveData = yield* database.messages.getMessageById(
-					newMessage.id,
-				);
-				const existingMessage = messageLiveData?.data;
+				const messageLiveData = yield* database.messages.getMessageById({
+					id: newMessage.id,
+				});
+				const existingMessage = messageLiveData;
 
 				if (!existingMessage) {
 					// Message doesn't exist, might be a new message, skip
@@ -82,10 +82,10 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				// Check if message exists in database
-				const messageLiveData = yield* database.messages.getMessageById(
-					message.id,
-				);
-				const existingMessage = messageLiveData?.data;
+				const messageLiveData = yield* database.messages.getMessageById({
+					id: message.id,
+				});
+				const existingMessage = messageLiveData;
 
 				if (!existingMessage) {
 					// Message doesn't exist, skip
@@ -93,7 +93,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				// Delete message from database
-				yield* database.messages.deleteMessage(message.id);
+				yield* database.messages.deleteMessage({ id: message.id });
 				yield* Console.log(`Deleted message ${message.id}`);
 			}).pipe(
 				Effect.catchAll((error) =>
@@ -117,7 +117,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				// Delete messages from database
-				yield* database.messages.deleteManyMessages(messageIds);
+				yield* database.messages.deleteManyMessages({ ids: messageIds });
 				yield* Console.log(`Bulk deleted ${messageIds.length} messages`);
 			}).pipe(
 				Effect.catchAll((error) =>
@@ -145,10 +145,10 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				// Get server by Discord ID to get Convex ID
-				const serverLiveData = yield* database.servers.getServerByDiscordId(
-					message.guildId ?? "",
-				);
-				const server = serverLiveData?.data;
+				const serverLiveData = yield* database.servers.getServerByDiscordId({
+					discordId: message.guildId ?? "",
+				});
+				const server = serverLiveData;
 
 				if (!server) {
 					yield* Console.warn(
@@ -180,9 +180,9 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 					// Upload attachments and update storage IDs
 					const uploadResults =
-						yield* database.attachments.uploadManyAttachmentsFromUrls(
-							attachmentsToUpload,
-						);
+						yield* database.attachments.uploadManyAttachmentsFromUrls({
+							attachments: attachmentsToUpload,
+						});
 
 					// Update attachment records with storage IDs
 					for (const result of uploadResults) {
@@ -215,8 +215,8 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				);
 
 				// Maintain Discord account parity for message author
-				yield* database.discordAccounts
-					.upsertDiscordAccount(toAODiscordAccount(message.author))
+				yield* database.discord_accounts
+					.upsertDiscordAccount({ account: toAODiscordAccount(message.author) })
 					.pipe(
 						Effect.catchAll((error) =>
 							Console.error(
@@ -227,11 +227,13 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					);
 
 				// Handle auto thread
-				const channelLiveData = yield* database.channels.getChannelByDiscordId(
-					message.channel.id,
+				const channelLiveData = yield* database.channels.findChannelByDiscordId(
+					{
+						discordId: message.channel.id,
+					},
 				);
 
-				const channelSettings = channelLiveData?.data ?? null;
+				const channelSettings = channelLiveData ?? null;
 
 				// Run auto thread handler (errors are handled internally)
 				yield* handleAutoThread(channelSettings, message).pipe(

@@ -161,10 +161,10 @@ export function handleManageAccountCommand(
 
 		// Get server by Discord ID
 		const serverLiveData = yield* Effect.scoped(
-			database.servers.getServerByDiscordId(interaction.guildId),
+			database.servers.getServerByDiscordId({ discordId: interaction.guildId }),
 		);
 
-		const server = serverLiveData?.data;
+		const server = serverLiveData;
 
 		if (!server) {
 			yield* Effect.tryPromise({
@@ -180,13 +180,13 @@ export function handleManageAccountCommand(
 
 		// Get user server settings (or default)
 		const userServerSettingsLiveData = yield* Effect.scoped(
-			database.userServerSettings.findUserServerSettingsById(
-				interaction.user.id,
-				server._id,
-			),
+			database.user_server_settings.findUserServerSettingsById({
+				userId: interaction.user.id,
+				serverId: server._id,
+			}),
 		);
 
-		const userServerSettingsRaw = userServerSettingsLiveData?.data;
+		const userServerSettingsRaw = userServerSettingsLiveData;
 
 		const userServerSettings: UserServerSettingsWithFlags =
 			userServerSettingsRaw
@@ -205,10 +205,11 @@ export function handleManageAccountCommand(
 					});
 
 		// Check if account is ignored
-		const isIgnoredAccount =
-			yield* database.ignoredDiscordAccounts.checkIfIgnored(
-				interaction.user.id,
-			);
+		const ignoredAccount =
+			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
+				id: interaction.user.id,
+			});
+		const isIgnoredAccount = ignoredAccount !== null;
 
 		const state: ManageAccountState = {
 			userServerSettings,
@@ -305,13 +306,13 @@ function handleManageAccountButtonPress(
 
 				// Upsert user server settings with new consent value
 				const existingSettingsLiveData = yield* Effect.scoped(
-					database.userServerSettings.findUserServerSettingsById(
+					database.user_server_settings.findUserServerSettingsById({
 						userId,
 						serverId,
-					),
+					}),
 				);
 
-				const existingSettings = existingSettingsLiveData?.data;
+				const existingSettings = existingSettingsLiveData;
 
 				const updatedSettings = existingSettings
 					? {
@@ -327,9 +328,9 @@ function handleManageAccountButtonPress(
 							apiCallsUsed: 0,
 						};
 
-				yield* database.userServerSettings.upsertUserServerSettings(
-					updatedSettings,
-				);
+				yield* database.user_server_settings.upsertUserServerSettings({
+					settings: updatedSettings,
+				});
 
 				// Update state
 				state.userServerSettings.flags.canPubliclyDisplayMessages =
@@ -346,13 +347,13 @@ function handleManageAccountButtonPress(
 
 				// Upsert user server settings with new indexing value
 				const existingSettingsLiveData = yield* Effect.scoped(
-					database.userServerSettings.findUserServerSettingsById(
+					database.user_server_settings.findUserServerSettingsById({
 						userId,
 						serverId,
-					),
+					}),
 				);
 
-				const existingSettings = existingSettingsLiveData?.data;
+				const existingSettings = existingSettingsLiveData;
 
 				const updatedSettings = existingSettings
 					? {
@@ -372,9 +373,9 @@ function handleManageAccountButtonPress(
 							apiCallsUsed: 0,
 						};
 
-				yield* database.userServerSettings.upsertUserServerSettings(
-					updatedSettings,
-				);
+				yield* database.user_server_settings.upsertUserServerSettings({
+					settings: updatedSettings,
+				});
 
 				// Update state
 				state.userServerSettings.flags.messageIndexingDisabled =
@@ -392,13 +393,13 @@ function handleManageAccountButtonPress(
 			case menuButtonIds.unignoreGloballyButton: {
 				if (customId === menuButtonIds.ignoreGloballyButton) {
 					// Delete account (adds to ignored)
-					yield* database.discordAccounts.deleteDiscordAccount(userId);
+					yield* database.discord_accounts.deleteDiscordAccount({ id: userId });
 					state.isIgnoredAccount = true;
 				} else {
 					// Undelete account (removes from ignored)
-					yield* database.ignoredDiscordAccounts.deleteIgnoredDiscordAccount(
-						userId,
-					);
+					yield* database.ignored_discord_accounts.deleteIgnoredDiscordAccount({
+						id: userId,
+					});
 					state.isIgnoredAccount = false;
 				}
 				break;

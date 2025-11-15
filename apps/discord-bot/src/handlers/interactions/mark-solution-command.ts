@@ -66,10 +66,12 @@ export function handleMarkSolutionCommand(
 		}
 
 		const serverLiveData = yield* Effect.scoped(
-			database.servers.getServerByDiscordId(targetMessage.guildId),
+			database.servers.getServerByDiscordId({
+				discordId: targetMessage.guildId,
+			}),
 		);
 
-		const server = serverLiveData?.data;
+		const server = serverLiveData;
 
 		if (!server) {
 			yield* Effect.tryPromise({
@@ -110,12 +112,12 @@ export function handleMarkSolutionCommand(
 
 		// Get channel settings
 		const channelLiveData = yield* Effect.scoped(
-			database.channels.getChannelByDiscordId(parentChannel.id),
+			database.channels.findChannelByDiscordId({ discordId: parentChannel.id }),
 		);
 
-		const channelSettings = channelLiveData?.data;
+		const channelSettings = channelLiveData;
 
-		if (!channelSettings?.flags.markSolutionEnabled) {
+		if (!channelSettings || !channelSettings.flags?.markSolutionEnabled) {
 			yield* Effect.tryPromise({
 				try: () =>
 					interaction.editReply({
@@ -218,9 +220,11 @@ export function handleMarkSolutionCommand(
 
 		// Get server preferences
 		const serverPreferencesLiveData = yield* Effect.scoped(
-			database.serverPreferences.getServerPreferencesByServerId(server._id),
+			database.server_preferences.getServerPreferencesByServerId({
+				serverId: server._id,
+			}),
 		);
-		const serverPreferences = serverPreferencesLiveData?.data ?? null;
+		const serverPreferences = serverPreferencesLiveData ?? null;
 
 		// Mark as solved
 		yield* Effect.promise(async () => {
@@ -237,7 +241,7 @@ export function handleMarkSolutionCommand(
 			// Add solved indicator
 			if (
 				parentChannel.type === 15 &&
-				channelSettings.solutionTagId &&
+				channelSettings?.solutionTagId &&
 				thread.appliedTags.length < 5
 			) {
 				// Forum channel: add solved tag
@@ -273,6 +277,17 @@ export function handleMarkSolutionCommand(
 		);
 
 		// Send success response
+		if (!channelSettings || !channelSettings.flags) {
+			yield* Effect.tryPromise({
+				try: () =>
+					interaction.editReply({
+						content: "Channel settings not found",
+					}),
+				catch: () => undefined,
+			});
+			return;
+		}
+
 		const { embed, components } = makeMarkSolutionResponse({
 			solution: targetMessage,
 			server: {
@@ -280,7 +295,10 @@ export function handleMarkSolutionCommand(
 				_id: server._id,
 			},
 			serverPreferences,
-			channelSettings,
+			channelSettings: {
+				...channelSettings,
+				flags: channelSettings.flags,
+			},
 		});
 
 		yield* Effect.tryPromise({

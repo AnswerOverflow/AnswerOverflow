@@ -23,10 +23,12 @@ it.scoped("upserting server", () =>
 
 		yield* database.servers.upsertServer(server);
 
-		const created = yield* database.servers.getServerByDiscordId("123");
+		const created = yield* database.servers.getServerByDiscordId({
+			discordId: "123",
+		});
 
 		// Data should already be loaded due to defer mechanism
-		expect(created?.data?.discordId).toBe("123");
+		expect(created?.discordId).toBe("123");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -43,7 +45,7 @@ it.scoped(
 			// Call getServerByDiscordId 5 times - should reuse the same watch from cache
 			const results = yield* Effect.all(
 				Array.from({ length: 5 }, () =>
-					database.servers.getServerByDiscordId("123"),
+					database.servers.getServerByDiscordId({ discordId: "123" }),
 				),
 			);
 
@@ -57,7 +59,7 @@ it.scoped(
 			// Data should already be loaded due to defer mechanism
 			// Verify all results are correct
 			for (const result of results) {
-				expect(result?.data?.discordId).toBe("123");
+				expect(result?.discordId).toBe("123");
 			}
 
 			// Verify cache works by checking that all LiveData instances share the same watch
@@ -70,7 +72,7 @@ it.scoped(
 			});
 			// Verify all instances updated together (they share the same watch)
 			for (const result of results) {
-				expect(result?.data?.description).toBe(updatedDescription);
+				expect(result?.description).toBe(updatedDescription);
 			}
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );

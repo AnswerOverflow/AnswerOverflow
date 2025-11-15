@@ -494,6 +494,21 @@ export async function findReactionsByMessageId(
 	);
 }
 
+export async function findMessagesByAuthorId(
+	ctx: QueryCtx | MutationCtx,
+	authorId: string,
+	limit?: number,
+) {
+	const messages = await getManyFrom(
+		ctx.db,
+		"messages",
+		"by_authorId",
+		authorId,
+		"authorId",
+	);
+	return messages.slice(0, limit ?? 100);
+}
+
 export async function findSolutionsByQuestionId(
 	ctx: QueryCtx | MutationCtx,
 	questionId: string,

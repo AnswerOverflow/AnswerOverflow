@@ -418,3 +418,38 @@ export const upsertChannelWithSettings = publicInternalMutation({
 		return args.channel.id;
 	},
 });
+
+export const findManyChannelsById = publicInternalQuery({
+	args: {
+		ids: v.array(v.string()),
+	},
+	handler: async (ctx, args) => {
+		if (args.ids.length === 0) return [];
+
+		const channels = await asyncMap(args.ids, (id) =>
+			getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
+		);
+
+		const validChannels = channels.filter(
+			(channel): channel is NonNullable<(typeof channels)[0]> =>
+				channel !== null,
+		);
+
+		const channelsWithFlags = await addSettingsToChannels(
+			ctx,
+			validChannels.map((c) => ({
+				id: c.id,
+				serverId: c.serverId,
+				name: c.name,
+				type: c.type,
+				parentId: c.parentId,
+				inviteCode: c.inviteCode,
+				archivedTimestamp: c.archivedTimestamp,
+				solutionTagId: c.solutionTagId,
+				lastIndexedSnowflake: c.lastIndexedSnowflake,
+			})),
+		);
+
+		return channelsWithFlags;
+	},
+});

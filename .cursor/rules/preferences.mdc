@@ -9,7 +9,7 @@ alwaysApply: true
 - Never use `any`, `unknown`, or TypeScript type casting (`as` or angle bracket syntax)
 - Use proper types and type inference instead
 - **Prefer type inference over manual type annotations** - if TypeScript can infer the type, let it infer rather than adding explicit annotations
-- Access data through proper type-safe methods (e.g., `liveData?.data?.property`)
+- Access data through proper type-safe methods (e.g., `liveData?.property`)
 
 ## Database Design
 
@@ -23,7 +23,7 @@ alwaysApply: true
 - Tests should work without `TestClock.adjust()` - LiveData should be available immediately after mutations
 - **Never use `TestClock.adjust()` after writing data and then reading it** - data should be available instantly, no waiting needed
 - **Only use `TestClock.adjust()` when testing functionality specifically related to time** (e.g., timeouts, delays, scheduled tasks)
-- Use LiveData properly: access data via `liveData?.data?.property` rather than casting or workarounds
+- Use LiveData properly: access data via `liveData?.property` rather than casting or workarounds
 - Tests should use the same patterns as production code (database service layer)
 - Include tests in implementation plans and run them during development (`bun run test`)
 

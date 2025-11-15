@@ -10,3 +10,9 @@
 [submodule ".context/better-auth"]
 	path = .context/better-auth
 	url = https://github.com/get-convex/better-auth.git
+[submodule ".context/convex-backend"]
+	path = .context/convex-backend
+	url = https://github.com/get-convex/convex-backend.git
+[submodule ".context/convex-js"]
+	path = .context/convex-js
+	url = https://github.com/get-convex/convex-js.git

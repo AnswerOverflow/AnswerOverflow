@@ -16,16 +16,16 @@ export default async function MessagePage(props: Props) {
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* Effect.scoped(
-			database.messages.getMessagePageData(params.messageId),
+			database.messages.getMessagePageData({ messageId: params.messageId }),
 		);
 		return liveData;
 	})
 		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
 		.pipe(Effect.runPromise);
 
-	if (!pageData.data) {
+	if (!pageData) {
 		return notFound();
 	}
 
-	return <MessagePageClient data={pageData.data} />;
+	return <MessagePageClient data={pageData} />;
 }

@@ -144,9 +144,9 @@ export function handleCheckmarkReactionMarkSolution(
 
 		// Get server by Discord ID
 		const serverLiveData = yield* Effect.scoped(
-			database.servers.getServerByDiscordId(fullMessage.guildId),
+			database.servers.getServerByDiscordId({ discordId: fullMessage.guildId }),
 		);
-		const server = serverLiveData?.data;
+		const server = serverLiveData;
 
 		if (!server) {
 			yield* Console.warn(
@@ -169,11 +169,11 @@ export function handleCheckmarkReactionMarkSolution(
 
 		// Get channel settings
 		const channelLiveData = yield* Effect.scoped(
-			database.channels.getChannelByDiscordId(parentChannel.id),
+			database.channels.findChannelByDiscordId({ discordId: parentChannel.id }),
 		);
-		const channelSettings = channelLiveData?.data;
+		const channelSettings = channelLiveData;
 
-		if (!channelSettings?.flags.markSolutionEnabled) {
+		if (!channelSettings || !channelSettings.flags?.markSolutionEnabled) {
 			return;
 		}
 
@@ -231,7 +231,7 @@ export function handleCheckmarkReactionMarkSolution(
 		// Check for solved tag (forum channels)
 		if (
 			parentChannel.type === 15 &&
-			channelSettings.solutionTagId &&
+			channelSettings?.solutionTagId &&
 			thread.appliedTags.includes(channelSettings.solutionTagId)
 		) {
 			return;
@@ -284,9 +284,11 @@ export function handleCheckmarkReactionMarkSolution(
 
 		// Get server preferences
 		const serverPreferencesLiveData = yield* Effect.scoped(
-			database.serverPreferences.getServerPreferencesByServerId(server._id),
+			database.server_preferences.getServerPreferencesByServerId({
+				serverId: server._id,
+			}),
 		);
-		const serverPreferences = serverPreferencesLiveData?.data ?? null;
+		const serverPreferences = serverPreferencesLiveData ?? null;
 
 		// Mark as solved
 		yield* Effect.promise(async () => {
@@ -303,7 +305,7 @@ export function handleCheckmarkReactionMarkSolution(
 			// Add solved indicator
 			if (
 				parentChannel.type === 15 &&
-				channelSettings.solutionTagId &&
+				channelSettings?.solutionTagId &&
 				thread.appliedTags.length < 5
 			) {
 				// Forum channel: add solved tag
@@ -324,6 +326,10 @@ export function handleCheckmarkReactionMarkSolution(
 			}
 
 			// Send response message with embed and buttons
+			if (!channelSettings || !channelSettings.flags) {
+				return;
+			}
+
 			const { embed, components } = makeMarkSolutionResponse({
 				solution: fullMessage,
 				server: {
@@ -331,7 +337,10 @@ export function handleCheckmarkReactionMarkSolution(
 					_id: server._id,
 				},
 				serverPreferences,
-				channelSettings,
+				channelSettings: {
+					...channelSettings,
+					flags: channelSettings.flags,
+				},
 			});
 
 			try {

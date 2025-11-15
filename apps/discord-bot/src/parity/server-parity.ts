@@ -40,18 +40,18 @@ export function syncGuild(guild: Guild) {
 			kickedTime: undefined, // Explicitly clear kickedTime when server is active
 		});
 
-		const serverLiveData = yield* database.servers.getServerByDiscordId(
-			guild.id,
-		);
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: guild.id,
+		});
 
-		if (serverLiveData?.data?._id) {
-			yield* database.serverPreferences.upsertServerPreferences({
-				serverId: serverLiveData?.data?._id,
+		if (serverLiveData?._id) {
+			yield* database.server_preferences.upsertServerPreferences({
+				serverId: serverLiveData._id,
 				considerAllMessagesPublicEnabled: true,
 			});
 		}
 
-		const server = serverLiveData?.data;
+		const server = serverLiveData;
 
 		if (!server) {
 			yield* Console.warn(
@@ -63,10 +63,10 @@ export function syncGuild(guild: Guild) {
 		// If server has a custom domain, upload their server icon to storage
 		if (server.preferencesId) {
 			const preferencesLiveData =
-				yield* database.serverPreferences.getServerPreferencesByServerId(
-					server._id,
-				);
-			const preferences = preferencesLiveData?.data;
+				yield* database.server_preferences.getServerPreferencesByServerId({
+					serverId: server._id,
+				});
+			const preferences = preferencesLiveData;
 			if (preferences?.customDomain && server.icon) {
 				yield* database.attachments
 					.uploadAttachmentFromUrl({
@@ -148,10 +148,10 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("guildUpdate", (_oldGuild, newGuild) =>
 			Effect.gen(function* () {
 				// Check if server exists in database
-				const serverLiveData = yield* database.servers.getServerByDiscordId(
-					newGuild.id,
-				);
-				const existingServer = serverLiveData?.data;
+				const serverLiveData = yield* database.servers.getServerByDiscordId({
+					discordId: newGuild.id,
+				});
+				const existingServer = serverLiveData;
 
 				if (!existingServer) {
 					// Server doesn't exist, might be a new server, skip
@@ -172,15 +172,18 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					...preservedFields
 				} = existingServer;
 
-				yield* database.servers.updateServer(existingServer._id, {
-					...preservedFields,
-					// Update fields that come from the guild object
-					discordId: newGuild.id,
-					name: aoServerData.name,
-					icon: aoServerData.icon,
-					description: aoServerData.description,
-					vanityInviteCode: aoServerData.vanityInviteCode,
-					approximateMemberCount: aoServerData.approximateMemberCount,
+				yield* database.servers.updateServer({
+					id: existingServer._id,
+					data: {
+						...preservedFields,
+						// Update fields that come from the guild object
+						discordId: newGuild.id,
+						name: aoServerData.name,
+						icon: aoServerData.icon,
+						description: aoServerData.description,
+						vanityInviteCode: aoServerData.vanityInviteCode,
+						approximateMemberCount: aoServerData.approximateMemberCount,
+					},
 				});
 			}).pipe(
 				Effect.catchAll((error) =>
@@ -193,10 +196,10 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
 				// Check if server exists in database
-				const serverLiveData = yield* database.servers.getServerByDiscordId(
-					guild.id,
-				);
-				const existingServer = serverLiveData?.data;
+				const serverLiveData = yield* database.servers.getServerByDiscordId({
+					discordId: guild.id,
+				});
+				const existingServer = serverLiveData;
 
 				if (!existingServer) {
 					// Server doesn't exist, skip
@@ -206,9 +209,12 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				// Mark server as kicked instead of deleting
 				const { _id, _creationTime, ...serverData } = existingServer;
 
-				yield* database.servers.updateServer(existingServer._id, {
-					...serverData,
-					kickedTime: Date.now(),
+				yield* database.servers.updateServer({
+					id: existingServer._id,
+					data: {
+						...serverData,
+						kickedTime: Date.now(),
+					},
 				});
 			}).pipe(
 				Effect.catchAll((error) =>
@@ -228,7 +234,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 				const servers = yield* database.servers.getAllServers();
 				// LiveData might not have data immediately, so we handle undefined
-				const serverCount = servers?.data?.length ?? 0;
+				const serverCount = servers?.length ?? 0;
 				yield* Console.log(
 					`Logged in as ${client.user.tag}! ${serverCount} servers`,
 				);
@@ -251,7 +257,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 				// For any servers that are in the database but not in the guilds the bot is in,
 				// mark them as kicked (handles cases where bot was offline when kicked)
-				const allServers = servers?.data ?? [];
+				const allServers = servers ?? [];
 				const serversToMarkAsKicked = allServers.filter(
 					(server) =>
 						!activeServerIds.has(server.discordId) && !server.kickedTime,
@@ -264,9 +270,12 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					yield* Effect.forEach(serversToMarkAsKicked, (server) =>
 						Effect.gen(function* () {
 							const { _id, _creationTime, ...serverData } = server;
-							yield* database.servers.updateServer(server._id, {
-								...serverData,
-								kickedTime: Date.now(),
+							yield* database.servers.updateServer({
+								id: server._id,
+								data: {
+									...serverData,
+									kickedTime: Date.now(),
+								},
 							});
 							yield* Console.log(`Marked server ${server.name} as kicked`);
 						}).pipe(

@@ -198,7 +198,8 @@ function storeMessages(
 
 		yield* Effect.forEach(
 			Arr.fromIterable(HashMap.values(uniqueAuthors)),
-			(author) => database.discordAccounts.upsertDiscordAccount(author),
+			(author) =>
+				database.discord_accounts.upsertDiscordAccount({ account: author }),
 			{ concurrency: 10 },
 		);
 
@@ -223,7 +224,9 @@ function storeMessages(
 			for (let i = 0; i < allAttachments.length; i += batchSize) {
 				const batch = allAttachments.slice(i, i + batchSize);
 				const uploadResults =
-					yield* database.attachments.uploadManyAttachmentsFromUrls(batch);
+					yield* database.attachments.uploadManyAttachmentsFromUrls({
+						attachments: batch,
+					});
 
 				// Update the aoMessages with storage IDs
 				for (const result of uploadResults) {
@@ -258,10 +261,11 @@ function storeMessages(
 			const lastMessage = humanMessages[humanMessages.length - 1];
 			if (lastMessage) {
 				// Get current channel to preserve other fields
-				const channelLiveData =
-					yield* database.channels.getChannelByDiscordId(channelId);
+				const channelLiveData = yield* database.channels.findChannelByDiscordId(
+					{ discordId: channelId },
+				);
 				yield* Effect.sleep(Duration.millis(10));
-				const currentChannel = channelLiveData?.data;
+				const currentChannel = channelLiveData;
 
 				if (currentChannel) {
 					const oldLastIndexed = currentChannel.lastIndexedSnowflake;
@@ -317,11 +321,11 @@ function indexTextChannel(
 		const database = yield* Database;
 
 		// Check if channel has indexing enabled
-		const channelLiveData = yield* database.channels.getChannelByDiscordId(
-			channel.id,
-		);
+		const channelLiveData = yield* database.channels.findChannelByDiscordId({
+			discordId: channel.id,
+		});
 		yield* Effect.sleep(Duration.millis(10));
-		const channelSettings = channelLiveData?.data;
+		const channelSettings = channelLiveData;
 
 		if (!channelSettings?.flags.indexingEnabled) {
 			return;
@@ -385,9 +389,11 @@ function indexTextChannel(
 
 						// Get thread's lastIndexedSnowflake if it exists
 						const threadChannelLiveData =
-							yield* database.channels.getChannelByDiscordId(thread.id);
+							yield* database.channels.findChannelByDiscordId({
+								discordId: thread.id,
+							});
 						yield* Effect.sleep(Duration.millis(10));
-						const threadChannel = threadChannelLiveData?.data;
+						const threadChannel = threadChannelLiveData;
 						const threadLastIndexed = threadChannel?.lastIndexedSnowflake;
 
 						// Fetch and store thread messages
@@ -422,11 +428,11 @@ function indexForumChannel(
 		const database = yield* Database;
 
 		// Check if channel has indexing enabled
-		const channelLiveData = yield* database.channels.getChannelByDiscordId(
-			channel.id,
-		);
+		const channelLiveData = yield* database.channels.findChannelByDiscordId({
+			discordId: channel.id,
+		});
 		yield* Effect.sleep(Duration.millis(10));
-		const channelSettings = channelLiveData?.data;
+		const channelSettings = channelLiveData;
 
 		if (!channelSettings?.flags.indexingEnabled) {
 			return;
@@ -469,9 +475,11 @@ function indexForumChannel(
 
 					// Get thread's lastIndexedSnowflake if it exists
 					const threadChannelLiveData =
-						yield* database.channels.getChannelByDiscordId(thread.id);
+						yield* database.channels.findChannelByDiscordId({
+							discordId: thread.id,
+						});
 					yield* Effect.sleep(Duration.millis(10));
-					const threadChannel = threadChannelLiveData?.data;
+					const threadChannel = threadChannelLiveData;
 					const threadLastIndexed = threadChannel?.lastIndexedSnowflake;
 
 					// Fetch and store thread messages
@@ -508,11 +516,13 @@ function indexForumChannel(
 			const latestThread = sortedThreads[0];
 			if (latestThread) {
 				// Get current channel to preserve other fields
-				const channelLiveData = yield* database.channels.getChannelByDiscordId(
-					channel.id,
+				const channelLiveData = yield* database.channels.findChannelByDiscordId(
+					{
+						discordId: channel.id,
+					},
 				);
 				yield* Effect.sleep(Duration.millis(10));
-				const currentChannel = channelLiveData?.data;
+				const currentChannel = channelLiveData;
 
 				if (currentChannel) {
 					const oldLastIndexed = currentChannel.lastIndexedSnowflake;
@@ -568,11 +578,11 @@ function indexGuild(guild: Guild) {
 		const database = yield* Database;
 
 		// Get server from database
-		const serverLiveData = yield* database.servers.getServerByDiscordId(
-			guild.id,
-		);
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: guild.id,
+		});
 		yield* Effect.sleep(Duration.millis(10));
-		const server = serverLiveData?.data;
+		const server = serverLiveData;
 
 		if (!server) {
 			yield* Console.warn(`Server ${guild.id} not found in database, skipping`);

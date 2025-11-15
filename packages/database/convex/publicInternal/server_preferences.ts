@@ -140,15 +140,12 @@ export const updateServerPreferences = publicInternalMutation({
 });
 
 export const upsertServerPreferences = publicInternalMutation({
-	args: {
-		preferences: serverPreferencesSchema,
-	},
+	args: serverPreferencesSchema,
 	handler: async (ctx, args) => {
+		const { serverId, ...preferences } = args;
 		const existing = await ctx.db
 			.query("serverPreferences")
-			.withIndex("by_serverId", (q) =>
-				q.eq("serverId", args.preferences.serverId),
-			)
+			.withIndex("by_serverId", (q) => q.eq("serverId", serverId))
 			.first();
 
 		if (existing) {
@@ -156,13 +153,13 @@ export const upsertServerPreferences = publicInternalMutation({
 			// Validate custom domain uniqueness if being changed
 
 			if (
-				args.preferences.customDomain &&
-				args.preferences.customDomain !== existing.customDomain
+				preferences.customDomain &&
+				preferences.customDomain !== existing.customDomain
 			) {
 				const domainError = await validateCustomDomainUniqueness(
 					ctx,
 
-					args.preferences.customDomain,
+					preferences.customDomain,
 
 					undefined,
 
@@ -174,7 +171,7 @@ export const upsertServerPreferences = publicInternalMutation({
 				}
 			}
 
-			await ctx.db.patch(existing._id, args.preferences);
+			await ctx.db.patch(existing._id, preferences);
 			const updated = await ctx.db.get(existing._id);
 			if (!updated) {
 				throw new Error("Failed to update server preferences");
@@ -187,22 +184,19 @@ export const upsertServerPreferences = publicInternalMutation({
 			const domainError = await validateCustomDomainUniqueness(
 				ctx,
 
-				args.preferences.customDomain,
+				preferences.customDomain,
 
-				args.preferences.serverId,
+				serverId,
 			);
 
 			if (domainError) {
 				throw new Error(domainError);
 			}
 
-			const preferencesId = await ctx.db.insert(
-				"serverPreferences",
-				args.preferences,
-			);
+			const preferencesId = await ctx.db.insert("serverPreferences", args);
 
 			// Update server to reference preferences
-			const serverRecord = await ctx.db.get(args.preferences.serverId);
+			const serverRecord = await ctx.db.get(serverId);
 			if (serverRecord) {
 				await ctx.db.patch(serverRecord._id, {
 					preferencesId,

@@ -61,10 +61,10 @@ export function handleLeaderboardCommand(
 
 		// Get server by Discord ID
 		const serverLiveData = yield* Effect.scoped(
-			database.servers.getServerByDiscordId(interaction.guildId),
+			database.servers.getServerByDiscordId({ discordId: interaction.guildId }),
 		);
 
-		const server = serverLiveData?.data;
+		const server = serverLiveData;
 
 		if (!server) {
 			yield* Effect.tryPromise({
@@ -79,10 +79,13 @@ export function handleLeaderboardCommand(
 
 		// Get top question solvers
 		const topSolversLiveData = yield* Effect.scoped(
-			database.messages.getTopQuestionSolversByServerId(server._id, 10),
+			database.messages.getTopQuestionSolversByServerId({
+				serverId: server._id,
+				limit: 10,
+			}),
 		);
 
-		const topSolvers = topSolversLiveData?.data ?? [];
+		const topSolvers = topSolversLiveData ?? [];
 
 		// Build embed description
 		const embedDescription =

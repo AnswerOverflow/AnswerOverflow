@@ -97,9 +97,10 @@ it.scoped("upsertMessage creates a new message", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -122,11 +123,13 @@ it.scoped("upsertMessage creates a new message", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.getMessageById("message123");
+		const liveData = yield* database.messages.getMessageById({
+			id: "message123",
+		});
 
-		expect(liveData?.data?.id).toBe("message123");
-		expect(liveData?.data?.content).toBe("Message message123");
-		expect(liveData?.data?.authorId).toBe("author123");
+		expect(liveData?.id).toBe("message123");
+		expect(liveData?.content).toBe("Message message123");
+		expect(liveData?.authorId).toBe("author123");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -136,9 +139,10 @@ it.scoped("upsertMessage updates an existing message", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -176,9 +180,11 @@ it.scoped("upsertMessage updates an existing message", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.getMessageById("message123");
+		const liveData = yield* database.messages.getMessageById({
+			id: "message123",
+		});
 
-		expect(liveData?.data?.content).toBe("Updated content");
+		expect(liveData?.content).toBe("Updated content");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -188,9 +194,10 @@ it.scoped("upsertMessage with attachments", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -217,9 +224,11 @@ it.scoped("upsertMessage with attachments", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.getMessageById("message123");
+		const liveData = yield* database.messages.getMessageById({
+			id: "message123",
+		});
 
-		expect(liveData?.data?.id).toBe("message123");
+		expect(liveData?.id).toBe("message123");
 		// Note: Attachments are stored separately, so we'd need a separate query to verify them
 		// For now, we just verify the message was created
 	}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -231,9 +240,10 @@ it.scoped("upsertMessage with reactions", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -263,9 +273,11 @@ it.scoped("upsertMessage with reactions", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.getMessageById("message123");
+		const liveData = yield* database.messages.getMessageById({
+			id: "message123",
+		});
 
-		expect(liveData?.data?.id).toBe("message123");
+		expect(liveData?.id).toBe("message123");
 		// Note: Reactions are stored separately, so we'd need a separate query to verify them
 		// For now, we just verify the message was created
 	}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -277,9 +289,10 @@ it.scoped("upsertManyMessages creates multiple messages", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -301,13 +314,19 @@ it.scoped("upsertManyMessages creates multiple messages", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData1 = yield* database.messages.getMessageById("message1");
-		const liveData2 = yield* database.messages.getMessageById("message2");
-		const liveData3 = yield* database.messages.getMessageById("message3");
+		const liveData1 = yield* database.messages.getMessageById({
+			id: "message1",
+		});
+		const liveData2 = yield* database.messages.getMessageById({
+			id: "message2",
+		});
+		const liveData3 = yield* database.messages.getMessageById({
+			id: "message3",
+		});
 
-		expect(liveData1?.data?.id).toBe("message1");
-		expect(liveData2?.data?.id).toBe("message2");
-		expect(liveData3?.data?.id).toBe("message3");
+		expect(liveData1?.id).toBe("message1");
+		expect(liveData2?.id).toBe("message2");
+		expect(liveData3?.id).toBe("message3");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -317,9 +336,10 @@ it.scoped("findMessagesByChannelId returns messages for a channel", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -341,13 +361,13 @@ it.scoped("findMessagesByChannelId returns messages for a channel", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findMessagesByChannelId(
-			"channel123",
-			{ limit: 10 },
-		);
+		const liveData = yield* database.messages.findMessagesByChannelId({
+			channelId: "channel123",
+			limit: 10,
+		});
 
-		expect(liveData?.data?.length).toBeGreaterThanOrEqual(3);
-		const messageIds = liveData?.data?.map((m) => m.id) ?? [];
+		expect(liveData?.length).toBeGreaterThanOrEqual(3);
+		const messageIds = liveData?.map((m) => m.id) ?? [];
 		expect(messageIds).toContain("message1");
 		expect(messageIds).toContain("message2");
 		expect(messageIds).toContain("message3");
@@ -360,9 +380,10 @@ it.scoped("findManyMessagesById returns messages by ids", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -384,14 +405,12 @@ it.scoped("findManyMessagesById returns messages by ids", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findManyMessagesById([
-			"message1",
-			"message2",
-			"message3",
-		]);
+		const liveData = yield* database.messages.findManyMessagesById({
+			ids: ["message1", "message2", "message3"],
+		});
 
-		expect(liveData?.data?.length).toBe(3);
-		const messageIds = liveData?.data?.map((m) => m.id) ?? [];
+		expect(liveData?.length).toBe(3);
+		const messageIds = liveData?.map((m) => m.id) ?? [];
 		expect(messageIds).toContain("message1");
 		expect(messageIds).toContain("message2");
 		expect(messageIds).toContain("message3");
@@ -404,9 +423,10 @@ it.scoped("deleteMessage removes a message", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -430,15 +450,19 @@ it.scoped("deleteMessage removes a message", () =>
 		});
 
 		// Verify message exists
-		const beforeDelete = yield* database.messages.getMessageById("message123");
-		expect(beforeDelete?.data?.id).toBe("message123");
+		const beforeDelete = yield* database.messages.getMessageById({
+			id: "message123",
+		});
+		expect(beforeDelete?.id).toBe("message123");
 
 		// Delete message
-		yield* database.messages.deleteMessage("message123");
+		yield* database.messages.deleteMessage({ id: "message123" });
 
 		// Verify message is deleted
-		const afterDelete = yield* database.messages.getMessageById("message123");
-		expect(afterDelete?.data).toBeNull();
+		const afterDelete = yield* database.messages.getMessageById({
+			id: "message123",
+		});
+		expect(afterDelete).toBeNull();
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -448,9 +472,10 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -473,16 +498,24 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 		});
 
 		// Delete messages
-		yield* database.messages.deleteManyMessages(["message1", "message2"]);
+		yield* database.messages.deleteManyMessages({
+			ids: ["message1", "message2"],
+		});
 
 		// Verify messages are deleted
-		const deleted1 = yield* database.messages.getMessageById("message1");
-		const deleted2 = yield* database.messages.getMessageById("message2");
-		const remaining = yield* database.messages.getMessageById("message3");
+		const deleted1 = yield* database.messages.getMessageById({
+			id: "message1",
+		});
+		const deleted2 = yield* database.messages.getMessageById({
+			id: "message2",
+		});
+		const remaining = yield* database.messages.getMessageById({
+			id: "message3",
+		});
 
-		expect(deleted1?.data).toBeNull();
-		expect(deleted2?.data).toBeNull();
-		expect(remaining?.data?.id).toBe("message3");
+		expect(deleted1).toBeNull();
+		expect(deleted2).toBeNull();
+		expect(remaining?.id).toBe("message3");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -492,9 +525,10 @@ it.scoped("findMessagesByAuthorId returns messages by author", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -516,13 +550,13 @@ it.scoped("findMessagesByAuthorId returns messages by author", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findMessagesByAuthorId(
-			"author123",
-			10,
-		);
+		const liveData = yield* database.messages.findMessagesByAuthorId({
+			authorId: "author123",
+			limit: 10,
+		});
 
-		expect(liveData?.data?.length).toBeGreaterThanOrEqual(2);
-		const authorIds = liveData?.data?.map((m) => m.authorId) ?? [];
+		expect(liveData?.length).toBeGreaterThanOrEqual(2);
+		const authorIds = liveData?.map((m) => m.authorId) ?? [];
 		expect(authorIds.every((id) => id === "author123")).toBe(true);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -533,9 +567,10 @@ it.scoped("findMessagesByServerId returns messages by server", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -557,13 +592,13 @@ it.scoped("findMessagesByServerId returns messages by server", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findMessagesByServerId(
+		const liveData = yield* database.messages.findMessagesByServerId({
 			serverId,
-			10,
-		);
+			limit: 10,
+		});
 
-		expect(liveData?.data?.length).toBeGreaterThanOrEqual(3);
-		const serverIds = liveData?.data?.map((m) => m.serverId) ?? [];
+		expect(liveData?.length).toBeGreaterThanOrEqual(3);
+		const serverIds = liveData?.map((m) => m.serverId) ?? [];
 		expect(serverIds.every((id) => id === serverId)).toBe(true);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -574,9 +609,10 @@ it.scoped("findMessagesByParentChannelId returns thread messages", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -612,14 +648,13 @@ it.scoped("findMessagesByParentChannelId returns thread messages", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findMessagesByParentChannelId(
-			"parent123",
-			10,
-		);
+		const liveData = yield* database.messages.findMessagesByParentChannelId({
+			parentChannelId: "parent123",
+			limit: 10,
+		});
 
-		expect(liveData?.data?.length).toBeGreaterThanOrEqual(2);
-		const parentChannelIds =
-			liveData?.data?.map((m) => m.parentChannelId) ?? [];
+		expect(liveData?.length).toBeGreaterThanOrEqual(2);
+		const parentChannelIds = liveData?.map((m) => m.parentChannelId) ?? [];
 		expect(parentChannelIds.every((id) => id === "parent123")).toBe(true);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -630,9 +665,10 @@ it.scoped("findLatestMessageInChannel returns latest message", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -654,12 +690,13 @@ it.scoped("findLatestMessageInChannel returns latest message", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData =
-			yield* database.messages.findLatestMessageInChannel("channel123");
+		const liveData = yield* database.messages.findLatestMessageInChannel({
+			channelId: "channel123",
+		});
 
 		// Should return one of the messages (order may vary, but should be latest)
-		expect(liveData?.data).not.toBeNull();
-		expect(liveData?.data?.channelId).toBe("channel123");
+		expect(liveData).not.toBeNull();
+		expect(liveData?.channelId).toBe("channel123");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -671,9 +708,10 @@ it.scoped(
 
 			// Create server
 			yield* database.servers.upsertServer(testServer);
-			const serverLiveData =
-				yield* database.servers.getServerByDiscordId("server123");
-			const serverId = serverLiveData?.data?._id;
+			const serverLiveData = yield* database.servers.getServerByDiscordId({
+				discordId: "server123",
+			});
+			const serverId = serverLiveData?._id;
 
 			if (!serverId) {
 				throw new Error("Server not found");
@@ -722,13 +760,13 @@ it.scoped(
 			});
 
 			const liveData =
-				yield* database.messages.findLatestMessageInChannelAndThreads(
-					"parent123",
-				);
+				yield* database.messages.findLatestMessageInChannelAndThreads({
+					channelId: "parent123",
+				});
 
 			// Should return the thread message (higher ID)
-			expect(liveData?.data).not.toBeNull();
-			expect(liveData?.data?.id).toBe("200");
+			expect(liveData).not.toBeNull();
+			expect(liveData?.id).toBe("200");
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -738,9 +776,10 @@ it.scoped("findAttachmentsByMessageId returns attachments for a message", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -767,11 +806,12 @@ it.scoped("findAttachmentsByMessageId returns attachments for a message", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData =
-			yield* database.messages.findAttachmentsByMessageId("message123");
+		const liveData = yield* database.messages.findAttachmentsByMessageId({
+			messageId: "message123",
+		});
 
-		expect(liveData?.data?.length).toBe(2);
-		const attachmentIds = liveData?.data?.map((a) => a.id) ?? [];
+		expect(liveData?.length).toBe(2);
+		const attachmentIds = liveData?.map((a) => a.id) ?? [];
 		expect(attachmentIds).toContain("attach1");
 		expect(attachmentIds).toContain("attach2");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -783,9 +823,10 @@ it.scoped("findReactionsByMessageId returns reactions for a message", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -815,11 +856,12 @@ it.scoped("findReactionsByMessageId returns reactions for a message", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData =
-			yield* database.messages.findReactionsByMessageId("message123");
+		const liveData = yield* database.messages.findReactionsByMessageId({
+			messageId: "message123",
+		});
 
-		expect(liveData?.data?.length).toBe(2);
-		const reactionMessageIds = liveData?.data?.map((r) => r.messageId) ?? [];
+		expect(liveData?.length).toBe(2);
+		const reactionMessageIds = liveData?.map((r) => r.messageId) ?? [];
 		expect(reactionMessageIds.every((id) => id === "message123")).toBe(true);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -830,9 +872,10 @@ it.scoped("findEmojiById returns emoji by ID", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -858,10 +901,10 @@ it.scoped("findEmojiById returns emoji by ID", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findEmojiById("emoji123");
+		const liveData = yield* database.messages.findEmojiById({ id: "emoji123" });
 
-		expect(liveData?.data?.id).toBe("emoji123");
-		expect(liveData?.data?.name).toBe("👍");
+		expect(liveData?.id).toBe("emoji123");
+		expect(liveData?.name).toBe("👍");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -873,9 +916,10 @@ it.scoped(
 
 			// Create server
 			yield* database.servers.upsertServer(testServer);
-			const serverLiveData =
-				yield* database.servers.getServerByDiscordId("server123");
-			const serverId = serverLiveData?.data?._id;
+			const serverLiveData = yield* database.servers.getServerByDiscordId({
+				discordId: "server123",
+			});
+			const serverId = serverLiveData?._id;
 
 			if (!serverId) {
 				throw new Error("Server not found");
@@ -898,12 +942,15 @@ it.scoped(
 			});
 
 			// Delete all messages in channel
-			yield* database.messages.deleteManyMessagesByChannelId("channel123");
+			yield* database.messages.deleteManyMessagesByChannelId({
+				channelId: "channel123",
+			});
 
 			// Verify all messages are deleted
-			const liveData =
-				yield* database.messages.findMessagesByChannelId("channel123");
-			expect(liveData?.data?.length).toBe(0);
+			const liveData = yield* database.messages.findMessagesByChannelId({
+				channelId: "channel123",
+			});
+			expect(liveData?.length).toBe(0);
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -913,9 +960,10 @@ it.scoped("deleteManyMessagesByUserId removes all messages by a user", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -938,17 +986,21 @@ it.scoped("deleteManyMessagesByUserId removes all messages by a user", () =>
 		});
 
 		// Delete all messages by author123
-		yield* database.messages.deleteManyMessagesByUserId("author123");
+		yield* database.messages.deleteManyMessagesByUserId({
+			userId: "author123",
+		});
 
 		// Verify author123's messages are deleted
-		const author123Messages =
-			yield* database.messages.findMessagesByAuthorId("author123");
-		expect(author123Messages?.data?.length).toBe(0);
+		const author123Messages = yield* database.messages.findMessagesByAuthorId({
+			authorId: "author123",
+		});
+		expect(author123Messages?.length).toBe(0);
 
 		// Verify author456's message still exists
-		const author456Messages =
-			yield* database.messages.findMessagesByAuthorId("author456");
-		expect(author456Messages?.data?.length).toBeGreaterThanOrEqual(1);
+		const author456Messages = yield* database.messages.findMessagesByAuthorId({
+			authorId: "author456",
+		});
+		expect(author456Messages?.length).toBeGreaterThanOrEqual(1);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -958,9 +1010,10 @@ it.scoped("findSolutionsByQuestionId returns solutions for a question", () =>
 
 		// Create server
 		yield* database.servers.upsertServer(testServer);
-		const serverLiveData =
-			yield* database.servers.getServerByDiscordId("server123");
-		const serverId = serverLiveData?.data?._id;
+		const serverLiveData = yield* database.servers.getServerByDiscordId({
+			discordId: "server123",
+		});
+		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -1012,16 +1065,17 @@ it.scoped("findSolutionsByQuestionId returns solutions for a question", () =>
 		});
 
 		// Find solutions
-		const liveData =
-			yield* database.messages.findSolutionsByQuestionId("question123");
+		const liveData = yield* database.messages.findSolutionsByQuestionId({
+			questionId: "question123",
+		});
 
-		expect(liveData?.data?.length).toBe(2);
-		const solutionIds = liveData?.data?.map((m) => m.id) ?? [];
+		expect(liveData?.length).toBe(2);
+		const solutionIds = liveData?.map((m) => m.id) ?? [];
 		expect(solutionIds).toContain("solution1");
 		expect(solutionIds).toContain("solution2");
 
 		// Verify all solutions have the correct questionId
-		const questionIds = liveData?.data?.map((m) => m.questionId) ?? [];
+		const questionIds = liveData?.map((m) => m.questionId) ?? [];
 		expect(questionIds.every((id) => id === "question123")).toBe(true);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );

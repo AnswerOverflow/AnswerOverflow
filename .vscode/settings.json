@@ -3,10 +3,12 @@
 	// 	"**/.context": true
 	// },
 	"search.exclude": {
-		"**/.context": true
+		"**/.context": true,
+		"**/_generated/**": true
 	},
 	"files.watcherExclude": {
-		"**/.context/**": true
+		"**/.context/**": true,
+		"**/_generated/**": true
 	},
 	"tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
 	"typescript.tsdk": "node_modules/typescript/lib"

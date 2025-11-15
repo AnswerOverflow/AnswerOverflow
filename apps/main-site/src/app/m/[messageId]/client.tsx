@@ -167,7 +167,7 @@ function MessageEmbed({ embed }: { embed: Embed }) {
 }
 
 export function MessagePageClient(props: { data: MessagePageData }) {
-	const data = props.data;
+	const { data } = props;
 
 	if (!data) {
 		return (
