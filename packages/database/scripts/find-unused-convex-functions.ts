@@ -8,16 +8,16 @@
  */
 
 import { readFile } from "fs/promises";
-import { join } from "path";
 import { glob } from "glob";
+import { join } from "path";
 
 const PACKAGE_ROOT = join(import.meta.dir, "..");
 const CONVEX_DIR = join(PACKAGE_ROOT, "convex");
 
 interface FunctionInfo {
 	name: string;
-	file: string;
-	namespace: string;
+	file: string; // Relative path from convex/ directory (e.g., "public/dashboard.ts")
+	namespace: string; // Last path component without extension (e.g., "dashboard")
 	type:
 		| "query"
 		| "mutation"
@@ -25,7 +25,6 @@ interface FunctionInfo {
 		| "internalQuery"
 		| "internalMutation"
 		| "internalAction";
-	isPublic: boolean;
 }
 
 async function extractFunctionsFromFile(
@@ -39,8 +38,6 @@ async function extractFunctionsFromFile(
 	// convex/public/channels.ts -> channels
 	// convex/publicInternal/channels.ts -> channels
 	const pathParts = relativePath.split("/");
-	const isPublic =
-		pathParts.includes("public") && !pathParts.includes("publicInternal");
 	const namespace = pathParts[pathParts.length - 1]?.replace(".ts", "") || "";
 
 	// Match exported functions
@@ -95,7 +92,6 @@ async function extractFunctionsFromFile(
 				file: relativePath,
 				namespace,
 				type: pattern.type,
-				isPublic,
 			});
 		}
 	}
@@ -121,57 +117,97 @@ async function findAllConvexFunctions(): Promise<FunctionInfo[]> {
 	return allFunctions;
 }
 
+/**
+ * Generate all possible API paths for a function based on its file location.
+ * Convex uses file-based routing where the API path mirrors the directory structure.
+ *
+ * Examples:
+ * - convex/public/dashboard.ts -> api.dashboard.* or internal.public.dashboard.*
+ * - convex/publicInternal/channels.ts -> api.publicInternal.channels.*
+ * - convex/client/publicInternal.ts -> api.client.publicInternal.* or internal.client.publicInternal.*
+ */
+function generateApiPaths(
+	functionFile: string,
+	functionName: string,
+): string[] {
+	// Remove .ts extension and split path
+	const pathWithoutExt = functionFile.replace(/\.ts$/, "");
+	const pathParts = pathWithoutExt.split("/").filter(Boolean);
+
+	if (pathParts.length === 0) {
+		return [];
+	}
+
+	const apiPaths: string[] = [];
+
+	// Build API path by joining path parts with dots
+	// e.g., ["public", "dashboard"] -> "public.dashboard"
+	const apiPath = pathParts.join(".");
+
+	// Public API path: api.path.to.function
+	apiPaths.push(`api\\.${apiPath}\\.${functionName}`);
+	apiPaths.push(`api\\.${apiPath}\\.${functionName}\\s*,`);
+	apiPaths.push(`api\\.${apiPath}\\.${functionName}\\s*\\)`);
+
+	// Internal API path: internal.path.to.function
+	apiPaths.push(`internal\\.${apiPath}\\.${functionName}`);
+	apiPaths.push(`internal\\.${apiPath}\\.${functionName}\\s*,`);
+	apiPaths.push(`internal\\.${apiPath}\\.${functionName}\\s*\\)`);
+
+	return apiPaths;
+}
+
 async function searchForFunctionUsage(
 	functionName: string,
-	namespace: string,
-	isPublic: boolean,
+	functionFile: string,
 ): Promise<boolean> {
-	// Search patterns:
-	// 1. api.namespace.functionName
-	// 2. internal.namespace.functionName
-	// 3. api.publicInternal.namespace.functionName (for publicInternal functions)
-	// 4. ctx.runQuery(api.namespace.functionName, ...)
-	// 5. ctx.runMutation(api.namespace.functionName, ...)
-	// 6. ctx.runAction(api.namespace.functionName, ...)
-	// 7. In FUNCTION_TYPE_MAP (for publicInternal functions)
-
 	const searchDirs = [
 		join(PACKAGE_ROOT, "src"),
 		join(PACKAGE_ROOT, "../../apps"),
+		CONVEX_DIR, // Also search within convex directory for cross-function calls
 	];
 
-	const patterns = isPublic
-		? [
-				// Public functions accessed via api
-				`api\\.${namespace}\\.${functionName}`,
-				`api\\.${namespace}\\.${functionName}\\s*,`,
-				`api\\.${namespace}\\.${functionName}\\s*\\)`,
-				`internal\\.${namespace}\\.${functionName}`,
-				`internal\\.${namespace}\\.${functionName}\\s*,`,
-				`internal\\.${namespace}\\.${functionName}\\s*\\)`,
-				`ctx\\.runQuery\\(api\\.${namespace}\\.${functionName}`,
-				`ctx\\.runMutation\\(api\\.${namespace}\\.${functionName}`,
-				`ctx\\.runAction\\(api\\.${namespace}\\.${functionName}`,
-				`ctx\\.runQuery\\(internal\\.${namespace}\\.${functionName}`,
-				`ctx\\.runMutation\\(internal\\.${namespace}\\.${functionName}`,
-				`ctx\\.runAction\\(internal\\.${namespace}\\.${functionName}`,
-				// Database service layer access
-				`database\\.${namespace}\\.${functionName}`,
-				`database\\.${namespace}\\.${functionName}\\s*,`,
-				`database\\.${namespace}\\.${functionName}\\s*\\)`,
-			]
-		: [
-				// PublicInternal functions accessed via api.publicInternal
-				`api\\.publicInternal\\.${namespace}\\.${functionName}`,
-				`api\\.publicInternal\\.${namespace}\\.${functionName}\\s*,`,
-				`api\\.publicInternal\\.${namespace}\\.${functionName}\\s*\\)`,
-				// Database service layer access
-				`database\\.${namespace}\\.${functionName}`,
-				`database\\.${namespace}\\.${functionName}\\s*,`,
-				`database\\.${namespace}\\.${functionName}\\s*\\)`,
-				`"${namespace}\\.${functionName}"`, // In FUNCTION_TYPE_MAP
-				`'${namespace}\\.${functionName}'`, // In FUNCTION_TYPE_MAP
-			];
+	// Generate all possible API paths dynamically based on file structure
+	const baseApiPaths = generateApiPaths(functionFile, functionName);
+
+	// Build comprehensive search patterns
+	const patterns: string[] = [];
+
+	// Base API paths (api.* and internal.*)
+	for (const path of baseApiPaths) {
+		patterns.push(path);
+	}
+
+	// ctx.runQuery/runMutation/runAction patterns
+	// Use the escaped paths directly since they're already properly escaped for regex
+	for (const path of baseApiPaths) {
+		patterns.push(`ctx\\.runQuery\\(${path}`);
+		patterns.push(`ctx\\.runMutation\\(${path}`);
+		patterns.push(`ctx\\.runAction\\(${path}`);
+	}
+
+	// Scheduler patterns (runAfter, interval, cron)
+	// Use the escaped paths directly since they're already properly escaped for regex
+	for (const path of baseApiPaths) {
+		patterns.push(`ctx\\.scheduler\\.runAfter\\([^,]+,\\s*${path}`);
+		patterns.push(`ctx\\.scheduler\\.interval\\([^,]+,\\s*${path}`);
+		patterns.push(`ctx\\.scheduler\\.cron\\([^,]+,\\s*${path}`);
+	}
+
+	// Database service layer access (uses namespace, which is the last path component)
+	const pathParts = functionFile
+		.replace(/\.ts$/, "")
+		.split("/")
+		.filter(Boolean);
+	const namespace = pathParts[pathParts.length - 1] || "";
+	if (namespace) {
+		patterns.push(`database\\.${namespace}\\.${functionName}`);
+		patterns.push(`database\\.${namespace}\\.${functionName}\\s*,`);
+		patterns.push(`database\\.${namespace}\\.${functionName}\\s*\\)`);
+		// FUNCTION_TYPE_MAP patterns (for publicInternal functions)
+		patterns.push(`"${namespace}\\.${functionName}"`);
+		patterns.push(`'${namespace}\\.${functionName}'`);
+	}
 
 	for (const searchDir of searchDirs) {
 		try {
@@ -189,21 +225,17 @@ async function searchForFunctionUsage(
 				const filePath = join(searchDir, file);
 				try {
 					const content = await readFile(filePath, "utf-8");
+					// We search for API paths (e.g., internal.public.dashboard.functionName),
+					// not function definitions, so we don't need to skip the definition file
 					for (const pattern of patterns) {
 						const regex = new RegExp(pattern, "g");
 						if (regex.test(content)) {
 							return true;
 						}
 					}
-				} catch (error) {
-					// Skip files that can't be read
-					continue;
-				}
+				} catch {}
 			}
-		} catch (error) {
-			// Skip directories that don't exist
-			continue;
-		}
+		} catch {}
 	}
 
 	return false;
@@ -218,11 +250,7 @@ async function main() {
 	const unusedFunctions: FunctionInfo[] = [];
 
 	for (const func of allFunctions) {
-		const isUsed = await searchForFunctionUsage(
-			func.name,
-			func.namespace,
-			func.isPublic,
-		);
+		const isUsed = await searchForFunctionUsage(func.name, func.file);
 		if (!isUsed) {
 			unusedFunctions.push(func);
 		}
@@ -237,9 +265,13 @@ async function main() {
 		`❌ Found ${unusedFunctions.length} unused Convex function(s):\n`,
 	);
 	for (const func of unusedFunctions) {
-		const apiPath = func.isPublic
-			? `api.${func.namespace}.${func.name}`
-			: `api.publicInternal.${func.namespace}.${func.name}`;
+		// Generate API path dynamically from file structure
+		const pathWithoutExt = func.file.replace(/\.ts$/, "");
+		const pathParts = pathWithoutExt.split("/").filter(Boolean);
+		const apiPath =
+			pathParts.length > 0
+				? `api.${pathParts.join(".")}.${func.name}`
+				: `api.${func.name}`;
 		console.log(`  - ${func.name} (${func.type}) in ${func.file}`);
 		console.log(`    API path: ${apiPath}`);
 		console.log();
