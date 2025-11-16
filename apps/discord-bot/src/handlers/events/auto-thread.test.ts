@@ -1,20 +1,17 @@
 import { expect, it } from "@effect/vitest";
 import { assertLeft } from "@effect/vitest/utils";
 import { Database } from "@packages/database/database";
-import { DatabaseTestLayer } from "@packages/database/database-test";
 import type { GuildBasedChannel, Message } from "discord.js";
 import { ChannelType, type Guild, MessageType } from "discord.js";
-import { Effect, type Either, Layer } from "effect";
+import { Effect, type Either } from "effect";
 import { describe } from "vitest";
 import { DiscordClientMock } from "../../core/discord-client-mock";
-import { DiscordClientTestLayer } from "../../core/discord-client-test-layer";
+import { TestLayer } from "../../utils/layers";
 import {
 	AutoThreadError,
 	AutoThreadErrorCode,
 	handleAutoThread,
-} from "./auto-thread-handler";
-
-const TestLayer = Layer.mergeAll(DiscordClientTestLayer, DatabaseTestLayer);
+} from "./auto-thread";
 
 const setupTestChannel = (
 	autoThreadEnabled = true,

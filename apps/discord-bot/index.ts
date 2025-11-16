@@ -2,7 +2,7 @@ import { DatabaseLayer } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Console, Effect, Layer, Logger, LogLevel } from "effect";
 import { Discord, DiscordLayer } from "./src/core/discord-service";
-import { AutoThreadHandlerLayer } from "./src/handlers/events/auto-thread-handler";
+import { AutoThreadHandlerLayer } from "./src/handlers/events/auto-thread";
 import { ChannelParityLayer } from "./src/parity/channel-parity";
 import { InteractionHandlersLayer } from "./src/parity/interaction-handlers";
 import { MessageParityLayer } from "./src/parity/message-parity";
