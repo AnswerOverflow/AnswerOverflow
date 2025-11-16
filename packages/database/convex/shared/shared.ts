@@ -1,6 +1,7 @@
 import type { Infer } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import { Array as EffectArray, Predicate } from "effect";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
 import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
@@ -294,13 +295,16 @@ export function extractMentionIds(content: string): {
 	const userMentionRegex = /<@(\d+)>/g;
 	const channelMentionRegex = /<#(\d+)>/g;
 
-	let match;
-	while ((match = userMentionRegex.exec(content)) !== null) {
-		userIds.add(match[1]);
+	for (const match of content.matchAll(userMentionRegex)) {
+		if (match[1]) {
+			userIds.add(match[1]);
+		}
 	}
 
-	while ((match = channelMentionRegex.exec(content)) !== null) {
-		channelIds.add(match[1]);
+	for (const match of content.matchAll(channelMentionRegex)) {
+		if (match[1]) {
+			channelIds.add(match[1]);
+		}
 	}
 
 	return {
@@ -315,27 +319,19 @@ export function extractDiscordLinks(content: string): Array<{
 	channelId: string;
 	messageId?: string;
 }> {
-	const links: Array<{
-		original: string;
-		guildId: string;
-		channelId: string;
-		messageId?: string;
-	}> = [];
-
 	const discordLinkRegex =
 		/https:\/\/discord\.com\/channels\/(\d+)\/(\d+)(?:\/(\d+))?/g;
 
-	let match;
-	while ((match = discordLinkRegex.exec(content)) !== null) {
-		links.push({
-			original: match[0],
-			guildId: match[1],
-			channelId: match[2],
-			messageId: match[3],
-		});
-	}
-
-	return links;
+	const matches = content.matchAll(discordLinkRegex);
+	return EffectArray.map(Array.from(matches), (match) => {
+		const guildId = match[1];
+		const channelId = match[2];
+		const messageId = match[3];
+		if (!guildId || !channelId || !messageId) {
+			return undefined;
+		}
+		return { original: match[0], guildId, channelId, messageId };
+	}).filter(Predicate.isNotNullable);
 }
 
 export async function getMentionMetadata(
@@ -381,6 +377,7 @@ export async function getMentionMetadata(
 
 		for (let i = 0; i < userIds.length; i++) {
 			const userId = userIds[i];
+			if (userId === undefined) continue;
 			const account = userAccounts[i];
 			if (account) {
 				users[userId] = {
@@ -409,6 +406,7 @@ export async function getMentionMetadata(
 
 		for (let i = 0; i < channelIds.length; i++) {
 			const channelId = channelIds[i];
+			if (channelId === undefined) continue;
 			const channel = channelDocs[i];
 			const settings = channelSettings[i];
 

@@ -18,7 +18,7 @@ function validateBackendAccessToken(token: string | undefined): void {
 	}
 }
 
-export const publicInternalQuery = customQuery(query, {
+export const privateQuery = customQuery(query, {
 	args: {
 		backendAccessToken: v.string(),
 	},
@@ -34,7 +34,7 @@ export const publicInternalQuery = customQuery(query, {
 	},
 });
 
-export const publicInternalMutation = customMutation(mutation, {
+export const privateMutation = customMutation(mutation, {
 	args: {
 		backendAccessToken: v.string(),
 	},
@@ -50,7 +50,7 @@ export const publicInternalMutation = customMutation(mutation, {
 	},
 });
 
-export const publicInternalAction = customAction(action, {
+export const privateAction = customAction(action, {
 	args: {
 		backendAccessToken: v.string(),
 	},

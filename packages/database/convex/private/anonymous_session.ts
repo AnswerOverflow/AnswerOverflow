@@ -1,7 +1,7 @@
 import { v } from "convex/values";
-import { publicInternalMutation, publicInternalQuery } from "../client";
+import { privateMutation, privateQuery } from "../client";
 
-export const createAnonymousSession = publicInternalMutation({
+export const createAnonymousSession = privateMutation({
 	args: {},
 	returns: v.object({
 		sessionId: v.string(),
@@ -23,7 +23,7 @@ export const createAnonymousSession = publicInternalMutation({
 	},
 });
 
-export const getAnonymousSession = publicInternalQuery({
+export const getAnonymousSession = privateQuery({
 	args: {
 		sessionId: v.string(),
 	},

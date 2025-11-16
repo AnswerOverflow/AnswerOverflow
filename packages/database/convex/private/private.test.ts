@@ -19,7 +19,7 @@ const normalizePath = (path: string): string => {
 		return `/convex/${path.replace(/^\.\.\//, "")}`;
 	}
 	if (path.startsWith("./")) {
-		return `/convex/publicInternal/${path.replace(/^\.\//, "")}`;
+		return `/convex/private/${path.replace(/^\.\//, "")}`;
 	}
 	return path;
 };
@@ -29,7 +29,7 @@ const rawModules = {
 	...import.meta.glob("../_generated/**/*.{ts,js}"),
 	...import.meta.glob("../shared/**/*.ts"),
 	...import.meta.glob("../public/**/*.ts"),
-	...import.meta.glob("../publicInternal/**/*.ts"),
+	...import.meta.glob("../private/**/*.ts"),
 };
 
 const testModules = Object.fromEntries(
@@ -39,7 +39,7 @@ const testModules = Object.fromEntries(
 	]),
 );
 
-describe("publicInternalQuery", () => {
+describe("privateQuery", () => {
 	const originalEnv = process.env.BACKEND_ACCESS_TOKEN;
 
 	beforeEach(() => {
@@ -64,13 +64,10 @@ describe("publicInternalQuery", () => {
 		});
 
 		await expect(
-			t.query(
-				api.publicInternal.server_preferences.getServerPreferencesByServerId,
-				{
-					backendAccessToken: "wrong-token",
-					serverId,
-				},
-			),
+			t.query(api.private.server_preferences.getServerPreferencesByServerId, {
+				backendAccessToken: "wrong-token",
+				serverId,
+			}),
 		).rejects.toThrow("Invalid BACKEND_ACCESS_TOKEN");
 	});
 
@@ -86,18 +83,15 @@ describe("publicInternalQuery", () => {
 		});
 
 		await expect(
-			t.query(
-				api.publicInternal.server_preferences.getServerPreferencesByServerId,
-				{
-					backendAccessToken: "any-token",
-					serverId,
-				},
-			),
+			t.query(api.private.server_preferences.getServerPreferencesByServerId, {
+				backendAccessToken: "any-token",
+				serverId,
+			}),
 		).rejects.toThrow("BACKEND_ACCESS_TOKEN not configured in environment");
 	});
 });
 
-describe("publicInternalMutation", () => {
+describe("privateMutation", () => {
 	const originalEnv = process.env.BACKEND_ACCESS_TOKEN;
 
 	beforeEach(() => {
@@ -122,15 +116,12 @@ describe("publicInternalMutation", () => {
 		});
 
 		await expect(
-			t.mutation(
-				api.publicInternal.server_preferences.createServerPreferences,
-				{
-					backendAccessToken: "wrong-token",
-					preferences: {
-						serverId,
-					},
+			t.mutation(api.private.server_preferences.createServerPreferences, {
+				backendAccessToken: "wrong-token",
+				preferences: {
+					serverId,
 				},
-			),
+			}),
 		).rejects.toThrow("Invalid BACKEND_ACCESS_TOKEN");
 	});
 
@@ -146,20 +137,17 @@ describe("publicInternalMutation", () => {
 		});
 
 		await expect(
-			t.mutation(
-				api.publicInternal.server_preferences.createServerPreferences,
-				{
-					backendAccessToken: "any-token",
-					preferences: {
-						serverId,
-					},
+			t.mutation(api.private.server_preferences.createServerPreferences, {
+				backendAccessToken: "any-token",
+				preferences: {
+					serverId,
 				},
-			),
+			}),
 		).rejects.toThrow("BACKEND_ACCESS_TOKEN not configured in environment");
 	});
 });
 
-describe("publicInternalAction", () => {
+describe("privateAction", () => {
 	const originalEnv = process.env.BACKEND_ACCESS_TOKEN;
 
 	beforeEach(() => {
@@ -177,7 +165,7 @@ describe("publicInternalAction", () => {
 	it("should reject invalid backendAccessToken", async () => {
 		const t = convexTest(testSchema, testModules);
 		await expect(
-			t.action(api.publicInternal.attachments.uploadAttachmentFromUrl, {
+			t.action(api.private.attachments.uploadAttachmentFromUrl, {
 				backendAccessToken: "wrong-token",
 				url: "https://example.com/file.jpg",
 				filename: "file.jpg",
@@ -190,7 +178,7 @@ describe("publicInternalAction", () => {
 
 		const t = convexTest(testSchema, testModules);
 		await expect(
-			t.action(api.publicInternal.attachments.uploadAttachmentFromUrl, {
+			t.action(api.private.attachments.uploadAttachmentFromUrl, {
 				backendAccessToken: "any-token",
 				url: "https://example.com/file.jpg",
 				filename: "file.jpg",

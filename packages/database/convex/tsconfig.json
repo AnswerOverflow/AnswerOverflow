@@ -13,7 +13,8 @@
 		"moduleResolution": "Bundler",
 		"isolatedModules": true,
 		"skipLibCheck": true,
-		"noEmit": true
+		"noEmit": true,
+		"noUncheckedIndexedAccess": true
 	},
 	"include": ["./**/*"],
 	"exclude": ["./_generated"]

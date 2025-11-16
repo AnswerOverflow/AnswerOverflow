@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
-import { publicInternalMutation, publicInternalQuery } from "../client";
+import { privateMutation, privateQuery } from "../client";
 import { serverSchema } from "../schema";
 
 const DEFAULT_CHANNEL_SETTINGS = {
@@ -14,7 +14,7 @@ const DEFAULT_CHANNEL_SETTINGS = {
 	forumGuidelinesConsentEnabled: false,
 };
 
-export const createServerExternal = publicInternalMutation({
+export const createServerExternal = privateMutation({
 	args: {
 		data: serverSchema,
 	},
@@ -36,7 +36,7 @@ export const createServerExternal = publicInternalMutation({
 	},
 });
 
-export const updateServerExternal = publicInternalMutation({
+export const updateServerExternal = privateMutation({
 	args: {
 		id: v.id("servers"),
 		data: serverSchema,
@@ -52,7 +52,7 @@ export const updateServerExternal = publicInternalMutation({
 	},
 });
 
-export const upsertServerExternal = publicInternalMutation({
+export const upsertServerExternal = privateMutation({
 	args: {
 		data: serverSchema,
 	},
@@ -88,7 +88,7 @@ export const upsertServerExternal = publicInternalMutation({
 	},
 });
 
-export const upsertServer = publicInternalMutation({
+export const upsertServer = privateMutation({
 	args: serverSchema,
 	handler: async (ctx, args) => {
 		const existing = await getOneFrom(
@@ -104,14 +104,14 @@ export const upsertServer = publicInternalMutation({
 	},
 });
 
-export const getAllServers = publicInternalQuery({
+export const getAllServers = privateQuery({
 	args: {},
 	handler: async (ctx) => {
 		return await ctx.db.query("servers").collect();
 	},
 });
 
-export const getBiggestServers = publicInternalQuery({
+export const getBiggestServers = privateQuery({
 	args: {
 		take: v.number(),
 	},
@@ -123,7 +123,7 @@ export const getBiggestServers = publicInternalQuery({
 	},
 });
 
-export const getServerByDiscordId = publicInternalQuery({
+export const getServerByDiscordId = privateQuery({
 	args: {
 		discordId: v.string(),
 	},
@@ -135,7 +135,7 @@ export const getServerByDiscordId = publicInternalQuery({
 	},
 });
 
-export const findManyServersById = publicInternalQuery({
+export const findManyServersById = privateQuery({
 	args: {
 		ids: v.array(v.id("servers")),
 	},
@@ -153,7 +153,7 @@ export const findManyServersById = publicInternalQuery({
 	},
 });
 
-export const findManyServersByDiscordId = publicInternalQuery({
+export const findManyServersByDiscordId = privateQuery({
 	args: {
 		discordIds: v.array(v.string()),
 	},
@@ -169,7 +169,7 @@ export const findManyServersByDiscordId = publicInternalQuery({
 	},
 });
 
-export const createServer = publicInternalMutation({
+export const createServer = privateMutation({
 	args: serverSchema,
 	handler: async (ctx, args) => {
 		const existing = await getOneFrom(
@@ -187,7 +187,7 @@ export const createServer = publicInternalMutation({
 	},
 });
 
-export const updateServer = publicInternalMutation({
+export const updateServer = privateMutation({
 	args: {
 		id: v.id("servers"),
 		data: serverSchema,
@@ -203,7 +203,7 @@ export const updateServer = publicInternalMutation({
 	},
 });
 
-export const getServerByDiscordIdWithChannels = publicInternalQuery({
+export const getServerByDiscordIdWithChannels = privateQuery({
 	args: {
 		discordId: v.string(),
 	},

@@ -12,4 +12,4 @@ export {
 	internalQuery,
 } from "../_generated/server";
 export * from "./authenticated";
-export * from "./publicInternal";
+export * from "./private";

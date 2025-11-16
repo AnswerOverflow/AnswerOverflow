@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { publicInternalMutation, publicInternalQuery } from "../client";
+import { privateMutation, privateQuery } from "../client";
 import { validateCustomDomainUniqueness } from "../shared/shared";
 
 const serverPreferencesSchema = v.object({
@@ -12,7 +12,7 @@ const serverPreferencesSchema = v.object({
 	subpath: v.optional(v.string()),
 });
 
-export const getServerPreferencesByServerId = publicInternalQuery({
+export const getServerPreferencesByServerId = privateQuery({
 	args: {
 		serverId: v.id("servers"),
 	},
@@ -28,7 +28,7 @@ export const getServerPreferencesByServerId = publicInternalQuery({
 	},
 });
 
-export const createServerPreferences = publicInternalMutation({
+export const createServerPreferences = privateMutation({
 	args: {
 		preferences: serverPreferencesSchema,
 	},
@@ -82,7 +82,7 @@ export const createServerPreferences = publicInternalMutation({
 	},
 });
 
-export const updateServerPreferences = publicInternalMutation({
+export const updateServerPreferences = privateMutation({
 	args: {
 		preferences: serverPreferencesSchema,
 	},
@@ -128,7 +128,7 @@ export const updateServerPreferences = publicInternalMutation({
 	},
 });
 
-export const upsertServerPreferences = publicInternalMutation({
+export const upsertServerPreferences = privateMutation({
 	args: serverPreferencesSchema,
 	handler: async (ctx, args) => {
 		const { serverId, ...preferences } = args;
@@ -194,7 +194,7 @@ export const upsertServerPreferences = publicInternalMutation({
 	},
 });
 
-export const deleteServerPreferences = publicInternalMutation({
+export const deleteServerPreferences = privateMutation({
 	args: {
 		serverId: v.id("servers"),
 	},

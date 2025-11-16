@@ -9,6 +9,35 @@ import type {
 import { DiscordMessage } from "@packages/ui/components/discord-message";
 import { Link } from "@packages/ui/components/link";
 
+type MessageMetadata = {
+	channels?: Record<
+		string,
+		{
+			name: string;
+			type: number;
+			url: string;
+			indexingEnabled?: boolean;
+			exists?: boolean;
+		}
+	>;
+	roles?: Record<string, { name: string; color: number }>;
+	users?: Record<
+		string,
+		{ username: string; globalName: string | null; url: string }
+	>;
+	internalLinks?: Array<{
+		original: string;
+		guild: { id: string; name: string };
+		channel: {
+			parent?: { name?: string; type?: number; parentId?: string };
+			id: string;
+			type: number;
+			name: string;
+		};
+		message?: string;
+	}>;
+};
+
 type MessagePageData = {
 	messages: Array<{
 		message: Message;
@@ -20,10 +49,7 @@ type MessagePageData = {
 		attachments: Attachment[];
 		reactions: Reaction[];
 		solutions: Message[];
-		metadata?: {
-			users?: Record<string, { username: string; globalName: string | null }>;
-			channels?: Record<string, { name: string; type: number }>;
-		};
+		metadata?: MessageMetadata;
 	}>;
 	server: {
 		_id: Id<"servers">;

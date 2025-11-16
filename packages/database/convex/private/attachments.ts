@@ -1,9 +1,9 @@
 import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
-import { publicInternalAction } from "../client";
+import { privateAction } from "../client";
 import { uploadAttachmentFromUrlLogic } from "../shared/shared";
 
-export const uploadAttachmentFromUrl = publicInternalAction({
+export const uploadAttachmentFromUrl = privateAction({
 	args: {
 		url: v.string(),
 		filename: v.string(),
@@ -19,7 +19,7 @@ export const uploadAttachmentFromUrl = publicInternalAction({
 	},
 });
 
-export const uploadManyAttachmentsFromUrls = publicInternalAction({
+export const uploadManyAttachmentsFromUrls = privateAction({
 	args: {
 		attachments: v.array(
 			v.object({
@@ -59,7 +59,7 @@ export const uploadManyAttachmentsFromUrls = publicInternalAction({
 	},
 });
 
-export const getAttachmentUrl = publicInternalAction({
+export const getAttachmentUrl = privateAction({
 	args: {
 		storageId: v.id("_storage"),
 	},

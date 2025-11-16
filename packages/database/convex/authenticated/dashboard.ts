@@ -214,7 +214,7 @@ export const getUserServers = authenticatedAction({
 								Effect.tryPromise({
 									try: () =>
 										ctx.runQuery(
-											api.publicInternal.servers.findManyServersByDiscordId,
+											api.private.servers.findManyServersByDiscordId,
 											{
 												discordIds: serverDiscordIds,
 												backendAccessToken: getBackendAccessToken(),
@@ -311,7 +311,7 @@ async function checkManageGuildPermission(
 	const backendAccessToken = getBackendAccessToken();
 
 	const settings = await ctx.runQuery(
-		api.publicInternal.user_server_settings.findUserServerSettingsById,
+		api.private.user_server_settings.findUserServerSettingsById,
 		{
 			backendAccessToken,
 			userId: discordAccountId,
@@ -435,7 +435,7 @@ export const trackBotAddClick = authenticatedAction({
 		const backendAccessToken = getBackendAccessToken();
 
 		const existingSettings = await ctx.runQuery(
-			api.publicInternal.user_server_settings.findUserServerSettingsById,
+			api.private.user_server_settings.findUserServerSettingsById,
 			{
 				backendAccessToken,
 				userId: discordAccountId,
@@ -457,7 +457,7 @@ export const trackBotAddClick = authenticatedAction({
 		};
 
 		await ctx.runMutation(
-			api.publicInternal.user_server_settings.upsertUserServerSettings,
+			api.private.user_server_settings.upsertUserServerSettings,
 			{ backendAccessToken, settings },
 		);
 	},
@@ -496,7 +496,7 @@ export const syncUserServerSettingsBackground = internalAction({
 					)(
 						Effect.tryPromise({
 							try: () =>
-								ctx.runQuery(api.publicInternal.servers.findManyServersById, {
+								ctx.runQuery(api.private.servers.findManyServersById, {
 									ids: aoServerIds,
 									backendAccessToken,
 								}) as Promise<Array<Doc<"servers">>>,
@@ -551,8 +551,7 @@ export const syncUserServerSettingsBackground = internalAction({
 							Effect.tryPromise({
 								try: () =>
 									ctx.runQuery(
-										api.publicInternal.user_server_settings
-											.findManyUserServerSettings,
+										api.private.user_server_settings.findManyUserServerSettings,
 										{
 											backendAccessToken,
 											settings: serversToSync.map(({ aoServer }) => ({
@@ -629,7 +628,7 @@ export const syncUserServerSettingsBackground = internalAction({
 												try: () =>
 													ctx
 														.runMutation(
-															api.publicInternal.user_server_settings
+															api.private.user_server_settings
 																.upsertUserServerSettings,
 															{ backendAccessToken, settings },
 														)

@@ -110,7 +110,7 @@ const serviceGen = Effect.gen(function* () {
 		}) as TransformToFunctions<T>;
 	};
 
-	return createProxy(api.publicInternal, []);
+	return createProxy(api.private, []);
 });
 
 const program = Effect.gen(function* () {

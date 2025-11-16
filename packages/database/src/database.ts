@@ -178,7 +178,7 @@ export const service = Effect.gen(function* () {
 		}) as TransformToFunctions<T>;
 	};
 
-	return createProxy(api.publicInternal, []);
+	return createProxy(api.private, []);
 });
 export class Database extends Context.Tag("Database")<
 	Database,

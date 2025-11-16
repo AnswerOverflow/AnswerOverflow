@@ -85,7 +85,7 @@ export const FUNCTION_TYPE_MAP = {
 	"user_server_settings.upsertUserServerSettingsInternal": "mutation",
 } as const;
 
-export const PUBLIC_INTERNAL_NAMESPACES = [
+export const PRIVATE_NAMESPACES = [
 	"anonymous_session",
 	"attachments",
 	"channels",

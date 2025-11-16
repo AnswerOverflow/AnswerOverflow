@@ -86,7 +86,6 @@ export function DiscordMarkdown({ content, className }: DiscordMarkdownProps) {
 				<CodeBlock
 					lang={language?.toLowerCase()}
 					content={String(children).replace(/\n$/, "")}
-					className="my-3"
 				/>
 			);
 		},

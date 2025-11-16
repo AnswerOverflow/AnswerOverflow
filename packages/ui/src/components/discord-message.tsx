@@ -9,6 +9,7 @@ import {
 	DiscordMessage as DiscordMessageComponent,
 	type DiscordMessageProps as DiscordMessageComponentProps,
 } from "./discord-message/discord-message";
+import type { MessageWithMetadata } from "./discord-message/types";
 
 export type DiscordMessageProps = {
 	message: Message;
@@ -20,6 +21,8 @@ export type DiscordMessageProps = {
 	attachments: Attachment[];
 	reactions: Reaction[];
 	solutions?: Message[];
+	metadata?: MessageWithMetadata["metadata"];
+	getAttachmentUrl?: (attachment: Attachment) => string | null;
 };
 
 export function DiscordMessage(props: DiscordMessageProps) {

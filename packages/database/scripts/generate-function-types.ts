@@ -3,7 +3,7 @@
 /**
  * Codegen script to extract function types from Convex API
  *
- * This script analyzes the publicInternal modules to determine which functions
+ * This script analyzes the private modules to determine which functions
  * are queries, mutations, or actions, and generates a runtime mapping.
  */
 
@@ -15,7 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const PACKAGE_ROOT = join(__dirname, "..");
-const PUBLIC_INTERNAL_DIR = join(PACKAGE_ROOT, "convex/publicInternal");
+const PRIVATE_DIR = join(PACKAGE_ROOT, "convex/private");
 const OUTPUT_FILE = join(PACKAGE_ROOT, "src/generated/function-types.ts");
 
 interface FunctionInfo {
@@ -30,13 +30,11 @@ async function extractFunctionsFromFile(
 	const content = await readFile(filePath, "utf-8");
 	const functions: FunctionInfo[] = [];
 
-	// Match exported functions that use publicInternalQuery, publicInternalMutation, or publicInternalAction
-	const queryRegex =
-		/export\s+(?:const|function)\s+(\w+)\s*=\s*publicInternalQuery/;
+	// Match exported functions that use privateQuery, privateMutation, or privateAction
+	const queryRegex = /export\s+(?:const|function)\s+(\w+)\s*=\s*privateQuery/;
 	const mutationRegex =
-		/export\s+(?:const|function)\s+(\w+)\s*=\s*publicInternalMutation/;
-	const actionRegex =
-		/export\s+(?:const|function)\s+(\w+)\s*=\s*publicInternalAction/;
+		/export\s+(?:const|function)\s+(\w+)\s*=\s*privateMutation/;
+	const actionRegex = /export\s+(?:const|function)\s+(\w+)\s*=\s*privateAction/;
 
 	// Find all matches
 	const queryMatches = [
@@ -81,8 +79,8 @@ async function generateFunctionTypes(): Promise<void> {
 	const namespaces = new Set<string>();
 	const namespaceToFunctions = new Map<string, FunctionInfo[]>();
 
-	// Read all files in publicInternal directory
-	const files = await readdir(PUBLIC_INTERNAL_DIR);
+	// Read all files in private directory
+	const files = await readdir(PRIVATE_DIR);
 
 	for (const file of files) {
 		// Skip test files and non-TypeScript files
@@ -90,7 +88,7 @@ async function generateFunctionTypes(): Promise<void> {
 			continue;
 		}
 
-		const filePath = join(PUBLIC_INTERNAL_DIR, file);
+		const filePath = join(PRIVATE_DIR, file);
 		// Extract namespace from filename (e.g., "servers.ts" -> "servers")
 		const namespace = file.replace(".ts", "");
 		namespaces.add(namespace);
@@ -126,7 +124,7 @@ export const FUNCTION_TYPE_MAP = {
 ${typeMapEntries}
 } as const;
 
-export const PUBLIC_INTERNAL_NAMESPACES = ${JSON.stringify(namespaceArray)} as const;
+export const PRIVATE_NAMESPACES = ${JSON.stringify(namespaceArray)} as const;
 
 export const NAMESPACE_STRUCTURE = {
 ${namespaceStructureEntries}

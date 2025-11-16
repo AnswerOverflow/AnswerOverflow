@@ -1,11 +1,11 @@
 import { type Infer, v } from "convex/values";
-import { publicInternalMutation, publicInternalQuery } from "../client";
+import { privateMutation, privateQuery } from "../client";
 import type { ignoredDiscordAccountSchema } from "../schema";
 import { findIgnoredDiscordAccountById as findIgnoredDiscordAccountByIdShared } from "../shared/shared";
 
 type IgnoredDiscordAccount = Infer<typeof ignoredDiscordAccountSchema>;
 
-export const findIgnoredDiscordAccountById = publicInternalQuery({
+export const findIgnoredDiscordAccountById = privateQuery({
 	args: {
 		id: v.string(),
 	},
@@ -14,7 +14,7 @@ export const findIgnoredDiscordAccountById = publicInternalQuery({
 	},
 });
 
-export const findManyIgnoredDiscordAccountsById = publicInternalQuery({
+export const findManyIgnoredDiscordAccountsById = privateQuery({
 	args: {
 		ids: v.array(v.string()),
 	},
@@ -35,7 +35,7 @@ export const findManyIgnoredDiscordAccountsById = publicInternalQuery({
 	},
 });
 
-export const upsertIgnoredDiscordAccount = publicInternalMutation({
+export const upsertIgnoredDiscordAccount = privateMutation({
 	args: {
 		id: v.string(),
 	},
@@ -73,7 +73,7 @@ export const upsertIgnoredDiscordAccount = publicInternalMutation({
 	},
 });
 
-export const deleteIgnoredDiscordAccount = publicInternalMutation({
+export const deleteIgnoredDiscordAccount = privateMutation({
 	args: {
 		id: v.string(),
 	},

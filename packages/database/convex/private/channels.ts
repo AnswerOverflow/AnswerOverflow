@@ -3,8 +3,8 @@ import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import {
 	type MutationCtx,
-	publicInternalMutation,
-	publicInternalQuery,
+	privateMutation,
+	privateQuery,
 	type QueryCtx,
 } from "../client";
 import { channelSchema, channelSettingsSchema } from "../schema";
@@ -47,7 +47,7 @@ async function addSettingsToChannels(
 	}));
 }
 
-export const findChannelByInviteCode = publicInternalQuery({
+export const findChannelByInviteCode = privateQuery({
 	args: {
 		inviteCode: v.string(),
 	},
@@ -65,7 +65,7 @@ export const findChannelByInviteCode = publicInternalQuery({
 	},
 });
 
-export const findChannelByDiscordId = publicInternalQuery({
+export const findChannelByDiscordId = privateQuery({
 	args: {
 		discordId: v.string(),
 	},
@@ -74,7 +74,7 @@ export const findChannelByDiscordId = publicInternalQuery({
 	},
 });
 
-export const findAllThreadsByParentId = publicInternalQuery({
+export const findAllThreadsByParentId = privateQuery({
 	args: {
 		parentId: v.string(),
 		limit: v.optional(v.number()),
@@ -94,7 +94,7 @@ export const findAllThreadsByParentId = publicInternalQuery({
 	},
 });
 
-export const findAllChannelsByServerId = publicInternalQuery({
+export const findAllChannelsByServerId = privateQuery({
 	args: {
 		serverId: v.id("servers"),
 	},
@@ -110,7 +110,7 @@ export const findAllChannelsByServerId = publicInternalQuery({
 	},
 });
 
-export const findLatestThreads = publicInternalQuery({
+export const findLatestThreads = privateQuery({
 	args: {
 		take: v.number(),
 	},
@@ -125,7 +125,7 @@ export const findLatestThreads = publicInternalQuery({
 	},
 });
 
-export const findChannelsBeforeId = publicInternalQuery({
+export const findChannelsBeforeId = privateQuery({
 	args: {
 		serverId: v.id("servers"),
 		id: v.string(),
@@ -148,7 +148,7 @@ export const findChannelsBeforeId = publicInternalQuery({
 	},
 });
 
-export const createChannel = publicInternalMutation({
+export const createChannel = privateMutation({
 	args: {
 		channel: channelSchema,
 		settings: v.optional(channelSettingsSchema),
@@ -175,7 +175,7 @@ export const createChannel = publicInternalMutation({
 	},
 });
 
-export const createManyChannels = publicInternalMutation({
+export const createManyChannels = privateMutation({
 	args: {
 		channels: v.array(
 			v.object({
@@ -208,7 +208,7 @@ export const createManyChannels = publicInternalMutation({
 	},
 });
 
-export const updateChannel = publicInternalMutation({
+export const updateChannel = privateMutation({
 	args: {
 		id: v.string(),
 		channel: channelSchema,
@@ -249,7 +249,7 @@ export const updateChannel = publicInternalMutation({
 	},
 });
 
-export const updateManyChannels = publicInternalMutation({
+export const updateManyChannels = privateMutation({
 	args: {
 		channels: v.array(channelSchema),
 	},
@@ -272,7 +272,7 @@ export const updateManyChannels = publicInternalMutation({
 	},
 });
 
-export const deleteChannel = publicInternalMutation({
+export const deleteChannel = privateMutation({
 	args: {
 		id: v.string(),
 	},
@@ -282,7 +282,7 @@ export const deleteChannel = publicInternalMutation({
 	},
 });
 
-export const upsertManyChannels = publicInternalMutation({
+export const upsertManyChannels = privateMutation({
 	args: {
 		channels: v.array(
 			v.object({
@@ -353,7 +353,7 @@ export const upsertManyChannels = publicInternalMutation({
 	},
 });
 
-export const upsertChannelWithSettings = publicInternalMutation({
+export const upsertChannelWithSettings = privateMutation({
 	args: {
 		channel: channelSchema,
 		settings: v.optional(channelSettingsSchema),
@@ -389,7 +389,7 @@ export const upsertChannelWithSettings = publicInternalMutation({
 	},
 });
 
-export const findManyChannelsById = publicInternalQuery({
+export const findManyChannelsById = privateQuery({
 	args: {
 		ids: v.array(v.string()),
 	},
@@ -424,7 +424,7 @@ export const findManyChannelsById = publicInternalQuery({
 	},
 });
 
-export const getChannelPageData = publicInternalQuery({
+export const getChannelPageData = privateQuery({
 	args: {
 		serverDiscordId: v.string(),
 		channelDiscordId: v.string(),

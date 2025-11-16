@@ -13,7 +13,8 @@
 		"with-env": "bun run --env-file=../../.env",
 		"codegen": "bunx convex codegen && bun run scripts/generate-function-types.ts",
 		"generate-function-types": "bun run scripts/generate-function-types.ts",
-		"dev": "convex dev",
+		"generate-function-types:watch": "chokidar \"convex/{public,authenticated,private}/**/*.ts\" -c \"bun run scripts/generate-function-types.ts\"",
+		"dev": "bun run generate-function-types:watch & convex dev",
 		"typecheck": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
 		"clean": "rm -rf node_modules .turbo",
 		"test": "vitest run --no-watch --pool=forks",
@@ -35,6 +36,7 @@
 		"@effect/vitest": "catalog:",
 		"@packages/convex-test": "workspace:*",
 		"@packages/observability": "workspace:*",
+		"chokidar-cli": "^3.0.0",
 		"glob": "^11.0.3",
 		"vitest": "catalog:"
 	}

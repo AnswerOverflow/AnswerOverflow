@@ -36,7 +36,7 @@ async function extractFunctionsFromFile(
 
 	// Determine namespace from file path
 	// convex/authenticated/channels.ts -> channels
-	// convex/publicInternal/channels.ts -> channels
+	// convex/private/channels.ts -> channels
 	const pathParts = relativePath.split("/");
 	const namespace = pathParts[pathParts.length - 1]?.replace(".ts", "") || "";
 
@@ -67,18 +67,15 @@ async function extractFunctionsFromFile(
 			type: "internalAction" as const,
 		},
 		{
-			regex:
-				/export\s+(?:const|function)\s+(\w+)\s*=\s*publicInternalQuery\s*\(/g,
+			regex: /export\s+(?:const|function)\s+(\w+)\s*=\s*privateQuery\s*\(/g,
 			type: "query" as const,
 		},
 		{
-			regex:
-				/export\s+(?:const|function)\s+(\w+)\s*=\s*publicInternalMutation\s*\(/g,
+			regex: /export\s+(?:const|function)\s+(\w+)\s*=\s*privateMutation\s*\(/g,
 			type: "mutation" as const,
 		},
 		{
-			regex:
-				/export\s+(?:const|function)\s+(\w+)\s*=\s*publicInternalAction\s*\(/g,
+			regex: /export\s+(?:const|function)\s+(\w+)\s*=\s*privateAction\s*\(/g,
 			type: "action" as const,
 		},
 	];
@@ -123,8 +120,8 @@ async function findAllConvexFunctions(): Promise<FunctionInfo[]> {
  *
  * Examples:
  * - convex/authenticated/dashboard.ts -> api.dashboard.* or internal.authenticated.dashboard.*
- * - convex/publicInternal/channels.ts -> api.publicInternal.channels.*
- * - convex/client/publicInternal.ts -> api.client.publicInternal.* or internal.client.publicInternal.*
+ * - convex/private/channels.ts -> api.private.channels.*
+ * - convex/client/private.ts -> api.client.private.* or internal.client.private.*
  */
 function generateApiPaths(
 	functionFile: string,
@@ -204,7 +201,7 @@ async function searchForFunctionUsage(
 		patterns.push(`database\\.${namespace}\\.${functionName}`);
 		patterns.push(`database\\.${namespace}\\.${functionName}\\s*,`);
 		patterns.push(`database\\.${namespace}\\.${functionName}\\s*\\)`);
-		// FUNCTION_TYPE_MAP patterns (for publicInternal functions)
+		// FUNCTION_TYPE_MAP patterns (for private functions)
 		patterns.push(`"${namespace}\\.${functionName}"`);
 		patterns.push(`'${namespace}\\.${functionName}'`);
 	}

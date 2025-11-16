@@ -50,7 +50,7 @@ it.scoped(
 			);
 
 			const queryCallCount = convexClientTest.getQueryCallCount(
-				api.publicInternal.servers.getServerByDiscordId,
+				api.private.servers.getServerByDiscordId,
 				{ discordId: "123", backendAccessToken: "test-backend-access-token" },
 			);
 			const otherQueryCallCount = convexClientTest.getQueryCallCount(

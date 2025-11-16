@@ -1,6 +1,6 @@
 import { type Infer, v } from "convex/values";
 import { getManyFrom } from "convex-helpers/server/relationships";
-import { publicInternalMutation, publicInternalQuery } from "../client";
+import { privateMutation, privateQuery } from "../client";
 import { discordAccountSchema } from "../schema";
 import {
 	deleteMessageInternalLogic,
@@ -22,7 +22,7 @@ function getDefaultDiscordAccount(data: {
 	};
 }
 
-export const getDiscordAccountById = publicInternalQuery({
+export const getDiscordAccountById = privateQuery({
 	args: {
 		id: v.string(),
 	},
@@ -31,7 +31,7 @@ export const getDiscordAccountById = publicInternalQuery({
 	},
 });
 
-export const createDiscordAccount = publicInternalMutation({
+export const createDiscordAccount = privateMutation({
 	args: {
 		account: discordAccountSchema,
 	},
@@ -71,7 +71,7 @@ export const createDiscordAccount = publicInternalMutation({
 	},
 });
 
-export const createManyDiscordAccounts = publicInternalMutation({
+export const createManyDiscordAccounts = privateMutation({
 	args: {
 		accounts: v.array(discordAccountSchema),
 	},
@@ -120,7 +120,7 @@ export const createManyDiscordAccounts = publicInternalMutation({
 	},
 });
 
-export const updateDiscordAccount = publicInternalMutation({
+export const updateDiscordAccount = privateMutation({
 	args: {
 		account: discordAccountSchema,
 	},
@@ -149,7 +149,7 @@ export const updateDiscordAccount = publicInternalMutation({
 	},
 });
 
-export const updateManyDiscordAccounts = publicInternalMutation({
+export const updateManyDiscordAccounts = privateMutation({
 	args: {
 		accounts: v.array(discordAccountSchema),
 	},
@@ -192,7 +192,7 @@ export const updateManyDiscordAccounts = publicInternalMutation({
 	},
 });
 
-export const upsertDiscordAccount = publicInternalMutation({
+export const upsertDiscordAccount = privateMutation({
 	args: {
 		account: discordAccountSchema,
 	},
@@ -238,7 +238,7 @@ export const upsertDiscordAccount = publicInternalMutation({
 	},
 });
 
-export const upsertManyDiscordAccounts = publicInternalMutation({
+export const upsertManyDiscordAccounts = privateMutation({
 	args: {
 		accounts: v.array(discordAccountSchema),
 	},
@@ -313,7 +313,7 @@ export const upsertManyDiscordAccounts = publicInternalMutation({
 	},
 });
 
-export const deleteDiscordAccount = publicInternalMutation({
+export const deleteDiscordAccount = privateMutation({
 	args: {
 		id: v.string(),
 	},
