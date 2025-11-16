@@ -5,8 +5,8 @@ import type { GuildBasedChannel, Message } from "discord.js";
 import { ChannelType, type Guild, MessageType } from "discord.js";
 import { Effect, type Either } from "effect";
 import { describe } from "vitest";
-import { DiscordClientMock } from "../../core/discord-client-mock";
-import { TestLayer } from "../../utils/layers";
+import { DiscordClientMock } from "../core/discord-client-mock";
+import { TestLayer } from "../utils/layers";
 import {
 	AutoThreadError,
 	AutoThreadErrorCode,

@@ -1,7 +1,7 @@
 import { Database, upsertMessage } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
 import { Effect } from "effect";
-import { toAOMessage } from "../../utils/conversions";
+import { toAOMessage } from "../utils/conversions";
 import { makeMarkSolutionResponse } from "./mark-solution";
 
 export function handleMarkSolutionCommand(

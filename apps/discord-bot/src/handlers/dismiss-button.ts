@@ -48,7 +48,7 @@ function handleDismissMessage({
 				DISMISS_OVERRIDE_PERMISSIONS,
 			);
 			if (!hasOverridePermissions) {
-				yield* Effect.fail(
+				return yield* Effect.fail(
 					new DismissError(
 						"not-allowed",
 						`You don't have permission to dismiss this message. Required permissions: ${DISMISS_OVERRIDE_PERMISSIONS.map((p) => Object.keys(PermissionFlagsBits).find((k) => PermissionFlagsBits[k as keyof typeof PermissionFlagsBits] === p)).join(", ")}`,
@@ -70,7 +70,7 @@ export function handleDismissButtonInteraction(
 ): Effect.Effect<void, unknown> {
 	return Effect.gen(function* () {
 		if (!interaction.guild || !interaction.member) {
-			yield* Effect.fail(
+			return yield* Effect.fail(
 				new Error("Dismiss button can only be used in guilds"),
 			);
 		}
@@ -87,12 +87,12 @@ export function handleDismissButtonInteraction(
 		});
 
 		if (!dismisser) {
-			yield* Effect.fail(new Error("Could not fetch member"));
+			return yield* Effect.fail(new Error("Could not fetch member"));
 		}
 
 		const messageToDismiss = interaction.message;
 		if (!(messageToDismiss instanceof Message)) {
-			yield* Effect.fail(new Error("Message not found"));
+			return yield* Effect.fail(new Error("Message not found"));
 		}
 
 		yield* handleDismissMessage({

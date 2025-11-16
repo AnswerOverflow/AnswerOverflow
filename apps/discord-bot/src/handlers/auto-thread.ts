@@ -2,12 +2,9 @@ import { Database, DatabaseLayer } from "@packages/database/database";
 import type { Message } from "discord.js";
 import { MessageType } from "discord.js";
 import { Data, Effect, Layer } from "effect";
-import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from "../../constants/channel-types";
-import { Discord } from "../../core/discord-service";
-import {
-	isHumanMessage,
-	removeDiscordMarkdown,
-} from "../../utils/message-utils";
+import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from "../constants/channel-types";
+import { Discord } from "../core/discord-service";
+import { isHumanMessage, removeDiscordMarkdown } from "../utils/message-utils";
 
 export enum AutoThreadErrorCode {
 	DM_OR_VOICE_CHANNEL = "DM_OR_VOICE_CHANNEL",

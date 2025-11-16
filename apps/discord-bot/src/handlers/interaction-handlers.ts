@@ -1,10 +1,10 @@
 import { DatabaseLayer } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { handleLeaderboardCommand } from "../handlers/commands/leaderboard-command";
-import { handleManageAccountCommand } from "../handlers/commands/manage-account-command";
-import { handleDismissButtonInteraction } from "../handlers/interactions/dismiss-button";
-import { handleMarkSolutionCommand } from "../handlers/interactions/mark-solution-command";
+import { handleDismissButtonInteraction } from "./dismiss-button";
+import { handleLeaderboardCommand } from "./leaderboard-command";
+import { handleManageAccountCommand } from "./manage-account-command";
+import { handleMarkSolutionCommand } from "./mark-solution-command";
 
 export const InteractionHandlersLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
