@@ -47,6 +47,51 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 			),
 		);
 
+		yield* discord.client.on("threadCreate", (thread) =>
+			Effect.gen(function* () {
+				if (!isAllowedThreadChannel(thread)) {
+					return;
+				}
+				if (!thread.parentId) {
+					return;
+				}
+				const parentChannelLiveData =
+					yield* database.channels.findChannelByDiscordId({
+						discordId: thread.parentId,
+					});
+				const parentChannel = parentChannelLiveData;
+				if (!parentChannel) {
+					return;
+				}
+				if (!parentChannel.flags?.indexingEnabled) {
+					return;
+				}
+				const serverLiveData = yield* database.servers.getServerByDiscordId({
+					discordId: thread.guild.id,
+				});
+				const server = serverLiveData;
+				if (!server) {
+					yield* Console.warn(
+						`Server ${thread.guild.id} not found, skipping thread parity`,
+					);
+					return;
+				}
+				const aoThread = toAOChannel(thread, server._id);
+				yield* database.channels.upsertManyChannels({
+					channels: [
+						{
+							create: aoThread,
+							update: aoThread,
+						},
+					],
+				});
+			}).pipe(
+				Effect.catchAll((error) =>
+					Console.error(`Error maintaining thread parity ${thread.id}:`, error),
+				),
+			),
+		);
+
 		yield* discord.client.on("channelUpdate", (_oldChannel, newChannel) =>
 			Effect.gen(function* () {
 				if (!isAllowedRootChannel(newChannel)) {
