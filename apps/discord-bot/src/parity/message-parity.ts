@@ -1,7 +1,6 @@
 import { Database, upsertMessage } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { handleAutoThread } from "../handlers/events/auto-thread";
 import { toAODiscordAccount, toAOMessage } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 
@@ -225,22 +224,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 							),
 						),
 					);
-
-				// Handle auto thread
-				const channelLiveData = yield* database.channels.findChannelByDiscordId(
-					{
-						discordId: message.channel.id,
-					},
-				);
-
-				const channelSettings = channelLiveData ?? null;
-
-				// Run auto thread handler (errors are handled internally)
-				yield* handleAutoThread(channelSettings, message).pipe(
-					Effect.catchAll((error) =>
-						Console.error("Error in auto thread handler:", error),
-					),
-				);
 			}),
 		);
 	}),

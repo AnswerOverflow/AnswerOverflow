@@ -3,6 +3,8 @@ import {
 	GatewayIntentBits,
 	type Guild,
 	type GuildBasedChannel,
+	type Message,
+	MessageType,
 } from "discord.js";
 import { Context, Effect, Layer } from "effect";
 import {
@@ -270,6 +272,87 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			return channel;
 		};
 
+		// Helper to create a mock message
+		const createMockMessage = (
+			channel: GuildBasedChannel,
+			partialData: Partial<{
+				id: string;
+				content: string;
+				cleanContent: string;
+				type: MessageType;
+				authorId: string;
+				authorBot: boolean;
+				authorSystem: boolean;
+				authorDisplayName: string;
+				memberNickname: string | null;
+				thread: Message["thread"] | null;
+				attachmentsSize: number;
+				attachmentName: string | null;
+				startThread: (options: {
+					name: string;
+					reason: string;
+				}) => Promise<Message["thread"]>;
+				channelOverride: Partial<Message["channel"]>;
+			}> = {},
+		): Message => {
+			// Create channel object with required methods
+			const baseChannel = {
+				...channel,
+				isDMBased: () => false,
+				isVoiceBased: () => false,
+			};
+
+			const messageChannel = partialData.channelOverride
+				? ({
+						...baseChannel,
+						...partialData.channelOverride,
+					} as Message["channel"])
+				: (baseChannel as Message["channel"]);
+
+			const defaultMessage = {
+				id: partialData.id ?? "100000000000000000",
+				channel: messageChannel,
+				content:
+					partialData.content ??
+					partialData.cleanContent ??
+					"Test message content",
+				cleanContent:
+					partialData.cleanContent ??
+					partialData.content ??
+					"Test message content",
+				type: partialData.type ?? MessageType.Default,
+				author: {
+					id: partialData.authorId ?? "user123",
+					bot: partialData.authorBot ?? false,
+					system: partialData.authorSystem ?? false,
+					displayName: partialData.authorDisplayName ?? "TestUser",
+				},
+				member: {
+					nickname: partialData.memberNickname ?? null,
+				},
+				thread: partialData.thread ?? null,
+				attachments: {
+					size: partialData.attachmentsSize ?? 0,
+					first: () =>
+						partialData.attachmentsSize && partialData.attachmentsSize > 0
+							? {
+									name: partialData.attachmentName ?? null,
+								}
+							: null,
+				},
+				startThread:
+					partialData.startThread ??
+					(async (options: { name: string; reason: string }) => {
+						return {
+							id: "thread123",
+							name: options.name,
+						} as unknown as Message["thread"];
+					}),
+			} as unknown as Message;
+
+			return defaultMessage;
+		};
+
 		// Emit events manually for testing
 		const emitGuildCreate = (guild: Guild) => {
 			client.emit("guildCreate", guild);
@@ -300,6 +383,7 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				createMockTextChannel,
 				createMockForumChannel,
 				createMockNewsChannel,
+				createMockMessage,
 				emitGuildCreate,
 				emitGuildUpdate,
 				emitGuildDelete,
