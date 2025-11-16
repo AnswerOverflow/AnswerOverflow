@@ -6,5 +6,10 @@
 		"moduleResolution": "bundler"
 	},
 	"include": ["src/**/*", "convex/**/*"],
-	"exclude": ["node_modules", "dist", "convex/_generated"]
+	"exclude": [
+		"node_modules",
+		"dist",
+		"convex/_generated",
+		"src/generated/function-types.ts"
+	]
 }

@@ -13,7 +13,8 @@
 			"!.context/**",
 			"!**/.context/**",
 			"!packages/convex-test/**",
-			"!packages/discord-api/src/generated.ts"
+			"!packages/discord-api/src/generated.ts",
+			"!packages/database/src/generated/function-types.ts"
 		]
 	},
 	"formatter": {
