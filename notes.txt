@@ -2,14 +2,8 @@
 
 
 
-
-
-
 We can reduce a lot of complexity by using convex-helpers, things we should use from them:
-- taking in extra arguments to customFunctions to pass the backend key (actually used for building queries)
-- Relationship helpers
 - rate limiting
-- richer use query
 - rls to enforce manage server permissions when updating server settings
 - https://www.convex.dev/components/workpool may be relevant
 
