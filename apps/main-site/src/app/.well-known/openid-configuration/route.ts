@@ -1,5 +1,5 @@
-import { getJWKSUri } from "@/lib/anonymous-auth";
 import { NextResponse } from "next/server";
+import { getJWKSUri } from "@/lib/anonymous-auth";
 
 const ANONYMOUS_AUTH_DOMAIN =
 	process.env.ANONYMOUS_AUTH_DOMAIN ?? process.env.NEXT_PUBLIC_SITE_URL ?? "";

@@ -3,8 +3,8 @@
 import { Moon, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { authClient } from "../convex-client-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
+import { authClient } from "../convex-client-provider";
 import {
 	DropdownMenu,
 	DropdownMenuContent,

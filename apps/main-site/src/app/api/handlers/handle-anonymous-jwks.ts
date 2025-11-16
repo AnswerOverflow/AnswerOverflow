@@ -1,5 +1,5 @@
-import { getPublicJWK, getJWKSUri } from "@/lib/anonymous-auth";
 import type { Context } from "hono";
+import { getPublicJWK } from "@/lib/anonymous-auth";
 
 export async function handleAnonymousJWKS(c: Context) {
 	try {

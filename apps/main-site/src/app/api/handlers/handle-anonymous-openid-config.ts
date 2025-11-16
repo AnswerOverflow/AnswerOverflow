@@ -1,5 +1,5 @@
-import { getJWKSUri, getOpenIDConfigUri } from "@/lib/anonymous-auth";
 import type { Context } from "hono";
+import { getJWKSUri } from "@/lib/anonymous-auth";
 
 export async function handleAnonymousOpenIDConfig(c: Context) {
 	const issuer =
