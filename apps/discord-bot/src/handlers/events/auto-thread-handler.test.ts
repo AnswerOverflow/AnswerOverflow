@@ -66,29 +66,6 @@ const setupTestChannel = (
 const expectError = <E>(result: Either.Either<unknown, E>, expectedError: E) =>
 	assertLeft(result, expectedError);
 
-const expectThreadCreated = (
-	startThread: (options: {
-		name: string;
-		reason: string;
-	}) => Promise<Message["thread"]>,
-) => {
-	let threadCreated = false;
-	let threadName = "";
-	const wrappedStartThread = async (options: {
-		name: string;
-		reason: string;
-	}) => {
-		threadCreated = true;
-		threadName = options.name;
-		return startThread(options);
-	};
-	return {
-		threadCreated: () => threadCreated,
-		threadName: () => threadName,
-		wrappedStartThread,
-	};
-};
-
 describe("handleAutoThread", () => {
 	it.scoped("returns early for DM channel", () =>
 		Effect.gen(function* () {
@@ -230,13 +207,7 @@ describe("handleAutoThread", () => {
 	it.scoped("creates thread when all conditions are met", () =>
 		Effect.gen(function* () {
 			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = expectThreadCreated(
-				async (options) =>
-					({
-						id: "thread123",
-						name: options.name,
-					}) as unknown as Message["thread"],
-			);
+			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
 			const message = discordMock.utilities.createMockMessage(channel, {
 				cleanContent: "Hello world",
 				content: "Hello world",
@@ -251,13 +222,7 @@ describe("handleAutoThread", () => {
 	it.scoped("uses nickname when available", () =>
 		Effect.gen(function* () {
 			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = expectThreadCreated(
-				async (options) =>
-					({
-						id: "thread123",
-						name: options.name,
-					}) as unknown as Message["thread"],
-			);
+			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
 			const message = discordMock.utilities.createMockMessage(channel, {
 				memberNickname: "CoolNickname",
 				cleanContent: "Test message",
@@ -271,13 +236,7 @@ describe("handleAutoThread", () => {
 	it.scoped("removes Discord markdown from thread title", () =>
 		Effect.gen(function* () {
 			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = expectThreadCreated(
-				async (options) =>
-					({
-						id: "thread123",
-						name: options.name,
-					}) as unknown as Message["thread"],
-			);
+			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
 			const message = discordMock.utilities.createMockMessage(channel, {
 				cleanContent: "*bold* _italic_ ~strike~ `code`",
 				content: "*bold* _italic_ ~strike~ `code`",
@@ -293,13 +252,7 @@ describe("handleAutoThread", () => {
 	it.scoped("truncates long thread titles", () =>
 		Effect.gen(function* () {
 			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = expectThreadCreated(
-				async (options) =>
-					({
-						id: "thread123",
-						name: options.name,
-					}) as unknown as Message["thread"],
-			);
+			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
 			const longContent = "a".repeat(100);
 			const message = discordMock.utilities.createMockMessage(channel, {
 				cleanContent: longContent,
@@ -317,13 +270,7 @@ describe("handleAutoThread", () => {
 	it.scoped("uses attachment name when message has no content", () =>
 		Effect.gen(function* () {
 			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = expectThreadCreated(
-				async (options) =>
-					({
-						id: "thread123",
-						name: options.name,
-					}) as unknown as Message["thread"],
-			);
+			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
 			const message = discordMock.utilities.createMockMessage(channel, {
 				cleanContent: "",
 				content: "",
@@ -339,13 +286,7 @@ describe("handleAutoThread", () => {
 	it.scoped("uses 'Attachment' fallback when attachment has no name", () =>
 		Effect.gen(function* () {
 			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = expectThreadCreated(
-				async (options) =>
-					({
-						id: "thread123",
-						name: options.name,
-					}) as unknown as Message["thread"],
-			);
+			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
 			const message = discordMock.utilities.createMockMessage(channel, {
 				cleanContent: "",
 				content: "",
@@ -364,13 +305,7 @@ describe("handleAutoThread", () => {
 				true,
 				(guild, utilities) => utilities.createMockNewsChannel(guild),
 			);
-			const threadHelper = expectThreadCreated(
-				async (options) =>
-					({
-						id: "thread123",
-						name: options.name,
-					}) as unknown as Message["thread"],
-			);
+			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
 			const message = discordMock.utilities.createMockMessage(channel, {
 				cleanContent: "Announcement message",
 				startThread: threadHelper.wrappedStartThread,

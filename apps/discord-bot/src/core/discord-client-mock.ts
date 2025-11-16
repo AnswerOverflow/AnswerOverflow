@@ -347,6 +347,34 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			client.emit("clientReady", client as Client<true>);
 		};
 
+		const createThreadTrackingHelper = (
+			startThread?: (options: {
+				name: string;
+				reason: string;
+			}) => Promise<Message["thread"]>,
+		) => {
+			let threadCreated = false;
+			let threadName = "";
+			const wrappedStartThread = async (options: {
+				name: string;
+				reason: string;
+			}) => {
+				threadCreated = true;
+				threadName = options.name;
+				return startThread
+					? startThread(options)
+					: ({
+							id: "thread123",
+							name: options.name,
+						} as unknown as Message["thread"]);
+			};
+			return {
+				threadCreated: () => threadCreated,
+				threadName: () => threadName,
+				wrappedStartThread,
+			};
+		};
+
 		return {
 			client,
 			utilities: {
@@ -359,6 +387,7 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				createMockForumChannel,
 				createMockNewsChannel,
 				createMockMessage,
+				createThreadTrackingHelper,
 				emitGuildCreate,
 				emitGuildUpdate,
 				emitGuildDelete,
