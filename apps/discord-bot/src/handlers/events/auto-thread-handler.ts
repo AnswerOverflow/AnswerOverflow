@@ -119,9 +119,7 @@ export const AutoThreadHandlerLayer = Layer.scopedDiscard(
 			Effect.scoped(
 				handleAutoThread(message).pipe(
 					Effect.provide(DatabaseLayer),
-					Effect.catchTags({
-						DiscordAPIError: (error) => Effect.logError(error),
-					}),
+					Effect.ignore,
 				),
 			),
 		);

@@ -1,6 +1,0 @@
-version: "2"
-
-tunnels:
-  web:
-    proto: http
-    addr: 3000

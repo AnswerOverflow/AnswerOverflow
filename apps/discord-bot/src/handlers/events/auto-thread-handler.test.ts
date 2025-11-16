@@ -1,4 +1,5 @@
 import { expect, it } from "@effect/vitest";
+import { assertLeft } from "@effect/vitest/utils";
 import { Database } from "@packages/database/database";
 import { DatabaseTestLayer } from "@packages/database/database-test";
 import type { Message } from "discord.js";
@@ -7,7 +8,11 @@ import { Effect, Layer } from "effect";
 import { describe } from "vitest";
 import { DiscordClientMock } from "../../core/discord-client-mock";
 import { DiscordClientTestLayer } from "../../core/discord-client-test-layer";
-import { handleAutoThread } from "./auto-thread-handler";
+import {
+	AutoThreadError,
+	AutoThreadErrorCode,
+	handleAutoThread,
+} from "./auto-thread-handler";
 
 const TestLayer = Layer.mergeAll(DiscordClientTestLayer, DatabaseTestLayer);
 
@@ -63,8 +68,14 @@ describe("handleAutoThread", () => {
 				} as unknown as Message["channel"],
 			});
 
-			const result = yield* handleAutoThread(message);
-			expect(result).toBeUndefined();
+			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			assertLeft(
+				result,
+				new AutoThreadError({
+					message: "Cannot create thread in DM or voice channel",
+					code: AutoThreadErrorCode.DM_OR_VOICE_CHANNEL,
+				}),
+			);
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
@@ -119,8 +130,14 @@ describe("handleAutoThread", () => {
 				} as unknown as Message["channel"],
 			});
 
-			const result = yield* handleAutoThread(message);
-			expect(result).toBeUndefined();
+			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			assertLeft(
+				result,
+				new AutoThreadError({
+					message: "Cannot create thread in DM or voice channel",
+					code: AutoThreadErrorCode.DM_OR_VOICE_CHANNEL,
+				}),
+			);
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
@@ -175,8 +192,14 @@ describe("handleAutoThread", () => {
 				} as unknown as Message["channel"],
 			});
 
-			const result = yield* handleAutoThread(message);
-			expect(result).toBeUndefined();
+			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			assertLeft(
+				result,
+				new AutoThreadError({
+					message: `Channel type ${ChannelType.GuildForum} is not allowed for auto threads`,
+					code: AutoThreadErrorCode.INVALID_CHANNEL_TYPE,
+				}),
+			);
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
@@ -229,8 +252,14 @@ describe("handleAutoThread", () => {
 				authorDisplayName: "BotUser",
 			});
 
-			const result = yield* handleAutoThread(message);
-			expect(result).toBeUndefined();
+			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			assertLeft(
+				result,
+				new AutoThreadError({
+					message: "Message is not from a human user",
+					code: AutoThreadErrorCode.NOT_HUMAN_MESSAGE,
+				}),
+			);
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
@@ -280,8 +309,14 @@ describe("handleAutoThread", () => {
 				type: MessageType.Reply,
 			});
 
-			const result = yield* handleAutoThread(message);
-			expect(result).toBeUndefined();
+			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			assertLeft(
+				result,
+				new AutoThreadError({
+					message: `Message type ${MessageType.Reply} is not supported`,
+					code: AutoThreadErrorCode.INVALID_MESSAGE_TYPE,
+				}),
+			);
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
@@ -333,8 +368,14 @@ describe("handleAutoThread", () => {
 				} as unknown as Message["thread"],
 			});
 
-			const result = yield* handleAutoThread(message);
-			expect(result).toBeUndefined();
+			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			assertLeft(
+				result,
+				new AutoThreadError({
+					message: "Message is already in a thread",
+					code: AutoThreadErrorCode.ALREADY_IN_THREAD,
+				}),
+			);
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
@@ -382,8 +423,14 @@ describe("handleAutoThread", () => {
 
 			const message = discordMock.utilities.createMockMessage(channel);
 
-			const result = yield* handleAutoThread(message);
-			expect(result).toBeUndefined();
+			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			assertLeft(
+				result,
+				new AutoThreadError({
+					message: "Auto thread is disabled for this channel",
+					code: AutoThreadErrorCode.AUTO_THREAD_DISABLED,
+				}),
+			);
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
