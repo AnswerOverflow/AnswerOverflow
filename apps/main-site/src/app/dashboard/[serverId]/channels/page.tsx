@@ -140,7 +140,7 @@ export default function ChannelsPage() {
 	);
 
 	const dashboardData = useQuery(
-		api.public.dashboard_queries.getDashboardData,
+		api.authenticated.dashboard_queries.getDashboardData,
 		{
 			serverId,
 		},
@@ -197,15 +197,15 @@ export default function ChannelsPage() {
 	}, [filteredChannels, setSelectedChannelIds]);
 
 	const updateChannelSettings = useMutation(
-		api.public.dashboard_mutations.updateChannelSettingsFlags,
+		api.authenticated.dashboard_mutations.updateChannelSettingsFlags,
 	).withOptimisticUpdate((localStore, args) => {
 		const currentData = localStore.getQuery(
-			api.public.dashboard_queries.getDashboardData,
+			api.authenticated.dashboard_queries.getDashboardData,
 			{ serverId },
 		);
 		if (currentData !== undefined) {
 			localStore.setQuery(
-				api.public.dashboard_queries.getDashboardData,
+				api.authenticated.dashboard_queries.getDashboardData,
 				{ serverId },
 				{
 					...currentData,

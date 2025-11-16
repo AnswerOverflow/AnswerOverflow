@@ -29,7 +29,7 @@ export default function DashboardLayout({
 	const shouldShowServerSelect = serverId !== undefined && !isOnboardingPage;
 
 	const servers = useQuery(
-		api.public.dashboard_queries.getUserServersForDropdown,
+		api.authenticated.dashboard_queries.getUserServersForDropdown,
 		isSessionPending || !session?.user ? "skip" : {},
 	);
 

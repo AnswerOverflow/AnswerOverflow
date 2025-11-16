@@ -20,7 +20,7 @@ export default function DashboardOverviewPage() {
 	const serverId = params.serverId as Id<"servers">;
 
 	const dashboardData = useQuery(
-		api.public.dashboard_queries.getDashboardData,
+		api.authenticated.dashboard_queries.getDashboardData,
 		{
 			serverId,
 		},

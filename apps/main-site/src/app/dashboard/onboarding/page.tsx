@@ -27,8 +27,10 @@ export default function OnboardingPage() {
 	const serverId = searchParams.get("serverId");
 	const { data: session, isPending: isSessionPending } =
 		authClient.useSession();
-	const getUserServers = useAction(api.public.dashboard.getUserServers);
-	const trackBotAddClick = useAction(api.public.dashboard.trackBotAddClick);
+	const getUserServers = useAction(api.authenticated.dashboard.getUserServers);
+	const trackBotAddClick = useAction(
+		api.authenticated.dashboard.trackBotAddClick,
+	);
 	const [step, setStep] = useState<OnboardingStep>("auth");
 	const [installingServerId, setInstallingServerId] = useState<string | null>(
 		null,

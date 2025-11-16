@@ -113,7 +113,7 @@ export const fetchDiscordGuilds = internalAction({
 });
 
 const discordGuildsCache = new ActionCache(components.actionCache, {
-	action: internal.public.dashboard.fetchDiscordGuilds,
+	action: internal.authenticated.dashboard.fetchDiscordGuilds,
 	name: "discordGuilds",
 	ttl: 300 * 1000, // 5 minutes in milliseconds
 });
@@ -233,7 +233,8 @@ export const getUserServers = authenticatedAction({
 							try: () => {
 								return ctx.scheduler.runAfter(
 									0,
-									internal.public.dashboard.syncUserServerSettingsBackground,
+									internal.authenticated.dashboard
+										.syncUserServerSettingsBackground,
 									{
 										discordAccountId,
 										manageableServers: manageableServers.map((guild) => ({
@@ -421,7 +422,7 @@ export const trackBotAddClick = authenticatedAction({
 		const { discordAccountId, serverDiscordId } = args;
 
 		const server = await ctx.runQuery(
-			api.public.servers.publicGetServerByDiscordId,
+			api.authenticated.servers.publicGetServerByDiscordId,
 			{
 				discordId: serverDiscordId,
 			},

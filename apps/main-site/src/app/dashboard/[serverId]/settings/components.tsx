@@ -40,7 +40,7 @@ function planToPrettyText(plan: Plan): string {
 
 export function CurrentPlanCard({ serverId }: { serverId: Id<"servers"> }) {
 	const dashboardData = useQuery(
-		api.public.dashboard_queries.getDashboardData,
+		api.authenticated.dashboard_queries.getDashboardData,
 		{
 			serverId,
 		},

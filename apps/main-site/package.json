@@ -17,6 +17,7 @@
 		"@packages/observability": "workspace:*",
 		"@packages/ui": "workspace:*",
 		"@tanstack/react-query": "catalog:",
+		"@uidotdev/usehooks": "^2.4.1",
 		"babel-plugin-react-compiler": "^19.1.0-rc.2",
 		"better-auth": "catalog:",
 		"convex": "catalog:",
@@ -25,7 +26,8 @@
 		"next": "catalog:",
 		"nuqs": "catalog:",
 		"react": "catalog:",
-		"react-dom": "catalog:"
+		"react-dom": "catalog:",
+		"use-debounce": "^10.0.6"
 	},
 	"devDependencies": {
 		"@packages/typescript-config": "workspace:*",

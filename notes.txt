@@ -15,9 +15,9 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 
 
 organize as:
-    publicInternal/
-    authenticated/
-    public/
+    /private/
+    /authenticated/
+    /public/
     
 each of those get their own query functions, keep the default ones banned
 

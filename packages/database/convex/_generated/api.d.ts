@@ -1,15 +1,23 @@
 /* eslint-disable */
+/**
+ * Generated `api` utility.
+ *
+ * THIS CODE IS AUTOMATICALLY GENERATED.
+ *
+ * To regenerate, run `npx convex dev`.
+ * @module
+ */
 
+import type * as authenticated_dashboard from "../authenticated/dashboard.js";
+import type * as authenticated_dashboard_mutations from "../authenticated/dashboard_mutations.js";
+import type * as authenticated_dashboard_queries from "../authenticated/dashboard_queries.js";
+import type * as authenticated_servers from "../authenticated/servers.js";
 import type * as client_authenticated from "../client/authenticated.js";
 import type * as client_index from "../client/index.js";
 import type * as client_publicInternal from "../client/publicInternal.js";
 import type * as http from "../http.js";
-import type * as public_channels from "../public/channels.js";
-import type * as public_dashboard from "../public/dashboard.js";
-import type * as public_dashboard_mutations from "../public/dashboard_mutations.js";
-import type * as public_dashboard_queries from "../public/dashboard_queries.js";
-import type * as public_messages from "../public/messages.js";
-import type * as public_servers from "../public/servers.js";
+import type * as public_custom_functions from "../public/custom_functions.js";
+import type * as public_search from "../public/search.js";
 import type * as publicInternal_attachments from "../publicInternal/attachments.js";
 import type * as publicInternal_channels from "../publicInternal/channels.js";
 import type * as publicInternal_discord_accounts from "../publicInternal/discord_accounts.js";
@@ -30,16 +38,16 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "authenticated/dashboard": typeof authenticated_dashboard;
+  "authenticated/dashboard_mutations": typeof authenticated_dashboard_mutations;
+  "authenticated/dashboard_queries": typeof authenticated_dashboard_queries;
+  "authenticated/servers": typeof authenticated_servers;
   "client/authenticated": typeof client_authenticated;
   "client/index": typeof client_index;
   "client/publicInternal": typeof client_publicInternal;
   http: typeof http;
-  "public/channels": typeof public_channels;
-  "public/dashboard": typeof public_dashboard;
-  "public/dashboard_mutations": typeof public_dashboard_mutations;
-  "public/dashboard_queries": typeof public_dashboard_queries;
-  "public/messages": typeof public_messages;
-  "public/servers": typeof public_servers;
+  "public/custom_functions": typeof public_custom_functions;
+  "public/search": typeof public_search;
   "publicInternal/attachments": typeof publicInternal_attachments;
   "publicInternal/channels": typeof publicInternal_channels;
   "publicInternal/discord_accounts": typeof publicInternal_discord_accounts;
@@ -54,11 +62,27 @@ declare const fullApi: ApiFromModules<{
   "shared/shared": typeof shared_shared;
 }>;
 
+/**
+ * A utility for referencing Convex functions in your app's public API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
 export declare const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">
 >;
 
+/**
+ * A utility for referencing Convex functions in your app's internal API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = internal.myModule.myFunction;
+ * ```
+ */
 export declare const internal: FilterApi<
   typeof fullApi,
   FunctionReference<any, "internal">

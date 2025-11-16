@@ -24,14 +24,14 @@ export function CustomDomainConfigurator({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const dashboardData = useQuery(
-		api.public.dashboard_queries.getDashboardData,
+		api.authenticated.dashboard_queries.getDashboardData,
 		{
 			serverId,
 		},
 	);
 
 	const updateCustomDomain = useMutation(
-		api.public.dashboard_mutations.updateCustomDomain,
+		api.authenticated.dashboard_mutations.updateCustomDomain,
 	);
 
 	const currentDomain = dashboardData?.server.customDomain ?? null;

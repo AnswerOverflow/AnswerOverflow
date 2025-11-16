@@ -16,7 +16,7 @@ const CONVEX_DIR = join(PACKAGE_ROOT, "convex");
 
 interface FunctionInfo {
 	name: string;
-	file: string; // Relative path from convex/ directory (e.g., "public/dashboard.ts")
+	file: string; // Relative path from convex/ directory (e.g., "authenticated/dashboard.ts")
 	namespace: string; // Last path component without extension (e.g., "dashboard")
 	type:
 		| "query"
@@ -35,7 +35,7 @@ async function extractFunctionsFromFile(
 	const functions: FunctionInfo[] = [];
 
 	// Determine namespace from file path
-	// convex/public/channels.ts -> channels
+	// convex/authenticated/channels.ts -> channels
 	// convex/publicInternal/channels.ts -> channels
 	const pathParts = relativePath.split("/");
 	const namespace = pathParts[pathParts.length - 1]?.replace(".ts", "") || "";
@@ -122,7 +122,7 @@ async function findAllConvexFunctions(): Promise<FunctionInfo[]> {
  * Convex uses file-based routing where the API path mirrors the directory structure.
  *
  * Examples:
- * - convex/public/dashboard.ts -> api.dashboard.* or internal.public.dashboard.*
+ * - convex/authenticated/dashboard.ts -> api.dashboard.* or internal.authenticated.dashboard.*
  * - convex/publicInternal/channels.ts -> api.publicInternal.channels.*
  * - convex/client/publicInternal.ts -> api.client.publicInternal.* or internal.client.publicInternal.*
  */
@@ -225,7 +225,7 @@ async function searchForFunctionUsage(
 				const filePath = join(searchDir, file);
 				try {
 					const content = await readFile(filePath, "utf-8");
-					// We search for API paths (e.g., internal.public.dashboard.functionName),
+					// We search for API paths (e.g., internal.authenticated.dashboard.functionName),
 					// not function definitions, so we don't need to skip the definition file
 					for (const pattern of patterns) {
 						const regex = new RegExp(pattern, "g");
