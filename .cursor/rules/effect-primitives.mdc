@@ -41,6 +41,10 @@ const sum = Num.sum(1, 2, 3);
 - **Prefer `Data.array`** for immutable arrays with structural equality
 - **Prefer `List<A>`** for linked list operations (efficient prepend/append)
 - **When using Effect's `Array` module**, always use aliased imports (e.g., `import { Array as Arr }`) to avoid shadowing the global `Array` type
+- **Prefer Effect's `Array` utilities** over standard JavaScript array methods when working with JavaScript arrays:
+  - Use `Arr.filter(values, Predicate.isNotNullable)` instead of `values.filter(x => x != null)`
+  - Use `Arr.map`, `Arr.filter`, `Arr.find`, etc. with Effect predicates and utilities for better type safety and composability
+  - Always import with aliases: `import { Array as Arr, Predicate } from "effect"`
 
 ### Maps & Sets
 
@@ -246,6 +250,9 @@ const sum = BigIntEffect.sum(value1, value2);
 const items: Array<number> = [1, 2, 3];
 const doubled = items.map((x) => x * 2);
 
+const values: Array<string | null | undefined> = ["a", null, "b", undefined, "c"];
+const filtered = values.filter((x) => x != null);
+
 const map = new Map<string, number>();
 map.set("key", 1);
 
@@ -263,7 +270,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 ```typescript
 import { Chunk, HashMap, Effect, Duration, Order } from "effect";
-import { Array as Arr, Number as Num, BigInt as BigIntEffect } from "effect";
+import { Array as Arr, Number as Num, BigInt as BigIntEffect, Predicate } from "effect";
 
 const items = Chunk.make(1, 2, 3);
 const doubled = Chunk.map(items, (x) => x * 2);
@@ -271,6 +278,10 @@ const doubled = Chunk.map(items, (x) => x * 2);
 // Using Effect's Array module with aliased import
 const jsArray = [1, 2, 3];
 const mapped = Arr.map(jsArray, (x) => x * 2);
+
+// Filtering with Effect predicates
+const values: Array<string | null | undefined> = ["a", null, "b", undefined, "c"];
+const filtered = Arr.filter(values, Predicate.isNotNullable);
 
 // Using Effect's Number module with aliased import
 const sum = Num.sum(1, 2, 3);

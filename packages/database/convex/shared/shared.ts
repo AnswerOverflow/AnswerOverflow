@@ -1,13 +1,19 @@
 import type { Infer } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
-import { Array as EffectArray, Predicate } from "effect";
+import { Array as Arr, Predicate } from "effect";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
-import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
+import type {
+	attachmentSchema,
+	emojiSchema,
+	messageSchema,
+	reactionSchema,
+} from "../schema";
 
 type Message = Infer<typeof messageSchema>;
 type Attachment = Infer<typeof attachmentSchema>;
+type Reaction = Infer<typeof reactionSchema>;
 
 export const DISCORD_PERMISSIONS = {
 	Administrator: 0x8,
@@ -323,7 +329,7 @@ export function extractDiscordLinks(content: string): Array<{
 		/https:\/\/discord\.com\/channels\/(\d+)\/(\d+)(?:\/(\d+))?/g;
 
 	const matches = content.matchAll(discordLinkRegex);
-	return EffectArray.map(Array.from(matches), (match) => {
+	return Arr.map(Array.from(matches), (match) => {
 		const guildId = match[1];
 		const channelId = match[2];
 		const messageId = match[3];
@@ -883,4 +889,203 @@ export async function uploadAttachmentFromUrlLogic(
 		console.error(`Error uploading attachment from ${args.url}:`, error);
 		return null;
 	}
+}
+
+export type EnrichedMessage = {
+	message: Message;
+	author: {
+		id: string;
+		name: string;
+		avatar?: string;
+	} | null;
+	attachments: Attachment[];
+	reactions: Reaction[];
+	solutions: Message[];
+	metadata?: {
+		users?: Record<
+			string,
+			{ username: string; globalName: string | null; url: string }
+		>;
+		channels?: Record<
+			string,
+			{
+				name: string;
+				type: number;
+				url: string;
+				indexingEnabled?: boolean;
+				exists?: boolean;
+			}
+		>;
+		internalLinks?: Array<{
+			original: string;
+			guild: { id: string; name: string };
+			channel: {
+				parent?: { name?: string; type?: number; parentId?: string };
+				id: string;
+				type: number;
+				name: string;
+			};
+			message?: string;
+		}>;
+	};
+};
+
+export async function enrichMessagesWithData(
+	ctx: QueryCtx | MutationCtx,
+	messages: Message[],
+): Promise<EnrichedMessage[]> {
+	if (messages.length === 0) {
+		return [];
+	}
+
+	const authorIds = new Set(messages.map((m) => m.authorId));
+	const authors = await asyncMap(Array.from(authorIds), (id) =>
+		getDiscordAccountById(ctx, id),
+	);
+	const authorMap = new Map(
+		Arr.filter(authors, Predicate.isNotNull).map((a) => [a.id, a]),
+	);
+
+	const allUserIds = new Set<string>();
+	const allChannelIds = new Set<string>();
+	const allDiscordLinks: Array<{
+		original: string;
+		guildId: string;
+		channelId: string;
+		messageId?: string;
+	}> = [];
+	const serverIds = new Set(messages.map((m) => m.serverId));
+
+	const servers = await asyncMap(Array.from(serverIds), (id) => ctx.db.get(id));
+	const serverMap = new Map(
+		Arr.filter(servers, Predicate.isNotNull).map((s) => [s._id, s.discordId]),
+	);
+
+	for (const message of messages) {
+		const { userIds, channelIds } = extractMentionIds(message.content);
+		for (const userId of userIds) {
+			allUserIds.add(userId);
+		}
+		for (const channelId of channelIds) {
+			allChannelIds.add(channelId);
+		}
+		const discordLinks = extractDiscordLinks(message.content);
+		allDiscordLinks.push(...discordLinks);
+	}
+
+	const internalLinks = await getInternalLinksMetadata(ctx, allDiscordLinks);
+
+	const messagesWithData = await Promise.all(
+		messages.map(async (message) => {
+			const serverDiscordId = serverMap.get(message.serverId);
+			if (!serverDiscordId) {
+				const [attachments, reactions, solutions] = await Promise.all([
+					findAttachmentsByMessageId(ctx, message.id),
+					findReactionsByMessageId(ctx, message.id),
+					message.questionId
+						? findSolutionsByQuestionId(ctx, message.questionId)
+						: [],
+				]);
+
+				const author = authorMap.get(message.authorId);
+				return {
+					message,
+					author: author
+						? {
+								id: author.id,
+								name: author.name,
+								avatar: author.avatar,
+							}
+						: null,
+					attachments,
+					reactions,
+					solutions,
+				};
+			}
+
+			const { userIds, channelIds } = extractMentionIds(message.content);
+			const messageDiscordLinks = extractDiscordLinks(message.content);
+			const messageInternalLinks = internalLinks.filter((link) =>
+				messageDiscordLinks.some((dl) => dl.original === link.original),
+			);
+
+			const mentionMetadata = await getMentionMetadata(
+				ctx,
+				userIds,
+				channelIds,
+				serverDiscordId,
+			);
+
+			const messageUsers: Record<
+				string,
+				{ username: string; globalName: string | null; url: string }
+			> = {};
+			const messageChannels: Record<
+				string,
+				{
+					name: string;
+					type: number;
+					url: string;
+					indexingEnabled?: boolean;
+					exists?: boolean;
+				}
+			> = {};
+
+			for (const userId of userIds) {
+				if (mentionMetadata.users[userId]) {
+					messageUsers[userId] = mentionMetadata.users[userId];
+				}
+			}
+
+			for (const channelId of channelIds) {
+				const channelMeta = mentionMetadata.channels[channelId];
+				if (channelMeta) {
+					messageChannels[channelId] = channelMeta;
+				} else {
+					messageChannels[channelId] = {
+						name: "Unknown Channel",
+						type: 0,
+						url: `https://discord.com/channels/${serverDiscordId}/${channelId}`,
+						indexingEnabled: false,
+						exists: false,
+					};
+				}
+			}
+
+			const [attachments, reactions, solutions] = await Promise.all([
+				findAttachmentsByMessageId(ctx, message.id),
+				findReactionsByMessageId(ctx, message.id),
+				message.questionId
+					? findSolutionsByQuestionId(ctx, message.questionId)
+					: [],
+			]);
+
+			const author = authorMap.get(message.authorId);
+			return {
+				message,
+				author: author
+					? {
+							id: author.id,
+							name: author.name,
+							avatar: author.avatar,
+						}
+					: null,
+				attachments,
+				reactions,
+				solutions,
+				metadata: {
+					users:
+						Object.keys(messageUsers).length > 0 ? messageUsers : undefined,
+					channels:
+						Object.keys(messageChannels).length > 0
+							? messageChannels
+							: undefined,
+					internalLinks:
+						messageInternalLinks.length > 0 ? messageInternalLinks : undefined,
+				},
+			};
+		}),
+	);
+
+	return messagesWithData;
 }
