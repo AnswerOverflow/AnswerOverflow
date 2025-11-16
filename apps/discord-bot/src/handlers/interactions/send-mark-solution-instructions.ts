@@ -52,7 +52,6 @@ export function handleSendMarkSolutionInstructions(
 	_question: Message | null,
 ): Effect.Effect<void, unknown, Database> {
 	return Effect.gen(function* () {
-		// Check if channel settings exist and flag is enabled
 		if (!channelSettings?.flags.sendMarkSolutionInstructionsInNewThreads) {
 			return;
 		}
@@ -62,7 +61,6 @@ export function handleSendMarkSolutionInstructions(
 			return;
 		}
 
-		// Create embed with instructions
 		const embed = new EmbedBuilder()
 			.setDescription(
 				`To help others find answers, you can mark your question as solved via \`Right click solution message -> Apps -> ✅ Mark Solution\``,
@@ -72,7 +70,6 @@ export function handleSendMarkSolutionInstructions(
 			)
 			.setColor(ANSWER_OVERFLOW_BLUE_HEX as `#${string}`);
 
-		// Create dismiss button
 		const components =
 			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 				makeDismissButton(threadOwner.id),

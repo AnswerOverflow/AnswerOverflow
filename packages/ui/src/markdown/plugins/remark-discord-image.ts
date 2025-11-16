@@ -11,13 +11,11 @@ export function remarkDiscordImage() {
 		visit(tree, "image", (node: Image, index: number, parent: Parent) => {
 			if (!parent || typeof index !== "number") return;
 
-			// Create text node with "!"
 			const textNode: Text = {
 				type: "text",
 				value: "!",
 			};
 
-			// Create link node with [alt](url)
 			const linkNode: Link = {
 				type: "link",
 				url: node.url,

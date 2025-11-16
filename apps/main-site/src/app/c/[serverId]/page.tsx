@@ -37,7 +37,6 @@ export default async function ServerPage(props: Props) {
 
 	const { server, channels } = pageData;
 
-	// Filter to root channels only (not threads) and sort
 	const rootChannels = channels
 		.filter((channel) => {
 			// Filter out thread types (11, 12)

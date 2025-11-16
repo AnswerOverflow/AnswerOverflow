@@ -26,7 +26,6 @@ const createLiveService = Effect.gen(function* () {
 			// Live client can only call public mutations
 			// Internal mutations will fail at runtime with a clear error from Convex
 			// This is intentional - internal mutations should only be used in test mode
-			// Check at runtime since TypeScript types don't distinguish internal vs public mutations
 			if (
 				typeof mutation === "object" &&
 				mutation !== null &&
@@ -77,7 +76,6 @@ export class ConvexClientLive extends Context.Tag("ConvexClientLive")<
 const ConvexClientLiveSharedLayer = Layer.effectContext(
 	Effect.gen(function* () {
 		const service = yield* createLiveService;
-		// Ensure the service matches WrappedUnifiedClient type
 		const unifiedService: WrappedUnifiedClient = {
 			client: service.client,
 			use: service.use,

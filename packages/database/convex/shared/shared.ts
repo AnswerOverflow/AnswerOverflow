@@ -312,7 +312,6 @@ export async function deleteChannelInternalLogic(
 	ctx: MutationCtx,
 	id: string,
 ): Promise<void> {
-	// Delete all threads first
 	const threads = await ctx.db
 		.query("channels")
 		.withIndex("by_parentId", (q) => q.eq("parentId", id))
@@ -323,7 +322,6 @@ export async function deleteChannelInternalLogic(
 		await deleteChannelInternalLogic(ctx, thread.id);
 	}
 
-	// Delete channel settings
 	const settings = await ctx.db
 		.query("channelSettings")
 		.withIndex("by_channelId", (q) => q.eq("channelId", id))
@@ -333,7 +331,6 @@ export async function deleteChannelInternalLogic(
 		await ctx.db.delete(setting._id);
 	}
 
-	// Delete the channel itself
 	const channel = await ctx.db
 		.query("channels")
 		.filter((q) => q.eq(q.field("id"), id))
@@ -399,7 +396,6 @@ export async function getFirstMessageInChannel(
 	ctx: QueryCtx | MutationCtx,
 	channelId: string,
 ): Promise<Message | null> {
-	// Fetch messages for the channel
 	// Then sort by ID to get the chronologically first message
 	const allMessages = await getManyFrom(
 		ctx.db,
@@ -426,7 +422,6 @@ export async function getFirstMessagesInChannels(
 	ctx: QueryCtx | MutationCtx,
 	channelIds: string[],
 ): Promise<Record<string, Message | null>> {
-	// Initialize results with null for all channels
 	const results: Record<string, Message | null> = {};
 	for (const channelId of channelIds) {
 		results[channelId] = null;
@@ -436,7 +431,6 @@ export async function getFirstMessagesInChannels(
 		return results;
 	}
 
-	// Fetch messages for each channel in a single efficient batch
 	const channelMessages = await Promise.all(
 		channelIds.map(async (channelId) => {
 			const messages = await getManyFrom(
@@ -528,7 +522,6 @@ export async function deleteMessageInternalLogic(
 	ctx: MutationCtx,
 	id: string,
 ): Promise<void> {
-	// Delete attachments
 	const attachments = await getManyFrom(
 		ctx.db,
 		"attachments",
@@ -541,7 +534,6 @@ export async function deleteMessageInternalLogic(
 		await ctx.db.delete(attachment._id);
 	}
 
-	// Delete reactions
 	const reactions = await getManyFrom(
 		ctx.db,
 		"reactions",
@@ -554,7 +546,6 @@ export async function deleteMessageInternalLogic(
 		await ctx.db.delete(reaction._id);
 	}
 
-	// Delete message
 	const message = await ctx.db
 		.query("messages")
 		.filter((q) => q.eq(q.field("id"), id))
@@ -591,9 +582,7 @@ export async function upsertMessageInternalLogic(
 		await ctx.db.insert("messages", messageData);
 	}
 
-	// Handle attachments
 	if (attachments !== undefined) {
-		// Delete existing attachments
 		const existingAttachments = await ctx.db
 			.query("attachments")
 			.withIndex("by_messageId", (q) => q.eq("messageId", messageData.id))
@@ -611,9 +600,7 @@ export async function upsertMessageInternalLogic(
 		}
 	}
 
-	// Handle reactions
 	if (reactions !== undefined) {
-		// Delete existing reactions
 		const existingReactions = await ctx.db
 			.query("reactions")
 			.withIndex("by_messageId", (q) => q.eq("messageId", messageData.id))
@@ -676,7 +663,6 @@ export async function uploadAttachmentFromUrlLogic(
 			return null;
 		}
 
-		// Get the file as a blob
 		const blob = await response.blob();
 
 		// Upload to Convex storage

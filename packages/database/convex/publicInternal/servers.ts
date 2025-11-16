@@ -18,7 +18,6 @@ export const createServerExternal = publicInternalMutation({
 		data: serverSchema,
 	},
 	handler: async (ctx, args) => {
-		// Check if server already exists
 		const existing = await getOneFrom(
 			ctx.db,
 			"servers",
@@ -65,7 +64,6 @@ export const upsertServerExternal = publicInternalMutation({
 		);
 
 		if (existing) {
-			// Check if we need to clear kickedTime
 			// If kickedTime is explicitly undefined in args.data and existing server has it set, clear it
 			const shouldClearKickedTime =
 				args.data.kickedTime === undefined &&
@@ -164,7 +162,6 @@ export const findManyServersById = publicInternalQuery({
 export const createServer = publicInternalMutation({
 	args: serverSchema,
 	handler: async (ctx, args) => {
-		// Check if server already exists
 		const existing = await getOneFrom(
 			ctx.db,
 			"servers",

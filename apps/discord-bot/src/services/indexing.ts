@@ -71,7 +71,6 @@ function fetchChannelMessages(
 		}
 
 		while (hasMore && messages.length < INDEXING_CONFIG.maxMessagesPerChannel) {
-			// Fetch a page of messages
 			const fetchAfter = lastMessageId === "0" ? undefined : lastMessageId;
 			const fetchedMessages = yield* discord.fetchChannelMessages(channelId, {
 				limit: INDEXING_CONFIG.messagesPerPage,
@@ -91,7 +90,6 @@ function fetchChannelMessages(
 
 			messages.push(...sortedMessages);
 
-			// Update last message ID for next iteration
 			const lastMsg = sortedMessages[sortedMessages.length - 1];
 			if (lastMsg && lastMsg.id !== lastMessageId) {
 				lastMessageId = lastMsg.id;
@@ -168,14 +166,12 @@ function storeMessages(
 			return;
 		}
 
-		// Filter to only human messages
 		const humanMessages = Arr.filter(messages, (msg) => isHumanMessage(msg));
 
 		yield* Effect.logDebug(
 			`Storing ${humanMessages.length} human messages (filtered from ${messages.length} total)`,
 		);
 
-		// Convert messages to AO format
 		const aoMessages: BaseMessageWithRelations[] = [];
 		for (const msg of humanMessages) {
 			try {
@@ -188,7 +184,6 @@ function storeMessages(
 			}
 		}
 
-		// Store Discord accounts
 		const uniqueAuthors = HashMap.fromIterable(
 			Arr.map(
 				humanMessages,
@@ -219,7 +214,6 @@ function storeMessages(
 				`Uploading ${allAttachments.length} attachments...`,
 			);
 
-			// Upload attachments in batches to avoid overwhelming the system
 			const batchSize = 5;
 			for (let i = 0; i < allAttachments.length; i += batchSize) {
 				const batch = allAttachments.slice(i, i + batchSize);
@@ -228,7 +222,6 @@ function storeMessages(
 						attachments: batch,
 					});
 
-				// Update the aoMessages with storage IDs
 				for (const result of uploadResults) {
 					if (result.storageId) {
 						for (const msg of aoMessages) {
@@ -248,7 +241,6 @@ function storeMessages(
 			);
 		}
 
-		// Store messages (with ignoreChecks: false to respect user settings)
 		yield* Effect.forEach(
 			aoMessages,
 			(msg) =>
@@ -256,11 +248,9 @@ function storeMessages(
 			{ concurrency: 5 },
 		);
 
-		// Update channel's lastIndexedSnowflake
 		if (humanMessages.length > 0) {
 			const lastMessage = humanMessages[humanMessages.length - 1];
 			if (lastMessage) {
-				// Get current channel to preserve other fields
 				const channelLiveData = yield* database.channels.findChannelByDiscordId(
 					{ discordId: channelId },
 				);
@@ -320,7 +310,6 @@ function indexTextChannel(
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Check if channel has indexing enabled
 		const channelLiveData = yield* database.channels.findChannelByDiscordId({
 			discordId: channel.id,
 		});
@@ -336,7 +325,6 @@ function indexTextChannel(
 			`Indexing text channel ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null (starting from beginning)"}`,
 		);
 
-		// Fetch messages
 		const messages = yield* fetchChannelMessages(
 			channel.id,
 			channel.name,
@@ -355,10 +343,8 @@ function indexTextChannel(
 			);
 		}
 
-		// Store messages
 		yield* storeMessages(messages, serverConvexId, channel.id);
 
-		// Process any threads found in messages
 		const threadsToIndex = Arr.filter(
 			Arr.map(messages, (msg) => msg.thread),
 			(thread): thread is AnyThreadChannel =>
@@ -377,7 +363,6 @@ function indexTextChannel(
 				threadsToIndex,
 				(thread) =>
 					Effect.gen(function* () {
-						// Upsert thread as a channel
 						yield* database.channels.upsertManyChannels({
 							channels: [
 								{
@@ -387,7 +372,6 @@ function indexTextChannel(
 							],
 						});
 
-						// Get thread's lastIndexedSnowflake if it exists
 						const threadChannelLiveData =
 							yield* database.channels.findChannelByDiscordId({
 								discordId: thread.id,
@@ -427,7 +411,6 @@ function indexForumChannel(
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Check if channel has indexing enabled
 		const channelLiveData = yield* database.channels.findChannelByDiscordId({
 			discordId: channel.id,
 		});
@@ -443,10 +426,8 @@ function indexForumChannel(
 			`Indexing forum ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"}`,
 		);
 
-		// Fetch all threads
 		const threads = yield* fetchForumThreads(channel.id, channel.name);
 
-		// Filter threads to only process ones newer than lastIndexedSnowflake
 		const threadsToIndex = lastIndexedSnowflake
 			? Arr.filter(
 					threads,
@@ -458,12 +439,10 @@ function indexForumChannel(
 			`Found ${threads.length} total threads, ${threadsToIndex.length} new threads to index (filtered by lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"})`,
 		);
 
-		// Index each thread
 		yield* Effect.forEach(
 			threadsToIndex,
 			(thread) =>
 				Effect.gen(function* () {
-					// Upsert thread as a channel
 					yield* database.channels.upsertManyChannels({
 						channels: [
 							{
@@ -473,7 +452,6 @@ function indexForumChannel(
 						],
 					});
 
-					// Get thread's lastIndexedSnowflake if it exists
 					const threadChannelLiveData =
 						yield* database.channels.findChannelByDiscordId({
 							discordId: thread.id,
@@ -490,7 +468,6 @@ function indexForumChannel(
 					);
 					yield* storeMessages(threadMessages, serverConvexId, thread.id);
 
-					// Small delay to avoid rate limits
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
 					Effect.catchAll((error) =>
@@ -503,7 +480,6 @@ function indexForumChannel(
 			{ concurrency: 2 },
 		);
 
-		// Update forum's lastIndexedSnowflake to the most recent thread ID
 		if (threads.length > 0) {
 			const sortedThreads = Arr.sort(
 				threads,
@@ -515,7 +491,6 @@ function indexForumChannel(
 			);
 			const latestThread = sortedThreads[0];
 			if (latestThread) {
-				// Get current channel to preserve other fields
 				const channelLiveData = yield* database.channels.findChannelByDiscordId(
 					{
 						discordId: channel.id,
@@ -577,7 +552,6 @@ function indexGuild(guild: Guild) {
 
 		const database = yield* Database;
 
-		// Get server from database
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: guild.id,
 		});
@@ -589,10 +563,8 @@ function indexGuild(guild: Guild) {
 			return;
 		}
 
-		// Get all channels
 		const channels = yield* discord.getChannels(guild.id);
 
-		// Filter to indexable channel types
 		const indexableChannels = Arr.filter(
 			channels,
 			(channel) =>
@@ -606,7 +578,6 @@ function indexGuild(guild: Guild) {
 			`Found ${indexableChannels.length} indexable channels in ${guild.name}`,
 		);
 
-		// Process each channel
 		yield* Effect.forEach(
 			indexableChannels,
 			(channel: Channel) =>
@@ -623,7 +594,6 @@ function indexGuild(guild: Guild) {
 						);
 					}
 
-					// Small delay between channels
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
 					Effect.catchAll((error) => {
@@ -652,12 +622,10 @@ function runIndexing() {
 		yield* Console.log("=== Starting indexing run ===");
 		yield* Effect.logDebug("=== Starting indexing run ===");
 
-		// Get all guilds
 		const guilds = yield* discord.getGuilds();
 		yield* Console.log(`Found ${guilds.length} guilds to index`);
 		yield* Effect.logDebug(`Found ${guilds.length} guilds to index`);
 
-		// Process each guild sequentially to avoid overwhelming the API
 		yield* Effect.forEach(
 			guilds,
 			(guild) =>
@@ -707,7 +675,6 @@ export function startIndexingLoop(runImmediately = true) {
 			);
 		}
 
-		// Create repeating schedule
 		const schedule = Schedule.fixed(INDEXING_CONFIG.scheduleInterval);
 
 		// Fork a fiber that runs the indexing on schedule

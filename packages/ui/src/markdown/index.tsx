@@ -23,7 +23,6 @@ function recreateElement(element: any, key?: string | number): React.ReactNode {
 		return element.map((item, index) => recreateElement(item, index));
 	}
 
-	// Check if it looks like a React element (has $$typeof)
 	// But we'll recreate it anyway to ensure it uses the current React instance
 	if (
 		element &&
@@ -35,7 +34,6 @@ function recreateElement(element: any, key?: string | number): React.ReactNode {
 		const { type, props } = element;
 		const { children, ...restProps } = props || {};
 
-		// Process children manually
 		let recreatedChildren: React.ReactNode = null;
 		if (children !== null && children !== undefined) {
 			if (Array.isArray(children)) {

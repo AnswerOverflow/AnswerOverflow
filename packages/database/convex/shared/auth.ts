@@ -63,7 +63,6 @@ export async function getDiscordAccountIdFromAuth(
 	const accountId = accountResult.accountId;
 	const providerId = accountResult.providerId;
 
-	// Verify it's actually a Discord account (should be guaranteed by the filter, but double-check)
 	if (providerId !== "discord") {
 		return null;
 	}
@@ -138,7 +137,6 @@ export async function assertCanEditServer(
 		} as unknown as AuthorizedUser<CanEditServer>;
 	}
 
-	// Get user server settings to check permissions
 	const settings = await getUserServerSettingsForServerByDiscordId(
 		ctx,
 		discordAccountId,
@@ -151,7 +149,6 @@ export async function assertCanEditServer(
 		);
 	}
 
-	// Check if user has Administrator or ManageGuild permission
 	// Discord permission bitfield: Administrator = 0x8, ManageGuild = 0x20
 	const ADMINISTRATOR = 0x8;
 	const MANAGE_GUILD = 0x20;
@@ -297,7 +294,6 @@ export async function getDiscordAccountWithToken(
 		return null;
 	}
 
-	// Get Discord account from BetterAuth
 	const accountResult = await Effect.gen(function* () {
 		return yield* Effect.withSpan(
 			"auth.getDiscordAccountWithToken.findAccount",

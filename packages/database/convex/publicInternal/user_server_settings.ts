@@ -84,7 +84,6 @@ export const findManyUserServerSettings = publicInternalQuery({
 							}),
 						);
 
-						// Filter to only the serverIds we need
 						const filtered = allUserSettings.filter((setting) =>
 							serverIds.has(setting.serverId),
 						);
@@ -147,7 +146,6 @@ export const updateUserServerSettings = publicInternalMutation({
 		settings: userServerSettingsSchema,
 	},
 	handler: async (ctx, args) => {
-		// Check authentication and authorization
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
 		// Permission check returns branded type - TypeScript enforces it's used
 		const _authorizedUser: AuthorizedUser<IsAuthenticated> = assertIsUser(
@@ -231,7 +229,6 @@ export const upsertUserServerSettings = publicInternalMutation({
 		settings: userServerSettingsSchema,
 	},
 	handler: async (ctx, args) => {
-		// Check authentication and authorization
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
 		// Permission check returns branded type - TypeScript enforces it's used
 		const _authorizedUser: AuthorizedUser<IsAuthenticated> = assertIsUser(
@@ -250,7 +247,6 @@ export const upsertUserServerSettings = publicInternalMutation({
 		);
 
 		if (existing) {
-			// Update existing
 			const updatedSettings = { ...args.settings };
 			if (updatedSettings.messageIndexingDisabled) {
 				updatedSettings.canPubliclyDisplayMessages = false;
@@ -290,7 +286,6 @@ export const upsertUserServerSettings = publicInternalMutation({
 			}
 			return updated;
 		} else {
-			// Create new
 			const newSettings = { ...args.settings };
 			if (newSettings.messageIndexingDisabled) {
 				newSettings.canPubliclyDisplayMessages = false;
@@ -319,7 +314,6 @@ export const deleteUserServerSettingsByUserId = publicInternalMutation({
 		userId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Check authentication and authorization
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
 		// Permission check returns branded type - TypeScript enforces it's used
 		const _authorizedUser: AuthorizedUser<IsAuthenticated> = assertIsUser(
@@ -358,7 +352,6 @@ export const upsertUserServerSettingsInternal = publicInternalMutation({
 		);
 
 		if (existing) {
-			// Update existing
 			const updatedSettings = { ...args.settings };
 			if (updatedSettings.messageIndexingDisabled) {
 				updatedSettings.canPubliclyDisplayMessages = false;
@@ -398,7 +391,6 @@ export const upsertUserServerSettingsInternal = publicInternalMutation({
 			}
 			return updated;
 		} else {
-			// Create new
 			const newSettings = { ...args.settings };
 			if (newSettings.messageIndexingDisabled) {
 				newSettings.canPubliclyDisplayMessages = false;

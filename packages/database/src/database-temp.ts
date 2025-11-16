@@ -71,7 +71,6 @@ const serviceGen = Effect.gen(function* () {
 	): TransformToFunctions<T> => {
 		return new Proxy(target, {
 			get(innerTarget, prop: string | symbol) {
-				// Handle symbols and special properties
 				if (
 					typeof prop !== "string" ||
 					prop.startsWith("_") ||

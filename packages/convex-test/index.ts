@@ -1259,7 +1259,6 @@ function asyncSyscallImpl() {
 					reference,
 					functionHandle,
 				});
-				// Convert args to a Convex value before storing them or passing them to the function
 				const parsedArgs = jsonToConvex(fnArgs);
 				const jobId = db.insert("_scheduled_functions", {
 					args: [parsedArgs],
@@ -2129,7 +2128,6 @@ function withAuth(auth: AuthFake = new AuthFake()) {
 			advanceTimers: () => void,
 			maxIterations: number = 100,
 		): Promise<void> => {
-			// Wait for all scheduled functions to finish, advancing time in between
 			// each function.
 			// Stop after a fixed number of iterations to avoid infinite loops.
 			for (let i = 0; i < maxIterations; i++) {
@@ -2161,7 +2159,6 @@ function withAuth(auth: AuthFake = new AuthFake()) {
 			const queryKey = `${functionIdentifier}:${argsKey}`;
 			queryCallCounts.set(queryKey, (queryCallCounts.get(queryKey) ?? 0) + 1);
 
-			// Create a refresh function that queries and calls callback
 			const refreshValue = async () => {
 				try {
 					const newValue = await byType.query(query, args);

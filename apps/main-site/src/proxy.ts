@@ -9,7 +9,6 @@ export default function proxy(request: NextRequest, _event: NextFetchEvent) {
 	const { pathname } = request.nextUrl;
 
 	if (isProtectedRoute(pathname)) {
-		// Check for BetterAuth session cookie
 		const sessionCookie = request.cookies.get("better-auth.session_token");
 		if (!sessionCookie) {
 			// Redirect to sign in if not authenticated

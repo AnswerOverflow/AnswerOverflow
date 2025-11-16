@@ -78,7 +78,6 @@ export const fetchDiscordGuilds = internalAction({
 						"convex.function": "fetchDiscordGuilds",
 					});
 
-					// Get Discord account with access token
 					const currentSpan = yield* Effect.currentSpan;
 					const discordAccount = yield* Effect.tryPromise({
 						try: () =>
@@ -157,7 +156,6 @@ export const getUserServers = authenticatedAction({
 						"convex.function": "getUserServers",
 					});
 
-					// Get Discord account with access token
 					const discordAccount = yield* Effect.withSpan(
 						"dashboard.getUserServers.getDiscordAccount",
 					)(
@@ -200,7 +198,6 @@ export const getUserServers = authenticatedAction({
 						}),
 					);
 
-					// Filter to servers user can manage (ManageGuild, Administrator, or Owner)
 					const manageableServers = yield* Effect.withSpan(
 						"dashboard.getUserServers.filterManageableServers",
 					)(
@@ -270,7 +267,6 @@ export const getUserServers = authenticatedAction({
 						}),
 					);
 
-					// Create a map for quick lookup of servers by Discord ID
 					const aoServersByDiscordId = new Map(
 						aoServers.map((server) => [server.discordId, server]),
 					);
@@ -338,7 +334,6 @@ async function checkManageGuildPermission(
 ): Promise<void> {
 	const backendAccessToken = getBackendAccessToken();
 
-	// Get user server settings to check permissions
 	const settings = await ctx.runQuery(
 		api.publicInternal.user_server_settings.findUserServerSettingsById,
 		{
@@ -354,7 +349,6 @@ async function checkManageGuildPermission(
 		);
 	}
 
-	// Check if user has Administrator or ManageGuild permission
 	const hasAdminOrManageGuild =
 		hasPermission(settings.permissions, DISCORD_PERMISSIONS.Administrator) ||
 		hasPermission(settings.permissions, DISCORD_PERMISSIONS.ManageGuild);
@@ -373,7 +367,6 @@ export const getTopQuestionSolversForServer = authenticatedAction({
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverId } = args;
 
-		// Check permissions
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);
 
 		// Call analytics service
@@ -397,7 +390,6 @@ export const getPageViewsForServer = authenticatedAction({
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverId } = args;
 
-		// Check permissions
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);
 
 		// Call analytics service
@@ -417,7 +409,6 @@ export const getServerInvitesClicked = authenticatedAction({
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverId } = args;
 
-		// Check permissions
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);
 
 		// Call analytics service
@@ -439,7 +430,6 @@ export const getQuestionsAndAnswers = authenticatedAction({
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverId } = args;
 
-		// Check permissions
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);
 
 		const program = Effect.gen(function* () {
@@ -462,7 +452,6 @@ export const trackBotAddClick = authenticatedAction({
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverDiscordId } = args;
 
-		// Get the server by Discord ID
 		const server = await ctx.runQuery(
 			api.public.servers.publicGetServerByDiscordId,
 			{
@@ -478,7 +467,6 @@ export const trackBotAddClick = authenticatedAction({
 
 		const backendAccessToken = getBackendAccessToken();
 
-		// Get existing user server settings
 		const existingSettings = await ctx.runQuery(
 			api.publicInternal.user_server_settings.findUserServerSettingsById,
 			{
@@ -556,12 +544,10 @@ export const syncUserServerSettingsBackground = internalAction({
 						}),
 					);
 
-					// Create a map for quick lookup of servers by Discord ID
 					const aoServersByDiscordId = new Map<string, Doc<"servers">>(
 						aoServers.map((server) => [server.discordId, server]),
 					);
 
-					// Filter to only servers that exist in AO
 					const serversToSync = manageableServers
 						.map((guild) => {
 							const aoServer = aoServersByDiscordId.get(guild.id);
@@ -620,7 +606,6 @@ export const syncUserServerSettingsBackground = internalAction({
 							}),
 						);
 
-					// Create a map for quick lookup of settings by server ID
 					const existingSettingsByServerId = new Map<
 						Id<"servers">,
 						UserServerSettings
@@ -644,10 +629,8 @@ export const syncUserServerSettingsBackground = internalAction({
 					}> = [];
 
 					for (const { guild, aoServer } of serversToSync) {
-						// Convert permissions string to number (Discord API returns permissions as string)
 						const permissionsNumber = Number(guild.permissions);
 
-						// Get existing user server settings from the map
 						const existingSettings = existingSettingsByServerId.get(
 							aoServer._id,
 						);

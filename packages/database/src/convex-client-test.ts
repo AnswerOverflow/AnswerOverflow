@@ -105,7 +105,6 @@ const createTestService = Effect.gen(function* () {
 			const unsubscribeFn = testClient.onUpdate(query, args, callback);
 			// ConvexClient.onUpdate returns an Unsubscribe object (callable with unsubscribe() and getCurrentValue())
 			// TestConvex.onUpdate returns a simple function
-			// Create an adapter that matches the Unsubscribe interface
 			const unsubscribe = Object.assign(
 				() => {
 					unsubscribeFn();
@@ -169,7 +168,6 @@ export class ConvexClientTest extends Context.Tag("ConvexClientTest")<
 const ConvexClientTestSharedLayer = Layer.effectContext(
 	Effect.gen(function* () {
 		const service = yield* createTestService;
-		// Ensure the service matches WrappedUnifiedClient type
 		const unifiedService: WrappedUnifiedClient = {
 			client: service.client,
 			use: service.use,

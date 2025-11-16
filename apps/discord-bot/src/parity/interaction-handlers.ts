@@ -16,7 +16,6 @@ export const InteractionHandlersLayer = Layer.scopedDiscard(
 		// Subscribe to interactionCreate event for slash commands and buttons
 		yield* discord.client.on("interactionCreate", (interaction) =>
 			Effect.gen(function* () {
-				// Handle button interactions (dismiss button)
 				if (interaction.isButton()) {
 					if (interaction.customId.startsWith("dismiss:")) {
 						yield* handleDismissButtonInteraction(interaction).pipe(
@@ -29,7 +28,6 @@ export const InteractionHandlersLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Handle context menu commands
 				if (interaction.isContextMenuCommand()) {
 					if (interaction.commandName === "✅ Mark Solution") {
 						yield* Effect.scoped(
@@ -44,7 +42,6 @@ export const InteractionHandlersLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Handle chat input commands (slash commands)
 				if (interaction.isChatInputCommand()) {
 					if (interaction.commandName === "leaderboard") {
 						yield* Effect.scoped(

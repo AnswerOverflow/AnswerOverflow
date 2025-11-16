@@ -1,4 +1,9 @@
-import { ChannelType, type Client, type ClientEvents } from "discord.js";
+import {
+	ChannelType,
+	type Client,
+	type ClientEvents,
+	DiscordAPIError as RawDiscordAPIError,
+} from "discord.js";
 import {
 	Array as Arr,
 	Config,
@@ -14,31 +19,36 @@ import {
 } from "effect";
 import { DiscordClient, DiscordClientLayer } from "./discord-client-service";
 
-export class DiscordError extends Data.TaggedError("DiscordError")<{
+class DiscordAPIError extends Data.TaggedError("DiscordAPIError")<{
+	cause: RawDiscordAPIError;
+}> {}
+
+export class UnknownDiscordError extends Data.TaggedError(
+	"UnknownDiscordError",
+)<{
 	cause: unknown;
 }> {}
 
-// High-level Discord service - provides convenient operations + re-exports low-level API
 export const createDiscordService = Effect.gen(function* () {
 	const client = yield* DiscordClient;
 	const token = yield* Config.string("DISCORD_BOT_TOKEN");
 
-	// Track active handler fibers for each event type
-	// This allows us to wait for all handlers to complete in tests
 	const activeHandlers = yield* Ref.make(
 		HashMap.empty<string, ReadonlyArray<Fiber.RuntimeFiber<void, unknown>>>(),
 	);
 
-	// Helper to wrap client operations in Effect
-	const use = <A>(
-		fn: (client: Client) => A | Promise<A>,
-	): Effect.Effect<Awaited<A>, DiscordError> =>
+	const use = <A>(fn: (client: Client) => A | Promise<A>) =>
 		Effect.tryPromise({
 			try: async (): Promise<Awaited<A>> => {
 				const result = await fn(client);
 				return result;
 			},
-			catch: (cause) => new DiscordError({ cause }),
+			catch: (cause) => {
+				if (cause instanceof RawDiscordAPIError) {
+					return new DiscordAPIError({ cause });
+				}
+				return new UnknownDiscordError({ cause });
+			},
 		});
 
 	// Login to Discord - called explicitly by the user
@@ -46,13 +56,12 @@ export const createDiscordService = Effect.gen(function* () {
 		Effect.gen(function* () {
 			yield* use((c) => c.login(token));
 
-			// Wait for client to be ready
-			yield* Effect.async<void, DiscordError>((resume) => {
+			yield* Effect.async<void, UnknownDiscordError>((resume) => {
 				client.once("clientReady", () => {
 					resume(Effect.void);
 				});
 				client.once("error", (error) => {
-					resume(Effect.fail(new DiscordError({ cause: error })));
+					resume(Effect.fail(new UnknownDiscordError({ cause: error })));
 				});
 			});
 		});
@@ -60,7 +69,7 @@ export const createDiscordService = Effect.gen(function* () {
 	const on = <E extends keyof ClientEvents, Err = never, Req = never>(
 		event: E,
 		handler: (...args: ClientEvents[E]) => Effect.Effect<void, Err, Req>,
-	): Effect.Effect<() => void, DiscordError, Req> =>
+	): Effect.Effect<() => void, UnknownDiscordError, Req> =>
 		Effect.gen(function* () {
 			// Capture the runtime - the type system ensures Req is available here
 			const runtime: Runtime.Runtime<Req> = yield* Effect.runtime<Req>();
@@ -135,7 +144,6 @@ export const createDiscordService = Effect.gen(function* () {
 				return;
 			}
 
-			// Wait for all fibers to complete
 			yield* Fiber.awaitAll(fibers).pipe(Effect.asVoid);
 		});
 
@@ -222,6 +230,21 @@ export const createDiscordService = Effect.gen(function* () {
 			});
 		});
 
+	const callClient = <T>(call: () => Promise<T>) =>
+		Effect.gen(function* () {
+			return yield* Effect.tryPromise({
+				try: async () => {
+					return await call();
+				},
+				catch: (cause) => {
+					if (cause instanceof RawDiscordAPIError) {
+						return new DiscordAPIError({ cause });
+					}
+					return new UnknownDiscordError({ cause });
+				},
+			});
+		});
+
 	return {
 		getGuild,
 		getGuilds,
@@ -230,6 +253,7 @@ export const createDiscordService = Effect.gen(function* () {
 		fetchChannelMessages,
 		fetchActiveThreads,
 		fetchArchivedThreads,
+		callClient,
 		client: {
 			login,
 			on,

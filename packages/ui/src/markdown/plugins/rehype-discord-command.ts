@@ -41,7 +41,6 @@ export function rehypeDiscordCommand() {
 						} as Text);
 					}
 
-					// Create span element for command
 					const commandElement: Element = {
 						type: "element",
 						tagName: "span",

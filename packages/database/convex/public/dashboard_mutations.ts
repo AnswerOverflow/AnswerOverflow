@@ -30,7 +30,6 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 		const _authorizedUser: AuthorizedUser<CanEditServer> =
 			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
-		// Check for existing preferences using unique() to enforce schema-level uniqueness
 		// unique() returns undefined if no document exists, throws if multiple exist
 		let preferences: Awaited<
 			ReturnType<typeof ctx.db.get<"serverPreferences">>
@@ -49,13 +48,11 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 		}
 
 		if (!preferences) {
-			// Create new preferences
 			const preferencesId = await ctx.db.insert("serverPreferences", {
 				serverId: args.serverId,
 				...args.flags,
 			});
 
-			// Update server to reference preferences
 			await ctx.db.patch(args.serverId, { preferencesId });
 
 			// Re-query using unique() to get the created preferences (handles race conditions and enforces uniqueness)
@@ -77,7 +74,6 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 				preferences = await ctx.db.get(preferencesId);
 			}
 		} else {
-			// Update existing preferences
 			await ctx.db.patch(preferences._id, args.flags);
 			preferences = await ctx.db.get(preferences._id);
 		}
@@ -108,7 +104,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 	handler: async (ctx, args) => {
 		const { discordAccountId } = args;
 
-		// Get channel to get server ID
 		const channel = await ctx.db
 			.query("channels")
 			.filter((q) => q.eq(q.field("id"), args.channelId))
@@ -118,7 +113,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 			throw new Error("Channel not found");
 		}
 
-		// Get server to check permissions
 		const server = await ctx.db.get(channel.serverId);
 		if (!server) {
 			throw new Error("Server not found");
@@ -128,7 +122,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 		const _authorizedUser: AuthorizedUser<CanEditServer> =
 			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
-		// Check for existing settings using unique() to enforce schema-level uniqueness
 		// unique() returns undefined if no document exists, throws if multiple exist
 		let settings: Awaited<
 			ReturnType<typeof ctx.db.get<"channelSettings">>
@@ -147,7 +140,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 		}
 
 		if (!settings) {
-			// Create new settings
 			const settingsId = await ctx.db.insert("channelSettings", {
 				channelId: args.channelId,
 				indexingEnabled: false,
@@ -177,7 +169,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 				settings = await ctx.db.get(settingsId);
 			}
 		} else {
-			// Update existing settings
 			await ctx.db.patch(settings._id, args.flags);
 			settings = await ctx.db.get(settings._id);
 		}
@@ -210,13 +201,11 @@ export const updateCustomDomain = authenticatedMutation({
 		const _authorizedUser: AuthorizedUser<CanEditServer> =
 			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
-		// Validate domain format (basic validation)
 		const domainError = validateCustomDomain(args.customDomain);
 		if (domainError) {
 			throw new Error(domainError);
 		}
 
-		// Get or create server preferences
 		let preferences = await getOneFrom(
 			ctx.db,
 			"serverPreferences",
@@ -225,7 +214,6 @@ export const updateCustomDomain = authenticatedMutation({
 		);
 
 		if (!preferences) {
-			// Create new preferences with custom domain
 			const preferencesId = await ctx.db.insert("serverPreferences", {
 				serverId: args.serverId,
 				customDomain: args.customDomain ?? undefined,
@@ -233,7 +221,6 @@ export const updateCustomDomain = authenticatedMutation({
 			await ctx.db.patch(args.serverId, { preferencesId });
 			preferences = await ctx.db.get(preferencesId);
 		} else {
-			// Update existing preferences
 			await ctx.db.patch(preferences._id, {
 				customDomain: args.customDomain ?? undefined,
 			});

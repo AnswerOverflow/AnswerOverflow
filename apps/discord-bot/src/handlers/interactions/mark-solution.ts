@@ -67,7 +67,6 @@ export function makeMarkSolutionResponse({
 		});
 	}
 
-	// Set description based on indexing and consent settings
 	if (
 		channelSettings.flags.indexingEnabled &&
 		!channelSettings.flags.forumGuidelinesConsentEnabled &&
@@ -142,7 +141,6 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Get server by Discord ID
 		const serverLiveData = yield* Effect.scoped(
 			database.servers.getServerByDiscordId({ discordId: fullMessage.guildId }),
 		);
@@ -155,7 +153,6 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Check if message is in a thread
 		if (!fullMessage.channel.isThread()) {
 			return;
 		}
@@ -167,7 +164,6 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Get channel settings
 		const channelLiveData = yield* Effect.scoped(
 			database.channels.findChannelByDiscordId({ discordId: parentChannel.id }),
 		);
@@ -227,8 +223,6 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Check if already solved
-		// Check for solved tag (forum channels)
 		if (
 			parentChannel.type === 15 &&
 			channelSettings?.solutionTagId &&
@@ -237,13 +231,11 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Check for checkmark reaction on question
 		const checkmarkReaction = questionMessage.reactions.cache.get("✅");
 		if (checkmarkReaction?.users.cache.has(fullMessage.client.user?.id ?? "")) {
 			return;
 		}
 
-		// Check permissions
 		const guild = fullMessage.guild;
 		if (!guild) {
 			return;
@@ -282,7 +274,6 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Get server preferences
 		const serverPreferencesLiveData = yield* Effect.scoped(
 			database.server_preferences.getServerPreferencesByServerId({
 				serverId: server._id,
@@ -292,7 +283,6 @@ function _handleCheckmarkReactionMarkSolution(
 
 		// Mark as solved
 		yield* Effect.promise(async () => {
-			// Update solution message with questionId
 			const solutionMessage = await toAOMessage(fullMessage, server._id);
 			await upsertMessage(
 				{

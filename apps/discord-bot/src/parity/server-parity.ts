@@ -130,7 +130,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		const discord = yield* Discord;
 		const database = yield* Database;
 
-		// Handle guildCreate event - when bot joins a new server
 		yield* discord.client.on("guildCreate", (guild) =>
 			Effect.gen(function* () {
 				yield* Console.log(
@@ -147,7 +146,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		// Subscribe to guildUpdate event
 		yield* discord.client.on("guildUpdate", (_oldGuild, newGuild) =>
 			Effect.gen(function* () {
-				// Check if server exists in database
 				const serverLiveData = yield* database.servers.getServerByDiscordId({
 					discordId: newGuild.id,
 				});
@@ -158,7 +156,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Update server with new data, preserving fields not in guild object
 				const aoServerData = toAOServer(newGuild);
 				const {
 					_id,
@@ -176,7 +173,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					id: existingServer._id,
 					data: {
 						...preservedFields,
-						// Update fields that come from the guild object
 						discordId: newGuild.id,
 						name: aoServerData.name,
 						icon: aoServerData.icon,
@@ -195,7 +191,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		// Subscribe to guildDelete event
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
-				// Check if server exists in database
 				const serverLiveData = yield* database.servers.getServerByDiscordId({
 					discordId: guild.id,
 				});

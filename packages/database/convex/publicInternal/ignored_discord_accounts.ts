@@ -40,7 +40,6 @@ export const upsertIgnoredDiscordAccount = publicInternalMutation({
 		id: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Check if account exists (should not exist if we're ignoring it)
 		const existingAccount = await ctx.db
 			.query("discordAccounts")
 			.filter((q) => q.eq(q.field("id"), args.id))
@@ -89,7 +88,6 @@ export const deleteIgnoredDiscordAccount = publicInternalMutation({
 			await ctx.db.delete(existing._id);
 		}
 
-		// Verify deletion
 		const deleted = await ctx.db
 			.query("ignoredDiscordAccounts")
 			.filter((q) => q.eq(q.field("id"), args.id))

@@ -122,7 +122,6 @@ export async function toAOMessage(
 		throw new Error("Message is not in a guild");
 	}
 
-	// Convert reactions - fetch users to get all reactors
 	const reactions: Array<{
 		userId: string;
 		emoji: AOEmoji;
@@ -132,7 +131,6 @@ export async function toAOMessage(
 		const emoji = reaction.emoji;
 		if (!emoji.name || !emoji.id) continue;
 
-		// Get all users who reacted (limit to avoid rate limits)
 		try {
 			const users = await reaction.users.fetch({ limit: 100 });
 			for (const user of users.values()) {

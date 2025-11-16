@@ -14,7 +14,6 @@ const program = Effect.gen(function* () {
 	// Login to Discord and wait for ready
 	yield* discord.client.login();
 
-	// Get and log guild count
 	const guilds = yield* discord.getGuilds();
 	yield* Console.log(`Bot is in ${guilds.length} guilds`);
 
@@ -24,7 +23,6 @@ const program = Effect.gen(function* () {
 
 // Run the program with the DiscordClientLayer and OpenTelemetry tracing
 const OtelLayer = createOtelLayer("discord-bot");
-// Set minimum log level to Info to filter out Debug logs
 const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
 
 // Base layers that provide services

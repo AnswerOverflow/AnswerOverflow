@@ -133,7 +133,6 @@ export const findChannelsBeforeId = publicInternalQuery({
 		take: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		// Get all channels for the server and filter manually
 		// Convex doesn't support lt() on string IDs directly, so we'll collect and filter
 		const allChannels = await getManyFrom(
 			ctx.db,
@@ -162,7 +161,6 @@ export const createChannel = publicInternalMutation({
 		await ctx.db.insert("channels", args.channel);
 
 		if (args.settings) {
-			// Check for existing settings to prevent duplicates
 			const existingSettings = await getOneFrom(
 				ctx.db,
 				"channelSettings",
@@ -173,7 +171,6 @@ export const createChannel = publicInternalMutation({
 			if (!existingSettings) {
 				await ctx.db.insert("channelSettings", args.settings);
 			} else {
-				// Update existing settings if they already exist
 				await ctx.db.patch(existingSettings._id, args.settings);
 			}
 		}
@@ -196,7 +193,6 @@ export const createManyChannels = publicInternalMutation({
 		for (const item of args.channels) {
 			await ctx.db.insert("channels", item.channel);
 			if (item.settings) {
-				// Check for existing settings to prevent duplicates
 				const existingSettings = await getOneFrom(
 					ctx.db,
 					"channelSettings",
@@ -207,7 +203,6 @@ export const createManyChannels = publicInternalMutation({
 				if (!existingSettings) {
 					await ctx.db.insert("channelSettings", item.settings);
 				} else {
-					// Update existing settings if they already exist
 					await ctx.db.patch(existingSettings._id, item.settings);
 				}
 			}
@@ -323,11 +318,9 @@ export const upsertManyChannels = publicInternalMutation({
 			const existing = existingChannels[i];
 
 			if (existing) {
-				// Update existing channel
 				const updateData = item.update ?? item.create;
 				await ctx.db.patch(existing._id, updateData);
 
-				// Update settings if provided
 				if (item.settings) {
 					const existingSettings = await getOneFrom(
 						ctx.db,
@@ -343,10 +336,8 @@ export const upsertManyChannels = publicInternalMutation({
 					}
 				}
 			} else {
-				// Create new channel
 				await ctx.db.insert("channels", item.create);
 				if (item.settings) {
-					// Check for existing settings to prevent duplicates
 					const existingSettings = await getOneFrom(
 						ctx.db,
 						"channelSettings",
@@ -357,7 +348,6 @@ export const upsertManyChannels = publicInternalMutation({
 					if (!existingSettings) {
 						await ctx.db.insert("channelSettings", item.settings);
 					} else {
-						// Update existing settings if they already exist
 						await ctx.db.patch(existingSettings._id, item.settings);
 					}
 				}
@@ -450,7 +440,6 @@ export const getChannelPageData = publicInternalQuery({
 		channelDiscordId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Get server by Discord ID
 		const server = await getOneFrom(
 			ctx.db,
 			"servers",
@@ -460,7 +449,6 @@ export const getChannelPageData = publicInternalQuery({
 
 		if (!server) return null;
 
-		// Get channel and all channels simultaneously
 		const [channel, allChannels, threads] = await Promise.all([
 			getChannelWithSettings(ctx, args.channelDiscordId),
 			getManyFrom(ctx.db, "channels", "by_serverId", server._id),
@@ -469,7 +457,6 @@ export const getChannelPageData = publicInternalQuery({
 
 		if (!channel || channel.serverId !== server._id) return null;
 
-		// Filter to root channels with indexing enabled
 		const ROOT_CHANNEL_TYPES = [10, 11, 12, 13, 15] as const; // Forum, Announcement, Text, etc.
 		const rootChannels = allChannels.filter((c) =>
 			ROOT_CHANNEL_TYPES.includes(
@@ -512,7 +499,6 @@ export const getChannelPageData = publicInternalQuery({
 			})
 			.slice(0, 50);
 
-		// Get first message for each thread
 		const threadIds = sortedThreads.map((t) => t.id);
 		const firstMessages = await getFirstMessagesInChannels(ctx, threadIds);
 

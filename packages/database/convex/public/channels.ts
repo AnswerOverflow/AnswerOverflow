@@ -79,7 +79,6 @@ export const getChannelPageData = query({
 						"convex.function": "getChannelPageData",
 					});
 
-					// Get server by Discord ID
 					const server = yield* Effect.withSpan(
 						"channels.getChannelPageData.getServer",
 					)(
@@ -148,7 +147,6 @@ export const getChannelPageData = query({
 
 					if (!channel || channel.serverId !== server._id) return null;
 
-					// Filter to root channels with indexing enabled
 					const ROOT_CHANNEL_TYPES = [10, 11, 12, 13, 15] as const; // Forum, Announcement, Text, etc.
 					const rootChannels = allChannels.filter((c) =>
 						ROOT_CHANNEL_TYPES.includes(
@@ -206,7 +204,6 @@ export const getChannelPageData = query({
 						})
 						.slice(0, 50);
 
-					// Get first message for each thread in one batch query
 					const threadIds = sortedThreads.map((t) => t.id);
 					const firstMessages = yield* Effect.withSpan(
 						"channels.getChannelPageData.getFirstMessages",

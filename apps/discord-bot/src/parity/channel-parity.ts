@@ -58,7 +58,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(newChannel)) {
 					return;
 				}
-				// Check if channel exists in database
 				const channelLiveData = yield* database.channels.findChannelByDiscordId(
 					{
 						discordId: newChannel.id,
@@ -179,7 +178,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Delete thread from database
 				yield* database.channels.deleteChannel({ id: thread.id });
 			}).pipe(
 				Effect.catchAll((error) =>

@@ -1,8 +1,7 @@
-import type { ConvexError } from "@packages/database/convex-unified-client";
 import { Database, DatabaseLayer } from "@packages/database/database";
 import type { Message } from "discord.js";
 import { MessageType } from "discord.js";
-import { Console, Data, Effect, Layer } from "effect";
+import { Data, Effect, Layer } from "effect";
 import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from "../../constants/channel-types";
 import { Discord } from "../../core/discord-service";
 import {
@@ -25,9 +24,7 @@ export class AutoThreadError extends Data.TaggedError("AutoThreadError")<{
 	code: AutoThreadErrorCode;
 }> {}
 
-export function handleAutoThread(
-	message: Message,
-): Effect.Effect<void, AutoThreadError | ConvexError, Database> {
+export function handleAutoThread(message: Message) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		if (message.channel.isDMBased() || message.channel.isVoiceBased()) {
@@ -104,20 +101,12 @@ export function handleAutoThread(
 			textTitle = `${textTitle.slice(0, 47)}...`;
 		}
 
-		yield* Effect.tryPromise({
-			try: () =>
-				message.startThread({
-					name: textTitle,
-					reason: "Answer Overflow auto thread",
-				}),
-			catch: (error) => {
-				return new AutoThreadError({
-					message: `Failed to create thread: ${error instanceof Error ? error.message : String(error)}`,
-					code: AutoThreadErrorCode.THREAD_CREATION_FAILED,
-				});
-			},
-		}).pipe(
-			Effect.catchAll((error) => Console.error("Error in autoThread:", error)),
+		const discord = yield* Discord;
+		yield* discord.callClient(() =>
+			message.startThread({
+				name: textTitle,
+				reason: "Answer Overflow auto thread",
+			}),
 		);
 	});
 }
@@ -131,9 +120,9 @@ export const AutoThreadHandlerLayer = Layer.scopedDiscard(
 			Effect.scoped(
 				handleAutoThread(message).pipe(
 					Effect.provide(DatabaseLayer),
-					Effect.catchAll((error) =>
-						Console.error("Error in auto thread handler:", error),
-					),
+					Effect.catchTags({
+						DiscordAPIError: (error) => Effect.logError(error),
+					}),
 				),
 			),
 		);

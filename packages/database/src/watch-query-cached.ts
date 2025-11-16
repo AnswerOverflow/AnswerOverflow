@@ -47,7 +47,6 @@ export const createWatchQueryToLiveData = <
 	// This allows us to reconstruct the query reference during cache lookup
 	const lookupContexts = new Map<string, LookupContext>();
 
-	// Create LRU cache for LiveData instances
 	// Capacity: 100 entries, TTL: 1 hour (entries will be evicted when capacity is reached or TTL expires)
 	// Note: When entries are automatically evicted, their unsubscribe functions won't be called.
 	// This is a limitation of Effect's Cache API which doesn't provide eviction hooks.
@@ -58,7 +57,6 @@ export const createWatchQueryToLiveData = <
 			timeToLive: Duration.hours(1),
 			lookup: (cacheKey: string) =>
 				Effect.gen(function* () {
-					// Get query and args from lookup context
 					const context = lookupContexts.get(cacheKey);
 					if (!context) {
 						throw new Error(`Lookup context not found for key: ${cacheKey}`);
@@ -69,12 +67,10 @@ export const createWatchQueryToLiveData = <
 					const callbacks = new Set<() => void>();
 					let currentValue: FunctionReturnType<typeof query> | undefined;
 
-					// Get initial value
 					currentValue = yield* wrappedClient.use((client) => {
 						return client.query(query, args);
 					});
 
-					// Set up watch for future updates
 					const unsubscribe = yield* wrappedClient.use((client) => {
 						return client.onUpdate(query, args, (result) => {
 							currentValue = result;
@@ -107,7 +103,6 @@ export const createWatchQueryToLiveData = <
 	) => {
 		return Effect.gen(function* () {
 			const query = getQuery(convexApi);
-			// Handle optional rest args - could be [] or [FunctionArgs<Query>]
 			const queryArgs = extractArgs(args);
 			const cacheKey = createCacheKey(query, queryArgs);
 
@@ -119,7 +114,6 @@ export const createWatchQueryToLiveData = <
 				});
 			}
 
-			// Get from cache (or create if not exists)
 			const cached = yield* cache.get(cacheKey);
 
 			return cached.liveData;

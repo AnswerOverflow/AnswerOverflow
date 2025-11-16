@@ -116,14 +116,12 @@ export const getMessagePageData = query({
 		channel: { id: string; name: string; type: number };
 		thread: { id: string; name: string; type: number } | null;
 	} | null> => {
-		// Get the target message
 		const targetMessage = await getMessageByIdShared(ctx, args.messageId);
 
 		if (!targetMessage) {
 			return null;
 		}
 
-		// Get server
 		const server = await ctx.db.get(targetMessage.serverId);
 		if (!server) {
 			return null;
@@ -133,7 +131,6 @@ export const getMessagePageData = query({
 		const threadId = getThreadIdOfMessage(targetMessage);
 		const parentId = getParentChannelOfMessage(targetMessage);
 
-		// Get channel info
 		const channelId = threadId ?? parentId;
 		const channel = await getChannelWithSettings(ctx, channelId);
 
@@ -141,7 +138,6 @@ export const getMessagePageData = query({
 			return null;
 		}
 
-		// Get thread if it exists
 		let thread: { id: string; name: string; type: number } | null = null;
 		if (threadId && threadId !== channelId) {
 			const threadChannel = await getChannelWithSettings(ctx, threadId);
@@ -154,7 +150,6 @@ export const getMessagePageData = query({
 			}
 		}
 
-		// Get all messages in the thread/channel
 		const allMessages = await findMessagesByChannelIdShared(
 			ctx,
 			threadId ?? parentId,
@@ -166,10 +161,8 @@ export const getMessagePageData = query({
 			? allMessages
 			: allMessages.filter((m) => m.id >= targetMessage.id);
 
-		// Get all author IDs
 		const authorIds = new Set(messagesToShow.map((m) => m.authorId));
 
-		// Get all Discord accounts
 		const authors = await asyncMap(Array.from(authorIds), (id) =>
 			getDiscordAccountById(ctx, id),
 		);
@@ -180,7 +173,6 @@ export const getMessagePageData = query({
 				.map((a) => [a.id, a]),
 		);
 
-		// Get attachments, reactions, and solutions for each message
 		const messagesWithData = await Promise.all(
 			messagesToShow.map(async (message) => {
 				const [attachments, reactions, solutions] = await Promise.all([

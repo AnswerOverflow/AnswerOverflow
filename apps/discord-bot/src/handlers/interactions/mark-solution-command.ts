@@ -20,7 +20,6 @@ export function handleMarkSolutionCommand(
 			catch: (error) => error,
 		});
 
-		// Get the target message
 		if (!interaction.channel) {
 			yield* Effect.tryPromise({
 				try: () =>
@@ -53,7 +52,6 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		// Get server
 		if (!targetMessage.guildId) {
 			yield* Effect.tryPromise({
 				try: () =>
@@ -84,7 +82,6 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		// Check if message is in a thread
 		if (!targetMessage.channel.isThread()) {
 			yield* Effect.tryPromise({
 				try: () =>
@@ -110,7 +107,6 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		// Get channel settings
 		const channelLiveData = yield* Effect.scoped(
 			database.channels.findChannelByDiscordId({ discordId: parentChannel.id }),
 		);
@@ -172,7 +168,6 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		// Check permissions
 		const guild = targetMessage.guild;
 		if (!guild) {
 			yield* Effect.tryPromise({
@@ -218,7 +213,6 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		// Get server preferences
 		const serverPreferencesLiveData = yield* Effect.scoped(
 			database.server_preferences.getServerPreferencesByServerId({
 				serverId: server._id,
@@ -228,7 +222,6 @@ export function handleMarkSolutionCommand(
 
 		// Mark as solved
 		yield* Effect.promise(async () => {
-			// Update solution message with questionId
 			const solutionMessage = await toAOMessage(targetMessage, server._id);
 			await upsertMessage(
 				{

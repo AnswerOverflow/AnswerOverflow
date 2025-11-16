@@ -41,7 +41,6 @@ export function rehypeDiscordSpoiler() {
 						} as Text);
 					}
 
-					// Create span element for spoiler
 					const spoilerElement: Element = {
 						type: "element",
 						tagName: "span",

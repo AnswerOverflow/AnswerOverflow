@@ -96,9 +96,7 @@ export const upsertMessage = publicInternalMutation({
 			await ctx.db.insert("messages", messageData);
 		}
 
-		// Handle attachments
 		if (attachments !== undefined) {
-			// Delete existing attachments
 			const existingAttachments = await getManyFrom(
 				ctx.db,
 				"attachments",
@@ -118,9 +116,7 @@ export const upsertMessage = publicInternalMutation({
 			}
 		}
 
-		// Handle reactions
 		if (reactions !== undefined) {
-			// Delete existing reactions
 			const existingReactions = await getManyFrom(
 				ctx.db,
 				"reactions",
@@ -191,7 +187,6 @@ export const upsertManyMessages = publicInternalMutation({
 	handler: async (ctx, args) => {
 		if (args.messages.length === 0) return null;
 
-		// Check ignored accounts and indexing disabled if needed
 		if (!args.ignoreChecks) {
 			const authorIds = new Set(args.messages.map((m) => m.message.authorId));
 			const ignoredAccounts = await asyncMap(Array.from(authorIds), (id) =>
@@ -207,7 +202,6 @@ export const upsertManyMessages = publicInternalMutation({
 				(msg) => !ignoredAccountIds.has(msg.message.authorId),
 			);
 
-			// Check for indexing disabled
 			const messagesToUpsert: typeof args.messages = [];
 			for (const msg of messagesToProcess) {
 				const indexingDisabled = await hasMessageIndexingDisabled(
@@ -220,7 +214,6 @@ export const upsertManyMessages = publicInternalMutation({
 				}
 			}
 
-			// Process messages
 			for (const msgData of messagesToUpsert) {
 				await upsertMessageInternalLogic(ctx, {
 					message: msgData.message,
@@ -229,7 +222,6 @@ export const upsertManyMessages = publicInternalMutation({
 				});
 			}
 		} else {
-			// Process all messages without checks
 			for (const msgData of args.messages) {
 				await upsertMessageInternalLogic(ctx, {
 					message: msgData.message,
@@ -355,7 +347,6 @@ export const findLatestMessageInChannelAndThreads = publicInternalQuery({
 		channelId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Get messages in the channel
 		const channelMessages = await getManyFrom(
 			ctx.db,
 			"messages",
@@ -363,7 +354,6 @@ export const findLatestMessageInChannelAndThreads = publicInternalQuery({
 			args.channelId,
 		);
 
-		// Get messages in threads (where parentChannelId matches)
 		const threadMessages = await getManyFrom(
 			ctx.db,
 			"messages",
@@ -480,7 +470,6 @@ export const getTopQuestionSolversByServerId = publicInternalQuery({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		// Get all messages in the server
 		const allMessages = await getManyFrom(
 			ctx.db,
 			"messages",
@@ -488,7 +477,6 @@ export const getTopQuestionSolversByServerId = publicInternalQuery({
 			args.serverId,
 		);
 
-		// Filter to only solutions (messages with questionId)
 		const solutions = allMessages.filter((msg) => msg.questionId !== undefined);
 
 		// Group by authorId and count
@@ -596,14 +584,12 @@ export const getMessagePageData = publicInternalQuery({
 		messageId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Get the target message
 		const targetMessage = await getMessageByIdShared(ctx, args.messageId);
 
 		if (!targetMessage) {
 			return null;
 		}
 
-		// Get server
 		const server = await ctx.db.get(targetMessage.serverId);
 		if (!server) {
 			return null;
@@ -613,7 +599,6 @@ export const getMessagePageData = publicInternalQuery({
 		const threadId = getThreadIdOfMessage(targetMessage);
 		const parentId = getParentChannelOfMessage(targetMessage);
 
-		// Get channel info
 		const channelId = threadId ?? parentId;
 		const channel = await getChannelWithSettings(ctx, channelId);
 
@@ -621,7 +606,6 @@ export const getMessagePageData = publicInternalQuery({
 			return null;
 		}
 
-		// Get thread if it exists
 		let thread: { id: string; name: string; type: number } | null = null;
 		if (threadId && threadId !== channelId) {
 			const threadChannel = await getChannelWithSettings(ctx, threadId);
@@ -634,7 +618,6 @@ export const getMessagePageData = publicInternalQuery({
 			}
 		}
 
-		// Get all messages in the thread/channel
 		const allMessages = await findMessagesByChannelIdShared(
 			ctx,
 			threadId ?? parentId,
@@ -646,10 +629,8 @@ export const getMessagePageData = publicInternalQuery({
 			? allMessages
 			: allMessages.filter((m) => m.id >= targetMessage.id);
 
-		// Get all author IDs
 		const authorIds = new Set(messagesToShow.map((m) => m.authorId));
 
-		// Get all Discord accounts
 		const authors = await asyncMap(Array.from(authorIds), (id) =>
 			getDiscordAccountById(ctx, id),
 		);
@@ -660,7 +641,6 @@ export const getMessagePageData = publicInternalQuery({
 				.map((a) => [a.id, a]),
 		);
 
-		// Get attachments, reactions, and solutions for each message
 		const messagesWithData = await Promise.all(
 			messagesToShow.map(async (message) => {
 				const [attachments, reactions, solutions] = await Promise.all([

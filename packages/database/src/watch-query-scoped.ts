@@ -61,15 +61,12 @@ export const createWatchQueryToLiveData = <
 ) => {
 	const activeWatches = new Map<string, ActiveWatch>();
 
-	// Create a resolver for watch requests
 	const watchResolver = RequestResolver.makeBatched(
 		(requests: ReadonlyArray<WatchRequest<FunctionReference<"query">>>) =>
 			Effect.gen(function* () {
-				// Process each request
 				for (const request of requests) {
 					const { query, args, cacheKey } = request;
 
-					// Check if we already have an active watch for this key
 					const existing = activeWatches.get(cacheKey);
 					if (existing) {
 						existing.refCount++;
@@ -79,18 +76,15 @@ export const createWatchQueryToLiveData = <
 						continue;
 					}
 
-					// Create new watch - handle errors at the request level
 					const result = yield* Effect.suspend(() =>
 						Effect.gen(function* () {
 							const callbacks = new Set<() => void>();
 							let currentValue: FunctionReturnType<typeof query> | undefined;
 
-							// Get initial value synchronously
 							currentValue = yield* wrappedClient.use((client) => {
 								return client.query(query, args);
 							});
 
-							// Set up watch for future updates
 							const unsubscribe = yield* wrappedClient.use((client) => {
 								return client.onUpdate(query, args, (result) => {
 									currentValue = result;
@@ -132,7 +126,6 @@ export const createWatchQueryToLiveData = <
 		return Effect.acquireRelease(
 			Effect.gen(function* () {
 				const query = getQuery(convexApi);
-				// Handle optional rest args - could be [] or [FunctionArgs<Query>]
 				const queryArgs = extractArgs(args);
 				const request = watchRequest(query, queryArgs);
 

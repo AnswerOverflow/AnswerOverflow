@@ -9,7 +9,6 @@ export class LiveData<T> {
 	) {
 		this._data = initialData ?? getCurrentValue();
 
-		// Set up automatic updates
 		this.unsubscribe = onUpdate(() => {
 			const newData = getCurrentValue();
 			if (newData !== undefined) {

@@ -113,13 +113,11 @@ export default function ChannelsPage() {
 		},
 	);
 
-	// Convert comma-separated string to/from Set
 	const selectedChannelIds = React.useMemo(() => {
 		if (!selectedChannelIdsParam) return new Set<string>();
 		return new Set(selectedChannelIdsParam.split(",").filter(Boolean));
 	}, [selectedChannelIdsParam]);
 
-	// Convert comma-separated string to/from Set for channel types
 	const channelTypeFilter = React.useMemo(() => {
 		if (!channelTypeFilterParam) return new Set<number>();
 		return new Set(
@@ -335,7 +333,6 @@ export default function ChannelsPage() {
 	) => {
 		if (selectedChannels.length === 0) return;
 		try {
-			// Update all selected channels
 			await Promise.all(
 				selectedChannels.map((channel: { id: string }) =>
 					updateChannelSettings({

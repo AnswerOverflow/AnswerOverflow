@@ -47,7 +47,6 @@ export function handleLeaderboardCommand(
 			catch: (error) => error,
 		});
 
-		// Get server
 		if (!interaction.guildId) {
 			yield* Effect.tryPromise({
 				try: () =>
@@ -59,7 +58,6 @@ export function handleLeaderboardCommand(
 			return;
 		}
 
-		// Get server by Discord ID
 		const serverLiveData = yield* Effect.scoped(
 			database.servers.getServerByDiscordId({ discordId: interaction.guildId }),
 		);
@@ -77,7 +75,6 @@ export function handleLeaderboardCommand(
 			return;
 		}
 
-		// Get top question solvers
 		const topSolversLiveData = yield* Effect.scoped(
 			database.messages.getTopQuestionSolversByServerId({
 				serverId: server._id,

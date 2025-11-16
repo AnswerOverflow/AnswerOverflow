@@ -44,7 +44,6 @@ export const publicInternalQuery = customQuery(query, {
 		backendAccessToken: v.string(),
 	},
 	input: async (ctx, args) => {
-		// Validate the backend access token
 		validateBackendAccessToken(args.backendAccessToken);
 
 		// Extract all args except backendAccessToken
@@ -80,7 +79,6 @@ export const publicInternalMutation = customMutation(mutation, {
 		backendAccessToken: v.string(),
 	},
 	input: async (ctx, args) => {
-		// Validate the backend access token
 		validateBackendAccessToken(args.backendAccessToken);
 
 		// Extract all args except backendAccessToken
@@ -116,7 +114,6 @@ export const publicInternalAction = customAction(action, {
 		backendAccessToken: v.string(),
 	},
 	input: async (ctx, args) => {
-		// Validate the backend access token
 		validateBackendAccessToken(args.backendAccessToken);
 
 		// Extract all args except backendAccessToken

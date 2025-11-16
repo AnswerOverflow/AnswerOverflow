@@ -146,7 +146,6 @@ export function handleManageAccountCommand(
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Check if interaction is in a guild
 		if (!interaction.guildId || !interaction.member) {
 			yield* Effect.tryPromise({
 				try: () =>
@@ -159,7 +158,6 @@ export function handleManageAccountCommand(
 			return;
 		}
 
-		// Get server by Discord ID
 		const serverLiveData = yield* Effect.scoped(
 			database.servers.getServerByDiscordId({ discordId: interaction.guildId }),
 		);
@@ -178,7 +176,6 @@ export function handleManageAccountCommand(
 			return;
 		}
 
-		// Get user server settings (or default)
 		const userServerSettingsLiveData = yield* Effect.scoped(
 			database.user_server_settings.findUserServerSettingsById({
 				userId: interaction.user.id,
@@ -204,7 +201,6 @@ export function handleManageAccountCommand(
 						serverId: server._id,
 					});
 
-		// Check if account is ignored
 		const ignoredAccount =
 			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
 				id: interaction.user.id,
@@ -231,7 +227,6 @@ export function handleManageAccountCommand(
 			catch: (error) => error,
 		});
 
-		// Set up button interaction collector
 		// InteractionResponse has createMessageComponentCollector for ephemeral messages
 		if (
 			reply &&
@@ -267,7 +262,6 @@ export function handleManageAccountCommand(
 					),
 				);
 
-				// Update the message with new state
 				const updatedEmbed = generateManageAccountEmbed(state);
 				const updatedActionRow = generateManageAccountActionRow(state);
 				await buttonInteraction
@@ -332,7 +326,6 @@ function handleManageAccountButtonPress(
 					settings: updatedSettings,
 				});
 
-				// Update state
 				state.userServerSettings.flags.canPubliclyDisplayMessages =
 					canPubliclyDisplayMessages;
 				state.userServerSettings.canPubliclyDisplayMessages =
@@ -377,7 +370,6 @@ function handleManageAccountButtonPress(
 					settings: updatedSettings,
 				});
 
-				// Update state
 				state.userServerSettings.flags.messageIndexingDisabled =
 					messageIndexingDisabled;
 				state.userServerSettings.messageIndexingDisabled =
@@ -392,7 +384,6 @@ function handleManageAccountButtonPress(
 			case menuButtonIds.ignoreGloballyButton:
 			case menuButtonIds.unignoreGloballyButton: {
 				if (customId === menuButtonIds.ignoreGloballyButton) {
-					// Delete account (adds to ignored)
 					yield* database.discord_accounts.deleteDiscordAccount({ id: userId });
 					state.isIgnoredAccount = true;
 				} else {

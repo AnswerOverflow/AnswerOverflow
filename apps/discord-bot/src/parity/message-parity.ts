@@ -28,7 +28,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Get server by Discord ID to get Convex ID
 				const serverLiveData = yield* database.servers.getServerByDiscordId({
 					discordId: newMessage.guildId ?? "",
 				});
@@ -41,7 +40,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Check if message exists in database
 				const messageLiveData = yield* database.messages.getMessageById({
 					id: newMessage.id,
 				});
@@ -80,7 +78,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Check if message exists in database
 				const messageLiveData = yield* database.messages.getMessageById({
 					id: message.id,
 				});
@@ -91,7 +88,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Delete message from database
 				yield* database.messages.deleteMessage({ id: message.id });
 				yield* Console.log(`Deleted message ${message.id}`);
 			}).pipe(
@@ -105,7 +101,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("messageDeleteBulk", (messages) =>
 			Effect.gen(function* () {
 				// messages is a Collection<Snowflake, Message | PartialMessage>
-				// Get all message IDs
 				const messageIds: string[] = [];
 				for (const [id] of messages) {
 					messageIds.push(id);
@@ -115,7 +110,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Delete messages from database
 				yield* database.messages.deleteManyMessages({ ids: messageIds });
 				yield* Console.log(`Bulk deleted ${messageIds.length} messages`);
 			}).pipe(
@@ -138,12 +132,10 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Handle ping command
 				if (message.content === "!ping") {
 					yield* Console.log("Received ping command!");
 				}
 
-				// Get server by Discord ID to get Convex ID
 				const serverLiveData = yield* database.servers.getServerByDiscordId({
 					discordId: message.guildId ?? "",
 				});
@@ -163,7 +155,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				// Upload attachments if any
 				if (message.attachments.size > 0) {
-					// Get Discord URLs from original message before converting
 					const attachmentsToUpload = Array.from(
 						message.attachments.values(),
 					).map((att) => ({
@@ -183,7 +174,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 							attachments: attachmentsToUpload,
 						});
 
-					// Update attachment records with storage IDs
 					for (const result of uploadResults) {
 						if (result.storageId && aoMessage.attachments) {
 							const attachment = aoMessage.attachments.find(

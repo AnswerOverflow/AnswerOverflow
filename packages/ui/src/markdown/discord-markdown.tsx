@@ -103,7 +103,6 @@ export function DiscordMarkdown({ content, className }: DiscordMarkdownProps) {
 			</blockquote>
 		),
 		p: ({ children }: { children?: React.ReactNode }) => {
-			// Check if paragraph is empty (blank line)
 			const childrenArray = React.Children.toArray(children);
 			const isEmpty =
 				childrenArray.length === 0 ||
@@ -111,7 +110,6 @@ export function DiscordMarkdown({ content, className }: DiscordMarkdownProps) {
 					if (typeof child === "string") {
 						return child.trim() === "";
 					}
-					// Check if it's a React element with no meaningful content
 					if (React.isValidElement(child)) {
 						const childProps = child.props as { children?: React.ReactNode };
 						const childChildren = React.Children.toArray(childProps?.children);

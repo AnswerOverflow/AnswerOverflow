@@ -288,7 +288,6 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 										const isImage =
 											attachment.contentType?.startsWith("image/") ?? false;
 
-										// Get attachment URL from Convex storage if available
 										const convexSiteUrl =
 											process.env.NEXT_PUBLIC_CONVEX_URL?.replace(
 												/\.cloud$/,

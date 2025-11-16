@@ -50,7 +50,6 @@ function handleDismissMessage({
 	allowedToDismissId: string;
 }): Effect.Effect<void, DismissError> {
 	return Effect.gen(function* () {
-		// Check if dismisser is allowed or has override permissions
 		if (dismisser.id !== allowedToDismissId) {
 			const hasOverridePermissions = dismisser.permissions.has(
 				DISMISS_OVERRIDE_PERMISSIONS,
@@ -65,7 +64,6 @@ function handleDismissMessage({
 			}
 		}
 
-		// Delete the message
 		yield* Effect.tryPromise({
 			try: () => messageToDismiss.delete(),
 			catch: (error) =>
@@ -91,7 +89,6 @@ export function handleDismissButtonInteraction(
 		// Parse the customId to get the allowed dismisser ID
 		const allowedToDismissId = parseDismissButtonId(interaction.customId);
 
-		// Get the member who clicked the button
 		if (!interaction.guild) {
 			return yield* Effect.fail(new Error("Guild not found"));
 		}
@@ -105,13 +102,11 @@ export function handleDismissButtonInteraction(
 			yield* Effect.fail(new Error("Could not fetch member"));
 		}
 
-		// Get the message to dismiss
 		const messageToDismiss = interaction.message;
 		if (!(messageToDismiss instanceof Message)) {
 			yield* Effect.fail(new Error("Message not found"));
 		}
 
-		// Handle dismissal
 		yield* handleDismissMessage({
 			messageToDismiss: messageToDismiss as Message,
 			dismisser: dismisser as GuildMember,

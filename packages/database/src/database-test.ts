@@ -7,7 +7,6 @@ import {
 } from "./convex-client-test";
 import { Database, service } from "./database";
 
-// Set BACKEND_ACCESS_TOKEN in process.env for Convex functions that use process.env directly
 process.env.BACKEND_ACCESS_TOKEN = "test-backend-access-token";
 
 // Use SimpleSpanProcessor for tests - exports spans immediately when they end

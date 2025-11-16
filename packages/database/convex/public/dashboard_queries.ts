@@ -16,13 +16,11 @@ import {
 export const getDashboardData = query({
 	args: { serverId: v.id("servers") },
 	handler: async (ctx, args) => {
-		// Get server directly from database
 		const server = await ctx.db.get(args.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
 
-		// Get server preferences directly from database
 		const preferences = await getOneFrom(
 			ctx.db,
 			"serverPreferences",
@@ -30,7 +28,6 @@ export const getDashboardData = query({
 			args.serverId,
 		);
 
-		// Get channels for the server directly from database
 		// Filter out threads (only show root channels: text, announcement, forum)
 		const allChannels = await ctx.db
 			.query("channels")
@@ -41,7 +38,6 @@ export const getDashboardData = query({
 			(channel) => !isThreadType(channel.type),
 		);
 
-		// Get channel settings for all channels
 		const channelSettings = await asyncMap(channels, (channel) =>
 			getOneFrom(ctx.db, "channelSettings", "by_channelId", channel.id),
 		);

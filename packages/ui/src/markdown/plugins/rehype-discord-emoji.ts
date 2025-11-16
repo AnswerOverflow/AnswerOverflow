@@ -41,7 +41,6 @@ export function rehypeDiscordEmoji() {
 						} as Text);
 					}
 
-					// Create img element for emoji
 					const imgElement: Element = {
 						type: "element",
 						tagName: "img",

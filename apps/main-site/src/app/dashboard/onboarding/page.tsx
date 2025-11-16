@@ -75,7 +75,6 @@ export default function OnboardingPage() {
 		}
 	}, [session, isSessionPending, serverId, step, router]);
 
-	// Check if bot was added (poll servers)
 	useEffect(() => {
 		if (step === "install" && installingServerId && selectedServer) {
 			let attempts = 0;

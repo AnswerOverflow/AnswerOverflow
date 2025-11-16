@@ -23,7 +23,6 @@ http.route({
 		}
 
 		try {
-			// Get the file URL from storage
 			const fileUrl = await ctx.storage.getUrl(storageId as Id<"_storage">);
 
 			if (!fileUrl) {

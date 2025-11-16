@@ -33,13 +33,11 @@ export const createServerPreferences = publicInternalMutation({
 		preferences: serverPreferencesSchema,
 	},
 	handler: async (ctx, args) => {
-		// Get server to get Discord ID
 		const server = await ctx.db.get(args.preferences.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
 
-		// Check if preferences already exist
 		const existing = await ctx.db
 			.query("serverPreferences")
 			.withIndex("by_serverId", (q) =>
@@ -50,8 +48,6 @@ export const createServerPreferences = publicInternalMutation({
 		if (existing) {
 			throw new Error("Server preferences already exist");
 		}
-
-		// Validate custom domain uniqueness if provided
 
 		const domainError = await validateCustomDomainUniqueness(
 			ctx,
@@ -70,7 +66,6 @@ export const createServerPreferences = publicInternalMutation({
 			args.preferences,
 		);
 
-		// Update server to reference preferences
 		const serverRecord = await ctx.db.get(args.preferences.serverId);
 		if (serverRecord) {
 			await ctx.db.patch(serverRecord._id, {
@@ -102,8 +97,6 @@ export const updateServerPreferences = publicInternalMutation({
 		if (!existing) {
 			throw new Error("Server preferences not found");
 		}
-
-		// Validate custom domain uniqueness if being changed
 
 		if (
 			args.preferences.customDomain &&
@@ -145,9 +138,6 @@ export const upsertServerPreferences = publicInternalMutation({
 			.first();
 
 		if (existing) {
-			// Update existing
-			// Validate custom domain uniqueness if being changed
-
 			if (
 				preferences.customDomain &&
 				preferences.customDomain !== existing.customDomain
@@ -174,9 +164,6 @@ export const upsertServerPreferences = publicInternalMutation({
 			}
 			return updated;
 		} else {
-			// Create new
-			// Validate custom domain uniqueness if provided
-
 			const domainError = await validateCustomDomainUniqueness(
 				ctx,
 
@@ -191,7 +178,6 @@ export const upsertServerPreferences = publicInternalMutation({
 
 			const preferencesId = await ctx.db.insert("serverPreferences", args);
 
-			// Update server to reference preferences
 			const serverRecord = await ctx.db.get(serverId);
 			if (serverRecord) {
 				await ctx.db.patch(serverRecord._id, {
@@ -229,7 +215,6 @@ export const deleteServerPreferences = publicInternalMutation({
 				});
 			}
 
-			// Delete preferences
 			await ctx.db.delete(preferences._id);
 		}
 

@@ -37,7 +37,6 @@ const MockDiscordClientLayer = Layer.effectContext(
 	}),
 ).pipe(Layer.provide(MockClientLayer));
 
-// Create a test-specific DiscordLayer that uses the mock client
 const TestDiscordLayer = Layer.effect(Discord, createDiscordService).pipe(
 	Layer.provide(MockDiscordClientLayer),
 	Layer.provide(DiscordTokenLayer),

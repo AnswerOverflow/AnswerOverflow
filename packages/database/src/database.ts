@@ -105,7 +105,6 @@ export const service = Effect.gen(function* () {
 	const backendAccessToken = yield* Config.string("BACKEND_ACCESS_TOKEN");
 	const convexClient = yield* ConvexClientUnified;
 
-	// Create watchQueryToLiveData helper for live queries
 	const watchQueryToLiveData = createWatchQueryToLiveData(convexClient, {
 		api,
 		internal,
@@ -119,7 +118,6 @@ export const service = Effect.gen(function* () {
 	): TransformToFunctions<T> => {
 		return new Proxy(target, {
 			get(innerTarget, prop: string | symbol) {
-				// Handle symbols and special properties
 				if (
 					typeof prop !== "string" ||
 					prop.startsWith("_") ||

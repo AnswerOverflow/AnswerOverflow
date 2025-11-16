@@ -6,7 +6,6 @@ import { HomePageClient } from "./client";
 const OtelLayer = createOtelLayer("main-site");
 
 export default async function HomePage() {
-	// Get featured servers (biggest servers)
 	const featuredServersData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const featuredServers = yield* Effect.scoped(

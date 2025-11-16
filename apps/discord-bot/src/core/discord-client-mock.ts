@@ -295,7 +295,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				channelOverride: Partial<Message["channel"]>;
 			}> = {},
 		): Message => {
-			// Create channel object with required methods
 			const baseChannel = {
 				...channel,
 				isDMBased: () => false,
