@@ -102,9 +102,6 @@ function SearchInput() {
 
 				{hasResults && (
 					<div className="space-y-4">
-						<p className="text-sm text-muted-foreground">
-							Found {results.length} result{results.length !== 1 ? "s" : ""}
-						</p>
 						<div className="space-y-4">
 							{results.map((result) => (
 								<DiscordMessage
