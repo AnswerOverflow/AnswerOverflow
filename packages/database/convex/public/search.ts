@@ -1,3 +1,4 @@
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import {
@@ -11,12 +12,19 @@ import { publicQuery } from "./custom_functions";
 export const publicSearch = publicQuery({
 	args: {
 		query: v.string(),
+		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
-		const messages = await ctx.db
+		const paginationOpts = {
+			...args.paginationOpts,
+			numItems: Math.min(args.paginationOpts.numItems, 10),
+		};
+		const paginatedResult = await ctx.db
 			.query("messages")
 			.withSearchIndex("search_content", (q) => q.search("content", args.query))
-			.collect();
+			.paginate(paginationOpts);
+
+		const messages = paginatedResult.page;
 
 		const authorIds = new Set(messages.map((m) => m.authorId));
 
@@ -57,6 +65,9 @@ export const publicSearch = publicQuery({
 			}),
 		);
 
-		return messagesWithData;
+		return {
+			...paginatedResult,
+			page: messagesWithData,
+		};
 	},
 });

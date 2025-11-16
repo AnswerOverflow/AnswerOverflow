@@ -5,8 +5,9 @@ import { Card, CardContent } from "@packages/ui/components/card";
 import { DiscordMessage } from "@packages/ui/components/discord-message";
 import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useQueryWithStatus } from "@packages/ui/hooks/use-query-with-status";
+import { usePaginatedQuery } from "convex/react";
 import { useQueryState } from "nuqs";
+import { useEffect, useRef } from "react";
 import { useDebounce } from "use-debounce";
 
 type Props = {
@@ -18,14 +19,41 @@ function SearchInput() {
 		defaultValue: "",
 	});
 	const [debouncedSearchQuery] = useDebounce(searchQuery, 250);
-	const { data, status } = useQueryWithStatus(api.public.search.publicSearch, {
-		query: debouncedSearchQuery,
-	});
+	const loadMoreRef = useRef<HTMLDivElement>(null);
 
-	const isLoading = status === "pending";
+	const { results, status, loadMore } = usePaginatedQuery(
+		api.public.search.publicSearch,
+		debouncedSearchQuery && debouncedSearchQuery.trim().length > 0
+			? { query: debouncedSearchQuery }
+			: "skip",
+		{ initialNumItems: 10 },
+	);
+
+	const isLoadingFirstPage = status === "LoadingFirstPage";
+	const isLoadingMore = status === "LoadingMore";
 	const hasQuery =
 		debouncedSearchQuery && debouncedSearchQuery.trim().length > 0;
-	const hasResults = data && data.length > 0;
+	const hasResults = results && results.length > 0;
+	const canLoadMore = status === "CanLoadMore";
+
+	useEffect(() => {
+		if (!loadMoreRef.current || !canLoadMore) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0]?.isIntersecting && canLoadMore) {
+					loadMore(10);
+				}
+			},
+			{ threshold: 0.1 },
+		);
+
+		observer.observe(loadMoreRef.current);
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [canLoadMore, loadMore]);
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -48,7 +76,7 @@ function SearchInput() {
 					/>
 				</div>
 
-				{isLoading && hasQuery && (
+				{isLoadingFirstPage && hasQuery && (
 					<div className="space-y-4">
 						{Array.from({ length: 3 }).map((_, i) => (
 							<Card key={`skeleton-${i}`}>
@@ -62,7 +90,7 @@ function SearchInput() {
 					</div>
 				)}
 
-				{!isLoading && hasQuery && !hasResults && (
+				{!isLoadingFirstPage && hasQuery && !hasResults && (
 					<Card>
 						<CardContent className="pt-6">
 							<p className="text-muted-foreground text-center py-8">
@@ -72,13 +100,13 @@ function SearchInput() {
 					</Card>
 				)}
 
-				{!isLoading && hasResults && (
+				{hasResults && (
 					<div className="space-y-4">
 						<p className="text-sm text-muted-foreground">
-							Found {data.length} result{data.length !== 1 ? "s" : ""}
+							Found {results.length} result{results.length !== 1 ? "s" : ""}
 						</p>
 						<div className="space-y-4">
-							{data.map((result) => (
+							{results.map((result) => (
 								<DiscordMessage
 									key={result.message.id}
 									message={result.message}
@@ -89,6 +117,20 @@ function SearchInput() {
 								/>
 							))}
 						</div>
+						{canLoadMore && (
+							<div ref={loadMoreRef} className="py-4">
+								<div className="flex justify-center">
+									<Skeleton className="h-32 w-full max-w-2xl" />
+								</div>
+							</div>
+						)}
+						{isLoadingMore && (
+							<div className="py-4">
+								<div className="flex justify-center">
+									<Skeleton className="h-32 w-full max-w-2xl" />
+								</div>
+							</div>
+						)}
 					</div>
 				)}
 
