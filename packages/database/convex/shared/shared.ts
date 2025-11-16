@@ -333,7 +333,7 @@ export function extractDiscordLinks(content: string): Array<{
 		const guildId = match[1];
 		const channelId = match[2];
 		const messageId = match[3];
-		if (!guildId || !channelId || !messageId) {
+		if (!guildId || !channelId) {
 			return undefined;
 		}
 		return { original: match[0], guildId, channelId, messageId };
@@ -385,19 +385,17 @@ export async function getMentionMetadata(
 			const userId = userIds[i];
 			if (userId === undefined) continue;
 			const account = userAccounts[i];
-			if (account) {
-				users[userId] = {
-					username: account.name,
-					globalName: null,
-					url: `/u/${userId}`,
-				};
-			} else {
-				users[userId] = {
-					username: userId,
-					globalName: null,
-					url: `https://discord.com/users/${userId}`,
-				};
-			}
+			users[userId] = account
+				? {
+						username: account.name,
+						globalName: null,
+						url: `/u/${userId}`,
+					}
+				: {
+						username: userId,
+						globalName: null,
+						url: `https://discord.com/users/${userId}`,
+					};
 		}
 	}
 
@@ -467,17 +465,6 @@ export async function getInternalLinksMetadata(
 		return [];
 	}
 
-	const serverMap = new Map<string, { id: string; name: string }>();
-	const channelMap = new Map<
-		string,
-		{ id: string; name: string; type: number; parentId?: string }
-	>();
-	const parentChannelMap = new Map<
-		string,
-		{ id: string; name: string; type: number }
-	>();
-	const messageExistsMap = new Map<string, boolean>();
-
 	const uniqueGuildIds = Array.from(
 		new Set(discordLinks.map((l) => l.guildId)),
 	);
@@ -490,108 +477,85 @@ export async function getInternalLinksMetadata(
 		),
 	);
 
-	for (const guildId of uniqueGuildIds) {
-		const server = await getOneFrom(ctx.db, "servers", "by_discordId", guildId);
-		if (server) {
-			serverMap.set(guildId, { id: server.discordId, name: server.name });
-		}
-	}
+	const servers = await asyncMap(uniqueGuildIds, (id) =>
+		getOneFrom(ctx.db, "servers", "by_discordId", id),
+	);
+	const serverMap = new Map(
+		Arr.filter(servers, Predicate.isNotNull).map((s) => [
+			s.discordId,
+			{ id: s.discordId, name: s.name },
+		]),
+	);
 
-	for (const channelId of uniqueChannelIds) {
-		const channel = await getOneFrom(
-			ctx.db,
-			"channels",
-			"by_discordChannelId",
-			channelId,
-			"id",
-		);
-		if (channel) {
-			channelMap.set(channelId, {
-				id: channel.id,
-				name: channel.name,
-				type: channel.type,
-				parentId: channel.parentId,
-			});
+	const channels = await asyncMap(uniqueChannelIds, (id) =>
+		getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
+	);
+	const channelMap = new Map(
+		Arr.filter(channels, Predicate.isNotNull).map((c) => [
+			c.id,
+			{ id: c.id, name: c.name, type: c.type, parentId: c.parentId },
+		]),
+	);
 
-			if (channel.parentId) {
-				const parentChannel = await getOneFrom(
-					ctx.db,
-					"channels",
-					"by_discordChannelId",
-					channel.parentId,
-					"id",
-				);
-				if (parentChannel) {
-					parentChannelMap.set(channel.parentId, {
-						id: parentChannel.id,
-						name: parentChannel.name,
-						type: parentChannel.type,
-					});
-				}
+	const parentChannelIds = Arr.filter(
+		Arr.map(channels, (c) => c?.parentId),
+		Predicate.isNotNullable,
+	);
+	const parentChannels = await asyncMap(
+		Array.from(new Set(parentChannelIds)),
+		(id) => getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
+	);
+	const parentChannelMap = new Map(
+		Arr.filter(parentChannels, Predicate.isNotNull).map((c) => [
+			c.id,
+			{ id: c.id, name: c.name, type: c.type },
+		]),
+	);
+
+	const messages = await asyncMap(uniqueMessageIds, (id) =>
+		getMessageById(ctx, id),
+	);
+	const messageExistsMap = new Map(
+		uniqueMessageIds.map((id, i) => [id, !!messages[i]]),
+	);
+
+	return Arr.filter(
+		Arr.map(discordLinks, (link) => {
+			const server = serverMap.get(link.guildId);
+			const channel = channelMap.get(link.channelId);
+
+			if (!server || !channel) {
+				return undefined;
 			}
-		}
-	}
 
-	for (const messageId of uniqueMessageIds) {
-		const message = await ctx.db
-			.query("messages")
-			.filter((q) => q.eq(q.field("id"), messageId))
-			.first();
-		messageExistsMap.set(messageId, !!message);
-	}
+			if (link.messageId && !messageExistsMap.get(link.messageId)) {
+				return undefined;
+			}
 
-	const results: Array<{
-		original: string;
-		guild: { id: string; name: string };
-		channel: {
-			parent?: { name?: string; type?: number; parentId?: string };
-			id: string;
-			type: number;
-			name: string;
-		};
-		message?: string;
-	}> = [];
+			const parentChannel = channel.parentId
+				? parentChannelMap.get(channel.parentId)
+				: undefined;
 
-	for (const link of discordLinks) {
-		const server = serverMap.get(link.guildId);
-		const channel = channelMap.get(link.channelId);
-
-		if (!server || !channel) {
-			continue;
-		}
-
-		const parentChannel = channel.parentId
-			? parentChannelMap.get(channel.parentId)
-			: undefined;
-
-		const messageExists = link.messageId
-			? messageExistsMap.get(link.messageId)
-			: undefined;
-
-		if (link.messageId && !messageExists) {
-			continue;
-		}
-
-		results.push({
-			original: link.original,
-			guild: { id: server.id, name: server.name },
-			channel: {
-				id: channel.id,
-				type: channel.type,
-				name: channel.name,
-				parent: parentChannel
-					? {
-							name: parentChannel.name,
-							type: parentChannel.type,
-							parentId: parentChannel.id,
-						}
-					: undefined,
-			},
-			message: link.messageId,
-		});
-	}
-
-	return results;
+			return {
+				original: link.original,
+				guild: { id: server.id, name: server.name },
+				channel: {
+					id: channel.id,
+					type: channel.type,
+					name: channel.name,
+					parent: parentChannel
+						? {
+								name: parentChannel.name,
+								type: parentChannel.type,
+								parentId: parentChannel.id,
+							}
+						: undefined,
+				},
+				message: link.messageId,
+			};
+		}),
+		Predicate.isNotNullable,
+	);
 }
 
 export async function getMessageById(ctx: QueryCtx | MutationCtx, id: string) {
@@ -640,11 +604,10 @@ export async function getFirstMessageInChannel(
 		return null;
 	}
 
-	const sortedMessages = allMessages.sort((a, b) => {
-		return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-	});
-
-	return sortedMessages[0] ?? null;
+	return (
+		allMessages.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0] ??
+		null
+	);
 }
 
 export async function getFirstMessagesInChannels(
@@ -669,21 +632,20 @@ export async function getFirstMessagesInChannels(
 				channelId,
 				"channelId",
 			);
-			return { channelId, messages };
+			return {
+				channelId,
+				firstMessage:
+					messages.length === 0
+						? null
+						: (messages.sort((a, b) =>
+								a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
+							)[0] ?? null),
+			};
 		}),
 	);
 
-	for (const { channelId, messages } of channelMessages) {
-		if (messages.length === 0) {
-			results[channelId] = null;
-			continue;
-		}
-
-		const sortedMessages = messages.sort((a, b) => {
-			return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-		});
-
-		results[channelId] = sortedMessages[0] ?? null;
+	for (const { channelId, firstMessage } of channelMessages) {
+		results[channelId] = firstMessage;
 	}
 
 	return results;
@@ -835,22 +797,31 @@ export async function upsertMessageInternalLogic(
 			await ctx.db.delete(reaction._id);
 		}
 
-		if (reactions.length > 0) {
-			for (const reaction of reactions) {
-				const emojiId = reaction.emoji.id;
-				if (!emojiId) continue;
+		const reactionsWithEmojiId = reactions.filter((r) => r.emoji.id);
+		if (reactionsWithEmojiId.length > 0) {
+			const emojiIds = new Set(
+				reactionsWithEmojiId
+					.map((r) => r.emoji.id)
+					.filter((id): id is string => !!id),
+			);
 
+			for (const emojiId of emojiIds) {
 				const existingEmoji = await ctx.db
 					.query("emojis")
 					.filter((q) => q.eq(q.field("id"), emojiId))
 					.first();
 
 				if (!existingEmoji) {
-					await ctx.db.insert("emojis", reaction.emoji);
+					const reaction = reactionsWithEmojiId.find(
+						(r) => r.emoji.id === emojiId,
+					);
+					if (reaction) {
+						await ctx.db.insert("emojis", reaction.emoji);
+					}
 				}
 			}
 
-			for (const reaction of reactions) {
+			for (const reaction of reactionsWithEmojiId) {
 				if (!reaction.emoji.id) continue;
 				await ctx.db.insert("reactions", {
 					messageId: messageData.id,
@@ -963,44 +934,41 @@ export async function enrichMessagesWithData(
 
 	for (const message of messages) {
 		const { userIds, channelIds } = extractMentionIds(message.content);
-		for (const userId of userIds) {
-			allUserIds.add(userId);
-		}
-		for (const channelId of channelIds) {
-			allChannelIds.add(channelId);
-		}
-		const discordLinks = extractDiscordLinks(message.content);
-		allDiscordLinks.push(...discordLinks);
+		userIds.forEach((id) => allUserIds.add(id));
+		channelIds.forEach((id) => allChannelIds.add(id));
+		allDiscordLinks.push(...extractDiscordLinks(message.content));
 	}
 
 	const internalLinks = await getInternalLinksMetadata(ctx, allDiscordLinks);
 
 	const messagesWithData = await Promise.all(
 		messages.map(async (message) => {
+			const [attachments, reactions, solutions] = await Promise.all([
+				findAttachmentsByMessageId(ctx, message.id),
+				findReactionsByMessageId(ctx, message.id),
+				message.questionId
+					? findSolutionsByQuestionId(ctx, message.questionId)
+					: [],
+			]);
+
+			const author = authorMap.get(message.authorId);
+			const baseEnriched = {
+				message,
+				author: author
+					? {
+							id: author.id,
+							name: author.name,
+							avatar: author.avatar,
+						}
+					: null,
+				attachments,
+				reactions,
+				solutions,
+			};
+
 			const serverDiscordId = serverMap.get(message.serverId);
 			if (!serverDiscordId) {
-				const [attachments, reactions, solutions] = await Promise.all([
-					findAttachmentsByMessageId(ctx, message.id),
-					findReactionsByMessageId(ctx, message.id),
-					message.questionId
-						? findSolutionsByQuestionId(ctx, message.questionId)
-						: [],
-				]);
-
-				const author = authorMap.get(message.authorId);
-				return {
-					message,
-					author: author
-						? {
-								id: author.id,
-								name: author.name,
-								avatar: author.avatar,
-							}
-						: null,
-					attachments,
-					reactions,
-					solutions,
-				};
+				return baseEnriched;
 			}
 
 			const { userIds, channelIds } = extractMentionIds(message.content);
@@ -1020,59 +988,28 @@ export async function enrichMessagesWithData(
 				string,
 				{ username: string; globalName: string | null; url: string }
 			> = {};
-			const messageChannels: Record<
-				string,
-				{
-					name: string;
-					type: number;
-					url: string;
-					indexingEnabled?: boolean;
-					exists?: boolean;
-				}
-			> = {};
-
 			for (const userId of userIds) {
-				if (mentionMetadata.users[userId]) {
-					messageUsers[userId] = mentionMetadata.users[userId];
+				const user = mentionMetadata.users[userId];
+				if (user) {
+					messageUsers[userId] = user;
 				}
 			}
 
-			for (const channelId of channelIds) {
-				const channelMeta = mentionMetadata.channels[channelId];
-				if (channelMeta) {
-					messageChannels[channelId] = channelMeta;
-				} else {
-					messageChannels[channelId] = {
+			const messageChannels = Object.fromEntries(
+				channelIds.map((id) => [
+					id,
+					mentionMetadata.channels[id] ?? {
 						name: "Unknown Channel",
 						type: 0,
-						url: `https://discord.com/channels/${serverDiscordId}/${channelId}`,
+						url: `https://discord.com/channels/${serverDiscordId}/${id}`,
 						indexingEnabled: false,
 						exists: false,
-					};
-				}
-			}
+					},
+				]),
+			);
 
-			const [attachments, reactions, solutions] = await Promise.all([
-				findAttachmentsByMessageId(ctx, message.id),
-				findReactionsByMessageId(ctx, message.id),
-				message.questionId
-					? findSolutionsByQuestionId(ctx, message.questionId)
-					: [],
-			]);
-
-			const author = authorMap.get(message.authorId);
 			return {
-				message,
-				author: author
-					? {
-							id: author.id,
-							name: author.name,
-							avatar: author.avatar,
-						}
-					: null,
-				attachments,
-				reactions,
-				solutions,
+				...baseEnriched,
 				metadata: {
 					users:
 						Object.keys(messageUsers).length > 0 ? messageUsers : undefined,
