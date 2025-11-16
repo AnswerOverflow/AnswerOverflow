@@ -22,6 +22,7 @@
 		"better-auth": "catalog:",
 		"convex": "catalog:",
 		"effect": "catalog:",
+		"hono": "^4.10.6",
 		"lucide-react": "catalog:",
 		"next": "catalog:",
 		"nuqs": "catalog:",

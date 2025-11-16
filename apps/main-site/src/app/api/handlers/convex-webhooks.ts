@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import type { Context } from "hono";
 
 const OTLP_ENDPOINT =
 	process.env.OTLP_HTTP_ENDPOINT ?? "http://localhost:4318/v1/traces";
@@ -131,7 +131,7 @@ function convertToResourceSpans(spans: SerializedSpan[]) {
 	};
 }
 
-async function exportSpansToCollector(resourceSpans: {
+export async function exportSpansToCollector(resourceSpans: {
 	resourceSpans: unknown[];
 }) {
 	const payload = JSON.stringify(resourceSpans);
@@ -157,15 +157,12 @@ async function exportSpansToCollector(resourceSpans: {
 	}
 }
 
-export async function POST(req: NextRequest) {
+export async function handleConvexWebhook(c: Context) {
 	try {
-		const body = (await req.json()) as ConvexWebhookEntry[] | unknown;
+		const body = (await c.req.json()) as ConvexWebhookEntry[] | unknown;
 
 		if (!Array.isArray(body)) {
-			return NextResponse.json(
-				{ error: "Expected array of log entries" },
-				{ status: 400 },
-			);
+			return c.json({ error: "Expected array of log entries" }, 400);
 		}
 
 		const spans: SerializedSpan[] = [];
@@ -177,21 +174,21 @@ export async function POST(req: NextRequest) {
 		}
 
 		if (spans.length === 0) {
-			return NextResponse.json({ message: "OK", spansProcessed: 0 });
+			return c.json({ message: "OK", spansProcessed: 0 });
 		}
 
 		const resourceSpans = convertToResourceSpans(spans);
 		await exportSpansToCollector(resourceSpans);
 
-		return NextResponse.json({
+		return c.json({
 			message: "OK",
 			spansProcessed: spans.length,
 		});
 	} catch (error: unknown) {
 		console.error("Error handling Convex OTEL webhook", error);
-		return NextResponse.json(
+		return c.json(
 			{ error: error instanceof Error ? error.message : "Unknown error" },
-			{ status: 500 },
+			500,
 		);
 	}
 }
