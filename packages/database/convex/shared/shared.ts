@@ -383,8 +383,8 @@ export async function getMentionMetadata(
 
 		for (let i = 0; i < userIds.length; i++) {
 			const userId = userIds[i];
-			if (userId === undefined) continue;
 			const account = userAccounts[i];
+			if (userId === undefined) continue;
 			users[userId] = account
 				? {
 						username: account.name,

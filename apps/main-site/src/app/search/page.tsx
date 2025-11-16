@@ -2,13 +2,13 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { Card, CardContent } from "@packages/ui/components/card";
+import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import { DiscordMessage } from "@packages/ui/components/discord-message";
 import { Input } from "@packages/ui/components/input";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useConvexAuth, usePaginatedQuery } from "convex/react";
+import { useConvexAuth } from "convex/react";
 import { useQueryState } from "nuqs";
-import { useEffect, useRef } from "react";
 import { useDebounce } from "use-debounce";
 
 type Props = {
@@ -21,43 +21,11 @@ function SearchInput() {
 		defaultValue: "",
 	});
 	const [debouncedSearchQuery] = useDebounce(searchQuery, 250);
-	const loadMoreRef = useRef<HTMLDivElement>(null);
 
-	const { results, status, loadMore } = usePaginatedQuery(
-		api.public.search.publicSearch,
-		auth.isAuthenticated &&
-			debouncedSearchQuery &&
-			debouncedSearchQuery.trim().length > 0
-			? { query: debouncedSearchQuery }
-			: "skip",
-		{ initialNumItems: 10 },
-	);
-
-	const isLoadingFirstPage = status === "LoadingFirstPage";
-	const isLoadingMore = status === "LoadingMore";
 	const hasQuery =
-		debouncedSearchQuery && debouncedSearchQuery.trim().length > 0;
-	const hasResults = results && results.length > 0;
-	const canLoadMore = status === "CanLoadMore";
-
-	useEffect(() => {
-		if (!loadMoreRef.current || !canLoadMore) return;
-
-		const observer = new IntersectionObserver(
-			(entries) => {
-				if (entries[0]?.isIntersecting && canLoadMore) {
-					loadMore(10);
-				}
-			},
-			{ threshold: 0.1 },
-		);
-
-		observer.observe(loadMoreRef.current);
-
-		return () => {
-			observer.disconnect();
-		};
-	}, [canLoadMore, loadMore]);
+		auth.isAuthenticated &&
+		debouncedSearchQuery &&
+		debouncedSearchQuery.trim().length > 0;
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -80,78 +48,48 @@ function SearchInput() {
 					/>
 				</div>
 
-				{isLoadingFirstPage && hasQuery && (
-					<div className="space-y-4">
-						{Array.from({ length: 3 }).map((_, i) => (
-							<Card key={`skeleton-${i}`}>
-								<CardContent className="pt-6">
-									<Skeleton className="h-4 w-3/4 mb-2" />
-									<Skeleton className="h-4 w-full mb-2" />
-									<Skeleton className="h-4 w-5/6" />
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				)}
-
-				{!isLoadingFirstPage && hasQuery && !hasResults && (
-					<Card>
-						<CardContent className="pt-6">
-							<p className="text-muted-foreground text-center py-8">
-								No results found for &quot;{debouncedSearchQuery}&quot;
-							</p>
-						</CardContent>
-					</Card>
-				)}
-
-				{hasResults && (
-					<div className="space-y-4">
-						<div className="space-y-4">
-							{results.map((result) => (
-								<div
-									key={result.message.id}
-									className="relative group hover:opacity-90 transition-opacity"
-								>
-									<Link
-										href={`/m/${result.message.id}`}
-										className="absolute inset-0 z-0"
-										aria-label="Open message"
-									/>
-									<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto">
-										<DiscordMessage
-											message={result.message}
-											author={result.author}
-											attachments={result.attachments}
-											reactions={result.reactions}
-											solutions={result.solutions}
-											metadata={result.metadata}
-										/>
-									</div>
-								</div>
-							))}
-						</div>
-						{canLoadMore && (
-							<div ref={loadMoreRef} className="py-4">
-								<div className="flex justify-center">
-									<Skeleton className="h-32 w-full max-w-2xl" />
-								</div>
-							</div>
-						)}
-						{isLoadingMore && (
+				{hasQuery ? (
+					<ConvexInfiniteList
+						query={api.public.search.publicSearch}
+						queryArgs={{ query: debouncedSearchQuery }}
+						pageSize={10}
+						loader={
 							<div className="py-4">
 								<div className="flex justify-center">
 									<Skeleton className="h-32 w-full max-w-2xl" />
 								</div>
 							</div>
+						}
+						renderItem={(result) => (
+							<div
+								key={result.message.id}
+								className="relative group hover:opacity-90 transition-opacity mb-4"
+							>
+								<Link
+									href={`/m/${result.message.id}`}
+									className="absolute inset-0 z-0"
+									aria-label="Open message"
+								/>
+								<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto">
+									<DiscordMessage
+										message={result.message}
+										author={result.author}
+										attachments={result.attachments}
+										reactions={result.reactions}
+										solutions={result.solutions}
+										metadata={result.metadata}
+									/>
+								</div>
+							</div>
 						)}
-					</div>
-				)}
-
-				{!hasQuery && (
+					/>
+				) : (
 					<Card>
 						<CardContent className="pt-6">
 							<p className="text-muted-foreground text-center py-8">
-								Enter a search query to find messages
+								{debouncedSearchQuery && debouncedSearchQuery.trim().length > 0
+									? `No results found for "${debouncedSearchQuery}"`
+									: "Enter a search query to find messages"}
 							</p>
 						</CardContent>
 					</Card>
