@@ -1,11 +1,11 @@
 import {
 	Client,
 	GatewayIntentBits,
-	Partials,
 	type Guild,
 	type GuildBasedChannel,
 	type Message,
 	MessageType,
+	Partials,
 } from "discord.js";
 import { Context, Effect, Layer } from "effect";
 import {

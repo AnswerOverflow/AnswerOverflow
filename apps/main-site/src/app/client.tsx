@@ -4,9 +4,9 @@ import { api } from "@packages/database/convex/_generated/api";
 import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import { DiscordMessage } from "@packages/ui/components/discord-message";
 import { ThreadIcon } from "@packages/ui/components/discord-message/mention";
+import { Link } from "@packages/ui/components/link";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { Link } from "@packages/ui/components/link";
 import { useConvexAuth } from "convex/react";
 import { Hash, MessageSquare } from "lucide-react";
 

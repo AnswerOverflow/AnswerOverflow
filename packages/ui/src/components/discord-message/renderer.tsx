@@ -1,14 +1,9 @@
 "use client";
 
-import { CornerUpRight } from "lucide-react";
 import dayjs from "dayjs";
 import { parse } from "discord-markdown-parser";
+import { CornerUpRight } from "lucide-react";
 import type React from "react";
-import type {
-	MessageWithMetadata,
-	MessageSnapshot,
-	SingleASTNode,
-} from "./types";
 import { Attachments } from "./attachments";
 import { Code } from "./code";
 import { Embeds } from "./embed";
@@ -17,6 +12,11 @@ import { Link } from "./link";
 import { Mention } from "./mention";
 import { Poll } from "./poll";
 import { Spoiler } from "./spoiler";
+import type {
+	MessageSnapshot,
+	MessageWithMetadata,
+	SingleASTNode,
+} from "./types";
 
 function renderASTNode(
 	node: SingleASTNode | SingleASTNode[],

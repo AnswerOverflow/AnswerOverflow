@@ -1,8 +1,8 @@
+import { ChannelType } from "discord-api-types/v10";
 import { Hash, Lock, MessageSquare } from "lucide-react";
 import type React from "react";
-import { ChannelType } from "discord-api-types/v10";
-import { Link } from "../link";
 import { cn } from "../../lib/utils";
+import { Link } from "../link";
 import type { MessageWithMetadata } from "./types";
 
 type MentionType = "channel" | "role" | "user" | "everyone" | "here";

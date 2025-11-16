@@ -1,6 +1,6 @@
-import { emojiToTwemoji } from "./utils";
 import { cn } from "../../lib/utils";
 import type { SingleASTNode } from "./types";
+import { emojiToTwemoji } from "./utils";
 
 function customEmojiUrl(id: string, animated = false) {
 	const extension = animated ? "webp" : "png";

@@ -1,8 +1,6 @@
-import { ArrowUpRight, File } from "lucide-react";
 import type { Attachment } from "@packages/database/convex/schema";
-import { constructDiscordLink } from "./utils";
-import { isEmbeddableAttachment } from "./utils";
 import bytes from "bytes";
+import { ArrowUpRight, File } from "lucide-react";
 import { Button } from "../../components/button";
 import {
 	Tooltip,
@@ -10,6 +8,7 @@ import {
 	TooltipTrigger,
 } from "../../components/tooltip";
 import { cn } from "../../lib/utils";
+import { constructDiscordLink, isEmbeddableAttachment } from "./utils";
 
 const isCode = (a: Attachment) =>
 	!a.contentType?.startsWith("image/") || a.filename?.endsWith(".svg");
