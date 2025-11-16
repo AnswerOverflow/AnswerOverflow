@@ -2,6 +2,7 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { Card, CardContent } from "@packages/ui/components/card";
+import { DiscordMessage } from "@packages/ui/components/discord-message";
 import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQueryWithStatus } from "@packages/ui/hooks/use-query-with-status";
@@ -77,14 +78,15 @@ function SearchInput() {
 							Found {data.length} result{data.length !== 1 ? "s" : ""}
 						</p>
 						<div className="space-y-4">
-							{data.map((message) => (
-								<Card key={message.id}>
-									<CardContent className="pt-6">
-										<p className="text-foreground whitespace-pre-wrap break-words">
-											{message.content}
-										</p>
-									</CardContent>
-								</Card>
+							{data.map((result) => (
+								<DiscordMessage
+									key={result.message.id}
+									message={result.message}
+									author={result.author}
+									attachments={result.attachments}
+									reactions={result.reactions}
+									solutions={result.solutions}
+								/>
 							))}
 						</div>
 					</div>
