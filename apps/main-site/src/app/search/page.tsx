@@ -4,6 +4,7 @@ import { api } from "@packages/database/convex/_generated/api";
 import { Card, CardContent } from "@packages/ui/components/card";
 import { DiscordMessage } from "@packages/ui/components/discord-message";
 import { Input } from "@packages/ui/components/input";
+import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useConvexAuth, usePaginatedQuery } from "convex/react";
 import { useQueryState } from "nuqs";
@@ -107,14 +108,26 @@ function SearchInput() {
 					<div className="space-y-4">
 						<div className="space-y-4">
 							{results.map((result) => (
-								<DiscordMessage
+								<div
 									key={result.message.id}
-									message={result.message}
-									author={result.author}
-									attachments={result.attachments}
-									reactions={result.reactions}
-									solutions={result.solutions}
-								/>
+									className="relative group hover:opacity-90 transition-opacity"
+								>
+									<Link
+										href={`/m/${result.message.id}`}
+										className="absolute inset-0 z-0"
+										aria-label="Open message"
+									/>
+									<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto">
+										<DiscordMessage
+											message={result.message}
+											author={result.author}
+											attachments={result.attachments}
+											reactions={result.reactions}
+											solutions={result.solutions}
+											metadata={result.metadata}
+										/>
+									</div>
+								</div>
 							))}
 						</div>
 						{canLoadMore && (

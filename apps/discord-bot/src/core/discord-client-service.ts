@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { Context, Effect, Layer } from "effect";
 
 const createDiscordClientService = Effect.succeed(
@@ -8,6 +8,13 @@ const createDiscordClientService = Effect.succeed(
 			GatewayIntentBits.GuildMessages,
 			GatewayIntentBits.MessageContent,
 			GatewayIntentBits.GuildMessageReactions,
+		],
+		partials: [
+			Partials.Message,
+			Partials.Channel,
+			Partials.GuildMember,
+			Partials.User,
+			Partials.Reaction,
 		],
 	}),
 );

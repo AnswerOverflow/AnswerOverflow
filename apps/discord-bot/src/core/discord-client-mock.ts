@@ -1,6 +1,7 @@
 import {
 	Client,
 	GatewayIntentBits,
+	Partials,
 	type Guild,
 	type GuildBasedChannel,
 	type Message,
@@ -28,6 +29,13 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 					GatewayIntentBits.GuildMessages,
 					GatewayIntentBits.MessageContent,
 					GatewayIntentBits.GuildMessageReactions,
+				],
+				partials: [
+					Partials.Message,
+					Partials.Channel,
+					Partials.GuildMember,
+					Partials.User,
+					Partials.Reaction,
 				],
 			});
 

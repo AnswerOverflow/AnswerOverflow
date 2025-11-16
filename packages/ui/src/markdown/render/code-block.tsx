@@ -8,7 +8,6 @@ interface CodeBlockProps {
 	lang?: string;
 	content: string;
 	key?: string;
-	className?: string;
 }
 
 interface CodeBlockInternalProps {
@@ -54,53 +53,20 @@ function CodeBlockInternal({
 	);
 }
 
-export function CodeBlock({ lang, content, key, className }: CodeBlockProps) {
+export function CodeBlock({ lang, content, key }: CodeBlockProps) {
 	return (
-		<div key={key} className="relative">
+		<div key={key} className="relative w-full">
 			<CodeBlockInternal
 				lang={lang}
 				content={content}
 				theme="light"
-				className={className}
+				className={"dark:hidden block w-full"}
 			/>
 			<CodeBlockInternal
 				lang={lang}
 				content={content}
 				theme="dark"
-				className={className}
-			/>
-			<script
-				// biome-ignore lint/security/noDangerouslySetInnerHtml: Inline script for theme switching
-				dangerouslySetInnerHTML={{
-					__html: `
-            (function() {
-              const container = document.currentScript.parentElement;
-              const lightBlock = container.querySelector('[data-theme="light"]');
-              const darkBlock = container.querySelector('[data-theme="dark"]');
-              
-              function updateTheme() {
-                const isDark = document.documentElement.classList.contains('dark');
-                if (lightBlock && darkBlock) {
-                  if (isDark) {
-                    lightBlock.style.display = 'none';
-                    darkBlock.style.display = 'block';
-                  } else {
-                    lightBlock.style.display = 'block';
-                    darkBlock.style.display = 'none';
-                  }
-                }
-              }
-              
-              updateTheme();
-              
-              const observer = new MutationObserver(updateTheme);
-              observer.observe(document.documentElement, {
-                attributes: true,
-                attributeFilter: ['class']
-              });
-            })();
-          `,
-				}}
+				className={"hidden dark:block w-full"}
 			/>
 		</div>
 	);

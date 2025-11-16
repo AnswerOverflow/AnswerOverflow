@@ -98,13 +98,10 @@ function useHybridAuth() {
 				anonymousTokenCache &&
 				anonymousTokenCache.expiresAt > now + bufferTime
 			) {
-				console.log("Using cached anonymous token");
 				return anonymousTokenCache.token;
 			}
 
-			console.log("Fetching new anonymous token");
 			const token = await fetchAnonymousToken();
-			console.log("Fetched anonymous token:", token ? "success" : "failed");
 			return token;
 		},
 		[session, anonymousTokenCache, fetchAnonymousToken],

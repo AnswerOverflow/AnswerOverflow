@@ -43,21 +43,72 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* Effect.promise(async () => {
-					const aoMessage = await toAOMessage(newMessage, server._id);
-					await upsertMessage(
+				const aoMessage = yield* Effect.promise(() =>
+					toAOMessage(newMessage, server._id),
+				);
+
+				if (newMessage.attachments.size > 0) {
+					const attachmentsToUpload = Array.from(
+						newMessage.attachments.values(),
+					).map((att) => ({
+						id: att.id,
+						url: att.url,
+						filename: att.name ?? "",
+						contentType: att.contentType ?? undefined,
+					}));
+
+					yield* Console.log(
+						`Uploading ${attachmentsToUpload.length} attachments for updated message ${newMessage.id}`,
+					);
+
+					const uploadResults =
+						yield* database.attachments.uploadManyAttachmentsFromUrls({
+							attachments: attachmentsToUpload,
+						});
+
+					for (const result of uploadResults) {
+						if (result.storageId && aoMessage.attachments) {
+							const attachment = aoMessage.attachments.find(
+								(a) => a.id === result.attachmentId,
+							);
+							if (attachment) {
+								attachment.storageId = result.storageId;
+							}
+						}
+					}
+				}
+
+				yield* Effect.promise(() =>
+					upsertMessage(
 						{
 							...aoMessage,
 							questionId: existingMessage.questionId,
 						},
 						{ ignoreChecks: false },
-					);
-				}).pipe(
-					Effect.tap(() => Console.log(`Updated message ${newMessage.id}`)),
+					),
+				).pipe(
+					Effect.tap(() =>
+						Console.log(
+							`Updated message ${newMessage.id} from ${newMessage.author.tag}`,
+						),
+					),
 					Effect.catchAll((error) =>
 						Console.error(`Error updating message ${newMessage.id}:`, error),
 					),
 				);
+
+				yield* database.discord_accounts
+					.upsertDiscordAccount({
+						account: toAODiscordAccount(newMessage.author),
+					})
+					.pipe(
+						Effect.catchAll((error) =>
+							Console.error(
+								`Error maintaining Discord account parity ${newMessage.author.id}:`,
+								error,
+							),
+						),
+					);
 			}),
 		);
 

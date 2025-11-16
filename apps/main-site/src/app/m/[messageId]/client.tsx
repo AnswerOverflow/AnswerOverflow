@@ -20,6 +20,10 @@ type MessagePageData = {
 		attachments: Attachment[];
 		reactions: Reaction[];
 		solutions: Message[];
+		metadata?: {
+			users?: Record<string, { username: string; globalName: string | null }>;
+			channels?: Record<string, { name: string; type: number }>;
+		};
 	}>;
 	server: {
 		_id: Id<"servers">;
@@ -97,8 +101,14 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 
 			<div className="space-y-4">
 				{data.messages.map((msgData: MessagePageData["messages"][number]) => {
-					const { message, author, attachments, reactions, solutions } =
-						msgData;
+					const {
+						message,
+						author,
+						attachments,
+						reactions,
+						solutions,
+						metadata,
+					} = msgData;
 
 					return (
 						<DiscordMessage
@@ -108,6 +118,7 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 							attachments={attachments}
 							reactions={reactions}
 							solutions={solutions}
+							metadata={metadata}
 							getAttachmentUrl={(attachment) => {
 								const convexSiteUrl =
 									process.env.NEXT_PUBLIC_CONVEX_URL?.replace(

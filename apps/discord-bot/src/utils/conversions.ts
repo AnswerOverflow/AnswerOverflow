@@ -120,6 +120,7 @@ export async function toAOMessage(
 					emoji: {
 						id: emoji.id,
 						name: emoji.name,
+						animated: emoji.animated ?? undefined,
 					},
 				});
 			}
@@ -222,7 +223,7 @@ export async function toAOMessage(
 		applicationId: message.applicationId ?? undefined,
 		interactionId: message.interaction?.id ?? undefined,
 		webhookId: message.webhookId ?? undefined,
-		content: message.cleanContent ?? message.content,
+		content: message.content,
 		flags: message.flags.bitfield,
 		type: message.type,
 		pinned: message.pinned ?? false,

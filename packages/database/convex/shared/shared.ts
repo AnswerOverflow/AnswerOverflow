@@ -1,4 +1,5 @@
 import type { Infer } from "convex/values";
+import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
@@ -281,6 +282,312 @@ export async function getDiscordAccountById(
 		.query("discordAccounts")
 		.filter((q) => q.eq(q.field("id"), id))
 		.first();
+}
+
+export function extractMentionIds(content: string): {
+	userIds: string[];
+	channelIds: string[];
+} {
+	const userIds = new Set<string>();
+	const channelIds = new Set<string>();
+
+	const userMentionRegex = /<@(\d+)>/g;
+	const channelMentionRegex = /<#(\d+)>/g;
+
+	let match;
+	while ((match = userMentionRegex.exec(content)) !== null) {
+		userIds.add(match[1]);
+	}
+
+	while ((match = channelMentionRegex.exec(content)) !== null) {
+		channelIds.add(match[1]);
+	}
+
+	return {
+		userIds: Array.from(userIds),
+		channelIds: Array.from(channelIds),
+	};
+}
+
+export function extractDiscordLinks(content: string): Array<{
+	original: string;
+	guildId: string;
+	channelId: string;
+	messageId?: string;
+}> {
+	const links: Array<{
+		original: string;
+		guildId: string;
+		channelId: string;
+		messageId?: string;
+	}> = [];
+
+	const discordLinkRegex =
+		/https:\/\/discord\.com\/channels\/(\d+)\/(\d+)(?:\/(\d+))?/g;
+
+	let match;
+	while ((match = discordLinkRegex.exec(content)) !== null) {
+		links.push({
+			original: match[0],
+			guildId: match[1],
+			channelId: match[2],
+			messageId: match[3],
+		});
+	}
+
+	return links;
+}
+
+export async function getMentionMetadata(
+	ctx: QueryCtx | MutationCtx,
+	userIds: string[],
+	channelIds: string[],
+	serverDiscordId: string,
+): Promise<{
+	users: Record<
+		string,
+		{ username: string; globalName: string | null; url: string }
+	>;
+	channels: Record<
+		string,
+		{
+			name: string;
+			type: number;
+			url: string;
+			indexingEnabled?: boolean;
+			exists?: boolean;
+		}
+	>;
+}> {
+	const users: Record<
+		string,
+		{ username: string; globalName: string | null; url: string }
+	> = {};
+	const channels: Record<
+		string,
+		{
+			name: string;
+			type: number;
+			url: string;
+			indexingEnabled?: boolean;
+			exists?: boolean;
+		}
+	> = {};
+
+	if (userIds.length > 0) {
+		const userAccounts = await asyncMap(userIds, (id) =>
+			getDiscordAccountById(ctx, id),
+		);
+
+		for (let i = 0; i < userIds.length; i++) {
+			const userId = userIds[i];
+			const account = userAccounts[i];
+			if (account) {
+				users[userId] = {
+					username: account.name,
+					globalName: null,
+					url: `/u/${userId}`,
+				};
+			} else {
+				users[userId] = {
+					username: userId,
+					globalName: null,
+					url: `https://discord.com/users/${userId}`,
+				};
+			}
+		}
+	}
+
+	if (channelIds.length > 0) {
+		const channelDocs = await asyncMap(channelIds, (id) =>
+			getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
+		);
+
+		const channelSettings = await asyncMap(channelIds, (id) =>
+			getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
+		);
+
+		for (let i = 0; i < channelIds.length; i++) {
+			const channelId = channelIds[i];
+			const channel = channelDocs[i];
+			const settings = channelSettings[i];
+
+			if (channel) {
+				const indexingEnabled = settings?.indexingEnabled ?? false;
+				channels[channelId] = {
+					name: channel.name,
+					type: channel.type,
+					url: indexingEnabled
+						? `/c/${serverDiscordId}/${channelId}`
+						: `https://discord.com/channels/${serverDiscordId}/${channelId}`,
+					indexingEnabled,
+					exists: true,
+				};
+			} else {
+				channels[channelId] = {
+					name: "Unknown Channel",
+					type: 0,
+					url: `https://discord.com/channels/${serverDiscordId}/${channelId}`,
+					indexingEnabled: false,
+					exists: false,
+				};
+			}
+		}
+	}
+
+	return { users, channels };
+}
+
+export async function getInternalLinksMetadata(
+	ctx: QueryCtx | MutationCtx,
+	discordLinks: Array<{
+		original: string;
+		guildId: string;
+		channelId: string;
+		messageId?: string;
+	}>,
+): Promise<
+	Array<{
+		original: string;
+		guild: { id: string; name: string };
+		channel: {
+			parent?: { name?: string; type?: number; parentId?: string };
+			id: string;
+			type: number;
+			name: string;
+		};
+		message?: string;
+	}>
+> {
+	if (discordLinks.length === 0) {
+		return [];
+	}
+
+	const serverMap = new Map<string, { id: string; name: string }>();
+	const channelMap = new Map<
+		string,
+		{ id: string; name: string; type: number; parentId?: string }
+	>();
+	const parentChannelMap = new Map<
+		string,
+		{ id: string; name: string; type: number }
+	>();
+	const messageExistsMap = new Map<string, boolean>();
+
+	const uniqueGuildIds = Array.from(
+		new Set(discordLinks.map((l) => l.guildId)),
+	);
+	const uniqueChannelIds = Array.from(
+		new Set(discordLinks.map((l) => l.channelId)),
+	);
+	const uniqueMessageIds = Array.from(
+		new Set(
+			discordLinks.map((l) => l.messageId).filter((id): id is string => !!id),
+		),
+	);
+
+	for (const guildId of uniqueGuildIds) {
+		const server = await getOneFrom(ctx.db, "servers", "by_discordId", guildId);
+		if (server) {
+			serverMap.set(guildId, { id: server.discordId, name: server.name });
+		}
+	}
+
+	for (const channelId of uniqueChannelIds) {
+		const channel = await getOneFrom(
+			ctx.db,
+			"channels",
+			"by_discordChannelId",
+			channelId,
+			"id",
+		);
+		if (channel) {
+			channelMap.set(channelId, {
+				id: channel.id,
+				name: channel.name,
+				type: channel.type,
+				parentId: channel.parentId,
+			});
+
+			if (channel.parentId) {
+				const parentChannel = await getOneFrom(
+					ctx.db,
+					"channels",
+					"by_discordChannelId",
+					channel.parentId,
+					"id",
+				);
+				if (parentChannel) {
+					parentChannelMap.set(channel.parentId, {
+						id: parentChannel.id,
+						name: parentChannel.name,
+						type: parentChannel.type,
+					});
+				}
+			}
+		}
+	}
+
+	for (const messageId of uniqueMessageIds) {
+		const message = await ctx.db
+			.query("messages")
+			.filter((q) => q.eq(q.field("id"), messageId))
+			.first();
+		messageExistsMap.set(messageId, !!message);
+	}
+
+	const results: Array<{
+		original: string;
+		guild: { id: string; name: string };
+		channel: {
+			parent?: { name?: string; type?: number; parentId?: string };
+			id: string;
+			type: number;
+			name: string;
+		};
+		message?: string;
+	}> = [];
+
+	for (const link of discordLinks) {
+		const server = serverMap.get(link.guildId);
+		const channel = channelMap.get(link.channelId);
+
+		if (!server || !channel) {
+			continue;
+		}
+
+		const parentChannel = channel.parentId
+			? parentChannelMap.get(channel.parentId)
+			: undefined;
+
+		const messageExists = link.messageId
+			? messageExistsMap.get(link.messageId)
+			: undefined;
+
+		if (link.messageId && !messageExists) {
+			continue;
+		}
+
+		results.push({
+			original: link.original,
+			guild: { id: server.id, name: server.name },
+			channel: {
+				id: channel.id,
+				type: channel.type,
+				name: channel.name,
+				parent: parentChannel
+					? {
+							name: parentChannel.name,
+							type: parentChannel.type,
+							parentId: parentChannel.id,
+						}
+					: undefined,
+			},
+			message: link.messageId,
+		});
+	}
+
+	return results;
 }
 
 export async function getMessageById(ctx: QueryCtx | MutationCtx, id: string) {

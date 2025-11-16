@@ -171,6 +171,7 @@ export const attachmentSchema = v.object({
 export const emojiSchema = v.object({
 	id: v.string(), // Discord emoji ID (snowflake)
 	name: v.string(),
+	animated: v.optional(v.boolean()),
 });
 
 export const reactionSchema = v.object({
