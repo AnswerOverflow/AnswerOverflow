@@ -14,7 +14,7 @@
 		"codegen": "bunx convex codegen && bun run scripts/generate-function-types.ts",
 		"generate-function-types": "bun run scripts/generate-function-types.ts",
 		"generate-function-types:watch": "chokidar \"convex/{public,authenticated,private}/**/*.ts\" -c \"bun run scripts/generate-function-types.ts\"",
-		"dev": "bun run generate-function-types:watch & convex dev",
+		"dev": "bun run scripts/dev.ts",
 		"typecheck": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
 		"clean": "rm -rf node_modules .turbo",
 		"test": "vitest run --no-watch --pool=forks",
