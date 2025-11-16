@@ -15,6 +15,7 @@ export const publicSearch = publicQuery({
 		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
+		console.log(args);
 		const paginationOpts = {
 			...args.paginationOpts,
 			numItems: Math.min(args.paginationOpts.numItems, 10),

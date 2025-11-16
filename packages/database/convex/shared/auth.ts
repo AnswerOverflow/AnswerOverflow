@@ -15,7 +15,7 @@ import {
 } from "../shared/shared";
 
 export async function getDiscordAccountIdFromAuth(
-	ctx: QueryCtx | MutationCtx,
+	ctx: QueryCtx | MutationCtx | ActionCtx,
 ): Promise<string | null> {
 	const user = await authComponent.getAuthUser(ctx);
 

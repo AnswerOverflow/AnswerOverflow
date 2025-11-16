@@ -2,6 +2,8 @@
 // DO NOT EDIT MANUALLY
 
 export const FUNCTION_TYPE_MAP = {
+	"anonymous_session.createAnonymousSession": "mutation",
+	"anonymous_session.getAnonymousSession": "query",
 	"attachments.getAttachmentUrl": "action",
 	"attachments.uploadAttachmentFromUrl": "action",
 	"attachments.uploadManyAttachmentsFromUrls": "action",
@@ -84,6 +86,7 @@ export const FUNCTION_TYPE_MAP = {
 } as const;
 
 export const PUBLIC_INTERNAL_NAMESPACES = [
+	"anonymous_session",
 	"attachments",
 	"channels",
 	"discord_accounts",
@@ -95,6 +98,7 @@ export const PUBLIC_INTERNAL_NAMESPACES = [
 ] as const;
 
 export const NAMESPACE_STRUCTURE = {
+	anonymous_session: ["createAnonymousSession", "getAnonymousSession"],
 	attachments: [
 		"getAttachmentUrl",
 		"uploadAttachmentFromUrl",

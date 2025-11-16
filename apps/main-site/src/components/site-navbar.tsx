@@ -48,23 +48,6 @@ export function SiteNavbar() {
 				href: "/dashboard",
 				children: "Get Started",
 			}}
-			userSection={
-				session?.user
-					? {
-							user: {
-								name: session.user.name ?? null,
-								image: session.user.image ?? null,
-								email: session.user.email ?? null,
-							},
-							onSignOut: async () => {
-								await authClient.signOut();
-								router.push("/");
-							},
-						}
-					: {
-							signInHref: "/api/auth/sign-in",
-						}
-			}
 		/>
 	);
 }

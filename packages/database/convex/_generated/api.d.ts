@@ -18,6 +18,7 @@ import type * as client_publicInternal from "../client/publicInternal.js";
 import type * as http from "../http.js";
 import type * as public_custom_functions from "../public/custom_functions.js";
 import type * as public_search from "../public/search.js";
+import type * as publicInternal_anonymous_session from "../publicInternal/anonymous_session.js";
 import type * as publicInternal_attachments from "../publicInternal/attachments.js";
 import type * as publicInternal_channels from "../publicInternal/channels.js";
 import type * as publicInternal_discord_accounts from "../publicInternal/discord_accounts.js";
@@ -27,6 +28,7 @@ import type * as publicInternal_server_preferences from "../publicInternal/serve
 import type * as publicInternal_servers from "../publicInternal/servers.js";
 import type * as publicInternal_user_server_settings from "../publicInternal/user_server_settings.js";
 import type * as shared_auth from "../shared/auth.js";
+import type * as shared_authIdentity from "../shared/authIdentity.js";
 import type * as shared_betterAuth from "../shared/betterAuth.js";
 import type * as shared_permissions from "../shared/permissions.js";
 import type * as shared_shared from "../shared/shared.js";
@@ -48,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "public/custom_functions": typeof public_custom_functions;
   "public/search": typeof public_search;
+  "publicInternal/anonymous_session": typeof publicInternal_anonymous_session;
   "publicInternal/attachments": typeof publicInternal_attachments;
   "publicInternal/channels": typeof publicInternal_channels;
   "publicInternal/discord_accounts": typeof publicInternal_discord_accounts;
@@ -57,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   "publicInternal/servers": typeof publicInternal_servers;
   "publicInternal/user_server_settings": typeof publicInternal_user_server_settings;
   "shared/auth": typeof shared_auth;
+  "shared/authIdentity": typeof shared_authIdentity;
   "shared/betterAuth": typeof shared_betterAuth;
   "shared/permissions": typeof shared_permissions;
   "shared/shared": typeof shared_shared;

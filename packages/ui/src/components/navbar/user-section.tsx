@@ -1,7 +1,9 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { authClient } from "../convex-client-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import {
 	DropdownMenu,
@@ -32,11 +34,7 @@ export interface User {
 }
 
 export interface UserSectionProps {
-	user?: User | null;
-	onSignIn?: () => void;
-	signInHref?: string;
 	showSignIn?: boolean;
-	onSignOut?: () => void | Promise<void>;
 }
 
 function ChangeThemeItem() {
@@ -123,22 +121,39 @@ function SignInButton({
 	);
 }
 
-export function UserSection({
-	user,
-	onSignIn,
-	signInHref,
-	showSignIn = true,
-	onSignOut,
-}: UserSectionProps) {
+export function UserSection({ showSignIn = true }: UserSectionProps) {
+	const router = useRouter();
+	const { data: session } = authClient.useSession();
+
+	const handleSignIn = async () => {
+		await authClient.signIn.social({
+			provider: "discord",
+			callbackURL: window.location.href,
+		});
+	};
+
+	const handleSignOut = async () => {
+		await authClient.signOut();
+		router.push("/");
+	};
+
+	const user = session?.user
+		? {
+				name: session.user.name ?? null,
+				image: session.user.image ?? null,
+				email: session.user.email ?? null,
+			}
+		: null;
+
 	if (!user && showSignIn) {
-		return <SignInButton onSignIn={onSignIn} href={signInHref} />;
+		return <SignInButton onSignIn={handleSignIn} />;
 	}
 
 	if (!user) {
 		return null;
 	}
 
-	return <UserAvatar user={user} onSignOut={onSignOut} />;
+	return <UserAvatar user={user} onSignOut={handleSignOut} />;
 }
 
 export function UserSectionSkeleton() {

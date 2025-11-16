@@ -53,28 +53,8 @@ export default function DashboardLayout({
 				}
 			: undefined;
 
-	const userSectionProps = session?.user
-		? {
-				user: {
-					name: session.user.name ?? null,
-					image: session.user.image ?? null,
-					email: session.user.email ?? null,
-				},
-				onSignOut: async () => {
-					await authClient.signOut();
-					window.location.href = "/";
-				},
-			}
-		: {
-				signInHref: "/api/auth/signin",
-			};
-
 	return (
-		<DashboardNavbar
-			serverSelect={serverSelectProps}
-			userSection={userSectionProps}
-			homeHref="/dashboard"
-		>
+		<DashboardNavbar serverSelect={serverSelectProps} homeHref="/dashboard">
 			{children}
 		</DashboardNavbar>
 	);

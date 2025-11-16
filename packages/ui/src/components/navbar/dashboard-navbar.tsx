@@ -9,7 +9,7 @@ import {
 	ServerSelectDropdown,
 	type ServerSelectDropdownProps,
 } from "./server-select-dropdown";
-import { UserSection, type UserSectionProps } from "./user-section";
+import { UserSection } from "./user-section";
 
 interface DashboardNavbarContextValue {
 	mobileSidebarOpen: boolean;
@@ -29,14 +29,12 @@ export function useDashboardNavbar() {
 
 export interface DashboardNavbarProps {
 	serverSelect?: ServerSelectDropdownProps;
-	userSection?: UserSectionProps;
 	homeHref?: string;
 	children?: React.ReactNode;
 }
 
 export function DashboardNavbar({
 	serverSelect,
-	userSection,
 	homeHref = "/dashboard",
 	children,
 }: DashboardNavbarProps) {
@@ -77,7 +75,7 @@ export function DashboardNavbar({
 					</div>
 
 					{/* User Section */}
-					{userSection && <UserSection {...userSection} />}
+					<UserSection />
 				</header>
 
 				{/* Main Content - Offset for navbar */}

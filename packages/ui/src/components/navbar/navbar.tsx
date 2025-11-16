@@ -8,13 +8,12 @@ import { Link } from "../link";
 import { LinkButton } from "../link-button";
 import { ServerIcon } from "../server-icon";
 import { ThemeSwitcher } from "../theme-switcher";
-import { UserSection, type UserSectionProps } from "./user-section";
+import { UserSection } from "./user-section";
 export interface NavbarProps {
 	logo?: React.ReactNode;
 	server?: Pick<Server, "discordId" | "name" | "icon"> | null;
 	homeHref?: string;
 	hideIcon?: boolean;
-	userSection?: UserSectionProps;
 	showSearch?: boolean;
 	searchHref?: string;
 	showGitHub?: boolean;
@@ -29,7 +28,6 @@ export function Navbar({
 	server,
 	homeHref = "/",
 	hideIcon = false,
-	userSection,
 	showSearch = true,
 	searchHref = "/search",
 	showGitHub = false,
@@ -96,11 +94,15 @@ export function Navbar({
 						</LinkButton>
 					)}
 					{showGetStarted && getStartedProps && (
-						<LinkButton className="hidden md:block" {...getStartedProps}>
+						<LinkButton
+							className={cn("hidden md:block", getStartedProps.className)}
+							variant={getStartedProps.variant ?? "default"}
+							{...getStartedProps}
+						>
 							Get Started
 						</LinkButton>
 					)}
-					{userSection && <UserSection {...userSection} />}
+					<UserSection />
 				</div>
 			</nav>
 		</header>

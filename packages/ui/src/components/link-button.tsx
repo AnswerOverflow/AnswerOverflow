@@ -30,11 +30,7 @@ export function LinkButton({
 
 	return (
 		<Button asChild variant={finalVariant} size={size} className={className}>
-			<Link
-				href={href}
-				className="!text-current no-underline hover:no-underline"
-				{...props}
-			>
+			<Link href={href} className="no-underline hover:no-underline" {...props}>
 				{children}
 			</Link>
 		</Button>
