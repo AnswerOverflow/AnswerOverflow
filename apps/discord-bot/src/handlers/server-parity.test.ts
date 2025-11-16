@@ -81,7 +81,7 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 	}).pipe(Effect.provide(TestLayer)),
 );
 
-it.scoped.only("guild-parity: runs first on guildCreate", () =>
+it.scoped("guild-parity: runs first on guildCreate", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 		const discordMock = yield* DiscordClientMock;

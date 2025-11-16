@@ -38,7 +38,7 @@ it.scoped("live data updates when server is modified", () =>
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
-it.scoped.only(
+it.scoped(
 	"deduplication: multiple requests for same query+args return same LiveData",
 	() =>
 		Effect.gen(function* () {
@@ -129,15 +129,24 @@ it.scoped("reference counting: multiple acquisitions increment refCount", () =>
 		const scope3 = yield* Scope.make();
 
 		const liveData1 = yield* Scope.extend(
-			database.servers.getServerByDiscordId({ discordId: "123" }),
+			database.servers.getServerByDiscordId(
+				{ discordId: "123" },
+				{ subscribe: true },
+			),
 			scope1,
 		);
 		const liveData2 = yield* Scope.extend(
-			database.servers.getServerByDiscordId({ discordId: "123" }),
+			database.servers.getServerByDiscordId(
+				{ discordId: "123" },
+				{ subscribe: true },
+			),
 			scope2,
 		);
 		const liveData3 = yield* Scope.extend(
-			database.servers.getServerByDiscordId({ discordId: "123" }),
+			database.servers.getServerByDiscordId(
+				{ discordId: "123" },
+				{ subscribe: true },
+			),
 			scope3,
 		);
 
@@ -146,12 +155,12 @@ it.scoped("reference counting: multiple acquisitions increment refCount", () =>
 
 		yield* Scope.close(scope1, Exit.succeed(undefined));
 
-		expect(liveData2?.discordId).toBe("123");
-		expect(liveData3?.discordId).toBe("123");
+		expect(liveData2?.data?.discordId).toBe("123");
+		expect(liveData3?.data?.discordId).toBe("123");
 
 		yield* Scope.close(scope2, Exit.succeed(undefined));
 
-		expect(liveData3?.discordId).toBe("123");
+		expect(liveData3?.data?.discordId).toBe("123");
 
 		yield* Scope.close(scope3, Exit.succeed(undefined));
 	}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -165,19 +174,28 @@ it.scoped(
 
 			yield* database.servers.upsertServer(server);
 
-			const liveData1 = yield* database.servers.getServerByDiscordId({
-				discordId: "123",
-			});
-			const liveData2 = yield* database.servers.getServerByDiscordId({
-				discordId: "123",
-			});
-			const liveData3 = yield* database.servers.getServerByDiscordId({
-				discordId: "123",
-			});
+			const liveData1 = yield* database.servers.getServerByDiscordId(
+				{
+					discordId: "123",
+				},
+				{ subscribe: true },
+			);
+			const liveData2 = yield* database.servers.getServerByDiscordId(
+				{
+					discordId: "123",
+				},
+				{ subscribe: true },
+			);
+			const liveData3 = yield* database.servers.getServerByDiscordId(
+				{
+					discordId: "123",
+				},
+				{ subscribe: true },
+			);
 
-			expect(liveData1?.description).toBe("Test Description");
-			expect(liveData2?.description).toBe("Test Description");
-			expect(liveData3?.description).toBe("Test Description");
+			expect(liveData1?.data?.description).toBe("Test Description");
+			expect(liveData2?.data?.description).toBe("Test Description");
+			expect(liveData3?.data?.description).toBe("Test Description");
 
 			const updatedDescription = `Updated description ${Math.random()}`;
 			yield* database.servers.upsertServer({
@@ -185,9 +203,9 @@ it.scoped(
 				description: updatedDescription,
 			});
 
-			expect(liveData1?.description).toBe(updatedDescription);
-			expect(liveData2?.description).toBe(updatedDescription);
-			expect(liveData3?.description).toBe(updatedDescription);
+			expect(liveData1?.data?.description).toBe(updatedDescription);
+			expect(liveData2?.data?.description).toBe(updatedDescription);
+			expect(liveData3?.data?.description).toBe(updatedDescription);
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -200,15 +218,21 @@ it.scoped(
 			yield* database.servers.upsertServer(server);
 			yield* database.servers.upsertServer(server2);
 
-			const liveData1 = yield* database.servers.getServerByDiscordId({
-				discordId: "123",
-			});
-			const liveData2 = yield* database.servers.getServerByDiscordId({
-				discordId: "456",
-			});
+			const liveData1 = yield* database.servers.getServerByDiscordId(
+				{
+					discordId: "123",
+				},
+				{ subscribe: true },
+			);
+			const liveData2 = yield* database.servers.getServerByDiscordId(
+				{
+					discordId: "456",
+				},
+				{ subscribe: true },
+			);
 
-			expect(liveData1?.discordId).toBe("123");
-			expect(liveData2?.discordId).toBe("456");
+			expect(liveData1?.data?.discordId).toBe("123");
+			expect(liveData2?.data?.discordId).toBe("456");
 
 			const updatedDescription = `Updated description ${Math.random()}`;
 			yield* database.servers.upsertServer({
@@ -216,9 +240,9 @@ it.scoped(
 				description: updatedDescription,
 			});
 
-			expect(liveData1?.description).toBe(updatedDescription);
-			expect(liveData2?.description).toBe("Test Description 2");
-			expect(liveData2?.discordId).toBe("456");
+			expect(liveData1?.data?.description).toBe(updatedDescription);
+			expect(liveData2?.data?.description).toBe("Test Description 2");
+			expect(liveData2?.data?.discordId).toBe("456");
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -258,16 +282,18 @@ it.scoped("getAllServers updates when any server changes", () =>
 
 		yield* database.servers.upsertServer(server);
 
-		const liveData = yield* database.servers.getAllServers();
+		const liveData = yield* database.servers.getAllServers(undefined, {
+			subscribe: true,
+		});
 
-		expect(liveData?.length).toBe(1);
-		expect(liveData?.[0]?.discordId).toBe("123");
+		expect(liveData?.data?.length).toBe(1);
+		expect(liveData?.data?.[0]?.discordId).toBe("123");
 
 		yield* database.servers.upsertServer(server2);
 
-		expect(liveData?.length).toBe(2);
-		expect(liveData?.some((s) => s.discordId === "123")).toBe(true);
-		expect(liveData?.some((s) => s.discordId === "456")).toBe(true);
+		expect(liveData?.data?.length).toBe(2);
+		expect(liveData?.data?.some((s) => s.discordId === "123")).toBe(true);
+		expect(liveData?.data?.some((s) => s.discordId === "456")).toBe(true);
 
 		const updatedDescription = `Updated description ${Math.random()}`;
 		yield* database.servers.upsertServer({
@@ -275,8 +301,8 @@ it.scoped("getAllServers updates when any server changes", () =>
 			description: updatedDescription,
 		});
 
-		expect(liveData?.length).toBe(2);
-		const updatedServer = liveData?.find((s) => s.discordId === "123");
+		expect(liveData?.data?.length).toBe(2);
+		const updatedServer = liveData?.data?.find((s) => s.discordId === "123");
 		expect(updatedServer?.description).toBe(updatedDescription);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -287,12 +313,16 @@ it.scoped("LiveData handles queries with no args", () =>
 
 		yield* database.servers.upsertServer(server);
 
-		const liveData1 = yield* database.servers.getAllServers();
-		const liveData2 = yield* database.servers.getAllServers();
+		const liveData1 = yield* database.servers.getAllServers(undefined, {
+			subscribe: true,
+		});
+		const liveData2 = yield* database.servers.getAllServers(undefined, {
+			subscribe: true,
+		});
 
 		expect(liveData1).toBe(liveData2);
 
-		expect(liveData1?.length).toBe(1);
+		expect(liveData1?.data?.length).toBe(1);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -312,11 +342,14 @@ it.scoped("LiveData updates when null result becomes non-null", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const liveData = yield* database.servers.getServerByDiscordId({
-			discordId: "789",
-		});
+		const liveData = yield* database.servers.getServerByDiscordId(
+			{
+				discordId: "789",
+			},
+			{ subscribe: true },
+		);
 
-		expect(liveData).toBeNull();
+		expect(liveData?.data).toBeNull();
 
 		const newServer: Server = {
 			...server,
@@ -325,8 +358,8 @@ it.scoped("LiveData updates when null result becomes non-null", () =>
 		};
 		yield* database.servers.upsertServer(newServer);
 
-		expect(liveData?.discordId).toBe("789");
-		expect(liveData?.name).toBe("New Server");
+		expect(liveData?.data?.discordId).toBe("789");
+		expect(liveData?.data?.name).toBe("New Server");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
