@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { query } from "../_generated/server";
 import { authenticatedQuery } from "../client";
 import {
 	DISCORD_PERMISSIONS,
@@ -11,7 +10,7 @@ import {
 	sortServersByBotAndRole,
 } from "../shared/shared";
 
-export const getDashboardData = query({
+export const getDashboardData = authenticatedQuery({
 	args: { serverId: v.id("servers") },
 	handler: async (ctx, args) => {
 		const server = await ctx.db.get(args.serverId);
