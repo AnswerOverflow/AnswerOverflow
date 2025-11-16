@@ -214,8 +214,11 @@ export const getUserServers = authenticatedAction({
 								Effect.tryPromise({
 									try: () =>
 										ctx.runQuery(
-											api.public.servers.publicFindManyServersByDiscordId,
-											{ discordIds: serverDiscordIds },
+											api.publicInternal.servers.findManyServersByDiscordId,
+											{
+												discordIds: serverDiscordIds,
+												backendAccessToken: getBackendAccessToken(),
+											},
 										),
 									catch: (error) => new Error(String(error)),
 								}),
@@ -492,8 +495,9 @@ export const syncUserServerSettingsBackground = internalAction({
 					)(
 						Effect.tryPromise({
 							try: () =>
-								ctx.runQuery(api.public.servers.publicFindManyServersById, {
+								ctx.runQuery(api.publicInternal.servers.findManyServersById, {
 									ids: aoServerIds,
+									backendAccessToken,
 								}) as Promise<Array<Doc<"servers">>>,
 							catch: (error) => new Error(String(error)),
 						}),

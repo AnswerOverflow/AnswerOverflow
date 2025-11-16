@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import { Array as Arr, Predicate } from "effect";
 import { publicInternalMutation, publicInternalQuery } from "../client";
 import { serverSchema } from "../schema";
 
@@ -149,6 +150,22 @@ export const findManyServersById = publicInternalQuery({
 			}
 		}
 		return servers;
+	},
+});
+
+export const findManyServersByDiscordId = publicInternalQuery({
+	args: {
+		discordIds: v.array(v.string()),
+	},
+	handler: async (ctx, args) => {
+		if (args.discordIds.length === 0) return [];
+		const servers = await asyncMap(args.discordIds, (discordId) =>
+			ctx.db
+				.query("servers")
+				.withIndex("by_discordId", (q) => q.eq("discordId", discordId))
+				.first(),
+		);
+		return Arr.filter(servers, Predicate.isNotNullable);
 	},
 });
 
