@@ -20,6 +20,7 @@
 		"@uidotdev/usehooks": "^2.4.1",
 		"babel-plugin-react-compiler": "^19.1.0-rc.2",
 		"better-auth": "catalog:",
+		"botid": "^1.5.10",
 		"convex": "catalog:",
 		"effect": "catalog:",
 		"hono": "^4.10.6",

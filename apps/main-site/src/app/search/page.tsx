@@ -9,12 +9,14 @@ import { usePaginatedQuery } from "convex/react";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 import { useDebounce } from "use-debounce";
+import { useAnonymousSession } from "@/hooks/session";
 
 type Props = {
 	searchParams: Promise<{ q?: string; s?: string; c?: string }>;
 };
 
 function SearchInput() {
+	const { data: anonymousSession } = useAnonymousSession();
 	const [searchQuery, setSearchQuery] = useQueryState("q", {
 		defaultValue: "",
 	});
