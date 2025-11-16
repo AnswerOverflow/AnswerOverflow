@@ -12,7 +12,6 @@ import type {
 } from "./convex-unified-client";
 import { LiveData } from "./live-data";
 
-// Request type for watch subscriptions
 interface WatchRequest<Query extends FunctionReference<"query">>
 	extends Request.Request<LiveData<FunctionReturnType<Query>>, ConvexError> {
 	readonly _tag: "WatchRequest";
@@ -21,10 +20,8 @@ interface WatchRequest<Query extends FunctionReference<"query">>
 	readonly cacheKey: string;
 }
 
-// WeakMap to store cache keys for LiveData instances
 const liveDataCacheKeys = new WeakMap<LiveData<unknown>, string>();
 
-// Helper to create a watch request
 const watchRequest = <Query extends FunctionReference<"query">>(
 	query: Query,
 	args: FunctionArgs<Query>,
@@ -38,14 +35,10 @@ const watchRequest = <Query extends FunctionReference<"query">>(
 	});
 };
 
-// Helper to extract args from OptionalRestArgs
-// When args is empty, returns {} for queries with no args
 const extractArgs = <Query extends FunctionReference<"query">>(
 	args: OptionalRestArgs<Query>,
 ): FunctionArgs<Query> => (args[0] ?? {}) as FunctionArgs<Query>;
 
-// Map to store active watches and their reference counts
-// Cache key (function name + args) guarantees type safety at runtime
 type ActiveWatch = {
 	liveData: LiveData<FunctionReturnType<FunctionReference<"query">>>;
 	unsubscribe: () => void;
@@ -70,8 +63,6 @@ export const createWatchQueryToLiveData = <
 					const existing = activeWatches.get(cacheKey);
 					if (existing) {
 						existing.refCount++;
-						// The cache key (function name + args) guarantees the stored LiveData
-						// has the correct type for this request at runtime
 						yield* Request.complete(request, Exit.succeed(existing.liveData));
 						continue;
 					}
@@ -103,7 +94,6 @@ export const createWatchQueryToLiveData = <
 								currentValue,
 							);
 
-							// Store in active watches
 							activeWatches.set(cacheKey, {
 								liveData,
 								unsubscribe,
@@ -129,10 +119,8 @@ export const createWatchQueryToLiveData = <
 				const queryArgs = extractArgs(args);
 				const request = watchRequest(query, queryArgs);
 
-				// Use the resolver with the request - deduplication happens automatically
 				const liveData = yield* Effect.request(request, watchResolver);
 
-				// Store cache key in WeakMap for cleanup
 				liveDataCacheKeys.set(liveData, request.cacheKey);
 
 				return liveData;

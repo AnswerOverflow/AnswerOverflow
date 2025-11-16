@@ -51,7 +51,6 @@ export const createDiscordService = Effect.gen(function* () {
 			},
 		});
 
-	// Login to Discord - called explicitly by the user
 	const login = () =>
 		Effect.gen(function* () {
 			yield* use((c) => c.login(token));
@@ -71,19 +70,14 @@ export const createDiscordService = Effect.gen(function* () {
 		handler: (...args: ClientEvents[E]) => Effect.Effect<void, Err, Req>,
 	): Effect.Effect<() => void, UnknownDiscordError, Req> =>
 		Effect.gen(function* () {
-			// Capture the runtime - the type system ensures Req is available here
 			const runtime: Runtime.Runtime<Req> = yield* Effect.runtime<Req>();
 			const eventKey = String(event);
 
 			const listener = (...args: ClientEvents[E]) => {
-				// Run the handler Effect in a scoped context to handle resource cleanup
-				// Effect.scoped provides a Scope and removes it from the requirements
 				const handlerEffect = Effect.scoped(handler(...args));
 
-				// Fork the handler and track the fiber
 				const fiber = Runtime.runFork(runtime)(handlerEffect);
 
-				// Add fiber to tracking synchronously
 				Runtime.runSync(runtime)(
 					Ref.update(activeHandlers, (map) => {
 						const existingFibers = Option.getOrElse(
@@ -94,7 +88,6 @@ export const createDiscordService = Effect.gen(function* () {
 					}),
 				);
 
-				// Remove fiber from tracking when handler completes
 				Runtime.runFork(runtime)(
 					Fiber.await(fiber).pipe(
 						Effect.flatMap(() =>
@@ -119,16 +112,11 @@ export const createDiscordService = Effect.gen(function* () {
 
 			client.on(event, listener);
 
-			// Return cleanup function
 			return () => {
 				client.off(event, listener);
 			};
 		});
 
-	/**
-	 * Wait for all handlers of a specific event to complete.
-	 * Useful for testing when you need to ensure all event handlers have finished.
-	 */
 	const waitForHandlers = <E extends keyof ClientEvents>(
 		event: E,
 	): Effect.Effect<void, never, never> =>
@@ -147,7 +135,6 @@ export const createDiscordService = Effect.gen(function* () {
 			yield* Fiber.awaitAll(fibers).pipe(Effect.asVoid);
 		});
 
-	// High-level operations using the raw client
 	const getGuild = (id: string) =>
 		use((c) => {
 			const guild = c.guilds.cache.get(id);

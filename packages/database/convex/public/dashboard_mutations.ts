@@ -5,10 +5,6 @@ import { assertCanEditServer } from "../shared/auth";
 import type { AuthorizedUser, CanEditServer } from "../shared/permissions";
 import { validateCustomDomain } from "../shared/shared";
 
-/**
- * Update server preferences flags (for dashboard)
- * Only updates the flags, not other preferences fields
- */
 export const updateServerPreferencesFlags = authenticatedMutation({
 	args: {
 		serverId: v.id("servers"),
@@ -26,11 +22,9 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 			throw new Error("Server not found");
 		}
 
-		// Permission check returns branded type - TypeScript enforces it's used
 		const _authorizedUser: AuthorizedUser<CanEditServer> =
 			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
-		// unique() returns undefined if no document exists, throws if multiple exist
 		let preferences: Awaited<
 			ReturnType<typeof ctx.db.get<"serverPreferences">>
 		> | null = null;
@@ -41,7 +35,6 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 					.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
 					.unique()) ?? null;
 		} catch {
-			// unique() throws if multiple documents exist - this enforces uniqueness at the database level
 			throw new Error(
 				`Multiple server preferences found for server ${args.serverId}. This indicates a data integrity issue.`,
 			);
@@ -55,7 +48,6 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 
 			await ctx.db.patch(args.serverId, { preferencesId });
 
-			// Re-query using unique() to get the created preferences (handles race conditions and enforces uniqueness)
 			try {
 				preferences =
 					(await ctx.db
@@ -63,13 +55,11 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 						.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
 						.unique()) ?? null;
 			} catch {
-				// If multiple documents exist, this is a data integrity issue
 				throw new Error(
 					`Multiple server preferences found for server ${args.serverId}. This indicates a data integrity issue.`,
 				);
 			}
 
-			// If still not found (shouldn't happen), try direct get as fallback
 			if (!preferences) {
 				preferences = await ctx.db.get(preferencesId);
 			}
@@ -86,10 +76,6 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 	},
 });
 
-/**
- * Update channel settings flags (for dashboard)
- * Only updates the flags, not other channel fields
- */
 export const updateChannelSettingsFlags = authenticatedMutation({
 	args: {
 		channelId: v.string(),
@@ -118,11 +104,9 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 			throw new Error("Server not found");
 		}
 
-		// Permission check returns branded type - TypeScript enforces it's used
 		const _authorizedUser: AuthorizedUser<CanEditServer> =
 			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
-		// unique() returns undefined if no document exists, throws if multiple exist
 		let settings: Awaited<
 			ReturnType<typeof ctx.db.get<"channelSettings">>
 		> | null = null;
@@ -133,7 +117,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 					.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
 					.unique()) ?? null;
 		} catch {
-			// unique() throws if multiple documents exist - this enforces uniqueness at the database level
 			throw new Error(
 				`Multiple channel settings found for channel ${args.channelId}. This indicates a data integrity issue.`,
 			);
@@ -150,7 +133,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 				...args.flags,
 			});
 
-			// Re-query using unique() to get the created settings (handles race conditions and enforces uniqueness)
 			try {
 				settings =
 					(await ctx.db
@@ -158,13 +140,11 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 						.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
 						.unique()) ?? null;
 			} catch {
-				// If multiple documents exist, this is a data integrity issue
 				throw new Error(
 					`Multiple channel settings found for channel ${args.channelId}. This indicates a data integrity issue.`,
 				);
 			}
 
-			// If still not found (shouldn't happen), try direct get as fallback
 			if (!settings) {
 				settings = await ctx.db.get(settingsId);
 			}
@@ -181,9 +161,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 	},
 });
 
-/**
- * Update custom domain for a server (for dashboard)
- */
 export const updateCustomDomain = authenticatedMutation({
 	args: {
 		serverId: v.id("servers"),
@@ -197,7 +174,6 @@ export const updateCustomDomain = authenticatedMutation({
 			throw new Error("Server not found");
 		}
 
-		// Permission check returns branded type - TypeScript enforces it's used
 		const _authorizedUser: AuthorizedUser<CanEditServer> =
 			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 

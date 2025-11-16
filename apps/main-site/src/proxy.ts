@@ -11,7 +11,6 @@ export default function proxy(request: NextRequest, _event: NextFetchEvent) {
 	if (isProtectedRoute(pathname)) {
 		const sessionCookie = request.cookies.get("better-auth.session_token");
 		if (!sessionCookie) {
-			// Redirect to sign in if not authenticated
 			const signInUrl = new URL("/api/auth/sign-in", request.url);
 			signInUrl.searchParams.set("redirect", pathname);
 			return NextResponse.redirect(signInUrl);

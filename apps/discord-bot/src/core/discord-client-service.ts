@@ -1,7 +1,6 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { Context, Effect, Layer } from "effect";
 
-// Low-level Discord client service - provides raw Discord.js client instance
 const createDiscordClientService = Effect.succeed(
 	new Client({
 		intents: [

@@ -11,7 +11,6 @@ import {
 } from "discord.js";
 import { Effect } from "effect";
 
-// Button IDs for manage account menu
 export const menuButtonIds = {
 	consentButton: "consent-button",
 	revokeConsentButton: "revoke-consent-button",
@@ -40,9 +39,6 @@ type ManageAccountState = {
 	isIgnoredAccount: boolean;
 };
 
-/**
- * Gets default user server settings with flags
- */
 function getDefaultUserServerSettingsWithFlags({
 	userId,
 	serverId,
@@ -64,9 +60,6 @@ function getDefaultUserServerSettingsWithFlags({
 	};
 }
 
-/**
- * Generates the embed for the manage account menu
- */
 function generateManageAccountEmbed(state: ManageAccountState): EmbedBuilder {
 	const embed = new EmbedBuilder()
 		.setTitle("Manage your account settings")
@@ -78,9 +71,6 @@ function generateManageAccountEmbed(state: ManageAccountState): EmbedBuilder {
 	return embed;
 }
 
-/**
- * Generates the action row with buttons for the manage account menu
- */
 function generateManageAccountActionRow(
 	state: ManageAccountState,
 ): ActionRowBuilder<MessageActionRowComponentBuilder> {
@@ -137,9 +127,6 @@ function generateManageAccountActionRow(
 	return actionRow;
 }
 
-/**
- * Handles the "manage-account" slash command
- */
 export function handleManageAccountCommand(
 	interaction: ChatInputCommandInteraction,
 ): Effect.Effect<void, unknown, Database> {
@@ -212,11 +199,9 @@ export function handleManageAccountCommand(
 			isIgnoredAccount,
 		};
 
-		// Generate embed and action row
 		const embed = generateManageAccountEmbed(state);
 		const actionRow = generateManageAccountActionRow(state);
 
-		// Reply with ephemeral message
 		const reply = yield* Effect.tryPromise({
 			try: () =>
 				interaction.reply({
@@ -227,7 +212,6 @@ export function handleManageAccountCommand(
 			catch: (error) => error,
 		});
 
-		// InteractionResponse has createMessageComponentCollector for ephemeral messages
 		if (
 			reply &&
 			typeof reply === "object" &&
@@ -277,9 +261,6 @@ export function handleManageAccountCommand(
 	});
 }
 
-/**
- * Handles button presses in the manage account menu
- */
 function handleManageAccountButtonPress(
 	interaction: { customId: string },
 	userId: string,
@@ -298,7 +279,6 @@ function handleManageAccountButtonPress(
 				const canPubliclyDisplayMessages =
 					customId === menuButtonIds.consentButton;
 
-				// Upsert user server settings with new consent value
 				const existingSettingsLiveData = yield* Effect.scoped(
 					database.user_server_settings.findUserServerSettingsById({
 						userId,
@@ -338,7 +318,6 @@ function handleManageAccountButtonPress(
 				const messageIndexingDisabled =
 					customId === menuButtonIds.disableMessageIndexingButton;
 
-				// Upsert user server settings with new indexing value
 				const existingSettingsLiveData = yield* Effect.scoped(
 					database.user_server_settings.findUserServerSettingsById({
 						userId,
@@ -352,7 +331,6 @@ function handleManageAccountButtonPress(
 					? {
 							...existingSettings,
 							messageIndexingDisabled,
-							// If disabling indexing, also revoke consent
 							canPubliclyDisplayMessages: messageIndexingDisabled
 								? false
 								: existingSettings.canPubliclyDisplayMessages,
@@ -387,7 +365,6 @@ function handleManageAccountButtonPress(
 					yield* database.discord_accounts.deleteDiscordAccount({ id: userId });
 					state.isIgnoredAccount = true;
 				} else {
-					// Undelete account (removes from ignored)
 					yield* database.ignored_discord_accounts.deleteIgnoredDiscordAccount({
 						id: userId,
 					});

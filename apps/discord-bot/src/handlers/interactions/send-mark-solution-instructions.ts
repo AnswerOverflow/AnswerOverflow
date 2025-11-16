@@ -9,16 +9,11 @@ import {
 } from "discord.js";
 import { Effect } from "effect";
 
-// Answer Overflow brand color
 const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
 
-// Dismiss button constants
 const DISMISS_ACTION_PREFIX = "dismiss";
 const DISMISS_BUTTON_LABEL = "Dismiss";
 
-/**
- * Creates a dismiss button for mark solution instructions
- */
 function makeDismissButton(dismisserId: string): ButtonBuilder {
 	return new ButtonBuilder({
 		label: DISMISS_BUTTON_LABEL,
@@ -37,9 +32,6 @@ export class SendMarkSolutionInstructionsError extends Error {
 	}
 }
 
-/**
- * Sends mark solution instructions to a newly created thread
- */
 export function handleSendMarkSolutionInstructions(
 	thread: ThreadChannel,
 	newlyCreated: boolean,
@@ -56,7 +48,6 @@ export function handleSendMarkSolutionInstructions(
 			return;
 		}
 
-		// Only send for newly created threads
 		if (!newlyCreated) {
 			return;
 		}
@@ -75,7 +66,6 @@ export function handleSendMarkSolutionInstructions(
 				makeDismissButton(threadOwner.id),
 			);
 
-		// Send message to thread
 		yield* Effect.tryPromise({
 			try: () =>
 				thread.send({

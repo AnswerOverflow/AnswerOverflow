@@ -17,13 +17,11 @@ describe("handleAutoThread", () => {
 			const database = yield* Database;
 			const discordMock = yield* DiscordClientMock;
 
-			// Create guild and channel
 			const guild = discordMock.utilities.createMockGuild();
 			discordMock.utilities.seedGuild(guild);
 			const channel = discordMock.utilities.createMockTextChannel(guild);
 			discordMock.utilities.seedChannel(channel);
 
-			// Create server and channel in database
 			yield* database.servers.upsertServer({
 				name: guild.name,
 				discordId: guild.id,
@@ -65,7 +63,6 @@ describe("handleAutoThread", () => {
 				} as unknown as Message["channel"],
 			});
 
-			// Should return early without creating thread
 			const result = yield* handleAutoThread(message);
 			expect(result).toBeUndefined();
 		}).pipe(Effect.provide(TestLayer)),

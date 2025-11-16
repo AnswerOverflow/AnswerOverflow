@@ -4,12 +4,6 @@
 import React from "react";
 import { parse } from "./render";
 
-/**
- * Recreates React elements using the current React instance
- * This fixes compatibility issues with simple-markdown creating elements
- * using an older React API
- */
-
 function recreateElement(element: any, key?: string | number): React.ReactNode {
 	if (element === null || element === undefined) {
 		return element;
@@ -23,7 +17,6 @@ function recreateElement(element: any, key?: string | number): React.ReactNode {
 		return element.map((item, index) => recreateElement(item, index));
 	}
 
-	// But we'll recreate it anyway to ensure it uses the current React instance
 	if (
 		element &&
 		typeof element === "object" &&
@@ -45,14 +38,11 @@ function recreateElement(element: any, key?: string | number): React.ReactNode {
 			}
 		}
 
-		// Recreate all props recursively to ensure no old React elements remain
 		const recreatedProps: Record<string, any> = {};
 		for (const [propKey, propValue] of Object.entries(restProps)) {
-			// Skip special React props
 			if (propKey === "key" || propKey === "ref") {
 				continue;
 			}
-			// Recursively recreate prop values that might be React elements
 			if (
 				propValue &&
 				typeof propValue === "object" &&
@@ -64,7 +54,6 @@ function recreateElement(element: any, key?: string | number): React.ReactNode {
 			}
 		}
 
-		// Use React.createElement to ensure we're using the current React instance
 		return React.createElement(
 			type as React.ElementType,
 			{ ...recreatedProps, key },
@@ -72,12 +61,10 @@ function recreateElement(element: any, key?: string | number): React.ReactNode {
 		);
 	}
 
-	// If it's not a React element, return as-is
 	return element;
 }
 
 export function DiscordMarkdown({ content }: { content: string }) {
-	// Parse the markdown content
 	const parsed = React.useMemo(() => {
 		try {
 			return parse(content);
@@ -87,7 +74,6 @@ export function DiscordMarkdown({ content }: { content: string }) {
 		}
 	}, [content]);
 
-	// Recreate elements using the current React instance
 	const recreated = React.useMemo(() => {
 		return recreateElement(parsed);
 	}, [parsed]);

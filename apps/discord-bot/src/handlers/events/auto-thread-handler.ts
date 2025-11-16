@@ -115,7 +115,6 @@ export const AutoThreadHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 
-		// Subscribe to messageCreate event for auto thread
 		yield* discord.client.on("messageCreate", (message) =>
 			Effect.scoped(
 				handleAutoThread(message).pipe(

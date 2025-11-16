@@ -26,13 +26,6 @@ interface DiscordMarkdownProps {
 	className?: string;
 }
 
-/**
- * Renders Discord markdown with support for:
- * - Discord emojis (<:name:id> and <a:name:id>)
- * - Spoilers (||text||)
- * - Command mentions (</command:id>)
- * - Standard markdown (bold, italic, code blocks, etc.)
- */
 export function DiscordMarkdown({ content, className }: DiscordMarkdownProps) {
 	const components: Components = {
 		a: ({
@@ -127,11 +120,9 @@ export function DiscordMarkdown({ content, className }: DiscordMarkdownProps) {
 				return <div className="h-6" />;
 			}
 
-			// Add spacing between paragraphs to match Discord's rendering
 			return <div className="mb-2">{children}</div>;
 		},
 		img: ({ src, alt }: { src?: string; alt?: string }) => {
-			// Discord doesn't support markdown images, render as plain text
 			return <span className="inline">{alt || src || ""}</span>;
 		},
 		h1: ({ children }: { children?: React.ReactNode }) => (

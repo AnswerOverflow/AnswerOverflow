@@ -14,21 +14,10 @@ import {
 	sampleOne,
 } from "./discord-mock-arbitraries";
 
-/**
- * Options for creating a mock Discord client service
- */
 interface DiscordMockOptions {
-	/**
-	 * Optional client to use instead of creating a new one
-	 * Useful for overriding specific client behavior
-	 */
 	client?: Client;
 }
 
-/**
- * Creates a mock Discord client service that uses a real Discord.js client
- * but provides utilities to seed the cache with test data
- */
 const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 	Effect.gen(function* () {
 		const client =
@@ -42,7 +31,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				],
 			});
 
-		// Utility functions for seeding test data
 		const seedGuild = (guild: Guild) => {
 			client.guilds.cache.set(guild.id, guild);
 		};
@@ -63,8 +51,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			clearCache();
 		};
 
-		// Helper to create a mock guild from minimal data
-		// Uses Discord.js's internal _add method (private API, but fine for testing)
 		const createMockGuild = (
 			partialData: Partial<{
 				id: string;
@@ -136,7 +122,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			return client.guilds._add(guildData);
 		};
 
-		// Helper to create a mock text channel
 		const createMockTextChannel = (
 			guild: Guild,
 			partialData: Partial<{
@@ -171,7 +156,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			};
 			// @ts-expect-error - _add is private but we need it for testing
 			const channel = guild.channels._add(channelData);
-			// Ensure channel has guild property (needed for filtering in syncGuild)
 			Object.defineProperty(channel, "guild", {
 				value: guild,
 				writable: false,
@@ -181,7 +165,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			return channel;
 		};
 
-		// Helper to create a mock forum channel
 		const createMockForumChannel = (
 			guild: Guild,
 			partialData: Partial<{
@@ -217,7 +200,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			};
 			// @ts-expect-error - _add is private but we need it for testing
 			const channel = guild.channels._add(channelData);
-			// Ensure channel has guild property (needed for filtering in syncGuild)
 			Object.defineProperty(channel, "guild", {
 				value: guild,
 				writable: false,
@@ -227,7 +209,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			return channel;
 		};
 
-		// Helper to create a mock news channel
 		const createMockNewsChannel = (
 			guild: Guild,
 			partialData: Partial<{
@@ -262,7 +243,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			};
 			// @ts-expect-error - _add is private but we need it for testing
 			const channel = guild.channels._add(channelData);
-			// Ensure channel has guild property (needed for filtering in syncGuild)
 			Object.defineProperty(channel, "guild", {
 				value: guild,
 				writable: false,
@@ -272,7 +252,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			return channel;
 		};
 
-		// Helper to create a mock message
 		const createMockMessage = (
 			channel: GuildBasedChannel,
 			partialData: Partial<{
@@ -352,7 +331,6 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 			return defaultMessage;
 		};
 
-		// Emit events manually for testing
 		const emitGuildCreate = (guild: Guild) => {
 			client.emit("guildCreate", guild);
 		};
@@ -370,9 +348,7 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 		};
 
 		return {
-			// Return the client itself (this is what DiscordClient yields)
 			client,
-			// Mock-specific utilities
 			utilities: {
 				seedGuild,
 				seedChannel,

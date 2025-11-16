@@ -24,10 +24,6 @@ import {
 	sortServersByBotAndRole,
 } from "../shared/shared";
 
-/**
- * Get the BACKEND_ACCESS_TOKEN from environment variables.
- * This is accessed at module load time, so it works without "use node".
- */
 function getBackendAccessToken(): string {
 	const token = process.env.BACKEND_ACCESS_TOKEN;
 	if (!token) {
@@ -59,10 +55,6 @@ const discordApi = (token: string) =>
 		});
 	}).pipe(Effect.provide(FetchHttpClient.layer));
 
-/**
- * Internal action to fetch Discord guilds for a user.
- * This is cached using ActionCache to reduce API calls.
- */
 export const fetchDiscordGuilds = internalAction({
 	args: {
 		discordAccountId: v.string(),
@@ -102,8 +94,6 @@ export const fetchDiscordGuilds = internalAction({
 						"dashboard.fetchDiscordGuilds.discordApi",
 					)(client.listMyGuilds());
 
-					// Only cache the fields we actually use to ensure Convex serialization compatibility
-					// This avoids caching unnecessary fields like 'features' arrays that Convex can't serialize
 					return guilds.map((guild) => ({
 						id: guild.id,
 						name: guild.name,
@@ -122,10 +112,6 @@ export const fetchDiscordGuilds = internalAction({
 	},
 });
 
-/**
- * ActionCache for Discord guilds.
- * Caches results for 5 minutes (300 seconds) to reduce API calls.
- */
 const discordGuildsCache = new ActionCache(components.actionCache, {
 	action: internal.public.dashboard.fetchDiscordGuilds,
 	name: "discordGuilds",
@@ -163,8 +149,6 @@ export const getUserServers = authenticatedAction({
 							yield* Effect.annotateCurrentSpan({
 								"discord.account.id": discordAccountId,
 							});
-							// Extract current span to pass as parent to getDiscordAccountWithToken
-							// so the span created there inherits the trace context
 							const currentSpan = yield* Effect.currentSpan;
 							return yield* Effect.tryPromise({
 								try: () =>
@@ -184,8 +168,6 @@ export const getUserServers = authenticatedAction({
 						throw new Error("Discord account not linked or mismatch");
 					}
 
-					// Fetch user's Discord servers using ActionCache
-					// Cache the result for 5 minutes to reduce API calls
 					const discordGuilds = yield* Effect.withSpan(
 						"dashboard.getUserServers.fetchDiscordGuilds",
 					)(
@@ -218,7 +200,6 @@ export const getUserServers = authenticatedAction({
 						}),
 					);
 
-					// Match with Answer Overflow servers
 					const serverDiscordIds = manageableServers.map((g) => g.id);
 					const aoServers = yield* Effect.withSpan(
 						"dashboard.getUserServers.matchAOServers",
@@ -242,14 +223,11 @@ export const getUserServers = authenticatedAction({
 						}),
 					);
 
-					// Schedule background sync - don't wait for it to complete
-					// This runs in the background so we can return immediately
 					yield* Effect.withSpan(
 						"dashboard.getUserServers.scheduleBackgroundSync",
 					)(
 						Effect.tryPromise({
 							try: () => {
-								// Schedule sync in background (delay 0 = run immediately but async)
 								return ctx.scheduler.runAfter(
 									0,
 									internal.public.dashboard.syncUserServerSettingsBackground,
@@ -271,7 +249,6 @@ export const getUserServers = authenticatedAction({
 						aoServers.map((server) => [server.discordId, server]),
 					);
 
-					// Combine Discord guild data with AO server data
 					const serversWithMetadata: ServerWithMetadata[] =
 						yield* Effect.withSpan(
 							"dashboard.getUserServers.combineServerData",
@@ -308,7 +285,6 @@ export const getUserServers = authenticatedAction({
 							}),
 						);
 
-					// Sort: has bot + owner/admin/manage, then no bot + owner/admin/manage
 					return yield* Effect.withSpan("dashboard.getUserServers.sortServers")(
 						Effect.succeed(sortServersByBotAndRole(serversWithMetadata)),
 					);
@@ -323,10 +299,6 @@ export const getUserServers = authenticatedAction({
 	},
 });
 
-/**
- * Helper function to check if user has ManageGuild permission for a server
- * Uses the same permission check as getUserServers
- */
 async function checkManageGuildPermission(
 	ctx: ActionCtx,
 	discordAccountId: string,
@@ -369,7 +341,6 @@ export const getTopQuestionSolversForServer = authenticatedAction({
 
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);
 
-		// Call analytics service
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getTopQuestionSolversForServer();
@@ -392,7 +363,6 @@ export const getPageViewsForServer = authenticatedAction({
 
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);
 
-		// Call analytics service
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getPageViewsForServer();
@@ -411,7 +381,6 @@ export const getServerInvitesClicked = authenticatedAction({
 
 		await checkManageGuildPermission(ctx, discordAccountId, serverId);
 
-		// Call analytics service
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getServerInvitesClicked();
@@ -441,10 +410,6 @@ export const getQuestionsAndAnswers = authenticatedAction({
 	},
 });
 
-/**
- * Track when a user clicks the "Add to Server" button
- * Stores a timestamp on userServerSettings to track who initiated the bot addition
- */
 export const trackBotAddClick = authenticatedAction({
 	args: {
 		serverDiscordId: v.string(),
@@ -460,8 +425,6 @@ export const trackBotAddClick = authenticatedAction({
 		);
 
 		if (!server) {
-			// Server doesn't exist yet, that's okay - we'll create/update settings when it does
-			// For now, just return without error
 			return;
 		}
 
@@ -476,8 +439,6 @@ export const trackBotAddClick = authenticatedAction({
 			},
 		);
 
-		// Prepare settings - preserve existing values or use defaults
-		// Only set botAddedTimestamp if it doesn't already exist (track first click)
 		const settings = {
 			serverId: server._id,
 			userId: discordAccountId,
@@ -491,7 +452,6 @@ export const trackBotAddClick = authenticatedAction({
 			botAddedTimestamp: existingSettings?.botAddedTimestamp ?? Date.now(), // Set timestamp when button was clicked (only if not already set)
 		};
 
-		// Upsert user server settings with botAddedTimestamp
 		await ctx.runMutation(
 			api.publicInternal.user_server_settings.upsertUserServerSettings,
 			{ backendAccessToken, settings },
@@ -499,10 +459,6 @@ export const trackBotAddClick = authenticatedAction({
 	},
 });
 
-/**
- * Background action to sync user server settings with permissions from Discord API
- * This is scheduled from getUserServers to avoid blocking the response
- */
 export const syncUserServerSettingsBackground = internalAction({
 	args: {
 		discordAccountId: v.string(),
@@ -531,7 +487,6 @@ export const syncUserServerSettingsBackground = internalAction({
 
 					const backendAccessToken = getBackendAccessToken();
 
-					// Fetch AO servers by IDs (more efficient than by Discord ID)
 					const aoServers: Array<Doc<"servers">> = yield* Effect.withSpan(
 						"dashboard.syncUserServerSettingsBackground.fetchAOServers",
 					)(
@@ -575,7 +530,6 @@ export const syncUserServerSettingsBackground = internalAction({
 						"servers.toSync": serversToSync.length,
 					});
 
-					// Batch fetch all existing user server settings
 					type UserServerSettings = {
 						serverId: Id<"servers">;
 						userId: string;
@@ -616,8 +570,6 @@ export const syncUserServerSettingsBackground = internalAction({
 						]),
 					);
 
-					// Upsert user server settings with synced permissions
-					// Only update if permissions changed to avoid redundant mutations
 					const settingsToUpdate: Array<{
 						serverId: Id<"servers">;
 						userId: string;
@@ -635,7 +587,6 @@ export const syncUserServerSettingsBackground = internalAction({
 							aoServer._id,
 						);
 
-						// Skip if permissions haven't changed
 						if (
 							existingSettings &&
 							existingSettings.permissions === permissionsNumber
@@ -643,7 +594,6 @@ export const syncUserServerSettingsBackground = internalAction({
 							continue;
 						}
 
-						// Prepare settings - preserve existing values or use defaults
 						settingsToUpdate.push({
 							serverId: aoServer._id,
 							userId: discordAccountId,
@@ -657,7 +607,6 @@ export const syncUserServerSettingsBackground = internalAction({
 						});
 					}
 
-					// Only run mutations for settings that actually need updating
 					if (settingsToUpdate.length > 0) {
 						yield* Effect.annotateCurrentSpan({
 							"mutations.count": settingsToUpdate.length,

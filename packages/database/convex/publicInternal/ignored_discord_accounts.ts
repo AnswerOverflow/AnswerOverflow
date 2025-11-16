@@ -49,7 +49,6 @@ export const upsertIgnoredDiscordAccount = publicInternalMutation({
 			throw new Error("Account is not ignored");
 		}
 
-		// Upsert ignored account
 		const existingIgnored = await ctx.db
 			.query("ignoredDiscordAccounts")
 			.filter((q) => q.eq(q.field("id"), args.id))

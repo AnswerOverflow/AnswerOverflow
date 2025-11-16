@@ -1,10 +1,6 @@
 import type { Image, Link, Parent, Root, Text } from "mdast";
 import { visit } from "unist-util-visit";
 
-/**
- * Remark plugin to convert markdown images ![alt](url) to ! followed by a link [alt](url)
- * Discord doesn't support markdown images, so we convert them to text + link
- */
 export function remarkDiscordImage() {
 	return (tree: Root) => {
 		// @ts-expect-error TODO: Fix this
@@ -28,7 +24,6 @@ export function remarkDiscordImage() {
 				],
 			};
 
-			// Replace the image node with text + link
 			parent.children.splice(index, 1, textNode, linkNode);
 		});
 	};

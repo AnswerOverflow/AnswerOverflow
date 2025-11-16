@@ -7,10 +7,6 @@ import { query } from "../_generated/server";
 import { authenticatedQuery } from "../client";
 import { getServerByDiscordId as getServerByDiscordIdShared } from "../shared/shared";
 
-/**
- * Public query: Get server by Discord ID
- * No authentication required - returns public server data
- */
 export const publicGetServerByDiscordId = authenticatedQuery({
 	args: {
 		discordId: v.string(),
@@ -48,10 +44,6 @@ export const publicFindManyServersById = query({
 	},
 });
 
-/**
- * Public query: Find many servers by Discord IDs
- * More efficient than calling publicGetServerByDiscordId multiple times
- */
 export const publicFindManyServersByDiscordId = query({
 	args: {
 		discordIds: v.array(v.string()),
@@ -63,8 +55,6 @@ export const publicFindManyServersByDiscordId = query({
 				"servers.count": args.discordIds.length,
 			});
 			if (args.discordIds.length === 0) return [];
-			// Use the index to query each Discord ID efficiently
-			// Execute queries in parallel using Effect.all for better Effect integration
 			const results = yield* Effect.all(
 				args.discordIds.map((discordId) =>
 					Effect.promise(() =>

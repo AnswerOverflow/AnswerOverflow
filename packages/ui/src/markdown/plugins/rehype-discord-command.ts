@@ -1,9 +1,6 @@
 import type { Element, Root, Text } from "hast";
 import { visit } from "unist-util-visit";
 
-/**
- * Rehype plugin to convert Discord command syntax (</command:id>) to span elements
- */
 export function rehypeDiscordCommand() {
 	return (tree: Root) => {
 		visit(
@@ -33,7 +30,6 @@ export function rehypeDiscordCommand() {
 					const matchIndex = match.index ?? 0;
 					const [fullMatch, commandName] = match;
 
-					// Add text before the match
 					if (matchIndex > lastIndex) {
 						newChildren.push({
 							type: "text",
@@ -59,7 +55,6 @@ export function rehypeDiscordCommand() {
 					lastIndex = matchIndex + fullMatch.length;
 				}
 
-				// Add remaining text after last match
 				if (lastIndex < text.length) {
 					newChildren.push({
 						type: "text",
@@ -67,7 +62,6 @@ export function rehypeDiscordCommand() {
 					} as Text);
 				}
 
-				// Replace the text node with new children
 				parent.children.splice(index, 1, ...newChildren);
 			},
 		);

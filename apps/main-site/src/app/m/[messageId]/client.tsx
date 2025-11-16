@@ -46,7 +46,6 @@ type MessagePageData = {
 	} | null;
 };
 
-// Helper to get Discord avatar URL
 function getDiscordAvatarUrl(
 	userId: string,
 	avatar?: string,
@@ -55,23 +54,19 @@ function getDiscordAvatarUrl(
 	if (avatar) {
 		return `https://cdn.discordapp.com/avatars/${userId}/${avatar}.webp?size=${size}`;
 	}
-	// Default avatar based on user ID
 	const defaultAvatar = (parseInt(userId) % 5).toString();
 	return `/discord/${defaultAvatar}.png`;
 }
 
-// Helper to get Discord emoji URL
 function getDiscordEmojiUrl(emojiId: string, animated = false): string {
 	return `https://cdn.discordapp.com/emojis/${emojiId}.${animated ? "gif" : "png"}`;
 }
 
-// Helper to parse Discord snowflake ID to date
 function getSnowflakeDate(snowflake: string): Date {
 	const timestamp = BigInt(snowflake) >> 22n;
 	return new Date(Number(timestamp) + 1420070400000);
 }
 
-// Helper to format relative time
 function formatRelativeTime(date: Date): string {
 	const now = new Date();
 	const diffMs = now.getTime() - date.getTime();
@@ -87,7 +82,6 @@ function formatRelativeTime(date: Date): string {
 	return date.toLocaleDateString();
 }
 
-// Embed component
 function MessageEmbed({ embed }: { embed: Embed }) {
 	return (
 		<div
@@ -298,7 +292,6 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 												? `${convexSiteUrl}/getAttachment?storageId=${attachment.storageId}`
 												: null;
 
-										// Skip if no attachment URL available
 										if (!attachmentUrl) {
 											return null;
 										}
@@ -354,7 +347,6 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 							{reactions.length > 0 && (
 								<div className="mb-3 flex flex-wrap gap-2">
 									{reactions.map((reaction: Reaction, idx: number) => {
-										// Group reactions by emoji
 										const emojiId = reaction.emojiId;
 										return (
 											<div

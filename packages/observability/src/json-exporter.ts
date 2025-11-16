@@ -1,4 +1,3 @@
-// convex/otel/JsonConsoleSpanExporter.ts
 import type { ExportResult } from "@opentelemetry/core";
 import { ExportResultCode } from "@opentelemetry/core";
 import type { ReadableSpan, SpanExporter } from "@opentelemetry/sdk-trace-base";
@@ -20,14 +19,9 @@ type SerializedSpan = {
 };
 
 function hrTimeToNanoseconds(time: [number, number]): bigint {
-	// [seconds, nanoseconds] -> total nanoseconds
 	return BigInt(time[0]) * 1_000_000_000n + BigInt(time[1]);
 }
 
-/**
- * SpanExporter that just console.logs JSON per span with a fixed marker.
- * Convex ships these logs to your webhook, which replays them to OTLP.
- */
 export class JsonConsoleSpanExporter implements SpanExporter {
 	export(
 		spans: ReadableSpan[],
@@ -59,7 +53,6 @@ export class JsonConsoleSpanExporter implements SpanExporter {
 					},
 				};
 
-				// Single, easy-to-parse line
 				console.log(OTEL_CONSOLE_MARKER + JSON.stringify(payload));
 			}
 
@@ -71,7 +64,6 @@ export class JsonConsoleSpanExporter implements SpanExporter {
 	}
 
 	shutdown(): Promise<void> {
-		// No flushing / timers – Convex safe
 		return Promise.resolve();
 	}
 }

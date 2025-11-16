@@ -6,14 +6,10 @@ import { handleManageAccountCommand } from "../handlers/commands/manage-account-
 import { handleDismissButtonInteraction } from "../handlers/interactions/dismiss-button";
 import { handleMarkSolutionCommand } from "../handlers/interactions/mark-solution-command";
 
-/**
- * Layer that sets up interaction event handlers (commands and buttons)
- */
 export const InteractionHandlersLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 
-		// Subscribe to interactionCreate event for slash commands and buttons
 		yield* discord.client.on("interactionCreate", (interaction) =>
 			Effect.gen(function* () {
 				if (interaction.isButton()) {
@@ -24,7 +20,6 @@ export const InteractionHandlersLayer = Layer.scopedDiscard(
 							),
 						);
 					}
-					// Manage account buttons are handled by the collector in handleManageAccountCommand
 					return;
 				}
 
@@ -64,8 +59,6 @@ export const InteractionHandlersLayer = Layer.scopedDiscard(
 					}
 					return;
 				}
-
-				// TODO: Add handlers for other slash commands (manage-account, consent)
 			}),
 		);
 	}),

@@ -23,7 +23,6 @@ type Message = Infer<typeof messageSchema>;
 type Attachment = Infer<typeof attachmentSchema>;
 type Reaction = Infer<typeof reactionSchema>;
 
-// Helper functions for message thread/channel resolution
 function getThreadIdOfMessage(
 	message: Pick<Message, "childThreadId" | "parentChannelId" | "channelId">,
 ): string | null {
@@ -42,7 +41,6 @@ function getParentChannelOfMessage(
 	return message.parentChannelId ?? message.channelId;
 }
 
-// Helper function to check if an account is ignored
 async function _isIgnoredAccount(
 	ctx: QueryCtx | MutationCtx,
 	authorId: string,
@@ -127,7 +125,6 @@ export const getMessagePageData = query({
 			return null;
 		}
 
-		// Determine thread and parent channel
 		const threadId = getThreadIdOfMessage(targetMessage);
 		const parentId = getParentChannelOfMessage(targetMessage);
 
@@ -156,7 +153,6 @@ export const getMessagePageData = query({
 			threadId ? undefined : 50, // Limit for non-thread channels
 		);
 
-		// Filter messages - if not a thread, only get messages >= target message ID
 		const messagesToShow = threadId
 			? allMessages
 			: allMessages.filter((m) => m.id >= targetMessage.id);

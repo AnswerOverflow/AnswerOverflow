@@ -19,10 +19,8 @@ it.scoped("live data updates when server is modified", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Initial upsert
 		yield* database.servers.upsertServer(server);
 
-		// Get live data
 		const liveData = yield* database.servers.getServerByDiscordId(
 			{
 				discordId: "123",
@@ -30,18 +28,15 @@ it.scoped("live data updates when server is modified", () =>
 			{ subscribe: true },
 		);
 
-		// Data should already be loaded due to defer mechanism
 		expect(liveData?.data?.discordId).toBe("123");
 		expect(liveData?.data?.description).toBe("Test Description");
 
-		// Update the server
 		const updatedDescription = `A brand new description ${Math.random()}`;
 		yield* database.servers.upsertServer({
 			...server,
 			description: updatedDescription,
 		});
 
-		// Verify live data has updated
 		expect(liveData?.data?.description).toBe(updatedDescription);
 		expect(liveData?.data?.discordId).toBe("123");
 	}).pipe(Effect.provide(DatabaseTestLayer)),

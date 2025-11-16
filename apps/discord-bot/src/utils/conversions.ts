@@ -20,7 +20,6 @@ import {
 	type User,
 } from "discord.js";
 
-// Channel types for root channels (forums, text, announcements)
 const ALLOWED_ROOT_CHANNEL_TYPES = new Set([
 	ChannelType.GuildText,
 	ChannelType.GuildAnnouncement,
@@ -31,9 +30,6 @@ const ALLOWED_THREAD_TYPES = new Set([
 	ChannelType.AnnouncementThread,
 ]);
 
-/**
- * Checks if a channel type is allowed for indexing (root channels only)
- */
 export function isAllowedRootChannelType(channelType: number) {
 	return ALLOWED_ROOT_CHANNEL_TYPES.has(channelType);
 }
@@ -59,10 +55,6 @@ function _isAllowedChannelType(channelType: number): boolean {
 	);
 }
 
-/**
- * Converts a Discord.js User to Answer Overflow DiscordAccount format
- * @param user - The Discord.js user to convert
- */
 export function toAODiscordAccount(user: User): AODiscordAccount {
 	return {
 		id: user.id,
@@ -71,11 +63,6 @@ export function toAODiscordAccount(user: User): AODiscordAccount {
 	};
 }
 
-/**
- * Converts a Discord.js Channel to Answer Overflow Channel format
- * @param channel - The Discord.js channel to convert
- * @param serverConvexId - The Convex server ID (must be looked up from Discord ID first)
- */
 export function toAOChannel(
 	channel: GuildChannel | GuildBasedChannel | AnyThreadChannel,
 	serverConvexId: Id<"servers">,
@@ -104,16 +91,10 @@ export function toAOChannel(
 	};
 }
 
-/**
- * Converts a Discord.js Message to Answer Overflow BaseMessageWithRelations format
- * @param message - The Discord.js message to convert
- * @param serverConvexId - The Convex server ID (must be looked up from Discord ID first)
- */
 export async function toAOMessage(
 	message: Message,
 	serverConvexId: Id<"servers">,
 ): Promise<BaseMessageWithRelations> {
-	// Fetch if partial
 	if (message.partial) {
 		message = await message.fetch();
 	}
@@ -143,12 +124,10 @@ export async function toAOMessage(
 				});
 			}
 		} catch (error) {
-			// If we can't fetch users, skip this reaction
 			console.warn(`Failed to fetch users for reaction ${emoji.name}:`, error);
 		}
 	}
 
-	// Convert attachments
 	const attachments: AOAttachment[] = message.attachments.map((attachment) => ({
 		id: attachment.id,
 		messageId: message.id,
@@ -161,7 +140,6 @@ export async function toAOMessage(
 		storageId: undefined, // Will be set after upload
 	}));
 
-	// Convert embeds
 	const embeds = message.embeds.map((embed) => ({
 		title: embed.title ?? undefined,
 		type: undefined, // Discord embed type is deprecated, not storing
@@ -223,13 +201,10 @@ export async function toAOMessage(
 		})),
 	}));
 
-	// Determine parent channel ID (if message is in a thread)
 	const parentChannelId = message.channel.isThread()
 		? (message.channel.parentId ?? undefined)
 		: undefined;
 
-	// Determine child thread ID (if this message started a thread)
-	// Message type 18 is a thread starter message
 	const childThreadId =
 		message.type === 18 && message.channel.isThread()
 			? message.channelId

@@ -12,9 +12,6 @@ export class ConvexError extends Data.TaggedError("ConvexError")<{
 	cause: unknown;
 }> {}
 
-// Extract the shared interface from ConvexClient - this is the source of truth
-// We pick only the methods we need for our unified interface
-// Override mutation to accept both public and internal mutations
 export type ConvexClientShared = Pick<
 	ConvexClient,
 	"query" | "action" | "onUpdate"

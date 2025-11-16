@@ -27,7 +27,6 @@ const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
 	forumGuidelinesConsentEnabled: false,
 };
 
-// Helper function to add settings to multiple channels
 async function addSettingsToChannels(
 	ctx: QueryCtx | MutationCtx,
 	channels: Channel[],
@@ -133,7 +132,6 @@ export const findChannelsBeforeId = publicInternalQuery({
 		take: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		// Convex doesn't support lt() on string IDs directly, so we'll collect and filter
 		const allChannels = await getManyFrom(
 			ctx.db,
 			"channels",
@@ -141,7 +139,6 @@ export const findChannelsBeforeId = publicInternalQuery({
 			args.serverId,
 		);
 
-		// Filter channels where id < args.id (comparing as strings)
 		const filtered = allChannels
 			.filter((c) => c.id < args.id)
 			.sort((a, b) => (b.id > a.id ? 1 : -1))
@@ -151,7 +148,6 @@ export const findChannelsBeforeId = publicInternalQuery({
 	},
 });
 
-// Mutation functions
 export const createChannel = publicInternalMutation({
 	args: {
 		channel: channelSchema,
@@ -228,8 +224,6 @@ export const updateChannel = publicInternalMutation({
 			throw new Error(`Channel with id ${args.id} not found`);
 		}
 
-		// Use replace instead of patch to allow removing optional fields
-		// Replace the entire document with the new channel data
 		await ctx.db.replace(existing._id, {
 			...args.channel,
 			_id: existing._id,
@@ -301,7 +295,6 @@ export const upsertManyChannels = publicInternalMutation({
 	handler: async (ctx, args) => {
 		const ids: string[] = [];
 
-		// First, fetch existing channels
 		const existingChannels = await Promise.all(
 			args.channels.map((item) =>
 				ctx.db
@@ -360,14 +353,12 @@ export const upsertManyChannels = publicInternalMutation({
 	},
 });
 
-// Mutation for inserting/updating channel with settings
 export const upsertChannelWithSettings = publicInternalMutation({
 	args: {
 		channel: channelSchema,
 		settings: v.optional(channelSettingsSchema),
 	},
 	handler: async (ctx, args) => {
-		// Upsert channel
 		const existingChannel = await ctx.db
 			.query("channels")
 			.filter((q) => q.eq(q.field("id"), args.channel.id))
@@ -379,7 +370,6 @@ export const upsertChannelWithSettings = publicInternalMutation({
 			await ctx.db.insert("channels", args.channel);
 		}
 
-		// Upsert settings if provided
 		if (args.settings) {
 			const existingSettings = await getOneFrom(
 				ctx.db,
@@ -479,7 +469,6 @@ export const getChannelPageData = publicInternalQuery({
 			}))
 			.filter((c) => c.flags.indexingEnabled)
 			.sort((a, b) => {
-				// Sort: forums first, then announcements, then text
 				if (a.type === 15) return -1; // GuildForum
 				if (b.type === 15) return 1;
 				if (a.type === 5) return -1; // GuildAnnouncement
@@ -487,12 +476,10 @@ export const getChannelPageData = publicInternalQuery({
 				return 0;
 			})
 			.map((c) => {
-				// Return full channel object without flags
 				const { flags: _flags, ...channel } = c;
 				return channel;
 			});
 
-		// Sort threads by ID (newest first) and limit to 50
 		const sortedThreads = threads
 			.sort((a, b) => {
 				return b.id > a.id ? 1 : b.id < a.id ? -1 : 0;
@@ -502,7 +489,6 @@ export const getChannelPageData = publicInternalQuery({
 		const threadIds = sortedThreads.map((t) => t.id);
 		const firstMessages = await getFirstMessagesInChannels(ctx, threadIds);
 
-		// Combine threads with their first messages
 		const threadsWithMessages = sortedThreads
 			.map((thread) => ({
 				thread,

@@ -28,13 +28,9 @@ export function useDashboardNavbar() {
 }
 
 export interface DashboardNavbarProps {
-	/** Server select dropdown props */
 	serverSelect?: ServerSelectDropdownProps;
-	/** User section props */
 	userSection?: UserSectionProps;
-	/** Home href for logo */
 	homeHref?: string;
-	/** Children to render in main content area */
 	children?: React.ReactNode;
 }
 

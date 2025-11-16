@@ -1,5 +1,3 @@
-// Tests for discord account functions
-
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
 import type { DiscordAccount } from "../convex/schema";
@@ -67,23 +65,19 @@ it.scoped("createDiscordAccount returns default account if ignored", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		// First, ignore the account
 		yield* database.ignored_discord_accounts.upsertIgnoredDiscordAccount({
 			id: "user123",
 		});
 
-		// Try to create account
 		const account = createTestDiscordAccount("user123", "Test User");
 		const result = yield* database.discord_accounts.createDiscordAccount({
 			account,
 		});
 
-		// Should return default account (no avatar)
 		expect(result.id).toBe("user123");
 		expect(result.name).toBe("Test User");
 		expect(result.avatar).toBeUndefined();
 
-		// Account should not exist in database
 		const liveData = yield* database.discord_accounts.getDiscordAccountById({
 			id: "user123",
 		});
@@ -117,7 +111,6 @@ it.scoped("upsertDiscordAccount creates or updates account", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		// First upsert (create)
 		const account1 = createTestDiscordAccount("user123", "Test User");
 		yield* database.discord_accounts.upsertDiscordAccount({
 			account: account1,
@@ -128,7 +121,6 @@ it.scoped("upsertDiscordAccount creates or updates account", () =>
 		});
 		expect(liveData1?.name).toBe("Test User");
 
-		// Second upsert (update)
 		const account2 = createTestDiscordAccount("user123", "Updated Name");
 		yield* database.discord_accounts.upsertDiscordAccount({
 			account: account2,
@@ -179,22 +171,18 @@ it.scoped("deleteDiscordAccount deletes account and adds to ignored", () =>
 		const account = createTestDiscordAccount("user123", "Test User");
 		yield* database.discord_accounts.createDiscordAccount({ account });
 
-		// Verify account exists
 		const beforeDelete = yield* database.discord_accounts.getDiscordAccountById(
 			{ id: "user123" },
 		);
 		expect(beforeDelete?.id).toBe("user123");
 
-		// Delete account
 		yield* database.discord_accounts.deleteDiscordAccount({ id: "user123" });
 
-		// Verify account is deleted
 		const afterDelete = yield* database.discord_accounts.getDiscordAccountById({
 			id: "user123",
 		});
 		expect(afterDelete).toBeNull();
 
-		// Verify account is in ignored list
 		const ignored =
 			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
 				id: "user123",
@@ -243,19 +231,16 @@ it.scoped("deleteIgnoredDiscordAccount removes ignored account", () =>
 			id: "user123",
 		});
 
-		// Verify ignored
 		const beforeDelete =
 			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
 				id: "user123",
 			});
 		expect(beforeDelete?.id).toBe("user123");
 
-		// Delete ignored account
 		yield* database.ignored_discord_accounts.deleteIgnoredDiscordAccount({
 			id: "user123",
 		});
 
-		// Verify deleted
 		const afterDelete =
 			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
 				id: "user123",

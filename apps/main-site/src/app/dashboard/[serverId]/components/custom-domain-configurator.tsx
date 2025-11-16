@@ -52,7 +52,6 @@ export function CustomDomainConfigurator({
 			setDomain(newDomain === "" ? null : newDomain);
 		} catch (error) {
 			console.error("Failed to update custom domain:", error);
-			// TODO: Add toast notification for error
 		} finally {
 			setIsSubmitting(false);
 		}

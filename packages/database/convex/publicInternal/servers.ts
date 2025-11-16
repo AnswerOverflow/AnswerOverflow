@@ -64,14 +64,12 @@ export const upsertServerExternal = publicInternalMutation({
 		);
 
 		if (existing) {
-			// If kickedTime is explicitly undefined in args.data and existing server has it set, clear it
 			const shouldClearKickedTime =
 				args.data.kickedTime === undefined &&
 				existing.kickedTime !== undefined &&
 				existing.kickedTime !== null;
 
 			if (shouldClearKickedTime) {
-				// Use replace to clear optional fields
 				const { _id, _creationTime, ...existingData } = existing;
 				await ctx.db.replace(existing._id, {
 					...existingData,
@@ -81,7 +79,6 @@ export const upsertServerExternal = publicInternalMutation({
 					_creationTime,
 				});
 			} else {
-				// Use patch for normal updates
 				await ctx.db.patch(existing._id, args.data);
 			}
 			return existing._id;
@@ -106,10 +103,6 @@ export const upsertServer = publicInternalMutation({
 	},
 });
 
-/**
- * Public internal query: Get all servers
- * Requires backend access token - returns all server data
- */
 export const getAllServers = publicInternalQuery({
 	args: {},
 	handler: async (ctx) => {
@@ -227,7 +220,6 @@ export const getServerByDiscordIdWithChannels = publicInternalQuery({
 			}))
 			.filter((c) => c.flags.indexingEnabled)
 			.map((c) => {
-				// Return channel object without flags
 				const { flags: _flags, ...channel } = c;
 				return channel;
 			});

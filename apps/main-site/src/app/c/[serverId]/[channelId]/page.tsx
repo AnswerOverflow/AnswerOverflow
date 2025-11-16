@@ -16,13 +16,11 @@ function getChannelIcon(type: number) {
 	return Hash; // Text, Announcement, etc.
 }
 
-// Helper to parse Discord snowflake ID to date
 function getSnowflakeDate(snowflake: string): Date {
 	const timestamp = BigInt(snowflake) >> 22n;
 	return new Date(Number(timestamp) + 1420070400000);
 }
 
-// Helper to format relative time
 function formatRelativeTime(date: Date): string {
 	const now = new Date();
 	const diffMs = now.getTime() - date.getTime();

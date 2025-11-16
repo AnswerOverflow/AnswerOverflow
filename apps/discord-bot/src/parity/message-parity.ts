@@ -4,18 +4,13 @@ import { Discord } from "../core/discord-service";
 import { toAODiscordAccount, toAOMessage } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 
-/**
- * Layer that sets up message create/update/delete event handlers for parity
- */
 export const MessageParityLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 		const database = yield* Database;
 
-		// Subscribe to messageUpdate event
 		yield* discord.client.on("messageUpdate", (_oldMessage, newMessage) =>
 			Effect.gen(function* () {
-				// Skip DMs and voice channels
 				if (
 					newMessage.channel.isDMBased() ||
 					newMessage.channel.isVoiceBased()
@@ -23,7 +18,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Skip bot messages
 				if (!isHumanMessage(newMessage)) {
 					return;
 				}
@@ -46,14 +40,11 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				const existingMessage = messageLiveData;
 
 				if (!existingMessage) {
-					// Message doesn't exist, might be a new message, skip
 					return;
 				}
 
-				// Convert and update message, preserving questionId
 				yield* Effect.promise(async () => {
 					const aoMessage = await toAOMessage(newMessage, server._id);
-					// Preserve questionId from existing message
 					await upsertMessage(
 						{
 							...aoMessage,
@@ -70,10 +61,8 @@ export const MessageParityLayer = Layer.scopedDiscard(
 			}),
 		);
 
-		// Subscribe to messageDelete event
 		yield* discord.client.on("messageDelete", (message) =>
 			Effect.gen(function* () {
-				// Skip DMs and voice channels
 				if (message.channel.isDMBased() || message.channel.isVoiceBased()) {
 					return;
 				}
@@ -84,7 +73,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				const existingMessage = messageLiveData;
 
 				if (!existingMessage) {
-					// Message doesn't exist, skip
 					return;
 				}
 
@@ -97,10 +85,8 @@ export const MessageParityLayer = Layer.scopedDiscard(
 			),
 		);
 
-		// Subscribe to messageBulkDelete event
 		yield* discord.client.on("messageDeleteBulk", (messages) =>
 			Effect.gen(function* () {
-				// messages is a Collection<Snowflake, Message | PartialMessage>
 				const messageIds: string[] = [];
 				for (const [id] of messages) {
 					messageIds.push(id);
@@ -119,15 +105,12 @@ export const MessageParityLayer = Layer.scopedDiscard(
 			),
 		);
 
-		// Subscribe to messageCreate event
 		yield* discord.client.on("messageCreate", (message) =>
 			Effect.gen(function* () {
-				// Skip DMs and voice channels
 				if (message.channel.isDMBased() || message.channel.isVoiceBased()) {
 					return;
 				}
 
-				// Skip bot messages for now (can add later if needed)
 				if (!isHumanMessage(message)) {
 					return;
 				}
@@ -148,12 +131,10 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				// Convert message
 				const aoMessage = yield* Effect.promise(() =>
 					toAOMessage(message, server._id),
 				);
 
-				// Upload attachments if any
 				if (message.attachments.size > 0) {
 					const attachmentsToUpload = Array.from(
 						message.attachments.values(),
@@ -168,7 +149,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 						`Uploading ${attachmentsToUpload.length} attachments for message ${message.id}`,
 					);
 
-					// Upload attachments and update storage IDs
 					const uploadResults =
 						yield* database.attachments.uploadManyAttachmentsFromUrls({
 							attachments: attachmentsToUpload,
@@ -186,7 +166,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					}
 				}
 
-				// Maintain message parity with uploaded attachment storage IDs
 				yield* Effect.promise(() =>
 					upsertMessage(aoMessage, { ignoreChecks: false }),
 				).pipe(
@@ -203,7 +182,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					),
 				);
 
-				// Maintain Discord account parity for message author
 				yield* database.discord_accounts
 					.upsertDiscordAccount({ account: toAODiscordAccount(message.author) })
 					.pipe(

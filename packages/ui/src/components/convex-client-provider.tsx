@@ -10,7 +10,6 @@ import type { ReactNode } from "react";
 
 // biome-ignore lint/style/noNonNullAssertion: Setup
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
-	// Don't pause queries until authenticated - let them fail naturally if needed
 	expectAuth: false,
 });
 const convexQueryClient = new ConvexQueryClient(convex);

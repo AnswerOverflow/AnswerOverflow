@@ -15,13 +15,9 @@ const medalMap = new Map<number, string>([
 	[2, ":third_place:"],
 ]);
 
-// Dismiss button constants (must match send-mark-solution-instructions.ts)
 const DISMISS_ACTION_PREFIX = "dismiss";
 const DISMISS_BUTTON_LABEL = "Dismiss";
 
-/**
- * Creates a dismiss button for leaderboard messages
- */
 function makeDismissButton(dismisserId: string): ButtonBuilder {
 	return new ButtonBuilder({
 		label: DISMISS_BUTTON_LABEL,
@@ -30,9 +26,6 @@ function makeDismissButton(dismisserId: string): ButtonBuilder {
 	});
 }
 
-/**
- * Handles the "leaderboard" slash command
- */
 export function handleLeaderboardCommand(
 	interaction: ChatInputCommandInteraction,
 ): Effect.Effect<void, unknown, Database> {
@@ -41,7 +34,6 @@ export function handleLeaderboardCommand(
 
 		const isEphemeral = interaction.options.getBoolean("ephemeral") ?? false;
 
-		// Defer reply
 		yield* Effect.tryPromise({
 			try: () => interaction.deferReply({ ephemeral: isEphemeral }),
 			catch: (error) => error,
@@ -84,7 +76,6 @@ export function handleLeaderboardCommand(
 
 		const topSolvers = topSolversLiveData ?? [];
 
-		// Build embed description
 		const embedDescription =
 			topSolvers.length === 0
 				? "No solutions have been marked yet in this server."

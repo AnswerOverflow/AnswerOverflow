@@ -96,7 +96,6 @@ export default function ChannelsPage() {
 	const params = useParams();
 	const serverId = params.serverId as Id<"servers">;
 
-	// URL state for selected channels and search
 	const [selectedChannelIdsParam, setSelectedChannelIdsParam] = useQueryState(
 		"channels",
 		{
@@ -147,21 +146,18 @@ export default function ChannelsPage() {
 		},
 	);
 
-	// Filter channels based on search query and channel type - must be before conditional return
 	const filteredChannels = React.useMemo(() => {
 		if (!dashboardData?.channels) {
 			return [];
 		}
 		let filtered = dashboardData.channels;
 
-		// Filter by channel type
 		if (channelTypeFilter && channelTypeFilter.size > 0) {
 			filtered = filtered.filter((channel) =>
 				channelTypeFilter.has(channel.type),
 			);
 		}
 
-		// Filter by search query
 		const searchQuery = channelSearchQuery ?? "";
 		if (searchQuery.trim()) {
 			const query = searchQuery.toLowerCase();
@@ -173,7 +169,6 @@ export default function ChannelsPage() {
 		return filtered;
 	}, [dashboardData?.channels, channelSearchQuery, channelTypeFilter]);
 
-	// Determine select all checkbox state - must be before conditional return
 	const selectAllState = React.useMemo(() => {
 		if (filteredChannels.length === 0) return false;
 		const selectedCount = filteredChannels.filter((c) =>
@@ -184,18 +179,15 @@ export default function ChannelsPage() {
 		return "indeterminate";
 	}, [filteredChannels, selectedChannelIds]);
 
-	// Toggle select all filtered channels - must be before conditional return
 	const toggleSelectAll = React.useCallback(() => {
 		setSelectedChannelIds((prev) => {
 			const next = new Set(prev);
 			const allSelected = filteredChannels.every((c) => next.has(c.id));
 			if (allSelected) {
-				// Deselect all filtered channels
 				filteredChannels.forEach((c) => {
 					next.delete(c.id);
 				});
 			} else {
-				// Select all filtered channels
 				filteredChannels.forEach((c) => {
 					next.add(c.id);
 				});
@@ -242,7 +234,6 @@ export default function ChannelsPage() {
 	const { channels } = dashboardData;
 	const selectedChannels = channels.filter((c) => selectedChannelIds.has(c.id));
 
-	// Helper function to get channel icon and type name
 	const getChannelInfo = (type: number) => {
 		if (type === 15) {
 			return { Icon: MessageSquare, typeName: "Forum" };
@@ -253,7 +244,6 @@ export default function ChannelsPage() {
 		return { Icon: Hash, typeName: "Text" };
 	};
 
-	// Channel type filter options
 	const channelTypeOptions = [
 		{ type: 0, label: "Text", Icon: Hash },
 		{ type: 5, label: "Announcement", Icon: Megaphone },
@@ -274,7 +264,6 @@ export default function ChannelsPage() {
 		}
 	};
 
-	// Helper to check if all selected channels have the same value for a flag
 	const getFlagValue = (
 		flagKey:
 			| "indexingEnabled"
@@ -292,7 +281,6 @@ export default function ChannelsPage() {
 		return "mixed";
 	};
 
-	// Helper to check if a flag should be disabled
 	const isFlagDisabled = (
 		flagKey:
 			| "indexingEnabled"

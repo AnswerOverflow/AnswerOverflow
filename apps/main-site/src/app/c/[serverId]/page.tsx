@@ -39,11 +39,9 @@ export default async function ServerPage(props: Props) {
 
 	const rootChannels = channels
 		.filter((channel) => {
-			// Filter out thread types (11, 12)
 			return channel.type !== 11 && channel.type !== 12;
 		})
 		.sort((a, b) => {
-			// Sort: forums first, then announcements, then text
 			if (a.type === 15) return -1; // GuildForum
 			if (b.type === 15) return 1;
 			if (a.type === 5) return -1; // GuildAnnouncement

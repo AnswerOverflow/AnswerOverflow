@@ -11,7 +11,6 @@ import {
 
 type DiscordAccount = Infer<typeof discordAccountSchema>;
 
-// Helper function to get default discord account (when account is ignored)
 function getDefaultDiscordAccount(data: {
 	id: string;
 	name: string;
@@ -43,7 +42,6 @@ export const createDiscordAccount = publicInternalMutation({
 			.first();
 
 		if (ignoredAccount) {
-			// Return default account if ignored
 			return getDefaultDiscordAccount({
 				id: args.account.id,
 				name: args.account.name,
@@ -91,7 +89,6 @@ export const createManyDiscordAccounts = publicInternalMutation({
 			}
 		}
 
-		// Filter out ignored accounts
 		const allowedAccounts = args.accounts.filter(
 			(acc) => !ignoredIds.has(acc.id),
 		);
@@ -111,7 +108,6 @@ export const createManyDiscordAccounts = publicInternalMutation({
 			}
 		}
 
-		// Return created accounts (or default for ignored ones)
 		return args.accounts.map((acc) => {
 			if (ignoredIds.has(acc.id)) {
 				return getDefaultDiscordAccount({
@@ -160,7 +156,6 @@ export const updateManyDiscordAccounts = publicInternalMutation({
 	handler: async (ctx, args) => {
 		if (args.accounts.length === 0) return [];
 
-		// Deduplicate by id
 		const accountMap = new Map<string, DiscordAccount>();
 		for (const account of args.accounts) {
 			accountMap.set(account.id, account);
@@ -182,7 +177,6 @@ export const updateManyDiscordAccounts = publicInternalMutation({
 			}
 		}
 
-		// Return updated accounts
 		const results: DiscordAccount[] = [];
 		for (const account of uniqueAccounts) {
 			const updated = await ctx.db
@@ -295,7 +289,6 @@ export const upsertManyDiscordAccounts = publicInternalMutation({
 			}
 		}
 
-		// Return results
 		const results: DiscordAccount[] = [];
 		for (const account of args.accounts) {
 			if (ignoredIds.has(account.id)) {
@@ -334,7 +327,6 @@ export const deleteDiscordAccount = publicInternalMutation({
 			await ctx.db.delete(existing._id);
 		}
 
-		// Add to ignored accounts
 		await upsertIgnoredDiscordAccountInternalLogic(ctx, args.id);
 
 		const messages = await getManyFrom(

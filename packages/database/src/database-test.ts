@@ -9,10 +9,6 @@ import { Database, service } from "./database";
 
 process.env.BACKEND_ACCESS_TOKEN = "test-backend-access-token";
 
-// Use SimpleSpanProcessor for tests - exports spans immediately when they end
-// This avoids TestClock timing issues since spans are exported synchronously
-// Provide a real Clock for the NodeSdk so shutdown timeout uses real time
-// This allows OTEL to use real time while the rest of the test uses TestClock
 const RealClockLayer = Layer.setClock(Clock.make());
 const OtelLayer = createOtelTestLayer(
 	"database-tests",
@@ -20,7 +16,6 @@ const OtelLayer = createOtelTestLayer(
 	Duration.seconds(5), // Shutdown timeout - uses real time now
 ).pipe(Layer.provide(RealClockLayer));
 
-// Provide BACKEND_ACCESS_TOKEN for Effect Config system
 const BackendAccessTokenLayer = Layer.setConfigProvider(
 	ConfigProvider.fromJson({
 		BACKEND_ACCESS_TOKEN: "test-backend-access-token",

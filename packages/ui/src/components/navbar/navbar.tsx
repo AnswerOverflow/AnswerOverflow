@@ -10,29 +10,17 @@ import { ServerIcon } from "../server-icon";
 import { ThemeSwitcher } from "../theme-switcher";
 import { UserSection, type UserSectionProps } from "./user-section";
 export interface NavbarProps {
-	/** Logo or brand name to display on the left */
 	logo?: React.ReactNode;
-	/** Server/tenant information to display instead of logo */
 	server?: Pick<Server, "discordId" | "name" | "icon"> | null;
-	/** Link to navigate to when clicking logo/server */
 	homeHref?: string;
-	/** Hide the logo/server icon */
 	hideIcon?: boolean;
-	/** User section props */
 	userSection?: UserSectionProps;
-	/** Show search button (mobile) */
 	showSearch?: boolean;
-	/** Search href */
 	searchHref?: string;
-	/** Show GitHub link */
 	showGitHub?: boolean;
-	/** GitHub link URL */
 	githubHref?: string;
-	/** Show "Get Started" button */
 	showGetStarted?: boolean;
-	/** Get Started button props */
 	getStartedProps?: React.ComponentProps<typeof LinkButton>;
-	/** Custom search bar component (centered, desktop only) */
 	searchBar?: React.ReactNode;
 }
 

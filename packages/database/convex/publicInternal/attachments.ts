@@ -3,10 +3,6 @@ import type { Id } from "../_generated/dataModel";
 import { publicInternalAction } from "../client";
 import { uploadAttachmentFromUrlLogic } from "../shared/shared";
 
-/**
- * Downloads an attachment from a URL and uploads it to Convex storage
- * Returns the storage ID
- */
 export const uploadAttachmentFromUrl = publicInternalAction({
 	args: {
 		url: v.string(),
@@ -23,10 +19,6 @@ export const uploadAttachmentFromUrl = publicInternalAction({
 	},
 });
 
-/**
- * Batch uploads multiple attachments from URLs
- * Returns a map of attachment IDs to storage IDs
- */
 export const uploadManyAttachmentsFromUrls = publicInternalAction({
 	args: {
 		attachments: v.array(
@@ -67,9 +59,6 @@ export const uploadManyAttachmentsFromUrls = publicInternalAction({
 	},
 });
 
-/**
- * Gets the storage URL for an attachment
- */
 export const getAttachmentUrl = publicInternalAction({
 	args: {
 		storageId: v.id("_storage"),

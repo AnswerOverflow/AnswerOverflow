@@ -14,7 +14,6 @@ import { FUNCTION_TYPE_MAP, isNamespace } from "./generated/function-types";
 import type { LiveData } from "./live-data";
 import { createWatchQueryToLiveData } from "./watch-query-cached";
 
-// Helper type to check if args are empty (only backendAccessToken)
 type IsEmptyArgs<Args> = Omit<Args, "backendAccessToken"> extends Record<
 	string,
 	never
@@ -22,12 +21,10 @@ type IsEmptyArgs<Args> = Omit<Args, "backendAccessToken"> extends Record<
 	? true
 	: false;
 
-// Options for query functions
 type QueryOptions = {
 	subscribe?: boolean;
 };
 
-// Helper type to determine return type based on options parameter
 type QueryReturnType<
 	Ref extends FunctionReference<"query", any>,
 	Opts extends QueryOptions | undefined,
@@ -35,11 +32,6 @@ type QueryReturnType<
 	? LiveData<FunctionReturnType<Ref>>
 	: FunctionReturnType<Ref>;
 
-// Transform FunctionReference to function signature, omitting backendAccessToken
-// Returns an Effect instead of a Promise
-// If args are empty (only backendAccessToken), make args optional
-// For queries, supports subscribe option as separate parameter - when subscribe is true, returns LiveData
-// Uses conditional types with generic parameter to check if options extends { subscribe: true }
 type FunctionRefToFunction<Ref extends FunctionReference<any, any>> =
 	Ref extends FunctionReference<"query", any>
 		? IsEmptyArgs<FunctionArgs<Ref>> extends true
@@ -59,7 +51,6 @@ type FunctionRefToFunction<Ref extends FunctionReference<any, any>> =
 					args: Omit<FunctionArgs<Ref>, "backendAccessToken">,
 				) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>;
 
-// Helper type for recursively transforming nested objects
 type TransformToFunctions<T> = {
 	[K in keyof T]: T[K] extends FunctionReference<any, any>
 		? FunctionRefToFunction<T[K]>
@@ -68,7 +59,6 @@ type TransformToFunctions<T> = {
 			: T[K];
 };
 
-// Helper function to build function path from namespace path and function name
 function buildFunctionPath(
 	namespacePath: string[],
 	functionName: string,
@@ -79,7 +69,6 @@ function buildFunctionPath(
 	return `${namespacePath.join(".")}.${functionName}`;
 }
 
-// Helper function to call the appropriate client method based on function type
 function callClientMethod(
 	funcType: "query" | "mutation" | "action",
 	funcRef: FunctionReference<any, any>,
@@ -110,8 +99,6 @@ export const service = Effect.gen(function* () {
 		internal,
 	});
 
-	// Use codegen-generated structure to simplify namespace/function detection
-	// Type the Proxy to preserve PublicInternalFunctions structure
 	const createProxy = <T extends Record<string, any>>(
 		target: T,
 		namespacePath: string[],
@@ -131,16 +118,13 @@ export const service = Effect.gen(function* () {
 					return undefined;
 				}
 
-				// Use generated structure to check if this is a namespace
 				if (isNamespace(prop)) {
-					// It's a namespace - create a proxy for it
 					return createProxy(value, [
 						...namespacePath,
 						prop,
 					]) as TransformToFunctions<T>[typeof prop];
 				}
 
-				// It's a function - look up its type and wrap it
 				const functionPath = buildFunctionPath(namespacePath, prop);
 				const funcType =
 					FUNCTION_TYPE_MAP[functionPath as keyof typeof FUNCTION_TYPE_MAP];
@@ -153,29 +137,21 @@ export const service = Effect.gen(function* () {
 
 				const funcRef = value as FunctionReference<any, any>;
 
-				// For queries, support subscribe option as separate parameter
 				if (funcType === "query") {
 					const wrappedFunction = ((args?: any, options: QueryOptions = {}) => {
 						const fullArgs = { ...(args ?? {}), backendAccessToken };
 
-						// If subscribe option is enabled, use watchQueryToLiveData
 						if (options.subscribe === true) {
 							return Effect.gen(function* () {
-								// watchQueryToLiveData expects a function that takes convexApi and returns the query
-								// We create a helper that always returns our query reference
 								const getQuery = () => funcRef;
-								// watchQueryToLiveData uses OptionalRestArgs, so pass args as rest parameter
-								// fullArgs always includes backendAccessToken, so pass it as [fullArgs]
 								const liveData = yield* watchQueryToLiveData(
 									getQuery,
 									fullArgs,
 								);
-								// Return the LiveData object
 								return liveData;
 							});
 						}
 
-						// Regular query
 						return callClientMethod(
 							funcType,
 							funcRef,
@@ -187,7 +163,6 @@ export const service = Effect.gen(function* () {
 					return wrappedFunction;
 				}
 
-				// For mutations and actions, use regular call
 				const wrappedFunction = ((args?: any) => {
 					const fullArgs = { ...(args ?? {}), backendAccessToken };
 					return callClientMethod(
@@ -214,10 +189,6 @@ export const DatabaseLayer = Layer.effect(Database, service).pipe(
 	Layer.provide(ConvexClientLiveUnifiedLayer),
 );
 
-/**
- * Upsert a single message to the database
- * Matches the old codebase interface for compatibility
- */
 export async function upsertMessage(
 	data: BaseMessageWithRelations,
 	opts?: {
@@ -256,9 +227,6 @@ export async function upsertMessage(
 	await Effect.runPromise(program);
 }
 
-/**
- * Base message with relations - matches the old codebase interface
- */
 export type BaseMessageWithRelations = Message & {
 	attachments?: Attachment[];
 	reactions?: Array<{
@@ -266,11 +234,6 @@ export type BaseMessageWithRelations = Message & {
 		emoji: Emoji;
 	}>;
 };
-/**
- * Upsert many messages to the database
- * Matches the old codebase interface for compatibility
- * Returns the messages that were successfully upserted
- */
 export async function upsertManyMessages(
 	data: BaseMessageWithRelations[],
 	opts?: {

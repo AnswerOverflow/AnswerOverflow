@@ -11,13 +11,10 @@ import { ConvexClientLiveUnifiedLayer } from "./convex-client-live";
 import { ConvexClientUnified, ConvexError } from "./convex-unified-client";
 import { FUNCTION_TYPE_MAP, isNamespace } from "./generated/function-types";
 
-// Transform FunctionReference to function signature, omitting backendAccessToken
-// Returns an Effect instead of a Promise
 type FunctionRefToFunction<Ref extends FunctionReference<any, any>> = (
 	args: Omit<FunctionArgs<Ref>, "backendAccessToken">,
 ) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>;
 
-// Helper type for recursively transforming nested objects
 type TransformToFunctions<T> = {
 	[K in keyof T]: T[K] extends FunctionReference<any, any>
 		? FunctionRefToFunction<T[K]>
@@ -26,7 +23,6 @@ type TransformToFunctions<T> = {
 			: T[K];
 };
 
-// Helper function to build function path from namespace path and function name
 function buildFunctionPath(
 	namespacePath: string[],
 	functionName: string,
@@ -37,7 +33,6 @@ function buildFunctionPath(
 	return `${namespacePath.join(".")}.${functionName}`;
 }
 
-// Helper function to call the appropriate client method based on function type
 function callClientMethod(
 	funcType: "query" | "mutation" | "action",
 	funcRef: FunctionReference<any, any>,
@@ -63,8 +58,6 @@ const serviceGen = Effect.gen(function* () {
 	const backendAccessToken = yield* Config.string("BACKEND_ACCESS_TOKEN");
 	const convexClient = yield* ConvexClientUnified;
 
-	// Use codegen-generated structure to simplify namespace/function detection
-	// Type the Proxy to preserve PublicInternalFunctions structure
 	const createProxy = <T extends Record<string, any>>(
 		target: T,
 		namespacePath: string[],
@@ -84,16 +77,13 @@ const serviceGen = Effect.gen(function* () {
 					return undefined;
 				}
 
-				// Use generated structure to check if this is a namespace
 				if (isNamespace(prop)) {
-					// It's a namespace - create a proxy for it
 					return createProxy(value, [
 						...namespacePath,
 						prop,
 					]) as TransformToFunctions<T>[typeof prop];
 				}
 
-				// It's a function - look up its type and wrap it
 				const functionPath = buildFunctionPath(namespacePath, prop);
 				const funcType =
 					FUNCTION_TYPE_MAP[functionPath as keyof typeof FUNCTION_TYPE_MAP];

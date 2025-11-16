@@ -4,7 +4,6 @@ import { v } from "convex/values";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { api } from "../_generated/api";
 
-// Minimal schema for testing - includes tables needed by the functions we're testing
 const testSchema = defineSchema({
 	servers: defineTable({
 		discordId: v.string(),
@@ -15,16 +14,11 @@ const testSchema = defineSchema({
 	}).index("by_serverId", ["serverId"]),
 });
 
-// Auto-discover convex modules - include _generated directory
-// Normalize paths to start with /convex/ as expected by convex-test
 const normalizePath = (path: string): string => {
-	// Convert relative paths to /convex/ paths
 	if (path.startsWith("../")) {
-		// Remove ../ prefix and add /convex/ prefix
 		return `/convex/${path.replace(/^\.\.\//, "")}`;
 	}
 	if (path.startsWith("./")) {
-		// For paths in publicInternal, convert to /convex/publicInternal/
 		return `/convex/publicInternal/${path.replace(/^\.\//, "")}`;
 	}
 	return path;
@@ -62,7 +56,6 @@ describe("publicInternalQuery", () => {
 
 	it("should reject invalid backendAccessToken", async () => {
 		const t = convexTest(testSchema, testModules);
-		// Create a valid server ID first
 		const serverId = await t.run(async (ctx) => {
 			return await ctx.db.insert("servers", {
 				discordId: "123456789",
@@ -85,7 +78,6 @@ describe("publicInternalQuery", () => {
 		delete process.env.BACKEND_ACCESS_TOKEN;
 
 		const t = convexTest(testSchema, testModules);
-		// Create a valid server ID first
 		const serverId = await t.run(async (ctx) => {
 			return await ctx.db.insert("servers", {
 				discordId: "123456789",
@@ -122,7 +114,6 @@ describe("publicInternalMutation", () => {
 
 	it("should reject invalid backendAccessToken", async () => {
 		const t = convexTest(testSchema, testModules);
-		// Create a valid server ID first
 		const serverId = await t.run(async (ctx) => {
 			return await ctx.db.insert("servers", {
 				discordId: "123456789",
@@ -147,7 +138,6 @@ describe("publicInternalMutation", () => {
 		delete process.env.BACKEND_ACCESS_TOKEN;
 
 		const t = convexTest(testSchema, testModules);
-		// Create a valid server ID first
 		const serverId = await t.run(async (ctx) => {
 			return await ctx.db.insert("servers", {
 				discordId: "123456789",

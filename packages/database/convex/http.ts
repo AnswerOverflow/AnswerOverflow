@@ -5,10 +5,6 @@ import { authComponent, createAuth } from "./shared/betterAuth";
 
 const http = httpRouter();
 
-/**
- * HTTP endpoint to serve attachments from Convex storage
- * Usage: GET /getAttachment?storageId=<storage_id>
- */
 http.route({
 	path: "/getAttachment",
 	method: "GET",
@@ -31,7 +27,6 @@ http.route({
 				});
 			}
 
-			// Redirect to the file URL
 			return new Response(null, {
 				status: 302,
 				headers: {

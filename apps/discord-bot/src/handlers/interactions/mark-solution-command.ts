@@ -4,17 +4,12 @@ import { Effect } from "effect";
 import { toAOMessage } from "../../utils/conversions";
 import { makeMarkSolutionResponse } from "./mark-solution";
 
-/**
- * Handles the "Mark Solution" context menu command
- * This is a simplified version that reuses logic from the reaction handler
- */
 export function handleMarkSolutionCommand(
 	interaction: ContextMenuCommandInteraction,
 ): Effect.Effect<void, unknown, Database> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Defer reply since this might take a moment
 		yield* Effect.tryPromise({
 			try: () => interaction.deferReply({ ephemeral: false }),
 			catch: (error) => error,
@@ -124,18 +119,15 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		// Find the question message (thread starter)
 		let questionMessage = null;
 
 		if (parentChannel.type === 15) {
-			// GuildForum
 			const fetchedMessage = yield* Effect.tryPromise({
 				try: () => thread.messages.fetch(thread.id),
 				catch: () => null,
 			});
 			questionMessage = fetchedMessage ?? null;
 		} else if (parentChannel.type === 0 || parentChannel.type === 5) {
-			// Text channel or Announcement channel thread
 			if ("messages" in parentChannel) {
 				const fetchedMessage = yield* Effect.tryPromise({
 					try: () => parentChannel.messages.fetch(thread.id),
@@ -156,7 +148,6 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		// Can't mark question as solution
 		if (questionMessage.id === targetMessage.id) {
 			yield* Effect.tryPromise({
 				try: () =>
@@ -196,7 +187,6 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		// User must be question author or have ManageThreads permission
 		const isQuestionAuthor = questionMessage.author.id === interaction.user.id;
 		const hasPermission =
 			parentChannel.permissionsFor(guildMember)?.has("ManageThreads") ?? false;
@@ -220,7 +210,6 @@ export function handleMarkSolutionCommand(
 		);
 		const serverPreferences = serverPreferencesLiveData ?? null;
 
-		// Mark as solved
 		yield* Effect.promise(async () => {
 			const solutionMessage = await toAOMessage(targetMessage, server._id);
 			await upsertMessage(
@@ -231,28 +220,22 @@ export function handleMarkSolutionCommand(
 				{ ignoreChecks: false },
 			);
 
-			// Add solved indicator
 			if (
 				parentChannel.type === 15 &&
 				channelSettings?.solutionTagId &&
 				thread.appliedTags.length < 5
 			) {
-				// Forum channel: add solved tag
 				await thread.setAppliedTags([
 					...thread.appliedTags,
 					channelSettings.solutionTagId,
 				]);
 			} else {
-				// Text channel: add checkmark reaction
 				await questionMessage.react("✅");
 			}
 
-			// React to solution message
 			try {
 				await targetMessage.react("✅");
-			} catch {
-				// Ignore if already reacted
-			}
+			} catch {}
 		}).pipe(
 			Effect.catchAll((error) =>
 				Effect.gen(function* () {
@@ -269,7 +252,6 @@ export function handleMarkSolutionCommand(
 			),
 		);
 
-		// Send success response
 		if (!channelSettings || !channelSettings.flags) {
 			yield* Effect.tryPromise({
 				try: () =>

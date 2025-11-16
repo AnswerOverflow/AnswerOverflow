@@ -14,8 +14,6 @@ const createLiveService = Effect.gen(function* () {
 
 	const client = new ConvexClient(convexUrl);
 
-	// Wrap mutation to prevent internal mutations from being called
-	// All other methods (query, action, onUpdate) are used directly from ConvexClient
 	const wrappedClient: ConvexClientShared = {
 		query: client.query.bind(client),
 		mutation: <Mutation extends FunctionReference<"mutation">>(
@@ -23,9 +21,6 @@ const createLiveService = Effect.gen(function* () {
 			args: Parameters<ConvexClient["mutation"]>[1],
 			options?: Parameters<ConvexClient["mutation"]>[2],
 		) => {
-			// Live client can only call public mutations
-			// Internal mutations will fail at runtime with a clear error from Convex
-			// This is intentional - internal mutations should only be used in test mode
 			if (
 				typeof mutation === "object" &&
 				mutation !== null &&

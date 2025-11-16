@@ -14,22 +14,11 @@ import {
 	getServerByDiscordId,
 } from "../shared/shared";
 
-/**
- * Get the authenticated user's Discord account ID from their BetterAuth identity
- * Returns null if not authenticated or no Discord account linked
- *
- * BetterAuth account structure:
- * - accountId: string (Discord user ID / provider account ID)
- * - providerId: string (provider name, e.g., "discord")
- * - userId: string (Convex user ID)
- */
 export async function getDiscordAccountIdFromAuth(
 	ctx: QueryCtx | MutationCtx,
 ): Promise<string | null> {
 	const user = await authComponent.getAuthUser(ctx);
 
-	// Use findOne with filters for both userId and providerId to get the Discord account directly
-	// This is cleaner than using findMany and filtering manually
 	const accountResult = await ctx.runQuery(
 		components.betterAuth.adapter.findOne,
 		{
@@ -49,7 +38,6 @@ export async function getDiscordAccountIdFromAuth(
 		},
 	);
 
-	// Type guard to ensure we have a valid account object with proper structure
 	if (
 		!accountResult ||
 		typeof accountResult !== "object" ||
@@ -59,7 +47,6 @@ export async function getDiscordAccountIdFromAuth(
 		return null;
 	}
 
-	// Narrow the type by checking the structure
 	const accountId = accountResult.accountId;
 	const providerId = accountResult.providerId;
 
@@ -67,7 +54,6 @@ export async function getDiscordAccountIdFromAuth(
 		return null;
 	}
 
-	// accountId is the Discord user ID (provider account ID)
 	if (typeof accountId !== "string") {
 		return null;
 	}
@@ -75,45 +61,27 @@ export async function getDiscordAccountIdFromAuth(
 	return accountId;
 }
 
-/**
- * Check if the authenticated user is a super user
- * Super users bypass permission checks
- */
 export function isSuperUser(discordAccountId: string | null): boolean {
-	// TODO: Move to env var
 	const SUPER_USER_IDS = ["523949187663134754"]; // Rhys's Discord ID
 	return discordAccountId !== null && SUPER_USER_IDS.includes(discordAccountId);
 }
 
-/**
- * Get user server settings for a specific server by Discord server ID
- * Used to check permissions
- */
 export async function getUserServerSettingsForServerByDiscordId(
 	ctx: QueryCtx | MutationCtx,
 	userId: string,
 	discordServerId: string,
 ) {
-	// First, get the Convex server ID from Discord server ID
 	const server = await getServerByDiscordId(ctx, discordServerId);
 
 	if (!server) {
 		return null;
 	}
 
-	// Then get user server settings using Convex server ID
 	const settings = await findUserServerSettingsById(ctx, userId, server._id);
 
 	return settings;
 }
 
-/**
- * Check if user has permission to edit a server
- * Requires Administrator or ManageGuild permission, or being the server owner
- * Returns a branded type that proves the permission check was performed.
- * @param discordServerId - Discord server ID (snowflake string)
- * @returns AuthorizedUser<CanEditServer> - Branded type proving permission was checked
- */
 export async function assertCanEditServer(
 	ctx: QueryCtx | MutationCtx,
 	discordServerId: string,
@@ -124,8 +92,6 @@ export async function assertCanEditServer(
 	}
 
 	if (isSuperUser(discordAccountId)) {
-		// Super users bypass permission checks but still return branded type
-		// We need to get settings for the branded type, but skip the check
 		const settings = await getUserServerSettingsForServerByDiscordId(
 			ctx,
 			discordAccountId,
@@ -149,7 +115,6 @@ export async function assertCanEditServer(
 		);
 	}
 
-	// Discord permission bitfield: Administrator = 0x8, ManageGuild = 0x20
 	const ADMINISTRATOR = 0x8;
 	const MANAGE_GUILD = 0x20;
 
@@ -163,19 +128,12 @@ export async function assertCanEditServer(
 		);
 	}
 
-	// Return branded type proving permission was checked
 	return {
 		discordAccountId,
 		userServerSettings: settings,
 	} as unknown as AuthorizedUser<CanEditServer>;
 }
 
-/**
- * Check if user is the owner or admin of a server
- * Returns a branded type that proves the permission check was performed.
- * @param discordServerId - Discord server ID (snowflake string)
- * @returns AuthorizedUser<IsAdminOrOwner> - Branded type proving permission was checked
- */
 export async function assertIsAdminOrOwnerOfServer(
 	ctx: QueryCtx | MutationCtx,
 	discordServerId: string,
@@ -186,7 +144,6 @@ export async function assertIsAdminOrOwnerOfServer(
 	}
 
 	if (isSuperUser(discordAccountId)) {
-		// Super users bypass permission checks but still return branded type
 		const settings = await getUserServerSettingsForServerByDiscordId(
 			ctx,
 			discordAccountId,
@@ -215,18 +172,12 @@ export async function assertIsAdminOrOwnerOfServer(
 		throw new Error("Only administrators or the server owner can do this");
 	}
 
-	// Return branded type proving permission was checked
 	return {
 		discordAccountId,
 		userServerSettings: settings,
 	} as unknown as AuthorizedUser<IsAdminOrOwner>;
 }
 
-/**
- * Check if the authenticated user matches the target user ID
- * Returns a branded type that proves the user check was performed.
- * @returns AuthorizedUser<IsAuthenticated> - Branded type proving user was verified
- */
 export function assertIsUser(
 	discordAccountId: string | null,
 	targetUserId: string,
@@ -246,18 +197,12 @@ export function assertIsUser(
 		throw new Error("You are not authorized to do this");
 	}
 
-	// Return branded type proving user was verified
 	return {
 		discordAccountId,
 		userServerSettings: null,
 	} as AuthorizedUser<IsAuthenticated>;
 }
 
-/**
- * Require authentication - throws if user is not authenticated
- * Returns a branded type that proves authentication was checked.
- * @returns AuthorizedUser<IsAuthenticated> - Branded type proving authentication
- */
 export async function requireAuth(
 	ctx: QueryCtx | MutationCtx,
 ): Promise<AuthorizedUser<IsAuthenticated>> {
@@ -271,20 +216,12 @@ export async function requireAuth(
 		throw new Error("Discord account not linked");
 	}
 
-	// Return branded type proving authentication was checked
 	return {
 		discordAccountId,
 		userServerSettings: null,
 	} as AuthorizedUser<IsAuthenticated>;
 }
 
-/**
- * Get the authenticated user's Discord account with access token from BetterAuth.
- * Returns null if not authenticated or no Discord account linked.
- *
- * @param parentSpan - Optional parent span context to inherit trace from. If provided,
- * the span will be created as a child of this span, maintaining trace continuity.
- */
 export async function getDiscordAccountWithToken(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
 	parentSpan?: Tracer.AnySpan,
@@ -329,7 +266,6 @@ export async function getDiscordAccountWithToken(
 		);
 	}).pipe(Effect.provide(createConvexOtelLayer("database")), Effect.runPromise);
 
-	// Type guard to ensure we have a valid account object with access token
 	if (
 		!accountResult ||
 		typeof accountResult !== "object" ||

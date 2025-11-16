@@ -46,19 +46,12 @@ const ServerSelectRow = (props: {
 );
 
 export interface ServerSelectDropdownProps {
-	/** Current selected server ID */
 	currentServerId?: string;
-	/** List of servers to display */
 	servers?: ServerSelectServer[];
-	/** Function to generate href for server navigation */
 	getServerHref?: (serverId: string) => string;
-	/** Href for "Add new" button */
 	addNewHref?: string;
-	/** Label for "Add new" button */
 	addNewLabel?: string;
-	/** Custom empty state message */
 	emptyMessage?: string;
-	/** Whether the servers are currently loading */
 	isLoading?: boolean;
 }
 

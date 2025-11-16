@@ -49,8 +49,6 @@ export const findManyUserServerSettings = publicInternalQuery({
 					});
 					if (args.settings.length === 0) return [];
 
-					// Optimization: If all settings have the same userId, we can query once and filter
-					// This reduces N queries to 1 query + filtering
 					const uniqueUserIds = new Set(args.settings.map((s) => s.userId));
 					const serverIds = new Set(args.settings.map((s) => s.serverId));
 
@@ -60,15 +58,12 @@ export const findManyUserServerSettings = publicInternalQuery({
 						"settings.optimized": uniqueUserIds.size === 1,
 					});
 
-					// If we have multiple userIds, fall back to the original approach
-					// Otherwise, optimize by querying all settings for the user and filtering
 					if (uniqueUserIds.size === 1) {
 						const userIdArray = Array.from(uniqueUserIds);
 						if (userIdArray.length === 0) {
 							return [];
 						}
 						const userId: string = userIdArray[0]!;
-						// Query all settings for this user
 						const allUserSettings = yield* Effect.withSpan(
 							"user_server_settings.findManyUserServerSettings.queryOptimized",
 						)(
@@ -93,7 +88,6 @@ export const findManyUserServerSettings = publicInternalQuery({
 						return filtered;
 					}
 
-					// Fallback: multiple userIds, use original approach
 					return yield* Effect.withSpan(
 						"user_server_settings.findManyUserServerSettings.queryFallback",
 					)(
@@ -134,8 +128,6 @@ export const findUserServerSettingsByApiKey = publicInternalQuery({
 		apiKey: v.string(),
 	},
 	handler: async (ctx, args) => {
-		// Note: We need to scan all user server settings since there's no index on apiKey
-		// In production, you might want to add an index
 		const allSettings = await ctx.db.query("userServerSettings").collect();
 		return allSettings.find((s) => s.apiKey === args.apiKey) ?? null;
 	},
@@ -147,7 +139,6 @@ export const updateUserServerSettings = publicInternalMutation({
 	},
 	handler: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		// Permission check returns branded type - TypeScript enforces it's used
 		const _authorizedUser: AuthorizedUser<IsAuthenticated> = assertIsUser(
 			discordAccountId,
 			args.settings.userId,
@@ -167,7 +158,6 @@ export const updateUserServerSettings = publicInternalMutation({
 			throw new Error("UserServerSettings not found");
 		}
 
-		// Validate: Cannot grant consent to publicly display messages with message indexing disabled
 		if (
 			args.settings.canPubliclyDisplayMessages &&
 			args.settings.messageIndexingDisabled
@@ -177,13 +167,11 @@ export const updateUserServerSettings = publicInternalMutation({
 			);
 		}
 
-		// If disabling message indexing, remove consent to publicly display messages
 		const updatedSettings = { ...args.settings };
 		if (updatedSettings.messageIndexingDisabled) {
 			updatedSettings.canPubliclyDisplayMessages = false;
 		}
 
-		// If we're disabling message indexing and it wasn't disabled before, delete all messages
 		if (
 			updatedSettings.messageIndexingDisabled &&
 			!existing.messageIndexingDisabled
@@ -230,7 +218,6 @@ export const upsertUserServerSettings = publicInternalMutation({
 	},
 	handler: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		// Permission check returns branded type - TypeScript enforces it's used
 		const _authorizedUser: AuthorizedUser<IsAuthenticated> = assertIsUser(
 			discordAccountId,
 			args.settings.userId,
@@ -315,7 +302,6 @@ export const deleteUserServerSettingsByUserId = publicInternalMutation({
 	},
 	handler: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		// Permission check returns branded type - TypeScript enforces it's used
 		const _authorizedUser: AuthorizedUser<IsAuthenticated> = assertIsUser(
 			discordAccountId,
 			args.userId,
@@ -424,7 +410,6 @@ export const countConsentingUsersInServer = publicInternalQuery({
 			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
 			.collect();
 
-		// Count users who have canPubliclyDisplayMessages enabled
 		return settings.filter(
 			(setting) => setting.canPubliclyDisplayMessages === true,
 		).length;

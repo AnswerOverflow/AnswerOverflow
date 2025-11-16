@@ -16,25 +16,19 @@ import {
 import { Console, Effect } from "effect";
 import { toAOMessage } from "../../utils/conversions";
 
-// Allowed guild IDs for checkmark reaction mark solution (legacy feature)
 const ALLOWED_CHECKMARK_AS_REACTION_GUILD_IDS = new Set([
 	"1037547185492996207", // Discord Bot Testing Server
 	"102860784329052160", // Reactiflux
 ]);
 
-// Answer Overflow brand color
 const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
 
-// Helper to create main site link
 function makeMainSiteLink(path: string): string {
 	const baseUrl =
 		process.env.NEXT_PUBLIC_BASE_URL || "https://www.answeroverflow.com";
 	return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-/**
- * Creates the embed and components for the mark solution response message
- */
 export function makeMarkSolutionResponse({
 	solution,
 	server,
@@ -59,7 +53,6 @@ export function makeMarkSolutionResponse({
 		ANSWER_OVERFLOW_BLUE_HEX as `#${string}`,
 	);
 
-	// Add "Learn more" field if no custom domain
 	if (!serverPreferences?.customDomain) {
 		embed.addFields({
 			name: "Learn more",
@@ -78,12 +71,10 @@ export function makeMarkSolutionResponse({
 				`Want to help others find the answer to this question? Use the button below to display your messages in ${server.name} on the web!`,
 			].join("\n\n"),
 		);
-		// TODO: Add consent button when manage account is implemented
 	} else {
 		embed.setDescription("**Thank you for marking this question as solved!**");
 	}
 
-	// Add "Jump To Solution" button
 	components.addComponents(
 		new ButtonBuilder()
 			.setLabel("Jump To Solution")
@@ -91,7 +82,6 @@ export function makeMarkSolutionResponse({
 			.setStyle(ButtonStyle.Link),
 	);
 
-	// Add "View on Answer Overflow" button if indexing is enabled
 	if (channelSettings.flags.indexingEnabled) {
 		components.addComponents(
 			new ButtonBuilder()
@@ -111,9 +101,6 @@ export function makeMarkSolutionResponse({
 	};
 }
 
-/**
- * Handles marking a message as a solution via checkmark reaction
- */
 function _handleCheckmarkReactionMarkSolution(
 	reaction: MessageReaction | PartialMessageReaction,
 	user: User | PartialUser,
@@ -121,12 +108,10 @@ function _handleCheckmarkReactionMarkSolution(
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Only handle checkmark emoji
 		if (reaction.emoji.name !== "✅" || reaction.me) {
 			return;
 		}
 
-		// Fetch full message if partial
 		const fullMessage = yield* Effect.tryPromise({
 			try: () => reaction.message.fetch(),
 			catch: (error) => error,
@@ -136,7 +121,6 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Only allow in specific guilds (legacy feature)
 		if (!ALLOWED_CHECKMARK_AS_REACTION_GUILD_IDS.has(fullMessage.guildId)) {
 			return;
 		}
@@ -173,13 +157,9 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Find the question message (thread starter)
-		// For forum channels, the thread ID is the question message ID
-		// For text channels, fetch the message that started the thread
 		let questionMessage: Message | null = null;
 
 		if (parentChannel.type === 15) {
-			// GuildForum
 			try {
 				const fetchedMessage = yield* Effect.tryPromise({
 					try: () => thread.messages.fetch(thread.id),
@@ -187,7 +167,6 @@ function _handleCheckmarkReactionMarkSolution(
 				});
 				questionMessage = fetchedMessage ?? null;
 			} catch {
-				// Fallback: get first message in thread
 				const messages = yield* Effect.tryPromise({
 					try: () => thread.messages.fetch({ limit: 1 }),
 					catch: () => null,
@@ -197,7 +176,6 @@ function _handleCheckmarkReactionMarkSolution(
 				}
 			}
 		} else if (parentChannel.type === 0 || parentChannel.type === 5) {
-			// Text channel or Announcement channel thread
 			try {
 				const fetchedMessage = yield* Effect.tryPromise({
 					try: () => {
@@ -218,7 +196,6 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Can't mark question as solution
 		if (questionMessage.id === fullMessage.id) {
 			return;
 		}
@@ -241,7 +218,6 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// Fetch full user if partial
 		const fullUser = yield* Effect.tryPromise({
 			try: () => {
 				if (user.partial) {
@@ -265,7 +241,6 @@ function _handleCheckmarkReactionMarkSolution(
 			return;
 		}
 
-		// User must be question author or have ManageThreads permission
 		const isQuestionAuthor = questionMessage.author.id === fullUser.id;
 		const hasPermission =
 			parentChannel.permissionsFor(guildMember)?.has("ManageThreads") ?? false;
@@ -281,7 +256,6 @@ function _handleCheckmarkReactionMarkSolution(
 		);
 		const serverPreferences = serverPreferencesLiveData ?? null;
 
-		// Mark as solved
 		yield* Effect.promise(async () => {
 			const solutionMessage = await toAOMessage(fullMessage, server._id);
 			await upsertMessage(
@@ -292,30 +266,23 @@ function _handleCheckmarkReactionMarkSolution(
 				{ ignoreChecks: false },
 			);
 
-			// Add solved indicator
 			if (
 				parentChannel.type === 15 &&
 				channelSettings?.solutionTagId &&
 				thread.appliedTags.length < 5
 			) {
-				// Forum channel: add solved tag
 				await thread.setAppliedTags([
 					...thread.appliedTags,
 					channelSettings.solutionTagId,
 				]);
 			} else {
-				// Text channel: add checkmark reaction
 				await questionMessage.react("✅");
 			}
 
-			// React to solution message
 			try {
 				await fullMessage.react("✅");
-			} catch {
-				// Ignore if already reacted
-			}
+			} catch {}
 
-			// Send response message with embed and buttons
 			if (!channelSettings || !channelSettings.flags) {
 				return;
 			}

@@ -30,25 +30,14 @@ import {
 } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 
-/**
- * Configuration for indexing
- */
 const INDEXING_CONFIG = {
-	/** Run every 6 hours */
 	scheduleInterval: Duration.hours(6),
-	/** Maximum number of messages to fetch per channel */
 	maxMessagesPerChannel: 10000,
-	/** Maximum number of messages to fetch in a single API call */
 	messagesPerPage: 100,
-	/** Delay between processing channels to avoid rate limits */
 	channelProcessDelay: Duration.millis(100),
-	/** Delay between processing guilds */
 	guildProcessDelay: Duration.millis(500),
 } as const;
 
-/**
- * Fetches all messages from a text-based channel, paginating through message history
- */
 function fetchChannelMessages(
 	channelId: string,
 	channelName: string,
@@ -82,7 +71,6 @@ function fetchChannelMessages(
 				break;
 			}
 
-			// Convert to array and sort by ID (snowflake)
 			const sortedMessages = Arr.sort(
 				Arr.fromIterable(fetchedMessages.values()),
 				Order.mapInput(BigIntEffect.Order, (msg: Message) => BigInt(msg.id)),
@@ -97,7 +85,6 @@ function fetchChannelMessages(
 				hasMore = false;
 			}
 
-			// If we haven't fetched a full page, we're done
 			if (fetchedMessages.size < INDEXING_CONFIG.messagesPerPage) {
 				hasMore = false;
 			}
@@ -110,20 +97,15 @@ function fetchChannelMessages(
 	});
 }
 
-/**
- * Fetches all threads from a forum channel
- */
 function fetchForumThreads(forumChannelId: string, forumChannelName: string) {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 		const threads: AnyThreadChannel[] = [];
 
-		// Fetch active threads
 		const activeThreads = yield* discord.fetchActiveThreads(forumChannelId);
 
 		threads.push(...Arr.fromIterable(activeThreads.threads.values()));
 
-		// Fetch archived threads
 		let hasMoreArchived = true;
 		let beforeId: string | undefined;
 
@@ -150,9 +132,6 @@ function fetchForumThreads(forumChannelId: string, forumChannelName: string) {
 	});
 }
 
-/**
- * Stores fetched messages in the database
- */
 function storeMessages(
 	messages: Message[],
 	serverConvexId: Id<"servers">,
@@ -198,8 +177,6 @@ function storeMessages(
 			{ concurrency: 10 },
 		);
 
-		// Upload attachments and update storage IDs
-		// Need to get Discord URLs from original messages since we removed them from schema
 		const allAttachments = Arr.flatMap(humanMessages, (msg) =>
 			Arr.map(Arr.fromIterable(msg.attachments.values()), (att) => ({
 				id: att.id,
@@ -265,7 +242,6 @@ function storeMessages(
 						`Updating lastIndexedSnowflake for channel ${channelId}: ${oldLastIndexed ?? "null"} -> ${newLastIndexed}`,
 					);
 
-					// Only pass the channel data fields, not system fields like _id, _creationTime, flags
 					yield* database.channels.updateChannel({
 						id: channelId,
 						channel: {
@@ -300,9 +276,6 @@ function storeMessages(
 	});
 }
 
-/**
- * Indexes a single text or announcement channel
- */
 function indexTextChannel(
 	channel: TextChannel | NewsChannel,
 	serverConvexId: Id<"servers">,
@@ -380,7 +353,6 @@ function indexTextChannel(
 						const threadChannel = threadChannelLiveData;
 						const threadLastIndexed = threadChannel?.lastIndexedSnowflake;
 
-						// Fetch and store thread messages
 						const threadMessages = yield* fetchChannelMessages(
 							thread.id,
 							thread.name,
@@ -401,9 +373,6 @@ function indexTextChannel(
 	});
 }
 
-/**
- * Indexes a forum channel by fetching all threads and their messages
- */
 function indexForumChannel(
 	channel: ForumChannel,
 	serverConvexId: Id<"servers">,
@@ -460,7 +429,6 @@ function indexForumChannel(
 					const threadChannel = threadChannelLiveData;
 					const threadLastIndexed = threadChannel?.lastIndexedSnowflake;
 
-					// Fetch and store thread messages
 					const threadMessages = yield* fetchChannelMessages(
 						thread.id,
 						thread.name,
@@ -507,7 +475,6 @@ function indexForumChannel(
 						`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexed} (latest thread: ${latestThread.name})`,
 					);
 
-					// Only pass the channel data fields, not system fields like _id, _creationTime, flags
 					yield* database.channels.updateChannel({
 						id: channel.id,
 						channel: {
@@ -540,9 +507,6 @@ function indexForumChannel(
 	});
 }
 
-/**
- * Indexes a single guild (server) by processing all its channels
- */
 function indexGuild(guild: Guild) {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
@@ -612,9 +576,6 @@ function indexGuild(guild: Guild) {
 	});
 }
 
-/**
- * Main indexing function - indexes all guilds
- */
 function runIndexing() {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
@@ -656,16 +617,12 @@ function runIndexing() {
 	);
 }
 
-/**
- * Starts the indexing loop that runs on a schedule
- */
 export function startIndexingLoop(runImmediately = true) {
 	return Effect.gen(function* () {
 		yield* Effect.logDebug(
 			`Starting indexing loop - will run every ${INDEXING_CONFIG.scheduleInterval}`,
 		);
 
-		// Run immediately if requested
 		if (runImmediately) {
 			yield* Effect.logDebug("Running initial indexing...");
 			yield* runIndexing().pipe(
@@ -677,7 +634,6 @@ export function startIndexingLoop(runImmediately = true) {
 
 		const schedule = Schedule.fixed(INDEXING_CONFIG.scheduleInterval);
 
-		// Fork a fiber that runs the indexing on schedule
 		yield* Effect.fork(
 			Effect.repeat(runIndexing(), schedule).pipe(
 				Effect.catchAllCause((cause) =>

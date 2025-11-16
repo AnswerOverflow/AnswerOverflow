@@ -29,7 +29,6 @@ const nextConfig: NextConfig = {
 	cacheComponents: false,
 	reactCompiler: true,
 	experimental: {
-		// turbopackFileSystemCacheForBuild: true,
 		turbopackFileSystemCacheForDev: true,
 	},
 };

@@ -6,9 +6,6 @@ import { Discord } from "../core/discord-service";
 import { startIndexingLoop } from "../services/indexing";
 import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
 
-/**
- * Converts a Discord Guild to AnswerOverflow Server data
- */
 function toAOServer(guild: Guild) {
 	return {
 		discordId: guild.id,
@@ -22,10 +19,6 @@ function toAOServer(guild: Guild) {
 	};
 }
 
-/**
- * Syncs a single guild (server) to the database
- * This includes upserting the server and maintaining channel parity
- */
 export function syncGuild(guild: Guild) {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
@@ -33,7 +26,6 @@ export function syncGuild(guild: Guild) {
 
 		yield* Console.log(`Syncing server ${guild.id} ${guild.name}`);
 
-		// Upsert server - explicitly clear kickedTime if server is active
 		const aoServerData = toAOServer(guild);
 		yield* database.servers.upsertServer({
 			...aoServerData,
@@ -60,7 +52,6 @@ export function syncGuild(guild: Guild) {
 			return;
 		}
 
-		// If server has a custom domain, upload their server icon to storage
 		if (server.preferencesId) {
 			const preferencesLiveData =
 				yield* database.server_preferences.getServerPreferencesByServerId({
@@ -90,7 +81,6 @@ export function syncGuild(guild: Guild) {
 			}
 		}
 
-		// Maintain channel parity - only root channels (text, announcement, forum)
 		const channels = yield* discord.getChannels(guild.id);
 		const rootChannels = channels.filter((channel) => {
 			if (!("guild" in channel) || !channel.guild) return false;
@@ -122,9 +112,6 @@ export function syncGuild(guild: Guild) {
 	);
 }
 
-/**
- * Layer that sets up server and channel parity on client ready and guild join
- */
 export const ServerParityLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
@@ -143,7 +130,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 			),
 		);
 
-		// Subscribe to guildUpdate event
 		yield* discord.client.on("guildUpdate", (_oldGuild, newGuild) =>
 			Effect.gen(function* () {
 				const serverLiveData = yield* database.servers.getServerByDiscordId({
@@ -152,7 +138,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				const existingServer = serverLiveData;
 
 				if (!existingServer) {
-					// Server doesn't exist, might be a new server, skip
 					return;
 				}
 
@@ -188,7 +173,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 			),
 		);
 
-		// Subscribe to guildDelete event
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
 				const serverLiveData = yield* database.servers.getServerByDiscordId({
@@ -197,11 +181,9 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				const existingServer = serverLiveData;
 
 				if (!existingServer) {
-					// Server doesn't exist, skip
 					return;
 				}
 
-				// Mark server as kicked instead of deleting
 				const { _id, _creationTime, ...serverData } = existingServer;
 
 				yield* database.servers.updateServer({
@@ -220,7 +202,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("clientReady", (client) =>
 			Effect.gen(function* () {
-				// Register slash commands
 				yield* registerCommands().pipe(
 					Effect.catchAll((error) =>
 						Console.error("Error registering commands:", error),
@@ -228,13 +209,11 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				);
 
 				const servers = yield* database.servers.getAllServers();
-				// LiveData might not have data immediately, so we handle undefined
 				const serverCount = servers?.length ?? 0;
 				yield* Console.log(
 					`Logged in as ${client.user.tag}! ${serverCount} servers`,
 				);
 
-				// Start indexing loop
 				yield* Console.log("Starting indexing loop...");
 				yield* startIndexingLoop(true).pipe(
 					Effect.tap(() => Console.log("Indexing loop started")),
@@ -244,14 +223,10 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				);
 
 				const guilds = yield* discord.getGuilds();
-				// Track which servers the bot is currently in
 				const activeServerIds = new Set(guilds.map((guild) => guild.id));
 
-				// Upsert each server entry and maintain channel parity
 				yield* Effect.forEach(guilds, syncGuild);
 
-				// For any servers that are in the database but not in the guilds the bot is in,
-				// mark them as kicked (handles cases where bot was offline when kicked)
 				const allServers = servers ?? [];
 				const serversToMarkAsKicked = allServers.filter(
 					(server) =>

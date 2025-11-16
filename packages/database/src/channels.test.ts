@@ -1,5 +1,3 @@
-// Tests for channel functions
-
 import { expect, it } from "@effect/vitest";
 import { Effect, Exit } from "effect";
 import type { Id } from "../convex/_generated/dataModel";
@@ -48,13 +46,10 @@ const createTestSettings = (
 	...overrides,
 });
 
-// Simple query tests
-
 it.scoped("getChannelByDiscordId returns channel with flags", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Create server
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
@@ -225,7 +220,6 @@ it.scoped("findAllThreadsByParentId respects limit parameter", () =>
 			channel: parentChannel,
 		});
 
-		// Create 5 threads
 		for (let i = 1; i <= 5; i++) {
 			const thread = createTestChannel(`thread${i}`, serverId, {
 				parentId: "parent456",
@@ -257,7 +251,6 @@ it.scoped("findLatestThreads returns latest threads", () =>
 			throw new Error("Server not found");
 		}
 
-		// Create multiple threads
 		for (let i = 1; i <= 5; i++) {
 			const thread = createTestChannel(`thread${i}`, serverId, {
 				type: 11, // PublicThread
@@ -271,8 +264,6 @@ it.scoped("findLatestThreads returns latest threads", () =>
 		expect(liveData?.every((t) => t.type === 11)).toBe(true);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
-
-// Mutation tests
 
 it.scoped("createChannel creates new channel", () =>
 	Effect.gen(function* () {
@@ -453,16 +444,13 @@ it.scoped("deleteChannel deletes channel and its threads", () =>
 		yield* database.channels.createChannel({ channel: thread1 });
 		yield* database.channels.createChannel({ channel: thread2 });
 
-		// Delete parent channel
 		yield* database.channels.deleteChannel({ id: "parent789" });
 
-		// Verify parent is deleted
 		const parentLiveData = yield* database.channels.findChannelByDiscordId({
 			discordId: "parent789",
 		});
 		expect(parentLiveData).toBeNull();
 
-		// Verify threads are deleted
 		const threadsLiveData = yield* database.channels.findAllThreadsByParentId({
 			parentId: "parent789",
 		});
@@ -484,11 +472,9 @@ it.scoped("upsertManyChannels creates and updates channels", () =>
 			throw new Error("Server not found");
 		}
 
-		// Create one channel first
 		const existingChannel = createTestChannel("upsert1", serverId);
 		yield* database.channels.createChannel({ channel: existingChannel });
 
-		// Upsert: update existing, create new
 		const channels = [
 			{
 				create: createTestChannel("upsert1", serverId, {
@@ -519,8 +505,6 @@ it.scoped("upsertManyChannels creates and updates channels", () =>
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
-// Complex tests with LiveData reactivity
-
 it.scoped(
 	"findAllChannelsByServerId updates when channels are added or removed",
 	() =>
@@ -537,7 +521,6 @@ it.scoped(
 				throw new Error("Server not found");
 			}
 
-			// Set up watch
 			const liveData = yield* database.channels.findAllChannelsByServerId(
 				{
 					serverId,
@@ -547,20 +530,17 @@ it.scoped(
 
 			expect(liveData?.data?.length).toBe(0);
 
-			// Add channel
 			const channel1 = createTestChannel("react1", serverId);
 			yield* database.channels.createChannel({ channel: channel1 });
 
 			expect(liveData?.data?.length).toBe(1);
 			expect(liveData?.data?.[0]?.id).toBe("react1");
 
-			// Add another channel
 			const channel2 = createTestChannel("react2", serverId);
 			yield* database.channels.createChannel({ channel: channel2 });
 
 			expect(liveData?.data?.length).toBe(2);
 
-			// Delete a channel
 			yield* database.channels.deleteChannel({ id: "react1" });
 
 			expect(liveData?.data?.length).toBe(1);
@@ -587,7 +567,6 @@ it.scoped(
 			const parentChannel = createTestChannel("parentreact", serverId);
 			yield* database.channels.createChannel({ channel: parentChannel });
 
-			// Set up watch
 			const liveData = yield* database.channels.findAllThreadsByParentId(
 				{
 					parentId: "parentreact",
@@ -597,7 +576,6 @@ it.scoped(
 
 			expect(liveData?.data?.length).toBe(0);
 
-			// Add thread
 			const thread1 = createTestChannel("threadreact1", serverId, {
 				parentId: "parentreact",
 				type: 11,
@@ -606,7 +584,6 @@ it.scoped(
 
 			expect(liveData?.data?.length).toBe(1);
 
-			// Add another thread
 			const thread2 = createTestChannel("threadreact2", serverId, {
 				parentId: "parentreact",
 				type: 11,
@@ -615,7 +592,6 @@ it.scoped(
 
 			expect(liveData?.data?.length).toBe(2);
 
-			// Delete thread
 			yield* database.channels.deleteChannel({ id: "threadreact1" });
 
 			expect(liveData?.data?.length).toBe(1);
@@ -640,7 +616,6 @@ it.scoped("getChannelByDiscordId updates when channel settings change", () =>
 		const channel = createTestChannel("settingschannel", serverId);
 		yield* database.channels.createChannel({ channel });
 
-		// Set up watch
 		const liveData = yield* database.channels.findChannelByDiscordId(
 			{
 				discordId: "settingschannel",
@@ -650,7 +625,6 @@ it.scoped("getChannelByDiscordId updates when channel settings change", () =>
 
 		expect(liveData?.data?.flags.indexingEnabled).toBe(false);
 
-		// Update settings
 		const updatedChannel = createTestChannel("settingschannel", serverId);
 		const updatedSettings = createTestSettings("settingschannel", {
 			indexingEnabled: true,
@@ -690,7 +664,6 @@ it.scoped("findManyChannelsById updates when channels change", () =>
 		yield* database.channels.createChannel({ channel: channel2 });
 		yield* database.channels.createChannel({ channel: channel3 });
 
-		// Set up watch
 		const allChannels = yield* database.channels.findAllChannelsByServerId(
 			{
 				serverId,
@@ -704,7 +677,6 @@ it.scoped("findManyChannelsById updates when channels change", () =>
 
 		expect(getLiveData()?.length).toBe(3);
 
-		// Update one channel
 		const updatedChannel = createTestChannel("batchreact1", serverId, {
 			name: "Updated Batch React 1",
 		});
@@ -718,15 +690,12 @@ it.scoped("findManyChannelsById updates when channels change", () =>
 		);
 		expect(updatedChannelData?.name).toBe("Updated Batch React 1");
 
-		// Delete one channel
 		yield* database.channels.deleteChannel({ id: "batchreact2" });
 
 		expect(getLiveData()?.length).toBe(2);
 		expect(getLiveData()?.some((c) => c.id === "batchreact2")).toBe(false);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
-
-// Error cases
 
 it.scoped("updateChannel throws error if channel does not exist", () =>
 	Effect.gen(function* () {
@@ -769,7 +738,6 @@ it.scoped("findChannelsBeforeId returns channels before given ID", () =>
 			throw new Error("Server not found");
 		}
 
-		// Create channels with sequential IDs (string comparison)
 		const channel1 = createTestChannel("channel001", serverId);
 		const channel2 = createTestChannel("channel002", serverId);
 		const channel3 = createTestChannel("channel003", serverId);
@@ -780,7 +748,6 @@ it.scoped("findChannelsBeforeId returns channels before given ID", () =>
 		yield* database.channels.createChannel({ channel: channel3 });
 		yield* database.channels.createChannel({ channel: channel4 });
 
-		// Get channels before channel004
 		const liveData = yield* database.channels.findChannelsBeforeId({
 			serverId,
 			id: "channel004",
@@ -788,7 +755,6 @@ it.scoped("findChannelsBeforeId returns channels before given ID", () =>
 		});
 
 		expect(liveData?.length).toBe(2);
-		// Should be ordered descending
 		expect(liveData?.[0]?.id).toBe("channel003");
 		expect(liveData?.[1]?.id).toBe("channel002");
 	}).pipe(Effect.provide(DatabaseTestLayer)),

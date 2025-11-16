@@ -23,7 +23,6 @@ const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
 	forumGuidelinesConsentEnabled: false,
 };
 
-// Helper function to add settings to multiple channels
 async function addSettingsToChannels(
 	ctx: QueryCtx | MutationCtx,
 	channels: Channel[],
@@ -101,7 +100,6 @@ export const getChannelPageData = query({
 
 					if (!server) return null;
 
-					// Parallelize independent operations: get channel and all channels simultaneously
 					const [channel, allChannels, threads] = yield* Effect.all([
 						Effect.withSpan("channels.getChannelPageData.getChannel")(
 							Effect.gen(function* () {
@@ -184,7 +182,6 @@ export const getChannelPageData = query({
 						}))
 						.filter((c) => c.flags.indexingEnabled)
 						.sort((a, b) => {
-							// Sort: forums first, then announcements, then text
 							if (a.type === 15) return -1; // GuildForum
 							if (b.type === 15) return 1;
 							if (a.type === 5) return -1; // GuildAnnouncement
@@ -192,12 +189,10 @@ export const getChannelPageData = query({
 							return 0;
 						})
 						.map((c) => {
-							// Return full channel object without flags
 							const { flags: _flags, ...channel } = c;
 							return channel;
 						});
 
-					// Sort threads by ID (newest first) and limit to 50
 					const sortedThreads = threads
 						.sort((a, b) => {
 							return b.id > a.id ? 1 : b.id < a.id ? -1 : 0;
@@ -219,7 +214,6 @@ export const getChannelPageData = query({
 						}),
 					);
 
-					// Combine threads with their first messages
 					const threadsWithMessages = sortedThreads
 						.map((thread) => ({
 							thread,

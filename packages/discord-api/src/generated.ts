@@ -59,137 +59,38 @@ export class OAuth2Scopes extends S.Union(/**
 * allows /users/@me without email
 */
 S.Literal("identify"),
-/**
-* enables /users/@me to return an email
-*/
 S.Literal("email"),
-/**
-* allows /users/@me/connections to return linked third-party accounts
-*/
 S.Literal("connections"),
-/**
-* allows /users/@me/guilds to return basic information about all of a user's guilds
-*/
 S.Literal("guilds"),
-/**
-* allows /guilds/{guild.id}/members/{user.id} to be used for joining users to a guild
-*/
 S.Literal("guilds.join"),
-/**
-* allows /users/@me/guilds/{guild.id}/member to return a user's member information in a guild
-*/
 S.Literal("guilds.members.read"),
-/**
-* allows your app to join users to a group dm
-*/
 S.Literal("gdm.join"),
-/**
-* for oauth2 bots, this puts the bot in the user's selected guild by default
-*/
 S.Literal("bot"),
-/**
-* for local rpc server access, this allows you to control a user's local Discord client - requires Discord approval
-*/
 S.Literal("rpc"),
-/**
-* for local rpc server access, this allows you to receive notifications pushed out to the user - requires Discord approval
-*/
 S.Literal("rpc.notifications.read"),
-/**
-* for local rpc server access, this allows you to read a user's voice settings and listen for voice events - requires Discord approval
-*/
 S.Literal("rpc.voice.read"),
-/**
-* for local rpc server access, this allows you to update a user's voice settings - requires Discord approval
-*/
 S.Literal("rpc.voice.write"),
-/**
-* for local rpc server access, this allows you to read a user's video status - requires Discord approval
-*/
 S.Literal("rpc.video.read"),
-/**
-* for local rpc server access, this allows you to update a user's video settings - requires Discord approval
-*/
 S.Literal("rpc.video.write"),
-/**
-* for local rpc server access, this allows you to read a user's screenshare status- requires Discord approval
-*/
 S.Literal("rpc.screenshare.read"),
-/**
-* for local rpc server access, this allows you to update a user's screenshare settings- requires Discord approval
-*/
 S.Literal("rpc.screenshare.write"),
-/**
-* for local rpc server access, this allows you to update a user's activity - requires Discord approval
-*/
 S.Literal("rpc.activities.write"),
-/**
-* this generates a webhook that is returned in the oauth token response for authorization code grants
-*/
 S.Literal("webhook.incoming"),
-/**
-* for local rpc server api access, this allows you to read messages from all client channels (otherwise restricted to channels/guilds your app creates)
-*/
 S.Literal("messages.read"),
-/**
-* allows your app to upload/update builds for a user's applications - requires Discord approval
-*/
 S.Literal("applications.builds.upload"),
-/**
-* allows your app to read build data for a user's applications
-*/
 S.Literal("applications.builds.read"),
-/**
-* allows your app to use commands in a guild
-*/
 S.Literal("applications.commands"),
-/**
-* allows your app to update permissions for its commands in a guild a user has permissions to
-*/
 S.Literal("applications.commands.permissions.update"),
-/**
-* allows your app to update its commands using a Bearer token - client credentials grant only
-*/
 S.Literal("applications.commands.update"),
-/**
-* allows your app to read and update store data (SKUs, store listings, achievements, etc.) for a user's applications
-*/
 S.Literal("applications.store.update"),
-/**
-* allows your app to read entitlements for a user's applications
-*/
 S.Literal("applications.entitlements"),
-/**
-* allows your app to fetch data from a user's "Now Playing/Recently Played" list - requires Discord approval
-*/
 S.Literal("activities.read"),
-/**
-* allows your app to update a user's activity - requires Discord approval (NOT REQUIRED FOR GAMESDK ACTIVITY MANAGER)
-*/
 S.Literal("activities.write"),
-/**
-* allows your app to send activity invites - requires Discord approval (NOT REQUIRED FOR GAMESDK ACTIVITY MANAGER)
-*/
 S.Literal("activities.invites.write"),
-/**
-* allows your app to know a user's friends and implicit relationships - requires Discord approval
-*/
 S.Literal("relationships.read"),
-/**
-* allows your app to connect to voice on user's behalf and see all the voice members - requires Discord approval
-*/
 S.Literal("voice"),
-/**
-* allows your app to see information about the user's DMs and group DMs - requires Discord approval
-*/
 S.Literal("dm_channels.read"),
-/**
-* allows your app to update a user's connection and metadata for the app
-*/
 S.Literal("role_connections.write"),
-/**
-* for OpenID Connect, this allows your app to receive user id and basic profile information
-*/
 S.Literal("openid")) {}
 
 export class ApplicationOAuth2InstallParamsResponse extends S.Class<ApplicationOAuth2InstallParamsResponse>("ApplicationOAuth2InstallParamsResponse")({
@@ -201,18 +102,12 @@ export class ApplicationExplicitContentFilterTypes extends S.Union(/**
 * inherit guild content filter setting
 */
 S.Literal(0),
-/**
-* interactions will always be scanned
-*/
 S.Literal(1)) {}
 
 export class TeamMembershipStates extends S.Union(/**
 * User has been invited to the team.
 */
 S.Literal(1),
-/**
-* User has accepted the team invitation.
-*/
 S.Literal(2)) {}
 
 export class TeamMemberResponse extends S.Class<TeamMemberResponse>("TeamMemberResponse")({
@@ -263,64 +158,28 @@ export class PrivateApplicationResponse extends S.Class<PrivateApplicationRespon
   "team": S.optionalWith(TeamResponse, { nullable: true })
 }) {}
 
-/**
-* A single error, either for an API response or a specific field.
-*/
 export class RatelimitedResponse extends S.Class<RatelimitedResponse>("RatelimitedResponse")({
-  /**
-* The number of seconds to wait before retrying your request
-*/
 "retry_after": S.Number,
-  /**
-* Whether you are being ratelimited by the global ratelimit or a per-endpoint ratelimit
-*/
 "global": S.Boolean,
-  /**
-* Discord internal error code. See error code reference
-*/
 "code": S.Int,
-  /**
-* Human-readable error message
-*/
 "message": S.String
 }) {}
 
-/**
-* A single error, either for an API response or a specific field.
-*/
 export class Error extends S.Class<Error>("Error")({
-  /**
-* Discord internal error code. See error code reference
-*/
 "code": S.Int,
-  /**
-* Human-readable error message
-*/
 "message": S.String
 }) {}
 
 export class InnerErrors extends S.Class<InnerErrors>("InnerErrors")({
-  /**
-* The list of errors for this field
-*/
 "_errors": S.Array(Error)
 }) {}
 
 export class ErrorDetails extends S.Union(S.Record({ key: S.String, value: S.Unknown }),
 InnerErrors) {}
 
-/**
-* A single error, either for an API response or a specific field.
-*/
 export class ErrorResponse extends S.Class<ErrorResponse>("ErrorResponse")({
   "errors": S.optionalWith(ErrorDetails, { nullable: true }),
-  /**
-* Discord internal error code. See error code reference
-*/
 "code": S.Int,
-  /**
-* Human-readable error message
-*/
 "message": S.String
 }) {}
 
@@ -353,13 +212,7 @@ export class EmbeddedActivityLocationKind extends S.Union(/**
 * guild channel
 */
 S.Literal("gc"),
-/**
-* private channel
-*/
 S.Literal("pc"),
-/**
-* party
-*/
 S.Literal("party")) {}
 
 export class GuildChannelLocation extends S.Class<GuildChannelLocation>("GuildChannelLocation")({
@@ -444,84 +297,36 @@ export class ApplicationCommandType extends S.Union(/**
 * Slash commands; a text-based command that shows up when a user types /
 */
 S.Literal(1),
-/**
-* A UI-based command that shows up when you right click or tap on a user
-*/
 S.Literal(2),
-/**
-* A UI-based command that shows up when you right click or tap on a message
-*/
 S.Literal(3),
-/**
-* A command that represents the primary way to use an application (e.g. launching an Activity)
-*/
 S.Literal(4)) {}
 
 export class InteractionContextType extends S.Union(/**
 * This command can be used within a Guild.
 */
 S.Literal(0),
-/**
-* This command can be used within a DM with this application's bot.
-*/
 S.Literal(1),
-/**
-* This command can be used within DMs and Group DMs with users.
-*/
 S.Literal(2)) {}
 
 export class ApplicationIntegrationType extends S.Union(/**
 * For Guild install.
 */
 S.Literal(0),
-/**
-* For User install.
-*/
 S.Literal(1)) {}
 
 export class ApplicationCommandOptionType extends S.Union(/**
 * A sub-action within a command or group
 */
 S.Literal(1),
-/**
-* A group of subcommands
-*/
 S.Literal(2),
-/**
-* A string option
-*/
 S.Literal(3),
-/**
-* An integer option. Any integer between -2^53 and 2^53 is a valid value
-*/
 S.Literal(4),
-/**
-* A boolean option
-*/
 S.Literal(5),
-/**
-* A snowflake option that represents a User
-*/
 S.Literal(6),
-/**
-* A snowflake option that represents a Channel. Includes all channel types and categories
-*/
 S.Literal(7),
-/**
-* A snowflake option that represents a Role
-*/
 S.Literal(8),
-/**
-* A snowflake option that represents anything you can mention
-*/
 S.Literal(9),
-/**
-* A number option. Any double between -2^53 and 2^53 is a valid value
-*/
 S.Literal(10),
-/**
-* An attachment option
-*/
 S.Literal(11)) {}
 
 export class ApplicationCommandAttachmentOptionResponse extends S.Class<ApplicationCommandAttachmentOptionResponse>("ApplicationCommandAttachmentOptionResponse")({
@@ -550,49 +355,16 @@ export class ChannelTypes extends S.Union(/**
 * A direct message between users
 */
 S.Literal(1),
-/**
-* A direct message between multiple users
-*/
 S.Literal(3),
-/**
-* A text channel within a server
-*/
 S.Literal(0),
-/**
-* A voice channel within a server
-*/
 S.Literal(2),
-/**
-* An organizational category that contains up to 50 channels
-*/
 S.Literal(4),
-/**
-* A channel that users can follow and crosspost into their own server (formerly news channels)
-*/
 S.Literal(5),
-/**
-* A temporary sub-channel within a GUILD_ANNOUNCEMENT channel
-*/
 S.Literal(10),
-/**
-* A temporary sub-channel within a GUILD_TEXT or GUILD_THREADS_ONLY channel type set
-*/
 S.Literal(11),
-/**
-* A temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
-*/
 S.Literal(12),
-/**
-* A voice channel for hosting events with an audience
-*/
 S.Literal(13),
-/**
-* The channel in a hub containing the listed servers
-*/
 S.Literal(14),
-/**
-* Channel that can only contain threads
-*/
 S.Literal(15)) {}
 
 export class ApplicationCommandChannelOptionResponse extends S.Class<ApplicationCommandChannelOptionResponse>("ApplicationCommandChannelOptionResponse")({
@@ -1079,13 +851,7 @@ export class ApplicationCommandPermissionType extends S.Union(/**
 * This permission is for a role.
 */
 S.Literal(1),
-/**
-* This permission is for a user.
-*/
 S.Literal(2),
-/**
-* This permission is for a channel.
-*/
 S.Literal(3)) {}
 
 export class CommandPermissionResponse extends S.Class<CommandPermissionResponse>("CommandPermissionResponse")({
@@ -1117,33 +883,12 @@ export class MetadataItemTypes extends S.Union(/**
 * the metadata value (integer) is less than or equal to the guild's configured value (integer)
 */
 S.Literal(1),
-/**
-* the metadata value (integer) is greater than or equal to the guild's configured value (integer)
-*/
 S.Literal(2),
-/**
-* the metadata value (integer) is equal to the guild's configured value (integer)
-*/
 S.Literal(3),
-/**
-* the metadata value (integer) is not equal to the guild's configured value (integer)
-*/
 S.Literal(4),
-/**
-* the metadata value (ISO8601 string) is less than or equal to the guild's configured value (integer; days before current date)
-*/
 S.Literal(5),
-/**
-* the metadata value (ISO8601 string) is greater than or equal to the guild's configured value (integer; days before current date)
-*/
 S.Literal(6),
-/**
-* the metadata value (integer) is equal to the guild's configured value (integer; 1)
-*/
 S.Literal(7),
-/**
-* the metadata value (integer) is not equal to the guild's configured value (integer; 1)
-*/
 S.Literal(8)) {}
 
 export class ApplicationRoleConnectionsMetadataItemResponse extends S.Class<ApplicationRoleConnectionsMetadataItemResponse>("ApplicationRoleConnectionsMetadataItemResponse")({
@@ -1174,26 +919,14 @@ export class VideoQualityModes extends S.Union(/**
 * Discord chooses the quality for optimal performance
 */
 S.Literal(1),
-/**
-* 720p
-*/
 S.Literal(2)) {}
 
 export class ThreadAutoArchiveDuration extends S.Union(/**
 * One hour
 */
 S.Literal(60),
-/**
-* One day
-*/
 S.Literal(1440),
-/**
-* Three days
-*/
 S.Literal(4320),
-/**
-* Seven days
-*/
 S.Literal(10080)) {}
 
 export class ChannelPermissionOverwrites extends S.Union(S.Literal(0),
@@ -1223,31 +956,19 @@ export class ThreadSortOrder extends S.Union(/**
 * Sort forum posts by activity
 */
 S.Literal(0),
-/**
-* Sort forum posts by creation time (from most recent to oldest)
-*/
 S.Literal(1)) {}
 
 export class ForumLayout extends S.Union(/**
 * No default has been set for forum channel
 */
 S.Literal(0),
-/**
-* Display posts as a list
-*/
 S.Literal(1),
-/**
-* Display posts as a collection of tiles
-*/
 S.Literal(2)) {}
 
 export class ThreadSearchTagSetting extends S.Union(/**
 * The thread tags must contain all tags in the search query
 */
 S.Literal("match_all"),
-/**
-* The thread tags must contain at least one of tags in the search query
-*/
 S.Literal("match_some")) {}
 
 export class GuildChannelResponse extends S.Class<GuildChannelResponse>("GuildChannelResponse")({
@@ -1499,30 +1220,15 @@ export class GroupDMInviteResponse extends S.Class<GroupDMInviteResponse>("Group
   "approximate_member_count": S.optionalWith(S.Int, { nullable: true })
 }) {}
 
-/**
-* Guild feature flags. May include values not yet documented in the OpenAPI spec.
-*/
 export class GuildFeatures extends S.String {}
 
 export class VerificationLevels extends S.Union(/**
 * unrestricted
 */
 S.Literal(0),
-/**
-* must have verified email on account
-*/
 S.Literal(1),
-/**
-* must be registered on Discord for longer than 5 minutes
-*/
 S.Literal(2),
-/**
-* must be a member of the server for longer than 10 minutes
-*/
 S.Literal(3),
-/**
-* must have a verified phone number
-*/
 S.Literal(4)) {}
 
 export class GuildNSFWContentLevel extends S.Union(S.Literal(0),
@@ -1796,69 +1502,21 @@ export class MessageComponentTypes extends S.Union(/**
 * Container for other components
 */
 S.Literal(1),
-/**
-* Button object
-*/
 S.Literal(2),
-/**
-* Select menu for picking from defined text options
-*/
 S.Literal(3),
-/**
-* Text input object
-*/
 S.Literal(4),
-/**
-* Select menu for users
-*/
 S.Literal(5),
-/**
-* Select menu for roles
-*/
 S.Literal(6),
-/**
-* Select menu for mentionables (users and roles)
-*/
 S.Literal(7),
-/**
-* Select menu for channels
-*/
 S.Literal(8),
-/**
-* Section component
-*/
 S.Literal(9),
-/**
-* Text component
-*/
 S.Literal(10),
-/**
-* Thumbnail component
-*/
 S.Literal(11),
-/**
-* Media gallery component
-*/
 S.Literal(12),
-/**
-* File component
-*/
 S.Literal(13),
-/**
-* Separator component
-*/
 S.Literal(14),
-/**
-* Container component
-*/
 S.Literal(17),
-/**
-* Label component
-*/
 S.Literal(18),
-/**
-* File upload component
-*/
 S.Literal(19)) {}
 
 export class ButtonStyleTypes extends S.Union(S.Literal(1),
@@ -1963,9 +1621,6 @@ export class TextInputStyleTypes extends S.Union(/**
 * Single-line input
 */
 S.Literal(1),
-/**
-* Multi-line input
-*/
 S.Literal(2)) {}
 
 export class TextInputComponentResponse extends S.Class<TextInputComponentResponse>("TextInputComponentResponse")({
@@ -2061,9 +1716,6 @@ export class MessageComponentSeparatorSpacingSize extends S.Union(/**
 * Small spacing
 */
 S.Literal(1),
-/**
-* Large spacing
-*/
 S.Literal(2)) {}
 
 export class SeparatorComponentResponse extends S.Class<SeparatorComponentResponse>("SeparatorComponentResponse")({
@@ -2090,9 +1742,6 @@ export class StickerTypes extends S.Union(/**
 * an official sticker in a pack, part of Nitro or in a removed purchasable pack
 */
 S.Literal(1),
-/**
-* a sticker uploaded to a guild for the guild's members
-*/
 S.Literal(2)) {}
 
 export class StickerFormatTypes extends S.Union(S.Literal(1),
@@ -2153,21 +1802,9 @@ export class InteractionTypes extends S.Union(/**
 * Sent by Discord to validate your application's interaction handler
 */
 S.Literal(1),
-/**
-* Sent when a user uses an application command
-*/
 S.Literal(2),
-/**
-* Sent when a user interacts with a message component previously sent by your application
-*/
 S.Literal(3),
-/**
-* Sent when a user is filling in an autocomplete option in a chat command
-*/
 S.Literal(4),
-/**
-* Sent when a user submits a modal previously sent by your application
-*/
 S.Literal(5)) {}
 
 export class MessageInteractionResponse extends S.Class<MessageInteractionResponse>("MessageInteractionResponse")({
@@ -2262,21 +1899,9 @@ export class MessageShareCustomUserThemeBaseTheme extends S.Union(/**
 * No base theme
 */
 S.Literal(0),
-/**
-* Dark base theme
-*/
 S.Literal(1),
-/**
-* Light base theme
-*/
 S.Literal(2),
-/**
-* Darker base theme
-*/
 S.Literal(3),
-/**
-* Midnight base theme
-*/
 S.Literal(4)) {}
 
 export class CustomClientThemeResponse extends S.Class<CustomClientThemeResponse>("CustomClientThemeResponse")({
@@ -2531,13 +2156,7 @@ export class AllowedMentionTypes extends S.Union(/**
 * Controls role mentions
 */
 S.Literal("users"),
-/**
-* Controls user mentions
-*/
 S.Literal("roles"),
-/**
-* Controls @everyone and @here mentions
-*/
 S.Literal("everyone")) {}
 
 export class MessageAllowedMentionsRequest extends S.Class<MessageAllowedMentionsRequest>("MessageAllowedMentionsRequest")({
@@ -2858,9 +2477,6 @@ export class ReactionTypes extends S.Union(/**
 * Normal reaction type
 */
 S.Literal(0),
-/**
-* Burst reaction type
-*/
 S.Literal(1)) {}
 
 export class ListMessageReactionsByEmojiParams extends S.Struct({
@@ -3042,13 +2658,7 @@ export class WebhookTypes extends S.Union(/**
 * Incoming Webhooks can post messages to channels with a generated token
 */
 S.Literal(1),
-/**
-* Channel Follower Webhooks are internal webhooks used with Channel Following to post new messages into channels
-*/
 S.Literal(2),
-/**
-* Application webhooks are webhooks used with Interactions
-*/
 S.Literal(3)) {}
 
 export class ApplicationIncomingWebhookResponse extends S.Class<ApplicationIncomingWebhookResponse>("ApplicationIncomingWebhookResponse")({
@@ -3129,159 +2739,51 @@ export class UserNotificationSettings extends S.Union(/**
 * members will receive notifications for all messages by default
 */
 S.Literal(0),
-/**
-* members will receive notifications only for messages that @mention them by default
-*/
 S.Literal(1)) {}
 
 export class GuildExplicitContentFilterTypes extends S.Union(/**
 * media content will not be scanned
 */
 S.Literal(0),
-/**
-* media content sent by members without roles will be scanned
-*/
 S.Literal(1),
-/**
-* media content sent by all members will be scanned
-*/
 S.Literal(2)) {}
 
 export class AvailableLocalesEnum extends S.Union(/**
 * The ar locale
 */
 S.Literal("ar"),
-/**
-* The bg locale
-*/
 S.Literal("bg"),
-/**
-* The cs locale
-*/
 S.Literal("cs"),
-/**
-* The da locale
-*/
 S.Literal("da"),
-/**
-* The de locale
-*/
 S.Literal("de"),
-/**
-* The el locale
-*/
 S.Literal("el"),
-/**
-* The en-GB locale
-*/
 S.Literal("en-GB"),
-/**
-* The en-US locale
-*/
 S.Literal("en-US"),
-/**
-* The es-419 locale
-*/
 S.Literal("es-419"),
-/**
-* The es-ES locale
-*/
 S.Literal("es-ES"),
-/**
-* The fi locale
-*/
 S.Literal("fi"),
-/**
-* The fr locale
-*/
 S.Literal("fr"),
-/**
-* The he locale
-*/
 S.Literal("he"),
-/**
-* The hi locale
-*/
 S.Literal("hi"),
-/**
-* The hr locale
-*/
 S.Literal("hr"),
-/**
-* The hu locale
-*/
 S.Literal("hu"),
-/**
-* The id locale
-*/
 S.Literal("id"),
-/**
-* The it locale
-*/
 S.Literal("it"),
-/**
-* The ja locale
-*/
 S.Literal("ja"),
-/**
-* The ko locale
-*/
 S.Literal("ko"),
-/**
-* The lt locale
-*/
 S.Literal("lt"),
-/**
-* The nl locale
-*/
 S.Literal("nl"),
-/**
-* The no locale
-*/
 S.Literal("no"),
-/**
-* The pl locale
-*/
 S.Literal("pl"),
-/**
-* The pt-BR locale
-*/
 S.Literal("pt-BR"),
-/**
-* The ro locale
-*/
 S.Literal("ro"),
-/**
-* The ru locale
-*/
 S.Literal("ru"),
-/**
-* The sv-SE locale
-*/
 S.Literal("sv-SE"),
-/**
-* The th locale
-*/
 S.Literal("th"),
-/**
-* The tr locale
-*/
 S.Literal("tr"),
-/**
-* The uk locale
-*/
 S.Literal("uk"),
-/**
-* The vi locale
-*/
 S.Literal("vi"),
-/**
-* The zh-CN locale
-*/
 S.Literal("zh-CN"),
-/**
-* The zh-TW locale
-*/
 S.Literal("zh-TW")) {}
 
 export class AfkTimeouts extends S.Union(S.Literal(60),
@@ -3415,26 +2917,14 @@ export class GuildMFALevel extends S.Union(/**
 * Guild has no MFA/2FA requirement for moderation actions
 */
 S.Literal(0),
-/**
-* Guild has a 2FA requirement for moderation actions
-*/
 S.Literal(1)) {}
 
 export class PremiumGuildTiers extends S.Union(/**
 * Guild has not unlocked any Server Boost perks
 */
 S.Literal(0),
-/**
-* Guild has unlocked Server Boost level 1 perks
-*/
 S.Literal(1),
-/**
-* Guild has unlocked Server Boost level 2 perks
-*/
 S.Literal(2),
-/**
-* Guild has unlocked Server Boost level 3 perks
-*/
 S.Literal(3)) {}
 
 export class GuildWithCountsResponse extends S.Class<GuildWithCountsResponse>("GuildWithCountsResponse")({
@@ -3752,26 +3242,14 @@ export class AutomodEventType extends S.Union(/**
 * A user submitted a message to a channel
 */
 S.Literal(1),
-/**
-* A user is attempting to join the server or a member's properties were updated.
-*/
 S.Literal(2)) {}
 
 export class AutomodActionType extends S.Union(/**
 * Block a user's message and prevent it from being posted. A custom explanation can be specified and shown to members whenever their message is blocked
 */
 S.Literal(1),
-/**
-* Send a system message to a channel in order to log the user message that triggered the rule
-*/
 S.Literal(2),
-/**
-* Temporarily disable a user's ability to communicate in the server (timeout)
-*/
 S.Literal(3),
-/**
-* Prevent a user from interacting in the server
-*/
 S.Literal(4)) {}
 
 export class BlockMessageActionMetadataResponse extends S.Class<BlockMessageActionMetadataResponse>("BlockMessageActionMetadataResponse")({
@@ -3814,34 +3292,16 @@ export class AutomodTriggerType extends S.Union(/**
 * Check if content contains words from a list of keywords or matches regex
 */
 S.Literal(1),
-/**
-* DEPRECATED
-*/
 S.Literal(2),
-/**
-* Check if content represents generic spam
-*/
 S.Literal(3),
-/**
-* Check if content contains words from internal pre-defined wordsets
-*/
 S.Literal(4),
-/**
-* Check if content contains more unique mentions than allowed
-*/
 S.Literal(5)) {}
 
 export class AutomodKeywordPresetType extends S.Union(/**
 * Words and phrases that may be considered profanity
 */
 S.Literal(1),
-/**
-* Words and phrases that may be considered as sexual content
-*/
 S.Literal(2),
-/**
-* Words and phrases that may be considered slurs and hate speech
-*/
 S.Literal(3)) {}
 
 export class DefaultKeywordListTriggerMetadataResponse extends S.Class<DefaultKeywordListTriggerMetadataResponse>("DefaultKeywordListTriggerMetadataResponse")({
@@ -4293,30 +3753,15 @@ export class IntegrationExpireBehaviorTypes extends S.Union(/**
 * Remove role
 */
 S.Literal(0),
-/**
-* Kick
-*/
 S.Literal(1)) {}
 
 export class IntegrationExpireGracePeriodTypes extends S.Union(/**
 * 1 day
 */
 S.Literal(1),
-/**
-* 3 days
-*/
 S.Literal(3),
-/**
-* 7 days
-*/
 S.Literal(7),
-/**
-* 14 days
-*/
 S.Literal(14),
-/**
-* 30 days
-*/
 S.Literal(30)) {}
 
 export class ExternalConnectionIntegrationResponse extends S.Class<ExternalConnectionIntegrationResponse>("ExternalConnectionIntegrationResponse")({
@@ -4463,9 +3908,6 @@ export class OnboardingPromptType extends S.Union(/**
 * Multiple choice options
 */
 S.Literal(0),
-/**
-* Many options shown as a dropdown
-*/
 S.Literal(1)) {}
 
 export class OnboardingPromptResponse extends S.Class<OnboardingPromptResponse>("OnboardingPromptResponse")({
@@ -4510,9 +3952,6 @@ export class GuildOnboardingMode extends S.Union(/**
 * Only Default Channels considered in constraints
 */
 S.Literal(0),
-/**
-* Default Channels and Onboarding Prompts considered in constraints
-*/
 S.Literal(1)) {}
 
 export class UpdateGuildOnboardingRequest extends S.Class<UpdateGuildOnboardingRequest>("UpdateGuildOnboardingRequest")({
@@ -4906,21 +4345,9 @@ export class WidgetImageStyles extends S.Union(/**
 * shield style widget with Discord icon and guild members online count
 */
 S.Literal("shield"),
-/**
-* large image with guild icon, name and online count. "POWERED BY DISCORD" as the footer of the widget
-*/
 S.Literal("banner1"),
-/**
-* smaller widget style with guild icon, name and online count. Split on the right with Discord logo
-*/
 S.Literal("banner2"),
-/**
-* large image with guild icon, name and online count. In the footer, Discord logo on the left and "Chat Now" on the right
-*/
 S.Literal("banner3"),
-/**
-* large Discord logo at the top of the widget. Guild icon, name and online count in the middle portion of the widget and a "JOIN MY SERVER" button at the bottom
-*/
 S.Literal("banner4")) {}
 
 export class GetGuildWidgetPngParams extends S.Struct({
@@ -5389,9 +4816,6 @@ export class StageInstancesPrivacyLevels extends S.Union(/**
 * The Stage instance is visible publicly. (deprecated)
 */
 S.Literal(1),
-/**
-* The Stage instance is visible publicly. (deprecated)
-*/
 S.Literal(2)) {}
 
 export class CreateStageInstanceRequest extends S.Class<CreateStageInstanceRequest>("CreateStageInstanceRequest")({
@@ -5438,17 +4862,8 @@ export class PremiumTypes extends S.Union(/**
 * None
 */
 S.Literal(0),
-/**
-* Nitro Classic
-*/
 S.Literal(1),
-/**
-* Nitro Standard
-*/
 S.Literal(2),
-/**
-* Nitro Basic
-*/
 S.Literal(3)) {}
 
 export class UserPIIResponse extends S.Class<UserPIIResponse>("UserPIIResponse")({

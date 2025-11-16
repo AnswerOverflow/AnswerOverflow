@@ -26,7 +26,6 @@ import {
 
 type Message = Infer<typeof messageSchema>;
 
-// Helper function to check if an account is ignored
 async function isIgnoredAccount(
 	ctx: QueryCtx | MutationCtx,
 	authorId: string,
@@ -35,7 +34,6 @@ async function isIgnoredAccount(
 	return ignoredAccount !== null;
 }
 
-// Helper function to check if message indexing is disabled for a user
 async function hasMessageIndexingDisabled(
 	ctx: QueryCtx | MutationCtx,
 	authorId: string,
@@ -81,7 +79,6 @@ export const upsertMessage = publicInternalMutation({
 		const { attachments, reactions } = args;
 		const messageData = args.message;
 
-		// Upsert message - use index for efficient lookup
 		const existing = await getOneFrom(
 			ctx.db,
 			"messages",
@@ -108,7 +105,6 @@ export const upsertMessage = publicInternalMutation({
 				await ctx.db.delete(attachment._id);
 			}
 
-			// Insert new attachments
 			if (attachments.length > 0) {
 				for (const attachment of attachments) {
 					await ctx.db.insert("attachments", attachment);
@@ -128,14 +124,12 @@ export const upsertMessage = publicInternalMutation({
 				await ctx.db.delete(reaction._id);
 			}
 
-			// Insert emojis and reactions
 			if (reactions.length > 0) {
 				const emojiSet = new Set<string>();
 				for (const reaction of reactions) {
 					emojiSet.add(reaction.emoji.id);
 				}
 
-				// Upsert emojis
 				for (const reaction of reactions) {
 					const emojiId = reaction.emoji.id;
 					if (!emojiId) continue;
@@ -150,7 +144,6 @@ export const upsertMessage = publicInternalMutation({
 					}
 				}
 
-				// Insert reactions
 				for (const reaction of reactions) {
 					if (!reaction.emoji.id) continue;
 					await ctx.db.insert("reactions", {
@@ -197,7 +190,6 @@ export const upsertManyMessages = publicInternalMutation({
 				Array.from(authorIds).filter((_, idx) => ignoredAccounts[idx]),
 			);
 
-			// Filter out messages from ignored accounts
 			const messagesToProcess = args.messages.filter(
 				(msg) => !ignoredAccountIds.has(msg.message.authorId),
 			);
@@ -333,7 +325,6 @@ export const findLatestMessageInChannel = publicInternalQuery({
 
 		if (messages.length === 0) return null;
 
-		// Sort by ID (which is a snowflake, so higher = newer)
 		messages.sort((a, b) => {
 			return a.id > b.id ? -1 : a.id < b.id ? 1 : 0;
 		});
@@ -361,11 +352,9 @@ export const findLatestMessageInChannelAndThreads = publicInternalQuery({
 			args.channelId,
 		);
 
-		// Combine and find latest
 		const allMessages = [...channelMessages, ...threadMessages];
 		if (allMessages.length === 0) return null;
 
-		// Sort by ID (which is a snowflake, so higher = newer)
 		allMessages.sort((a, b) => {
 			return a.id > b.id ? -1 : a.id < b.id ? 1 : 0;
 		});
@@ -479,14 +468,12 @@ export const getTopQuestionSolversByServerId = publicInternalQuery({
 
 		const solutions = allMessages.filter((msg) => msg.questionId !== undefined);
 
-		// Group by authorId and count
 		const solutionCounts = new Map<string, number>();
 		for (const solution of solutions) {
 			const current = solutionCounts.get(solution.authorId) ?? 0;
 			solutionCounts.set(solution.authorId, current + 1);
 		}
 
-		// Convert to array and sort by count descending
 		const topSolvers = Array.from(solutionCounts.entries())
 			.map(([authorId, count]) => ({ authorId, count }))
 			.sort((a, b) => b.count - a.count)
@@ -558,7 +545,6 @@ export const deleteManyMessagesByUserId = publicInternalMutation({
 	},
 });
 
-// Helper functions for message thread/channel resolution
 function getThreadIdOfMessage(
 	message: Pick<Message, "channelId"> &
 		Partial<Pick<Message, "childThreadId" | "parentChannelId">>,
@@ -595,7 +581,6 @@ export const getMessagePageData = publicInternalQuery({
 			return null;
 		}
 
-		// Determine thread and parent channel
 		const threadId = getThreadIdOfMessage(targetMessage);
 		const parentId = getParentChannelOfMessage(targetMessage);
 
@@ -624,7 +609,6 @@ export const getMessagePageData = publicInternalQuery({
 			threadId ? undefined : 50, // Limit for non-thread channels
 		);
 
-		// Filter messages - if not a thread, only get messages >= target message ID
 		const messagesToShow = threadId
 			? allMessages
 			: allMessages.filter((m) => m.id >= targetMessage.id);

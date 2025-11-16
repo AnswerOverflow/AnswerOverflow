@@ -11,21 +11,17 @@ import { ServerParityLayer } from "./src/parity/server-parity";
 const program = Effect.gen(function* () {
 	const discord = yield* Discord;
 
-	// Login to Discord and wait for ready
 	yield* discord.client.login();
 
 	const guilds = yield* discord.getGuilds();
 	yield* Console.log(`Bot is in ${guilds.length} guilds`);
 
-	// Keep the bot running
 	return yield* Effect.never;
 });
 
-// Run the program with the DiscordClientLayer and OpenTelemetry tracing
 const OtelLayer = createOtelLayer("discord-bot");
 const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
 
-// Base layers that provide services
 const BaseLayer = Layer.mergeAll(
 	DiscordLayer,
 	DatabaseLayer,
@@ -33,7 +29,6 @@ const BaseLayer = Layer.mergeAll(
 	LoggerLayer,
 );
 
-// Parity layers that require Discord and Database
 const ParityLayers = Layer.mergeAll(
 	ServerParityLayer,
 	ChannelParityLayer,
@@ -42,7 +37,6 @@ const ParityLayers = Layer.mergeAll(
 	InteractionHandlersLayer,
 );
 
-// Provide BaseLayer to ParityLayers, then merge everything
 const AppLayer = Layer.mergeAll(
 	BaseLayer,
 	ParityLayers.pipe(Layer.provide(BaseLayer)),

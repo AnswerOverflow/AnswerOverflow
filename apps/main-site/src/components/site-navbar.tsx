@@ -13,7 +13,6 @@ export function SiteNavbar() {
 	const { data: session } = authClient.useSession();
 	const [searchQuery, setSearchQuery] = useState("");
 
-	// Don't show navbar on dashboard routes (they have their own navbar)
 	if (pathname?.startsWith("/dashboard")) {
 		return null;
 	}

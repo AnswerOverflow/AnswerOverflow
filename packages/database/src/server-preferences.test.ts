@@ -1,5 +1,3 @@
-// Tests for server preferences functions
-
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
 import type { Id } from "../convex/_generated/dataModel";
@@ -35,7 +33,6 @@ it.scoped("getServerPreferencesByServerId returns preferences", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Create server
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
@@ -69,7 +66,6 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			// Create server
 			yield* database.servers.upsertServer(testServer);
 			const serverLiveData = yield* database.servers.getServerByDiscordId({
 				discordId: "server123",
@@ -93,7 +89,6 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Create first server
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData1 = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
@@ -111,7 +106,6 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 			preferences: preferences1,
 		});
 
-		// Create second server
 		const testServer2: Server = {
 			...testServer,
 			discordId: "server456",
@@ -126,7 +120,6 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 			throw new Error("Server not found");
 		}
 
-		// Try to create preferences with same custom domain
 		const preferences2 = createTestServerPreferences(serverId2, {
 			customDomain: "example.com",
 		});
@@ -145,7 +138,6 @@ it.scoped("updateServerPreferences updates existing preferences", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Create server
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
@@ -186,7 +178,6 @@ it.scoped("upsertServerPreferences creates or updates preferences", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Create server
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
@@ -197,7 +188,6 @@ it.scoped("upsertServerPreferences creates or updates preferences", () =>
 			throw new Error("Server not found");
 		}
 
-		// First upsert (create)
 		const preferences1 = createTestServerPreferences(serverId, {
 			customDomain: "example.com",
 		});
@@ -209,7 +199,6 @@ it.scoped("upsertServerPreferences creates or updates preferences", () =>
 			});
 		expect(liveData1?.customDomain).toBe("example.com");
 
-		// Second upsert (update)
 		const preferences2 = createTestServerPreferences(serverId, {
 			customDomain: "updated.com",
 		});
@@ -227,7 +216,6 @@ it.scoped("server preferences handle all flag types", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		// Create server
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",

@@ -1,5 +1,3 @@
-// Build modules object using Bun's glob to bypass import.meta.glob
-
 import { readdir } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,8 +22,6 @@ const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, "..");
 const convexDir = join(projectRoot, "convex");
 
-// Recursively find all .ts and .js files in convex directory
-// Exclude test files and .d.ts files (only include .ts and .js implementation files)
 async function findConvexFiles(
 	dir: string,
 	basePath: string = "",
@@ -47,13 +43,10 @@ async function findConvexFiles(
 				files.push(relativePath);
 			}
 		}
-	} catch {
-		// Ignore errors
-	}
+	} catch {}
 	return files;
 }
 
-// Build modules object in the format convex-test expects
 async function buildModules(): Promise<Record<string, () => Promise<unknown>>> {
 	const convexFiles = await findConvexFiles(convexDir);
 	const modules: Record<string, () => Promise<unknown>> = {};
@@ -68,13 +61,9 @@ async function buildModules(): Promise<Record<string, () => Promise<unknown>>> {
 }
 
 const createTestService = Effect.gen(function* () {
-	// Build modules and pass as second parameter to bypass import.meta.glob
 	const modules = yield* Effect.promise(buildModules);
 	const testClient = convexTest(schema, modules);
 
-	// Adapt TestConvex to match ConvexClientShared interface (which is based on ConvexClient)
-	// ConvexClient uses: query(query, args), mutation(mutation, args, options?), etc.
-	// TestConvex uses rest args: query(query, ...args), mutation(mutation, ...args), etc.
 	const adaptedClient: ConvexClientShared = {
 		query: <Query extends FunctionReference<"query">>(
 			query: Query,
@@ -103,8 +92,6 @@ const createTestService = Effect.gen(function* () {
 			callback: (result: FunctionReturnType<Query>) => void,
 		) => {
 			const unsubscribeFn = testClient.onUpdate(query, args, callback);
-			// ConvexClient.onUpdate returns an Unsubscribe object (callable with unsubscribe() and getCurrentValue())
-			// TestConvex.onUpdate returns a simple function
 			const unsubscribe = Object.assign(
 				() => {
 					unsubscribeFn();
@@ -138,7 +125,6 @@ const createTestService = Effect.gen(function* () {
 				return result as Awaited<A>;
 			},
 			catch(cause) {
-				// Log the actual error for debugging
 				if (cause instanceof Error) {
 					console.error("ConvexError cause:", cause.message, cause.stack);
 				} else {

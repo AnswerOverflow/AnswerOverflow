@@ -11,8 +11,6 @@ import {
 	sortServersByBotAndRole,
 } from "../shared/shared";
 
-// Query to get dashboard data for a server
-// Returns server with preferences and channels with settings
 export const getDashboardData = query({
 	args: { serverId: v.id("servers") },
 	handler: async (ctx, args) => {
@@ -28,7 +26,6 @@ export const getDashboardData = query({
 			args.serverId,
 		);
 
-		// Filter out threads (only show root channels: text, announcement, forum)
 		const allChannels = await ctx.db
 			.query("channels")
 			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
@@ -42,7 +39,6 @@ export const getDashboardData = query({
 			getOneFrom(ctx.db, "channelSettings", "by_channelId", channel.id),
 		);
 
-		// Map channels to the format expected by the dashboard
 		const channelsWithFlags = channels.map((channel, idx) => {
 			const settings = channelSettings[idx];
 			return {
@@ -82,8 +78,6 @@ export const getDashboardData = query({
 	},
 });
 
-// Query to get user's servers based on user server settings and permissions
-// Returns servers where user has ManageGuild or Administrator permission
 export const getUserServersForDropdown = authenticatedQuery({
 	args: {},
 	returns: v.array(

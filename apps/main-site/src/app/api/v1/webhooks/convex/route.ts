@@ -1,4 +1,3 @@
-// app/api/convex-otel/route.ts
 import { type NextRequest, NextResponse } from "next/server";
 
 const OTLP_ENDPOINT =
@@ -48,7 +47,6 @@ function parseSpanFromMessage(message: string): SerializedSpan | null {
 	const jsonPart = message
 		.slice(idx + OTEL_CONSOLE_MARKER.length)
 		.trim()
-		// remove the ' from the start and end of the string
 		.slice(0, -1);
 	if (!jsonPart) return null;
 

@@ -27,7 +27,6 @@ it.scoped("upserting server", () =>
 			discordId: "123",
 		});
 
-		// Data should already be loaded due to defer mechanism
 		expect(created?.discordId).toBe("123");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -39,10 +38,8 @@ it.scoped(
 			const database = yield* Database;
 			const convexClientTest = yield* ConvexClientTest;
 
-			// Set up server data
 			yield* database.servers.upsertServer(server);
 
-			// Call getServerByDiscordId 5 times - should reuse the same watch from cache
 			const results = yield* Effect.all(
 				Array.from({ length: 5 }, () =>
 					database.servers.getServerByDiscordId(
@@ -52,9 +49,6 @@ it.scoped(
 				),
 			);
 
-			// Verify that only 1 query was made despite 5 calls to getServerByDiscordId
-			// Note: The actual query args include backendAccessToken, but getQueryCallCount
-			// tracks calls by the args passed to onUpdate, which should match what we pass here
 			const queryCallCount = convexClientTest.getQueryCallCount(
 				api.publicInternal.servers.getServerByDiscordId,
 				{ discordId: "123", backendAccessToken: "test-backend-access-token" },
@@ -66,21 +60,15 @@ it.scoped(
 			);
 			expect(queryCallCount).toBe(1);
 			expect(otherQueryCallCount).toBe(0);
-			// Data should already be loaded due to defer mechanism
-			// Verify all results are correct
 			for (const result of results) {
 				expect(result?.data?.discordId).toBe("123");
 			}
 
-			// Verify cache works by checking that all LiveData instances share the same watch
-			// If the cache works, all 5 calls should reuse the same watch, meaning they should
-			// all update together when data changes
 			const updatedDescription = "Updated Description";
 			yield* database.servers.upsertServer({
 				...server,
 				description: updatedDescription,
 			});
-			// Verify all instances updated together (they share the same watch)
 			for (const result of results) {
 				expect(result?.data?.description).toBe(updatedDescription);
 			}

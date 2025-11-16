@@ -8,15 +8,11 @@ import {
 	toAOChannel,
 } from "../utils/conversions";
 
-/**
- * Layer that sets up channel create/update/delete event handlers for parity
- */
 export const ChannelParityLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 		const database = yield* Database;
 
-		// Subscribe to channelCreate event
 		yield* discord.client.on("channelCreate", (channel) =>
 			Effect.gen(function* () {
 				if (!isAllowedRootChannel(channel)) {
@@ -27,7 +23,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				});
 				const server = serverLiveData;
 				if (!server) {
-					// this should never happen
 					yield* Console.warn(
 						`Server ${channel.guild.id} not found, skipping channel parity`,
 					);
@@ -52,7 +47,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 			),
 		);
 
-		// Subscribe to channelUpdate event
 		yield* discord.client.on("channelUpdate", (_oldChannel, newChannel) =>
 			Effect.gen(function* () {
 				if (!isAllowedRootChannel(newChannel)) {
@@ -66,7 +60,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				const existingChannel = channelLiveData;
 
 				if (!existingChannel) {
-					// this should never happen
 					yield* Console.warn(
 						`Channel ${newChannel.id} not found, skipping channel update`,
 					);
@@ -78,7 +71,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				});
 				const server = serverLiveData;
 				if (!server) {
-					// this should never happen
 					yield* Console.warn(
 						`Server ${newChannel.guild.id} not found, skipping channel update`,
 					);
@@ -98,7 +90,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 			),
 		);
 
-		// Subscribe to channelDelete event
 		yield* discord.client.on("channelDelete", (channel) =>
 			Effect.gen(function* () {
 				if (!isAllowedRootChannel(channel)) {
@@ -125,7 +116,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				const existingChannel = channelLiveData;
 
 				if (!existingChannel) {
-					// this should never happen
 					yield* Console.warn(
 						`Thread ${newThread.id} not found, skipping thread update`,
 					);
@@ -171,7 +161,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				const existingChannel = channelLiveData;
 
 				if (!existingChannel) {
-					// this should never happen
 					yield* Console.warn(
 						`Thread ${thread.id} not found, skipping thread delete`,
 					);

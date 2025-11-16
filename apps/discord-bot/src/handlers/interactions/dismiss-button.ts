@@ -2,7 +2,6 @@ import type { ButtonInteraction, GuildMember } from "discord.js";
 import { Message, PermissionFlagsBits } from "discord.js";
 import { Effect } from "effect";
 
-// Dismiss button constants (must match send-mark-solution-instructions.ts)
 const DISMISS_ACTION_PREFIX = "dismiss";
 const DISMISS_OVERRIDE_PERMISSIONS = [
 	PermissionFlagsBits.ManageMessages,
@@ -19,9 +18,6 @@ class DismissError extends Error {
 	}
 }
 
-/**
- * Parses a dismiss button customId to extract the allowed dismisser ID
- */
 function parseDismissButtonId(customId: string): string {
 	const parts = customId.split(":");
 	if (parts.length !== 2 || parts[0] !== DISMISS_ACTION_PREFIX) {
@@ -37,9 +33,6 @@ function parseDismissButtonId(customId: string): string {
 	return dismisserId;
 }
 
-/**
- * Handles dismissing a message via button interaction
- */
 function handleDismissMessage({
 	messageToDismiss,
 	dismisser,
@@ -72,21 +65,16 @@ function handleDismissMessage({
 	});
 }
 
-/**
- * Handles a dismiss button interaction
- */
 export function handleDismissButtonInteraction(
 	interaction: ButtonInteraction,
 ): Effect.Effect<void, unknown> {
 	return Effect.gen(function* () {
-		// Only handle button interactions in guilds
 		if (!interaction.guild || !interaction.member) {
 			yield* Effect.fail(
 				new Error("Dismiss button can only be used in guilds"),
 			);
 		}
 
-		// Parse the customId to get the allowed dismisser ID
 		const allowedToDismissId = parseDismissButtonId(interaction.customId);
 
 		if (!interaction.guild) {
@@ -114,7 +102,6 @@ export function handleDismissButtonInteraction(
 		}).pipe(
 			Effect.catchAll((error) =>
 				Effect.gen(function* () {
-					// Reply to the interaction with error message
 					if (interaction.deferred || interaction.replied) {
 						yield* Effect.tryPromise({
 							try: () =>
@@ -139,7 +126,6 @@ export function handleDismissButtonInteraction(
 			),
 		);
 
-		// Reply with success
 		if (interaction.deferred || interaction.replied) {
 			yield* Effect.tryPromise({
 				try: () =>

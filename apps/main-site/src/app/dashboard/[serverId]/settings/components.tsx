@@ -61,11 +61,7 @@ export function CurrentPlanCard({ serverId }: { serverId: Id<"servers"> }) {
 
 	const { plan } = dashboardData.server;
 
-	// TODO: Add subscription status, checkout URLs, and date handling when Stripe integration is added
-	// For now, we'll show a simplified version
 	const CTA = () => {
-		// When Stripe integration is added, show pricing dialog or change plan link
-		// For now, return null or a placeholder
 		return null;
 	};
 

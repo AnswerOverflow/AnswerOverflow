@@ -19,9 +19,6 @@ export default function DashboardLayout({
 	const { data: session, isPending: isSessionPending } =
 		authClient.useSession();
 
-	// Extract serverId from pathname if we're on a server-specific route
-	// Pathname will be like "/dashboard/[serverId]" or "/dashboard/[serverId]/channels" etc.
-	// Exclude onboarding page from server-specific routes
 	const isOnboardingPage = pathname === "/dashboard/onboarding";
 	const serverIdMatch = pathname?.match(/^\/dashboard\/([^/]+)/);
 	const serverId =
@@ -29,10 +26,8 @@ export default function DashboardLayout({
 			? (serverIdMatch[1] as Id<"servers">)
 			: undefined;
 
-	// Only show server select on server-specific routes (not on /dashboard or /dashboard/onboarding)
 	const shouldShowServerSelect = serverId !== undefined && !isOnboardingPage;
 
-	// Fetch servers for dropdown using reactive query based on user server settings
 	const servers = useQuery(
 		api.public.dashboard_queries.getUserServersForDropdown,
 		isSessionPending || !session?.user ? "skip" : {},

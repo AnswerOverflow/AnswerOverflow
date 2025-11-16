@@ -8,7 +8,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../sheet";
 import { useDashboardNavbar } from "./dashboard-navbar";
 
 export interface DashboardSidebarProps {
-	/** Children to render in main content area */
 	children?: React.ReactNode;
 }
 

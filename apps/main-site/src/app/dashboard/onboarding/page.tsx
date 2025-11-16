@@ -51,7 +51,6 @@ export default function OnboardingPage() {
 
 	const selectedServer = servers?.find((s) => s.discordId === serverId);
 
-	// Determine current step
 	useEffect(() => {
 		if (isSessionPending) {
 			setStep("auth");
@@ -63,13 +62,11 @@ export default function OnboardingPage() {
 			return;
 		}
 
-		// If authenticated but no serverId, redirect to dashboard
 		if (!serverId) {
 			router.push("/dashboard");
 			return;
 		}
 
-		// If authenticated and has serverId, go to install step
 		if (step === "auth" && serverId) {
 			setStep("install");
 		}
@@ -91,8 +88,6 @@ export default function OnboardingPage() {
 					clearInterval(interval);
 				} else if (attempts >= maxAttempts) {
 					clearInterval(interval);
-					// Still show completion step even if polling timed out
-					// User can manually refresh or navigate
 				}
 			}, 3000); // Check every 3 seconds
 
@@ -106,11 +101,9 @@ export default function OnboardingPage() {
 			return;
 		}
 
-		// Track that the user clicked the "Add to Server" button
 		try {
 			await trackBotAddClick({ serverDiscordId: discordId });
 		} catch (error) {
-			// Don't block the user if tracking fails
 			console.error("Failed to track bot add click:", error);
 		}
 
@@ -130,7 +123,6 @@ export default function OnboardingPage() {
 		);
 	}
 
-	// Step 1: Authentication
 	if (step === "auth" || !session?.user) {
 		return (
 			<main className="flex items-center justify-center p-4 md:p-8">
@@ -171,7 +163,6 @@ export default function OnboardingPage() {
 		);
 	}
 
-	// If no server selected or server not found, redirect to dashboard
 	if (!serverId || !selectedServer) {
 		return (
 			<main className="flex items-center justify-center p-4 md:p-8">
@@ -194,7 +185,6 @@ export default function OnboardingPage() {
 		);
 	}
 
-	// Step 2: Installation
 	if (step === "install" && selectedServer) {
 		return (
 			<main className="flex items-center justify-center p-4 md:p-8">
@@ -213,7 +203,6 @@ export default function OnboardingPage() {
 		);
 	}
 
-	// Step 3: Completion
 	if (step === "complete" && selectedServer) {
 		const serverWithBot = servers?.find(
 			(s) => s.discordId === serverId && s.hasBot && s.aoServerId,

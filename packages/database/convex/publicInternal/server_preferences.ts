@@ -207,7 +207,6 @@ export const deleteServerPreferences = publicInternalMutation({
 		);
 
 		if (preferences) {
-			// Remove reference from server
 			const serverRecord = await ctx.db.get(args.serverId);
 			if (serverRecord) {
 				await ctx.db.patch(serverRecord._id, {

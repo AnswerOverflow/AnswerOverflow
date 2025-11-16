@@ -19,25 +19,20 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 		const database = yield* Database;
 		const discordMock = yield* DiscordClientMock;
 
-		// Create and seed guild
 		const guild = discordMock.utilities.createMockGuild({
 			description: "A test guild",
 			icon: "test_icon",
 		});
 		discordMock.utilities.seedGuild(guild);
 
-		// Create channels
 		const textChannel = discordMock.utilities.createMockTextChannel(guild);
 		const forumChannel = discordMock.utilities.createMockForumChannel(guild);
 
-		// Seed channels in client cache
 		discordMock.utilities.seedChannel(textChannel);
 		discordMock.utilities.seedChannel(forumChannel);
 
-		// Sync guild
 		yield* syncGuild(guild);
 
-		// Verify server was created
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: guild.id,
 		});
@@ -50,7 +45,6 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 			guild.approximateMemberCount,
 		);
 
-		// Verify server preferences were created
 		if (serverLiveData?._id) {
 			const preferencesLiveData =
 				yield* database.server_preferences.getServerPreferencesByServerId({
@@ -60,7 +54,6 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 			expect(preferencesLiveData?.considerAllMessagesPublicEnabled).toBe(true);
 		}
 
-		// Verify channels were synced
 		if (!serverLiveData?._id) {
 			throw new Error("Server ID not found");
 		}
@@ -72,7 +65,6 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 		expect(channelsLiveData).not.toBeNull();
 		expect(channelsLiveData?.length).toBe(2);
 
-		// Verify text channel
 		const textChannelLiveData = yield* database.channels.findChannelByDiscordId(
 			{
 				discordId: textChannel.id,
@@ -82,7 +74,6 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 		expect(textChannelLiveData?.name).toBe(textChannel.name);
 		expect(textChannelLiveData?.type).toBe(0); // GuildText
 
-		// Verify forum channel
 		const forumChannelLiveData =
 			yield* database.channels.findChannelByDiscordId({
 				discordId: forumChannel.id,

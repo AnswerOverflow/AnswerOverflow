@@ -7,23 +7,11 @@ import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 type Message = Infer<typeof messageSchema>;
 type Attachment = Infer<typeof attachmentSchema>;
 
-// ============================================================================
-// Discord Permissions
-// ============================================================================
-
-/**
- * Discord permission flags from Discord API
- * These can be used with both number and bigint permission values
- */
 export const DISCORD_PERMISSIONS = {
 	Administrator: 0x8,
 	ManageGuild: 0x20,
 } as const;
 
-/**
- * Check if permissions include a specific permission flag
- * Works with both number and bigint permission values
- */
 export function hasPermission(
 	permissions: number | bigint,
 	permission: number | bigint,
@@ -36,13 +24,6 @@ export function hasPermission(
 	return (permissions & permission) === permission;
 }
 
-// ============================================================================
-// Discord Channel Types
-// ============================================================================
-
-/**
- * Channel types from Discord API
- */
 export const CHANNEL_TYPE = {
 	GuildText: 0,
 	GuildAnnouncement: 5,
@@ -52,9 +33,6 @@ export const CHANNEL_TYPE = {
 	PrivateThread: 12,
 } as const;
 
-/**
- * Check if a channel type is a thread
- */
 export function isThreadType(type: number): boolean {
 	return (
 		type === CHANNEL_TYPE.AnnouncementThread ||
@@ -63,27 +41,17 @@ export function isThreadType(type: number): boolean {
 	);
 }
 
-/**
- * Root channel types (forums, text, announcements) - excludes threads
- */
 export const ROOT_CHANNEL_TYPES = [
 	CHANNEL_TYPE.GuildText,
 	CHANNEL_TYPE.GuildAnnouncement,
 	CHANNEL_TYPE.GuildForum,
 ] as const;
 
-// ============================================================================
-// Server Sorting
-// ============================================================================
-
 type ServerWithMetadata = {
 	hasBot: boolean;
 	highestRole: "Owner" | "Administrator" | "Manage Guild";
 };
 
-/**
- * Sort servers: has bot + owner/admin/manage, then no bot + owner/admin/manage
- */
 export function sortServersByBotAndRole<T extends ServerWithMetadata>(
 	servers: T[],
 ): T[] {
@@ -103,9 +71,6 @@ export function sortServersByBotAndRole<T extends ServerWithMetadata>(
 	});
 }
 
-/**
- * Determine highest role from permissions
- */
 export function getHighestRoleFromPermissions(
 	permissions: number | bigint,
 	isOwner: boolean = false,
@@ -119,25 +84,15 @@ export function getHighestRoleFromPermissions(
 	return "Manage Guild";
 }
 
-// ============================================================================
-// Validation Utilities
-// ============================================================================
-
-/**
- * Validate custom domain format
- * Returns error message if invalid, null if valid
- */
 export function validateCustomDomain(domain: string | null): string | null {
 	if (domain === null || domain === "") {
 		return null; // Empty is valid (means no custom domain)
 	}
 
-	// Basic domain validation - must not end with .answeroverflow.com
 	if (domain.toLowerCase().endsWith(".answeroverflow.com")) {
 		return "Domain cannot end with .answeroverflow.com. Please use a domain that you own";
 	}
 
-	// Basic domain format validation
 	const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
 	if (!domainRegex.test(domain)) {
 		return "Invalid domain format";
@@ -146,10 +101,6 @@ export function validateCustomDomain(domain: string | null): string | null {
 	return null;
 }
 
-/**
- * Check if a custom domain is already in use by another server
- * Returns error message if in use, null if available
- */
 export async function validateCustomDomainUniqueness(
 	ctx: QueryCtx | MutationCtx,
 	customDomain: string | null | undefined,
@@ -162,7 +113,6 @@ export async function validateCustomDomainUniqueness(
 
 	const allServers = await ctx.db.query("servers").collect();
 	for (const server of allServers) {
-		// Skip the server we're updating if provided
 		if (excludeServerId && server._id === excludeServerId) {
 			continue;
 		}
@@ -181,10 +131,6 @@ export async function validateCustomDomainUniqueness(
 	return null;
 }
 
-// ============================================================================
-// Servers
-// ============================================================================
-
 export async function getServerByDiscordId(
 	ctx: QueryCtx | MutationCtx,
 	discordId: string,
@@ -194,10 +140,6 @@ export async function getServerByDiscordId(
 		.withIndex("by_discordId", (q) => q.eq("discordId", discordId))
 		.first();
 }
-
-// ============================================================================
-// Ignored Discord Accounts
-// ============================================================================
 
 export async function findIgnoredDiscordAccountById(
 	ctx: QueryCtx | MutationCtx,
@@ -213,7 +155,6 @@ export async function upsertIgnoredDiscordAccountInternalLogic(
 	ctx: MutationCtx,
 	id: string,
 ) {
-	// Upsert ignored account (no check for existing account in internal version)
 	const existingIgnored = await ctx.db
 		.query("ignoredDiscordAccounts")
 		.filter((q) => q.eq(q.field("id"), id))
@@ -236,10 +177,6 @@ export async function upsertIgnoredDiscordAccountInternalLogic(
 
 	return upserted;
 }
-
-// ============================================================================
-// User Server Settings
-// ============================================================================
 
 export async function findUserServerSettingsById(
 	ctx: QueryCtx | MutationCtx,
@@ -268,10 +205,6 @@ export async function deleteUserServerSettingsByUserIdLogic(
 		await ctx.db.delete(setting._id);
 	}
 }
-
-// ============================================================================
-// Channels
-// ============================================================================
 
 const DEFAULT_CHANNEL_SETTINGS = {
 	channelId: "",
@@ -318,7 +251,6 @@ export async function deleteChannelInternalLogic(
 		.collect();
 
 	for (const thread of threads) {
-		// Recursively delete threads
 		await deleteChannelInternalLogic(ctx, thread.id);
 	}
 
@@ -339,14 +271,7 @@ export async function deleteChannelInternalLogic(
 	if (channel) {
 		await ctx.db.delete(channel._id);
 	}
-
-	// TODO: Delete messages when messages table exists
-	// await deleteManyMessagesByChannelId(id);
 }
-
-// ============================================================================
-// Discord Accounts
-// ============================================================================
 
 export async function getDiscordAccountById(
 	ctx: QueryCtx | MutationCtx,
@@ -357,10 +282,6 @@ export async function getDiscordAccountById(
 		.filter((q) => q.eq(q.field("id"), id))
 		.first();
 }
-
-// ============================================================================
-// Messages
-// ============================================================================
 
 export async function getMessageById(ctx: QueryCtx | MutationCtx, id: string) {
 	return await ctx.db
@@ -396,7 +317,6 @@ export async function getFirstMessageInChannel(
 	ctx: QueryCtx | MutationCtx,
 	channelId: string,
 ): Promise<Message | null> {
-	// Then sort by ID to get the chronologically first message
 	const allMessages = await getManyFrom(
 		ctx.db,
 		"messages",
@@ -409,8 +329,6 @@ export async function getFirstMessageInChannel(
 		return null;
 	}
 
-	// Sort by ID (snowflake) to get the chronologically first message
-	// Lower ID = earlier message
 	const sortedMessages = allMessages.sort((a, b) => {
 		return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 	});
@@ -444,14 +362,12 @@ export async function getFirstMessagesInChannels(
 		}),
 	);
 
-	// Find the first message (lowest ID) for each channel
 	for (const { channelId, messages } of channelMessages) {
 		if (messages.length === 0) {
 			results[channelId] = null;
 			continue;
 		}
 
-		// Sort by ID (snowflake) to get the chronologically first message
 		const sortedMessages = messages.sort((a, b) => {
 			return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 		});
@@ -570,7 +486,6 @@ export async function upsertMessageInternalLogic(
 	const { attachments, reactions } = args;
 	const messageData = args.message;
 
-	// Upsert message - use index for efficient lookup
 	const existing = await ctx.db
 		.query("messages")
 		.withIndex("by_messageId", (q) => q.eq("id", messageData.id))
@@ -592,7 +507,6 @@ export async function upsertMessageInternalLogic(
 			await ctx.db.delete(attachment._id);
 		}
 
-		// Insert new attachments
 		if (attachments.length > 0) {
 			for (const attachment of attachments) {
 				await ctx.db.insert("attachments", attachment);
@@ -610,9 +524,7 @@ export async function upsertMessageInternalLogic(
 			await ctx.db.delete(reaction._id);
 		}
 
-		// Insert emojis and reactions
 		if (reactions.length > 0) {
-			// Upsert emojis
 			for (const reaction of reactions) {
 				const emojiId = reaction.emoji.id;
 				if (!emojiId) continue;
@@ -627,7 +539,6 @@ export async function upsertMessageInternalLogic(
 				}
 			}
 
-			// Insert reactions
 			for (const reaction of reactions) {
 				if (!reaction.emoji.id) continue;
 				await ctx.db.insert("reactions", {
@@ -640,10 +551,6 @@ export async function upsertMessageInternalLogic(
 	}
 }
 
-// ============================================================================
-// Attachments
-// ============================================================================
-
 export async function uploadAttachmentFromUrlLogic(
 	ctx: ActionCtx,
 	args: {
@@ -653,7 +560,6 @@ export async function uploadAttachmentFromUrlLogic(
 	},
 ): Promise<Id<"_storage"> | null> {
 	try {
-		// Download the file from the URL
 		const response = await fetch(args.url);
 
 		if (!response.ok) {
@@ -665,7 +571,6 @@ export async function uploadAttachmentFromUrlLogic(
 
 		const blob = await response.blob();
 
-		// Upload to Convex storage
 		const storageId = await ctx.storage.store(blob);
 
 		return storageId;

@@ -32,7 +32,6 @@ export const serverSchema = v.object({
 	preferencesId: v.optional(v.id("serverPreferences")),
 });
 
-// Discord accounts (separate from BetterAuth users)
 export const discordAccountSchema = v.object({
 	id: v.string(), // Discord snowflake ID
 	name: v.string(),
@@ -75,7 +74,6 @@ export const channelSettingsSchema = v.object({
 	forumGuidelinesConsentEnabled: v.boolean(),
 });
 
-// Embed schema for messages
 const embedFooterSchema = v.object({
 	text: v.string(),
 	iconUrl: v.optional(v.string()),
