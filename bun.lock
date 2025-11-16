@@ -49,6 +49,7 @@
         "convex": "catalog:",
         "effect": "catalog:",
         "hono": "^4.10.6",
+        "jose": "^6.1.2",
         "lucide-react": "catalog:",
         "next": "catalog:",
         "nuqs": "catalog:",
