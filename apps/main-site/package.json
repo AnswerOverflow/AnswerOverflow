@@ -30,6 +30,7 @@
 		"nuqs": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
+		"shiki": "^3.12.2",
 		"use-debounce": "^10.0.6"
 	},
 	"devDependencies": {
