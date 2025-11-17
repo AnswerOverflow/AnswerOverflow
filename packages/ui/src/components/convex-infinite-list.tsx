@@ -5,10 +5,11 @@ import type {
 	PaginatedQueryItem,
 	PaginatedQueryReference,
 } from "convex/react";
-import { usePaginatedQuery } from "convex/react";
+
 import type { ReactNode } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Virtuoso } from "react-virtuoso";
+import { useStablePaginatedQuery } from "../hooks/use-stable-query";
 
 type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	query: Query;
@@ -31,7 +32,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	loader = <div className="py-2 text-sm text-gray-500">Loading…</div>,
 	scrollThreshold = 0.8,
 }: ConvexInfiniteListProps<Query>) {
-	const { results, status, loadMore, isLoading } = usePaginatedQuery(
+	const { results, status, loadMore, isLoading } = useStablePaginatedQuery(
 		query,
 		queryArgs,
 		{ initialNumItems: pageSize },
