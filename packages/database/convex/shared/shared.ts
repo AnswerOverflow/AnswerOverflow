@@ -1,5 +1,4 @@
 import type { Infer } from "convex/values";
-import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Id } from "../_generated/dataModel";
@@ -345,22 +344,7 @@ export async function getMentionMetadata(
 	userIds: string[],
 	channelIds: string[],
 	serverDiscordId: string,
-): Promise<{
-	users: Record<
-		string,
-		{ username: string; globalName: string | null; url: string }
-	>;
-	channels: Record<
-		string,
-		{
-			name: string;
-			type: number;
-			url: string;
-			indexingEnabled?: boolean;
-			exists?: boolean;
-		}
-	>;
-}> {
+) {
 	const users: Record<
 		string,
 		{ username: string; globalName: string | null; url: string }
@@ -376,64 +360,46 @@ export async function getMentionMetadata(
 		}
 	> = {};
 
-	if (userIds.length > 0) {
-		const userAccounts = await asyncMap(userIds, (id) =>
-			getDiscordAccountById(ctx, id),
-		);
-
-		for (let i = 0; i < userIds.length; i++) {
-			const userId = userIds[i];
-			const account = userAccounts[i];
-			if (userId === undefined) continue;
-			users[userId] = account
-				? {
-						username: account.name,
-						globalName: null,
-						url: `/u/${userId}`,
-					}
-				: {
-						username: userId,
-						globalName: null,
-						url: `https://discord.com/users/${userId}`,
-					};
-		}
+	for (const userId of userIds) {
+		const account = await getDiscordAccountById(ctx, userId);
+		users[userId] = account
+			? {
+					username: account.name,
+					globalName: null,
+					url: `/u/${userId}`,
+				}
+			: {
+					username: userId,
+					globalName: null,
+					url: `https://discord.com/users/${userId}`,
+				};
 	}
 
-	if (channelIds.length > 0) {
-		const channelDocs = await asyncMap(channelIds, (id) =>
-			getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
-		);
+	for (const channelId of channelIds) {
+		const [channel, settings] = await Promise.all([
+			getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
+			getOneFrom(ctx.db, "channelSettings", "by_channelId", channelId),
+		]);
 
-		const channelSettings = await asyncMap(channelIds, (id) =>
-			getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
-		);
-
-		for (let i = 0; i < channelIds.length; i++) {
-			const channelId = channelIds[i];
-			if (channelId === undefined) continue;
-			const channel = channelDocs[i];
-			const settings = channelSettings[i];
-
-			if (channel) {
-				const indexingEnabled = settings?.indexingEnabled ?? false;
-				channels[channelId] = {
-					name: channel.name,
-					type: channel.type,
-					url: indexingEnabled
-						? `/c/${serverDiscordId}/${channelId}`
-						: `https://discord.com/channels/${serverDiscordId}/${channelId}`,
-					indexingEnabled,
-					exists: true,
-				};
-			} else {
-				channels[channelId] = {
-					name: "Unknown Channel",
-					type: 0,
-					url: `https://discord.com/channels/${serverDiscordId}/${channelId}`,
-					indexingEnabled: false,
-					exists: false,
-				};
-			}
+		if (channel) {
+			const indexingEnabled = settings?.indexingEnabled ?? false;
+			channels[channelId] = {
+				name: channel.name,
+				type: channel.type,
+				url: indexingEnabled
+					? `/c/${serverDiscordId}/${channelId}`
+					: `https://discord.com/channels/${serverDiscordId}/${channelId}`,
+				indexingEnabled,
+				exists: true,
+			};
+		} else {
+			channels[channelId] = {
+				name: "Unknown Channel",
+				type: 0,
+				url: `https://discord.com/channels/${serverDiscordId}/${channelId}`,
+				indexingEnabled: false,
+				exists: false,
+			};
 		}
 	}
 
@@ -448,97 +414,48 @@ export async function getInternalLinksMetadata(
 		channelId: string;
 		messageId?: string;
 	}>,
-): Promise<
-	Array<{
-		original: string;
-		guild: { id: string; name: string };
-		channel: {
-			parent?: { name?: string; type?: number; parentId?: string };
-			id: string;
-			type: number;
-			name: string;
-		};
-		message?: string;
-	}>
-> {
+) {
 	if (discordLinks.length === 0) {
 		return [];
 	}
 
-	const uniqueGuildIds = Array.from(
-		new Set(discordLinks.map((l) => l.guildId)),
-	);
-	const uniqueChannelIds = Array.from(
-		new Set(discordLinks.map((l) => l.channelId)),
-	);
-	const uniqueMessageIds = Array.from(
-		new Set(
-			discordLinks.map((l) => l.messageId).filter((id): id is string => !!id),
-		),
-	);
-
-	const servers = await asyncMap(uniqueGuildIds, (id) =>
-		getOneFrom(ctx.db, "servers", "by_discordId", id),
-	);
-	const serverMap = new Map(
-		Arr.filter(servers, Predicate.isNotNull).map((s) => [
-			s.discordId,
-			{ id: s.discordId, name: s.name },
-		]),
-	);
-
-	const channels = await asyncMap(uniqueChannelIds, (id) =>
-		getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
-	);
-	const channelMap = new Map(
-		Arr.filter(channels, Predicate.isNotNull).map((c) => [
-			c.id,
-			{ id: c.id, name: c.name, type: c.type, parentId: c.parentId },
-		]),
-	);
-
-	const parentChannelIds = Arr.filter(
-		Arr.map(channels, (c) => c?.parentId),
-		Predicate.isNotNullable,
-	);
-	const parentChannels = await asyncMap(
-		Array.from(new Set(parentChannelIds)),
-		(id) => getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
-	);
-	const parentChannelMap = new Map(
-		Arr.filter(parentChannels, Predicate.isNotNull).map((c) => [
-			c.id,
-			{ id: c.id, name: c.name, type: c.type },
-		]),
-	);
-
-	const messages = await asyncMap(uniqueMessageIds, (id) =>
-		getMessageById(ctx, id),
-	);
-	const messageExistsMap = new Map(
-		uniqueMessageIds.map((id, i) => [id, !!messages[i]]),
-	);
-
-	return Arr.filter(
-		Arr.map(discordLinks, (link) => {
-			const server = serverMap.get(link.guildId);
-			const channel = channelMap.get(link.channelId);
+	const results = await Promise.all(
+		discordLinks.map(async (link) => {
+			const [server, channel] = await Promise.all([
+				getOneFrom(ctx.db, "servers", "by_discordId", link.guildId),
+				getOneFrom(
+					ctx.db,
+					"channels",
+					"by_discordChannelId",
+					link.channelId,
+					"id",
+				),
+			]);
 
 			if (!server || !channel) {
 				return undefined;
 			}
 
-			if (link.messageId && !messageExistsMap.get(link.messageId)) {
-				return undefined;
+			if (link.messageId) {
+				const message = await getMessageById(ctx, link.messageId);
+				if (!message) {
+					return undefined;
+				}
 			}
 
 			const parentChannel = channel.parentId
-				? parentChannelMap.get(channel.parentId)
+				? await getOneFrom(
+						ctx.db,
+						"channels",
+						"by_discordChannelId",
+						channel.parentId,
+						"id",
+					)
 				: undefined;
 
 			return {
 				original: link.original,
-				guild: { id: server.id, name: server.name },
+				guild: { id: server.discordId, name: server.name },
 				channel: {
 					id: channel.id,
 					type: channel.type,
@@ -554,8 +471,9 @@ export async function getInternalLinksMetadata(
 				message: link.messageId,
 			};
 		}),
-		Predicate.isNotNullable,
 	);
+
+	return Arr.filter(results, Predicate.isNotNullable);
 }
 
 export async function getMessageById(ctx: QueryCtx | MutationCtx, id: string) {
@@ -909,49 +827,19 @@ export async function enrichMessagesWithData(
 		return [];
 	}
 
-	const authorIds = new Set(messages.map((m) => m.authorId));
-	const authors = await asyncMap(Array.from(authorIds), (id) =>
-		getDiscordAccountById(ctx, id),
-	);
-	const authorMap = new Map(
-		Arr.filter(authors, Predicate.isNotNull).map((a) => [a.id, a]),
-	);
-
-	const allUserIds = new Set<string>();
-	const allChannelIds = new Set<string>();
-	const allDiscordLinks: Array<{
-		original: string;
-		guildId: string;
-		channelId: string;
-		messageId?: string;
-	}> = [];
-	const serverIds = new Set(messages.map((m) => m.serverId));
-
-	const servers = await asyncMap(Array.from(serverIds), (id) => ctx.db.get(id));
-	const serverMap = new Map(
-		Arr.filter(servers, Predicate.isNotNull).map((s) => [s._id, s.discordId]),
-	);
-
-	for (const message of messages) {
-		const { userIds, channelIds } = extractMentionIds(message.content);
-		userIds.forEach((id) => allUserIds.add(id));
-		channelIds.forEach((id) => allChannelIds.add(id));
-		allDiscordLinks.push(...extractDiscordLinks(message.content));
-	}
-
-	const internalLinks = await getInternalLinksMetadata(ctx, allDiscordLinks);
-
 	const messagesWithData = await Promise.all(
 		messages.map(async (message) => {
-			const [attachments, reactions, solutions] = await Promise.all([
-				findAttachmentsByMessageId(ctx, message.id),
-				findReactionsByMessageId(ctx, message.id),
-				message.questionId
-					? findSolutionsByQuestionId(ctx, message.questionId)
-					: [],
-			]);
+			const [author, server, attachments, reactions, solutions] =
+				await Promise.all([
+					getDiscordAccountById(ctx, message.authorId),
+					ctx.db.get(message.serverId),
+					findAttachmentsByMessageId(ctx, message.id),
+					findReactionsByMessageId(ctx, message.id),
+					message.questionId
+						? findSolutionsByQuestionId(ctx, message.questionId)
+						: [],
+				]);
 
-			const author = authorMap.get(message.authorId);
 			const baseEnriched = {
 				message,
 				author: author
@@ -966,16 +854,13 @@ export async function enrichMessagesWithData(
 				solutions,
 			};
 
-			const serverDiscordId = serverMap.get(message.serverId);
-			if (!serverDiscordId) {
+			if (!server) {
 				return baseEnriched;
 			}
 
+			const serverDiscordId = server.discordId;
 			const { userIds, channelIds } = extractMentionIds(message.content);
 			const messageDiscordLinks = extractDiscordLinks(message.content);
-			const messageInternalLinks = internalLinks.filter((link) =>
-				messageDiscordLinks.some((dl) => dl.original === link.original),
-			);
 
 			const mentionMetadata = await getMentionMetadata(
 				ctx,
@@ -1006,6 +891,11 @@ export async function enrichMessagesWithData(
 						exists: false,
 					},
 				]),
+			);
+
+			const messageInternalLinks = await getInternalLinksMetadata(
+				ctx,
+				messageDiscordLinks,
 			);
 
 			return {
