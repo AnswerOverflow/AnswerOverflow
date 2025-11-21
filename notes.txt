@@ -64,11 +64,11 @@ Main Site:
     - [ ] /robots.txt
     - [ ] /about
     - [ ] /browse
-    - [ ] /contributors
-    - [ ] /cookies
-    - [ ] /eula
-    - [ ] /privacy
-    - [ ] /tos
+    - [X] /contributors
+    - [X] /cookies
+    - [X] /eula
+    - [X] /privacy
+    - [X] /tos
     - [ ] /c/
     - [ ] /c/:channelId
     - [ ] /m/:messageId
