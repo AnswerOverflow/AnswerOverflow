@@ -9,7 +9,8 @@ import {
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
-import { Effect } from "effect";
+import { Console, Effect, Layer } from "effect";
+import { Discord } from "../core/discord-service";
 
 export const menuButtonIds = {
 	consentButton: "consent-button",
@@ -375,3 +376,28 @@ function handleManageAccountButtonPress(
 		}
 	});
 }
+
+export const InteractionHandlersLayer = Layer.scopedDiscard(
+	Effect.gen(function* () {
+		const discord = yield* Discord;
+
+		yield* discord.client.on("interactionCreate", (interaction) =>
+			Effect.gen(function* () {
+				if (
+					!interaction.isChatInputCommand() ||
+					interaction.commandName === "manage-account"
+				) {
+					return;
+				}
+				yield* Effect.scoped(
+					handleManageAccountCommand(interaction).pipe(
+						Effect.provide(DatabaseLayer),
+						Effect.catchAll((error) =>
+							Console.error("Error in manage account command:", error),
+						),
+					),
+				);
+			}),
+		);
+	}),
+);

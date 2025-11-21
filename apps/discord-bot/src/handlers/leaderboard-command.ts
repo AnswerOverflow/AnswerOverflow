@@ -1,4 +1,4 @@
-import { Database } from "@packages/database/database";
+import { Database, DatabaseLayer } from "@packages/database/database";
 import type { ChatInputCommandInteraction } from "discord.js";
 import {
 	ActionRowBuilder,
@@ -7,7 +7,8 @@ import {
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
-import { Effect } from "effect";
+import { Console, Effect, Layer } from "effect";
+import { Discord } from "../core/discord-service";
 
 const medalMap = new Map<number, string>([
 	[0, ":first_place:"],
@@ -118,3 +119,28 @@ export function handleLeaderboardCommand(
 		});
 	});
 }
+
+export const InteractionHandlersLayer = Layer.scopedDiscard(
+	Effect.gen(function* () {
+		const discord = yield* Discord;
+
+		yield* discord.client.on("interactionCreate", (interaction) =>
+			Effect.gen(function* () {
+				if (
+					!interaction.isChatInputCommand() ||
+					interaction.commandName === "leaderboard"
+				) {
+					return;
+				}
+				yield* Effect.scoped(
+					handleLeaderboardCommand(interaction).pipe(
+						Effect.provide(DatabaseLayer),
+						Effect.catchAll((error) =>
+							Console.error("Error in leaderboard command:", error),
+						),
+					),
+				);
+			}),
+		);
+	}),
+);

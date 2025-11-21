@@ -5,10 +5,6 @@ import {
 	PostHogClientLayerForServer,
 } from "./posthog-client";
 
-export type BaseProps = {
-	"Answer Overflow Account Id": string;
-};
-
 export type ServerAnalyticsOptions = {
 	to?: Date;
 	from?: Date;

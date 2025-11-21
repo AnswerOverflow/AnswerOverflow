@@ -1,25 +1,14 @@
 - there's probably a bug in our onUpdate implementation where null should be part of live data, depends how convex handles onUpdate when the first value is null
 
 
-
 We can reduce a lot of complexity by using convex-helpers, things we should use from them:
 - rate limiting
-- rls to enforce manage server permissions when updating server settings
 - https://www.convex.dev/components/workpool may be relevant
 
 
-organize as:
-    /private/
-    /authenticated/
-    /public/
-    
-each of those get their own query functions, keep the default ones banned
-
-
-
-- we need to improve the way OTEL is done in convex/
-
 setup react grab
+
+## urls & linking
 
 we need to get construction urls to work with:
 - local dev
@@ -27,3 +16,144 @@ we need to get construction urls to work with:
 - custom subpaths
 - main site (answeroverflow.com)
 right from the beginning
+
+potential URLs:
+    answeroverflow.com/:path
+    custom.domain.com
+    domain.com/prefix/:path
+
+maybe <base/> helps although it's never worked in the past
+
+## Sitemap
+    /c/ sitemap
+    /:domain sitemap
+    / sitemap
+
+## Discord Bot Features:
+    Commands:
+    - [ ] Consent 
+    - [ ] Manage Account
+    - [ ] Mark Solution
+    - [ ] Leaderboard
+    - [ ] Quick Action
+
+    Events:
+    - [ ] Auto thread
+    - [ ] Checkmark mark solution
+    - [ ] Forum post guidelines consent
+    - [ ] Read the rules consent
+    - [ ] Send mark solutions in new threads
+    - [ ] Update status
+
+    Parity:
+    - [ ] Cache parity
+    - [ ] Channel parity
+    - [ ] Guild parity
+    - [ ] Message parity
+    - [ ] User parity
+
+    Misc:
+    - [ ] Deny list
+
+
+
+## Website Features:
+
+Main Site:
+    - [ ] /
+    - [ ] /robots.txt
+    - [ ] /about
+    - [ ] /browse
+    - [ ] /contributors
+    - [ ] /cookies
+    - [ ] /eula
+    - [ ] /privacy
+    - [ ] /tos
+    - [ ] /c/
+    - [ ] /c/:channelId
+    - [ ] /m/:messageId
+    - [ ] /og/post?id
+    - [ ] /u/:userId
+    - [ ] /u/:userId/comments
+
+Tenant Site:
+    - [ ] /:domain
+    - [ ] /:domain/m/:messageId
+    - [ ] /:domain/search
+    - [ ] /:domain/u/:userId
+    - [ ] /:domain/u/:userId/comments
+    - [ ] /:domain/c/:channelId
+    - [ ] /:domain/og/post?id
+    - [ ] /:domain/robots.txt
+    
+
+## Dashboard Features:
+
+Analytics:
+    - [ ] Top Pages
+    - [ ] Top question solvers
+    - [ ] Page views over time
+    - [ ] Server invite clicks over time
+    - [ ] Q&As over time
+
+Server Settings:
+    - [ ] Set custom domain
+    - [ ] Set custom subpath
+    - [ ] Enable / disable consider all messages public
+    - [ ] Enable / disable aonymize messages
+    - [ ] Enable / disable read the rules consent
+    - [ ] Upgrade / downgrade plan
+
+Channel Settings:
+    - [ ] Enable / disable mark solution
+    - [ ] Enable / disable mark solution instructions
+    - [ ] Enable / disable auto thread
+    - [ ] Enable / disable indexing
+    - [ ] Enable / disabe forum guidelines consent
+
+
+
+
+Extra work to be done after the migration is complete:
+
+## Onboarding
+
+Include a floating support widget / something similar w/ a quick add for Rhys on Discord
+
+If the server has 10k+ members, 'VIP' onboarding
+
+Flow is the following:
+1. Sign in, have all servers listed to setup
+2. On click setup open a page / modal with an add button for the bot
+    - display the permissions it asks for & why it needs them
+3. Put them on a pending screen while waiting for the bot to be added, pending screen should:
+    - Have a link to go back
+    - Have a button to readd the bot
+    - Let them know we'll automatically detect being added
+4. After being added, display a 'Thanks for adding, lets get it configured' screen
+5. One click config that detects & applies recommended settings
+    Recommended:
+        - All messages public
+        - All forum channels indexed
+        - Send mark solution instructions
+        - Apply solved tag
+    Optional:
+        - Anonymize messages
+6. Advanced config that lets them customize
+
+
+## Permissions
+
+sync the bot permissions for that channel to channel preferences under the 'botPermissions' category
+use this permisions value on the dashboard to show a 'red' 'yellow' 'green' on permissions if setup correctly
+instructions on how to fix
+
+
+## Draft mode
+
+Communities should be able to turn on 'draft mode' that lets them see their server but not anyone else to make them more comfortable with getting context indexed
+
+## MCP
+
+- Global search
+- Search a community (needs to pass an id, get from search communities), searches name + description

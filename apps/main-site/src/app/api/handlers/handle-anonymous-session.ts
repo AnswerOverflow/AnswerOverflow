@@ -3,7 +3,7 @@ import { createOtelLayer } from "@packages/observability/effect-otel";
 import { checkBotId } from "botid/server";
 import { Effect, Layer } from "effect";
 import type { Context } from "hono";
-import { signAnonymousToken } from "@/lib/anonymous-auth";
+import { signAnonymousToken } from "../../../lib/anonymous-auth";
 
 const OtelLayer = createOtelLayer("main-site");
 

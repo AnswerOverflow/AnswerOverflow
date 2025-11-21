@@ -209,7 +209,8 @@ export default defineSchema({
 	),
 	userServerSettings: defineTable(userServerSettingsSchema)
 		.index("by_serverId", ["serverId"])
-		.index("by_userId", ["userId"]),
+		.index("by_userId", ["userId"])
+		.index("by_userId_serverId", ["userId", "serverId"]),
 	ignoredDiscordAccounts: defineTable(ignoredDiscordAccountSchema).index(
 		"by_discordAccountId",
 		["id"],

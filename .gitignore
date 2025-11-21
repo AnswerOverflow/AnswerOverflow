@@ -38,3 +38,5 @@ yarn-error.log*
 .turbo
 
 temp-*
+
+*.env*

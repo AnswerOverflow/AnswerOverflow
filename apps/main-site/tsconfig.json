@@ -9,9 +9,6 @@
 				"name": "@effect/language-service"
 			}
 		],
-		"paths": {
-			"@/*": ["./src/*"]
-		},
 		"jsx": "preserve",
 		"esModuleInterop": true,
 		"moduleResolution": "bundler"

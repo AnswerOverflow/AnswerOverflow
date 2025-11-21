@@ -1,6 +1,11 @@
-import { Database, upsertMessage } from "@packages/database/database";
+import {
+	Database,
+	DatabaseLayer,
+	upsertMessage,
+} from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
-import { Effect } from "effect";
+import { Console, Effect, Layer } from "effect";
+import { Discord } from "../core/discord-service";
 import { toAOMessage } from "../utils/conversions";
 import { makeMarkSolutionResponse } from "./mark-solution";
 
@@ -289,3 +294,28 @@ export function handleMarkSolutionCommand(
 		});
 	});
 }
+
+export const InteractionHandlersLayer = Layer.scopedDiscard(
+	Effect.gen(function* () {
+		const discord = yield* Discord;
+
+		yield* discord.client.on("interactionCreate", (interaction) =>
+			Effect.gen(function* () {
+				if (
+					interaction.isContextMenuCommand() &&
+					interaction.commandName === "✅ Mark Solution"
+				) {
+					yield* Effect.scoped(
+						handleMarkSolutionCommand(interaction).pipe(
+							Effect.provide(DatabaseLayer),
+							Effect.catchAll((error) =>
+								Console.error("Error in mark solution command:", error),
+							),
+						),
+					);
+				}
+				return;
+			}),
+		);
+	}),
+);

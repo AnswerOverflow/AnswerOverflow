@@ -190,11 +190,13 @@ export async function findUserServerSettingsById(
 	userId: string,
 	serverId: Id<"servers">,
 ) {
-	const settings = await ctx.db
-		.query("userServerSettings")
-		.withIndex("by_userId", (q) => q.eq("userId", userId))
-		.filter((q) => q.eq(q.field("serverId"), serverId))
-		.first();
+	const settings = await getOneFrom(
+		ctx.db,
+		"userServerSettings",
+		"by_userId_serverId",
+		userId,
+		"userId",
+	);
 
 	return settings ?? null;
 }

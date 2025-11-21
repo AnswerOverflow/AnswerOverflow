@@ -9,12 +9,5 @@
 		"baseColor": "neutral",
 		"cssVariables": true
 	},
-	"iconLibrary": "lucide",
-	"aliases": {
-		"components": "@/components",
-		"hooks": "@/hooks",
-		"lib": "@/lib",
-		"utils": "@packages/ui/lib/utils",
-		"ui": "@packages/ui/components"
-	}
+	"iconLibrary": "lucide"
 }

@@ -1,6 +1,7 @@
 import type { ButtonInteraction, GuildMember } from "discord.js";
 import { Message, PermissionFlagsBits } from "discord.js";
-import { Effect } from "effect";
+import { Console, Effect, Layer } from "effect";
+import { Discord } from "../core/discord-service";
 
 const DISMISS_ACTION_PREFIX = "dismiss";
 const DISMISS_OVERRIDE_PERMISSIONS = [
@@ -147,3 +148,24 @@ export function handleDismissButtonInteraction(
 		}
 	});
 }
+
+export const InteractionHandlersLayer = Layer.scopedDiscard(
+	Effect.gen(function* () {
+		const discord = yield* Discord;
+
+		yield* discord.client.on("interactionCreate", (interaction) =>
+			Effect.gen(function* () {
+				if (
+					interaction.isButton() &&
+					interaction.customId.startsWith("dismiss:")
+				) {
+					yield* handleDismissButtonInteraction(interaction).pipe(
+						Effect.catchAll((error) =>
+							Console.error("Error in dismiss button handler:", error),
+						),
+					);
+				}
+			}),
+		);
+	}),
+);
