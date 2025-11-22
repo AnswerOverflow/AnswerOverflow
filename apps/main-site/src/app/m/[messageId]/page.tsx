@@ -2,7 +2,7 @@ import { Database, DatabaseLayer } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Effect, Layer } from "effect";
 import { notFound } from "next/navigation";
-import { MessagePageClient } from "./client";
+import { MessagePage } from "./message-page";
 
 const OtelLayer = createOtelLayer("main-site");
 
@@ -10,7 +10,7 @@ type Props = {
 	params: Promise<{ messageId: string }>;
 };
 
-export default async function MessagePage(props: Props) {
+export default async function Page(props: Props) {
 	const params = await props.params;
 
 	const pageData = await Effect.gen(function* () {
@@ -27,5 +27,5 @@ export default async function MessagePage(props: Props) {
 		return notFound();
 	}
 
-	return <MessagePageClient data={pageData} />;
+	return <MessagePage data={pageData} />;
 }

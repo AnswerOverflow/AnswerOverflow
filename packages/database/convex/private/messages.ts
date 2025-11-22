@@ -23,8 +23,8 @@ import {
 	findUserServerSettingsById,
 	getChannelWithSettings,
 	getDiscordAccountById,
-	getInternalLinksMetadata,
-	getMentionMetadata,
+	type getInternalLinksMetadata,
+	type getMentionMetadata,
 	getMessageById as getMessageByIdShared,
 	getServerByDiscordId,
 	upsertMessageInternalLogic,
@@ -210,7 +210,9 @@ function selectMessagesForDisplay(
 		return messages;
 	}
 
-	return messages.filter((message) => message.id >= targetMessageId);
+	return messages.filter(
+		(message) => BigInt(message.id) >= BigInt(targetMessageId),
+	);
 }
 
 export const upsertMessage = privateMutation({

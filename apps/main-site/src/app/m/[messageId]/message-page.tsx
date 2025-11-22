@@ -1,5 +1,3 @@
-"use client";
-
 import type { Id } from "@packages/database/convex/_generated/dataModel";
 import {
 	DiscordMessage,
@@ -28,7 +26,7 @@ type MessagePageData = {
 	} | null;
 };
 
-export function MessagePageClient(props: { data: MessagePageData }) {
+export function MessagePage(props: { data: MessagePageData }) {
 	const { data } = props;
 
 	if (!data) {
