@@ -30,7 +30,10 @@ import type * as public_search from "../public/search.js";
 import type * as shared_auth from "../shared/auth.js";
 import type * as shared_authIdentity from "../shared/authIdentity.js";
 import type * as shared_betterAuth from "../shared/betterAuth.js";
+import type * as shared_dataAccess from "../shared/dataAccess.js";
+import type * as shared_messagePrivacy from "../shared/messagePrivacy.js";
 import type * as shared_permissions from "../shared/permissions.js";
+import type * as shared_publicSchemas from "../shared/publicSchemas.js";
 import type * as shared_shared from "../shared/shared.js";
 
 import type {
@@ -62,7 +65,10 @@ declare const fullApi: ApiFromModules<{
   "shared/auth": typeof shared_auth;
   "shared/authIdentity": typeof shared_authIdentity;
   "shared/betterAuth": typeof shared_betterAuth;
+  "shared/dataAccess": typeof shared_dataAccess;
+  "shared/messagePrivacy": typeof shared_messagePrivacy;
   "shared/permissions": typeof shared_permissions;
+  "shared/publicSchemas": typeof shared_publicSchemas;
   "shared/shared": typeof shared_shared;
 }>;
 

@@ -18,8 +18,8 @@ import {
 	isMessagePublic,
 	type MessageWithPrivacyFlags,
 	shouldAnonymizeMessage,
-} from "./message-privacy";
-import type { PublicChannel, PublicServer } from "./public-schemas";
+} from "./messagePrivacy";
+import type { PublicChannel, PublicServer } from "./publicSchemas";
 import {
 	findAttachmentsByMessageId,
 	findReactionsByMessageId,
@@ -161,6 +161,9 @@ export async function enrichedMessageWithServerAndChannels(
 			"discordId",
 		),
 	]);
+	console.log("parentChannel", parentChannel);
+	console.log("channel", channel);
+	console.log("server", server);
 	if (!channel || !server) return null;
 
 	return {

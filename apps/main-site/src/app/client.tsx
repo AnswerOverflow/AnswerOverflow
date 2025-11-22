@@ -36,8 +36,10 @@ export function HomePageClient() {
 						queryArgs={{}}
 						pageSize={20}
 						renderItem={(threadData) => {
-							const ChannelIcon = threadData.parentChannel
-								? getChannelIcon(threadData.parentChannel.type)
+							if (!threadData.thread) return null;
+
+							const ChannelIcon = threadData.channel
+								? getChannelIcon(threadData.channel.type)
 								: Hash;
 
 							return (
@@ -66,12 +68,12 @@ export function HomePageClient() {
 													<span className="text-muted-foreground">•</span>
 												</>
 											)}
-											{threadData.parentChannel && (
+											{threadData.channel && (
 												<>
 													<div className="flex items-center gap-1.5">
 														<ChannelIcon className="size-4 text-muted-foreground shrink-0" />
 														<span className="text-muted-foreground">
-															{threadData.parentChannel.name}
+															{threadData.channel.name}
 														</span>
 													</div>
 													<span className="text-muted-foreground">•</span>
@@ -81,22 +83,24 @@ export function HomePageClient() {
 												<ThreadIcon className="size-4 text-muted-foreground shrink-0" />
 												<span className="text-muted-foreground">
 													{threadData.thread.name ||
-														threadData.message.content?.slice(0, 30).trim() ||
+														threadData.message.message.content
+															?.slice(0, 30)
+															.trim() ||
 														"Untitled thread"}
 												</span>
 											</div>
 										</div>
 									</div>
 									<Link
-										href={`/m/${threadData.message.id}`}
+										href={`/m/${threadData.message.message.id}`}
 										className="block hover:bg-accent/50 transition-colors"
 									>
 										<div className="p-4">
 											<DiscordMessage
-												message={threadData.message}
-												author={threadData.author}
-												attachments={threadData.attachments}
-												reactions={threadData.reactions}
+												message={threadData.message.message}
+												author={threadData.message.author}
+												attachments={threadData.message.attachments}
+												reactions={threadData.message.reactions}
 											/>
 										</div>
 									</Link>

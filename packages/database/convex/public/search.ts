@@ -1,11 +1,11 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import type { Message } from "../schema";
+import { Array as Arr, Predicate } from "effect";
 import {
 	enrichedMessageWithServerAndChannels,
 	searchMessages,
-} from "../shared/data-access";
-import { CHANNEL_TYPE } from "../shared/shared";
+} from "../shared/dataAccess";
+import { CHANNEL_TYPE, getFirstMessageInChannel } from "../shared/shared";
 import { publicQuery } from "./custom_functions";
 
 export const publicSearch = publicQuery({
@@ -35,13 +35,35 @@ export const getRecentThreads = publicQuery({
 			.order("desc")
 			.paginate(args.paginationOpts);
 
-		// todo: get the messages where the discord id matches the channel id
-		// @ts-expect-error
-		const messages: Message = [];
+		const results = await Promise.all(
+			paginatedResult.page.map(async (threadChannel) => {
+				const firstMessage = await getFirstMessageInChannel(
+					ctx,
+					threadChannel.id,
+				);
+				if (!firstMessage) {
+					return null;
+				}
+				const enriched = await enrichedMessageWithServerAndChannels(
+					ctx,
+					firstMessage,
+				);
+				console.log("enriched", enriched);
+				if (!enriched) {
+					return null;
+				}
+				return {
+					...enriched,
+					thread: threadChannel,
+					channel: enriched.channel,
+				};
+			}),
+		);
 
-		const enriched = await enrichedMessageWithServerAndChannels(ctx, messages);
+		const filteredResults = Arr.filter(results, Predicate.isNotNullable);
+
 		return {
-			page: enriched,
+			page: filteredResults,
 			isDone: paginatedResult.isDone,
 			continueCursor: paginatedResult.continueCursor,
 		};
