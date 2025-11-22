@@ -11,7 +11,7 @@
 		"test": "turbo run test",
 		"test:watch": "turbo run test:watch",
 		"lint": "biome check . && eslint .",
-		"lint:eslint": "eslint .",
+		"lint:eslint": "eslint . --cache",
 		"lint:fix": "biome check . --write",
 		"fix:safe": "biome check . --write",
 		"fix:unsafe": "biome check . --write --unsafe",
