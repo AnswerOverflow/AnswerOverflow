@@ -55,7 +55,6 @@ export type DiscordMessageProps = {
 		emoji: { id: string; name: string; animated?: boolean };
 	}>;
 	solutions?: Message[];
-	getAttachmentUrl?: (attachment: Attachment) => string | null;
 	getMessageUrl?: (messageId: string) => string;
 	getUserUrl?: (userId: string) => string;
 	metadata?: MessageWithMetadata["metadata"];

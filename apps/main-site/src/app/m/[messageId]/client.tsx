@@ -1,7 +1,6 @@
 "use client";
 
 import type { Id } from "@packages/database/convex/_generated/dataModel";
-import type { Attachment } from "@packages/database/convex/schema";
 import {
 	DiscordMessage,
 	type EnrichedMessage,
@@ -90,16 +89,6 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 						<DiscordMessage
 							key={enrichedMessage.message.id}
 							enrichedMessage={enrichedMessage}
-							getAttachmentUrl={(attachment: Attachment) => {
-								const convexSiteUrl =
-									process.env.NEXT_PUBLIC_CONVEX_URL?.replace(
-										/\.cloud$/,
-										".site",
-									);
-								return attachment.storageId && convexSiteUrl
-									? `${convexSiteUrl}/getAttachment?storageId=${attachment.storageId}`
-									: null;
-							}}
 						/>
 					);
 				})}

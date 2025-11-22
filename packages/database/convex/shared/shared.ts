@@ -3,10 +3,15 @@ import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
-import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
+import type {
+	attachmentSchema,
+	emojiSchema,
+	messageSchema,
+	type Attachment,
+} from "../schema";
 
 type Message = Infer<typeof messageSchema>;
-type Attachment = Infer<typeof attachmentSchema>;
+type DatabaseAttachment = Infer<typeof attachmentSchema>;
 
 export const DISCORD_PERMISSIONS = {
 	Administrator: 0x8,
@@ -887,6 +892,19 @@ export async function enrichMessageForDisplay(
 		};
 	});
 
+	const convexSiteUrl = process.env.CONVEX_SITE_URL;
+	const attachmentsWithUrl: Attachment[] = attachments
+		.map((attachment: DatabaseAttachment) => {
+			if (attachment.storageId && convexSiteUrl) {
+				return {
+					...attachment,
+					url: `${convexSiteUrl}/getAttachment?storageId=${attachment.storageId}`,
+				};
+			}
+			return null;
+		})
+		.filter((attachment): attachment is Attachment => attachment !== null);
+
 	const baseEnriched: EnrichedMessage = {
 		message,
 		author: author
@@ -896,7 +914,7 @@ export async function enrichMessageForDisplay(
 					avatar: author.avatar,
 				}
 			: null,
-		attachments,
+		attachments: attachmentsWithUrl,
 		reactions: formattedReactions,
 		solutions,
 	};

@@ -193,7 +193,9 @@ export type ChannelSettings = Infer<typeof channelSettingsSchema>;
 export type DiscordAccount = Infer<typeof discordAccountSchema>;
 export type UserServerSettings = Infer<typeof userServerSettingsSchema>;
 export type Message = Infer<typeof messageSchema>;
-export type Attachment = Infer<typeof attachmentSchema>;
+export type Attachment = Infer<typeof attachmentSchema> & {
+	url: string;
+};
 export type Emoji = Infer<typeof emojiSchema>;
 export type Reaction = Infer<typeof reactionSchema>;
 export type Embed = Infer<typeof embedSchema>;

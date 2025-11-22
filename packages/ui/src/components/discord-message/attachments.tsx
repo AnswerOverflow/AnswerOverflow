@@ -12,21 +12,12 @@ import {
 	TooltipTrigger,
 } from "../../components/tooltip";
 import { cn } from "../../lib/utils";
-import { constructDiscordLink, isEmbeddableAttachment } from "./utils";
+import { isEmbeddableAttachment } from "./utils";
 
 const isCode = (a: Attachment) =>
 	!a.contentType?.startsWith("image/") || a.filename?.endsWith(".svg");
 
-export function Attachments({
-	attachments,
-	metadata,
-}: {
-	metadata: {
-		serverId: string;
-		channelId: string;
-	};
-	attachments: Attachment[];
-}) {
+export function Attachments({ attachments }: { attachments: Attachment[] }) {
 	if (!attachments?.length) {
 		return null;
 	}
@@ -35,32 +26,14 @@ export function Attachments({
 		<div className="flex flex-col gap-2">
 			<ImageGallery images={attachments.filter(isEmbeddableAttachment)} />
 			{attachments.filter(isCode).map((attachment) => (
-				<FileShowcase
-					attachment={attachment}
-					key={attachment.id}
-					metadata={metadata}
-				/>
+				<FileShowcase attachment={attachment} key={attachment.id} />
 			))}
 		</div>
 	);
 }
 
-function FileShowcase({
-	attachment,
-	metadata,
-}: {
-	metadata: {
-		serverId: string;
-		channelId: string;
-	};
-	attachment: Attachment;
-}) {
-	const { filename, size, messageId } = attachment;
-	const attachmentMessageUrl = constructDiscordLink({
-		serverId: metadata.serverId,
-		threadId: metadata.channelId,
-		messageId,
-	});
+function FileShowcase({ attachment }: { attachment: Attachment }) {
+	const { filename, size, url: attachmentUrl } = attachment;
 
 	return (
 		<div className="group relative mt-2 flex w-full max-w-md gap-2.5 border border-neutral-300 p-4 shadow">
@@ -70,7 +43,7 @@ function FileShowcase({
 			<div className="flex flex-col overflow-hidden">
 				<a
 					className="overflow-hidden text-ellipsis whitespace-nowrap underline-offset-2 hover:underline"
-					href={attachmentMessageUrl}
+					href={attachmentUrl}
 					target="_blank"
 					rel="noreferrer"
 				>
@@ -83,14 +56,14 @@ function FileShowcase({
 			<div className="group-hover:fade-in-0 group-hover:zoom-in-95 absolute top-0 right-0 translate-x-[50%] translate-y-[-50%] opacity-0 transition-opacity duration-300 group-hover:animate-in group-hover:opacity-100">
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<a href={attachmentMessageUrl} target="_blank" rel="noreferrer">
+						<a href={attachmentUrl} target="_blank" rel="noreferrer">
 							<Button size="icon" variant="outline">
 								<ArrowUpRight className="size-6" />
 							</Button>
 						</a>
 					</TooltipTrigger>
 					<TooltipContent>
-						<p>Open in discord</p>
+						<p>Open attachment</p>
 					</TooltipContent>
 				</Tooltip>
 			</div>
@@ -123,24 +96,16 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 			)}
 		>
 			{images.map((attachment) => {
-				const imageUrl =
-					attachment.storageId && process.env.NEXT_PUBLIC_CONVEX_URL
-						? `${process.env.NEXT_PUBLIC_CONVEX_URL.replace(
-								/\.cloud$/,
-								".site",
-							)}/getAttachment?storageId=${attachment.storageId}`
-						: null;
-				if (!imageUrl) {
-					return null;
-				}
 				const hasDimensions = attachment.width && attachment.height;
 				const aspectRatio = hasDimensions
-					? Number((attachment.width! / attachment.height!).toFixed(4))
+					? Number(
+							((attachment.width ?? 0) / (attachment.height ?? 1)).toFixed(4),
+						)
 					: 16 / 9;
 				return (
 					<ImageWithSkeleton
 						key={attachment.id}
-						imageUrl={imageUrl}
+						imageUrl={attachment.url}
 						alt={attachment.filename}
 						width={attachment.width ?? undefined}
 						height={attachment.height ?? undefined}

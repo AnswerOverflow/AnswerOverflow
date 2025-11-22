@@ -249,10 +249,7 @@ export function DiscordUIMessage({
 		return (
 			<>
 				<DiscordMarkdown message={msg}>{msg.content}</DiscordMarkdown>
-				<Attachments
-					attachments={msg.attachments ?? []}
-					metadata={{ serverId, channelId }}
-				/>
+				<Attachments attachments={msg.attachments ?? []} />
 				<Embeds embeds={msg.embeds ?? null} />
 			</>
 		);
