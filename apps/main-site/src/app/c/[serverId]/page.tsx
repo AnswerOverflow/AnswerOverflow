@@ -1,5 +1,6 @@
 import { Database, DatabaseLayer } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/effect-otel";
+import { ChannelType } from "discord-api-types/v10";
 import { Effect, Layer } from "effect";
 import { Hash, MessageSquare } from "lucide-react";
 import Link from "next/link";
@@ -12,8 +13,8 @@ type Props = {
 };
 
 function getChannelIcon(type: number) {
-	if (type === 15) return MessageSquare; // Forum
-	return Hash; // Text, Announcement, etc.
+	if (type === ChannelType.GuildForum) return MessageSquare;
+	return Hash;
 }
 
 export default async function ServerPage(props: Props) {
@@ -36,18 +37,6 @@ export default async function ServerPage(props: Props) {
 	}
 
 	const { server, channels } = pageData;
-
-	const rootChannels = channels
-		.filter((channel) => {
-			return channel.type !== 11 && channel.type !== 12;
-		})
-		.sort((a, b) => {
-			if (a.type === 15) return -1; // GuildForum
-			if (b.type === 15) return 1;
-			if (a.type === 5) return -1; // GuildAnnouncement
-			if (b.type === 5) return 1;
-			return 0;
-		});
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -80,13 +69,13 @@ export default async function ServerPage(props: Props) {
 					<h2 className="text-xl font-semibold text-foreground mb-4">
 						Channels
 					</h2>
-					{rootChannels.length === 0 ? (
+					{channels.length === 0 ? (
 						<div className="text-center py-12 text-muted-foreground">
 							No channels available
 						</div>
 					) : (
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-							{rootChannels.map((channel) => {
+							{channels.map((channel) => {
 								const Icon = getChannelIcon(channel.type);
 								return (
 									<Link

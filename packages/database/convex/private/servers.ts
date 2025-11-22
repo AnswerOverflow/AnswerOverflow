@@ -4,6 +4,7 @@ import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { privateMutation, privateQuery } from "../client";
 import { serverSchema } from "../schema";
+import { CHANNEL_TYPE, isThreadType } from "../shared/shared";
 
 const DEFAULT_CHANNEL_SETTINGS = {
 	channelId: "",
@@ -219,7 +220,7 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 			ctx.db,
 			"channels",
 			"by_serverId",
-			server._id,
+			server.discordId,
 		);
 
 		const channelIds = allChannels.map((c) => c.id);
@@ -236,6 +237,14 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 				},
 			}))
 			.filter((c) => c.flags.indexingEnabled)
+			.filter((c) => !isThreadType(c.type))
+			.sort((a, b) => {
+				if (a.type === CHANNEL_TYPE.GuildForum) return -1;
+				if (b.type === CHANNEL_TYPE.GuildForum) return 1;
+				if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
+				if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
+				return 0;
+			})
 			.map((c) => {
 				const { flags: _flags, ...channel } = c;
 				return channel;
