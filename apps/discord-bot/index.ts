@@ -4,7 +4,10 @@ import { Console, Effect, Layer, Logger, LogLevel } from "effect";
 import { Discord, DiscordLayer } from "./src/core/discord-service";
 import { AutoThreadHandlerLayer } from "./src/handlers/auto-thread";
 import { ChannelParityLayer } from "./src/handlers/channel-parity";
-import { InteractionHandlersLayer } from "./src/handlers/interaction-handlers";
+import { DismissButtonHandlerLayer } from "./src/handlers/dismiss-button";
+import { LeaderboardCommandHandlerLayer } from "./src/handlers/leaderboard-command";
+import { ManageAccountCommandHandlerLayer } from "./src/handlers/manage-account-command";
+import { MarkSolutionCommandHandlerLayer } from "./src/handlers/mark-solution-command";
 import { MessageParityLayer } from "./src/handlers/message-parity";
 import { ServerParityLayer } from "./src/handlers/server-parity";
 
@@ -34,7 +37,10 @@ const ParityLayers = Layer.mergeAll(
 	ChannelParityLayer,
 	MessageParityLayer,
 	AutoThreadHandlerLayer,
-	InteractionHandlersLayer,
+	DismissButtonHandlerLayer,
+	LeaderboardCommandHandlerLayer,
+	ManageAccountCommandHandlerLayer,
+	MarkSolutionCommandHandlerLayer,
 );
 
 const AppLayer = Layer.mergeAll(

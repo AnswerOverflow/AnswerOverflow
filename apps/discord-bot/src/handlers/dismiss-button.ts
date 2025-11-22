@@ -149,7 +149,7 @@ export function handleDismissButtonInteraction(
 	});
 }
 
-export const InteractionHandlersLayer = Layer.scopedDiscard(
+export const DismissButtonHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 

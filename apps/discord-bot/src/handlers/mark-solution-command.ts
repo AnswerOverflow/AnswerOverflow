@@ -295,7 +295,7 @@ export function handleMarkSolutionCommand(
 	});
 }
 
-export const InteractionHandlersLayer = Layer.scopedDiscard(
+export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 

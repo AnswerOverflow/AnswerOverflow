@@ -377,7 +377,7 @@ function handleManageAccountButtonPress(
 	});
 }
 
-export const InteractionHandlersLayer = Layer.scopedDiscard(
+export const ManageAccountCommandHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 

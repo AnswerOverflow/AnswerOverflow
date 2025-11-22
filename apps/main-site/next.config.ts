@@ -73,8 +73,8 @@ const nextConfig: NextConfig = {
 				permanent: false,
 			},
 			{
-				source: "/changelog:slug*",
-				destination: "https://docs.answeroverflow.com/changelog:slug",
+				source: "/changelog/:slug*",
+				destination: "https://docs.answeroverflow.com/changelog/:slug",
 				permanent: false,
 			},
 		];
