@@ -1,4 +1,3 @@
-import type { Id } from "@packages/database/convex/_generated/dataModel";
 import { Database, DatabaseLayer } from "@packages/database/database";
 import type { ChatInputCommandInteraction } from "discord.js";
 import {

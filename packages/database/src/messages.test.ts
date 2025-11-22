@@ -1,6 +1,5 @@
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import type { Id } from "../convex/_generated/dataModel";
 import type {
 	Attachment,
 	Channel,

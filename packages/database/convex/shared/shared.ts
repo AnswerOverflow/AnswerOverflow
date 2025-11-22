@@ -4,10 +4,10 @@ import { Array as Arr, Predicate } from "effect";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
 import type {
+	Attachment,
 	attachmentSchema,
 	emojiSchema,
 	messageSchema,
-	type Attachment,
 } from "../schema";
 
 type Message = Infer<typeof messageSchema>;

@@ -102,7 +102,7 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 								{embed.description}
 							</div>
 						)}
-						{previewUrl && previewUrl.width && previewUrl.height && (
+						{previewUrl?.width && previewUrl.height && (
 							<div className="mt-4 max-h-[300px] overflow-hidden rounded">
 								<img
 									className="max-h-full overflow-hidden object-cover"

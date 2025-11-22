@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import type { Id } from "@packages/database/convex/_generated/dataModel";
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,

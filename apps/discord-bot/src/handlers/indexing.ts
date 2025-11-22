@@ -1,4 +1,3 @@
-import type { Id } from "@packages/database/convex/_generated/dataModel";
 import type { BaseMessageWithRelations } from "@packages/database/database";
 import { Database, upsertMessage } from "@packages/database/database";
 import type {

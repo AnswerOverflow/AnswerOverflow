@@ -1,6 +1,5 @@
 import { expect, it } from "@effect/vitest";
 import { Effect, Exit } from "effect";
-import type { Id } from "../convex/_generated/dataModel";
 import type { Channel, ChannelSettings, Server } from "../convex/schema";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";

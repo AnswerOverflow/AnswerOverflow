@@ -1,6 +1,5 @@
 import { type Infer, v } from "convex/values";
 import { getManyFrom } from "convex-helpers/server/relationships";
-import type { Id } from "../_generated/dataModel";
 import { privateMutation, privateQuery } from "../client";
 import { userServerSettingsSchema } from "../schema";
 import { assertIsUser, getDiscordAccountIdFromAuth } from "../shared/auth";
