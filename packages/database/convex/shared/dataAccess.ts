@@ -187,7 +187,7 @@ export async function searchMessages(
 ): Promise<{
 	page: SearchResult[];
 	isDone: boolean;
-	continueCursor: string | null;
+	continueCursor: string;
 }> {
 	const paginatedResult = await ctx.db
 		.query("messages")

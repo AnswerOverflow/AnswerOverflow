@@ -62,22 +62,28 @@ function SearchInput() {
 						}
 						renderItem={(result) => (
 							<div
-								key={result.message.id}
+								key={result.message.message.id}
 								className="relative group hover:opacity-90 transition-opacity mb-4"
 							>
 								<Link
-									href={`/m/${result.message.id}`}
+									href={`/m/${result.message.message.id}`}
 									className="absolute inset-0 z-0"
 									aria-label="Open message"
 								/>
 								<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto">
 									<DiscordMessage
-										message={result.message}
-										author={result.author}
-										attachments={result.attachments}
-										reactions={result.reactions}
-										solutions={result.solutions}
-										metadata={result.metadata}
+										message={result.message.message}
+										author={
+											result.message.author
+												? {
+														id: result.message.author.id,
+														name: result.message.author.name,
+														avatar: result.message.author.avatar,
+													}
+												: null
+										}
+										attachments={result.message.attachments}
+										reactions={result.message.reactions}
 									/>
 								</div>
 							</div>
