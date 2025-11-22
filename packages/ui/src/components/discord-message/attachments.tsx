@@ -1,7 +1,11 @@
+"use client";
+
 import type { Attachment } from "@packages/database/convex/schema";
 import bytes from "bytes";
 import { ArrowUpRight, File } from "lucide-react";
+import { useState } from "react";
 import { Button } from "../../components/button";
+import { Skeleton } from "../../components/skeleton";
 import {
 	Tooltip,
 	TooltipContent,
@@ -134,24 +138,67 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 					? Number((attachment.width! / attachment.height!).toFixed(4))
 					: 16 / 9;
 				return (
-					<div
+					<ImageWithSkeleton
 						key={attachment.id}
-						className="relative w-full overflow-hidden rounded"
-						style={{
-							aspectRatio: `${aspectRatio}`,
-						}}
-					>
-						<img
-							alt={attachment.filename}
-							className="absolute inset-0 h-full w-full object-cover"
-							src={imageUrl}
-							width={attachment.width ?? undefined}
-							height={attachment.height ?? undefined}
-							loading="lazy"
-						/>
-					</div>
+						imageUrl={imageUrl}
+						alt={attachment.filename}
+						width={attachment.width ?? undefined}
+						height={attachment.height ?? undefined}
+						aspectRatio={aspectRatio}
+					/>
 				);
 			})}
+		</div>
+	);
+}
+
+function ImageWithSkeleton({
+	imageUrl,
+	alt,
+	width,
+	height,
+	aspectRatio,
+}: {
+	imageUrl: string;
+	alt: string;
+	width?: number;
+	height?: number;
+	aspectRatio: number;
+}) {
+	const [isLoading, setIsLoading] = useState(true);
+	const [hasError, setHasError] = useState(false);
+
+	return (
+		<div
+			className="relative w-full overflow-hidden rounded"
+			style={{
+				aspectRatio: `${aspectRatio}`,
+			}}
+		>
+			{isLoading && (
+				<Skeleton className="absolute inset-0 h-full w-full rounded" />
+			)}
+			<img
+				alt={alt}
+				className={cn(
+					"absolute inset-0 h-full w-full object-cover transition-opacity duration-200",
+					isLoading ? "opacity-0" : "opacity-100",
+				)}
+				src={imageUrl}
+				width={width}
+				height={height}
+				loading="lazy"
+				onLoad={() => setIsLoading(false)}
+				onError={() => {
+					setIsLoading(false);
+					setHasError(true);
+				}}
+			/>
+			{hasError && (
+				<div className="absolute inset-0 flex items-center justify-center bg-neutral-100 text-neutral-500 text-sm">
+					Failed to load image
+				</div>
+			)}
 		</div>
 	);
 }

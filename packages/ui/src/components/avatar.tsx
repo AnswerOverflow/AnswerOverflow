@@ -3,6 +3,7 @@
 import { cn } from "@packages/ui/lib/utils";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import type * as React from "react";
+import { useState } from "react";
 
 export type AvatarProps = React.ComponentProps<typeof AvatarPrimitive.Root>;
 
@@ -21,14 +22,44 @@ function Avatar({ className, ...props }: AvatarProps) {
 
 function AvatarImage({
 	className,
+	src,
 	...props
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+	const [imageError, setImageError] = useState(false);
+
+	if (!src) {
+		return (
+			<AvatarPrimitive.Image
+				data-slot="avatar-image"
+				className={cn("aspect-square size-full", className)}
+				{...props}
+			/>
+		);
+	}
+
 	return (
-		<AvatarPrimitive.Image
-			data-slot="avatar-image"
-			className={cn("aspect-square size-full", className)}
-			{...props}
-		/>
+		<>
+			{!imageError && (
+				<img
+					src={src}
+					alt={props.alt}
+					width={props.width}
+					height={props.height}
+					className={cn("aspect-square size-full", className)}
+					onError={() => setImageError(true)}
+				/>
+			)}
+			<AvatarPrimitive.Image
+				data-slot="avatar-image"
+				className={cn(
+					"aspect-square size-full",
+					!imageError && "hidden",
+					className,
+				)}
+				src={src}
+				{...props}
+			/>
+		</>
 	);
 }
 
