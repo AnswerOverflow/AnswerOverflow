@@ -13,6 +13,11 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 					: "dadadc";
 				if (embed.type === "gifv") {
 					const { height, width } = embed.video!;
+					const scaledStyle = getScaledDownWidth({
+						width: width!,
+						height: height!,
+					});
+					const aspectRatio = width! / height!;
 					return (
 						<div className="mt-4 overflow-hidden rounded" key={idx}>
 							<video
@@ -21,18 +26,38 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 								muted
 								poster={embed.thumbnail?.proxyUrl ?? embed.thumbnail?.url}
 								src={embed.video?.proxyUrl ?? embed.video?.url}
-								style={getScaledDownWidth({ width: width!, height: height! })}
+								width={scaledStyle.scaledWidth}
+								height={scaledStyle.scaledHeight}
+								style={{
+									width: scaledStyle.width,
+									height: scaledStyle.height,
+									maxWidth: scaledStyle.maxWidth,
+									aspectRatio: `${aspectRatio}`,
+								}}
 							/>
 						</div>
 					);
 				}
 				if (embed.type === "image") {
 					const { height, width } = embed.image! ?? embed.thumbnail!;
+					const scaledStyle = getScaledDownWidth({
+						width: width!,
+						height: height!,
+					});
+					const aspectRatio = width! / height!;
 					return (
 						<div className="mt-4 overflow-hidden rounded" key={idx}>
 							<img
 								src={embed.url ?? embed.image?.proxyUrl ?? embed.image?.url}
-								style={getScaledDownWidth({ width: width!, height: height! })}
+								width={scaledStyle.scaledWidth}
+								height={scaledStyle.scaledHeight}
+								style={{
+									width: scaledStyle.width,
+									height: scaledStyle.height,
+									maxWidth: scaledStyle.maxWidth,
+									aspectRatio: `${aspectRatio}`,
+								}}
+								loading="lazy"
 							/>
 						</div>
 					);
@@ -77,15 +102,21 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 								{embed.description}
 							</div>
 						)}
-						{previewUrl && (
+						{previewUrl && previewUrl.width && previewUrl.height && (
 							<div className="mt-4 max-h-[300px] overflow-hidden rounded">
 								<img
 									className="max-h-full overflow-hidden object-cover"
 									src={previewUrl.proxyUrl ?? previewUrl.url}
-									style={getScaledDownWidth({
-										width: previewUrl.width ?? 0,
-										height: previewUrl.height ?? 0,
-									})}
+									width={previewUrl.width}
+									height={previewUrl.height}
+									style={{
+										...getScaledDownWidth({
+											width: previewUrl.width,
+											height: previewUrl.height,
+										}),
+										aspectRatio: `${previewUrl.width / previewUrl.height}`,
+									}}
+									loading="lazy"
 								/>
 							</div>
 						)}
@@ -138,5 +169,7 @@ function getScaledDownWidth({
 		width: `${scaledWidth}px`,
 		height: `${scaledHeight}px`,
 		maxWidth: "100%",
+		scaledWidth,
+		scaledHeight,
 	};
 }

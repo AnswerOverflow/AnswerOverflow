@@ -120,9 +120,7 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 		>
 			{images.map((attachment) => {
 				const imageUrl =
-					attachment.storageId &&
-					typeof window !== "undefined" &&
-					process.env.NEXT_PUBLIC_CONVEX_URL
+					attachment.storageId && process.env.NEXT_PUBLIC_CONVEX_URL
 						? `${process.env.NEXT_PUBLIC_CONVEX_URL.replace(
 								/\.cloud$/,
 								".site",
@@ -131,13 +129,27 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 				if (!imageUrl) {
 					return null;
 				}
+				const hasDimensions = attachment.width && attachment.height;
+				const aspectRatio = hasDimensions
+					? Number((attachment.width! / attachment.height!).toFixed(4))
+					: 16 / 9;
 				return (
-					<img
-						alt={attachment.filename}
-						className="inline-block min-h-full min-w-full rounded object-cover"
+					<div
 						key={attachment.id}
-						src={imageUrl}
-					/>
+						className="relative w-full overflow-hidden rounded"
+						style={{
+							aspectRatio: `${aspectRatio}`,
+						}}
+					>
+						<img
+							alt={attachment.filename}
+							className="absolute inset-0 h-full w-full object-cover"
+							src={imageUrl}
+							width={attachment.width ?? undefined}
+							height={attachment.height ?? undefined}
+							loading="lazy"
+						/>
+					</div>
 				);
 			})}
 		</div>
