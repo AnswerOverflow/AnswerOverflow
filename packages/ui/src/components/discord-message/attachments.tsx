@@ -12,20 +12,26 @@ import {
 	TooltipTrigger,
 } from "../../components/tooltip";
 import { cn } from "../../lib/utils";
-import { isEmbeddableAttachment } from "./utils";
-
-const isCode = (a: Attachment) =>
-	!a.contentType?.startsWith("image/") || a.filename?.endsWith(".svg");
+import { isEmbeddableAttachment, isVideoAttachment } from "./utils";
 
 export function Attachments({ attachments }: { attachments: Attachment[] }) {
 	if (!attachments?.length) {
 		return null;
 	}
 
+	const images = attachments.filter(isEmbeddableAttachment);
+	const videos = attachments.filter(isVideoAttachment);
+	const otherFiles = attachments.filter(
+		(a) => !isEmbeddableAttachment(a) && !isVideoAttachment(a),
+	);
+
 	return (
 		<div className="flex flex-col gap-2">
-			<ImageGallery images={attachments.filter(isEmbeddableAttachment)} />
-			{attachments.filter(isCode).map((attachment) => (
+			<ImageGallery images={images} />
+			{videos.map((attachment) => (
+				<VideoPlayer attachment={attachment} key={attachment.id} />
+			))}
+			{otherFiles.map((attachment) => (
 				<FileShowcase attachment={attachment} key={attachment.id} />
 			))}
 		</div>
@@ -162,6 +168,52 @@ function ImageWithSkeleton({
 			{hasError && (
 				<div className="absolute inset-0 flex items-center justify-center bg-neutral-100 text-neutral-500 text-sm">
 					Failed to load image
+				</div>
+			)}
+		</div>
+	);
+}
+
+function VideoPlayer({ attachment }: { attachment: Attachment }) {
+	const [isLoading, setIsLoading] = useState(true);
+	const [hasError, setHasError] = useState(false);
+	const hasDimensions = attachment.width && attachment.height;
+	const aspectRatio = hasDimensions
+		? Number(((attachment.width ?? 0) / (attachment.height ?? 1)).toFixed(4))
+		: 16 / 9;
+
+	return (
+		<div
+			className="relative w-full max-w-[550px] overflow-hidden rounded"
+			style={{
+				aspectRatio: `${aspectRatio}`,
+			}}
+		>
+			{isLoading && (
+				<Skeleton className="absolute inset-0 h-full w-full rounded" />
+			)}
+			<video
+				className={cn(
+					"h-full w-full object-contain transition-opacity duration-200",
+					isLoading ? "opacity-0" : "opacity-100",
+				)}
+				controls
+				width={attachment.width ?? undefined}
+				height={attachment.height ?? undefined}
+				onLoadedData={() => setIsLoading(false)}
+				onError={() => {
+					setIsLoading(false);
+					setHasError(true);
+				}}
+			>
+				<source
+					src={attachment.url}
+					type={attachment.contentType ?? undefined}
+				/>
+			</video>
+			{hasError && (
+				<div className="absolute inset-0 flex items-center justify-center bg-neutral-100 text-neutral-500 text-sm">
+					Failed to load video
 				</div>
 			)}
 		</div>

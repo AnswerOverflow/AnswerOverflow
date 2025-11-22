@@ -57,6 +57,13 @@ export function isEmbeddableAttachment(a: {
 	return a.contentType?.startsWith("image/") && !a.filename?.endsWith(".svg");
 }
 
+export function isVideoAttachment(a: {
+	contentType?: string | null;
+	filename: string;
+}) {
+	return a.contentType?.startsWith("video/");
+}
+
 export function getDiscordEmojiUrl(emojiId: string, animated = false): string {
 	return `https://cdn.discordapp.com/emojis/${emojiId}.${animated ? "gif" : "png"}`;
 }
