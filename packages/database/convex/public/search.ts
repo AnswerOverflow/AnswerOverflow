@@ -31,7 +31,9 @@ export const getRecentThreads = publicQuery({
 	handler: async (ctx, args) => {
 		const paginatedResult = await ctx.db
 			.query("channels")
-			.withIndex("by_type", (q) => q.eq("type", CHANNEL_TYPE.PublicThread))
+			.withIndex("by_type_and_id", (q) =>
+				q.eq("type", CHANNEL_TYPE.PublicThread),
+			)
 			.order("desc")
 			.paginate(args.paginationOpts);
 
