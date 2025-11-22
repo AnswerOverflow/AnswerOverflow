@@ -10,9 +10,8 @@ import {
 	ServerAnalyticsLayer,
 } from "@packages/analytics/server/index";
 import { make } from "@packages/discord-api/generated";
-import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { v } from "convex/values";
-import { Effect, type Tracer } from "effect";
+import { Effect } from "effect";
 import { api, components, internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { type ActionCtx, authenticatedAction, internalAction } from "../client";
@@ -62,53 +61,23 @@ export const fetchDiscordGuilds = internalAction({
 	handler: async (ctx, args) => {
 		const { discordAccountId } = args;
 
-		const tracedEffect = Effect.gen(function* () {
-			return yield* Effect.withSpan("dashboard.fetchDiscordGuilds")(
-				Effect.gen(function* () {
-					yield* Effect.annotateCurrentSpan({
-						"discord.account.id": discordAccountId,
-						"convex.function": "fetchDiscordGuilds",
-					});
+		const discordAccount = await getDiscordAccountWithToken(ctx);
 
-					const currentSpan = yield* Effect.currentSpan;
-					const discordAccount = yield* Effect.tryPromise({
-						try: () =>
-							getDiscordAccountWithToken(
-								ctx,
-								currentSpan ? (currentSpan as Tracer.AnySpan) : undefined,
-							),
-						catch: (error) => new Error(String(error)),
-					});
+		if (!discordAccount || discordAccount.accountId !== discordAccountId) {
+			throw new Error("Discord account not linked or mismatch");
+		}
 
-					if (
-						!discordAccount ||
-						discordAccount.accountId !== discordAccountId
-					) {
-						throw new Error("Discord account not linked or mismatch");
-					}
+		const token = discordAccount.accessToken;
+		const client = await Effect.runPromise(discordApi(token));
+		const guilds = await Effect.runPromise(client.listMyGuilds());
 
-					const token = discordAccount.accessToken;
-					const client = yield* discordApi(token);
-
-					const guilds = yield* Effect.withSpan(
-						"dashboard.fetchDiscordGuilds.discordApi",
-					)(client.listMyGuilds());
-
-					return guilds.map((guild) => ({
-						id: guild.id,
-						name: guild.name,
-						icon: guild.icon ?? null,
-						owner: guild.owner,
-						permissions: guild.permissions,
-					}));
-				}),
-			);
-		});
-
-		return await Effect.provide(
-			tracedEffect,
-			createConvexOtelLayer("database"),
-		).pipe(Effect.runPromise);
+		return guilds.map((guild) => ({
+			id: guild.id,
+			name: guild.name,
+			icon: guild.icon ?? null,
+			owner: guild.owner,
+			permissions: guild.permissions,
+		}));
 	},
 });
 
@@ -134,172 +103,78 @@ export const getUserServers = authenticatedAction({
 	handler: async (ctx, args): Promise<ServerWithMetadata[]> => {
 		const { discordAccountId } = args;
 
-		const tracedEffect = Effect.gen(function* () {
-			return yield* Effect.withSpan("dashboard.getUserServers")(
-				Effect.gen(function* () {
-					yield* Effect.annotateCurrentSpan({
-						"discord.account.id": discordAccountId,
-						"convex.function": "getUserServers",
-					});
+		const discordAccount = await getDiscordAccountWithToken(ctx);
 
-					const discordAccount = yield* Effect.withSpan(
-						"dashboard.getUserServers.getDiscordAccount",
-					)(
-						Effect.gen(function* () {
-							yield* Effect.annotateCurrentSpan({
-								"discord.account.id": discordAccountId,
-							});
-							const currentSpan = yield* Effect.currentSpan;
-							return yield* Effect.tryPromise({
-								try: () =>
-									getDiscordAccountWithToken(
-										ctx,
-										currentSpan ? (currentSpan as Tracer.AnySpan) : undefined,
-									),
-								catch: (error) => new Error(String(error)),
-							});
-						}),
-					);
+		if (!discordAccount || discordAccount.accountId !== discordAccountId) {
+			throw new Error("Discord account not linked or mismatch");
+		}
 
-					if (
-						!discordAccount ||
-						discordAccount.accountId !== discordAccountId
-					) {
-						throw new Error("Discord account not linked or mismatch");
-					}
+		const discordGuilds = await discordGuildsCache.fetch(ctx, {
+			discordAccountId,
+		});
 
-					const discordGuilds = yield* Effect.withSpan(
-						"dashboard.getUserServers.fetchDiscordGuilds",
-					)(
-						Effect.tryPromise({
-							try: () =>
-								discordGuildsCache.fetch(ctx, {
-									discordAccountId,
-								}),
-							catch: (error) => new Error(String(error)),
-						}),
-					);
-
-					const manageableServers = yield* Effect.withSpan(
-						"dashboard.getUserServers.filterManageableServers",
-					)(
-						Effect.gen(function* () {
-							const filtered = discordGuilds.filter((guild) => {
-								const permissions = BigInt(guild.permissions);
-								return (
-									guild.owner ||
-									hasPermission(permissions, DISCORD_PERMISSIONS.ManageGuild) ||
-									hasPermission(permissions, DISCORD_PERMISSIONS.Administrator)
-								);
-							});
-							yield* Effect.annotateCurrentSpan({
-								"guilds.total": discordGuilds.length,
-								"guilds.manageable": filtered.length,
-							});
-							return filtered;
-						}),
-					);
-
-					const serverDiscordIds = manageableServers.map((g) => g.id);
-					const aoServers = yield* Effect.withSpan(
-						"dashboard.getUserServers.matchAOServers",
-					)(
-						Effect.gen(function* () {
-							yield* Effect.annotateCurrentSpan({
-								"servers.count": serverDiscordIds.length,
-							});
-							return yield* Effect.withSpan(
-								"dashboard.getUserServers.matchAOServers.query",
-							)(
-								Effect.tryPromise({
-									try: () =>
-										ctx.runQuery(
-											api.private.servers.findManyServersByDiscordId,
-											{
-												discordIds: serverDiscordIds,
-												backendAccessToken: getBackendAccessToken(),
-											},
-										),
-									catch: (error) => new Error(String(error)),
-								}),
-							);
-						}),
-					);
-
-					yield* Effect.withSpan(
-						"dashboard.getUserServers.scheduleBackgroundSync",
-					)(
-						Effect.tryPromise({
-							try: () => {
-								return ctx.scheduler.runAfter(
-									0,
-									internal.authenticated.dashboard
-										.syncUserServerSettingsBackground,
-									{
-										discordAccountId,
-										manageableServers: manageableServers.map((guild) => ({
-											id: guild.id,
-											permissions: guild.permissions,
-										})),
-										aoServerIds: aoServers.map((server) => server._id),
-									},
-								);
-							},
-							catch: (error) => new Error(String(error)),
-						}),
-					);
-
-					const aoServersByDiscordId = new Map(
-						aoServers.map((server) => [server.discordId, server]),
-					);
-
-					const serversWithMetadata: ServerWithMetadata[] =
-						yield* Effect.withSpan(
-							"dashboard.getUserServers.combineServerData",
-						)(
-							Effect.gen(function* () {
-								const combined = manageableServers.map((guild) => {
-									const aoServer = aoServersByDiscordId.get(guild.id);
-									const permissions = BigInt(guild.permissions);
-
-									const highestRole = getHighestRoleFromPermissions(
-										permissions,
-										guild.owner,
-									);
-
-									return {
-										discordId: guild.id,
-										name: guild.name,
-										icon: guild.icon ?? null,
-										owner: guild.owner,
-										permissions: guild.permissions,
-										highestRole,
-										hasBot:
-											aoServer !== null &&
-											aoServer !== undefined &&
-											(aoServer.kickedTime === null ||
-												aoServer.kickedTime === undefined),
-										aoServerId: aoServer?._id,
-									};
-								});
-								yield* Effect.annotateCurrentSpan({
-									"servers.combined": combined.length,
-								});
-								return combined;
-							}),
-						);
-
-					return yield* Effect.withSpan("dashboard.getUserServers.sortServers")(
-						Effect.succeed(sortServersByBotAndRole(serversWithMetadata)),
-					);
-				}),
+		const manageableServers = discordGuilds.filter((guild) => {
+			const permissions = BigInt(guild.permissions);
+			return (
+				guild.owner ||
+				hasPermission(permissions, DISCORD_PERMISSIONS.ManageGuild) ||
+				hasPermission(permissions, DISCORD_PERMISSIONS.Administrator)
 			);
 		});
 
-		return await Effect.provide(
-			tracedEffect,
-			createConvexOtelLayer("database"),
-		).pipe(Effect.runPromise);
+		const serverDiscordIds = manageableServers.map((g) => g.id);
+		const aoServers = await ctx.runQuery(
+			api.private.servers.findManyServersByDiscordId,
+			{
+				discordIds: serverDiscordIds,
+				backendAccessToken: getBackendAccessToken(),
+			},
+		);
+
+		await ctx.scheduler.runAfter(
+			0,
+			internal.authenticated.dashboard.syncUserServerSettingsBackground,
+			{
+				discordAccountId,
+				manageableServers: manageableServers.map((guild) => ({
+					id: guild.id,
+					permissions: guild.permissions,
+				})),
+				aoServerIds: aoServers.map((server) => server._id),
+			},
+		);
+
+		const aoServersByDiscordId = new Map(
+			aoServers.map((server) => [server.discordId, server]),
+		);
+
+		const serversWithMetadata: ServerWithMetadata[] = manageableServers.map(
+			(guild) => {
+				const aoServer = aoServersByDiscordId.get(guild.id);
+				const permissions = BigInt(guild.permissions);
+
+				const highestRole = getHighestRoleFromPermissions(
+					permissions,
+					guild.owner,
+				);
+
+				return {
+					discordId: guild.id,
+					name: guild.name,
+					icon: guild.icon ?? null,
+					owner: guild.owner,
+					permissions: guild.permissions,
+					highestRole,
+					hasBot:
+						aoServer !== null &&
+						aoServer !== undefined &&
+						(aoServer.kickedTime === null || aoServer.kickedTime === undefined),
+					aoServerId: aoServer?._id,
+				};
+			},
+		);
+
+		return sortServersByBotAndRole(serversWithMetadata);
 	},
 });
 

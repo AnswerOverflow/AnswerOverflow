@@ -1,7 +1,5 @@
-import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
 import { type Infer, v } from "convex/values";
 import { getManyFrom } from "convex-helpers/server/relationships";
-import { Effect } from "effect";
 import type { Id } from "../_generated/dataModel";
 import { privateMutation, privateQuery } from "../client";
 import { userServerSettingsSchema } from "../schema";
@@ -38,88 +36,44 @@ export const findManyUserServerSettings = privateQuery({
 		),
 	},
 	handler: async (ctx, args) => {
-		const tracedEffect = Effect.gen(function* () {
-			return yield* Effect.withSpan(
-				"user_server_settings.findManyUserServerSettings",
-			)(
-				Effect.gen(function* () {
-					yield* Effect.annotateCurrentSpan({
-						"convex.function": "findManyUserServerSettings",
-						"settings.count": args.settings.length,
-					});
-					if (args.settings.length === 0) return [];
+		if (args.settings.length === 0) return [];
 
-					const uniqueUserIds = new Set(args.settings.map((s) => s.userId));
-					const serverIds = new Set(args.settings.map((s) => s.serverId));
+		const uniqueUserIds = new Set(args.settings.map((s) => s.userId));
+		const serverIds = new Set(args.settings.map((s) => s.serverId));
 
-					yield* Effect.annotateCurrentSpan({
-						"settings.uniqueUsers": uniqueUserIds.size,
-						"settings.uniqueServers": serverIds.size,
-						"settings.optimized": uniqueUserIds.size === 1,
-					});
-
-					if (uniqueUserIds.size === 1) {
-						const userIdArray = Array.from(uniqueUserIds);
-						if (userIdArray.length === 0) {
-							return [];
-						}
-						const userId: string = userIdArray[0]!;
-						const allUserSettings = yield* Effect.withSpan(
-							"user_server_settings.findManyUserServerSettings.queryOptimized",
-						)(
-							Effect.tryPromise({
-								try: () =>
-									getManyFrom(
-										ctx.db,
-										"userServerSettings",
-										"by_userId",
-										userId,
-									),
-								catch: (error) => new Error(String(error)),
-							}),
-						);
-
-						const filtered = allUserSettings.filter((setting) =>
-							serverIds.has(setting.serverId),
-						);
-						yield* Effect.annotateCurrentSpan({
-							"settings.found": filtered.length,
-						});
-						return filtered;
-					}
-
-					return yield* Effect.withSpan(
-						"user_server_settings.findManyUserServerSettings.queryFallback",
-					)(
-						Effect.tryPromise({
-							try: async () => {
-								const results: UserServerSettings[] = [];
-								for (const setting of args.settings) {
-									const userSettings = await getManyFrom(
-										ctx.db,
-										"userServerSettings",
-										"by_userId",
-										setting.userId,
-									);
-									const found = userSettings.find(
-										(s) => s.serverId === setting.serverId,
-									);
-									if (found) {
-										results.push(found);
-									}
-								}
-								return results;
-							},
-							catch: (error) => new Error(String(error)),
-						}),
-					);
-				}),
+		if (uniqueUserIds.size === 1) {
+			const userIdArray = Array.from(uniqueUserIds);
+			if (userIdArray.length === 0) {
+				return [];
+			}
+			const userId: string = userIdArray[0]!;
+			const allUserSettings = await getManyFrom(
+				ctx.db,
+				"userServerSettings",
+				"by_userId",
+				userId,
 			);
-		});
-		return await Effect.provide(
-			tracedEffect,
-			createConvexOtelLayer("database"),
-		).pipe(Effect.runPromise);
+
+			const filtered = allUserSettings.filter((setting) =>
+				serverIds.has(setting.serverId),
+			);
+			return filtered;
+		}
+
+		const results: UserServerSettings[] = [];
+		for (const setting of args.settings) {
+			const userSettings = await getManyFrom(
+				ctx.db,
+				"userServerSettings",
+				"by_userId",
+				setting.userId,
+			);
+			const found = userSettings.find((s) => s.serverId === setting.serverId);
+			if (found) {
+				results.push(found);
+			}
+		}
+		return results;
 	},
 });
 

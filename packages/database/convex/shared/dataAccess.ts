@@ -160,9 +160,7 @@ export async function enrichedMessageWithServerAndChannels(
 			"discordId",
 		),
 	]);
-	console.log("parentChannel", parentChannel);
-	console.log("channel", channel);
-	console.log("server", server);
+
 	if (!channel || !server) return null;
 
 	return {

@@ -1,5 +1,3 @@
-import { createConvexOtelLayer } from "@packages/observability/convex-effect-otel";
-import { Effect, type Tracer } from "effect";
 import { components } from "../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
 import { authComponent } from "../shared/betterAuth";
@@ -224,47 +222,30 @@ export async function requireAuth(
 
 export async function getDiscordAccountWithToken(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
-	parentSpan?: Tracer.AnySpan,
 ): Promise<{ accountId: string; accessToken: string } | null> {
 	const user = await authComponent.getAuthUser(ctx);
 	if (!user) {
 		return null;
 	}
 
-	const accountResult = await Effect.gen(function* () {
-		return yield* Effect.withSpan(
-			"auth.getDiscordAccountWithToken.findAccount",
-			{
-				...(parentSpan ? { parent: parentSpan } : {}),
-			},
-		)(
-			Effect.gen(function* () {
-				yield* Effect.annotateCurrentSpan({
-					"auth.user.id": user._id,
-					"auth.provider": "discord",
-				});
-				return yield* Effect.tryPromise({
-					try: () =>
-						ctx.runQuery(components.betterAuth.adapter.findOne, {
-							model: "account",
-							where: [
-								{
-									field: "userId",
-									operator: "eq",
-									value: user._id,
-								},
-								{
-									field: "providerId",
-									operator: "eq",
-									value: "discord",
-								},
-							],
-						}),
-					catch: (error) => new Error(String(error)),
-				});
-			}),
-		);
-	}).pipe(Effect.provide(createConvexOtelLayer("database")), Effect.runPromise);
+	const accountResult = await ctx.runQuery(
+		components.betterAuth.adapter.findOne,
+		{
+			model: "account",
+			where: [
+				{
+					field: "userId",
+					operator: "eq",
+					value: user._id,
+				},
+				{
+					field: "providerId",
+					operator: "eq",
+					value: "discord",
+				},
+			],
+		},
+	);
 
 	if (
 		!accountResult ||
