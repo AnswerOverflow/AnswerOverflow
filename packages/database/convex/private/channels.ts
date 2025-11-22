@@ -96,7 +96,7 @@ export const findAllThreadsByParentId = privateQuery({
 
 export const findAllChannelsByServerId = privateQuery({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 	},
 	handler: async (ctx, args) => {
 		const channels = await getManyFrom(
@@ -127,7 +127,7 @@ export const findLatestThreads = privateQuery({
 
 export const findChannelsBeforeId = privateQuery({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 		id: v.string(),
 		take: v.optional(v.number()),
 	},
@@ -441,11 +441,11 @@ export const getChannelPageData = privateQuery({
 
 		const [channel, allChannels, threads] = await Promise.all([
 			getChannelWithSettings(ctx, args.channelDiscordId),
-			getManyFrom(ctx.db, "channels", "by_serverId", server._id),
+			getManyFrom(ctx.db, "channels", "by_serverId", server.discordId),
 			getManyFrom(ctx.db, "channels", "by_parentId", args.channelDiscordId),
 		]);
 
-		if (!channel || channel.serverId !== server._id) return null;
+		if (!channel || channel.serverId !== server.discordId) return null;
 
 		const ROOT_CHANNEL_TYPES = [10, 11, 12, 13, 15] as const; // Forum, Announcement, Text, etc.
 		const rootChannels = allChannels.filter((c) =>

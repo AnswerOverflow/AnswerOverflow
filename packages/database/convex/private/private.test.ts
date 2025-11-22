@@ -10,7 +10,7 @@ const testSchema = defineSchema({
 		name: v.string(),
 	}),
 	serverPreferences: defineTable({
-		serverId: v.id("servers"),
+		serverId: v.string(),
 	}).index("by_serverId", ["serverId"]),
 });
 
@@ -56,12 +56,16 @@ describe("privateQuery", () => {
 
 	it("should reject invalid backendAccessToken", async () => {
 		const t = convexTest(testSchema, testModules);
-		const serverId = await t.run(async (ctx) => {
+		const server = await t.run(async (ctx) => {
 			return await ctx.db.insert("servers", {
 				discordId: "123456789",
 				name: "Test Server",
 			});
 		});
+		const serverDoc = await t.run(async (ctx) => {
+			return await ctx.db.get(server);
+		});
+		const serverId = serverDoc?.discordId ?? "123456789";
 
 		await expect(
 			t.query(api.private.server_preferences.getServerPreferencesByServerId, {
@@ -75,12 +79,16 @@ describe("privateQuery", () => {
 		delete process.env.BACKEND_ACCESS_TOKEN;
 
 		const t = convexTest(testSchema, testModules);
-		const serverId = await t.run(async (ctx) => {
+		const server = await t.run(async (ctx) => {
 			return await ctx.db.insert("servers", {
 				discordId: "123456789",
 				name: "Test Server",
 			});
 		});
+		const serverDoc = await t.run(async (ctx) => {
+			return await ctx.db.get(server);
+		});
+		const serverId = serverDoc?.discordId ?? "123456789";
 
 		await expect(
 			t.query(api.private.server_preferences.getServerPreferencesByServerId, {
@@ -108,12 +116,16 @@ describe("privateMutation", () => {
 
 	it("should reject invalid backendAccessToken", async () => {
 		const t = convexTest(testSchema, testModules);
-		const serverId = await t.run(async (ctx) => {
+		const server = await t.run(async (ctx) => {
 			return await ctx.db.insert("servers", {
 				discordId: "123456789",
 				name: "Test Server",
 			});
 		});
+		const serverDoc = await t.run(async (ctx) => {
+			return await ctx.db.get(server);
+		});
+		const serverId = serverDoc?.discordId ?? "123456789";
 
 		await expect(
 			t.mutation(api.private.server_preferences.createServerPreferences, {
@@ -129,12 +141,16 @@ describe("privateMutation", () => {
 		delete process.env.BACKEND_ACCESS_TOKEN;
 
 		const t = convexTest(testSchema, testModules);
-		const serverId = await t.run(async (ctx) => {
+		const server = await t.run(async (ctx) => {
 			return await ctx.db.insert("servers", {
 				discordId: "123456789",
 				name: "Test Server",
 			});
 		});
+		const serverDoc = await t.run(async (ctx) => {
+			return await ctx.db.get(server);
+		});
+		const serverId = serverDoc?.discordId ?? "123456789";
 
 		await expect(
 			t.mutation(api.private.server_preferences.createServerPreferences, {

@@ -17,7 +17,7 @@ type UserServerSettings = Infer<typeof userServerSettingsSchema>;
 export const findUserServerSettingsById = privateQuery({
 	args: {
 		userId: v.string(),
-		serverId: v.id("servers"),
+		serverId: v.string(),
 	},
 	handler: async (ctx, args) => {
 		return await findUserServerSettingsByIdShared(
@@ -33,7 +33,7 @@ export const findManyUserServerSettings = privateQuery({
 		settings: v.array(
 			v.object({
 				userId: v.string(),
-				serverId: v.id("servers"),
+				serverId: v.string(),
 			}),
 		),
 	},
@@ -402,7 +402,7 @@ export const upsertUserServerSettingsInternal = privateMutation({
 
 export const countConsentingUsersInServer = privateQuery({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 	},
 	handler: async (ctx, args) => {
 		const settings = await ctx.db
@@ -418,12 +418,12 @@ export const countConsentingUsersInServer = privateQuery({
 
 export const countConsentingUsersInManyServers = privateQuery({
 	args: {
-		serverIds: v.array(v.id("servers")),
+		serverIds: v.array(v.string()),
 	},
 	handler: async (ctx, args) => {
 		if (args.serverIds.length === 0) return [];
 
-		const results: Array<{ serverId: Id<"servers">; count: number }> = [];
+		const results: Array<{ serverId: string; count: number }> = [];
 
 		for (const serverId of args.serverIds) {
 			const settings = await getManyFrom(

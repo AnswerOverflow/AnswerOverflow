@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import type { Id } from "@packages/database/convex/_generated/dataModel";
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,
@@ -17,7 +16,7 @@ import { useParams } from "next/navigation";
 
 export default function DashboardOverviewPage() {
 	const params = useParams();
-	const serverId = params.serverId as Id<"servers">;
+	const serverId = params.serverId as string;
 
 	const dashboardData = useQuery(
 		api.authenticated.dashboard_queries.getDashboardData,

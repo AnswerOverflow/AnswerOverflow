@@ -25,6 +25,7 @@ import {
 	getInternalLinksMetadata,
 	getMentionMetadata,
 	getMessageById as getMessageByIdShared,
+	getServerByDiscordId,
 	upsertMessageInternalLogic,
 } from "../shared/shared";
 
@@ -53,7 +54,7 @@ async function isIgnoredAccount(
 async function hasMessageIndexingDisabled(
 	ctx: QueryCtx | MutationCtx,
 	authorId: string,
-	serverId: Id<"servers">,
+	serverId: string,
 ): Promise<boolean> {
 	const settings = await findUserServerSettingsById(ctx, authorId, serverId);
 	return settings?.messageIndexingDisabled === true;
@@ -447,7 +448,7 @@ export const findMessagesByAuthorId = privateQuery({
 
 export const findMessagesByServerId = privateQuery({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
@@ -623,7 +624,7 @@ export const findSolutionsByQuestionId = privateQuery({
 
 export const getTopQuestionSolversByServerId = privateQuery({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
@@ -744,7 +745,7 @@ export const getMessagePageData = privateQuery({
 			return null;
 		}
 
-		const server = await ctx.db.get(targetMessage.serverId);
+		const server = await getServerByDiscordId(ctx, targetMessage.serverId);
 		if (!server) {
 			return null;
 		}

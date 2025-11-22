@@ -10,7 +10,7 @@ export type UserServer = {
 export function isMessagePublic(
 	serverPreferences: ServerPreferences | null,
 	userServerSettings: UserServerSettings | null,
-	serverId: Id<"servers">,
+	serverId: string,
 ): boolean {
 	const areAllServerMessagesPublic = Boolean(
 		serverPreferences?.considerAllMessagesPublicEnabled,
@@ -25,7 +25,7 @@ export function isMessagePublic(
 export function shouldAnonymizeMessage(
 	serverPreferences: ServerPreferences | null,
 	userServerSettings: UserServerSettings | null,
-	serverId: Id<"servers">,
+	serverId: string,
 ): boolean {
 	const anonymizeEnabled = serverPreferences?.anonymizeMessagesEnabled ?? false;
 	const hasUserGrantedConsent =

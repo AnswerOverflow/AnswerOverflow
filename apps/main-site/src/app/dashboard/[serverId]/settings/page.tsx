@@ -57,7 +57,7 @@ function ToggleServerFlag({
 
 export default function SettingsPage() {
 	const params = useParams();
-	const serverId = params.serverId as Id<"servers">;
+	const serverId = params.serverId as string;
 
 	const dashboardData = useQuery(
 		api.authenticated.dashboard_queries.getDashboardData,

@@ -1,6 +1,5 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
-import type { Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../client";
 import type {
 	Attachment,
@@ -126,7 +125,7 @@ export function hiddenMessageStub(): MessageWithPrivacyFlags {
 		id: "",
 		isAnonymous: true,
 		public: false,
-		serverId: "" as Id<"servers">,
+		serverId: "",
 	};
 }
 

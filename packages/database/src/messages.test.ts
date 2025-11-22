@@ -24,7 +24,7 @@ const testServer: Server = {
 
 const createTestChannel = (
 	id: string,
-	serverId: Id<"servers">,
+	serverId: string,
 	overrides?: Partial<Channel>,
 ): Channel => ({
 	id,
@@ -42,7 +42,7 @@ const createTestChannel = (
 const createTestMessage = (
 	id: string,
 	authorId: string,
-	serverId: Id<"servers">,
+	serverId: string,
 	channelId: string,
 	overrides?: Partial<Message>,
 ): Message => ({
@@ -97,7 +97,7 @@ it.scoped("upsertMessage creates a new message", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -136,7 +136,7 @@ it.scoped("upsertMessage updates an existing message", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -187,7 +187,7 @@ it.scoped("upsertMessage with attachments", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -228,7 +228,7 @@ it.scoped("upsertMessage with reactions", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -272,7 +272,7 @@ it.scoped("upsertManyMessages creates multiple messages", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -316,7 +316,7 @@ it.scoped("findMessagesByChannelId returns messages for a channel", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -357,7 +357,7 @@ it.scoped("findManyMessagesById returns messages by ids", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -397,7 +397,7 @@ it.scoped("deleteMessage removes a message", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -440,7 +440,7 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -488,7 +488,7 @@ it.scoped("findMessagesByAuthorId returns messages by author", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -527,7 +527,7 @@ it.scoped("findMessagesByServerId returns messages by server", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -566,7 +566,7 @@ it.scoped("findMessagesByParentChannelId returns thread messages", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -618,7 +618,7 @@ it.scoped("findLatestMessageInChannel returns latest message", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -657,7 +657,7 @@ it.scoped(
 			const serverLiveData = yield* database.servers.getServerByDiscordId({
 				discordId: "server123",
 			});
-			const serverId = serverLiveData?._id;
+			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
 				throw new Error("Server not found");
@@ -719,7 +719,7 @@ it.scoped("findAttachmentsByMessageId returns attachments for a message", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -763,7 +763,7 @@ it.scoped("findReactionsByMessageId returns reactions for a message", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -809,7 +809,7 @@ it.scoped("findEmojiById returns emoji by ID", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -850,7 +850,7 @@ it.scoped(
 			const serverLiveData = yield* database.servers.getServerByDiscordId({
 				discordId: "server123",
 			});
-			const serverId = serverLiveData?._id;
+			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
 				throw new Error("Server not found");
@@ -889,7 +889,7 @@ it.scoped("deleteManyMessagesByUserId removes all messages by a user", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -933,7 +933,7 @@ it.scoped("findSolutionsByQuestionId returns solutions for a question", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");

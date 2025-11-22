@@ -44,7 +44,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				const aoMessage = yield* Effect.promise(() =>
-					toAOMessage(newMessage, server._id),
+					toAOMessage(newMessage, server.discordId),
 				);
 
 				if (newMessage.attachments.size > 0) {
@@ -183,7 +183,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				const aoMessage = yield* Effect.promise(() =>
-					toAOMessage(message, server._id),
+					toAOMessage(message, server.discordId),
 				);
 
 				if (message.attachments.size > 0) {

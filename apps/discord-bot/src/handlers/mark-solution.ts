@@ -251,13 +251,13 @@ function _handleCheckmarkReactionMarkSolution(
 
 		const serverPreferencesLiveData = yield* Effect.scoped(
 			database.server_preferences.getServerPreferencesByServerId({
-				serverId: server._id,
+				serverId: server.discordId,
 			}),
 		);
 		const serverPreferences = serverPreferencesLiveData ?? null;
 
 		yield* Effect.promise(async () => {
-			const solutionMessage = await toAOMessage(fullMessage, server._id);
+			const solutionMessage = await toAOMessage(fullMessage, server.discordId);
 			await upsertMessage(
 				{
 					...solutionMessage,

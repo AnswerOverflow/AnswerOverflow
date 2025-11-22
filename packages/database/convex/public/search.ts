@@ -48,7 +48,6 @@ export const getRecentThreads = publicQuery({
 					ctx,
 					firstMessage,
 				);
-				console.log("enriched", enriched);
 				if (!enriched) {
 					return null;
 				}

@@ -28,7 +28,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					);
 					return;
 				}
-				const aoChannel = toAOChannel(channel, server._id);
+				const aoChannel = toAOChannel(channel, server.discordId);
 				yield* database.channels.upsertManyChannels({
 					channels: [
 						{
@@ -76,7 +76,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					);
 					return;
 				}
-				const aoThread = toAOChannel(thread, server._id);
+				const aoThread = toAOChannel(thread, server.discordId);
 				yield* database.channels.upsertManyChannels({
 					channels: [
 						{
@@ -125,7 +125,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				yield* database.channels.updateChannel({
 					id: newChannel.id,
 					channel: {
-						...toAOChannel(newChannel as GuildChannel, server._id),
+						...toAOChannel(newChannel as GuildChannel, server.discordId),
 					},
 				});
 			}).pipe(
@@ -183,7 +183,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				yield* database.channels.updateChannel({
 					id: newThread.id,
 					channel: {
-						...toAOChannel(newThread as AnyThreadChannel, server._id),
+						...toAOChannel(newThread as AnyThreadChannel, server.discordId),
 					},
 				});
 			}).pipe(

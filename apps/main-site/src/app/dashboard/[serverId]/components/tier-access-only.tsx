@@ -20,7 +20,7 @@ export function TierAccessOnly({
 }: {
 	children: ReactNode;
 	enabledFor: Plan[];
-	serverId: Id<"servers">;
+	serverId: string;
 }) {
 	const dashboardData = useQuery(
 		api.authenticated.dashboard_queries.getDashboardData,

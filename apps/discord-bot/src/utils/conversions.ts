@@ -1,4 +1,3 @@
-import type { Id } from "@packages/database/convex/_generated/dataModel";
 import type {
 	Attachment as AOAttachment,
 	Channel as AOChannel,
@@ -65,7 +64,7 @@ export function toAODiscordAccount(user: User): AODiscordAccount {
 
 export function toAOChannel(
 	channel: GuildChannel | GuildBasedChannel | AnyThreadChannel,
-	serverConvexId: Id<"servers">,
+	discordServerId: string,
 ): AOChannel {
 	if (!("guild" in channel) || !channel.guild) {
 		throw new Error("Channel is not in a guild");
@@ -80,20 +79,20 @@ export function toAOChannel(
 
 	return {
 		id: channel.id,
-		serverId: serverConvexId,
+		serverId: discordServerId,
 		name: channel.name ?? "",
 		type: channel.type,
 		parentId: parentId,
-		inviteCode: undefined, // Will be set separately if needed
+		inviteCode: undefined,
 		archivedTimestamp: archivedTimestamp,
-		solutionTagId: undefined, // Will be set separately if needed
-		lastIndexedSnowflake: undefined, // Will be set when indexing
+		solutionTagId: undefined,
+		lastIndexedSnowflake: undefined,
 	};
 }
 
 export async function toAOMessage(
 	message: Message,
-	serverConvexId: Id<"servers">,
+	discordServerId: string,
 ): Promise<BaseMessageWithRelations> {
 	if (message.partial) {
 		message = await message.fetch();
@@ -214,7 +213,7 @@ export async function toAOMessage(
 	const convertedMessage: BaseMessageWithRelations = {
 		id: message.id,
 		authorId: message.author.id,
-		serverId: serverConvexId,
+		serverId: discordServerId,
 		channelId: message.channelId,
 		parentChannelId: parentChannelId,
 		childThreadId: childThreadId,

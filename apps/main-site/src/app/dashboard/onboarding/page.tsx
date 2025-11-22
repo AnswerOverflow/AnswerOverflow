@@ -240,9 +240,9 @@ export default function OnboardingPage() {
 							</div>
 
 							<div className="flex flex-col gap-3">
-								{serverWithBot?.aoServerId ? (
+								{serverWithBot ? (
 									<Button asChild size="lg">
-										<Link href={`/dashboard/${serverWithBot.aoServerId}`}>
+										<Link href={`/dashboard/${serverWithBot.discordId}`}>
 											Go to Dashboard
 										</Link>
 									</Button>

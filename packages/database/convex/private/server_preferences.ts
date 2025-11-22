@@ -1,10 +1,13 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { privateMutation, privateQuery } from "../client";
-import { validateCustomDomainUniqueness } from "../shared/shared";
+import {
+	getServerByDiscordId,
+	validateCustomDomainUniqueness,
+} from "../shared/shared";
 
 const serverPreferencesSchema = v.object({
-	serverId: v.id("servers"),
+	serverId: v.string(),
 	readTheRulesConsentEnabled: v.optional(v.boolean()),
 	considerAllMessagesPublicEnabled: v.optional(v.boolean()),
 	anonymizeMessagesEnabled: v.optional(v.boolean()),
@@ -14,7 +17,7 @@ const serverPreferencesSchema = v.object({
 
 export const getServerPreferencesByServerId = privateQuery({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 	},
 	handler: async (ctx, args) => {
 		const preferences = await getOneFrom(
@@ -33,7 +36,7 @@ export const createServerPreferences = privateMutation({
 		preferences: serverPreferencesSchema,
 	},
 	handler: async (ctx, args) => {
-		const server = await ctx.db.get(args.preferences.serverId);
+		const server = await getServerByDiscordId(ctx, args.preferences.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
@@ -66,12 +69,9 @@ export const createServerPreferences = privateMutation({
 			args.preferences,
 		);
 
-		const serverRecord = await ctx.db.get(args.preferences.serverId);
-		if (serverRecord) {
-			await ctx.db.patch(serverRecord._id, {
-				preferencesId,
-			});
-		}
+		await ctx.db.patch(server._id, {
+			preferencesId,
+		});
 
 		const created = await ctx.db.get(preferencesId);
 		if (!created) {
@@ -178,7 +178,7 @@ export const upsertServerPreferences = privateMutation({
 
 			const preferencesId = await ctx.db.insert("serverPreferences", args);
 
-			const serverRecord = await ctx.db.get(serverId);
+			const serverRecord = await getServerByDiscordId(ctx, serverId);
 			if (serverRecord) {
 				await ctx.db.patch(serverRecord._id, {
 					preferencesId,
@@ -196,7 +196,7 @@ export const upsertServerPreferences = privateMutation({
 
 export const deleteServerPreferences = privateMutation({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 	},
 	handler: async (ctx, args) => {
 		const preferences = await getOneFrom(
@@ -207,7 +207,7 @@ export const deleteServerPreferences = privateMutation({
 		);
 
 		if (preferences) {
-			const serverRecord = await ctx.db.get(args.serverId);
+			const serverRecord = await getServerByDiscordId(ctx, args.serverId);
 			if (serverRecord) {
 				await ctx.db.patch(serverRecord._id, {
 					preferencesId: undefined,

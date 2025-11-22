@@ -18,7 +18,7 @@ const testServer: Server = {
 
 const _createTestUserServerSettings = (
 	userId: string,
-	serverId: Id<"servers">,
+	serverId: string,
 	overrides?: Partial<UserServerSettings>,
 ): UserServerSettings => ({
 	userId,
@@ -41,7 +41,7 @@ it.scoped(
 			const serverLiveData = yield* database.servers.getServerByDiscordId({
 				discordId: "server123",
 			});
-			const serverId = serverLiveData?._id;
+			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
 				throw new Error("Server not found");

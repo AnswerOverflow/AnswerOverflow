@@ -17,7 +17,7 @@ const testServer: Server = {
 };
 
 const createTestServerPreferences = (
-	serverId: Id<"servers">,
+	serverId: string,
 	overrides?: Partial<ServerPreferences>,
 ): ServerPreferences => ({
 	serverId,
@@ -37,7 +37,7 @@ it.scoped("getServerPreferencesByServerId returns preferences", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -70,7 +70,7 @@ it.scoped(
 			const serverLiveData = yield* database.servers.getServerByDiscordId({
 				discordId: "server123",
 			});
-			const serverId = serverLiveData?._id;
+			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
 				throw new Error("Server not found");
@@ -93,7 +93,7 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 		const serverLiveData1 = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId1 = serverLiveData1?._id;
+		const serverId1 = serverLiveData1?.discordId;
 
 		if (!serverId1) {
 			throw new Error("Server not found");
@@ -114,7 +114,7 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 		const serverLiveData2 = yield* database.servers.getServerByDiscordId({
 			discordId: "server456",
 		});
-		const serverId2 = serverLiveData2?._id;
+		const serverId2 = serverLiveData2?.discordId;
 
 		if (!serverId2) {
 			throw new Error("Server not found");
@@ -142,7 +142,7 @@ it.scoped("updateServerPreferences updates existing preferences", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -182,7 +182,7 @@ it.scoped("upsertServerPreferences creates or updates preferences", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");
@@ -220,7 +220,7 @@ it.scoped("server preferences handle all flag types", () =>
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
 			discordId: "server123",
 		});
-		const serverId = serverLiveData?._id;
+		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
 			throw new Error("Server not found");

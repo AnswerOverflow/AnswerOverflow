@@ -53,9 +53,9 @@ export function ServerCard({ server }: ServerCardProps) {
 					</span>
 				</div>
 				<div className="ml-auto">
-					{server.hasBot && server.aoServerId ? (
+					{server.hasBot ? (
 						<Button asChild>
-							<Link href={`/dashboard/${server.aoServerId}`}>View</Link>
+							<Link href={`/dashboard/${server.discordId}`}>View</Link>
 						</Button>
 					) : (
 						<Button asChild variant="outline">

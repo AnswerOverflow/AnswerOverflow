@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { type Infer, v } from "convex/values";
 
 const serverPreferencesSchema = v.object({
-	serverId: v.id("servers"),
+	serverId: v.string(),
 	readTheRulesConsentEnabled: v.optional(v.boolean()),
 	considerAllMessagesPublicEnabled: v.optional(v.boolean()),
 	anonymizeMessagesEnabled: v.optional(v.boolean()),
@@ -39,7 +39,7 @@ export const discordAccountSchema = v.object({
 });
 
 export const userServerSettingsSchema = v.object({
-	serverId: v.id("servers"),
+	serverId: v.string(),
 	userId: v.string(), // Discord account ID (snowflake), not BetterAuth user ID
 	permissions: v.number(), // Bitfield of permissions for the user in the server, this comes from Discord and is not allowed to be modified by the user
 	canPubliclyDisplayMessages: v.boolean(),
@@ -55,7 +55,7 @@ export const ignoredDiscordAccountSchema = v.object({
 
 export const channelSchema = v.object({
 	id: v.string(),
-	serverId: v.id("servers"),
+	serverId: v.string(),
 	name: v.string(),
 	type: v.number(),
 	parentId: v.optional(v.string()),
@@ -138,7 +138,7 @@ const embedSchema = v.object({
 export const messageSchema = v.object({
 	id: v.string(), // Discord snowflake ID
 	authorId: v.string(), // Discord account ID
-	serverId: v.id("servers"),
+	serverId: v.string(), // Discord server ID
 	channelId: v.string(), // Discord channel ID
 	parentChannelId: v.optional(v.string()), // If message is in a thread, parent channel ID
 	childThreadId: v.optional(v.string()), // Thread started by this message

@@ -1,15 +1,15 @@
 {
-	// "files.exclude": {
-	// 	"**/.context": true
-	// },
-	// "search.exclude": {
-	// 	// "**/_generated/**": true
-	// 	"**/.context": true
-	// },
-	// "files.watcherExclude": {
-	// 	// "**/_generated/**": true
-	// 	"**/.context/**": true
-	// },
+	"files.exclude": {
+		"**/.context": true
+	},
+	"search.exclude": {
+		// "**/_generated/**": true
+		"**/.context": true
+	},
+	"files.watcherExclude": {
+		// "**/_generated/**": true
+		"**/.context/**": true
+	},
 	"tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
 	"typescript.tsdk": "node_modules/typescript/lib"
 }

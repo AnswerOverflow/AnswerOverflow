@@ -111,16 +111,16 @@ export function validateCustomDomain(domain: string | null): string | null {
 export async function validateCustomDomainUniqueness(
 	ctx: QueryCtx | MutationCtx,
 	customDomain: string | null | undefined,
-	excludeServerId?: Id<"servers">,
+	excludeServerId?: string,
 	excludePreferencesId?: Id<"serverPreferences">,
 ): Promise<string | null> {
 	if (!customDomain) {
-		return null; // Empty is valid
+		return null;
 	}
 
 	const allServers = await ctx.db.query("servers").collect();
 	for (const server of allServers) {
-		if (excludeServerId && server._id === excludeServerId) {
+		if (excludeServerId && server.discordId === excludeServerId) {
 			continue;
 		}
 
@@ -188,15 +188,14 @@ export async function upsertIgnoredDiscordAccountInternalLogic(
 export async function findUserServerSettingsById(
 	ctx: QueryCtx | MutationCtx,
 	userId: string,
-	serverId: Id<"servers">,
+	serverId: string,
 ) {
-	const settings = await getOneFrom(
-		ctx.db,
-		"userServerSettings",
-		"by_userId_serverId",
-		userId,
-		"userId",
-	);
+	const settings = await ctx.db
+		.query("userServerSettings")
+		.withIndex("by_userId_serverId", (q) =>
+			q.eq("userId", userId).eq("serverId", serverId),
+		)
+		.first();
 
 	return settings ?? null;
 }

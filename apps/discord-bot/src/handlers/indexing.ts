@@ -134,7 +134,7 @@ function fetchForumThreads(forumChannelId: string, forumChannelName: string) {
 
 function storeMessages(
 	messages: Message[],
-	serverConvexId: Id<"servers">,
+	discordServerId: string,
 	channelId: string,
 ) {
 	return Effect.gen(function* () {
@@ -155,7 +155,7 @@ function storeMessages(
 		for (const msg of humanMessages) {
 			try {
 				const aoMessage = yield* Effect.promise(() =>
-					toAOMessage(msg, serverConvexId),
+					toAOMessage(msg, discordServerId),
 				);
 				aoMessages.push(aoMessage);
 			} catch (error) {
@@ -278,7 +278,7 @@ function storeMessages(
 
 function indexTextChannel(
 	channel: TextChannel | NewsChannel,
-	serverConvexId: Id<"servers">,
+	discordServerId: string,
 ) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
@@ -316,7 +316,7 @@ function indexTextChannel(
 			);
 		}
 
-		yield* storeMessages(messages, serverConvexId, channel.id);
+		yield* storeMessages(messages, discordServerId, channel.id);
 
 		const threadsToIndex = Arr.filter(
 			Arr.map(messages, (msg) => msg.thread),
@@ -339,8 +339,8 @@ function indexTextChannel(
 						yield* database.channels.upsertManyChannels({
 							channels: [
 								{
-									create: toAOChannel(thread, serverConvexId),
-									update: toAOChannel(thread, serverConvexId),
+									create: toAOChannel(thread, discordServerId),
+									update: toAOChannel(thread, discordServerId),
 								},
 							],
 						});
@@ -358,7 +358,7 @@ function indexTextChannel(
 							thread.name,
 							threadLastIndexed ?? undefined,
 						);
-						yield* storeMessages(threadMessages, serverConvexId, thread.id);
+						yield* storeMessages(threadMessages, discordServerId, thread.id);
 					}).pipe(
 						Effect.catchAll((error) =>
 							Console.error(
@@ -373,10 +373,7 @@ function indexTextChannel(
 	});
 }
 
-function indexForumChannel(
-	channel: ForumChannel,
-	serverConvexId: Id<"servers">,
-) {
+function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
@@ -415,8 +412,8 @@ function indexForumChannel(
 					yield* database.channels.upsertManyChannels({
 						channels: [
 							{
-								create: toAOChannel(thread, serverConvexId),
-								update: toAOChannel(thread, serverConvexId),
+								create: toAOChannel(thread, discordServerId),
+								update: toAOChannel(thread, discordServerId),
 							},
 						],
 					});
@@ -434,7 +431,7 @@ function indexForumChannel(
 						thread.name,
 						threadLastIndexed ?? undefined,
 					);
-					yield* storeMessages(threadMessages, serverConvexId, thread.id);
+					yield* storeMessages(threadMessages, discordServerId, thread.id);
 
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
@@ -547,14 +544,14 @@ function indexGuild(guild: Guild) {
 			(channel: Channel) =>
 				Effect.gen(function* () {
 					if (channel.type === ChannelType.GuildForum) {
-						yield* indexForumChannel(channel as ForumChannel, server._id);
+						yield* indexForumChannel(channel as ForumChannel, server.discordId);
 					} else if (
 						channel.type === ChannelType.GuildText ||
 						channel.type === ChannelType.GuildAnnouncement
 					) {
 						yield* indexTextChannel(
 							channel as TextChannel | NewsChannel,
-							server._id,
+							server.discordId,
 						);
 					}
 

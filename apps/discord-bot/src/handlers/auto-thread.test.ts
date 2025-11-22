@@ -44,7 +44,7 @@ const setupTestChannel = (
 		yield* database.channels.upsertChannelWithSettings({
 			channel: {
 				id: channel.id,
-				serverId: serverLiveData._id,
+				serverId: serverLiveData.discordId,
 				name: channel.name,
 				type: channel.type,
 			},

@@ -3,11 +3,11 @@ import { getOneFrom } from "convex-helpers/server/relationships";
 import { authenticatedMutation } from "../client";
 import { assertCanEditServer } from "../shared/auth";
 import type { AuthorizedUser, CanEditServer } from "../shared/permissions";
-import { validateCustomDomain } from "../shared/shared";
+import { getServerByDiscordId, validateCustomDomain } from "../shared/shared";
 
 export const updateServerPreferencesFlags = authenticatedMutation({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 		flags: v.object({
 			readTheRulesConsentEnabled: v.optional(v.boolean()),
 			considerAllMessagesPublicEnabled: v.optional(v.boolean()),
@@ -17,7 +17,7 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 	handler: async (ctx, args) => {
 		const { discordAccountId } = args;
 
-		const server = await ctx.db.get(args.serverId);
+		const server = await getServerByDiscordId(ctx, args.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
@@ -46,7 +46,7 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 				...args.flags,
 			});
 
-			await ctx.db.patch(args.serverId, { preferencesId });
+			await ctx.db.patch(server._id, { preferencesId });
 
 			try {
 				preferences =
@@ -99,7 +99,7 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 			throw new Error("Channel not found");
 		}
 
-		const server = await ctx.db.get(channel.serverId);
+		const server = await getServerByDiscordId(ctx, channel.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
@@ -163,13 +163,13 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 
 export const updateCustomDomain = authenticatedMutation({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 		customDomain: v.union(v.string(), v.null()),
 	},
 	handler: async (ctx, args) => {
 		const { discordAccountId } = args;
 
-		const server = await ctx.db.get(args.serverId);
+		const server = await getServerByDiscordId(ctx, args.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
@@ -194,7 +194,7 @@ export const updateCustomDomain = authenticatedMutation({
 				serverId: args.serverId,
 				customDomain: args.customDomain ?? undefined,
 			});
-			await ctx.db.patch(args.serverId, { preferencesId });
+			await ctx.db.patch(server._id, { preferencesId });
 			preferences = await ctx.db.get(preferencesId);
 		} else {
 			await ctx.db.patch(preferences._id, {

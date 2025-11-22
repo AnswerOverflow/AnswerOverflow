@@ -210,13 +210,16 @@ export function handleMarkSolutionCommand(
 
 		const serverPreferencesLiveData = yield* Effect.scoped(
 			database.server_preferences.getServerPreferencesByServerId({
-				serverId: server._id,
+				serverId: server.discordId,
 			}),
 		);
 		const serverPreferences = serverPreferencesLiveData ?? null;
 
 		yield* Effect.promise(async () => {
-			const solutionMessage = await toAOMessage(targetMessage, server._id);
+			const solutionMessage = await toAOMessage(
+				targetMessage,
+				server.discordId,
+			);
 			await upsertMessage(
 				{
 					...solutionMessage,

@@ -15,11 +15,7 @@ import { useMutation, useQuery } from "convex/react";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
-export function CustomDomainConfigurator({
-	serverId,
-}: {
-	serverId: Id<"servers">;
-}) {
+export function CustomDomainConfigurator({ serverId }: { serverId: string }) {
 	const [_domain, setDomain] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 

@@ -306,7 +306,7 @@ export const getUserServers = authenticatedAction({
 async function checkManageGuildPermission(
 	ctx: ActionCtx,
 	discordAccountId: string,
-	serverId: Id<"servers">,
+	serverId: string,
 ): Promise<void> {
 	const backendAccessToken = getBackendAccessToken();
 
@@ -338,7 +338,7 @@ async function checkManageGuildPermission(
 
 export const getTopQuestionSolversForServer = authenticatedAction({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 	},
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverId } = args;
@@ -358,7 +358,7 @@ export const getTopQuestionSolversForServer = authenticatedAction({
 
 export const getPageViewsForServer = authenticatedAction({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 		from: v.optional(v.number()),
 		to: v.optional(v.number()),
 	},
@@ -378,7 +378,7 @@ export const getPageViewsForServer = authenticatedAction({
 
 export const getServerInvitesClicked = authenticatedAction({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 	},
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverId } = args;
@@ -396,7 +396,7 @@ export const getServerInvitesClicked = authenticatedAction({
 
 export const getQuestionsAndAnswers = authenticatedAction({
 	args: {
-		serverId: v.id("servers"),
+		serverId: v.string(),
 		from: v.optional(v.number()),
 		to: v.optional(v.number()),
 	},
@@ -505,7 +505,7 @@ export const syncUserServerSettingsBackground = internalAction({
 			);
 
 		type UserServerSettings = {
-			serverId: Id<"servers">;
+			serverId: string;
 			userId: string;
 			permissions: number;
 			canPubliclyDisplayMessages: boolean;
@@ -519,19 +519,20 @@ export const syncUserServerSettingsBackground = internalAction({
 				backendAccessToken,
 				settings: serversToSync.map(({ aoServer }) => ({
 					userId: discordAccountId,
-					serverId: aoServer._id,
+					serverId: aoServer.discordId,
 				})),
 			},
 		);
-		const existingSettingsByServerId = new Map<
-			Id<"servers">,
-			UserServerSettings
-		>(existingSettingsArray.map((settings) => [settings.serverId, settings]));
+		const existingSettingsByServerId = new Map<string, UserServerSettings>(
+			existingSettingsArray.map((settings) => [settings.serverId, settings]),
+		);
 
 		for (const { guild, aoServer } of serversToSync) {
 			const permissionsNumber = Number(guild.permissions);
 
-			const existingSettings = existingSettingsByServerId.get(aoServer._id);
+			const existingSettings = existingSettingsByServerId.get(
+				aoServer.discordId,
+			);
 
 			if (
 				existingSettings &&
@@ -545,7 +546,7 @@ export const syncUserServerSettingsBackground = internalAction({
 				{
 					backendAccessToken,
 					settings: {
-						serverId: aoServer._id,
+						serverId: aoServer.discordId,
 						userId: discordAccountId,
 						permissions: permissionsNumber, // Sync permissions from Discord API
 						canPubliclyDisplayMessages:

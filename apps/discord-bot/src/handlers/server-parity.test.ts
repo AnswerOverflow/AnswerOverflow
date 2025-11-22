@@ -42,21 +42,21 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 			guild.approximateMemberCount,
 		);
 
-		if (serverLiveData?._id) {
+		if (serverLiveData?.discordId) {
 			const preferencesLiveData =
 				yield* database.server_preferences.getServerPreferencesByServerId({
-					serverId: serverLiveData._id,
+					serverId: serverLiveData.discordId,
 				});
 			expect(preferencesLiveData).not.toBeNull();
 			expect(preferencesLiveData?.considerAllMessagesPublicEnabled).toBe(true);
 		}
 
-		if (!serverLiveData?._id) {
+		if (!serverLiveData?.discordId) {
 			throw new Error("Server ID not found");
 		}
 		const channelsLiveData = yield* database.channels.findAllChannelsByServerId(
 			{
-				serverId: serverLiveData._id,
+				serverId: serverLiveData.discordId,
 			},
 		);
 		expect(channelsLiveData).not.toBeNull();

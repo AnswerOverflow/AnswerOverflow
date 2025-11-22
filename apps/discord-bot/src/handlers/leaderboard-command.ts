@@ -70,7 +70,7 @@ export function handleLeaderboardCommand(
 
 		const topSolversLiveData = yield* Effect.scoped(
 			database.messages.getTopQuestionSolversByServerId({
-				serverId: server._id,
+				serverId: server.discordId,
 				limit: 10,
 			}),
 		);
@@ -128,7 +128,7 @@ export const LeaderboardCommandHandlerLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				if (
 					!interaction.isChatInputCommand() ||
-					interaction.commandName === "leaderboard"
+					interaction.commandName !== "leaderboard"
 				) {
 					return;
 				}

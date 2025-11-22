@@ -38,7 +38,7 @@ function planToPrettyText(plan: Plan): string {
 	}
 }
 
-export function CurrentPlanCard({ serverId }: { serverId: Id<"servers"> }) {
+export function CurrentPlanCard({ serverId }: { serverId: string }) {
 	const dashboardData = useQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{

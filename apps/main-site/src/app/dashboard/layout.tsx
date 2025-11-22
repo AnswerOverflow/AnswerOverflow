@@ -23,7 +23,7 @@ export default function DashboardLayout({
 	const serverIdMatch = pathname?.match(/^\/dashboard\/([^/]+)/);
 	const serverId =
 		serverIdMatch && !isOnboardingPage
-			? (serverIdMatch[1] as Id<"servers">)
+			? (serverIdMatch[1] as string)
 			: undefined;
 
 	const shouldShowServerSelect = serverId !== undefined && !isOnboardingPage;
@@ -35,11 +35,11 @@ export default function DashboardLayout({
 
 	const serversForDropdown: ServerSelectServer[] =
 		servers?.map((server) => ({
-			id: server.aoServerId ? String(server.aoServerId) : server.discordId,
+			id: server.discordId,
 			name: server.name,
 			icon: server.icon,
 			hasBot: server.hasBot,
-			discordId: server.discordId, // Preserve Discord ID for icon fetching
+			discordId: server.discordId,
 		})) ?? [];
 
 	const serverSelectProps =

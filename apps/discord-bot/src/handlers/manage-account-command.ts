@@ -23,7 +23,7 @@ export const menuButtonIds = {
 
 type UserServerSettingsWithFlags = {
 	userId: string;
-	serverId: Id<"servers">;
+	serverId: string;
 	permissions: number;
 	canPubliclyDisplayMessages: boolean;
 	messageIndexingDisabled: boolean;
@@ -45,7 +45,7 @@ function getDefaultUserServerSettingsWithFlags({
 	serverId,
 }: {
 	userId: string;
-	serverId: Id<"servers">;
+	serverId: string;
 }): UserServerSettingsWithFlags {
 	return {
 		userId,
@@ -167,7 +167,7 @@ export function handleManageAccountCommand(
 		const userServerSettingsLiveData = yield* Effect.scoped(
 			database.user_server_settings.findUserServerSettingsById({
 				userId: interaction.user.id,
-				serverId: server._id,
+				serverId: server.discordId,
 			}),
 		);
 
@@ -186,7 +186,7 @@ export function handleManageAccountCommand(
 					}
 				: getDefaultUserServerSettingsWithFlags({
 						userId: interaction.user.id,
-						serverId: server._id,
+						serverId: server.discordId,
 					});
 
 		const ignoredAccount =
@@ -234,7 +234,7 @@ export function handleManageAccountCommand(
 						handleManageAccountButtonPress(
 							buttonInteraction,
 							interaction.user.id,
-							server._id,
+							server.discordId,
 							state,
 						).pipe(
 							Effect.provide(DatabaseLayer),
@@ -265,7 +265,7 @@ export function handleManageAccountCommand(
 function handleManageAccountButtonPress(
 	interaction: { customId: string },
 	userId: string,
-	serverId: Id<"servers">,
+	serverId: string,
 	state: ManageAccountState,
 ): Effect.Effect<void, unknown, Database> {
 	return Effect.gen(function* () {

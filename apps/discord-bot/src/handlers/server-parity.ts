@@ -36,9 +36,9 @@ export function syncGuild(guild: Guild) {
 			discordId: guild.id,
 		});
 
-		if (serverLiveData?._id) {
+		if (serverLiveData?.discordId) {
 			yield* database.server_preferences.upsertServerPreferences({
-				serverId: serverLiveData._id,
+				serverId: serverLiveData.discordId,
 				considerAllMessagesPublicEnabled: true,
 			});
 		}
@@ -55,7 +55,7 @@ export function syncGuild(guild: Guild) {
 		if (server.preferencesId) {
 			const preferencesLiveData =
 				yield* database.server_preferences.getServerPreferencesByServerId({
-					serverId: server._id,
+					serverId: server.discordId,
 				});
 			const preferences = preferencesLiveData;
 			if (preferences?.customDomain && server.icon) {
@@ -91,10 +91,10 @@ export function syncGuild(guild: Guild) {
 
 		if (rootChannels.length > 0) {
 			const channelsToUpsert = rootChannels.map((channel) => {
-				const aoChannel = toAOChannel(channel, server._id);
+				const aoChannel = toAOChannel(channel, server.discordId);
 				return {
 					create: aoChannel,
-					update: aoChannel, // Update with full channel data
+					update: aoChannel,
 				};
 			});
 

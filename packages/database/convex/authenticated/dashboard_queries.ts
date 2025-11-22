@@ -5,15 +5,16 @@ import { authenticatedQuery } from "../client";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
+	getServerByDiscordId,
 	hasPermission,
 	isThreadType,
 	sortServersByBotAndRole,
 } from "../shared/shared";
 
 export const getDashboardData = authenticatedQuery({
-	args: { serverId: v.id("servers") },
+	args: { serverId: v.string() },
 	handler: async (ctx, args) => {
-		const server = await ctx.db.get(args.serverId);
+		const server = await getServerByDiscordId(ctx, args.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
@@ -106,7 +107,7 @@ export const getUserServersForDropdown = authenticatedQuery({
 		});
 
 		const servers = await asyncMap(manageableSettings, async (setting) => {
-			const server = await ctx.db.get(setting.serverId);
+			const server = await getServerByDiscordId(ctx, setting.serverId);
 			if (!server) return null;
 
 			const highestRole = getHighestRoleFromPermissions(setting.permissions);
