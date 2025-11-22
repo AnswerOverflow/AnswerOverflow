@@ -499,7 +499,7 @@ export async function findMessagesByChannelId(
 
 	let messages = allMessages;
 	if (after) {
-		messages = messages.filter((msg) => msg.id > after);
+		messages = messages.filter((msg) => BigInt(msg.id) > BigInt(after));
 	}
 
 	const effectiveLimit = limit ?? 100;
@@ -523,8 +523,9 @@ export async function getFirstMessageInChannel(
 	}
 
 	return (
-		allMessages.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0] ??
-		null
+		allMessages.sort((a, b) =>
+			BigInt(a.id) < BigInt(b.id) ? -1 : BigInt(a.id) > BigInt(b.id) ? 1 : 0,
+		)[0] ?? null
 	);
 }
 
@@ -556,7 +557,11 @@ export async function getFirstMessagesInChannels(
 					messages.length === 0
 						? null
 						: (messages.sort((a, b) =>
-								a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
+								BigInt(a.id) < BigInt(b.id)
+									? -1
+									: BigInt(a.id) > BigInt(b.id)
+										? 1
+										: 0,
 							)[0] ?? null),
 			};
 		}),

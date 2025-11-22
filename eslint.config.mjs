@@ -1,4 +1,34 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import tseslint from "typescript-eslint";
+import noStringComparison from "./eslint-rules/no-string-comparison.mjs";
+
+function getGitignorePatterns() {
+	try {
+		const gitignoreContent = readFileSync(
+			join(process.cwd(), ".gitignore"),
+			"utf-8",
+		);
+		return gitignoreContent
+			.split("\n")
+			.map((line) => line.trim())
+			.filter((line) => line && !line.startsWith("#"))
+			.map((pattern) => {
+				if (pattern.startsWith("/")) {
+					return pattern.slice(1);
+				}
+				if (pattern.endsWith("/")) {
+					return `**/${pattern}**`;
+				}
+				if (pattern.includes("/")) {
+					return `**/${pattern}`;
+				}
+				return `**/${pattern}`;
+			});
+	} catch {
+		return [];
+	}
+}
 
 export default tseslint.config(
 	{
@@ -8,48 +38,36 @@ export default tseslint.config(
 			parserOptions: {
 				ecmaVersion: "latest",
 				sourceType: "module",
+				projectService: {
+					allowDefaultProject: [
+						"apps/main-site/src/app/.well-known/openid-configuration/route.ts",
+						"packages/database/scripts/dev.ts",
+						"packages/database/scripts/find-unused-convex-functions.ts",
+						"packages/database/scripts/generate-function-types.ts",
+						"packages/discord-api/scripts/sync-openapi.ts",
+						"scripts/start-dbs.ts",
+					],
+				},
 			},
 		},
+		plugins: {
+			"no-string-comparison": noStringComparison,
+		},
 		rules: {
-			"no-restricted-syntax": [
-				"error",
-				{
-					selector:
-						"BinaryExpression[operator='>=']:has(> Identifier, > MemberExpression):not(:has(> Literal))",
-					message:
-						"Do not use '>=' operator on strings. Convert to BigInt for Discord snowflake IDs: BigInt(id1) >= BigInt(id2). If this is a legitimate numeric comparison, add // eslint-disable-next-line no-restricted-syntax",
-				},
-				{
-					selector:
-						"BinaryExpression[operator='<=']:has(> Identifier, > MemberExpression):not(:has(> Literal))",
-					message:
-						"Do not use '<=' operator on strings. Convert to BigInt for Discord snowflake IDs: BigInt(id1) <= BigInt(id2). If this is a legitimate numeric comparison, add // eslint-disable-next-line no-restricted-syntax",
-				},
-				{
-					selector:
-						"BinaryExpression[operator='>']:has(> Identifier, > MemberExpression):not(:has(> Literal))",
-					message:
-						"Do not use '>' operator on strings. Convert to BigInt for Discord snowflake IDs: BigInt(id1) > BigInt(id2). If this is a legitimate numeric comparison, add // eslint-disable-next-line no-restricted-syntax",
-				},
-				{
-					selector:
-						"BinaryExpression[operator='<']:has(> Identifier, > MemberExpression):not(:has(> Literal))",
-					message:
-						"Do not use '<' operator on strings. Convert to BigInt for Discord snowflake IDs: BigInt(id1) < BigInt(id2). If this is a legitimate numeric comparison, add // eslint-disable-next-line no-restricted-syntax",
-				},
-			],
+			"no-string-comparison/no-string-comparison": "error",
 		},
 	},
 	{
 		ignores: [
-			"**/node_modules/**",
-			"**/dist/**",
-			"**/.turbo/**",
+			...getGitignorePatterns(),
 			"**/convex/_generated/**",
 			"**/.context/**",
 			"**/packages/convex-test/**",
 			"**/packages/discord-api/src/generated.ts",
 			"**/packages/database/src/generated/function-types.ts",
+			"**/scripts/**",
+			"**/packages/*/scripts/**",
+			"**/.well-known/**",
 		],
 	},
 );

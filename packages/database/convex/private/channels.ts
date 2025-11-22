@@ -140,8 +140,8 @@ export const findChannelsBeforeId = privateQuery({
 		);
 
 		const filtered = allChannels
-			.filter((c) => c.id < args.id)
-			.sort((a, b) => (b.id > a.id ? 1 : -1))
+			.filter((c) => BigInt(c.id) < BigInt(args.id))
+			.sort((a, b) => (BigInt(b.id) > BigInt(a.id) ? 1 : -1))
 			.slice(0, args.take ?? 100);
 
 		return await addSettingsToChannels(ctx, filtered);
@@ -482,7 +482,11 @@ export const getChannelPageData = privateQuery({
 
 		const sortedThreads = threads
 			.sort((a, b) => {
-				return b.id > a.id ? 1 : b.id < a.id ? -1 : 0;
+				return BigInt(b.id) > BigInt(a.id)
+					? 1
+					: BigInt(b.id) < BigInt(a.id)
+						? -1
+						: 0;
 			})
 			.slice(0, 50);
 
