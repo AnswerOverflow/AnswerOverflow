@@ -1,15 +1,29 @@
 {
-	// "files.exclude": {
-	// 	"**/.context": true
-	// },
+	"files.exclude": {
+		"**/.context": true,
+		"**/_generated": true,
+		"**/.turbo": true,
+		"**/.next": true,
+		"**/dist": true
+	},
 	"search.exclude": {
-		// "**/_generated/**": true
-		"**/.context": true
+		"**/.context": true,
+		"**/_generated": true,
+		"**/.turbo": true,
+		"**/.next": true,
+		"**/dist": true,
+		"**/node_modules": true
 	},
 	"files.watcherExclude": {
-		// "**/_generated/**": true
-		"**/.context/**": true
+		"**/.context/**": true,
+		"**/_generated/**": true,
+		"**/.turbo/**": true,
+		"**/.next/**": true,
+		"**/dist/**": true,
+		"**/node_modules/**": true
 	},
+	"typescript.preferences.excludePackageJsonAutoImports": "on",
+	"typescript.tsserver.experimental.enableProjectDiagnostics": false,
 	"tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
 	"typescript.tsdk": "node_modules/typescript/lib"
 }

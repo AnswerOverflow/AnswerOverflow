@@ -17,5 +17,11 @@
 		"noUncheckedIndexedAccess": true
 	},
 	"include": ["./**/*"],
-	"exclude": ["./_generated"]
+	"exclude": [
+		"./_generated",
+		"**/node_modules",
+		"**/.turbo",
+		"**/dist",
+		"**/.next"
+	]
 }
