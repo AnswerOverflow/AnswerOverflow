@@ -11,7 +11,7 @@ import type {
 } from "../schema";
 
 type Message = Infer<typeof messageSchema>;
-type DatabaseAttachment = Infer<typeof attachmentSchema>;
+export type DatabaseAttachment = Infer<typeof attachmentSchema>;
 
 export const DISCORD_PERMISSIONS = {
 	Administrator: 0x8,
@@ -679,7 +679,7 @@ export async function upsertMessageInternalLogic(
 	ctx: MutationCtx,
 	args: {
 		message: Message;
-		attachments?: Attachment[];
+		attachments?: DatabaseAttachment[];
 		reactions?: Array<{
 			userId: string;
 			emoji: Infer<typeof emojiSchema>;

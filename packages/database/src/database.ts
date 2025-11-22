@@ -7,7 +7,8 @@ import type {
 } from "convex/server";
 import { Config, Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
-import type { Attachment, Emoji, Message } from "../convex/schema";
+import type { Emoji, Message } from "../convex/schema";
+import type { DatabaseAttachment } from "../convex/shared/shared";
 import { ConvexClientLiveUnifiedLayer } from "./convex-client-live";
 import { ConvexClientUnified, ConvexError } from "./convex-unified-client";
 import { FUNCTION_TYPE_MAP, isNamespace } from "./generated/function-types";
@@ -228,7 +229,7 @@ export async function upsertMessage(
 }
 
 export type BaseMessageWithRelations = Message & {
-	attachments?: Attachment[];
+	attachments?: DatabaseAttachment[];
 	reactions?: Array<{
 		userId: string;
 		emoji: Emoji;

@@ -3,7 +3,7 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@packages/ui/components/avatar";
-import { SocialIcon } from "react-social-icons";
+import { SocialIcon } from "react-social-icons"; // TODO: use our own social icon component
 import { FollowCursor } from "../../../components/follow";
 
 export interface ContributorData {

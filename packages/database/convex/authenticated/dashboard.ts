@@ -379,15 +379,6 @@ export const syncUserServerSettingsBackground = internalAction({
 				} => item !== null,
 			);
 
-		type UserServerSettings = {
-			serverId: string;
-			userId: string;
-			permissions: number;
-			canPubliclyDisplayMessages: boolean;
-			messageIndexingDisabled: boolean;
-			apiKey: string | undefined;
-			apiCallsUsed: number;
-		};
 		const existingSettingsArray = await ctx.runQuery(
 			api.private.user_server_settings.findManyUserServerSettings,
 			{
@@ -398,7 +389,7 @@ export const syncUserServerSettingsBackground = internalAction({
 				})),
 			},
 		);
-		const existingSettingsByServerId = new Map<string, UserServerSettings>(
+		const existingSettingsByServerId = new Map(
 			existingSettingsArray.map((settings) => [settings.serverId, settings]),
 		);
 

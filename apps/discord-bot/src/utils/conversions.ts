@@ -1,9 +1,9 @@
 import type {
-	Attachment as AOAttachment,
 	Channel as AOChannel,
 	DiscordAccount as AODiscordAccount,
 	Emoji as AOEmoji,
 } from "@packages/database/convex/schema";
+import type { DatabaseAttachment } from "@packages/database/convex/shared/shared";
 import type { BaseMessageWithRelations } from "@packages/database/database";
 import {
 	type AnyThreadChannel,
@@ -128,17 +128,19 @@ export async function toAOMessage(
 		}
 	}
 
-	const attachments: AOAttachment[] = message.attachments.map((attachment) => ({
-		id: attachment.id,
-		messageId: message.id,
-		contentType: attachment.contentType ?? undefined,
-		filename: attachment.name ?? "",
-		width: attachment.width ?? undefined,
-		height: attachment.height ?? undefined,
-		size: attachment.size,
-		description: attachment.description ?? undefined,
-		storageId: undefined, // Will be set after upload
-	}));
+	const attachments: DatabaseAttachment[] = message.attachments.map(
+		(attachment) => ({
+			id: attachment.id,
+			messageId: message.id,
+			contentType: attachment.contentType ?? undefined,
+			filename: attachment.name ?? "",
+			width: attachment.width ?? undefined,
+			height: attachment.height ?? undefined,
+			size: attachment.size,
+			description: attachment.description ?? undefined,
+			storageId: undefined,
+		}),
+	);
 
 	const embeds = message.embeds.map((embed) => ({
 		title: embed.title ?? undefined,

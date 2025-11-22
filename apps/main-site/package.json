@@ -31,15 +31,19 @@
 		"nuqs": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
+		"react-social-icons": "^6.25.0",
+		"react-spring": "^10.0.3",
 		"shiki": "^3.12.2",
 		"use-debounce": "^10.0.6"
 	},
 	"devDependencies": {
 		"@packages/typescript-config": "workspace:*",
 		"@tailwindcss/postcss": "catalog:",
+		"@types/http-proxy": "^1.17.17",
 		"@types/node": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
+		"http-proxy": "^1.18.1",
 		"postcss": "catalog:"
 	}
 }

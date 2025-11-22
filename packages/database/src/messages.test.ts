@@ -1,12 +1,7 @@
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import type {
-	Attachment,
-	Channel,
-	Emoji,
-	Message,
-	Server,
-} from "../convex/schema";
+import type { Channel, Emoji, Message, Server } from "../convex/schema";
+import type { DatabaseAttachment } from "../convex/shared/shared";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
 
@@ -69,8 +64,8 @@ const createTestMessage = (
 const createTestAttachment = (
 	id: string,
 	messageId: string,
-	overrides?: Partial<Attachment>,
-): Attachment => ({
+	overrides?: Partial<DatabaseAttachment>,
+): DatabaseAttachment => ({
 	id,
 	messageId,
 	filename: `file-${id}.txt`,
