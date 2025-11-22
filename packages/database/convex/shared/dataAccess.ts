@@ -1,14 +1,7 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { QueryCtx } from "../client";
-import type {
-	Attachment,
-	DiscordAccount,
-	Message,
-	Reaction,
-	ServerPreferences,
-	UserServerSettings,
-} from "../schema";
+import type { Message, ServerPreferences, UserServerSettings } from "../schema";
 import {
 	getDiscordAccountIdFromAuth,
 	getUserServerSettingsForServerByDiscordId,
@@ -20,9 +13,8 @@ import {
 } from "./messagePrivacy";
 import type { PublicChannel, PublicServer } from "./publicSchemas";
 import {
-	findAttachmentsByMessageId,
-	findReactionsByMessageId,
-	getDiscordAccountById,
+	enrichMessageForDisplay,
+	type EnrichedMessage as SharedEnrichedMessage,
 } from "./shared";
 
 async function fetchMessagePrivacyData(
@@ -47,29 +39,18 @@ async function fetchMessagePrivacyData(
 	};
 }
 
-type EnrichedMessage = {
-	message: Message;
-	author: DiscordAccount | null;
-	attachments: Attachment[];
-	reactions: Reaction[];
-};
-
-async function enrichMessage(
+async function enrichMessageWithPrivacy(
 	ctx: QueryCtx,
 	message: Message,
-): Promise<EnrichedMessage> {
-	const [author, attachments, reactions, privacyData, userServerSettings] =
-		await Promise.all([
-			getDiscordAccountById(ctx, message.authorId),
-			findAttachmentsByMessageId(ctx, message.id),
-			findReactionsByMessageId(ctx, message.id),
-			await fetchMessagePrivacyData(ctx, message),
-			await getDiscordAccountIdFromAuth(ctx).then((id) =>
-				id
-					? getUserServerSettingsForServerByDiscordId(ctx, id, message.serverId)
-					: null,
-			),
-		]);
+): Promise<SharedEnrichedMessage | null> {
+	const [privacyData, userServerSettings] = await Promise.all([
+		fetchMessagePrivacyData(ctx, message),
+		getDiscordAccountIdFromAuth(ctx).then((id) =>
+			id
+				? getUserServerSettingsForServerByDiscordId(ctx, id, message.serverId)
+				: null,
+		),
+	]);
 
 	const { serverPreferences, authorServerSettings } = privacyData;
 
@@ -91,23 +72,10 @@ async function enrichMessage(
 	};
 
 	if (!messageWithPrivacy.public && !userServerSettings) {
-		return {
-			attachments: [],
-			author: {
-				id: "",
-				name: "",
-			},
-			message: hiddenMessageStub(),
-			reactions: [],
-		};
+		return null;
 	}
 
-	return {
-		message,
-		author,
-		attachments,
-		reactions,
-	};
+	return await enrichMessageForDisplay(ctx, message);
 }
 
 export function hiddenMessageStub(): MessageWithPrivacyFlags {
@@ -135,7 +103,7 @@ export async function enrichedMessageWithServerAndChannels(
 ) {
 	const { parentChannelId } = message;
 	const [enrichedMessage, parentChannel, channel, server] = await Promise.all([
-		enrichMessage(ctx, message),
+		enrichMessageWithPrivacy(ctx, message),
 		parentChannelId
 			? getOneFrom(
 					ctx.db,
@@ -161,7 +129,7 @@ export async function enrichedMessageWithServerAndChannels(
 		),
 	]);
 
-	if (!channel || !server) return null;
+	if (!channel || !server || !enrichedMessage) return null;
 
 	return {
 		channel: parentChannel || channel,
@@ -172,7 +140,7 @@ export async function enrichedMessageWithServerAndChannels(
 }
 
 export type SearchResult = {
-	message: EnrichedMessage;
+	message: SharedEnrichedMessage;
 	channel: PublicChannel;
 	server: PublicServer;
 	thread?: PublicChannel | null;

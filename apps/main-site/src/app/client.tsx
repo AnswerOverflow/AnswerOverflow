@@ -96,12 +96,7 @@ export function HomePageClient() {
 										className="block hover:bg-accent/50 transition-colors"
 									>
 										<div className="p-4">
-											<DiscordMessage
-												message={threadData.message.message}
-												author={threadData.message.author}
-												attachments={threadData.message.attachments}
-												reactions={threadData.message.reactions}
-											/>
+											<DiscordMessage enrichedMessage={threadData.message} />
 										</div>
 									</Link>
 								</div>

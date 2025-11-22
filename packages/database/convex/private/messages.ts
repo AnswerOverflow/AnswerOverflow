@@ -11,6 +11,7 @@ import {
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import {
 	deleteMessageInternalLogic,
+	enrichMessageForDisplay,
 	extractDiscordLinks,
 	extractMentionIds,
 	findAttachmentsByMessageId as findAttachmentsByMessageIdShared,
@@ -778,55 +779,8 @@ export const getMessagePageData = privateQuery({
 			targetMessage.id,
 		);
 
-		const authorMap = await buildAuthorMap(ctx, messagesToShow);
-
-		const referenceTargets = collectMessageReferenceTargets(messagesToShow);
-
-		const [mentionMetadata, internalLinks] = await Promise.all([
-			getMentionMetadata(
-				ctx,
-				referenceTargets.userIds,
-				referenceTargets.channelIds,
-				server.discordId,
-			),
-			getInternalLinksMetadata(ctx, referenceTargets.discordLinks),
-		]);
-
-		const internalLinkLookup = createInternalLinkLookup(internalLinks);
-
 		const messagesWithData = await asyncMap(messagesToShow, async (message) => {
-			const mentionIds = extractMentionIds(message.content);
-			const messageDiscordLinks = extractDiscordLinks(message.content);
-			const metadata = buildMessageMetadataRecord(
-				mentionMetadata,
-				server.discordId,
-				mentionIds,
-				internalLinkLookup,
-				messageDiscordLinks,
-			);
-
-			const [attachments, reactions, solutions] = await Promise.all([
-				findAttachmentsByMessageIdShared(ctx, message.id),
-				findReactionsByMessageIdShared(ctx, message.id),
-				getSolutionsForMessage(ctx, message),
-			]);
-
-			const author = authorMap.get(message.authorId) ?? null;
-
-			return {
-				message,
-				author: author
-					? {
-							id: author.id,
-							name: author.name,
-							avatar: author.avatar,
-						}
-					: null,
-				attachments,
-				reactions,
-				solutions,
-				metadata,
-			};
+			return await enrichMessageForDisplay(ctx, message);
 		});
 
 		return {

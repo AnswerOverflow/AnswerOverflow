@@ -3,16 +3,10 @@ import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
-import type {
-	attachmentSchema,
-	emojiSchema,
-	messageSchema,
-	reactionSchema,
-} from "../schema";
+import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 
 type Message = Infer<typeof messageSchema>;
 type Attachment = Infer<typeof attachmentSchema>;
-type Reaction = Infer<typeof reactionSchema>;
 
 export const DISCORD_PERMISSIONS = {
 	Administrator: 0x8,
@@ -789,7 +783,14 @@ export type EnrichedMessage = {
 		avatar?: string;
 	} | null;
 	attachments: Attachment[];
-	reactions: Reaction[];
+	reactions: Array<{
+		userId: string;
+		emoji: {
+			id: string;
+			name: string;
+			animated?: boolean;
+		};
+	}>;
 	solutions: Message[];
 	metadata?: {
 		users?: Record<
@@ -830,90 +831,128 @@ export async function enrichMessagesWithData(
 
 	const messagesWithData = await Promise.all(
 		messages.map(async (message) => {
-			const [author, server, attachments, reactions, solutions] =
-				await Promise.all([
-					getDiscordAccountById(ctx, message.authorId),
-					ctx.db.get(message.serverId),
-					findAttachmentsByMessageId(ctx, message.id),
-					findReactionsByMessageId(ctx, message.id),
-					message.questionId
-						? findSolutionsByQuestionId(ctx, message.questionId)
-						: [],
-				]);
-
-			const baseEnriched = {
-				message,
-				author: author
-					? {
-							id: author.id,
-							name: author.name,
-							avatar: author.avatar,
-						}
-					: null,
-				attachments,
-				reactions,
-				solutions,
-			};
-
-			if (!server) {
-				return baseEnriched;
-			}
-
-			const serverDiscordId = server.discordId;
-			const { userIds, channelIds } = extractMentionIds(message.content);
-			const messageDiscordLinks = extractDiscordLinks(message.content);
-
-			const mentionMetadata = await getMentionMetadata(
-				ctx,
-				userIds,
-				channelIds,
-				serverDiscordId,
-			);
-
-			const messageUsers: Record<
-				string,
-				{ username: string; globalName: string | null; url: string }
-			> = {};
-			for (const userId of userIds) {
-				const user = mentionMetadata.users[userId];
-				if (user) {
-					messageUsers[userId] = user;
-				}
-			}
-
-			const messageChannels = Object.fromEntries(
-				channelIds.map((id) => [
-					id,
-					mentionMetadata.channels[id] ?? {
-						name: "Unknown Channel",
-						type: 0,
-						url: `https://discord.com/channels/${serverDiscordId}/${id}`,
-						indexingEnabled: false,
-						exists: false,
-					},
-				]),
-			);
-
-			const messageInternalLinks = await getInternalLinksMetadata(
-				ctx,
-				messageDiscordLinks,
-			);
-
-			return {
-				...baseEnriched,
-				metadata: {
-					users:
-						Object.keys(messageUsers).length > 0 ? messageUsers : undefined,
-					channels:
-						Object.keys(messageChannels).length > 0
-							? messageChannels
-							: undefined,
-					internalLinks:
-						messageInternalLinks.length > 0 ? messageInternalLinks : undefined,
-				},
-			};
+			return await enrichMessageForDisplay(ctx, message);
 		}),
 	);
 
 	return messagesWithData;
+}
+
+export async function enrichMessageForDisplay(
+	ctx: QueryCtx | MutationCtx,
+	message: Message,
+): Promise<EnrichedMessage> {
+	const [author, server, attachments, reactions, solutions] = await Promise.all(
+		[
+			getDiscordAccountById(ctx, message.authorId),
+			getServerByDiscordId(ctx, message.serverId),
+			findAttachmentsByMessageId(ctx, message.id),
+			findReactionsByMessageId(ctx, message.id),
+			message.questionId
+				? findSolutionsByQuestionId(ctx, message.questionId)
+				: [],
+		],
+	);
+
+	const emojiIds = new Set(
+		reactions.map((r) => r.emojiId).filter((id): id is string => !!id),
+	);
+
+	const emojiMap = new Map<
+		string,
+		{ id: string; name: string; animated?: boolean }
+	>();
+	for (const emojiId of emojiIds) {
+		const emoji = await ctx.db
+			.query("emojis")
+			.filter((q) => q.eq(q.field("id"), emojiId))
+			.first();
+		if (emoji) {
+			emojiMap.set(emojiId, {
+				id: emoji.id,
+				name: emoji.name,
+				animated: emoji.animated,
+			});
+		}
+	}
+
+	const formattedReactions = reactions.map((reaction) => {
+		const emoji = emojiMap.get(reaction.emojiId);
+		return {
+			userId: reaction.userId,
+			emoji: emoji ?? {
+				id: reaction.emojiId,
+				name: "",
+			},
+		};
+	});
+
+	const baseEnriched: EnrichedMessage = {
+		message,
+		author: author
+			? {
+					id: author.id,
+					name: author.name,
+					avatar: author.avatar,
+				}
+			: null,
+		attachments,
+		reactions: formattedReactions,
+		solutions,
+	};
+
+	if (!server) {
+		return baseEnriched;
+	}
+
+	const serverDiscordId = server.discordId;
+	const { userIds, channelIds } = extractMentionIds(message.content);
+	const messageDiscordLinks = extractDiscordLinks(message.content);
+
+	const mentionMetadata = await getMentionMetadata(
+		ctx,
+		userIds,
+		channelIds,
+		serverDiscordId,
+	);
+
+	const messageUsers: Record<
+		string,
+		{ username: string; globalName: string | null; url: string }
+	> = {};
+	for (const userId of userIds) {
+		const user = mentionMetadata.users[userId];
+		if (user) {
+			messageUsers[userId] = user;
+		}
+	}
+
+	const messageChannels = Object.fromEntries(
+		channelIds.map((id) => [
+			id,
+			mentionMetadata.channels[id] ?? {
+				name: "Unknown Channel",
+				type: 0,
+				url: `https://discord.com/channels/${serverDiscordId}/${id}`,
+				indexingEnabled: false,
+				exists: false,
+			},
+		]),
+	);
+
+	const messageInternalLinks = await getInternalLinksMetadata(
+		ctx,
+		messageDiscordLinks,
+	);
+
+	return {
+		...baseEnriched,
+		metadata: {
+			users: Object.keys(messageUsers).length > 0 ? messageUsers : undefined,
+			channels:
+				Object.keys(messageChannels).length > 0 ? messageChannels : undefined,
+			internalLinks:
+				messageInternalLinks.length > 0 ? messageInternalLinks : undefined,
+		},
+	};
 }

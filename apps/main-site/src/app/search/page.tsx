@@ -71,20 +71,7 @@ function SearchInput() {
 									aria-label="Open message"
 								/>
 								<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto">
-									<DiscordMessage
-										message={result.message.message}
-										author={
-											result.message.author
-												? {
-														id: result.message.author.id,
-														name: result.message.author.name,
-														avatar: result.message.author.avatar,
-													}
-												: null
-										}
-										attachments={result.message.attachments}
-										reactions={result.message.reactions}
-									/>
+									<DiscordMessage enrichedMessage={result.message} />
 								</div>
 							</div>
 						)}

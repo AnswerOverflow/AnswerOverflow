@@ -1,56 +1,15 @@
 "use client";
 
 import type { Id } from "@packages/database/convex/_generated/dataModel";
-import type {
-	Attachment,
-	Message,
-	Reaction,
-} from "@packages/database/convex/schema";
-import { DiscordMessage } from "@packages/ui/components/discord-message";
+import type { Attachment } from "@packages/database/convex/schema";
+import {
+	DiscordMessage,
+	type EnrichedMessage,
+} from "@packages/ui/components/discord-message";
 import { Link } from "@packages/ui/components/link";
 
-type MessageMetadata = {
-	channels?: Record<
-		string,
-		{
-			name: string;
-			type: number;
-			url: string;
-			indexingEnabled?: boolean;
-			exists?: boolean;
-		}
-	>;
-	roles?: Record<string, { name: string; color: number }>;
-	users?: Record<
-		string,
-		{ username: string; globalName: string | null; url: string }
-	>;
-	internalLinks?: Array<{
-		original: string;
-		guild: { id: string; name: string };
-		channel: {
-			parent?: { name?: string; type?: number; parentId?: string };
-			id: string;
-			type: number;
-			name: string;
-		};
-		message?: string;
-	}>;
-};
-
 type MessagePageData = {
-	messages: Array<{
-		message: Message;
-		author: {
-			id: string;
-			name: string;
-			avatar?: string;
-		} | null;
-		attachments: Attachment[];
-		reactions: Reaction[];
-		solutions: Message[];
-		metadata?: MessageMetadata;
-	}>;
+	messages: EnrichedMessage[];
 	server: {
 		_id: Id<"servers">;
 		discordId: string;
@@ -126,26 +85,12 @@ export function MessagePageClient(props: { data: MessagePageData }) {
 			</div>
 
 			<div className="space-y-4">
-				{data.messages.map((msgData: MessagePageData["messages"][number]) => {
-					const {
-						message,
-						author,
-						attachments,
-						reactions,
-						solutions,
-						metadata,
-					} = msgData;
-
+				{data.messages.map((enrichedMessage) => {
 					return (
 						<DiscordMessage
-							key={message.id}
-							message={message}
-							author={author}
-							attachments={attachments}
-							reactions={reactions}
-							solutions={solutions}
-							metadata={metadata}
-							getAttachmentUrl={(attachment) => {
+							key={enrichedMessage.message.id}
+							enrichedMessage={enrichedMessage}
+							getAttachmentUrl={(attachment: Attachment) => {
 								const convexSiteUrl =
 									process.env.NEXT_PUBLIC_CONVEX_URL?.replace(
 										/\.cloud$/,
