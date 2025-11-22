@@ -497,7 +497,14 @@ export async function findMessagesByChannelId(
 		"channelId",
 	);
 
-	let messages = allMessages;
+	let messages = allMessages.sort((a, b) => {
+		const aId = BigInt(a.id);
+		const bId = BigInt(b.id);
+		if (aId < bId) return -1;
+		if (aId > bId) return 1;
+		return 0;
+	});
+
 	if (after) {
 		messages = messages.filter((msg) => BigInt(msg.id) > BigInt(after));
 	}
