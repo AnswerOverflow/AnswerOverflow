@@ -10,7 +10,7 @@
 		"typecheck": "turbo run typecheck",
 		"test": "turbo run test",
 		"test:watch": "turbo run test:watch",
-		"lint": "biome check .",
+		"lint": "biome check . && eslint .",
 		"lint:fix": "biome check . --write",
 		"fix:safe": "biome check . --write",
 		"fix:unsafe": "biome check . --write --unsafe",
@@ -22,11 +22,16 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.4",
+		"@eslint/js": "^9.39.1",
 		"@types/bytes": "^3.1.5",
+		"@typescript-eslint/eslint-plugin": "^8.47.0",
+		"@typescript-eslint/parser": "^8.47.0",
+		"eslint": "^9.39.1",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.6",
 		"turbo": "^2.6.1",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"typescript-eslint": "^8.47.0"
 	},
 	"engines": {
 		"node": ">=18.8.0"
