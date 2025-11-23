@@ -3,6 +3,7 @@
 import type { EnrichedMessage } from "@packages/database/convex/shared/shared";
 import { cn } from "../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { Badge } from "./badge";
 import { Link } from "./link";
 import { MessageBlurrer } from "./message-blurrer";
 import { MessageBody } from "./message-body";
@@ -57,9 +58,12 @@ export function ThinMessage(props: {
 							<span>Unknown</span>
 						)}
 						{op && (
-							<span className="text-muted-foreground border-[1.5px] text-sm border-muted-foreground px-1 rounded-md">
+							<Badge
+								variant="secondary"
+								className="rounded-md px-1.5 py-0 text-[10px] font-bold h-5"
+							>
 								OP
-							</span>
+							</Badge>
 						)}
 						<span className="text-sm">•</span>
 						<TimeAgo snowflake={message.message.id} />
