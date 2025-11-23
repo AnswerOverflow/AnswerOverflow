@@ -6,14 +6,9 @@ import {
 } from "./posthog-client";
 
 export {
-	PostHogCaptureClient,
-	PostHogCaptureClientLayer,
-} from "./capture-client";
-export {
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
 } from "./discord-helpers";
-export { registerServerGroup, trackEvent } from "./tracking";
 export type {
 	BaseProps,
 	ChannelProps,

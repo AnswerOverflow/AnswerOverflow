@@ -1,5 +1,3 @@
-"use client";
-
 import type { Server } from "@packages/database/convex/schema";
 import { Button } from "@packages/ui/components/button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
