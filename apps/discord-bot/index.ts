@@ -13,6 +13,7 @@ import { MessageParityLayer } from "./src/handlers/message-parity";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./src/handlers/send-mark-solution-instructions-handler";
 import { ServerParityLayer } from "./src/handlers/server-parity";
 import { StatusUpdateHandlerLayer } from "./src/handlers/status-update";
+import { PostHogCaptureClientLayer } from "@packages/analytics/server/index";
 
 const program = Effect.gen(function* () {
 	const discord = yield* Discord;
@@ -31,6 +32,7 @@ const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
 const BaseLayer = Layer.mergeAll(
 	DiscordLayer,
 	DatabaseLayer,
+	PostHogCaptureClientLayer,
 	OtelLayer,
 	LoggerLayer,
 );

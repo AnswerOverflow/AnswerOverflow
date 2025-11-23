@@ -36,11 +36,6 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 				if (!isAllowedThreadChannel(thread)) {
 					return;
 				}
-
-				if (thread.type === ChannelType.PrivateThread) {
-					return;
-				}
-
 				if (!thread.parentId) {
 					return;
 				}

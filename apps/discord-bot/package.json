@@ -11,10 +11,12 @@
 		"test:watch": "vitest"
 	},
 	"dependencies": {
+		"@packages/analytics": "workspace:*",
 		"@packages/database": "workspace:*",
 		"@packages/observability": "workspace:*",
 		"discord.js": "^14.22.1",
-		"effect": "catalog:"
+		"effect": "catalog:",
+		"posthog-node": "^4.2.0"
 	},
 	"devDependencies": {
 		"@effect/language-service": "catalog:",
