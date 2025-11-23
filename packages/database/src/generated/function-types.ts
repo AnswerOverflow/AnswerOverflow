@@ -68,6 +68,7 @@ export const FUNCTION_TYPE_MAP = {
   "servers.findManyServersById": "query",
   "servers.getAllServers": "query",
   "servers.getBiggestServers": "query",
+  "servers.getBrowseServers": "query",
   "servers.getServerByDiscordId": "query",
   "servers.getServerByDiscordIdWithChannels": "query",
   "servers.updateServer": "mutation",
@@ -94,7 +95,7 @@ export const NAMESPACE_STRUCTURE = {
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById","findManyIgnoredDiscordAccountsById","upsertIgnoredDiscordAccount"],
   "messages": ["countMessagesInChannel","countMessagesInManyChannels","deleteManyMessages","deleteManyMessagesByChannelId","deleteManyMessagesByUserId","deleteMessage","findAttachmentsByMessageId","findEmojiById","findLatestMessageInChannel","findLatestMessageInChannelAndThreads","findManyMessagesById","findMessagesByAuthorId","findMessagesByChannelId","findMessagesByParentChannelId","findMessagesByServerId","findReactionsByMessageId","findSolutionsByQuestionId","getMessageById","getMessagePageData","getTopQuestionSolversByServerId","getTotalMessageCount","upsertManyMessages","upsertMessage"],
   "server_preferences": ["createServerPreferences","deleteServerPreferences","getServerPreferencesByServerId","updateServerPreferences","upsertServerPreferences"],
-  "servers": ["createServer","createServerExternal","findManyServersByDiscordId","findManyServersById","getAllServers","getBiggestServers","getServerByDiscordId","getServerByDiscordIdWithChannels","updateServer","updateServerExternal","upsertServer","upsertServerExternal"],
+  "servers": ["createServer","createServerExternal","findManyServersByDiscordId","findManyServersById","getAllServers","getBiggestServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","updateServer","updateServerExternal","upsertServer","upsertServerExternal"],
   "user_server_settings": ["countConsentingUsersInManyServers","countConsentingUsersInServer","deleteUserServerSettingsByUserId","findManyUserServerSettings","findUserServerSettingsByApiKey","findUserServerSettingsById","updateUserServerSettings","upsertUserServerSettings"]
 } as const;
 

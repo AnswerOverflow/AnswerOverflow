@@ -2,10 +2,12 @@ import {
 	type BaseProps,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
-	PostHogCaptureClientLayer,
+} from "@packages/analytics/server";
+import { PostHogCaptureClientLayer } from "@packages/analytics/server/capture-client";
+import {
 	registerServerGroup as registerServerGroupBase,
 	trackEvent,
-} from "@packages/analytics/server";
+} from "@packages/analytics/server/tracking";
 import type { Guild } from "discord.js";
 import { Effect } from "effect";
 
