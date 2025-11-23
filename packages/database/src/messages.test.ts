@@ -477,7 +477,7 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 			id: message002,
 		});
 		const remaining = yield* database.messages.getMessageById({
-			id: "message3",
+			id: message003,
 		});
 
 		expect(deleted1).toBeNull();

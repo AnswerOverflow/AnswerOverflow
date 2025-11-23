@@ -35,6 +35,7 @@
 		"@edge-runtime/vm": "catalog:",
 		"@effect/vitest": "catalog:",
 		"@packages/convex-test": "workspace:*",
+		"@packages/database-utils": "workspace:*",
 		"@packages/observability": "workspace:*",
 		"@packages/test-utils": "workspace:*",
 		"chokidar-cli": "^3.0.0",
