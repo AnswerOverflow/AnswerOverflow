@@ -172,7 +172,9 @@ function storeMessages(
 		yield* Effect.forEach(
 			Arr.fromIterable(HashMap.values(uniqueAuthors)),
 			(author) =>
-				database.discord_accounts.upsertDiscordAccount({ account: author }),
+				database.private.discord_accounts.upsertDiscordAccount({
+					account: author,
+				}),
 			{ concurrency: 10 },
 		);
 
@@ -194,7 +196,7 @@ function storeMessages(
 			for (let i = 0; i < allAttachments.length; i += batchSize) {
 				const batch = allAttachments.slice(i, i + batchSize);
 				const uploadResults =
-					yield* database.attachments.uploadManyAttachmentsFromUrls({
+					yield* database.private.attachments.uploadManyAttachmentsFromUrls({
 						attachments: batch,
 					});
 
@@ -227,9 +229,10 @@ function storeMessages(
 		if (humanMessages.length > 0) {
 			const lastMessage = humanMessages[humanMessages.length - 1];
 			if (lastMessage) {
-				const channelLiveData = yield* database.channels.findChannelByDiscordId(
-					{ discordId: channelId },
-				);
+				const channelLiveData =
+					yield* database.private.channels.findChannelByDiscordId({
+						discordId: channelId,
+					});
 				yield* Effect.sleep(Duration.millis(10));
 				const currentChannel = channelLiveData;
 
@@ -241,7 +244,7 @@ function storeMessages(
 						`Updating lastIndexedSnowflake for channel ${channelId}: ${oldLastIndexed ?? "null"} -> ${newLastIndexed}`,
 					);
 
-					yield* database.channels.updateChannel({
+					yield* database.private.channels.updateChannel({
 						id: channelId,
 						channel: {
 							id: currentChannel.id,
@@ -282,9 +285,10 @@ function indexTextChannel(
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		const channelLiveData = yield* database.channels.findChannelByDiscordId({
-			discordId: channel.id,
-		});
+		const channelLiveData =
+			yield* database.private.channels.findChannelByDiscordId({
+				discordId: channel.id,
+			});
 		yield* Effect.sleep(Duration.millis(10));
 		const channelSettings = channelLiveData;
 
@@ -335,7 +339,7 @@ function indexTextChannel(
 				threadsToIndex,
 				(thread) =>
 					Effect.gen(function* () {
-						yield* database.channels.upsertManyChannels({
+						yield* database.private.channels.upsertManyChannels({
 							channels: [
 								{
 									create: toAOChannel(thread, discordServerId),
@@ -345,7 +349,7 @@ function indexTextChannel(
 						});
 
 						const threadChannelLiveData =
-							yield* database.channels.findChannelByDiscordId({
+							yield* database.private.channels.findChannelByDiscordId({
 								discordId: thread.id,
 							});
 						yield* Effect.sleep(Duration.millis(10));
@@ -376,9 +380,10 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		const channelLiveData = yield* database.channels.findChannelByDiscordId({
-			discordId: channel.id,
-		});
+		const channelLiveData =
+			yield* database.private.channels.findChannelByDiscordId({
+				discordId: channel.id,
+			});
 		yield* Effect.sleep(Duration.millis(10));
 		const channelSettings = channelLiveData;
 
@@ -408,7 +413,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			threadsToIndex,
 			(thread) =>
 				Effect.gen(function* () {
-					yield* database.channels.upsertManyChannels({
+					yield* database.private.channels.upsertManyChannels({
 						channels: [
 							{
 								create: toAOChannel(thread, discordServerId),
@@ -418,7 +423,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 					});
 
 					const threadChannelLiveData =
-						yield* database.channels.findChannelByDiscordId({
+						yield* database.private.channels.findChannelByDiscordId({
 							discordId: thread.id,
 						});
 					yield* Effect.sleep(Duration.millis(10));
@@ -455,11 +460,10 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			);
 			const latestThread = sortedThreads[0];
 			if (latestThread) {
-				const channelLiveData = yield* database.channels.findChannelByDiscordId(
-					{
+				const channelLiveData =
+					yield* database.private.channels.findChannelByDiscordId({
 						discordId: channel.id,
-					},
-				);
+					});
 				yield* Effect.sleep(Duration.millis(10));
 				const currentChannel = channelLiveData;
 
@@ -471,7 +475,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 						`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexed} (latest thread: ${latestThread.name})`,
 					);
 
-					yield* database.channels.updateChannel({
+					yield* database.private.channels.updateChannel({
 						id: channel.id,
 						channel: {
 							id: currentChannel.id,
@@ -512,9 +516,11 @@ function indexGuild(guild: Guild) {
 
 		const database = yield* Database;
 
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: guild.id,
-		});
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: guild.id,
+			},
+		);
 		yield* Effect.sleep(Duration.millis(10));
 		const server = serverLiveData;
 

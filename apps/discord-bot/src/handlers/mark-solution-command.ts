@@ -64,7 +64,7 @@ export function handleMarkSolutionCommand(
 		}
 
 		const serverLiveData = yield* Effect.scoped(
-			database.servers.getServerByDiscordId({
+			database.private.servers.getServerByDiscordId({
 				discordId: targetMessage.guildId,
 			}),
 		);
@@ -108,7 +108,9 @@ export function handleMarkSolutionCommand(
 		}
 
 		const channelLiveData = yield* Effect.scoped(
-			database.channels.findChannelByDiscordId({ discordId: parentChannel.id }),
+			database.private.channels.findChannelByDiscordId({
+				discordId: parentChannel.id,
+			}),
 		);
 
 		const channelSettings = channelLiveData;
@@ -209,7 +211,7 @@ export function handleMarkSolutionCommand(
 		}
 
 		const serverPreferencesLiveData = yield* Effect.scoped(
-			database.server_preferences.getServerPreferencesByServerId({
+			database.private.server_preferences.getServerPreferencesByServerId({
 				serverId: server.discordId,
 			}),
 		);

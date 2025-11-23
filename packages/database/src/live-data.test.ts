@@ -22,9 +22,9 @@ it.scoped("live data updates when server is modified", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server);
 
-		const liveData = yield* database.servers.getServerByDiscordId(
+		const liveData = yield* database.private.servers.getServerByDiscordId(
 			{
 				discordId: serverDiscordId,
 			},
@@ -35,7 +35,7 @@ it.scoped("live data updates when server is modified", () =>
 		expect(liveData?.data?.description).toBe("Test Description");
 
 		const updatedDescription = `A brand new description ${Math.random()}`;
-		yield* database.servers.upsertServer({
+		yield* database.private.servers.upsertServer({
 			...server,
 			description: updatedDescription,
 		});

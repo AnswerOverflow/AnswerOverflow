@@ -29,19 +29,21 @@ const setupTestChannel = (
 			? channelFactory(guild, discordMock.utilities)
 			: discordMock.utilities.createMockTextChannel(guild);
 		discordMock.utilities.seedChannel(channel);
-		yield* database.servers.upsertServer({
+		yield* database.private.servers.upsertServer({
 			name: guild.name,
 			discordId: guild.id,
 			plan: "FREE",
 			approximateMemberCount: 0,
 		});
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: guild.id,
-		});
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: guild.id,
+			},
+		);
 		if (!serverLiveData?._id) {
 			throw new Error("Server not found");
 		}
-		yield* database.channels.upsertChannelWithSettings({
+		yield* database.private.channels.upsertChannelWithSettings({
 			channel: {
 				id: channel.id,
 				serverId: serverLiveData.discordId,

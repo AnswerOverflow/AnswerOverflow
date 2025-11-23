@@ -29,7 +29,7 @@ export default async function Page(props: Props) {
 
 	const message = await Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.messages.getMessageById({
+		return yield* database.private.messages.getMessageById({
 			id: params.messageId,
 		});
 	})
@@ -48,7 +48,7 @@ export default async function Page(props: Props) {
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* Effect.scoped(
-			database.messages.getMessagePageData({
+			database.private.messages.getMessagePageData({
 				messageId: params.messageId,
 			}),
 		);

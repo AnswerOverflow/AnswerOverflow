@@ -28,25 +28,13 @@ export const publicQuery = customQuery(query, {
 		const identityType = identity.type;
 		const subject = identity.subject;
 		if (identityType === "anonymous" && subject) {
-			let anonymousSession = await ctx.db
+			const anonymousSession = await ctx.db
 				.query("anonymousSessions")
 				.withIndex("by_sessionId", (q) => q.eq("sessionId", subject))
 				.first();
 
 			if (!anonymousSession) {
-				const isDev =
-					process.env.CONVEX_DEPLOYMENT === "dev" ||
-					!process.env.CONVEX_DEPLOYMENT;
-				if (isDev) {
-					const sessionId = ctx.db.insert("anonymousSessions", {
-						sessionId: subject,
-						createdAt: Date.now(),
-						expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30,
-					});
-					anonymousSessionId = sessionId;
-				} else {
-					throw new Error("Not authenticated");
-				}
+				throw new Error("Not authenticated");
 			} else {
 				anonymousSessionId = anonymousSession._id;
 			}

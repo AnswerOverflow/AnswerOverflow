@@ -42,7 +42,7 @@ export default async function ChannelPage(props: Props) {
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* Effect.scoped(
-			database.channels.getChannelPageData({
+			database.private.channels.getChannelPageData({
 				serverDiscordId: params.serverId,
 				channelDiscordId: params.channelId,
 			}),

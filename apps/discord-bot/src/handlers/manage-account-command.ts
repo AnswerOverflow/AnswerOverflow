@@ -146,7 +146,9 @@ export function handleManageAccountCommand(
 		}
 
 		const serverLiveData = yield* Effect.scoped(
-			database.servers.getServerByDiscordId({ discordId: interaction.guildId }),
+			database.private.servers.getServerByDiscordId({
+				discordId: interaction.guildId,
+			}),
 		);
 
 		const server = serverLiveData;
@@ -164,7 +166,7 @@ export function handleManageAccountCommand(
 		}
 
 		const userServerSettingsLiveData = yield* Effect.scoped(
-			database.user_server_settings.findUserServerSettingsById({
+			database.private.user_server_settings.findUserServerSettingsById({
 				userId: interaction.user.id,
 				serverId: server.discordId,
 			}),
@@ -189,9 +191,11 @@ export function handleManageAccountCommand(
 					});
 
 		const ignoredAccount =
-			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
-				id: interaction.user.id,
-			});
+			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+				{
+					id: interaction.user.id,
+				},
+			);
 		const isIgnoredAccount = ignoredAccount !== null;
 
 		const state: ManageAccountState = {
@@ -280,7 +284,7 @@ function handleManageAccountButtonPress(
 					customId === menuButtonIds.consentButton;
 
 				const existingSettingsLiveData = yield* Effect.scoped(
-					database.user_server_settings.findUserServerSettingsById({
+					database.private.user_server_settings.findUserServerSettingsById({
 						userId,
 						serverId,
 					}),
@@ -302,7 +306,7 @@ function handleManageAccountButtonPress(
 							apiCallsUsed: 0,
 						};
 
-				yield* database.user_server_settings.upsertUserServerSettings({
+				yield* database.private.user_server_settings.upsertUserServerSettings({
 					settings: updatedSettings,
 				});
 
@@ -319,7 +323,7 @@ function handleManageAccountButtonPress(
 					customId === menuButtonIds.disableMessageIndexingButton;
 
 				const existingSettingsLiveData = yield* Effect.scoped(
-					database.user_server_settings.findUserServerSettingsById({
+					database.private.user_server_settings.findUserServerSettingsById({
 						userId,
 						serverId,
 					}),
@@ -344,7 +348,7 @@ function handleManageAccountButtonPress(
 							apiCallsUsed: 0,
 						};
 
-				yield* database.user_server_settings.upsertUserServerSettings({
+				yield* database.private.user_server_settings.upsertUserServerSettings({
 					settings: updatedSettings,
 				});
 
@@ -362,12 +366,16 @@ function handleManageAccountButtonPress(
 			case menuButtonIds.ignoreGloballyButton:
 			case menuButtonIds.unignoreGloballyButton: {
 				if (customId === menuButtonIds.ignoreGloballyButton) {
-					yield* database.discord_accounts.deleteDiscordAccount({ id: userId });
-					state.isIgnoredAccount = true;
-				} else {
-					yield* database.ignored_discord_accounts.deleteIgnoredDiscordAccount({
+					yield* database.private.discord_accounts.deleteDiscordAccount({
 						id: userId,
 					});
+					state.isIgnoredAccount = true;
+				} else {
+					yield* database.private.ignored_discord_accounts.deleteIgnoredDiscordAccount(
+						{
+							id: userId,
+						},
+					);
 					state.isIgnoredAccount = false;
 				}
 				break;

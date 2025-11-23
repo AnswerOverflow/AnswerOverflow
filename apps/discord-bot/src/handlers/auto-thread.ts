@@ -68,9 +68,10 @@ export function handleAutoThread(message: Message) {
 				}),
 			);
 		}
-		const channelLiveData = yield* database.channels.findChannelByDiscordId({
-			discordId: message.channel.id,
-		});
+		const channelLiveData =
+			yield* database.private.channels.findChannelByDiscordId({
+				discordId: message.channel.id,
+			});
 
 		const channelSettings = channelLiveData ?? null;
 

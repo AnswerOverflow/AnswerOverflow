@@ -23,7 +23,7 @@ export default async function ServerPage(props: Props) {
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* Effect.scoped(
-			database.servers.getServerByDiscordIdWithChannels({
+			database.private.servers.getServerByDiscordIdWithChannels({
 				discordId: params.serverId,
 			}),
 		);

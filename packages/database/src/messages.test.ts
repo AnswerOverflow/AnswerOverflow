@@ -88,10 +88,12 @@ it.scoped("upsertMessage creates a new message", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -99,7 +101,7 @@ it.scoped("upsertMessage creates a new message", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message = createTestMessage(
 			"message123",
@@ -108,12 +110,12 @@ it.scoped("upsertMessage creates a new message", () =>
 			"channel123",
 		);
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message,
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.getMessageById({
+		const liveData = yield* database.private.messages.getMessageById({
 			id: "message123",
 		});
 
@@ -127,10 +129,12 @@ it.scoped("upsertMessage updates an existing message", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -138,7 +142,7 @@ it.scoped("upsertMessage updates an existing message", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message = createTestMessage(
 			"message123",
@@ -148,7 +152,7 @@ it.scoped("upsertMessage updates an existing message", () =>
 			{ content: "Original content" },
 		);
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message,
 			ignoreChecks: true,
 		});
@@ -161,12 +165,12 @@ it.scoped("upsertMessage updates an existing message", () =>
 			{ content: "Updated content" },
 		);
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message: updatedMessage,
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.getMessageById({
+		const liveData = yield* database.private.messages.getMessageById({
 			id: "message123",
 		});
 
@@ -178,10 +182,12 @@ it.scoped("upsertMessage with attachments", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -189,7 +195,7 @@ it.scoped("upsertMessage with attachments", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message = createTestMessage(
 			"message123",
@@ -201,13 +207,13 @@ it.scoped("upsertMessage with attachments", () =>
 		const attachment1 = createTestAttachment("attach1", "message123");
 		const attachment2 = createTestAttachment("attach2", "message123");
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message,
 			attachments: [attachment1, attachment2],
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.getMessageById({
+		const liveData = yield* database.private.messages.getMessageById({
 			id: "message123",
 		});
 
@@ -219,10 +225,12 @@ it.scoped("upsertMessage with reactions", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -230,7 +238,7 @@ it.scoped("upsertMessage with reactions", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message = createTestMessage(
 			"message123",
@@ -242,7 +250,7 @@ it.scoped("upsertMessage with reactions", () =>
 		const emoji1 = createTestEmoji("emoji1", "👍");
 		const emoji2 = createTestEmoji("emoji2", "❤️");
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message,
 			reactions: [
 				{ userId: "user1", emoji: emoji1 },
@@ -251,7 +259,7 @@ it.scoped("upsertMessage with reactions", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.getMessageById({
+		const liveData = yield* database.private.messages.getMessageById({
 			id: "message123",
 		});
 
@@ -263,10 +271,12 @@ it.scoped("upsertManyMessages creates multiple messages", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -274,7 +284,7 @@ it.scoped("upsertManyMessages creates multiple messages", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 		const message001 = generateSnowflakeString();
 		const message002 = generateSnowflakeString();
 		const message003 = generateSnowflakeString();
@@ -284,18 +294,18 @@ it.scoped("upsertManyMessages creates multiple messages", () =>
 			createTestMessage(message003, "author3", serverId, "channel123"),
 		];
 
-		yield* database.messages.upsertManyMessages({
+		yield* database.private.messages.upsertManyMessages({
 			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
-		const liveData1 = yield* database.messages.getMessageById({
+		const liveData1 = yield* database.private.messages.getMessageById({
 			id: message001,
 		});
-		const liveData2 = yield* database.messages.getMessageById({
+		const liveData2 = yield* database.private.messages.getMessageById({
 			id: message002,
 		});
-		const liveData3 = yield* database.messages.getMessageById({
+		const liveData3 = yield* database.private.messages.getMessageById({
 			id: message003,
 		});
 
@@ -309,10 +319,12 @@ it.scoped("findMessagesByChannelId returns messages for a channel", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -320,7 +332,7 @@ it.scoped("findMessagesByChannelId returns messages for a channel", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message001 = generateSnowflakeString();
 		const message002 = generateSnowflakeString();
@@ -331,12 +343,12 @@ it.scoped("findMessagesByChannelId returns messages for a channel", () =>
 			createTestMessage(message003, "author3", serverId, "channel123"),
 		];
 
-		yield* database.messages.upsertManyMessages({
+		yield* database.private.messages.upsertManyMessages({
 			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findMessagesByChannelId({
+		const liveData = yield* database.private.messages.findMessagesByChannelId({
 			channelId: "channel123",
 			limit: 10,
 		});
@@ -353,10 +365,12 @@ it.scoped("findManyMessagesById returns messages by ids", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -364,7 +378,7 @@ it.scoped("findManyMessagesById returns messages by ids", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message001 = generateSnowflakeString();
 		const message002 = generateSnowflakeString();
@@ -375,12 +389,12 @@ it.scoped("findManyMessagesById returns messages by ids", () =>
 			createTestMessage(message003, "author3", serverId, "channel123"),
 		];
 
-		yield* database.messages.upsertManyMessages({
+		yield* database.private.messages.upsertManyMessages({
 			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findManyMessagesById({
+		const liveData = yield* database.private.messages.findManyMessagesById({
 			ids: [message001, message002, message003],
 		});
 
@@ -396,10 +410,12 @@ it.scoped("deleteMessage removes a message", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -407,7 +423,7 @@ it.scoped("deleteMessage removes a message", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message = createTestMessage(
 			"message123",
@@ -416,19 +432,19 @@ it.scoped("deleteMessage removes a message", () =>
 			"channel123",
 		);
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message,
 			ignoreChecks: true,
 		});
 
-		const beforeDelete = yield* database.messages.getMessageById({
+		const beforeDelete = yield* database.private.messages.getMessageById({
 			id: "message123",
 		});
 		expect(beforeDelete?.id).toBe("message123");
 
-		yield* database.messages.deleteMessage({ id: "message123" });
+		yield* database.private.messages.deleteMessage({ id: "message123" });
 
-		const afterDelete = yield* database.messages.getMessageById({
+		const afterDelete = yield* database.private.messages.getMessageById({
 			id: "message123",
 		});
 		expect(afterDelete).toBeNull();
@@ -439,10 +455,12 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -450,7 +468,7 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message001 = generateSnowflakeString();
 		const message002 = generateSnowflakeString();
@@ -461,22 +479,22 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 			createTestMessage(message003, "author3", serverId, "channel123"),
 		];
 
-		yield* database.messages.upsertManyMessages({
+		yield* database.private.messages.upsertManyMessages({
 			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
-		yield* database.messages.deleteManyMessages({
+		yield* database.private.messages.deleteManyMessages({
 			ids: [message001, message002],
 		});
 
-		const deleted1 = yield* database.messages.getMessageById({
+		const deleted1 = yield* database.private.messages.getMessageById({
 			id: message001,
 		});
-		const deleted2 = yield* database.messages.getMessageById({
+		const deleted2 = yield* database.private.messages.getMessageById({
 			id: message002,
 		});
-		const remaining = yield* database.messages.getMessageById({
+		const remaining = yield* database.private.messages.getMessageById({
 			id: message003,
 		});
 
@@ -490,10 +508,12 @@ it.scoped("findMessagesByAuthorId returns messages by author", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -501,7 +521,7 @@ it.scoped("findMessagesByAuthorId returns messages by author", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const messages = [
 			createTestMessage("message1", "author123", serverId, "channel123"),
@@ -509,12 +529,12 @@ it.scoped("findMessagesByAuthorId returns messages by author", () =>
 			createTestMessage("message3", "author456", serverId, "channel123"),
 		];
 
-		yield* database.messages.upsertManyMessages({
+		yield* database.private.messages.upsertManyMessages({
 			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findMessagesByAuthorId({
+		const liveData = yield* database.private.messages.findMessagesByAuthorId({
 			authorId: "author123",
 			limit: 10,
 		});
@@ -529,10 +549,12 @@ it.scoped("findMessagesByServerId returns messages by server", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -540,7 +562,7 @@ it.scoped("findMessagesByServerId returns messages by server", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const messages = [
 			createTestMessage("message1", "author1", serverId, "channel123"),
@@ -548,12 +570,12 @@ it.scoped("findMessagesByServerId returns messages by server", () =>
 			createTestMessage("message3", "author3", serverId, "channel123"),
 		];
 
-		yield* database.messages.upsertManyMessages({
+		yield* database.private.messages.upsertManyMessages({
 			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findMessagesByServerId({
+		const liveData = yield* database.private.messages.findMessagesByServerId({
 			serverId,
 			limit: 10,
 		});
@@ -568,10 +590,12 @@ it.scoped("findMessagesByParentChannelId returns thread messages", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -579,7 +603,7 @@ it.scoped("findMessagesByParentChannelId returns thread messages", () =>
 		}
 
 		const parentChannel = createTestChannel("parent123", serverId);
-		yield* database.channels.upsertChannelWithSettings({
+		yield* database.private.channels.upsertChannelWithSettings({
 			channel: parentChannel,
 		});
 
@@ -587,7 +611,7 @@ it.scoped("findMessagesByParentChannelId returns thread messages", () =>
 			parentId: "parent123",
 			type: 11, // PublicThread
 		});
-		yield* database.channels.upsertChannelWithSettings({
+		yield* database.private.channels.upsertChannelWithSettings({
 			channel: threadChannel,
 		});
 
@@ -600,15 +624,16 @@ it.scoped("findMessagesByParentChannelId returns thread messages", () =>
 			}),
 		];
 
-		yield* database.messages.upsertManyMessages({
+		yield* database.private.messages.upsertManyMessages({
 			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findMessagesByParentChannelId({
-			parentChannelId: "parent123",
-			limit: 10,
-		});
+		const liveData =
+			yield* database.private.messages.findMessagesByParentChannelId({
+				parentChannelId: "parent123",
+				limit: 10,
+			});
 
 		expect(liveData?.length).toBeGreaterThanOrEqual(2);
 		const parentChannelIds = liveData?.map((m) => m.parentChannelId) ?? [];
@@ -620,10 +645,12 @@ it.scoped("findLatestMessageInChannel returns latest message", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -631,7 +658,7 @@ it.scoped("findLatestMessageInChannel returns latest message", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const messages = [
 			createTestMessage("100", "author1", serverId, "channel123"),
@@ -639,14 +666,15 @@ it.scoped("findLatestMessageInChannel returns latest message", () =>
 			createTestMessage("300", "author3", serverId, "channel123"),
 		];
 
-		yield* database.messages.upsertManyMessages({
+		yield* database.private.messages.upsertManyMessages({
 			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findLatestMessageInChannel({
-			channelId: "channel123",
-		});
+		const liveData =
+			yield* database.private.messages.findLatestMessageInChannel({
+				channelId: "channel123",
+			});
 
 		expect(liveData).not.toBeNull();
 		expect(liveData?.channelId).toBe("channel123");
@@ -659,10 +687,11 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			yield* database.servers.upsertServer(testServer);
-			const serverLiveData = yield* database.servers.getServerByDiscordId({
-				discordId: "server123",
-			});
+			yield* database.private.servers.upsertServer(testServer);
+			const serverLiveData =
+				yield* database.private.servers.getServerByDiscordId({
+					discordId: "server123",
+				});
 			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
@@ -670,7 +699,7 @@ it.scoped(
 			}
 
 			const parentChannel = createTestChannel("parent123", serverId);
-			yield* database.channels.upsertChannelWithSettings({
+			yield* database.private.channels.upsertChannelWithSettings({
 				channel: parentChannel,
 			});
 
@@ -678,7 +707,7 @@ it.scoped(
 				parentId: "parent123",
 				type: 11, // PublicThread
 			});
-			yield* database.channels.upsertChannelWithSettings({
+			yield* database.private.channels.upsertChannelWithSettings({
 				channel: threadChannel,
 			});
 
@@ -688,7 +717,7 @@ it.scoped(
 				serverId,
 				"parent123",
 			);
-			yield* database.messages.upsertMessage({
+			yield* database.private.messages.upsertMessage({
 				message: parentMessage,
 				ignoreChecks: true,
 			});
@@ -702,13 +731,13 @@ it.scoped(
 					parentChannelId: "parent123",
 				},
 			);
-			yield* database.messages.upsertMessage({
+			yield* database.private.messages.upsertMessage({
 				message: threadMessage,
 				ignoreChecks: true,
 			});
 
 			const liveData =
-				yield* database.messages.findLatestMessageInChannelAndThreads({
+				yield* database.private.messages.findLatestMessageInChannelAndThreads({
 					channelId: "parent123",
 				});
 
@@ -721,10 +750,12 @@ it.scoped("findAttachmentsByMessageId returns attachments for a message", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -732,7 +763,7 @@ it.scoped("findAttachmentsByMessageId returns attachments for a message", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message = createTestMessage(
 			"message123",
@@ -744,15 +775,16 @@ it.scoped("findAttachmentsByMessageId returns attachments for a message", () =>
 		const attachment1 = createTestAttachment("attach1", "message123");
 		const attachment2 = createTestAttachment("attach2", "message123");
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message,
 			attachments: [attachment1, attachment2],
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findAttachmentsByMessageId({
-			messageId: "message123",
-		});
+		const liveData =
+			yield* database.private.messages.findAttachmentsByMessageId({
+				messageId: "message123",
+			});
 
 		expect(liveData?.length).toBe(2);
 		const attachmentIds = liveData?.map((a) => a.id) ?? [];
@@ -765,10 +797,12 @@ it.scoped("findReactionsByMessageId returns reactions for a message", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -776,7 +810,7 @@ it.scoped("findReactionsByMessageId returns reactions for a message", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message = createTestMessage(
 			"message123",
@@ -788,7 +822,7 @@ it.scoped("findReactionsByMessageId returns reactions for a message", () =>
 		const emoji1 = createTestEmoji("emoji1", "👍");
 		const emoji2 = createTestEmoji("emoji2", "❤️");
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message,
 			reactions: [
 				{ userId: "user1", emoji: emoji1 },
@@ -797,7 +831,7 @@ it.scoped("findReactionsByMessageId returns reactions for a message", () =>
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findReactionsByMessageId({
+		const liveData = yield* database.private.messages.findReactionsByMessageId({
 			messageId: "message123",
 		});
 
@@ -811,10 +845,12 @@ it.scoped("findEmojiById returns emoji by ID", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -822,7 +858,7 @@ it.scoped("findEmojiById returns emoji by ID", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const message = createTestMessage(
 			"message123",
@@ -833,13 +869,15 @@ it.scoped("findEmojiById returns emoji by ID", () =>
 
 		const emoji = createTestEmoji("emoji123", "👍");
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message,
 			reactions: [{ userId: "user1", emoji }],
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findEmojiById({ id: "emoji123" });
+		const liveData = yield* database.private.messages.findEmojiById({
+			id: "emoji123",
+		});
 
 		expect(liveData?.id).toBe("emoji123");
 		expect(liveData?.name).toBe("👍");
@@ -852,10 +890,11 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			yield* database.servers.upsertServer(testServer);
-			const serverLiveData = yield* database.servers.getServerByDiscordId({
-				discordId: "server123",
-			});
+			yield* database.private.servers.upsertServer(testServer);
+			const serverLiveData =
+				yield* database.private.servers.getServerByDiscordId({
+					discordId: "server123",
+				});
 			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
@@ -863,7 +902,7 @@ it.scoped(
 			}
 
 			const channel = createTestChannel("channel123", serverId);
-			yield* database.channels.upsertChannelWithSettings({ channel });
+			yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 			const message001 = generateSnowflakeString();
 			const message002 = generateSnowflakeString();
@@ -874,18 +913,20 @@ it.scoped(
 				createTestMessage(message003, "author3", serverId, "channel123"),
 			];
 
-			yield* database.messages.upsertManyMessages({
+			yield* database.private.messages.upsertManyMessages({
 				messages: messages.map((msg) => ({ message: msg })),
 				ignoreChecks: true,
 			});
 
-			yield* database.messages.deleteManyMessagesByChannelId({
+			yield* database.private.messages.deleteManyMessagesByChannelId({
 				channelId: "channel123",
 			});
 
-			const liveData = yield* database.messages.findMessagesByChannelId({
-				channelId: "channel123",
-			});
+			const liveData = yield* database.private.messages.findMessagesByChannelId(
+				{
+					channelId: "channel123",
+				},
+			);
 			expect(liveData?.length).toBe(0);
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -894,10 +935,12 @@ it.scoped("deleteManyMessagesByUserId removes all messages by a user", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -905,7 +948,7 @@ it.scoped("deleteManyMessagesByUserId removes all messages by a user", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const messages = [
 			createTestMessage("message1", "author123", serverId, "channel123"),
@@ -913,23 +956,25 @@ it.scoped("deleteManyMessagesByUserId removes all messages by a user", () =>
 			createTestMessage("message3", "author456", serverId, "channel123"),
 		];
 
-		yield* database.messages.upsertManyMessages({
+		yield* database.private.messages.upsertManyMessages({
 			messages: messages.map((msg) => ({ message: msg })),
 			ignoreChecks: true,
 		});
 
-		yield* database.messages.deleteManyMessagesByUserId({
+		yield* database.private.messages.deleteManyMessagesByUserId({
 			userId: "author123",
 		});
 
-		const author123Messages = yield* database.messages.findMessagesByAuthorId({
-			authorId: "author123",
-		});
+		const author123Messages =
+			yield* database.private.messages.findMessagesByAuthorId({
+				authorId: "author123",
+			});
 		expect(author123Messages?.length).toBe(0);
 
-		const author456Messages = yield* database.messages.findMessagesByAuthorId({
-			authorId: "author456",
-		});
+		const author456Messages =
+			yield* database.private.messages.findMessagesByAuthorId({
+				authorId: "author456",
+			});
 		expect(author456Messages?.length).toBeGreaterThanOrEqual(1);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -938,10 +983,12 @@ it.scoped("findSolutionsByQuestionId returns solutions for a question", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -949,7 +996,7 @@ it.scoped("findSolutionsByQuestionId returns solutions for a question", () =>
 		}
 
 		const channel = createTestChannel("channel123", serverId);
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
 		const questionMessage = createTestMessage(
 			"question123",
@@ -957,7 +1004,7 @@ it.scoped("findSolutionsByQuestionId returns solutions for a question", () =>
 			serverId,
 			"channel123",
 		);
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message: questionMessage,
 			ignoreChecks: true,
 		});
@@ -981,18 +1028,20 @@ it.scoped("findSolutionsByQuestionId returns solutions for a question", () =>
 			},
 		);
 
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message: solution1,
 			ignoreChecks: true,
 		});
-		yield* database.messages.upsertMessage({
+		yield* database.private.messages.upsertMessage({
 			message: solution2,
 			ignoreChecks: true,
 		});
 
-		const liveData = yield* database.messages.findSolutionsByQuestionId({
-			questionId: "question123",
-		});
+		const liveData = yield* database.private.messages.findSolutionsByQuestionId(
+			{
+				questionId: "question123",
+			},
+		);
 
 		expect(liveData?.length).toBe(2);
 		const solutionIds = liveData?.map((m) => m.id) ?? [];

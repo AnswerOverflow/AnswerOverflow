@@ -52,7 +52,9 @@ export function handleLeaderboardCommand(
 		}
 
 		const serverLiveData = yield* Effect.scoped(
-			database.servers.getServerByDiscordId({ discordId: interaction.guildId }),
+			database.private.servers.getServerByDiscordId({
+				discordId: interaction.guildId,
+			}),
 		);
 
 		const server = serverLiveData;
@@ -69,7 +71,7 @@ export function handleLeaderboardCommand(
 		}
 
 		const topSolversLiveData = yield* Effect.scoped(
-			database.messages.getTopQuestionSolversByServerId({
+			database.private.messages.getTopQuestionSolversByServerId({
 				serverId: server.discordId,
 				limit: 10,
 			}),

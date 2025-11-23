@@ -36,10 +36,12 @@ it.scoped("getServerPreferencesByServerId returns preferences", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: serverDiscordId1,
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: serverDiscordId1,
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -49,14 +51,16 @@ it.scoped("getServerPreferencesByServerId returns preferences", () =>
 		const preferences = createTestServerPreferences(serverId, {
 			customDomain: "example.com",
 		});
-		yield* database.server_preferences.createServerPreferences({
+		yield* database.private.server_preferences.createServerPreferences({
 			preferences,
 		});
 
 		const liveData =
-			yield* database.server_preferences.getServerPreferencesByServerId({
-				serverId,
-			});
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId,
+				},
+			);
 
 		expect(liveData?.serverId).toBe(serverId);
 		expect(liveData?.customDomain).toBe("example.com");
@@ -69,10 +73,11 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			yield* database.servers.upsertServer(testServer);
-			const serverLiveData = yield* database.servers.getServerByDiscordId({
-				discordId: serverDiscordId1,
-			});
+			yield* database.private.servers.upsertServer(testServer);
+			const serverLiveData =
+				yield* database.private.servers.getServerByDiscordId({
+					discordId: serverDiscordId1,
+				});
 			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
@@ -80,9 +85,11 @@ it.scoped(
 			}
 
 			const liveData =
-				yield* database.server_preferences.getServerPreferencesByServerId({
-					serverId,
-				});
+				yield* database.private.server_preferences.getServerPreferencesByServerId(
+					{
+						serverId,
+					},
+				);
 
 			expect(liveData).toBeNull();
 		}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -92,10 +99,11 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData1 = yield* database.servers.getServerByDiscordId({
-			discordId: serverDiscordId1,
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData1 =
+			yield* database.private.servers.getServerByDiscordId({
+				discordId: serverDiscordId1,
+			});
 		const serverId1 = serverLiveData1?.discordId;
 
 		if (!serverId1) {
@@ -105,7 +113,7 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 		const preferences1 = createTestServerPreferences(serverId1, {
 			customDomain: "example.com",
 		});
-		yield* database.server_preferences.createServerPreferences({
+		yield* database.private.server_preferences.createServerPreferences({
 			preferences: preferences1,
 		});
 
@@ -113,10 +121,11 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 			...testServer,
 			discordId: serverDiscordId2,
 		};
-		yield* database.servers.upsertServer(testServer2);
-		const serverLiveData2 = yield* database.servers.getServerByDiscordId({
-			discordId: serverDiscordId2,
-		});
+		yield* database.private.servers.upsertServer(testServer2);
+		const serverLiveData2 =
+			yield* database.private.servers.getServerByDiscordId({
+				discordId: serverDiscordId2,
+			});
 		const serverId2 = serverLiveData2?.discordId;
 
 		if (!serverId2) {
@@ -128,7 +137,7 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 		});
 
 		const result = yield* Effect.either(
-			database.server_preferences.createServerPreferences({
+			database.private.server_preferences.createServerPreferences({
 				preferences: preferences2,
 			}),
 		);
@@ -141,10 +150,12 @@ it.scoped("updateServerPreferences updates existing preferences", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: serverDiscordId1,
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: serverDiscordId1,
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -154,7 +165,7 @@ it.scoped("updateServerPreferences updates existing preferences", () =>
 		const preferences = createTestServerPreferences(serverId, {
 			customDomain: "example.com",
 		});
-		yield* database.server_preferences.createServerPreferences({
+		yield* database.private.server_preferences.createServerPreferences({
 			preferences,
 		});
 
@@ -163,14 +174,16 @@ it.scoped("updateServerPreferences updates existing preferences", () =>
 			considerAllMessagesPublicEnabled: true,
 		});
 
-		yield* database.server_preferences.updateServerPreferences({
+		yield* database.private.server_preferences.updateServerPreferences({
 			preferences: updated,
 		});
 
 		const liveData =
-			yield* database.server_preferences.getServerPreferencesByServerId({
-				serverId,
-			});
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId,
+				},
+			);
 
 		expect(liveData?.customDomain).toBe("updated.com");
 		expect(liveData?.considerAllMessagesPublicEnabled).toBe(true);
@@ -181,10 +194,12 @@ it.scoped("upsertServerPreferences creates or updates preferences", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: serverDiscordId1,
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: serverDiscordId1,
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -194,23 +209,31 @@ it.scoped("upsertServerPreferences creates or updates preferences", () =>
 		const preferences1 = createTestServerPreferences(serverId, {
 			customDomain: "example.com",
 		});
-		yield* database.server_preferences.upsertServerPreferences(preferences1);
+		yield* database.private.server_preferences.upsertServerPreferences(
+			preferences1,
+		);
 
 		const liveData1 =
-			yield* database.server_preferences.getServerPreferencesByServerId({
-				serverId,
-			});
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId,
+				},
+			);
 		expect(liveData1?.customDomain).toBe("example.com");
 
 		const preferences2 = createTestServerPreferences(serverId, {
 			customDomain: "updated.com",
 		});
-		yield* database.server_preferences.upsertServerPreferences(preferences2);
+		yield* database.private.server_preferences.upsertServerPreferences(
+			preferences2,
+		);
 
 		const liveData2 =
-			yield* database.server_preferences.getServerPreferencesByServerId({
-				serverId,
-			});
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId,
+				},
+			);
 		expect(liveData2?.customDomain).toBe("updated.com");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -219,10 +242,12 @@ it.scoped("server preferences handle all flag types", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: serverDiscordId1,
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: serverDiscordId1,
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -237,14 +262,16 @@ it.scoped("server preferences handle all flag types", () =>
 			subpath: "/path",
 		});
 
-		yield* database.server_preferences.createServerPreferences({
+		yield* database.private.server_preferences.createServerPreferences({
 			preferences,
 		});
 
 		const liveData =
-			yield* database.server_preferences.getServerPreferencesByServerId({
-				serverId,
-			});
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId,
+				},
+			);
 
 		expect(liveData?.readTheRulesConsentEnabled).toBe(true);
 		expect(liveData?.considerAllMessagesPublicEnabled).toBe(true);

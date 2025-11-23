@@ -8,7 +8,9 @@ const OtelLayer = createOtelLayer("main-site");
 export default async function BrowsePage() {
 	const serversLiveData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* Effect.scoped(database.servers.getAllServers());
+		const liveData = yield* Effect.scoped(
+			database.private.servers.getAllServers(),
+		);
 		return liveData;
 	})
 		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))

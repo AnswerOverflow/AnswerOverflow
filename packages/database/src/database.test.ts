@@ -51,21 +51,21 @@ it.scoped(
 
 			testClient.resetQueryCallCounts();
 
-			yield* database.servers.upsertServer(server);
+			yield* database.private.servers.upsertServer(server);
 
-			const liveData1 = yield* database.servers.getServerByDiscordId(
+			const liveData1 = yield* database.private.servers.getServerByDiscordId(
 				{
 					discordId: discordId1,
 				},
 				{ subscribe: true },
 			);
-			const liveData2 = yield* database.servers.getServerByDiscordId(
+			const liveData2 = yield* database.private.servers.getServerByDiscordId(
 				{
 					discordId: discordId1,
 				},
 				{ subscribe: true },
 			);
-			const liveData3 = yield* database.servers.getServerByDiscordId(
+			const liveData3 = yield* database.private.servers.getServerByDiscordId(
 				{
 					discordId: discordId1,
 				},
@@ -86,13 +86,13 @@ it.scoped("different args create different LiveData instances", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
-		yield* database.servers.upsertServer(server2);
+		yield* database.private.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server2);
 
-		const liveData1 = yield* database.servers.getServerByDiscordId({
+		const liveData1 = yield* database.private.servers.getServerByDiscordId({
 			discordId: discordId1,
 		});
-		const liveData2 = yield* database.servers.getServerByDiscordId({
+		const liveData2 = yield* database.private.servers.getServerByDiscordId({
 			discordId: discordId2,
 		});
 
@@ -107,12 +107,12 @@ it.scoped("different queries create different LiveData instances", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server);
 
-		const liveData1 = yield* database.servers.getServerByDiscordId({
+		const liveData1 = yield* database.private.servers.getServerByDiscordId({
 			discordId: discordId1,
 		});
-		const liveData2 = yield* database.servers.getAllServers();
+		const liveData2 = yield* database.private.servers.getAllServers();
 
 		expect(liveData1).not.toBe(liveData2);
 
@@ -126,28 +126,28 @@ it.scoped("reference counting: multiple acquisitions increment refCount", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server);
 
 		const scope1 = yield* Scope.make();
 		const scope2 = yield* Scope.make();
 		const scope3 = yield* Scope.make();
 
 		const liveData1 = yield* Scope.extend(
-			database.servers.getServerByDiscordId(
+			database.private.servers.getServerByDiscordId(
 				{ discordId: discordId1 },
 				{ subscribe: true },
 			),
 			scope1,
 		);
 		const liveData2 = yield* Scope.extend(
-			database.servers.getServerByDiscordId(
+			database.private.servers.getServerByDiscordId(
 				{ discordId: discordId1 },
 				{ subscribe: true },
 			),
 			scope2,
 		);
 		const liveData3 = yield* Scope.extend(
-			database.servers.getServerByDiscordId(
+			database.private.servers.getServerByDiscordId(
 				{ discordId: discordId1 },
 				{ subscribe: true },
 			),
@@ -176,21 +176,21 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			yield* database.servers.upsertServer(server);
+			yield* database.private.servers.upsertServer(server);
 
-			const liveData1 = yield* database.servers.getServerByDiscordId(
+			const liveData1 = yield* database.private.servers.getServerByDiscordId(
 				{
 					discordId: discordId1,
 				},
 				{ subscribe: true },
 			);
-			const liveData2 = yield* database.servers.getServerByDiscordId(
+			const liveData2 = yield* database.private.servers.getServerByDiscordId(
 				{
 					discordId: discordId1,
 				},
 				{ subscribe: true },
 			);
-			const liveData3 = yield* database.servers.getServerByDiscordId(
+			const liveData3 = yield* database.private.servers.getServerByDiscordId(
 				{
 					discordId: discordId1,
 				},
@@ -202,7 +202,7 @@ it.scoped(
 			expect(liveData3?.data?.description).toBe("Test Description");
 
 			const updatedDescription = `Updated description ${Math.random()}`;
-			yield* database.servers.upsertServer({
+			yield* database.private.servers.upsertServer({
 				...server,
 				description: updatedDescription,
 			});
@@ -219,16 +219,16 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			yield* database.servers.upsertServer(server);
-			yield* database.servers.upsertServer(server2);
+			yield* database.private.servers.upsertServer(server);
+			yield* database.private.servers.upsertServer(server2);
 
-			const liveData1 = yield* database.servers.getServerByDiscordId(
+			const liveData1 = yield* database.private.servers.getServerByDiscordId(
 				{
 					discordId: discordId1,
 				},
 				{ subscribe: true },
 			);
-			const liveData2 = yield* database.servers.getServerByDiscordId(
+			const liveData2 = yield* database.private.servers.getServerByDiscordId(
 				{
 					discordId: discordId2,
 				},
@@ -239,7 +239,7 @@ it.scoped(
 			expect(liveData2?.data?.discordId).toBe(discordId2);
 
 			const updatedDescription = `Updated description ${Math.random()}`;
-			yield* database.servers.upsertServer({
+			yield* database.private.servers.upsertServer({
 				...server,
 				description: updatedDescription,
 			});
@@ -254,12 +254,12 @@ it.scoped("LiveData can be reacquired after cleanup", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server);
 
 		const scope1 = yield* Scope.make();
 
 		const liveData1 = yield* Scope.extend(
-			database.servers.getServerByDiscordId({ discordId: discordId1 }),
+			database.private.servers.getServerByDiscordId({ discordId: discordId1 }),
 			scope1,
 		);
 		expect(liveData1?.discordId).toBe(discordId1);
@@ -268,7 +268,7 @@ it.scoped("LiveData can be reacquired after cleanup", () =>
 
 		const scope2 = yield* Scope.make();
 		const liveData2 = yield* Scope.extend(
-			database.servers.getServerByDiscordId({ discordId: discordId1 }),
+			database.private.servers.getServerByDiscordId({ discordId: discordId1 }),
 			scope2,
 		);
 
@@ -284,23 +284,23 @@ it.scoped("getAllServers updates when any server changes", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server);
 
-		const liveData = yield* database.servers.getAllServers(undefined, {
+		const liveData = yield* database.private.servers.getAllServers(undefined, {
 			subscribe: true,
 		});
 
 		expect(liveData?.data?.length).toBe(1);
 		expect(liveData?.data?.[0]?.discordId).toBe(discordId1);
 
-		yield* database.servers.upsertServer(server2);
+		yield* database.private.servers.upsertServer(server2);
 
 		expect(liveData?.data?.length).toBe(2);
 		expect(liveData?.data?.some((s) => s.discordId === discordId1)).toBe(true);
 		expect(liveData?.data?.some((s) => s.discordId === discordId2)).toBe(true);
 
 		const updatedDescription = `Updated description ${Math.random()}`;
-		yield* database.servers.upsertServer({
+		yield* database.private.servers.upsertServer({
 			...server,
 			description: updatedDescription,
 		});
@@ -317,12 +317,12 @@ it.scoped("LiveData handles queries with no args", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server);
 
-		const liveData1 = yield* database.servers.getAllServers(undefined, {
+		const liveData1 = yield* database.private.servers.getAllServers(undefined, {
 			subscribe: true,
 		});
-		const liveData2 = yield* database.servers.getAllServers(undefined, {
+		const liveData2 = yield* database.private.servers.getAllServers(undefined, {
 			subscribe: true,
 		});
 
@@ -337,7 +337,7 @@ it.scoped("LiveData handles null query results", () =>
 		const database = yield* Database;
 
 		const nonexistentId = generateSnowflakeString();
-		const liveData = yield* database.servers.getServerByDiscordId({
+		const liveData = yield* database.private.servers.getServerByDiscordId({
 			discordId: nonexistentId,
 		});
 
@@ -350,7 +350,7 @@ it.scoped("LiveData updates when null result becomes non-null", () =>
 		const database = yield* Database;
 
 		const newDiscordId = generateSnowflakeString();
-		const liveData = yield* database.servers.getServerByDiscordId(
+		const liveData = yield* database.private.servers.getServerByDiscordId(
 			{
 				discordId: newDiscordId,
 			},
@@ -364,7 +364,7 @@ it.scoped("LiveData updates when null result becomes non-null", () =>
 			discordId: newDiscordId,
 			name: "New Server",
 		};
-		yield* database.servers.upsertServer(newServer);
+		yield* database.private.servers.upsertServer(newServer);
 
 		expect(liveData?.data?.discordId).toBe(newDiscordId);
 		expect(liveData?.data?.name).toBe("New Server");
@@ -391,7 +391,7 @@ it("LiveData propagates ConvexError from .use()", () =>
 		const database = yield* Database;
 
 		const result = yield* Effect.scoped(
-			database.servers.getServerByDiscordId({ discordId: discordId1 }),
+			database.private.servers.getServerByDiscordId({ discordId: discordId1 }),
 		).pipe(Effect.exit);
 
 		expect(Exit.isFailure(result)).toBe(true);
