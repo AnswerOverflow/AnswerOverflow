@@ -294,8 +294,14 @@ function handleManageAccountButtonPress(
 
 				const updatedSettings = existingSettings
 					? {
-							...existingSettings,
+							userId: existingSettings.userId,
+							serverId: existingSettings.serverId,
+							permissions: existingSettings.permissions,
 							canPubliclyDisplayMessages,
+							messageIndexingDisabled: existingSettings.messageIndexingDisabled,
+							apiKey: existingSettings.apiKey,
+							apiCallsUsed: existingSettings.apiCallsUsed,
+							botAddedTimestamp: existingSettings.botAddedTimestamp,
 						}
 					: {
 							userId,
@@ -333,11 +339,16 @@ function handleManageAccountButtonPress(
 
 				const updatedSettings = existingSettings
 					? {
-							...existingSettings,
-							messageIndexingDisabled,
+							userId: existingSettings.userId,
+							serverId: existingSettings.serverId,
+							permissions: existingSettings.permissions,
 							canPubliclyDisplayMessages: messageIndexingDisabled
 								? false
 								: existingSettings.canPubliclyDisplayMessages,
+							messageIndexingDisabled,
+							apiKey: existingSettings.apiKey,
+							apiCallsUsed: existingSettings.apiCallsUsed,
+							botAddedTimestamp: existingSettings.botAddedTimestamp,
 						}
 					: {
 							userId,
@@ -392,7 +403,7 @@ export const ManageAccountCommandHandlerLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				if (
 					!interaction.isChatInputCommand() ||
-					interaction.commandName === "manage-account"
+					interaction.commandName !== "manage-account"
 				) {
 					return;
 				}

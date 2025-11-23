@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandType,
 	ContextMenuCommandBuilder,
+	PermissionFlagsBits,
 	REST,
 	Routes,
 	SlashCommandBuilder,
@@ -25,6 +26,11 @@ const commands = [
 		.setName("manage-account")
 		.setDescription("Manage how Answer Overflow interacts with your account")
 		.setDMPermission(false),
+	new SlashCommandBuilder()
+		.setName("channel-settings")
+		.setDescription("Configure channel settings in the dashboard")
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 ] as const;
 
 export function registerCommands(): Effect.Effect<void, Error> {

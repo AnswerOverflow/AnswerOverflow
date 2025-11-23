@@ -81,8 +81,7 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.findUserServerSettingsByApiKey": "query",
   "user_server_settings.findUserServerSettingsById": "query",
   "user_server_settings.updateUserServerSettings": "mutation",
-  "user_server_settings.upsertUserServerSettings": "mutation",
-  "user_server_settings.upsertUserServerSettingsInternal": "mutation"
+  "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
 export const PRIVATE_NAMESPACES = ["anonymous_session","attachments","channels","discord_accounts","ignored_discord_accounts","messages","server_preferences","servers","user_server_settings"] as const;
@@ -96,7 +95,7 @@ export const NAMESPACE_STRUCTURE = {
   "messages": ["countMessagesInChannel","countMessagesInManyChannels","deleteManyMessages","deleteManyMessagesByChannelId","deleteManyMessagesByUserId","deleteMessage","findAttachmentsByMessageId","findEmojiById","findLatestMessageInChannel","findLatestMessageInChannelAndThreads","findManyMessagesById","findMessagesByAuthorId","findMessagesByChannelId","findMessagesByParentChannelId","findMessagesByServerId","findReactionsByMessageId","findSolutionsByQuestionId","getMessageById","getMessagePageData","getTopQuestionSolversByServerId","getTotalMessageCount","upsertManyMessages","upsertMessage"],
   "server_preferences": ["createServerPreferences","deleteServerPreferences","getServerPreferencesByServerId","updateServerPreferences","upsertServerPreferences"],
   "servers": ["createServer","createServerExternal","findManyServersByDiscordId","findManyServersById","getAllServers","getBiggestServers","getServerByDiscordId","getServerByDiscordIdWithChannels","updateServer","updateServerExternal","upsertServer","upsertServerExternal"],
-  "user_server_settings": ["countConsentingUsersInManyServers","countConsentingUsersInServer","deleteUserServerSettingsByUserId","findManyUserServerSettings","findUserServerSettingsByApiKey","findUserServerSettingsById","updateUserServerSettings","upsertUserServerSettings","upsertUserServerSettingsInternal"]
+  "user_server_settings": ["countConsentingUsersInManyServers","countConsentingUsersInServer","deleteUserServerSettingsByUserId","findManyUserServerSettings","findUserServerSettingsByApiKey","findUserServerSettingsById","updateUserServerSettings","upsertUserServerSettings"]
 } as const;
 
 export type FunctionPath = keyof typeof FUNCTION_TYPE_MAP;

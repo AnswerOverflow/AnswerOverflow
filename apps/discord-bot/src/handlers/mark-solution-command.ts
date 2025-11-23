@@ -16,7 +16,7 @@ export function handleMarkSolutionCommand(
 		const database = yield* Database;
 
 		yield* Effect.tryPromise({
-			try: () => interaction.deferReply({ ephemeral: false }),
+			try: () => interaction.deferReply({ ephemeral: true }),
 			catch: (error) => error,
 		});
 

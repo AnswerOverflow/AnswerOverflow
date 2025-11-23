@@ -31,9 +31,8 @@ maybe <base/> helps although it's never worked in the past
 
 ## Discord Bot Features:
     Commands:
-    - [ ] Consent 
-    - [ ] Manage Account
-    - [ ] Mark Solution
+    - [X] Manage Account
+    - [X] Mark Solution
     - [ ] Leaderboard
     - [ ] Quick Action
 
@@ -61,7 +60,7 @@ maybe <base/> helps although it's never worked in the past
 
 Main Site:
     - [ ] /
-    - [ ] /robots.txt
+    - [X] /robots.txt
     - [ ] /about
     - [ ] /browse
     - [X] /contributors

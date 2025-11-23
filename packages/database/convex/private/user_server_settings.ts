@@ -173,12 +173,6 @@ export const upsertUserServerSettings = privateMutation({
 		settings: userServerSettingsSchema,
 	},
 	handler: async (ctx, args) => {
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		const _authorizedUser: AuthorizedUser<IsAuthenticated> = assertIsUser(
-			discordAccountId,
-			args.settings.userId,
-		);
-
 		const userSettings = await getManyFrom(
 			ctx.db,
 			"userServerSettings",
@@ -275,84 +269,6 @@ export const deleteUserServerSettingsByUserId = privateMutation({
 		}
 
 		return null;
-	},
-});
-
-export const upsertUserServerSettingsInternal = privateMutation({
-	args: {
-		settings: userServerSettingsSchema,
-	},
-	handler: async (ctx, args) => {
-		const userSettings = await getManyFrom(
-			ctx.db,
-			"userServerSettings",
-			"by_userId",
-			args.settings.userId,
-		);
-		const existing = userSettings.find(
-			(s) => s.serverId === args.settings.serverId,
-		);
-
-		if (existing) {
-			const updatedSettings = { ...args.settings };
-			if (updatedSettings.messageIndexingDisabled) {
-				updatedSettings.canPubliclyDisplayMessages = false;
-			}
-
-			if (
-				updatedSettings.messageIndexingDisabled &&
-				!existing.messageIndexingDisabled
-			) {
-				const allMessages = await getManyFrom(
-					ctx.db,
-					"messages",
-					"by_authorId",
-					args.settings.userId,
-				);
-				const messages = allMessages.filter(
-					(m) => m.serverId === args.settings.serverId,
-				);
-
-				for (const message of messages) {
-					await deleteMessageInternalLogic(ctx, message.id);
-				}
-			}
-
-			await ctx.db.patch(existing._id, updatedSettings);
-			const updatedUserSettings = await getManyFrom(
-				ctx.db,
-				"userServerSettings",
-				"by_userId",
-				args.settings.userId,
-			);
-			const updated = updatedUserSettings.find(
-				(s) => s.serverId === args.settings.serverId,
-			);
-			if (!updated) {
-				throw new Error("Failed to update user server settings");
-			}
-			return updated;
-		} else {
-			const newSettings = { ...args.settings };
-			if (newSettings.messageIndexingDisabled) {
-				newSettings.canPubliclyDisplayMessages = false;
-			}
-
-			await ctx.db.insert("userServerSettings", newSettings);
-			const createdUserSettings = await getManyFrom(
-				ctx.db,
-				"userServerSettings",
-				"by_userId",
-				args.settings.userId,
-			);
-			const created = createdUserSettings.find(
-				(s) => s.serverId === args.settings.serverId,
-			);
-			if (!created) {
-				throw new Error("Failed to create user server settings");
-			}
-			return created;
-		}
 	},
 });
 
