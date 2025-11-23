@@ -1,5 +1,5 @@
 import {
-	ActivityType,
+	type ActivityType,
 	ChannelType,
 	type Client,
 	type ClientEvents,

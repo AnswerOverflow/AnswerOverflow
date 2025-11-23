@@ -1,4 +1,3 @@
-import type { PostHogCaptureClient } from "@packages/analytics/server";
 import { Database } from "@packages/database/database";
 import type { Guild, GuildChannel } from "discord.js";
 import { Console, Effect, Layer } from "effect";

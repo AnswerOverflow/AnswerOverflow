@@ -1,3 +1,4 @@
+import { PostHogCaptureClientLayer } from "@packages/analytics/server/index";
 import { DatabaseLayer } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Console, Effect, Layer, Logger, LogLevel } from "effect";
@@ -13,7 +14,6 @@ import { MessageParityLayer } from "./src/handlers/message-parity";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./src/handlers/send-mark-solution-instructions-handler";
 import { ServerParityLayer } from "./src/handlers/server-parity";
 import { StatusUpdateHandlerLayer } from "./src/handlers/status-update";
-import { PostHogCaptureClientLayer } from "@packages/analytics/server/index";
 
 const program = Effect.gen(function* () {
 	const discord = yield* Discord;

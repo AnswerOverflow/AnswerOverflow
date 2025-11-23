@@ -49,8 +49,7 @@ export function memberToAnalyticsUser<T extends UserType>(
 		[`${userType} Id`]: user.id,
 		[`${userType} Joined At`]: user.joinedAt?.getTime(),
 		[`${userType} Time In Server In Ms`]:
-			user.joinedAt?.getTime() &&
-			new Date().getTime() - user.joinedAt.getTime(),
+			user.joinedAt?.getTime() && Date.now() - user.joinedAt.getTime(),
 	} as UserProps<T>;
 }
 

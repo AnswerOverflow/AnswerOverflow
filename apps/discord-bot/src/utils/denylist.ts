@@ -1,6 +1,5 @@
 import type { Guild } from "discord.js";
 import { Console, Effect } from "effect";
-import { Discord } from "../core/discord-service";
 
 export const DENYLIST = {
 	SERVER_IDS: new Set([
@@ -21,7 +20,6 @@ export const DENYLIST = {
 
 export function leaveServerIfNecessary(guild: Guild) {
 	return Effect.gen(function* () {
-		const discord = yield* Discord;
 		const isServerInDenylist = DENYLIST.SERVER_IDS.has(guild.id);
 		const isServerOwnerInDenylist = DENYLIST.USER_IDS.has(guild.ownerId);
 		const doesNameHaveGrowAGarden = guild.name

@@ -43,28 +43,6 @@ async function hasMessageIndexingDisabled(
 	return settings?.messageIndexingDisabled === true;
 }
 
-async function loadThreadSummary(
-	ctx: QueryCtx | MutationCtx,
-	threadId: string | null,
-	channelId: string,
-	channelType: number,
-) {
-	if (!threadId || threadId === channelId) {
-		return null;
-	}
-
-	const threadChannel = await getChannelWithSettings(ctx, threadId);
-	if (!threadChannel) {
-		return null;
-	}
-
-	return {
-		id: threadChannel.id,
-		name: threadChannel.name,
-		type: channelType,
-	};
-}
-
 function selectMessagesForDisplay(
 	messages: Array<Message>,
 	threadId: string | null,
