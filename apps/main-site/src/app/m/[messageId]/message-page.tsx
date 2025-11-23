@@ -42,6 +42,7 @@ import {
 	getServerHomepageUrl,
 } from "@packages/ui/utils/server";
 import { getDate } from "@packages/ui/utils/snowflake";
+import { Array as Arr, Effect, Predicate } from "effect";
 import { ExternalLink, MessageSquare } from "lucide-react";
 
 type MessagePageData = {
@@ -169,8 +170,9 @@ export function MessagePage(props: { data: MessagePageData }) {
 		return result;
 	});
 
-	const nonNull = messagesWithMergedContent.filter(
-		(msg): msg is EnrichedMessage => msg !== null,
+	const nonNull = Arr.filter(
+		messagesWithMergedContent,
+		Predicate.isNotNullable,
 	);
 	const messagesToDisplay = nonNull.filter((message, index) => {
 		if (message.message.id === firstMessage.message.id) return false;
@@ -388,6 +390,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 			<div className="mx-auto pt-2">
 				<script
 					type="application/ld+json"
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: is fine
 					dangerouslySetInnerHTML={{
 						__html: JSON.stringify({
 							"@context": "https://schema.org",
