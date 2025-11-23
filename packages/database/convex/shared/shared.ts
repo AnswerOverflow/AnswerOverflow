@@ -483,6 +483,28 @@ export async function getMessageById(ctx: QueryCtx | MutationCtx, id: string) {
 		.first();
 }
 
+function isValidSnowflake(id: string): boolean {
+	try {
+		BigInt(id);
+		return /^\d+$/.test(id);
+	} catch {
+		return false;
+	}
+}
+
+function compareIds(a: string, b: string): number {
+	const aIsSnowflake = isValidSnowflake(a);
+	const bIsSnowflake = isValidSnowflake(b);
+
+	if (aIsSnowflake && bIsSnowflake) {
+		const aBig = BigInt(a);
+		const bBig = BigInt(b);
+		return aBig > bBig ? 1 : aBig < bBig ? -1 : 0;
+	}
+
+	return BigInt(a) > BigInt(b) ? 1 : BigInt(a) < BigInt(b) ? -1 : 0;
+}
+
 export async function findMessagesByChannelId(
 	ctx: QueryCtx | MutationCtx,
 	channelId: string,
@@ -497,16 +519,10 @@ export async function findMessagesByChannelId(
 		"channelId",
 	);
 
-	let messages = allMessages.sort((a, b) => {
-		const aId = BigInt(a.id);
-		const bId = BigInt(b.id);
-		if (aId < bId) return -1;
-		if (aId > bId) return 1;
-		return 0;
-	});
+	let messages = allMessages.sort((a, b) => compareIds(a.id, b.id));
 
 	if (after) {
-		messages = messages.filter((msg) => BigInt(msg.id) > BigInt(after));
+		messages = messages.filter((msg) => compareIds(msg.id, after) > 0);
 	}
 
 	const effectiveLimit = limit ?? 100;
@@ -529,11 +545,7 @@ export async function getFirstMessageInChannel(
 		return null;
 	}
 
-	return (
-		allMessages.sort((a, b) =>
-			BigInt(a.id) < BigInt(b.id) ? -1 : BigInt(a.id) > BigInt(b.id) ? 1 : 0,
-		)[0] ?? null
-	);
+	return allMessages.sort((a, b) => compareIds(a.id, b.id))[0] ?? null;
 }
 
 export async function getFirstMessagesInChannels(
@@ -563,13 +575,7 @@ export async function getFirstMessagesInChannels(
 				firstMessage:
 					messages.length === 0
 						? null
-						: (messages.sort((a, b) =>
-								BigInt(a.id) < BigInt(b.id)
-									? -1
-									: BigInt(a.id) > BigInt(b.id)
-										? 1
-										: 0,
-							)[0] ?? null),
+						: (messages.sort((a, b) => compareIds(a.id, b.id))[0] ?? null),
 			};
 		}),
 	);

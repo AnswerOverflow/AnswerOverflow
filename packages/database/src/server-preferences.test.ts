@@ -1,8 +1,11 @@
 import { expect, it } from "@effect/vitest";
+import { generateSnowflakeArray } from "@packages/test-utils/snowflakes";
 import { Effect } from "effect";
 import type { Server, ServerPreferences } from "../convex/schema";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
+
+const [serverDiscordId1, serverDiscordId2] = generateSnowflakeArray(2);
 
 const testServer: Server = {
 	name: "Test Server",
@@ -10,7 +13,7 @@ const testServer: Server = {
 	icon: "https://example.com/icon.png",
 	vanityInviteCode: "test",
 	vanityUrl: "test",
-	discordId: "server123",
+	discordId: serverDiscordId1,
 	plan: "FREE",
 	approximateMemberCount: 0,
 };
@@ -34,7 +37,7 @@ it.scoped("getServerPreferencesByServerId returns preferences", () =>
 
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
+			discordId: serverDiscordId1,
 		});
 		const serverId = serverLiveData?.discordId;
 
@@ -107,11 +110,11 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 
 		const testServer2: Server = {
 			...testServer,
-			discordId: "server456",
+			discordId: serverDiscordId2,
 		};
 		yield* database.servers.upsertServer(testServer2);
 		const serverLiveData2 = yield* database.servers.getServerByDiscordId({
-			discordId: "server456",
+			discordId: serverDiscordId2,
 		});
 		const serverId2 = serverLiveData2?.discordId;
 
@@ -139,7 +142,7 @@ it.scoped("updateServerPreferences updates existing preferences", () =>
 
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
+			discordId: serverDiscordId1,
 		});
 		const serverId = serverLiveData?.discordId;
 
@@ -179,7 +182,7 @@ it.scoped("upsertServerPreferences creates or updates preferences", () =>
 
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
+			discordId: serverDiscordId1,
 		});
 		const serverId = serverLiveData?.discordId;
 
@@ -217,7 +220,7 @@ it.scoped("server preferences handle all flag types", () =>
 
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
+			discordId: serverDiscordId1,
 		});
 		const serverId = serverLiveData?.discordId;
 

@@ -1,8 +1,11 @@
 import { expect, it } from "@effect/vitest";
+import { generateSnowflakeString } from "@packages/test-utils/snowflakes";
 import { Effect } from "effect";
 import type { Server } from "../convex/schema";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
+
+const serverDiscordId = generateSnowflakeString();
 
 const server: Server = {
 	name: "Test Server",
@@ -10,7 +13,7 @@ const server: Server = {
 	icon: "https://example.com/icon.png",
 	vanityInviteCode: "test",
 	vanityUrl: "test",
-	discordId: "123",
+	discordId: serverDiscordId,
 	plan: "FREE",
 	approximateMemberCount: 0,
 };
@@ -23,12 +26,12 @@ it.scoped("live data updates when server is modified", () =>
 
 		const liveData = yield* database.servers.getServerByDiscordId(
 			{
-				discordId: "123",
+				discordId: serverDiscordId,
 			},
 			{ subscribe: true },
 		);
 
-		expect(liveData?.data?.discordId).toBe("123");
+		expect(liveData?.data?.discordId).toBe(serverDiscordId);
 		expect(liveData?.data?.description).toBe("Test Description");
 
 		const updatedDescription = `A brand new description ${Math.random()}`;
@@ -38,6 +41,6 @@ it.scoped("live data updates when server is modified", () =>
 		});
 
 		expect(liveData?.data?.description).toBe(updatedDescription);
-		expect(liveData?.data?.discordId).toBe("123");
+		expect(liveData?.data?.discordId).toBe(serverDiscordId);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );

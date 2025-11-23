@@ -5,7 +5,6 @@ export default {
 		"no-string-comparison": {
 			meta: {
 				type: "problem",
-				fixable: "code",
 				docs: {
 					description:
 						"Disallow comparison operators (<, >, <=, >=) on strings. Use BigInt for Discord snowflake IDs.",
