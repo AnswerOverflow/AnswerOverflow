@@ -617,12 +617,15 @@ export const getMessagePageData = privateQuery({
 			return null;
 		}
 
-		const thread = await loadThreadSummary(
-			ctx,
-			threadId,
-			channelId,
-			channel.type,
-		);
+		const thread = threadId
+			? await getOneFrom(
+					ctx.db,
+					"channels",
+					"by_discordChannelId",
+					threadId,
+					"id",
+				)
+			: null;
 
 		let allMessages = await findMessagesByChannelIdShared(
 			ctx,
