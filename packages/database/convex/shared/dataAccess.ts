@@ -39,7 +39,7 @@ async function fetchMessagePrivacyData(
 	};
 }
 
-async function enrichMessageWithPrivacy(
+async function enrichMessage(
 	ctx: QueryCtx,
 	message: Message,
 ): Promise<SharedEnrichedMessage | null> {
@@ -97,13 +97,23 @@ export function hiddenMessageStub(): MessageWithPrivacyFlags {
 	};
 }
 
+export async function enrichMessages(
+	ctx: QueryCtx,
+	messages: Message[],
+): Promise<SharedEnrichedMessage[]> {
+	const results = await Promise.all(
+		messages.map((message) => enrichMessage(ctx, message)),
+	);
+	return Arr.filter(results, Predicate.isNotNullable);
+}
+
 export async function enrichedMessageWithServerAndChannels(
 	ctx: QueryCtx,
 	message: Message,
 ) {
 	const { parentChannelId } = message;
 	const [enrichedMessage, parentChannel, channel, server] = await Promise.all([
-		enrichMessageWithPrivacy(ctx, message),
+		enrichMessage(ctx, message),
 		parentChannelId
 			? getOneFrom(
 					ctx.db,
@@ -165,16 +175,17 @@ export async function searchMessages(
 			numItems: Math.min(args.paginationOpts.numItems, 10),
 		});
 
-	const results = await Promise.all(
-		paginatedResult.page.map((m) =>
-			enrichedMessageWithServerAndChannels(ctx, m),
+	const results = Arr.filter(
+		await Promise.all(
+			paginatedResult.page.map((m) =>
+				enrichedMessageWithServerAndChannels(ctx, m),
+			),
 		),
+		Predicate.isNotNullable,
 	);
 
-	const filteredResults = Arr.filter(results, Predicate.isNotNullable);
-
 	return {
-		page: filteredResults,
+		page: results,
 		isDone: paginatedResult.isDone,
 		continueCursor: paginatedResult.continueCursor,
 	};

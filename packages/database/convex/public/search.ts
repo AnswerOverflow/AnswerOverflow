@@ -37,34 +37,35 @@ export const getRecentThreads = publicQuery({
 			.order("desc")
 			.paginate(args.paginationOpts);
 
-		const results = await Promise.all(
-			paginatedResult.page.map(async (threadChannel) => {
-				const firstMessage = await getFirstMessageInChannel(
-					ctx,
-					threadChannel.id,
-				);
-				if (!firstMessage) {
-					return null;
-				}
-				const enriched = await enrichedMessageWithServerAndChannels(
-					ctx,
-					firstMessage,
-				);
-				if (!enriched) {
-					return null;
-				}
-				return {
-					...enriched,
-					thread: threadChannel,
-					channel: enriched.channel,
-				};
-			}),
+		const results = Arr.filter(
+			await Promise.all(
+				paginatedResult.page.map(async (threadChannel) => {
+					const firstMessage = await getFirstMessageInChannel(
+						ctx,
+						threadChannel.id,
+					);
+					if (!firstMessage) {
+						return null;
+					}
+					const enriched = await enrichedMessageWithServerAndChannels(
+						ctx,
+						firstMessage,
+					);
+					if (!enriched) {
+						return null;
+					}
+					return {
+						...enriched,
+						thread: threadChannel,
+						channel: enriched.channel,
+					};
+				}),
+			),
+			Predicate.isNotNullable,
 		);
 
-		const filteredResults = Arr.filter(results, Predicate.isNotNullable);
-
 		return {
-			page: filteredResults,
+			page: results,
 			isDone: paginatedResult.isDone,
 			continueCursor: paginatedResult.continueCursor,
 		};
