@@ -1,6 +1,6 @@
 "use client";
 
-import type { Id } from "@packages/database/convex/_generated/dataModel";
+import type { api } from "@packages/database/convex/_generated/api";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import { FormattedNumber } from "@packages/ui/components/formatted-number";
 import { HelpfulFeedback } from "@packages/ui/components/helpful-feedback";
@@ -30,35 +30,13 @@ import {
 	getServerHomepageUrl,
 } from "@packages/ui/utils/server";
 import { getDate } from "@packages/ui/utils/snowflake";
+import type { FunctionReturnType } from "convex/server";
 import { Array as Arr, Predicate } from "effect";
 import { ExternalLink, MessageSquare } from "lucide-react";
 
-type MessagePageData = {
-	messages: EnrichedMessage[];
-	server: {
-		_id: Id<"servers">;
-		discordId: string;
-		name: string;
-		icon?: string;
-		description?: string;
-		approximateMemberCount?: number;
-		customDomain?: string;
-		subpath?: string;
-		vanityInviteCode?: string;
-	};
-	channel: {
-		id: string;
-		name: string;
-		type: number;
-		inviteCode?: string;
-	};
-	thread: {
-		id: string;
-		name: string;
-		type: number;
-		archivedTimestamp?: number;
-	} | null;
-};
+type MessagePageData = NonNullable<
+	FunctionReturnType<typeof api.private.messages.getMessagePageData>
+>;
 
 const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
 
