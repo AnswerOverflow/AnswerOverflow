@@ -37,11 +37,11 @@ maybe <base/> helps although it's never worked in the past
     - [ ] Quick Action
 
     Events:
-    - [ ] Auto thread
+    - [X] Auto thread
     - [ ] Checkmark mark solution
     - [ ] Forum post guidelines consent
     - [ ] Read the rules consent
-    - [ ] Send mark solutions in new threads
+    - [X] Send mark solutions in new threads
     - [ ] Update status
 
     Parity:

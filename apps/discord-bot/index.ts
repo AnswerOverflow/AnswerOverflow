@@ -10,6 +10,7 @@ import { LeaderboardCommandHandlerLayer } from "./src/handlers/leaderboard-comma
 import { ManageAccountCommandHandlerLayer } from "./src/handlers/manage-account-command";
 import { MarkSolutionCommandHandlerLayer } from "./src/handlers/mark-solution-command";
 import { MessageParityLayer } from "./src/handlers/message-parity";
+import { SendMarkSolutionInstructionsHandlerLayer } from "./src/handlers/send-mark-solution-instructions-handler";
 import { ServerParityLayer } from "./src/handlers/server-parity";
 
 const program = Effect.gen(function* () {
@@ -43,6 +44,7 @@ const ParityLayers = Layer.mergeAll(
 	ManageAccountCommandHandlerLayer,
 	MarkSolutionCommandHandlerLayer,
 	ChannelSettingsCommandHandlerLayer,
+	SendMarkSolutionInstructionsHandlerLayer,
 );
 
 const AppLayer = Layer.mergeAll(
