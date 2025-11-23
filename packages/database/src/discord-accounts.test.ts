@@ -23,11 +23,12 @@ it.scoped("getDiscordAccountById returns account", () =>
 		const userId = generateSnowflakeString();
 		const account = createTestDiscordAccount(userId, "Test User");
 
-		yield* database.discord_accounts.createDiscordAccount({ account });
+		yield* database.private.discord_accounts.createDiscordAccount({ account });
 
-		const liveData = yield* database.discord_accounts.getDiscordAccountById({
-			id: userId,
-		});
+		const liveData =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId,
+			});
 
 		expect(liveData?.id).toBe(userId);
 		expect(liveData?.name).toBe("Test User");
@@ -39,9 +40,10 @@ it.scoped("getDiscordAccountById returns null for non-existent account", () =>
 		const database = yield* Database;
 
 		const nonexistentId = generateSnowflakeString();
-		const liveData = yield* database.discord_accounts.getDiscordAccountById({
-			id: nonexistentId,
-		});
+		const liveData =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: nonexistentId,
+			});
 
 		expect(liveData).toBeNull();
 	}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -54,11 +56,12 @@ it.scoped("createDiscordAccount creates a new account", () =>
 		const userId = generateSnowflakeString();
 		const account = createTestDiscordAccount(userId, "Test User");
 
-		yield* database.discord_accounts.createDiscordAccount({ account });
+		yield* database.private.discord_accounts.createDiscordAccount({ account });
 
-		const liveData = yield* database.discord_accounts.getDiscordAccountById({
-			id: userId,
-		});
+		const liveData =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId,
+			});
 
 		expect(liveData?.id).toBe(userId);
 		expect(liveData?.name).toBe("Test User");
@@ -70,22 +73,26 @@ it.scoped("createDiscordAccount returns default account if ignored", () =>
 		const database = yield* Database;
 
 		const userId = generateSnowflakeString();
-		yield* database.ignored_discord_accounts.upsertIgnoredDiscordAccount({
-			id: userId,
-		});
+		yield* database.private.ignored_discord_accounts.upsertIgnoredDiscordAccount(
+			{
+				id: userId,
+			},
+		);
 
 		const account = createTestDiscordAccount(userId, "Test User");
-		const result = yield* database.discord_accounts.createDiscordAccount({
-			account,
-		});
+		const result =
+			yield* database.private.discord_accounts.createDiscordAccount({
+				account,
+			});
 
 		expect(result.id).toBe(userId);
 		expect(result.name).toBe("Test User");
 		expect(result.avatar).toBeUndefined();
 
-		const liveData = yield* database.discord_accounts.getDiscordAccountById({
-			id: userId,
-		});
+		const liveData =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId,
+			});
 		expect(liveData).toBeNull();
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -96,17 +103,20 @@ it.scoped("updateDiscordAccount updates an existing account", () =>
 
 		const userId = generateSnowflakeString();
 		const account = createTestDiscordAccount(userId, "Test User");
-		yield* database.discord_accounts.createDiscordAccount({ account });
+		yield* database.private.discord_accounts.createDiscordAccount({ account });
 
 		const updated = createTestDiscordAccount(userId, "Updated Name", {
 			avatar: "https://example.com/avatar.png",
 		});
 
-		yield* database.discord_accounts.updateDiscordAccount({ account: updated });
-
-		const liveData = yield* database.discord_accounts.getDiscordAccountById({
-			id: userId,
+		yield* database.private.discord_accounts.updateDiscordAccount({
+			account: updated,
 		});
+
+		const liveData =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId,
+			});
 
 		expect(liveData?.name).toBe("Updated Name");
 		expect(liveData?.avatar).toBe("https://example.com/avatar.png");
@@ -119,23 +129,25 @@ it.scoped("upsertDiscordAccount creates or updates account", () =>
 
 		const userId = generateSnowflakeString();
 		const account1 = createTestDiscordAccount(userId, "Test User");
-		yield* database.discord_accounts.upsertDiscordAccount({
+		yield* database.private.discord_accounts.upsertDiscordAccount({
 			account: account1,
 		});
 
-		const liveData1 = yield* database.discord_accounts.getDiscordAccountById({
-			id: userId,
-		});
+		const liveData1 =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId,
+			});
 		expect(liveData1?.name).toBe("Test User");
 
 		const account2 = createTestDiscordAccount(userId, "Updated Name");
-		yield* database.discord_accounts.upsertDiscordAccount({
+		yield* database.private.discord_accounts.upsertDiscordAccount({
 			account: account2,
 		});
 
-		const liveData2 = yield* database.discord_accounts.getDiscordAccountById({
-			id: userId,
-		});
+		const liveData2 =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId,
+			});
 		expect(liveData2?.name).toBe("Updated Name");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -153,17 +165,22 @@ it.scoped("get multiple accounts by individual calls", () =>
 			createTestDiscordAccount(userId3, "User 3"),
 		];
 
-		yield* database.discord_accounts.createManyDiscordAccounts({ accounts });
+		yield* database.private.discord_accounts.createManyDiscordAccounts({
+			accounts,
+		});
 
-		const user1 = yield* database.discord_accounts.getDiscordAccountById({
-			id: userId1,
-		});
-		const user2 = yield* database.discord_accounts.getDiscordAccountById({
-			id: userId2,
-		});
-		const user3 = yield* database.discord_accounts.getDiscordAccountById({
-			id: userId3,
-		});
+		const user1 =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId1,
+			});
+		const user2 =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId2,
+			});
+		const user3 =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId3,
+			});
 
 		expect(user1?.id).toBe(userId1);
 		expect(user1?.name).toBe("User 1");
@@ -180,24 +197,30 @@ it.scoped("deleteDiscordAccount deletes account and adds to ignored", () =>
 
 		const userId = generateSnowflakeString();
 		const account = createTestDiscordAccount(userId, "Test User");
-		yield* database.discord_accounts.createDiscordAccount({ account });
+		yield* database.private.discord_accounts.createDiscordAccount({ account });
 
-		const beforeDelete = yield* database.discord_accounts.getDiscordAccountById(
-			{ id: userId },
-		);
+		const beforeDelete =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId,
+			});
 		expect(beforeDelete?.id).toBe(userId);
 
-		yield* database.discord_accounts.deleteDiscordAccount({ id: userId });
-
-		const afterDelete = yield* database.discord_accounts.getDiscordAccountById({
+		yield* database.private.discord_accounts.deleteDiscordAccount({
 			id: userId,
 		});
+
+		const afterDelete =
+			yield* database.private.discord_accounts.getDiscordAccountById({
+				id: userId,
+			});
 		expect(afterDelete).toBeNull();
 
 		const ignored =
-			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
-				id: userId,
-			});
+			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+				{
+					id: userId,
+				},
+			);
 		expect(ignored?.id).toBe(userId);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -207,14 +230,18 @@ it.scoped("findIgnoredDiscordAccountById returns ignored account", () =>
 		const database = yield* Database;
 
 		const userId = generateSnowflakeString();
-		yield* database.ignored_discord_accounts.upsertIgnoredDiscordAccount({
-			id: userId,
-		});
+		yield* database.private.ignored_discord_accounts.upsertIgnoredDiscordAccount(
+			{
+				id: userId,
+			},
+		);
 
 		const liveData =
-			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
-				id: userId,
-			});
+			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+				{
+					id: userId,
+				},
+			);
 
 		expect(liveData?.id).toBe(userId);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -228,9 +255,11 @@ it.scoped(
 
 			const userId = generateSnowflakeString();
 			const liveData =
-				yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
-					id: userId,
-				});
+				yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+					{
+						id: userId,
+					},
+				);
 
 			expect(liveData).toBeNull();
 		}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -241,24 +270,32 @@ it.scoped("deleteIgnoredDiscordAccount removes ignored account", () =>
 		const database = yield* Database;
 
 		const userId = generateSnowflakeString();
-		yield* database.ignored_discord_accounts.upsertIgnoredDiscordAccount({
-			id: userId,
-		});
+		yield* database.private.ignored_discord_accounts.upsertIgnoredDiscordAccount(
+			{
+				id: userId,
+			},
+		);
 
 		const beforeDelete =
-			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
-				id: userId,
-			});
+			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+				{
+					id: userId,
+				},
+			);
 		expect(beforeDelete?.id).toBe(userId);
 
-		yield* database.ignored_discord_accounts.deleteIgnoredDiscordAccount({
-			id: userId,
-		});
+		yield* database.private.ignored_discord_accounts.deleteIgnoredDiscordAccount(
+			{
+				id: userId,
+			},
+		);
 
 		const afterDelete =
-			yield* database.ignored_discord_accounts.findIgnoredDiscordAccountById({
-				id: userId,
-			});
+			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+				{
+					id: userId,
+				},
+			);
 		expect(afterDelete).toBeNull();
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -272,18 +309,24 @@ it.scoped(
 			const userId1 = generateSnowflakeString();
 			const userId2 = generateSnowflakeString();
 			const userId3 = generateSnowflakeString();
-			yield* database.ignored_discord_accounts.upsertIgnoredDiscordAccount({
-				id: userId1,
-			});
-			yield* database.ignored_discord_accounts.upsertIgnoredDiscordAccount({
-				id: userId2,
-			});
-			yield* database.ignored_discord_accounts.upsertIgnoredDiscordAccount({
-				id: userId3,
-			});
+			yield* database.private.ignored_discord_accounts.upsertIgnoredDiscordAccount(
+				{
+					id: userId1,
+				},
+			);
+			yield* database.private.ignored_discord_accounts.upsertIgnoredDiscordAccount(
+				{
+					id: userId2,
+				},
+			);
+			yield* database.private.ignored_discord_accounts.upsertIgnoredDiscordAccount(
+				{
+					id: userId3,
+				},
+			);
 
 			const liveData =
-				yield* database.ignored_discord_accounts.findManyIgnoredDiscordAccountsById(
+				yield* database.private.ignored_discord_accounts.findManyIgnoredDiscordAccountsById(
 					{ ids: [userId1, userId2, userId3] },
 				);
 

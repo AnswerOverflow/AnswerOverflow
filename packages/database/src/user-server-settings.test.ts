@@ -39,10 +39,11 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			yield* database.servers.upsertServer(testServer);
-			const serverLiveData = yield* database.servers.getServerByDiscordId({
-				discordId: serverDiscordId,
-			});
+			yield* database.private.servers.upsertServer(testServer);
+			const serverLiveData =
+				yield* database.private.servers.getServerByDiscordId({
+					discordId: serverDiscordId,
+				});
 			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
@@ -51,10 +52,12 @@ it.scoped(
 
 			const userId = generateSnowflakeString();
 			const liveData =
-				yield* database.user_server_settings.findUserServerSettingsById({
-					userId,
-					serverId: serverId,
-				});
+				yield* database.private.user_server_settings.findUserServerSettingsById(
+					{
+						userId,
+						serverId: serverId,
+					},
+				);
 
 			expect(liveData).toBeNull();
 		}).pipe(Effect.provide(DatabaseTestLayer)),

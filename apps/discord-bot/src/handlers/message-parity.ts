@@ -22,9 +22,10 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const serverLiveData = yield* database.servers.getServerByDiscordId({
-					discordId: newMessage.guildId ?? "",
-				});
+				const serverLiveData =
+					yield* database.private.servers.getServerByDiscordId({
+						discordId: newMessage.guildId ?? "",
+					});
 				const server = serverLiveData;
 
 				if (!server) {
@@ -34,9 +35,11 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const messageLiveData = yield* database.messages.getMessageById({
-					id: newMessage.id,
-				});
+				const messageLiveData = yield* database.private.messages.getMessageById(
+					{
+						id: newMessage.id,
+					},
+				);
 				const existingMessage = messageLiveData;
 
 				if (!existingMessage) {
@@ -62,7 +65,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					);
 
 					const uploadResults =
-						yield* database.attachments.uploadManyAttachmentsFromUrls({
+						yield* database.private.attachments.uploadManyAttachmentsFromUrls({
 							attachments: attachmentsToUpload,
 						});
 
@@ -97,7 +100,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					),
 				);
 
-				yield* database.discord_accounts
+				yield* database.private.discord_accounts
 					.upsertDiscordAccount({
 						account: toAODiscordAccount(newMessage.author),
 					})
@@ -118,16 +121,18 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const messageLiveData = yield* database.messages.getMessageById({
-					id: message.id,
-				});
+				const messageLiveData = yield* database.private.messages.getMessageById(
+					{
+						id: message.id,
+					},
+				);
 				const existingMessage = messageLiveData;
 
 				if (!existingMessage) {
 					return;
 				}
 
-				yield* database.messages.deleteMessage({ id: message.id });
+				yield* database.private.messages.deleteMessage({ id: message.id });
 				yield* Console.log(`Deleted message ${message.id}`);
 			}).pipe(
 				Effect.catchAll((error) =>
@@ -147,7 +152,9 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* database.messages.deleteManyMessages({ ids: messageIds });
+				yield* database.private.messages.deleteManyMessages({
+					ids: messageIds,
+				});
 				yield* Console.log(`Bulk deleted ${messageIds.length} messages`);
 			}).pipe(
 				Effect.catchAll((error) =>
@@ -170,9 +177,10 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					yield* Console.log("Received ping command!");
 				}
 
-				const serverLiveData = yield* database.servers.getServerByDiscordId({
-					discordId: message.guildId ?? "",
-				});
+				const serverLiveData =
+					yield* database.private.servers.getServerByDiscordId({
+						discordId: message.guildId ?? "",
+					});
 				const server = serverLiveData;
 
 				if (!server) {
@@ -201,7 +209,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					);
 
 					const uploadResults =
-						yield* database.attachments.uploadManyAttachmentsFromUrls({
+						yield* database.private.attachments.uploadManyAttachmentsFromUrls({
 							attachments: attachmentsToUpload,
 						});
 
@@ -233,7 +241,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					),
 				);
 
-				yield* database.discord_accounts
+				yield* database.private.discord_accounts
 					.upsertDiscordAccount({ account: toAODiscordAccount(message.author) })
 					.pipe(
 						Effect.catchAll((error) =>

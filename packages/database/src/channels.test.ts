@@ -50,10 +50,12 @@ it.scoped("getChannelByDiscordId returns channel with flags", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -65,9 +67,12 @@ it.scoped("getChannelByDiscordId returns channel with flags", () =>
 			indexingEnabled: true,
 		});
 
-		yield* database.channels.upsertChannelWithSettings({ channel, settings });
+		yield* database.private.channels.upsertChannelWithSettings({
+			channel,
+			settings,
+		});
 
-		const liveData = yield* database.channels.findChannelByDiscordId({
+		const liveData = yield* database.private.channels.findChannelByDiscordId({
 			discordId: "channel123",
 		});
 
@@ -80,7 +85,7 @@ it.scoped("getChannelByDiscordId returns null for non-existent channel", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const liveData = yield* database.channels.findChannelByDiscordId({
+		const liveData = yield* database.private.channels.findChannelByDiscordId({
 			discordId: "nonexistent",
 		});
 
@@ -92,10 +97,12 @@ it.scoped("findChannelByInviteCode returns channel by invite code", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -106,9 +113,9 @@ it.scoped("findChannelByInviteCode returns channel by invite code", () =>
 			inviteCode: "abc123",
 		});
 
-		yield* database.channels.upsertChannelWithSettings({ channel });
+		yield* database.private.channels.upsertChannelWithSettings({ channel });
 
-		const liveData = yield* database.channels.findChannelByInviteCode({
+		const liveData = yield* database.private.channels.findChannelByInviteCode({
 			inviteCode: "abc123",
 		});
 
@@ -121,7 +128,7 @@ it.scoped("findChannelByInviteCode returns null for non-existent invite", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const liveData = yield* database.channels.findChannelByInviteCode({
+		const liveData = yield* database.private.channels.findChannelByInviteCode({
 			inviteCode: "nonexistent",
 		});
 
@@ -133,10 +140,12 @@ it.scoped("findAllChannelsByServerId returns all channels for server", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -147,13 +156,21 @@ it.scoped("findAllChannelsByServerId returns all channels for server", () =>
 		const channel2 = createTestChannel("channel2", serverId, { type: 15 }); // Forum
 		const channel3 = createTestChannel("channel3", serverId, { type: 5 }); // Announcement
 
-		yield* database.channels.upsertChannelWithSettings({ channel: channel1 });
-		yield* database.channels.upsertChannelWithSettings({ channel: channel2 });
-		yield* database.channels.upsertChannelWithSettings({ channel: channel3 });
-
-		const liveData = yield* database.channels.findAllChannelsByServerId({
-			serverId,
+		yield* database.private.channels.upsertChannelWithSettings({
+			channel: channel1,
 		});
+		yield* database.private.channels.upsertChannelWithSettings({
+			channel: channel2,
+		});
+		yield* database.private.channels.upsertChannelWithSettings({
+			channel: channel3,
+		});
+
+		const liveData = yield* database.private.channels.findAllChannelsByServerId(
+			{
+				serverId,
+			},
+		);
 
 		expect(liveData?.length).toBe(3);
 		expect(liveData?.some((c) => c.id === "channel1")).toBe(true);
@@ -166,10 +183,12 @@ it.scoped("findAllThreadsByParentId returns threads for parent channel", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -186,13 +205,17 @@ it.scoped("findAllThreadsByParentId returns threads for parent channel", () =>
 			type: 11, // PublicThread
 		});
 
-		yield* database.channels.upsertChannelWithSettings({
+		yield* database.private.channels.upsertChannelWithSettings({
 			channel: parentChannel,
 		});
-		yield* database.channels.upsertChannelWithSettings({ channel: thread1 });
-		yield* database.channels.upsertChannelWithSettings({ channel: thread2 });
+		yield* database.private.channels.upsertChannelWithSettings({
+			channel: thread1,
+		});
+		yield* database.private.channels.upsertChannelWithSettings({
+			channel: thread2,
+		});
 
-		const liveData = yield* database.channels.findAllThreadsByParentId({
+		const liveData = yield* database.private.channels.findAllThreadsByParentId({
 			parentId: "parent123",
 		});
 
@@ -205,10 +228,12 @@ it.scoped("findAllThreadsByParentId respects limit parameter", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -216,7 +241,7 @@ it.scoped("findAllThreadsByParentId respects limit parameter", () =>
 		}
 
 		const parentChannel = createTestChannel("parent456", serverId);
-		yield* database.channels.upsertChannelWithSettings({
+		yield* database.private.channels.upsertChannelWithSettings({
 			channel: parentChannel,
 		});
 
@@ -225,10 +250,12 @@ it.scoped("findAllThreadsByParentId respects limit parameter", () =>
 				parentId: "parent456",
 				type: 11,
 			});
-			yield* database.channels.upsertChannelWithSettings({ channel: thread });
+			yield* database.private.channels.upsertChannelWithSettings({
+				channel: thread,
+			});
 		}
 
-		const liveData = yield* database.channels.findAllThreadsByParentId({
+		const liveData = yield* database.private.channels.findAllThreadsByParentId({
 			parentId: "parent456",
 			limit: 3,
 		});
@@ -241,10 +268,12 @@ it.scoped("findLatestThreads returns latest threads", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -255,10 +284,14 @@ it.scoped("findLatestThreads returns latest threads", () =>
 			const thread = createTestChannel(`thread${i}`, serverId, {
 				type: 11, // PublicThread
 			});
-			yield* database.channels.upsertChannelWithSettings({ channel: thread });
+			yield* database.private.channels.upsertChannelWithSettings({
+				channel: thread,
+			});
 		}
 
-		const liveData = yield* database.channels.findLatestThreads({ take: 3 });
+		const liveData = yield* database.private.channels.findLatestThreads({
+			take: 3,
+		});
 
 		expect(liveData?.length).toBe(3);
 		expect(liveData?.every((t) => t.type === 11)).toBe(true);
@@ -269,10 +302,12 @@ it.scoped("createChannel creates new channel", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -282,9 +317,9 @@ it.scoped("createChannel creates new channel", () =>
 		const channel = createTestChannel("newchannel", serverId);
 		const settings = createTestSettings("newchannel");
 
-		yield* database.channels.createChannel({ channel, settings });
+		yield* database.private.channels.createChannel({ channel, settings });
 
-		const liveData = yield* database.channels.findChannelByDiscordId({
+		const liveData = yield* database.private.channels.findChannelByDiscordId({
 			discordId: "newchannel",
 		});
 
@@ -297,10 +332,12 @@ it.scoped("createManyChannels creates multiple channels", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -321,9 +358,9 @@ it.scoped("createManyChannels creates multiple channels", () =>
 			},
 		];
 
-		yield* database.channels.createManyChannels({ channels });
+		yield* database.private.channels.createManyChannels({ channels });
 
-		const liveData = yield* database.channels.findManyChannelsById({
+		const liveData = yield* database.private.channels.findManyChannelsById({
 			ids: ["multi1", "multi2", "multi3"],
 		});
 
@@ -335,10 +372,12 @@ it.scoped("updateChannel updates existing channel", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -346,7 +385,7 @@ it.scoped("updateChannel updates existing channel", () =>
 		}
 
 		const channel = createTestChannel("updatechannel", serverId);
-		yield* database.channels.createChannel({ channel });
+		yield* database.private.channels.createChannel({ channel });
 
 		const updatedChannel = createTestChannel("updatechannel", serverId, {
 			name: "Updated Channel Name",
@@ -355,13 +394,13 @@ it.scoped("updateChannel updates existing channel", () =>
 			indexingEnabled: true,
 		});
 
-		yield* database.channels.updateChannel({
+		yield* database.private.channels.updateChannel({
 			id: "updatechannel",
 			channel: updatedChannel,
 			settings: updatedSettings,
 		});
 
-		const liveData = yield* database.channels.findChannelByDiscordId({
+		const liveData = yield* database.private.channels.findChannelByDiscordId({
 			discordId: "updatechannel",
 		});
 
@@ -374,10 +413,12 @@ it.scoped("updateManyChannels updates multiple channels", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -388,9 +429,9 @@ it.scoped("updateManyChannels updates multiple channels", () =>
 		const channel2 = createTestChannel("batch2", serverId);
 		const channel3 = createTestChannel("batch3", serverId);
 
-		yield* database.channels.createChannel({ channel: channel1 });
-		yield* database.channels.createChannel({ channel: channel2 });
-		yield* database.channels.createChannel({ channel: channel3 });
+		yield* database.private.channels.createChannel({ channel: channel1 });
+		yield* database.private.channels.createChannel({ channel: channel2 });
+		yield* database.private.channels.createChannel({ channel: channel3 });
 
 		const updatedChannels = [
 			createTestChannel("batch1", serverId, { name: "Updated Batch 1" }),
@@ -398,9 +439,11 @@ it.scoped("updateManyChannels updates multiple channels", () =>
 			createTestChannel("batch3", serverId, { name: "Updated Batch 3" }),
 		];
 
-		yield* database.channels.updateManyChannels({ channels: updatedChannels });
+		yield* database.private.channels.updateManyChannels({
+			channels: updatedChannels,
+		});
 
-		const liveData = yield* database.channels.findManyChannelsById({
+		const liveData = yield* database.private.channels.findManyChannelsById({
 			ids: ["batch1", "batch2", "batch3"],
 		});
 
@@ -420,10 +463,12 @@ it.scoped("deleteChannel deletes channel and its threads", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -440,20 +485,22 @@ it.scoped("deleteChannel deletes channel and its threads", () =>
 			type: 11,
 		});
 
-		yield* database.channels.createChannel({ channel: parentChannel });
-		yield* database.channels.createChannel({ channel: thread1 });
-		yield* database.channels.createChannel({ channel: thread2 });
+		yield* database.private.channels.createChannel({ channel: parentChannel });
+		yield* database.private.channels.createChannel({ channel: thread1 });
+		yield* database.private.channels.createChannel({ channel: thread2 });
 
-		yield* database.channels.deleteChannel({ id: "parent789" });
+		yield* database.private.channels.deleteChannel({ id: "parent789" });
 
-		const parentLiveData = yield* database.channels.findChannelByDiscordId({
-			discordId: "parent789",
-		});
+		const parentLiveData =
+			yield* database.private.channels.findChannelByDiscordId({
+				discordId: "parent789",
+			});
 		expect(parentLiveData).toBeNull();
 
-		const threadsLiveData = yield* database.channels.findAllThreadsByParentId({
-			parentId: "parent789",
-		});
+		const threadsLiveData =
+			yield* database.private.channels.findAllThreadsByParentId({
+				parentId: "parent789",
+			});
 		expect(threadsLiveData?.length).toBe(0);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -462,10 +509,12 @@ it.scoped("upsertManyChannels creates and updates channels", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -473,7 +522,9 @@ it.scoped("upsertManyChannels creates and updates channels", () =>
 		}
 
 		const existingChannel = createTestChannel("upsert1", serverId);
-		yield* database.channels.createChannel({ channel: existingChannel });
+		yield* database.private.channels.createChannel({
+			channel: existingChannel,
+		});
 
 		const channels = [
 			{
@@ -491,9 +542,9 @@ it.scoped("upsertManyChannels creates and updates channels", () =>
 			},
 		];
 
-		yield* database.channels.upsertManyChannels({ channels });
+		yield* database.private.channels.upsertManyChannels({ channels });
 
-		const liveData = yield* database.channels.findManyChannelsById({
+		const liveData = yield* database.private.channels.findManyChannelsById({
 			ids: ["upsert1", "upsert2"],
 		});
 
@@ -511,37 +562,39 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			yield* database.servers.upsertServer(testServer);
-			const serverLiveData = yield* database.servers.getServerByDiscordId({
-				discordId: "server123",
-			});
+			yield* database.private.servers.upsertServer(testServer);
+			const serverLiveData =
+				yield* database.private.servers.getServerByDiscordId({
+					discordId: "server123",
+				});
 			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
 				throw new Error("Server not found");
 			}
 
-			const liveData = yield* database.channels.findAllChannelsByServerId(
-				{
-					serverId,
-				},
-				{ subscribe: true },
-			);
+			const liveData =
+				yield* database.private.channels.findAllChannelsByServerId(
+					{
+						serverId,
+					},
+					{ subscribe: true },
+				);
 
 			expect(liveData?.data?.length).toBe(0);
 
 			const channel1 = createTestChannel("react1", serverId);
-			yield* database.channels.createChannel({ channel: channel1 });
+			yield* database.private.channels.createChannel({ channel: channel1 });
 
 			expect(liveData?.data?.length).toBe(1);
 			expect(liveData?.data?.[0]?.id).toBe("react1");
 
 			const channel2 = createTestChannel("react2", serverId);
-			yield* database.channels.createChannel({ channel: channel2 });
+			yield* database.private.channels.createChannel({ channel: channel2 });
 
 			expect(liveData?.data?.length).toBe(2);
 
-			yield* database.channels.deleteChannel({ id: "react1" });
+			yield* database.private.channels.deleteChannel({ id: "react1" });
 
 			expect(liveData?.data?.length).toBe(1);
 			expect(liveData?.data?.[0]?.id).toBe("react2");
@@ -554,10 +607,11 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			yield* database.servers.upsertServer(testServer);
-			const serverLiveData = yield* database.servers.getServerByDiscordId({
-				discordId: "server123",
-			});
+			yield* database.private.servers.upsertServer(testServer);
+			const serverLiveData =
+				yield* database.private.servers.getServerByDiscordId({
+					discordId: "server123",
+				});
 			const serverId = serverLiveData?.discordId;
 
 			if (!serverId) {
@@ -565,14 +619,17 @@ it.scoped(
 			}
 
 			const parentChannel = createTestChannel("parentreact", serverId);
-			yield* database.channels.createChannel({ channel: parentChannel });
+			yield* database.private.channels.createChannel({
+				channel: parentChannel,
+			});
 
-			const liveData = yield* database.channels.findAllThreadsByParentId(
-				{
-					parentId: "parentreact",
-				},
-				{ subscribe: true },
-			);
+			const liveData =
+				yield* database.private.channels.findAllThreadsByParentId(
+					{
+						parentId: "parentreact",
+					},
+					{ subscribe: true },
+				);
 
 			expect(liveData?.data?.length).toBe(0);
 
@@ -580,7 +637,7 @@ it.scoped(
 				parentId: "parentreact",
 				type: 11,
 			});
-			yield* database.channels.createChannel({ channel: thread1 });
+			yield* database.private.channels.createChannel({ channel: thread1 });
 
 			expect(liveData?.data?.length).toBe(1);
 
@@ -588,11 +645,11 @@ it.scoped(
 				parentId: "parentreact",
 				type: 11,
 			});
-			yield* database.channels.createChannel({ channel: thread2 });
+			yield* database.private.channels.createChannel({ channel: thread2 });
 
 			expect(liveData?.data?.length).toBe(2);
 
-			yield* database.channels.deleteChannel({ id: "threadreact1" });
+			yield* database.private.channels.deleteChannel({ id: "threadreact1" });
 
 			expect(liveData?.data?.length).toBe(1);
 			expect(liveData?.data?.[0]?.id).toBe("threadreact2");
@@ -603,10 +660,12 @@ it.scoped("getChannelByDiscordId updates when channel settings change", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -614,9 +673,9 @@ it.scoped("getChannelByDiscordId updates when channel settings change", () =>
 		}
 
 		const channel = createTestChannel("settingschannel", serverId);
-		yield* database.channels.createChannel({ channel });
+		yield* database.private.channels.createChannel({ channel });
 
-		const liveData = yield* database.channels.findChannelByDiscordId(
+		const liveData = yield* database.private.channels.findChannelByDiscordId(
 			{
 				discordId: "settingschannel",
 			},
@@ -631,7 +690,7 @@ it.scoped("getChannelByDiscordId updates when channel settings change", () =>
 			autoThreadEnabled: true,
 		});
 
-		yield* database.channels.updateChannel({
+		yield* database.private.channels.updateChannel({
 			id: "settingschannel",
 			channel: updatedChannel,
 			settings: updatedSettings,
@@ -646,10 +705,12 @@ it.scoped("findManyChannelsById updates when channels change", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -660,16 +721,17 @@ it.scoped("findManyChannelsById updates when channels change", () =>
 		const channel2 = createTestChannel("batchreact2", serverId);
 		const channel3 = createTestChannel("batchreact3", serverId);
 
-		yield* database.channels.createChannel({ channel: channel1 });
-		yield* database.channels.createChannel({ channel: channel2 });
-		yield* database.channels.createChannel({ channel: channel3 });
+		yield* database.private.channels.createChannel({ channel: channel1 });
+		yield* database.private.channels.createChannel({ channel: channel2 });
+		yield* database.private.channels.createChannel({ channel: channel3 });
 
-		const allChannels = yield* database.channels.findAllChannelsByServerId(
-			{
-				serverId,
-			},
-			{ subscribe: true },
-		);
+		const allChannels =
+			yield* database.private.channels.findAllChannelsByServerId(
+				{
+					serverId,
+				},
+				{ subscribe: true },
+			);
 		const getLiveData = () =>
 			allChannels?.data?.filter((c) =>
 				["batchreact1", "batchreact2", "batchreact3"].includes(c.id),
@@ -680,7 +742,7 @@ it.scoped("findManyChannelsById updates when channels change", () =>
 		const updatedChannel = createTestChannel("batchreact1", serverId, {
 			name: "Updated Batch React 1",
 		});
-		yield* database.channels.updateChannel({
+		yield* database.private.channels.updateChannel({
 			id: "batchreact1",
 			channel: updatedChannel,
 		});
@@ -690,7 +752,7 @@ it.scoped("findManyChannelsById updates when channels change", () =>
 		);
 		expect(updatedChannelData?.name).toBe("Updated Batch React 1");
 
-		yield* database.channels.deleteChannel({ id: "batchreact2" });
+		yield* database.private.channels.deleteChannel({ id: "batchreact2" });
 
 		expect(getLiveData()?.length).toBe(2);
 		expect(getLiveData()?.some((c) => c.id === "batchreact2")).toBe(false);
@@ -701,10 +763,12 @@ it.scoped("updateChannel throws error if channel does not exist", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -713,7 +777,7 @@ it.scoped("updateChannel throws error if channel does not exist", () =>
 
 		const fakeChannel = createTestChannel("nonexistent", serverId);
 
-		const result = yield* database.channels
+		const result = yield* database.private.channels
 			.updateChannel({
 				id: "nonexistent",
 				channel: fakeChannel,
@@ -728,10 +792,12 @@ it.scoped("findChannelsBeforeId returns channels before given ID", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(testServer);
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
-		});
+		yield* database.private.servers.upsertServer(testServer);
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: "server123",
+			},
+		);
 		const serverId = serverLiveData?.discordId;
 
 		if (!serverId) {
@@ -746,12 +812,12 @@ it.scoped("findChannelsBeforeId returns channels before given ID", () =>
 		const channel3 = createTestChannel(channel003!, serverId!);
 		const channel4 = createTestChannel(channel004!, serverId!);
 
-		yield* database.channels.createChannel({ channel: channel1 });
-		yield* database.channels.createChannel({ channel: channel2 });
-		yield* database.channels.createChannel({ channel: channel3 });
-		yield* database.channels.createChannel({ channel: channel4 });
+		yield* database.private.channels.createChannel({ channel: channel1 });
+		yield* database.private.channels.createChannel({ channel: channel2 });
+		yield* database.private.channels.createChannel({ channel: channel3 });
+		yield* database.private.channels.createChannel({ channel: channel4 });
 
-		const liveData = yield* database.channels.findChannelsBeforeId({
+		const liveData = yield* database.private.channels.findChannelsBeforeId({
 			serverId: serverId!,
 			id: channel004!,
 			take: 2,

@@ -18,9 +18,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(channel)) {
 					return;
 				}
-				const serverLiveData = yield* database.servers.getServerByDiscordId({
-					discordId: channel.guild.id,
-				});
+				const serverLiveData =
+					yield* database.private.servers.getServerByDiscordId({
+						discordId: channel.guild.id,
+					});
 				const server = serverLiveData;
 				if (!server) {
 					yield* Console.warn(
@@ -29,7 +30,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 				const aoChannel = toAOChannel(channel, server.discordId);
-				yield* database.channels.upsertManyChannels({
+				yield* database.private.channels.upsertManyChannels({
 					channels: [
 						{
 							create: aoChannel,
@@ -56,7 +57,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 				const parentChannelLiveData =
-					yield* database.channels.findChannelByDiscordId({
+					yield* database.private.channels.findChannelByDiscordId({
 						discordId: thread.parentId,
 					});
 				const parentChannel = parentChannelLiveData;
@@ -66,9 +67,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!parentChannel.flags?.indexingEnabled) {
 					return;
 				}
-				const serverLiveData = yield* database.servers.getServerByDiscordId({
-					discordId: thread.guild.id,
-				});
+				const serverLiveData =
+					yield* database.private.servers.getServerByDiscordId({
+						discordId: thread.guild.id,
+					});
 				const server = serverLiveData;
 				if (!server) {
 					yield* Console.warn(
@@ -77,7 +79,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 				const aoThread = toAOChannel(thread, server.discordId);
-				yield* database.channels.upsertManyChannels({
+				yield* database.private.channels.upsertManyChannels({
 					channels: [
 						{
 							create: aoThread,
@@ -97,11 +99,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(newChannel)) {
 					return;
 				}
-				const channelLiveData = yield* database.channels.findChannelByDiscordId(
-					{
+				const channelLiveData =
+					yield* database.private.channels.findChannelByDiscordId({
 						discordId: newChannel.id,
-					},
-				);
+					});
 				const existingChannel = channelLiveData;
 
 				if (!existingChannel) {
@@ -111,9 +112,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const serverLiveData = yield* database.servers.getServerByDiscordId({
-					discordId: newChannel.guild.id,
-				});
+				const serverLiveData =
+					yield* database.private.servers.getServerByDiscordId({
+						discordId: newChannel.guild.id,
+					});
 				const server = serverLiveData;
 				if (!server) {
 					yield* Console.warn(
@@ -122,7 +124,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* database.channels.updateChannel({
+				yield* database.private.channels.updateChannel({
 					id: newChannel.id,
 					channel: {
 						...toAOChannel(newChannel as GuildChannel, server.discordId),
@@ -140,7 +142,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(channel)) {
 					return;
 				}
-				yield* database.channels.deleteChannel({ id: channel.id });
+				yield* database.private.channels.deleteChannel({ id: channel.id });
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error deleting channel ${channel.id}:`, error),
@@ -153,11 +155,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedThreadChannel(newThread)) {
 					return;
 				}
-				const channelLiveData = yield* database.channels.findChannelByDiscordId(
-					{
+				const channelLiveData =
+					yield* database.private.channels.findChannelByDiscordId({
 						discordId: newThread.id,
-					},
-				);
+					});
 				const existingChannel = channelLiveData;
 
 				if (!existingChannel) {
@@ -167,9 +168,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const serverLiveData = yield* database.servers.getServerByDiscordId({
-					discordId: newThread.guild.id,
-				});
+				const serverLiveData =
+					yield* database.private.servers.getServerByDiscordId({
+						discordId: newThread.guild.id,
+					});
 
 				const server = serverLiveData;
 
@@ -180,7 +182,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* database.channels.updateChannel({
+				yield* database.private.channels.updateChannel({
 					id: newThread.id,
 					channel: {
 						...toAOChannel(newThread as AnyThreadChannel, server.discordId),
@@ -198,11 +200,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedThreadChannel(thread)) {
 					return;
 				}
-				const channelLiveData = yield* database.channels.findChannelByDiscordId(
-					{
+				const channelLiveData =
+					yield* database.private.channels.findChannelByDiscordId({
 						discordId: thread.id,
-					},
-				);
+					});
 				const existingChannel = channelLiveData;
 
 				if (!existingChannel) {
@@ -212,7 +213,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* database.channels.deleteChannel({ id: thread.id });
+				yield* database.private.channels.deleteChannel({ id: thread.id });
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error deleting thread ${thread.id}:`, error),
@@ -223,7 +224,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("inviteDelete", (invite) =>
 			Effect.gen(function* () {
 				const channelLiveData =
-					yield* database.channels.findChannelByInviteCode({
+					yield* database.private.channels.findChannelByInviteCode({
 						inviteCode: invite.code,
 					});
 				const channelWithSettings = channelLiveData;
@@ -240,7 +241,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					...channel
 				} = channelWithSettings;
 
-				yield* database.channels.updateChannel({
+				yield* database.private.channels.updateChannel({
 					id: channel.id,
 					channel: {
 						...channel,

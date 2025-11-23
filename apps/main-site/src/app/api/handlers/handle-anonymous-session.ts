@@ -18,7 +18,7 @@ export async function handleAnonymousSession(c: Context) {
 	}
 	const session = await Effect.gen(function* () {
 		const db = yield* Database;
-		return yield* db.anonymous_session.createAnonymousSession();
+		return yield* db.private.anonymous_session.createAnonymousSession();
 	}).pipe(
 		Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)),
 		Effect.runPromise,

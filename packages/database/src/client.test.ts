@@ -24,9 +24,9 @@ it.scoped("upserting server", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server);
 
-		const created = yield* database.servers.getServerByDiscordId({
+		const created = yield* database.private.servers.getServerByDiscordId({
 			discordId: serverDiscordId,
 		});
 
@@ -41,11 +41,11 @@ it.scoped(
 			const database = yield* Database;
 			const convexClientTest = yield* ConvexClientTest;
 
-			yield* database.servers.upsertServer(server);
+			yield* database.private.servers.upsertServer(server);
 
 			const results = yield* Effect.all(
 				Array.from({ length: 5 }, () =>
-					database.servers.getServerByDiscordId(
+					database.private.servers.getServerByDiscordId(
 						{ discordId: serverDiscordId },
 						{ subscribe: true },
 					),
@@ -72,7 +72,7 @@ it.scoped(
 			}
 
 			const updatedDescription = "Updated Description";
-			yield* database.servers.upsertServer({
+			yield* database.private.servers.upsertServer({
 				...server,
 				description: updatedDescription,
 			});

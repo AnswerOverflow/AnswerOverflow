@@ -30,9 +30,11 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 
 		yield* syncGuild(guild);
 
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: guild.id,
-		});
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: guild.id,
+			},
+		);
 		expect(serverLiveData).not.toBeNull();
 		expect(serverLiveData?.discordId).toBe(guild.id);
 		expect(serverLiveData?.name).toBe(guild.name);
@@ -44,9 +46,11 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 
 		if (serverLiveData?.discordId) {
 			const preferencesLiveData =
-				yield* database.server_preferences.getServerPreferencesByServerId({
-					serverId: serverLiveData.discordId,
-				});
+				yield* database.private.server_preferences.getServerPreferencesByServerId(
+					{
+						serverId: serverLiveData.discordId,
+					},
+				);
 			expect(preferencesLiveData).not.toBeNull();
 			expect(preferencesLiveData?.considerAllMessagesPublicEnabled).toBe(true);
 		}
@@ -54,25 +58,23 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 		if (!serverLiveData?.discordId) {
 			throw new Error("Server ID not found");
 		}
-		const channelsLiveData = yield* database.channels.findAllChannelsByServerId(
-			{
+		const channelsLiveData =
+			yield* database.private.channels.findAllChannelsByServerId({
 				serverId: serverLiveData.discordId,
-			},
-		);
+			});
 		expect(channelsLiveData).not.toBeNull();
 		expect(channelsLiveData?.length).toBe(2);
 
-		const textChannelLiveData = yield* database.channels.findChannelByDiscordId(
-			{
+		const textChannelLiveData =
+			yield* database.private.channels.findChannelByDiscordId({
 				discordId: textChannel.id,
-			},
-		);
+			});
 		expect(textChannelLiveData).not.toBeNull();
 		expect(textChannelLiveData?.name).toBe(textChannel.name);
 		expect(textChannelLiveData?.type).toBe(0); // GuildText
 
 		const forumChannelLiveData =
-			yield* database.channels.findChannelByDiscordId({
+			yield* database.private.channels.findChannelByDiscordId({
 				discordId: forumChannel.id,
 			});
 		expect(forumChannelLiveData).not.toBeNull();
@@ -104,9 +106,11 @@ it.scoped("guild-parity: runs first on guildCreate", () =>
 
 		yield* discord.client.waitForHandlers("guildCreate");
 
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: guild.id,
-		});
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: guild.id,
+			},
+		);
 		expect(serverLiveData).not.toBeNull();
 		expect(serverLiveData?.discordId).toBe(guild.id);
 	}).pipe(Effect.provide(TestLayerWithParity)),

@@ -126,7 +126,9 @@ function _handleCheckmarkReactionMarkSolution(
 		}
 
 		const serverLiveData = yield* Effect.scoped(
-			database.servers.getServerByDiscordId({ discordId: fullMessage.guildId }),
+			database.private.servers.getServerByDiscordId({
+				discordId: fullMessage.guildId,
+			}),
 		);
 		const server = serverLiveData;
 
@@ -149,7 +151,9 @@ function _handleCheckmarkReactionMarkSolution(
 		}
 
 		const channelLiveData = yield* Effect.scoped(
-			database.channels.findChannelByDiscordId({ discordId: parentChannel.id }),
+			database.private.channels.findChannelByDiscordId({
+				discordId: parentChannel.id,
+			}),
 		);
 		const channelSettings = channelLiveData;
 
@@ -250,7 +254,7 @@ function _handleCheckmarkReactionMarkSolution(
 		}
 
 		const serverPreferencesLiveData = yield* Effect.scoped(
-			database.server_preferences.getServerPreferencesByServerId({
+			database.private.server_preferences.getServerPreferencesByServerId({
 				serverId: server.discordId,
 			}),
 		);

@@ -35,15 +35,17 @@ it.scoped("findManyServersById returns multiple servers", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
-		yield* database.servers.upsertServer(server2);
+		yield* database.private.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server2);
 
-		const server1LiveData = yield* database.servers.getServerByDiscordId({
-			discordId: discordId1,
-		});
-		const server2LiveData = yield* database.servers.getServerByDiscordId({
-			discordId: discordId2,
-		});
+		const server1LiveData =
+			yield* database.private.servers.getServerByDiscordId({
+				discordId: discordId1,
+			});
+		const server2LiveData =
+			yield* database.private.servers.getServerByDiscordId({
+				discordId: discordId2,
+			});
 
 		const server1Id = server1LiveData?._id;
 		const server2Id = server2LiveData?._id;
@@ -52,7 +54,7 @@ it.scoped("findManyServersById returns multiple servers", () =>
 			throw new Error("Servers not found");
 		}
 
-		const liveData = yield* database.servers.findManyServersById({
+		const liveData = yield* database.private.servers.findManyServersById({
 			ids: [server1Id, server2Id],
 		});
 
@@ -86,11 +88,13 @@ it.scoped("getBiggestServers returns servers ordered by member count", () =>
 			approximateMemberCount: 1000,
 		};
 
-		yield* database.servers.upsertServer(serverSmall);
-		yield* database.servers.upsertServer(serverMedium);
-		yield* database.servers.upsertServer(serverLarge);
+		yield* database.private.servers.upsertServer(serverSmall);
+		yield* database.private.servers.upsertServer(serverMedium);
+		yield* database.private.servers.upsertServer(serverLarge);
 
-		const liveData = yield* database.servers.getBiggestServers({ take: 2 });
+		const liveData = yield* database.private.servers.getBiggestServers({
+			take: 2,
+		});
 
 		expect(liveData?.length).toBe(2);
 		expect(liveData?.[0]?.discordId).toBe(largeId);
@@ -110,9 +114,9 @@ it.scoped("createServer creates new server", () =>
 			name: "New Server",
 		};
 
-		yield* database.servers.createServer(newServer);
+		yield* database.private.servers.createServer(newServer);
 
-		const liveData = yield* database.servers.getServerByDiscordId({
+		const liveData = yield* database.private.servers.getServerByDiscordId({
 			discordId: newDiscordId,
 		});
 
@@ -125,11 +129,13 @@ it.scoped("updateServer updates existing server", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.upsertServer(server);
+		yield* database.private.servers.upsertServer(server);
 
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: discordId1,
-		});
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: discordId1,
+			},
+		);
 		const serverId = serverLiveData?._id;
 
 		if (!serverId) {
@@ -141,11 +147,15 @@ it.scoped("updateServer updates existing server", () =>
 			name: "Updated Server Name",
 			description: "Updated Description",
 		};
-		yield* database.servers.updateServer({ id: serverId, data: updatedServer });
-
-		const updatedLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: discordId1,
+		yield* database.private.servers.updateServer({
+			id: serverId,
+			data: updatedServer,
 		});
+
+		const updatedLiveData =
+			yield* database.private.servers.getServerByDiscordId({
+				discordId: discordId1,
+			});
 
 		expect(updatedLiveData?.name).toBe("Updated Server Name");
 		expect(updatedLiveData?.description).toBe("Updated Description");
@@ -170,10 +180,10 @@ it.scoped("getBiggestServers updates when member counts change", () =>
 			approximateMemberCount: 200,
 		};
 
-		yield* database.servers.upsertServer(serverA);
-		yield* database.servers.upsertServer(serverB);
+		yield* database.private.servers.upsertServer(serverA);
+		yield* database.private.servers.upsertServer(serverB);
 
-		const liveData = yield* database.servers.getBiggestServers(
+		const liveData = yield* database.private.servers.getBiggestServers(
 			{ take: 2 },
 			{ subscribe: true },
 		);
@@ -182,9 +192,10 @@ it.scoped("getBiggestServers updates when member counts change", () =>
 		expect(liveData?.data?.[0]?.discordId).toBe(serverBId);
 		expect(liveData?.data?.[1]?.discordId).toBe(serverAId);
 
-		const serverALiveData = yield* database.servers.getServerByDiscordId({
-			discordId: serverAId,
-		});
+		const serverALiveData =
+			yield* database.private.servers.getServerByDiscordId({
+				discordId: serverAId,
+			});
 		const serverAConvexId = serverALiveData?._id;
 
 		if (!serverAConvexId) {
@@ -195,7 +206,7 @@ it.scoped("getBiggestServers updates when member counts change", () =>
 			...serverA,
 			approximateMemberCount: 300,
 		};
-		yield* database.servers.updateServer({
+		yield* database.private.servers.updateServer({
 			id: serverAConvexId,
 			data: updatedServerA,
 		});
@@ -221,17 +232,17 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 			name: "Server 3",
 		};
 
-		yield* database.servers.upsertServer(server1);
-		yield* database.servers.upsertServer(server2Test);
-		yield* database.servers.upsertServer(server3);
+		yield* database.private.servers.upsertServer(server1);
+		yield* database.private.servers.upsertServer(server2Test);
+		yield* database.private.servers.upsertServer(server3);
 
-		const s1Live = yield* database.servers.getServerByDiscordId({
+		const s1Live = yield* database.private.servers.getServerByDiscordId({
 			discordId: s1Id,
 		});
-		const s2Live = yield* database.servers.getServerByDiscordId({
+		const s2Live = yield* database.private.servers.getServerByDiscordId({
 			discordId: s2Id,
 		});
-		const s3Live = yield* database.servers.getServerByDiscordId({
+		const s3Live = yield* database.private.servers.getServerByDiscordId({
 			discordId: s3Id,
 		});
 
@@ -243,7 +254,7 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 			throw new Error("Servers not found");
 		}
 
-		const liveData = yield* database.servers.findManyServersById(
+		const liveData = yield* database.private.servers.findManyServersById(
 			{
 				ids: [s1ConvexId, s2ConvexId, s3ConvexId],
 			},
@@ -256,7 +267,10 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 			...server1,
 			name: "Updated Server 1",
 		};
-		yield* database.servers.updateServer({ id: s1ConvexId, data: updatedS1 });
+		yield* database.private.servers.updateServer({
+			id: s1ConvexId,
+			data: updatedS1,
+		});
 
 		const updatedServer = liveData?.data?.find((s) => s._id === s1ConvexId);
 		expect(updatedServer?.name).toBe("Updated Server 1");
@@ -268,9 +282,9 @@ it.scoped("createServer throws error if server already exists", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* database.servers.createServer(server);
+		yield* database.private.servers.createServer(server);
 
-		const result = yield* database.servers
+		const result = yield* database.private.servers
 			.createServer(server)
 			.pipe(Effect.exit);
 
@@ -283,7 +297,7 @@ it.scoped("updateServer throws error if server does not exist", () =>
 		const database = yield* Database;
 
 		const fakeId = "j9z8y7x6w5v4u3t2s1r0q" as Id<"servers">;
-		const result = yield* database.servers
+		const result = yield* database.private.servers
 			.updateServer({ id: fakeId, data: server })
 			.pipe(Effect.exit);
 

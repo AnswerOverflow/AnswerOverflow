@@ -27,17 +27,19 @@ export function syncGuild(guild: Guild) {
 		yield* Console.log(`Syncing server ${guild.id} ${guild.name}`);
 
 		const aoServerData = toAOServer(guild);
-		yield* database.servers.upsertServer({
+		yield* database.private.servers.upsertServer({
 			...aoServerData,
 			kickedTime: undefined, // Explicitly clear kickedTime when server is active
 		});
 
-		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: guild.id,
-		});
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: guild.id,
+			},
+		);
 
 		if (serverLiveData?.discordId) {
-			yield* database.server_preferences.upsertServerPreferences({
+			yield* database.private.server_preferences.upsertServerPreferences({
 				serverId: serverLiveData.discordId,
 				considerAllMessagesPublicEnabled: true,
 			});
@@ -54,12 +56,14 @@ export function syncGuild(guild: Guild) {
 
 		if (server.preferencesId) {
 			const preferencesLiveData =
-				yield* database.server_preferences.getServerPreferencesByServerId({
-					serverId: server.discordId,
-				});
+				yield* database.private.server_preferences.getServerPreferencesByServerId(
+					{
+						serverId: server.discordId,
+					},
+				);
 			const preferences = preferencesLiveData;
 			if (preferences?.customDomain && server.icon) {
-				yield* database.attachments
+				yield* database.private.attachments
 					.uploadAttachmentFromUrl({
 						url: `https://cdn.discordapp.com/icons/${guild.id}/${server.icon}.png?size=48`,
 						filename: `${server.icon}/icon.png`,
@@ -98,7 +102,7 @@ export function syncGuild(guild: Guild) {
 				};
 			});
 
-			yield* database.channels.upsertManyChannels({
+			yield* database.private.channels.upsertManyChannels({
 				channels: channelsToUpsert,
 			});
 			yield* Console.log(
@@ -132,9 +136,10 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildUpdate", (_oldGuild, newGuild) =>
 			Effect.gen(function* () {
-				const serverLiveData = yield* database.servers.getServerByDiscordId({
-					discordId: newGuild.id,
-				});
+				const serverLiveData =
+					yield* database.private.servers.getServerByDiscordId({
+						discordId: newGuild.id,
+					});
 				const existingServer = serverLiveData;
 
 				if (!existingServer) {
@@ -154,7 +159,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					...preservedFields
 				} = existingServer;
 
-				yield* database.servers.updateServer({
+				yield* database.private.servers.updateServer({
 					id: existingServer._id,
 					data: {
 						...preservedFields,
@@ -175,9 +180,10 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
-				const serverLiveData = yield* database.servers.getServerByDiscordId({
-					discordId: guild.id,
-				});
+				const serverLiveData =
+					yield* database.private.servers.getServerByDiscordId({
+						discordId: guild.id,
+					});
 				const existingServer = serverLiveData;
 
 				if (!existingServer) {
@@ -186,7 +192,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 				const { _id, _creationTime, ...serverData } = existingServer;
 
-				yield* database.servers.updateServer({
+				yield* database.private.servers.updateServer({
 					id: existingServer._id,
 					data: {
 						...serverData,
@@ -208,7 +214,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					),
 				);
 
-				const servers = yield* database.servers.getAllServers();
+				const servers = yield* database.private.servers.getAllServers();
 				const serverCount = servers?.length ?? 0;
 				yield* Console.log(
 					`Logged in as ${client.user.tag}! ${serverCount} servers`,
@@ -240,7 +246,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					yield* Effect.forEach(serversToMarkAsKicked, (server) =>
 						Effect.gen(function* () {
 							const { _id, _creationTime, ...serverData } = server;
-							yield* database.servers.updateServer({
+							yield* database.private.servers.updateServer({
 								id: server._id,
 								data: {
 									...serverData,
