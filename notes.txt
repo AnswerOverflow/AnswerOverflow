@@ -46,13 +46,13 @@ maybe <base/> helps although it's never worked in the past
 
     Parity:
     - [ ] Cache parity
-    - [ ] Channel parity
+    - [X] Channel parity
     - [ ] Guild parity
     - [ ] Message parity
     - [ ] User parity
 
     Misc:
-    - [ ] Deny list
+    - [X] Deny list
 
 
 

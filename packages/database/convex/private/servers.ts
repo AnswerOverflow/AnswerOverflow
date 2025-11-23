@@ -124,6 +124,65 @@ export const getBiggestServers = privateQuery({
 	},
 });
 
+export const getBrowseServers = privateQuery({
+	args: {},
+	handler: async (ctx) => {
+		const allServers = await ctx.db.query("servers").collect();
+
+		const nonKickedServers = allServers.filter(
+			(server) => server.kickedTime === undefined || server.kickedTime === null,
+		);
+
+		const serverDiscordIds = nonKickedServers.map((server) => server.discordId);
+
+		const consentingUserCounts: Array<{ serverId: string; count: number }> = [];
+		for (const serverId of serverDiscordIds) {
+			const settings = await getManyFrom(
+				ctx.db,
+				"userServerSettings",
+				"by_serverId",
+				serverId,
+			);
+
+			const count = settings.filter(
+				(setting) => setting.canPubliclyDisplayMessages === true,
+			).length;
+
+			consentingUserCounts.push({ serverId, count });
+		}
+
+		const consentingUserCountMap = new Map(
+			consentingUserCounts.map((result) => [result.serverId, result.count]),
+		);
+
+		const preferencesPromises = nonKickedServers.map(async (server) => {
+			if (server.preferencesId) {
+				const preferences = await ctx.db.get(server.preferencesId);
+				return { serverId: server.discordId, preferences };
+			}
+			return { serverId: server.discordId, preferences: null };
+		});
+
+		const preferencesResults = await Promise.all(preferencesPromises);
+		const preferencesMap = new Map(
+			preferencesResults.map((result) => [result.serverId, result.preferences]),
+		);
+
+		const filteredServers = nonKickedServers.filter((server) => {
+			const consentingUserCount =
+				consentingUserCountMap.get(server.discordId) ?? 0;
+			if (consentingUserCount > 10) return true;
+
+			const preferences = preferencesMap.get(server.discordId);
+			if (preferences?.considerAllMessagesPublicEnabled === true) return true;
+
+			return false;
+		});
+
+		return filteredServers.sort((a, b) => a.name.localeCompare(b.name));
+	},
+});
+
 export const getServerByDiscordId = privateQuery({
 	args: {
 		discordId: v.string(),

@@ -1,9 +1,16 @@
+import type { PostHogCaptureClient } from "@packages/analytics/server";
 import { Database } from "@packages/database/database";
 import type { Guild, GuildChannel } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { registerCommands } from "../commands/register";
 import { Discord } from "../core/discord-service";
+import {
+	registerServerGroup,
+	trackServerJoin,
+	trackServerLeave,
+} from "../utils/analytics";
 import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
+import { leaveServerIfNecessary } from "../utils/denylist";
 import { startIndexingLoop } from "./indexing";
 
 function toAOServer(guild: Guild) {
@@ -29,7 +36,7 @@ export function syncGuild(guild: Guild) {
 		const aoServerData = toAOServer(guild);
 		yield* database.private.servers.upsertServer({
 			...aoServerData,
-			kickedTime: undefined, // Explicitly clear kickedTime when server is active
+			kickedTime: undefined,
 		});
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
@@ -37,6 +44,8 @@ export function syncGuild(guild: Guild) {
 				discordId: guild.id,
 			},
 		);
+
+		const wasNewServer = !serverLiveData;
 
 		if (serverLiveData?.discordId) {
 			yield* database.private.server_preferences.upsertServerPreferences({
@@ -52,6 +61,12 @@ export function syncGuild(guild: Guild) {
 				`Server ${guild.id} not found after upsert, skipping channel parity`,
 			);
 			return;
+		}
+
+		if (wasNewServer) {
+			yield* registerServerGroup(guild, server.discordId).pipe(
+				Effect.catchAll(() => Effect.void),
+			);
 		}
 
 		if (server.preferencesId) {
@@ -126,7 +141,14 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				yield* Console.log(
 					`Bot joined new server: ${guild.name} (${guild.id})`,
 				);
+
+				const leftServer = yield* leaveServerIfNecessary(guild);
+				if (leftServer) {
+					return;
+				}
+
 				yield* syncGuild(guild);
+				yield* trackServerJoin(guild).pipe(Effect.catchAll(() => Effect.void));
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error handling guild create ${guild.id}:`, error),
@@ -199,6 +221,8 @@ export const ServerParityLayer = Layer.scopedDiscard(
 						kickedTime: Date.now(),
 					},
 				});
+
+				yield* trackServerLeave(guild).pipe(Effect.catchAll(() => Effect.void));
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error handling guild delete ${guild.id}:`, error),
@@ -231,7 +255,19 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				const guilds = yield* discord.getGuilds();
 				const activeServerIds = new Set(guilds.map((guild) => guild.id));
 
-				yield* Effect.forEach(guilds, syncGuild);
+				yield* Effect.forEach(guilds, (guild) =>
+					Effect.gen(function* () {
+						const leftServer = yield* leaveServerIfNecessary(guild);
+						if (leftServer) {
+							return;
+						}
+						yield* syncGuild(guild);
+					}).pipe(
+						Effect.catchAll((error) =>
+							Console.error(`Error syncing guild ${guild.id}:`, error),
+						),
+					),
+				);
 
 				const allServers = servers ?? [];
 				const serversToMarkAsKicked = allServers.filter(
