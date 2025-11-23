@@ -45,7 +45,10 @@ export const findManyUserServerSettings = privateQuery({
 			if (userIdArray.length === 0) {
 				return [];
 			}
-			const userId: string = userIdArray[0]!;
+			const userId = userIdArray[0];
+			if (!userId) {
+				return [];
+			}
 			const allUserSettings = await getManyFrom(
 				ctx.db,
 				"userServerSettings",

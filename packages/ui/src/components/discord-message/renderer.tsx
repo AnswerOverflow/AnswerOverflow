@@ -97,6 +97,9 @@ function renderASTNode(
 
 		case "link":
 		case "url":
+			if (!message) {
+				return null;
+			}
 			return (
 				<Link
 					content={
@@ -105,7 +108,7 @@ function renderASTNode(
 						) as string
 					}
 					key={key}
-					message={message!}
+					message={message}
 					target={node.target as string}
 				/>
 			);
@@ -134,10 +137,13 @@ function renderASTNode(
 		case "user":
 		case "channel":
 		case "role":
+			if (!message) {
+				return null;
+			}
 			return (
 				<Mention
 					key={key}
-					message={message!}
+					message={message}
 					type={node.type as "user" | "channel" | "role"}
 				>
 					{node.id as string}
@@ -237,7 +243,6 @@ export function DiscordUIMessage({
 			</div>
 		);
 	}
-	const { serverId, channelId } = message;
 	const MessageContent = ({
 		message: msg,
 	}: {

@@ -10,6 +10,7 @@ import {
 import { channelSchema, channelSettingsSchema } from "../schema";
 import {
 	CHANNEL_TYPE,
+	compareIds,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
 	getFirstMessagesInChannels,
@@ -138,28 +139,6 @@ export const findChannelsBeforeId = privateQuery({
 			"by_serverId",
 			args.serverId,
 		);
-
-		const isValidSnowflake = (id: string): boolean => {
-			try {
-				BigInt(id);
-				return /^\d+$/.test(id);
-			} catch {
-				return false;
-			}
-		};
-
-		const compareIds = (a: string, b: string): number => {
-			const aIsSnowflake = isValidSnowflake(a);
-			const bIsSnowflake = isValidSnowflake(b);
-
-			if (aIsSnowflake && bIsSnowflake) {
-				const aBig = BigInt(a);
-				const bBig = BigInt(b);
-				return aBig > bBig ? 1 : aBig < bBig ? -1 : 0;
-			}
-
-			return BigInt(a) > BigInt(b) ? 1 : BigInt(a) < BigInt(b) ? -1 : 0;
-		};
 
 		const filtered = allChannels
 			.filter((c) => compareIds(c.id, args.id) < 0)

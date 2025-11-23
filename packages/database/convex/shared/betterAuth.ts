@@ -4,9 +4,7 @@ import { betterAuth } from "better-auth";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 
-const siteUrl = process.env.SITE_URL!;
-
-const getTrustedOrigins = (): string[] => {
+const getTrustedOrigins = (siteUrl: string): string[] => {
 	const origins = [siteUrl];
 
 	if (siteUrl.includes("localhost")) {
@@ -24,18 +22,45 @@ export const createAuth = (
 	ctx: GenericCtx<DataModel>,
 	{ optionsOnly } = { optionsOnly: false },
 ): ReturnType<typeof betterAuth> => {
+	const siteUrl = process.env.SITE_URL;
+	if (!siteUrl) {
+		throw new Error("SITE_URL environment variable is required");
+	}
+
 	return betterAuth({
 		logger: {
 			disabled: optionsOnly,
 		},
 		baseURL: siteUrl,
 		database: authComponent.adapter(ctx),
-		secret: process.env.BETTER_AUTH_SECRET!,
-		trustedOrigins: getTrustedOrigins(),
+		secret: (() => {
+			const secret = process.env.BETTER_AUTH_SECRET;
+			if (!secret) {
+				throw new Error("BETTER_AUTH_SECRET environment variable is required");
+			}
+			return secret;
+		})(),
+		trustedOrigins: getTrustedOrigins(siteUrl),
 		socialProviders: {
 			discord: {
-				clientId: process.env.DISCORD_CLIENT_ID!,
-				clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+				clientId: (() => {
+					const clientId = process.env.DISCORD_CLIENT_ID;
+					if (!clientId) {
+						throw new Error(
+							"DISCORD_CLIENT_ID environment variable is required",
+						);
+					}
+					return clientId;
+				})(),
+				clientSecret: (() => {
+					const clientSecret = process.env.DISCORD_CLIENT_SECRET;
+					if (!clientSecret) {
+						throw new Error(
+							"DISCORD_CLIENT_SECRET environment variable is required",
+						);
+					}
+					return clientSecret;
+				})(),
 			},
 		},
 		plugins: [convex()],

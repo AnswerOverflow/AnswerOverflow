@@ -1,8 +1,5 @@
 import { expect, it } from "@effect/vitest";
-import {
-	generateSnowflakeArray,
-	generateSnowflakeString,
-} from "@packages/test-utils/snowflakes";
+import { generateSnowflakeString } from "@packages/test-utils/snowflakes";
 import { Effect } from "effect";
 import type { DiscordAccount } from "../convex/schema";
 import { Database } from "./database";
@@ -147,7 +144,9 @@ it.scoped("get multiple accounts by individual calls", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const [userId1, userId2, userId3] = generateSnowflakeArray(3);
+		const userId1 = generateSnowflakeString();
+		const userId2 = generateSnowflakeString();
+		const userId3 = generateSnowflakeString();
 		const accounts = [
 			createTestDiscordAccount(userId1, "User 1"),
 			createTestDiscordAccount(userId2, "User 2"),
@@ -270,7 +269,9 @@ it.scoped(
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			const [userId1, userId2, userId3] = generateSnowflakeArray(3);
+			const userId1 = generateSnowflakeString();
+			const userId2 = generateSnowflakeString();
+			const userId3 = generateSnowflakeString();
 			yield* database.ignored_discord_accounts.upsertIgnoredDiscordAccount({
 				id: userId1,
 			});

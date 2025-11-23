@@ -1,11 +1,12 @@
 import { expect, it } from "@effect/vitest";
-import { generateSnowflakeArray } from "@packages/test-utils/snowflakes";
+import { generateSnowflakeString } from "@packages/test-utils/snowflakes";
 import { Effect } from "effect";
 import type { Server, ServerPreferences } from "../convex/schema";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
 
-const [serverDiscordId1, serverDiscordId2] = generateSnowflakeArray(2);
+const serverDiscordId1 = generateSnowflakeString();
+const serverDiscordId2 = generateSnowflakeString();
 
 const testServer: Server = {
 	name: "Test Server",
@@ -70,7 +71,7 @@ it.scoped(
 
 			yield* database.servers.upsertServer(testServer);
 			const serverLiveData = yield* database.servers.getServerByDiscordId({
-				discordId: "server123",
+				discordId: serverDiscordId1,
 			});
 			const serverId = serverLiveData?.discordId;
 
@@ -93,7 +94,7 @@ it.scoped("createServerPreferences prevents duplicate custom domains", () =>
 
 		yield* database.servers.upsertServer(testServer);
 		const serverLiveData1 = yield* database.servers.getServerByDiscordId({
-			discordId: "server123",
+			discordId: serverDiscordId1,
 		});
 		const serverId1 = serverLiveData1?.discordId;
 

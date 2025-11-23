@@ -1,5 +1,5 @@
 import { expect, it } from "@effect/vitest";
-import { generateSnowflakeArray } from "@packages/test-utils/snowflakes";
+import { generateSnowflakeString } from "@packages/test-utils/snowflakes";
 import { Cause, Chunk, Effect, Exit, Layer, Scope } from "effect";
 import type { Server } from "../convex/schema";
 import { ConvexClientTest } from "./convex-client-test";
@@ -11,7 +11,8 @@ import {
 import { Database, service } from "./database";
 import { DatabaseTestLayer } from "./database-test";
 
-const [discordId1, discordId2] = generateSnowflakeArray(2);
+const discordId1 = generateSnowflakeString();
+const discordId2 = generateSnowflakeString();
 
 const server: Server = {
 	name: "Test Server",
@@ -335,7 +336,7 @@ it.scoped("LiveData handles null query results", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const nonexistentId = generateSnowflakeArray(1)[0];
+		const nonexistentId = generateSnowflakeString();
 		const liveData = yield* database.servers.getServerByDiscordId({
 			discordId: nonexistentId,
 		});
@@ -348,7 +349,7 @@ it.scoped("LiveData updates when null result becomes non-null", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const newDiscordId = generateSnowflakeArray(1)[0];
+		const newDiscordId = generateSnowflakeString();
 		const liveData = yield* database.servers.getServerByDiscordId(
 			{
 				discordId: newDiscordId,

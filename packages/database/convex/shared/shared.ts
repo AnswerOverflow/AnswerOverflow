@@ -483,25 +483,7 @@ export async function getMessageById(ctx: QueryCtx | MutationCtx, id: string) {
 		.first();
 }
 
-function isValidSnowflake(id: string): boolean {
-	try {
-		BigInt(id);
-		return /^\d+$/.test(id);
-	} catch {
-		return false;
-	}
-}
-
-function compareIds(a: string, b: string): number {
-	const aIsSnowflake = isValidSnowflake(a);
-	const bIsSnowflake = isValidSnowflake(b);
-
-	if (aIsSnowflake && bIsSnowflake) {
-		const aBig = BigInt(a);
-		const bBig = BigInt(b);
-		return aBig > bBig ? 1 : aBig < bBig ? -1 : 0;
-	}
-
+export function compareIds(a: string, b: string): number {
 	return BigInt(a) > BigInt(b) ? 1 : BigInt(a) < BigInt(b) ? -1 : 0;
 }
 
