@@ -15,7 +15,11 @@ import {
 export async function getDiscordAccountIdFromAuth(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
 ): Promise<string | null> {
-	const user = await authComponent.getAuthUser(ctx);
+	const user = await authComponent.safeGetAuthUser(ctx);
+
+	if (!user) {
+		return null;
+	}
 
 	const accountResult = await ctx.runQuery(
 		components.betterAuth.adapter.findOne,

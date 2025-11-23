@@ -101,6 +101,7 @@
 		"./components/navbar": "./src/components/navbar/index.tsx",
 		"./components/answer-overflow-logo": "./src/components/answer-overflow-logo.tsx",
 		"./hooks/*": "./src/hooks/*.ts",
+		"./utils/*": "./src/utils/*.ts",
 		"./markdown": "./src/markdown/index.tsx"
 	}
 }

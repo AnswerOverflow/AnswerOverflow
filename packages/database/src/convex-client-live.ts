@@ -11,8 +11,11 @@ import {
 
 const createLiveService = Effect.gen(function* () {
 	const convexUrl = yield* Config.string("CONVEX_URL");
+	const backendAccessToken = yield* Config.string("BACKEND_ACCESS_TOKEN");
 
 	const client = new ConvexClient(convexUrl);
+
+	client.setAuth(async () => backendAccessToken);
 
 	const wrappedClient: ConvexClientShared = {
 		query: client.query.bind(client),
