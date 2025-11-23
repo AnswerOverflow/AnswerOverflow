@@ -1,7 +1,6 @@
 "use client";
 
 import type { EnrichedMessage } from "@packages/database/convex/shared/shared";
-import { cn } from "../lib/utils";
 
 export function MessageBlurrer(props: {
 	children: React.ReactNode;

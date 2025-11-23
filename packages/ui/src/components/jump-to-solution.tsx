@@ -1,7 +1,7 @@
 "use client";
 
-import { useMessageResultPageContext } from "./message-result-page-context";
 import { Link } from "./link";
+import { useMessageResultPageContext } from "./message-result-page-context";
 
 export function JumpToSolution(props: { id: string }) {
 	const { setShowAllMessages } = useMessageResultPageContext();

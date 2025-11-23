@@ -1,18 +1,6 @@
 "use client";
 
 import type { Id } from "@packages/database/convex/_generated/dataModel";
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-} from "@packages/ui/components/avatar";
-import { Button } from "@packages/ui/components/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@packages/ui/components/card";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import { FormattedNumber } from "@packages/ui/components/formatted-number";
 import { HelpfulFeedback } from "@packages/ui/components/helpful-feedback";
@@ -42,7 +30,7 @@ import {
 	getServerHomepageUrl,
 } from "@packages/ui/utils/server";
 import { getDate } from "@packages/ui/utils/snowflake";
-import { Array as Arr, Effect, Predicate } from "effect";
+import { Array as Arr, Predicate } from "effect";
 import { ExternalLink, MessageSquare } from "lucide-react";
 
 type MessagePageData = {
@@ -74,7 +62,7 @@ type MessagePageData = {
 
 const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
 
-function getDiscordAvatarUrl(
+function _getDiscordAvatarUrl(
 	userId: string,
 	avatar?: string,
 	size = 40,
@@ -176,7 +164,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 	);
 	const messagesToDisplay = nonNull.filter((message, index) => {
 		if (message.message.id === firstMessage.message.id) return false;
-		const nextMessage = nonNull.at(index + 1);
+		const _nextMessage = nonNull.at(index + 1);
 		if (data.thread || message.message.parentChannelId) {
 			if (message.message.channelId !== data.channel.id) return false;
 		} else {

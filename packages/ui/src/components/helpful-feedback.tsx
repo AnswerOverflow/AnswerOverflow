@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "./button";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 
-export function HelpfulFeedback(props: { page: Record<string, unknown> }) {
+export function HelpfulFeedback(_props: { page: Record<string, unknown> }) {
 	const [voted, setVoted] = useState<"Yes" | "No" | null>(null);
 
 	const handleVote = (value: "Yes" | "No") => {
