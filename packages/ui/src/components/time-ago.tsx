@@ -1,7 +1,7 @@
 "use client";
 
-import { getDate } from "../utils/snowflake";
 import { cn } from "../lib/utils";
+import { getDate } from "../utils/snowflake";
 
 function formatRelativeTime(date: Date) {
 	const now = new Date();

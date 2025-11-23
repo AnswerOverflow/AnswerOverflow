@@ -1,9 +1,9 @@
 "use client";
 
 import type { EnrichedMessage } from "@packages/database/convex/shared/shared";
+import { Attachments } from "./discord-message/attachments";
 import { DiscordUIMessage } from "./discord-message/renderer";
 import type { MessageWithMetadata } from "./discord-message/types";
-import { Attachments } from "./discord-message/attachments";
 
 export function MessageBody(props: {
 	message: EnrichedMessage;

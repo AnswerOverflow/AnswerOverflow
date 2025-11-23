@@ -1,12 +1,12 @@
 "use client";
 
 import type { EnrichedMessage } from "@packages/database/convex/shared/shared";
+import { cn } from "../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { Link } from "./link";
-import { TimeAgo } from "./time-ago";
-import { cn } from "../lib/utils";
-import { MessageBody } from "./message-body";
 import { MessageBlurrer } from "./message-blurrer";
+import { MessageBody } from "./message-body";
+import { TimeAgo } from "./time-ago";
 
 function getDiscordAvatarUrl(
 	userId: string,
