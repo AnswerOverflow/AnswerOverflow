@@ -1,8 +1,11 @@
 import { expect, it } from "@effect/vitest";
+import { generateSnowflakeString } from "@packages/test-utils/snowflakes";
 import { Effect } from "effect";
 import type { Server, UserServerSettings } from "../convex/schema";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
+
+const serverDiscordId = generateSnowflakeString();
 
 const testServer: Server = {
 	name: "Test Server",
@@ -10,7 +13,7 @@ const testServer: Server = {
 	icon: "https://example.com/icon.png",
 	vanityInviteCode: "test",
 	vanityUrl: "test",
-	discordId: "server123",
+	discordId: serverDiscordId,
 	plan: "FREE",
 	approximateMemberCount: 0,
 };
@@ -38,7 +41,7 @@ it.scoped(
 
 			yield* database.servers.upsertServer(testServer);
 			const serverLiveData = yield* database.servers.getServerByDiscordId({
-				discordId: "server123",
+				discordId: serverDiscordId,
 			});
 			const serverId = serverLiveData?.discordId;
 
@@ -46,9 +49,10 @@ it.scoped(
 				throw new Error("Server not found");
 			}
 
+			const userId = generateSnowflakeString();
 			const liveData =
 				yield* database.user_server_settings.findUserServerSettingsById({
-					userId: "user123",
+					userId,
 					serverId: serverId,
 				});
 

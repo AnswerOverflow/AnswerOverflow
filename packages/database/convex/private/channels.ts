@@ -139,9 +139,31 @@ export const findChannelsBeforeId = privateQuery({
 			args.serverId,
 		);
 
+		const isValidSnowflake = (id: string): boolean => {
+			try {
+				BigInt(id);
+				return /^\d+$/.test(id);
+			} catch {
+				return false;
+			}
+		};
+
+		const compareIds = (a: string, b: string): number => {
+			const aIsSnowflake = isValidSnowflake(a);
+			const bIsSnowflake = isValidSnowflake(b);
+
+			if (aIsSnowflake && bIsSnowflake) {
+				const aBig = BigInt(a);
+				const bBig = BigInt(b);
+				return aBig > bBig ? 1 : aBig < bBig ? -1 : 0;
+			}
+
+			return BigInt(a) > BigInt(b) ? 1 : BigInt(a) < BigInt(b) ? -1 : 0;
+		};
+
 		const filtered = allChannels
-			.filter((c) => BigInt(c.id) < BigInt(args.id))
-			.sort((a, b) => (BigInt(b.id) > BigInt(a.id) ? 1 : -1))
+			.filter((c) => compareIds(c.id, args.id) < 0)
+			.sort((a, b) => compareIds(b.id, a.id))
 			.slice(0, args.take ?? 100);
 
 		return await addSettingsToChannels(ctx, filtered);

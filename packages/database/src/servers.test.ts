@@ -1,9 +1,12 @@
 import { expect, it } from "@effect/vitest";
+import { generateSnowflakeArray } from "@packages/test-utils/snowflakes";
 import { Effect, Exit } from "effect";
 import type { Id } from "../convex/_generated/dataModel";
 import type { Server } from "../convex/schema";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
+
+const [discordId1, discordId2] = generateSnowflakeArray(2);
 
 const server: Server = {
 	name: "Test Server",
@@ -11,7 +14,7 @@ const server: Server = {
 	icon: "https://example.com/icon.png",
 	vanityInviteCode: "test",
 	vanityUrl: "test",
-	discordId: "123",
+	discordId: discordId1,
 	plan: "FREE",
 	approximateMemberCount: 0,
 };
@@ -22,7 +25,7 @@ const server2: Server = {
 	icon: "https://example.com/icon2.png",
 	vanityInviteCode: "test2",
 	vanityUrl: "test2",
-	discordId: "456",
+	discordId: discordId2,
 	plan: "STARTER",
 	approximateMemberCount: 100,
 };
@@ -35,10 +38,10 @@ it.scoped("findManyServersById returns multiple servers", () =>
 		yield* database.servers.upsertServer(server2);
 
 		const server1LiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "123",
+			discordId: discordId1,
 		});
 		const server2LiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "456",
+			discordId: discordId2,
 		});
 
 		const server1Id = server1LiveData?._id;
@@ -53,8 +56,8 @@ it.scoped("findManyServersById returns multiple servers", () =>
 		});
 
 		expect(liveData?.length).toBe(2);
-		expect(liveData?.some((s) => s.discordId === "123")).toBe(true);
-		expect(liveData?.some((s) => s.discordId === "456")).toBe(true);
+		expect(liveData?.some((s) => s.discordId === discordId1)).toBe(true);
+		expect(liveData?.some((s) => s.discordId === discordId2)).toBe(true);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -62,19 +65,21 @@ it.scoped("getBiggestServers returns servers ordered by member count", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
+		const [smallId, mediumId, largeId] = generateSnowflakeArray(3);
+
 		const serverSmall: Server = {
 			...server,
-			discordId: "small",
+			discordId: smallId,
 			approximateMemberCount: 10,
 		};
 		const serverMedium: Server = {
 			...server2,
-			discordId: "medium",
+			discordId: mediumId,
 			approximateMemberCount: 100,
 		};
 		const serverLarge: Server = {
 			...server,
-			discordId: "large",
+			discordId: largeId,
 			approximateMemberCount: 1000,
 		};
 
@@ -85,8 +90,8 @@ it.scoped("getBiggestServers returns servers ordered by member count", () =>
 		const liveData = yield* database.servers.getBiggestServers({ take: 2 });
 
 		expect(liveData?.length).toBe(2);
-		expect(liveData?.[0]?.discordId).toBe("large");
-		expect(liveData?.[1]?.discordId).toBe("medium");
+		expect(liveData?.[0]?.discordId).toBe(largeId);
+		expect(liveData?.[1]?.discordId).toBe(mediumId);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -94,19 +99,21 @@ it.scoped("createServer creates new server", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
+		const newDiscordId = generateSnowflakeArray(1)[0];
+
 		const newServer: Server = {
 			...server,
-			discordId: "new123",
+			discordId: newDiscordId,
 			name: "New Server",
 		};
 
 		yield* database.servers.createServer(newServer);
 
 		const liveData = yield* database.servers.getServerByDiscordId({
-			discordId: "new123",
+			discordId: newDiscordId,
 		});
 
-		expect(liveData?.discordId).toBe("new123");
+		expect(liveData?.discordId).toBe(newDiscordId);
 		expect(liveData?.name).toBe("New Server");
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
@@ -118,7 +125,7 @@ it.scoped("updateServer updates existing server", () =>
 		yield* database.servers.upsertServer(server);
 
 		const serverLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "123",
+			discordId: discordId1,
 		});
 		const serverId = serverLiveData?._id;
 
@@ -134,7 +141,7 @@ it.scoped("updateServer updates existing server", () =>
 		yield* database.servers.updateServer({ id: serverId, data: updatedServer });
 
 		const updatedLiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "123",
+			discordId: discordId1,
 		});
 
 		expect(updatedLiveData?.name).toBe("Updated Server Name");
@@ -146,14 +153,16 @@ it.scoped("getBiggestServers updates when member counts change", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
+		const [serverAId, serverBId] = generateSnowflakeArray(2);
+
 		const serverA: Server = {
 			...server,
-			discordId: "serverA",
+			discordId: serverAId,
 			approximateMemberCount: 100,
 		};
 		const serverB: Server = {
 			...server2,
-			discordId: "serverB",
+			discordId: serverBId,
 			approximateMemberCount: 200,
 		};
 
@@ -166,15 +175,15 @@ it.scoped("getBiggestServers updates when member counts change", () =>
 		);
 
 		expect(liveData?.data?.length).toBe(2);
-		expect(liveData?.data?.[0]?.discordId).toBe("serverB");
-		expect(liveData?.data?.[1]?.discordId).toBe("serverA");
+		expect(liveData?.data?.[0]?.discordId).toBe(serverBId);
+		expect(liveData?.data?.[1]?.discordId).toBe(serverAId);
 
 		const serverALiveData = yield* database.servers.getServerByDiscordId({
-			discordId: "serverA",
+			discordId: serverAId,
 		});
-		const serverAId = serverALiveData?._id;
+		const serverAConvexId = serverALiveData?._id;
 
-		if (!serverAId) {
+		if (!serverAConvexId) {
 			throw new Error("Server not found");
 		}
 
@@ -183,12 +192,12 @@ it.scoped("getBiggestServers updates when member counts change", () =>
 			approximateMemberCount: 300,
 		};
 		yield* database.servers.updateServer({
-			id: serverAId,
+			id: serverAConvexId,
 			data: updatedServerA,
 		});
 
-		expect(liveData?.data?.[0]?.discordId).toBe("serverA");
-		expect(liveData?.data?.[1]?.discordId).toBe("serverB");
+		expect(liveData?.data?.[0]?.discordId).toBe(serverAId);
+		expect(liveData?.data?.[1]?.discordId).toBe(serverBId);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -196,11 +205,13 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const server1: Server = { ...server, discordId: "s1" };
-		const server2Test: Server = { ...server2, discordId: "s2" };
+		const [s1Id, s2Id, s3Id] = generateSnowflakeArray(3);
+
+		const server1: Server = { ...server, discordId: s1Id };
+		const server2Test: Server = { ...server2, discordId: s2Id };
 		const server3: Server = {
 			...server,
-			discordId: "s3",
+			discordId: s3Id,
 			name: "Server 3",
 		};
 
@@ -209,26 +220,26 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 		yield* database.servers.upsertServer(server3);
 
 		const s1Live = yield* database.servers.getServerByDiscordId({
-			discordId: "s1",
+			discordId: s1Id,
 		});
 		const s2Live = yield* database.servers.getServerByDiscordId({
-			discordId: "s2",
+			discordId: s2Id,
 		});
 		const s3Live = yield* database.servers.getServerByDiscordId({
-			discordId: "s3",
+			discordId: s3Id,
 		});
 
-		const s1Id = s1Live?._id;
-		const s2Id = s2Live?._id;
-		const s3Id = s3Live?._id;
+		const s1ConvexId = s1Live?._id;
+		const s2ConvexId = s2Live?._id;
+		const s3ConvexId = s3Live?._id;
 
-		if (!s1Id || !s2Id || !s3Id) {
+		if (!s1ConvexId || !s2ConvexId || !s3ConvexId) {
 			throw new Error("Servers not found");
 		}
 
 		const liveData = yield* database.servers.findManyServersById(
 			{
-				ids: [s1Id, s2Id, s3Id],
+				ids: [s1ConvexId, s2ConvexId, s3ConvexId],
 			},
 			{ subscribe: true },
 		);
@@ -239,9 +250,9 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 			...server1,
 			name: "Updated Server 1",
 		};
-		yield* database.servers.updateServer({ id: s1Id, data: updatedS1 });
+		yield* database.servers.updateServer({ id: s1ConvexId, data: updatedS1 });
 
-		const updatedServer = liveData?.data?.find((s) => s._id === s1Id);
+		const updatedServer = liveData?.data?.find((s) => s._id === s1ConvexId);
 		expect(updatedServer?.name).toBe("Updated Server 1");
 		expect(liveData?.data?.length).toBe(3);
 	}).pipe(Effect.provide(DatabaseTestLayer)),

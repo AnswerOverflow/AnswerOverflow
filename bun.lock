@@ -121,6 +121,7 @@
         "@effect/vitest": "catalog:",
         "@packages/convex-test": "workspace:*",
         "@packages/observability": "workspace:*",
+        "@packages/test-utils": "workspace:*",
         "chokidar-cli": "^3.0.0",
         "glob": "^11.0.3",
         "vitest": "catalog:",
@@ -150,6 +151,16 @@
       },
       "devDependencies": {
         "vitest": "catalog:",
+      },
+    },
+    "packages/test-utils": {
+      "name": "@packages/test-utils",
+      "version": "1.0.0",
+      "dependencies": {
+        "fast-check": "^3.23.2",
+      },
+      "devDependencies": {
+        "typescript": "catalog:",
       },
     },
     "packages/typescript-config": {
@@ -763,6 +774,8 @@
     "@packages/main-site": ["@packages/main-site@workspace:apps/main-site"],
 
     "@packages/observability": ["@packages/observability@workspace:packages/observability"],
+
+    "@packages/test-utils": ["@packages/test-utils@workspace:packages/test-utils"],
 
     "@packages/typescript-config": ["@packages/typescript-config@workspace:packages/typescript-config"],
 

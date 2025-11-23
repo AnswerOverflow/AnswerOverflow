@@ -36,6 +36,7 @@
 		"@effect/vitest": "catalog:",
 		"@packages/convex-test": "workspace:*",
 		"@packages/observability": "workspace:*",
+		"@packages/test-utils": "workspace:*",
 		"chokidar-cli": "^3.0.0",
 		"glob": "^11.0.3",
 		"vitest": "catalog:"

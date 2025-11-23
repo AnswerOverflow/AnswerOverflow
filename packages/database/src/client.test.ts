@@ -1,4 +1,5 @@
 import { expect, it } from "@effect/vitest";
+import { generateSnowflakeString } from "@packages/test-utils/snowflakes";
 import { Effect } from "effect";
 import { api } from "../convex/_generated/api";
 import type { Server } from "../convex/schema";
@@ -6,13 +7,15 @@ import { ConvexClientTest } from "./convex-client-test";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
 
+const serverDiscordId = generateSnowflakeString();
+
 const server: Server = {
 	name: "Test Server",
 	description: "Test Description",
 	icon: "https://example.com/icon.png",
 	vanityInviteCode: "test",
 	vanityUrl: "test",
-	discordId: "123",
+	discordId: serverDiscordId,
 	plan: "FREE",
 	approximateMemberCount: 0,
 };
@@ -24,10 +27,10 @@ it.scoped("upserting server", () =>
 		yield* database.servers.upsertServer(server);
 
 		const created = yield* database.servers.getServerByDiscordId({
-			discordId: "123",
+			discordId: serverDiscordId,
 		});
 
-		expect(created?.discordId).toBe("123");
+		expect(created?.discordId).toBe(serverDiscordId);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -43,7 +46,7 @@ it.scoped(
 			const results = yield* Effect.all(
 				Array.from({ length: 5 }, () =>
 					database.servers.getServerByDiscordId(
-						{ discordId: "123" },
+						{ discordId: serverDiscordId },
 						{ subscribe: true },
 					),
 				),
@@ -51,17 +54,23 @@ it.scoped(
 
 			const queryCallCount = convexClientTest.getQueryCallCount(
 				api.private.servers.getServerByDiscordId,
-				{ discordId: "123", backendAccessToken: "test-backend-access-token" },
+				{
+					discordId: serverDiscordId,
+					backendAccessToken: "test-backend-access-token",
+				},
 			);
 			const otherQueryCallCount = convexClientTest.getQueryCallCount(
 				api.authenticated.servers.publicGetServerByDiscordId,
 				// @ts-expect-error - intentionally passing wrong args to verify functions are tracked separately
-				{ discordId: "123", backendAccessToken: "test-backend-access-token" },
+				{
+					discordId: serverDiscordId,
+					backendAccessToken: "test-backend-access-token",
+				},
 			);
 			expect(queryCallCount).toBe(1);
 			expect(otherQueryCallCount).toBe(0);
 			for (const result of results) {
-				expect(result?.data?.discordId).toBe("123");
+				expect(result?.data?.discordId).toBe(serverDiscordId);
 			}
 
 			const updatedDescription = "Updated Description";
