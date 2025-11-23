@@ -8,13 +8,31 @@ import { action, mutation, query } from "../_generated/server";
 
 function validateBackendAccessToken(token: string | undefined): void {
 	const expectedToken = process.env.BACKEND_ACCESS_TOKEN;
+	const isDev =
+		process.env.CONVEX_DEPLOYMENT === "dev" || !process.env.CONVEX_DEPLOYMENT;
 
 	if (!expectedToken) {
 		throw new Error("BACKEND_ACCESS_TOKEN not configured in environment");
 	}
 
-	if (!token || token !== expectedToken) {
-		throw new Error("Invalid BACKEND_ACCESS_TOKEN");
+	if (!token) {
+		const devHint = isDev
+			? " In dev environments, you can use 'TESTING' as the backendAccessToken."
+			: "";
+		throw new Error(
+			`Invalid BACKEND_ACCESS_TOKEN: token is required.${devHint}`,
+		);
+	}
+
+	if (isDev && token === "TESTING") {
+		return;
+	}
+
+	if (token !== expectedToken) {
+		const devHint = isDev
+			? " In dev environments, you can use 'TESTING' as the backendAccessToken."
+			: "";
+		throw new Error(`Invalid BACKEND_ACCESS_TOKEN.${devHint}`);
 	}
 }
 

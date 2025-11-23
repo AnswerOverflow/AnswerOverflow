@@ -624,11 +624,27 @@ export const getMessagePageData = privateQuery({
 			channel.type,
 		);
 
-		const allMessages = await findMessagesByChannelIdShared(
+		let allMessages = await findMessagesByChannelIdShared(
 			ctx,
 			channelId,
 			threadId ? undefined : 50,
 		);
+
+		if (threadId) {
+			const threadStarterMessages = await ctx.db
+				.query("messages")
+				.withIndex("by_channelId", (q) => q.eq("channelId", parentId))
+				.filter((q) => q.eq(q.field("childThreadId"), threadId))
+				.collect();
+
+			const existingIds = new Set(allMessages.map((m) => m.id));
+			const newMessages = threadStarterMessages.filter(
+				(m) => !existingIds.has(m.id),
+			);
+			allMessages = [...allMessages, ...newMessages].sort((a, b) =>
+				compareIds(a.id, b.id),
+			);
+		}
 
 		const messagesToShow = selectMessagesForDisplay(
 			allMessages,
@@ -651,6 +667,10 @@ export const getMessagePageData = privateQuery({
 			return null;
 		}
 
+		const serverPreferences = server.preferencesId
+			? await ctx.db.get(server.preferencesId)
+			: null;
+
 		return {
 			messages: enrichedMessages,
 			server: {
@@ -659,11 +679,16 @@ export const getMessagePageData = privateQuery({
 				name: server.name,
 				icon: server.icon,
 				description: server.description,
+				approximateMemberCount: server.approximateMemberCount,
+				customDomain: serverPreferences?.customDomain,
+				subpath: serverPreferences?.subpath,
+				vanityInviteCode: server.vanityInviteCode,
 			},
 			channel: {
 				id: channel.id,
 				name: channel.name,
 				type: channel.type,
+				inviteCode: channel.inviteCode,
 			},
 			thread,
 		};

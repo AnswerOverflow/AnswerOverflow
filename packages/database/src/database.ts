@@ -176,10 +176,34 @@ export const service = Effect.gen(function* () {
 
 				return wrappedFunction;
 			},
+			ownKeys(innerTarget) {
+				return Reflect.ownKeys(innerTarget);
+			},
+			getOwnPropertyDescriptor(innerTarget, prop) {
+				return Reflect.getOwnPropertyDescriptor(innerTarget, prop);
+			},
 		}) as TransformToFunctions<T>;
 	};
 
-	return createProxy(api.private, []);
+	const privateProxy = createProxy(api.private, []);
+	const publicProxy = createProxy(api.public, []);
+	const authenticatedProxy = createProxy(api.authenticated, []);
+
+	const result = {
+		public: publicProxy,
+		authenticated: authenticatedProxy,
+		anonymous_session: (privateProxy as any).anonymous_session,
+		attachments: (privateProxy as any).attachments,
+		channels: (privateProxy as any).channels,
+		discord_accounts: (privateProxy as any).discord_accounts,
+		ignored_discord_accounts: (privateProxy as any).ignored_discord_accounts,
+		messages: (privateProxy as any).messages,
+		server_preferences: (privateProxy as any).server_preferences,
+		servers: (privateProxy as any).servers,
+		user_server_settings: (privateProxy as any).user_server_settings,
+	};
+
+	return result;
 });
 export class Database extends Context.Tag("Database")<
 	Database,
