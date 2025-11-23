@@ -1,6 +1,6 @@
 import { Database, DatabaseLayer } from "@packages/database/database";
 import type { ThreadChannel } from "discord.js";
-import { ChannelType, DiscordAPIError } from "discord.js";
+import { DiscordAPIError } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { isAllowedThreadChannel } from "../utils/conversions";

@@ -7,7 +7,7 @@ import {
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
-import { Config, Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 
 function getDashboardUrl(serverId: string, channelId: string): string {

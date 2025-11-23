@@ -4,32 +4,29 @@ import {
 	PostHogClientLayer,
 	PostHogClientLayerForServer,
 } from "./posthog-client";
-import {
-	PostHogCaptureClient,
-	PostHogCaptureClientLayer,
-} from "./capture-client";
+
 export {
 	PostHogCaptureClient,
 	PostHogCaptureClientLayer,
 } from "./capture-client";
-export { trackEvent, registerServerGroup } from "./tracking";
 export {
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
 } from "./discord-helpers";
+export { registerServerGroup, trackEvent } from "./tracking";
 export type {
 	BaseProps,
-	UserType,
-	UserProps,
-	MessageType,
-	MessageProps,
-	ServerProps,
-	ServerPropsWithSettings,
-	ServerPropsWithDiscordData,
 	ChannelProps,
-	ChannelPropsWithSettings,
 	ChannelPropsWithDiscordData,
+	ChannelPropsWithSettings,
+	MessageProps,
+	MessageType,
+	ServerProps,
+	ServerPropsWithDiscordData,
+	ServerPropsWithSettings,
 	ThreadProps,
+	UserProps,
+	UserType,
 } from "./types";
 
 export type ServerAnalyticsOptions = {

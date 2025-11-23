@@ -1,12 +1,12 @@
 import type { Channel, Guild, ThreadChannel } from "discord.js";
 import { Effect } from "effect";
 import { PostHogCaptureClient } from "./capture-client";
-import type { BaseProps } from "./types";
 import {
-	serverWithDiscordInfoToAnalyticsData as convertServer,
 	channelWithDiscordInfoToAnalyticsData as convertChannel,
+	serverWithDiscordInfoToAnalyticsData as convertServer,
 	threadWithDiscordInfoToAnalyticsData as convertThread,
 } from "./discord-helpers";
+import type { BaseProps } from "./types";
 
 type ServerWithSettings = {
 	discordId: string;
