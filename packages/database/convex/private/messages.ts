@@ -10,6 +10,7 @@ import {
 } from "../client";
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import {
+	compareIds,
 	deleteMessageInternalLogic,
 	enrichMessageForDisplay,
 	findAttachmentsByMessageId as findAttachmentsByMessageIdShared,
@@ -76,7 +77,7 @@ function selectMessagesForDisplay(
 	}
 
 	return messages.filter(
-		(message) => BigInt(message.id) >= BigInt(targetMessageId),
+		(message) => compareIds(message.id, targetMessageId) >= 0,
 	);
 }
 
@@ -362,13 +363,7 @@ export const findLatestMessageInChannel = privateQuery({
 
 		if (messages.length === 0) return null;
 
-		messages.sort((a, b) => {
-			return BigInt(a.id) > BigInt(b.id)
-				? -1
-				: BigInt(a.id) < BigInt(b.id)
-					? 1
-					: 0;
-		});
+		messages.sort((a, b) => compareIds(b.id, a.id));
 
 		return messages[0] ?? null;
 	},
@@ -396,13 +391,7 @@ export const findLatestMessageInChannelAndThreads = privateQuery({
 		const allMessages = [...channelMessages, ...threadMessages];
 		if (allMessages.length === 0) return null;
 
-		allMessages.sort((a, b) => {
-			return BigInt(a.id) > BigInt(b.id)
-				? -1
-				: BigInt(a.id) < BigInt(b.id)
-					? 1
-					: 0;
-		});
+		allMessages.sort((a, b) => compareIds(b.id, a.id));
 
 		return allMessages[0] ?? null;
 	},

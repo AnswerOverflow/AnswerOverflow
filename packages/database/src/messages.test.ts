@@ -1,4 +1,5 @@
 import { expect, it } from "@effect/vitest";
+import { generateSnowflakeString } from "@packages/test-utils/snowflakes";
 import { Effect } from "effect";
 import type { Channel, Emoji, Message, Server } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
@@ -274,11 +275,13 @@ it.scoped("upsertManyMessages creates multiple messages", () =>
 
 		const channel = createTestChannel("channel123", serverId);
 		yield* database.channels.upsertChannelWithSettings({ channel });
-
+		const message001 = generateSnowflakeString();
+		const message002 = generateSnowflakeString();
+		const message003 = generateSnowflakeString();
 		const messages = [
-			createTestMessage("message1", "author1", serverId, "channel123"),
-			createTestMessage("message2", "author2", serverId, "channel123"),
-			createTestMessage("message3", "author3", serverId, "channel123"),
+			createTestMessage(message001, "author1", serverId, "channel123"),
+			createTestMessage(message002, "author2", serverId, "channel123"),
+			createTestMessage(message003, "author3", serverId, "channel123"),
 		];
 
 		yield* database.messages.upsertManyMessages({
@@ -287,18 +290,18 @@ it.scoped("upsertManyMessages creates multiple messages", () =>
 		});
 
 		const liveData1 = yield* database.messages.getMessageById({
-			id: "message1",
+			id: message001,
 		});
 		const liveData2 = yield* database.messages.getMessageById({
-			id: "message2",
+			id: message002,
 		});
 		const liveData3 = yield* database.messages.getMessageById({
-			id: "message3",
+			id: message003,
 		});
 
-		expect(liveData1?.id).toBe("message1");
-		expect(liveData2?.id).toBe("message2");
-		expect(liveData3?.id).toBe("message3");
+		expect(liveData1?.id).toBe(message001);
+		expect(liveData2?.id).toBe(message002);
+		expect(liveData3?.id).toBe(message003);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -319,10 +322,13 @@ it.scoped("findMessagesByChannelId returns messages for a channel", () =>
 		const channel = createTestChannel("channel123", serverId);
 		yield* database.channels.upsertChannelWithSettings({ channel });
 
+		const message001 = generateSnowflakeString();
+		const message002 = generateSnowflakeString();
+		const message003 = generateSnowflakeString();
 		const messages = [
-			createTestMessage("message1", "author1", serverId, "channel123"),
-			createTestMessage("message2", "author2", serverId, "channel123"),
-			createTestMessage("message3", "author3", serverId, "channel123"),
+			createTestMessage(message001, "author1", serverId, "channel123"),
+			createTestMessage(message002, "author2", serverId, "channel123"),
+			createTestMessage(message003, "author3", serverId, "channel123"),
 		];
 
 		yield* database.messages.upsertManyMessages({
@@ -337,9 +343,9 @@ it.scoped("findMessagesByChannelId returns messages for a channel", () =>
 
 		expect(liveData?.length).toBeGreaterThanOrEqual(3);
 		const messageIds = liveData?.map((m) => m.id) ?? [];
-		expect(messageIds).toContain("message1");
-		expect(messageIds).toContain("message2");
-		expect(messageIds).toContain("message3");
+		expect(messageIds).toContain(message001);
+		expect(messageIds).toContain(message002);
+		expect(messageIds).toContain(message003);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -360,10 +366,13 @@ it.scoped("findManyMessagesById returns messages by ids", () =>
 		const channel = createTestChannel("channel123", serverId);
 		yield* database.channels.upsertChannelWithSettings({ channel });
 
+		const message001 = generateSnowflakeString();
+		const message002 = generateSnowflakeString();
+		const message003 = generateSnowflakeString();
 		const messages = [
-			createTestMessage("message1", "author1", serverId, "channel123"),
-			createTestMessage("message2", "author2", serverId, "channel123"),
-			createTestMessage("message3", "author3", serverId, "channel123"),
+			createTestMessage(message001, "author1", serverId, "channel123"),
+			createTestMessage(message002, "author2", serverId, "channel123"),
+			createTestMessage(message003, "author3", serverId, "channel123"),
 		];
 
 		yield* database.messages.upsertManyMessages({
@@ -372,14 +381,14 @@ it.scoped("findManyMessagesById returns messages by ids", () =>
 		});
 
 		const liveData = yield* database.messages.findManyMessagesById({
-			ids: ["message1", "message2", "message3"],
+			ids: [message001, message002, message003],
 		});
 
 		expect(liveData?.length).toBe(3);
 		const messageIds = liveData?.map((m) => m.id) ?? [];
-		expect(messageIds).toContain("message1");
-		expect(messageIds).toContain("message2");
-		expect(messageIds).toContain("message3");
+		expect(messageIds).toContain(message001);
+		expect(messageIds).toContain(message002);
+		expect(messageIds).toContain(message003);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -443,10 +452,13 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 		const channel = createTestChannel("channel123", serverId);
 		yield* database.channels.upsertChannelWithSettings({ channel });
 
+		const message001 = generateSnowflakeString();
+		const message002 = generateSnowflakeString();
+		const message003 = generateSnowflakeString();
 		const messages = [
-			createTestMessage("message1", "author1", serverId, "channel123"),
-			createTestMessage("message2", "author2", serverId, "channel123"),
-			createTestMessage("message3", "author3", serverId, "channel123"),
+			createTestMessage(message001, "author1", serverId, "channel123"),
+			createTestMessage(message002, "author2", serverId, "channel123"),
+			createTestMessage(message003, "author3", serverId, "channel123"),
 		];
 
 		yield* database.messages.upsertManyMessages({
@@ -455,14 +467,14 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 		});
 
 		yield* database.messages.deleteManyMessages({
-			ids: ["message1", "message2"],
+			ids: [message001, message002],
 		});
 
 		const deleted1 = yield* database.messages.getMessageById({
-			id: "message1",
+			id: message001,
 		});
 		const deleted2 = yield* database.messages.getMessageById({
-			id: "message2",
+			id: message002,
 		});
 		const remaining = yield* database.messages.getMessageById({
 			id: "message3",
@@ -470,7 +482,7 @@ it.scoped("deleteManyMessages removes multiple messages", () =>
 
 		expect(deleted1).toBeNull();
 		expect(deleted2).toBeNull();
-		expect(remaining?.id).toBe("message3");
+		expect(remaining?.id).toBe(message003);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -853,10 +865,13 @@ it.scoped(
 			const channel = createTestChannel("channel123", serverId);
 			yield* database.channels.upsertChannelWithSettings({ channel });
 
+			const message001 = generateSnowflakeString();
+			const message002 = generateSnowflakeString();
+			const message003 = generateSnowflakeString();
 			const messages = [
-				createTestMessage("message1", "author1", serverId, "channel123"),
-				createTestMessage("message2", "author2", serverId, "channel123"),
-				createTestMessage("message3", "author3", serverId, "channel123"),
+				createTestMessage(message001, "author1", serverId, "channel123"),
+				createTestMessage(message002, "author2", serverId, "channel123"),
+				createTestMessage(message003, "author3", serverId, "channel123"),
 			];
 
 			yield* database.messages.upsertManyMessages({

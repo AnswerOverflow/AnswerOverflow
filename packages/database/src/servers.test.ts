@@ -1,12 +1,13 @@
 import { expect, it } from "@effect/vitest";
-import { generateSnowflakeArray } from "@packages/test-utils/snowflakes";
+import { generateSnowflakeString } from "@packages/test-utils/snowflakes";
 import { Effect, Exit } from "effect";
 import type { Id } from "../convex/_generated/dataModel";
 import type { Server } from "../convex/schema";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
 
-const [discordId1, discordId2] = generateSnowflakeArray(2);
+const discordId1 = generateSnowflakeString();
+const discordId2 = generateSnowflakeString();
 
 const server: Server = {
 	name: "Test Server",
@@ -65,7 +66,9 @@ it.scoped("getBiggestServers returns servers ordered by member count", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const [smallId, mediumId, largeId] = generateSnowflakeArray(3);
+		const smallId = generateSnowflakeString();
+		const mediumId = generateSnowflakeString();
+		const largeId = generateSnowflakeString();
 
 		const serverSmall: Server = {
 			...server,
@@ -99,7 +102,7 @@ it.scoped("createServer creates new server", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const newDiscordId = generateSnowflakeArray(1)[0];
+		const newDiscordId = generateSnowflakeString();
 
 		const newServer: Server = {
 			...server,
@@ -153,7 +156,8 @@ it.scoped("getBiggestServers updates when member counts change", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const [serverAId, serverBId] = generateSnowflakeArray(2);
+		const serverAId = generateSnowflakeString();
+		const serverBId = generateSnowflakeString();
 
 		const serverA: Server = {
 			...server,
@@ -205,7 +209,9 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const [s1Id, s2Id, s3Id] = generateSnowflakeArray(3);
+		const s1Id = generateSnowflakeString();
+		const s2Id = generateSnowflakeString();
+		const s3Id = generateSnowflakeString();
 
 		const server1: Server = { ...server, discordId: s1Id };
 		const server2Test: Server = { ...server2, discordId: s2Id };

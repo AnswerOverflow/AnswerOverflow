@@ -31,11 +31,14 @@ export function CustomEmoji({
 	name,
 	className = "size-12",
 }: Props) {
+	if (!emojiId) {
+		return null;
+	}
 	return (
 		<EmojiBase
 			className={className}
 			name={name}
-			src={customEmojiUrl(emojiId!, animated)}
+			src={customEmojiUrl(emojiId, animated)}
 		/>
 	);
 }

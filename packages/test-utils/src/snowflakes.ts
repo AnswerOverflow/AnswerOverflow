@@ -32,9 +32,9 @@ export const discordSnowflake = fc
 	);
 
 export function generateSnowflakeString(): string {
-	return fc.sample(discordSnowflake, { numRuns: 1 })[0];
-}
-
-export function generateSnowflakeArray(count: number): string[] {
-	return fc.sample(discordSnowflake, { numRuns: count });
+	const result = fc.sample(discordSnowflake, { numRuns: 1 })[0];
+	if (!result) {
+		throw new Error("Failed to generate snowflake string");
+	}
+	return result;
 }

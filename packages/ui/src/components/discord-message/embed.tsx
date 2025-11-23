@@ -12,12 +12,15 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 					? `#${embed.color.toString(16).padStart(6, "0")}`
 					: "dadadc";
 				if (embed.type === "gifv") {
-					const { height, width } = embed.video!;
+					if (!embed.video?.width || !embed.video?.height) {
+						return null;
+					}
+					const { height, width } = embed.video;
 					const scaledStyle = getScaledDownWidth({
-						width: width!,
-						height: height!,
+						width,
+						height,
 					});
-					const aspectRatio = width! / height!;
+					const aspectRatio = width / height;
 					return (
 						<div className="mt-4 overflow-hidden rounded" key={idx}>
 							<video
@@ -39,12 +42,16 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 					);
 				}
 				if (embed.type === "image") {
-					const { height, width } = embed.image! ?? embed.thumbnail!;
+					const imageData = embed.image ?? embed.thumbnail;
+					if (!imageData?.width || !imageData?.height) {
+						return null;
+					}
+					const { height, width } = imageData;
 					const scaledStyle = getScaledDownWidth({
-						width: width!,
-						height: height!,
+						width,
+						height,
 					});
-					const aspectRatio = width! / height!;
+					const aspectRatio = width / height;
 					return (
 						<div className="mt-4 overflow-hidden rounded" key={idx}>
 							<img

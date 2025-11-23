@@ -61,10 +61,8 @@ it.scoped(
 			);
 			const otherQueryCallCount = convexClientTest.getQueryCallCount(
 				api.authenticated.servers.publicGetServerByDiscordId,
-				// @ts-expect-error - intentionally passing wrong args to verify functions are tracked separately
 				{
 					discordId: serverDiscordId,
-					backendAccessToken: "test-backend-access-token",
 				},
 			);
 			expect(queryCallCount).toBe(1);

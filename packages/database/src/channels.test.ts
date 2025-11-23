@@ -1,4 +1,5 @@
 import { expect, it } from "@effect/vitest";
+import { generateSnowflakeString } from "@packages/test-utils/snowflakes";
 import { Effect, Exit } from "effect";
 import type { Channel, ChannelSettings, Server } from "../convex/schema";
 import { Database } from "./database";
@@ -737,10 +738,15 @@ it.scoped("findChannelsBeforeId returns channels before given ID", () =>
 			throw new Error("Server not found");
 		}
 
-		const channel1 = createTestChannel("channel001", serverId);
-		const channel2 = createTestChannel("channel002", serverId);
-		const channel3 = createTestChannel("channel003", serverId);
-		const channel4 = createTestChannel("channel004", serverId);
+		const channel001 = generateSnowflakeString();
+		const channel002 = generateSnowflakeString();
+		const channel003 = generateSnowflakeString();
+		const channel004 = generateSnowflakeString();
+
+		const channel1 = createTestChannel(channel001, serverId);
+		const channel2 = createTestChannel(channel002, serverId);
+		const channel3 = createTestChannel(channel003, serverId);
+		const channel4 = createTestChannel(channel004, serverId);
 
 		yield* database.channels.createChannel({ channel: channel1 });
 		yield* database.channels.createChannel({ channel: channel2 });
@@ -749,12 +755,12 @@ it.scoped("findChannelsBeforeId returns channels before given ID", () =>
 
 		const liveData = yield* database.channels.findChannelsBeforeId({
 			serverId,
-			id: "channel004",
+			id: channel004,
 			take: 2,
 		});
 
 		expect(liveData?.length).toBe(2);
-		expect(liveData?.[0]?.id).toBe("channel003");
-		expect(liveData?.[1]?.id).toBe("channel002");
+		expect(liveData?.[0]?.id).toBe(channel003);
+		expect(liveData?.[1]?.id).toBe(channel002);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
