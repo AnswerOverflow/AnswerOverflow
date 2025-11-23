@@ -124,10 +124,18 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
+				const discordChannelData = toAOChannel(
+					newChannel as GuildChannel,
+					server.discordId,
+				);
+
 				yield* database.private.channels.updateChannel({
 					id: newChannel.id,
 					channel: {
-						...toAOChannel(newChannel as GuildChannel, server.discordId),
+						...discordChannelData,
+						inviteCode: existingChannel.inviteCode,
+						solutionTagId: existingChannel.solutionTagId,
+						lastIndexedSnowflake: existingChannel.lastIndexedSnowflake,
 					},
 				});
 			}).pipe(
@@ -182,10 +190,18 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
+				const discordThreadData = toAOChannel(
+					newThread as AnyThreadChannel,
+					server.discordId,
+				);
+
 				yield* database.private.channels.updateChannel({
 					id: newThread.id,
 					channel: {
-						...toAOChannel(newThread as AnyThreadChannel, server.discordId),
+						...discordThreadData,
+						inviteCode: existingChannel.inviteCode,
+						solutionTagId: existingChannel.solutionTagId,
+						lastIndexedSnowflake: existingChannel.lastIndexedSnowflake,
 					},
 				});
 			}).pipe(

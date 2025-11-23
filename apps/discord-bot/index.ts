@@ -12,6 +12,7 @@ import { MarkSolutionCommandHandlerLayer } from "./src/handlers/mark-solution-co
 import { MessageParityLayer } from "./src/handlers/message-parity";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./src/handlers/send-mark-solution-instructions-handler";
 import { ServerParityLayer } from "./src/handlers/server-parity";
+import { StatusUpdateHandlerLayer } from "./src/handlers/status-update";
 
 const program = Effect.gen(function* () {
 	const discord = yield* Discord;
@@ -45,6 +46,7 @@ const ParityLayers = Layer.mergeAll(
 	MarkSolutionCommandHandlerLayer,
 	ChannelSettingsCommandHandlerLayer,
 	SendMarkSolutionInstructionsHandlerLayer,
+	StatusUpdateHandlerLayer,
 );
 
 const AppLayer = Layer.mergeAll(

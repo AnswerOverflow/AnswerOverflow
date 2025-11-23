@@ -1,4 +1,5 @@
 import {
+	ActivityType,
 	ChannelType,
 	type Client,
 	type ClientEvents,
@@ -232,6 +233,11 @@ export const createDiscordService = Effect.gen(function* () {
 			});
 		});
 
+	const setActivity = (name: string, options?: { type?: ActivityType }) =>
+		use((c) => {
+			return c.user?.setActivity(name, options);
+		});
+
 	return {
 		getGuild,
 		getGuilds,
@@ -241,6 +247,7 @@ export const createDiscordService = Effect.gen(function* () {
 		fetchActiveThreads,
 		fetchArchivedThreads,
 		callClient,
+		setActivity,
 		client: {
 			login,
 			on,
