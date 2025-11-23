@@ -1,7 +1,6 @@
 import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
-
 import {
 	type MutationCtx,
 	privateMutation,
@@ -9,10 +8,10 @@ import {
 	type QueryCtx,
 } from "../client";
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
+import { enrichMessages } from "../shared/dataAccess";
 import {
 	compareIds,
 	deleteMessageInternalLogic,
-	enrichMessageForDisplay,
 	findAttachmentsByMessageId as findAttachmentsByMessageIdShared,
 	findIgnoredDiscordAccountById,
 	findMessagesByAuthorId as findMessagesByAuthorIdShared,
@@ -22,7 +21,6 @@ import {
 	findUserServerSettingsById,
 	getChannelWithSettings,
 	getMessageById as getMessageByIdShared,
-	getServerByDiscordId,
 	upsertMessageInternalLogic,
 } from "../shared/shared";
 
@@ -610,11 +608,6 @@ export const getMessagePageData = privateQuery({
 			return null;
 		}
 
-		const server = await getServerByDiscordId(ctx, targetMessage.serverId);
-		if (!server) {
-			return null;
-		}
-
 		const threadId = getThreadIdOfMessage(targetMessage);
 		const parentId = getParentChannelOfMessage(targetMessage);
 		const channelId = threadId ?? parentId;
@@ -643,12 +636,23 @@ export const getMessagePageData = privateQuery({
 			targetMessage.id,
 		);
 
-		const messagesWithData = await asyncMap(messagesToShow, async (message) => {
-			return await enrichMessageForDisplay(ctx, message);
-		});
+		const [enrichedMessages, server] = await Promise.all([
+			enrichMessages(ctx, messagesToShow),
+			getOneFrom(
+				ctx.db,
+				"servers",
+				"by_discordId",
+				targetMessage.serverId,
+				"discordId",
+			),
+		]);
+
+		if (enrichedMessages.length === 0 || !server) {
+			return null;
+		}
 
 		return {
-			messages: messagesWithData,
+			messages: enrichedMessages,
 			server: {
 				_id: server._id,
 				discordId: server.discordId,
