@@ -18,7 +18,12 @@ export type MessageMetadata = {
 	roles?: Record<string, { name: string; color: number }>;
 	users?: Record<
 		string,
-		{ username: string; globalName: string | null; url: string }
+		{
+			username: string;
+			globalName: string | null;
+			url: string;
+			exists?: boolean;
+		}
 	>;
 	internalLinks?: Array<{
 		original: string;

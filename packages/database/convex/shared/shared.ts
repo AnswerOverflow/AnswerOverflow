@@ -348,7 +348,12 @@ export async function getMentionMetadata(
 ) {
 	const users: Record<
 		string,
-		{ username: string; globalName: string | null; url: string }
+		{
+			username: string;
+			globalName: string | null;
+			url: string;
+			exists?: boolean;
+		}
 	> = {};
 	const channels: Record<
 		string,
@@ -363,17 +368,21 @@ export async function getMentionMetadata(
 
 	for (const userId of userIds) {
 		const account = await getDiscordAccountById(ctx, userId);
-		users[userId] = account
-			? {
-					username: account.name,
-					globalName: null,
-					url: `/u/${userId}`,
-				}
-			: {
-					username: userId,
-					globalName: null,
-					url: `https://discord.com/users/${userId}`,
-				};
+		if (account) {
+			users[userId] = {
+				username: account.name,
+				globalName: null,
+				url: `/u/${userId}`,
+				exists: true,
+			};
+		} else {
+			users[userId] = {
+				username: "Unknown user",
+				globalName: null,
+				url: "",
+				exists: false,
+			};
+		}
 	}
 
 	for (const channelId of channelIds) {
@@ -801,7 +810,12 @@ export type EnrichedMessage = {
 	metadata?: {
 		users?: Record<
 			string,
-			{ username: string; globalName: string | null; url: string }
+			{
+				username: string;
+				globalName: string | null;
+				url: string;
+				exists?: boolean;
+			}
 		>;
 		channels?: Record<
 			string,
@@ -951,7 +965,12 @@ export async function enrichMessageForDisplay(
 
 	const messageUsers: Record<
 		string,
-		{ username: string; globalName: string | null; url: string }
+		{
+			username: string;
+			globalName: string | null;
+			url: string;
+			exists?: boolean;
+		}
 	> = {};
 	for (const userId of userIds) {
 		const user = mentionMetadata.users[userId];
