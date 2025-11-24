@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"outDir": "./dist",
 		"module": "ESNext",
-		"moduleResolution": "bundler"
+		"moduleResolution": "bundler",
+		"rootDir": "."
 	},
 	"include": ["src/**/*", "convex/**/*"],
 	"exclude": [
