@@ -639,16 +639,22 @@ export default function ChannelsPage() {
 												}
 											/>
 
-											<ToggleChannelFlag
-												title="Auto Thread Enabled"
-												description="Automatically create threads for messages in this channel."
-												flagKey="autoThreadEnabled"
-												checked={getFlagValue("autoThreadEnabled") === true}
-												isMixed={getFlagValue("autoThreadEnabled") === "mixed"}
-												onChange={(checked) =>
-													handleChannelToggle("autoThreadEnabled", checked)
-												}
-											/>
+											{!selectedChannels.some(
+												(c: { type: number }) => c.type === 15,
+											) && (
+												<ToggleChannelFlag
+													title="Auto Thread Enabled"
+													description="Automatically create threads for messages in this channel."
+													flagKey="autoThreadEnabled"
+													checked={getFlagValue("autoThreadEnabled") === true}
+													isMixed={
+														getFlagValue("autoThreadEnabled") === "mixed"
+													}
+													onChange={(checked) =>
+														handleChannelToggle("autoThreadEnabled", checked)
+													}
+												/>
+											)}
 
 											<ToggleChannelFlag
 												title="Send Mark Solution Instructions in New Threads"

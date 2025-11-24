@@ -33,13 +33,13 @@ maybe <base/> helps although it's never worked in the past
     Commands:
     - [X] Manage Account
     - [X] Mark Solution
-    - [ ] Leaderboard
+    - [X] Leaderboard
     - [ ] Quick Action
 
     Events:
     - [X] Auto thread
     - [ ] Checkmark mark solution
-    - [ ] Forum post guidelines consent
+    - [X] Forum post guidelines consent
     - [ ] Read the rules consent
     - [X] Send mark solutions in new threads
     - [ ] Update status
@@ -104,11 +104,11 @@ Server Settings:
     - [ ] Upgrade / downgrade plan
 
 Channel Settings:
-    - [ ] Enable / disable mark solution
-    - [ ] Enable / disable mark solution instructions
-    - [ ] Enable / disable auto thread
-    - [ ] Enable / disable indexing
-    - [ ] Enable / disabe forum guidelines consent
+    - [X] Enable / disable mark solution
+    - [X] Enable / disable mark solution instructions
+    - [X] Enable / disable auto thread
+    - [X] Enable / disable indexing
+    - [X] Enable / disabe forum guidelines consent
 
 
 
