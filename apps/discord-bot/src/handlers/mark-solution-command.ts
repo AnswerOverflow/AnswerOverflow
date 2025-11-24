@@ -1,6 +1,6 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
-import { Console, Effect, Layer } from "effect";
+import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { toAOMessage } from "../utils/conversions";
 import { makeMarkSolutionResponse } from "./mark-solution";
