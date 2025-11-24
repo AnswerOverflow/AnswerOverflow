@@ -21,7 +21,7 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 
     Events:
     - [X] Auto thread
-    - [ ] Checkmark mark solution
+    - ~~[ ] Checkmark mark solution~~ (removed)
     - [X] Forum post guidelines consent
     - [X] Read the rules consent
     - [X] Send mark solutions in new threads
@@ -31,8 +31,8 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
     - [ ] Cache parity
     - [X] Channel parity
     - [X] Guild parity
-    - [ ] Message parity
-    - [ ] User parity
+    - [X] Message parity
+    - [X] User parity
 
     Misc:
     - [X] Deny list
@@ -51,8 +51,8 @@ Main Site:
     - [X] /eula
     - [X] /privacy
     - [X] /tos
-    - [ ] /c/
-    - [ ] /c/:channelId
+    - [ ] /c/:serverId
+    - [ ] /c/:serverId/:channelId
     - [ ] /m/:messageId
     - [ ] /og/post?id
     - [ ] /u/:userId
@@ -92,6 +92,25 @@ Channel Settings:
     - [X] Enable / disable auto thread
     - [X] Enable / disable indexing
     - [X] Enable / disabe forum guidelines consent
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
