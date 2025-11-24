@@ -4,6 +4,7 @@ import type { Tenant } from "@packages/ui/components/tenant-context";
 import { normalizeSubpath } from "@packages/ui/utils/links";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
+import { DomainNavbarFooterWrapper } from "../../components/domain-navbar-footer-wrapper";
 
 const subpathTenants = [
 	{
@@ -60,5 +61,9 @@ export default async function DomainLayout(props: {
 		discordId: tenantData.discordId,
 	};
 
-	return <Providers tenant={tenant}>{props.children}</Providers>;
+	return (
+		<Providers tenant={tenant}>
+			<DomainNavbarFooterWrapper>{props.children}</DomainNavbarFooterWrapper>
+		</Providers>
+	);
 }
