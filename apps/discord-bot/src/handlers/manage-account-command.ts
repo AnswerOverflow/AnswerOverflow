@@ -231,22 +231,13 @@ export function handleManageAccountCommand(
 			});
 
 			collector.on("collect", async (buttonInteraction) => {
-				// todo: use managed runtime
 				await Effect.runPromise(
-					Effect.scoped(
-						handleManageAccountButtonPress(
-							buttonInteraction,
-							interaction.user.id,
-							server.discordId,
-							state,
-						).pipe(
-							Effect.provide(DatabaseLayer),
-							Effect.catchAll((error) =>
-								Effect.sync(() => {
-									console.error("Error handling button press:", error);
-								}),
-							),
-						),
+					handleManageAccountButtonPress(
+						buttonInteraction,
+						database,
+						interaction.user.id,
+						server.discordId,
+						state,
 					),
 				);
 
@@ -267,13 +258,12 @@ export function handleManageAccountCommand(
 
 function handleManageAccountButtonPress(
 	interaction: { customId: string },
+	database: Effect.Effect.Success<typeof Database>,
 	userId: string,
 	serverId: string,
 	state: ManageAccountState,
-): Effect.Effect<void, unknown, Database> {
+) {
 	return Effect.gen(function* () {
-		const database = yield* Database;
-
 		const customId =
 			interaction.customId as (typeof menuButtonIds)[keyof typeof menuButtonIds];
 
