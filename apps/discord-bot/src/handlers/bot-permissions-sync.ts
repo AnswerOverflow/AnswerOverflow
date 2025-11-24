@@ -1,8 +1,8 @@
 import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { syncBotPermissionsForChannel } from "./channel-parity";
 import { isAllowedRootChannelType } from "../utils/conversions";
+import { syncBotPermissionsForChannel } from "./channel-parity";
 
 function syncBotPermissionsForAllChannelsInGuild(
 	discord: Effect.Effect.Success<typeof Discord>,

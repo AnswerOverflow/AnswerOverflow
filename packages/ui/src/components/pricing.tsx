@@ -1,5 +1,4 @@
 "use client";
-import { usePathname } from "next/navigation";
 import { LinkButton } from "./link-button";
 
 export const PricingOptions = () => {
