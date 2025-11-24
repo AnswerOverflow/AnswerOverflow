@@ -10,10 +10,10 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { Input } from "@packages/ui/components/input";
+import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
-import { Link } from "@packages/ui/components/link";
 import { useQueryState } from "nuqs";
 import { ServerCard } from "../../components/server-card";
 import { authClient } from "../../lib/auth-client";
