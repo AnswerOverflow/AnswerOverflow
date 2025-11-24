@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { privateMutation, privateQuery } from "../client";
+import { privateMutation } from "../client";
 
 export const createAnonymousSession = privateMutation({
 	args: {},
@@ -20,21 +20,5 @@ export const createAnonymousSession = privateMutation({
 			createdAt: Date.now(),
 			expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30,
 		};
-	},
-});
-
-export const getAnonymousSession = privateQuery({
-	args: {
-		sessionId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const anonymousSession = await ctx.db
-			.query("anonymousSessions")
-			.withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
-			.first();
-		if (!anonymousSession) {
-			return null;
-		}
-		return anonymousSession;
 	},
 });

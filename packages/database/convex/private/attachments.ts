@@ -58,13 +58,3 @@ export const uploadManyAttachmentsFromUrls = privateAction({
 		return results;
 	},
 });
-
-export const getAttachmentUrl = privateAction({
-	args: {
-		storageId: v.id("_storage"),
-	},
-	returns: v.union(v.string(), v.null()),
-	handler: async (ctx, args) => {
-		return await ctx.storage.getUrl(args.storageId);
-	},
-});
