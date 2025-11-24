@@ -1,9 +1,6 @@
-import { type Infer, v } from "convex/values";
+import { v } from "convex/values";
 import { privateMutation, privateQuery } from "../client";
-import type { ignoredDiscordAccountSchema } from "../schema";
 import { findIgnoredDiscordAccountById as findIgnoredDiscordAccountByIdShared } from "../shared/shared";
-
-type IgnoredDiscordAccount = Infer<typeof ignoredDiscordAccountSchema>;
 
 export const findIgnoredDiscordAccountById = privateQuery({
 	args: {
@@ -11,27 +8,6 @@ export const findIgnoredDiscordAccountById = privateQuery({
 	},
 	handler: async (ctx, args) => {
 		return await findIgnoredDiscordAccountByIdShared(ctx, args.id);
-	},
-});
-
-export const findManyIgnoredDiscordAccountsById = privateQuery({
-	args: {
-		ids: v.array(v.string()),
-	},
-	handler: async (ctx, args) => {
-		if (args.ids.length === 0) return [];
-
-		const accounts: IgnoredDiscordAccount[] = [];
-		for (const id of args.ids) {
-			const account = await ctx.db
-				.query("ignoredDiscordAccounts")
-				.filter((q) => q.eq(q.field("id"), id))
-				.first();
-			if (account) {
-				accounts.push(account);
-			}
-		}
-		return accounts;
 	},
 });
 

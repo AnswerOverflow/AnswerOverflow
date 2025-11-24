@@ -31,6 +31,7 @@ export const getDiscordAccountById = privateQuery({
 	},
 });
 
+// TODO: This should all just go through upsert
 export const createDiscordAccount = privateMutation({
 	args: {
 		account: discordAccountSchema,
