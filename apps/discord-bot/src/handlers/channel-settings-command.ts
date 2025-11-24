@@ -24,7 +24,11 @@ export function handleChannelSettingsCommand(
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		if (!interaction.guildId || !interaction.channelId) {
+		if (
+			!interaction.guildId ||
+			!interaction.channelId ||
+			!interaction.channel
+		) {
 			yield* Effect.tryPromise({
 				try: () =>
 					interaction.reply({
@@ -36,8 +40,7 @@ export function handleChannelSettingsCommand(
 			return;
 		}
 
-		const isThread = interaction.channel?.isThread() ?? false;
-		const targetChannelId = isThread
+		const targetChannelId = interaction.channel?.isThread()
 			? (interaction.channel.parentId ?? interaction.channelId)
 			: interaction.channelId;
 
