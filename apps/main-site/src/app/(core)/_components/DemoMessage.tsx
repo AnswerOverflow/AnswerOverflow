@@ -1,14 +1,12 @@
-import { getSnowflakeUTCDate } from "@packages/ui/utils/snowflake";
-import Image from "next/image";
-
 import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
 } from "@packages/ui/components/avatar";
 import { Link } from "@packages/ui/components/link";
-
 import { DiscordIcon } from "@packages/ui/icons/index";
+import { getSnowflakeUTCDate } from "@packages/ui/utils/snowflake";
+import Image from "next/image";
 import { forwardRef } from "react";
 
 function getInitials(name: string) {
@@ -145,7 +143,7 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 			threadId?: string;
 		}) {
 			const endpoint = `${serverId}/${channelId}/${
-				threadId ? threadId + "/" : ""
+				threadId ? `${threadId}/` : ""
 			}${messageId}`;
 			return `discord://discord.com/channels/${endpoint}`;
 		}
@@ -191,10 +189,9 @@ export const DemoMessage = forwardRef<HTMLDivElement, MessageProps>(
 								<Link
 									href={getMessageUrl({
 										serverId: message.serverId,
-										channelId:
-											thread && thread.parentId
-												? thread.parentId
-												: message.channelId,
+										channelId: thread?.parentId
+											? thread.parentId
+											: message.channelId,
 										messageId: message.id,
 										threadId: thread?.id,
 									})}

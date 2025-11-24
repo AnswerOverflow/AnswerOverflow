@@ -1,7 +1,6 @@
 "use client";
-import Image from "next/image";
-import { LinkButton } from "../../link-button";
 import { cn } from "../../../lib/utils";
+import { LinkButton } from "../../link-button";
 
 export function FeaturedCommunitiesSection(props: { className?: string }) {
 	return (

@@ -5,6 +5,7 @@ import { DemoMessage, type MessageProps } from "./DemoMessage";
 import { GooglePage } from "./GooglePage";
 import "./DashAnimation.css";
 import { useTheme } from "next-themes";
+
 if (typeof window === "undefined") React.useLayoutEffect = () => {};
 export interface NewLandingAnimationProps {
 	questionMessage: MessageProps;
