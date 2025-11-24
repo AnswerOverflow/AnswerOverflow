@@ -60,10 +60,11 @@ const nextConfig: NextConfig = {
 			},
 		];
 	},
-	assetPrefix:
-		process.env.NODE_ENV === "development"
-			? undefined
-			: "https://www.answeroverflow.com/",
+	// TODO: probably bring this back
+	// assetPrefix:
+	// 	process.env.NODE_ENV === "development"
+	// 		? undefined
+	// 		: "https://www.answeroverflow.com/",
 	skipTrailingSlashRedirect: true,
 	redirects: async () => {
 		return [

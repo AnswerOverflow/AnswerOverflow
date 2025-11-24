@@ -10,7 +10,8 @@ const OtelLayer = createOtelLayer("main-site");
 export async function handleAnonymousSession(c: Context) {
 	const verification = await checkBotId({
 		developmentOptions: {
-			bypass: process.env.NODE_ENV === "development" ? "HUMAN" : undefined,
+			// TODO: Undisable
+			bypass: "HUMAN", // process.env.NODE_ENV === "development" ? "HUMAN" : undefined,
 		},
 	});
 	if (!verification.isHuman) {

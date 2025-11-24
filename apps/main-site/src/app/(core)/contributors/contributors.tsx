@@ -89,7 +89,7 @@ export const Contributors = ({
 	<div className="mx-auto my-16 grid w-max grid-cols-1 gap-8 md:mx-0 md:mr-auto md:grid-flow-col md:grid-cols-2">
 		{contributors.map((contributor) => (
 			<FollowCursor key={`${contributor.name}`} intensity={25}>
-				<Contributor key={contributor.name} {...contributor} />
+				<Contributor {...contributor} />
 			</FollowCursor>
 		))}
 	</div>
