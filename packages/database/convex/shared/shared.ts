@@ -3,13 +3,13 @@ import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
-import { anonymizeDiscordAccount } from "./anonymization.js";
 import type {
 	Attachment,
 	attachmentSchema,
 	emojiSchema,
 	messageSchema,
 } from "../schema";
+import { anonymizeDiscordAccount } from "./anonymization.js";
 
 type Message = Infer<typeof messageSchema>;
 export type DatabaseAttachment = Infer<typeof attachmentSchema>;
@@ -911,14 +911,7 @@ export async function enrichMessageForDisplay(
 	let authorData: { id: string; name: string; avatar?: string } | null = null;
 	if (author) {
 		if (options?.isAnonymous) {
-			const anonymized = anonymizeDiscordAccount(
-				{
-					id: author.id,
-					name: author.name,
-					avatar: author.avatar,
-				},
-				message.authorId,
-			);
+			const anonymized = anonymizeDiscordAccount(message.authorId);
 			authorData = {
 				id: anonymized.id,
 				name: anonymized.name,

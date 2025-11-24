@@ -12,7 +12,7 @@ export type DiscordAccountPublic = {
 };
 
 export function anonymizeDiscordAccount(
-	account: DiscordAccountPublic,
+	_account: DiscordAccountPublic,
 	seed: string,
 ): DiscordAccountPublic {
 	const shortName: string = uniqueNamesGenerator({
