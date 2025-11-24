@@ -1,4 +1,4 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import type { ChatInputCommandInteraction } from "discord.js";
 import {
 	ActionRowBuilder,
@@ -7,7 +7,7 @@ import {
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
-import { Console, Effect, Layer } from "effect";
+import { Effect, Layer } from "effect";
 import { Discord, UnknownDiscordError } from "../core/discord-service";
 
 function getDashboardUrl(serverId: string, channelId: string): string {
