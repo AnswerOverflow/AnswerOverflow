@@ -895,8 +895,8 @@ export async function enrichMessageForDisplay(
 	});
 
 	const convexSiteUrl = process.env.CONVEX_SITE_URL;
-	const attachmentsWithUrl: Attachment[] = attachments
-		.map((attachment: DatabaseAttachment) => {
+	const attachmentsWithUrl: Attachment[] = Arr.filter(
+		Arr.map(attachments, (attachment: DatabaseAttachment) => {
 			if (attachment.storageId && convexSiteUrl) {
 				return {
 					...attachment,
@@ -904,8 +904,9 @@ export async function enrichMessageForDisplay(
 				};
 			}
 			return null;
-		})
-		.filter((attachment): attachment is Attachment => attachment !== null);
+		}),
+		Predicate.isNotNull,
+	);
 
 	let authorData: { id: string; name: string; avatar?: string } | null = null;
 	if (author) {

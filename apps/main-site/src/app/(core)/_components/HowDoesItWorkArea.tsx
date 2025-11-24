@@ -15,7 +15,6 @@ const HowDoesItWorkAreaText = () => {
 			</p>
 			<div className="mb-8 flex w-full flex-col items-center justify-center gap-4 sm:w-fit sm:flex-row lg:mb-0">
 				<GetStarted
-					variant={"blue"}
 					location="Hero"
 					className="mx-auto w-auto px-6 text-lg shadow-[0px_0px_40px_rgba(255,_255,_255,_0.2)] duration-200 hover:shadow-[0px_0px_40px_rgba(255,_255,_255,_0.4)] xl:mx-0"
 				/>

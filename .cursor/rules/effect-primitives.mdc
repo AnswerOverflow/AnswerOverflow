@@ -45,6 +45,11 @@ const sum = Num.sum(1, 2, 3);
   - Use `Arr.filter(values, Predicate.isNotNullable)` instead of `values.filter(x => x != null)`
   - Use `Arr.map`, `Arr.filter`, `Arr.find`, etc. with Effect predicates and utilities for better type safety and composability
   - Always import with aliases: `import { Array as Arr, Predicate } from "effect"`
+- **When filtering null values after map operations**, **ALWAYS** use `Arr.filter` with `Predicate.isNotNull` instead of manual `.map().filter()` patterns, **even in non-Effect code**:
+  - ❌ Avoid: `items.map(x => x?.value ?? null).filter((x): x is NonNullable<typeof x> => x !== null)`
+  - ✅ Prefer: `Arr.filter(Arr.map(items, x => x?.value ?? null), Predicate.isNotNull)`
+  - This applies to **all code**, not just Effect-based code - use Effect primitives consistently throughout the codebase
+  - This provides better type safety and cleaner code without manual type guards
 
 ### Maps & Sets
 
@@ -236,6 +241,8 @@ const sum = BigIntEffect.sum(value1, value2);
 3. **Simple cases**: For trivial, local operations where Effect primitives add unnecessary complexity
 4. **Convex functions**: When working within Convex functions, follow Convex conventions first
 
+**Note**: Filtering null values with `Arr.filter` and `Predicate.isNotNull` is **NOT** an exception - this pattern should **always** be used, even in non-Effect code, as it provides better type safety and cleaner code without performance overhead.
+
 ### Migration Strategy
 
 - Start with new code: Use Effect primitives in all new code
@@ -252,6 +259,14 @@ const doubled = items.map((x) => x * 2);
 
 const values: Array<string | null | undefined> = ["a", null, "b", undefined, "c"];
 const filtered = values.filter((x) => x != null);
+
+const threadsWithMessages = sortedThreads
+  .map((thread) => {
+    const message = firstMessages[thread.id];
+    if (!message) return null;
+    return { thread, message };
+  })
+  .filter((tm): tm is { thread: typeof tm.thread; message: NonNullable<typeof tm.message> } => tm !== null);
 
 const map = new Map<string, number>();
 map.set("key", 1);
@@ -282,6 +297,16 @@ const mapped = Arr.map(jsArray, (x) => x * 2);
 // Filtering with Effect predicates
 const values: Array<string | null | undefined> = ["a", null, "b", undefined, "c"];
 const filtered = Arr.filter(values, Predicate.isNotNullable);
+
+// Filtering null values after map operations
+const threadsWithMessages = Arr.filter(
+  Arr.map(sortedThreads, (thread) => {
+    const message = firstMessages[thread.id];
+    if (!message) return null;
+    return { thread, message };
+  }),
+  Predicate.isNotNull,
+);
 
 // Using Effect's Number module with aliased import
 const sum = Num.sum(1, 2, 3);

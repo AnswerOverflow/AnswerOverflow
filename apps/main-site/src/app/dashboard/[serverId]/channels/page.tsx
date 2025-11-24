@@ -618,9 +618,7 @@ export default function ChannelsPage() {
 										<div className="space-y-6">
 											{selectedChannels.length === 1 && selectedChannels[0] && (
 												<ChannelBotPermissionsStatus
-													botPermissions={
-														selectedChannels[0].flags.botPermissions
-													}
+													botPermissions={selectedChannels[0].flags.botPermissions?.toString()}
 													channelName={selectedChannels[0].name}
 												/>
 											)}
