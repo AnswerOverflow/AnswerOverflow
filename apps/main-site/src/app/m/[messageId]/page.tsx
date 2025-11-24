@@ -1,11 +1,9 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
-import { createOtelLayer } from "@packages/observability/effect-otel";
-import { Effect, Layer } from "effect";
+import { Database } from "@packages/database/database";
+import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { runtime } from "../../../lib/runtime";
 import { MessagePage } from "./message-page";
-
-const OtelLayer = createOtelLayer("main-site");
 
 type Props = {
 	params: Promise<{ messageId: string }>;
@@ -30,15 +28,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* Effect.scoped(
-			database.private.messages.getMessagePageData({
-				messageId: params.messageId,
-			}),
-		);
+		const liveData = yield* database.private.messages.getMessagePageData({
+			messageId: params.messageId,
+		});
 		return liveData;
-	})
-		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
-		.pipe(Effect.runPromise);
+	}).pipe(runtime.runPromise);
 
 	if (!pageData) {
 		return {};
@@ -71,15 +65,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function Page(props: Props) {
 	const params = await props.params;
 
+	const start = performance.now();
 	const message = await Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.private.messages.getMessageById({
 			id: params.messageId,
 		});
-	})
-		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
-		.pipe(Effect.runPromise);
-
+	}).pipe(runtime.runPromise);
+	const end = performance.now();
+	console.log(`getMessageById took ${end - start}ms`);
 	if (!message) {
 		return notFound();
 	}
@@ -91,15 +85,11 @@ export default async function Page(props: Props) {
 
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* Effect.scoped(
-			database.private.messages.getMessagePageData({
-				messageId: params.messageId,
-			}),
-		);
+		const liveData = yield* database.private.messages.getMessagePageData({
+			messageId: params.messageId,
+		});
 		return liveData;
-	})
-		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
-		.pipe(Effect.runPromise);
+	}).pipe(runtime.runPromise);
 
 	if (!pageData) {
 		return notFound();

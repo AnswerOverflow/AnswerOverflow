@@ -1,4 +1,4 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import type { ChatInputCommandInteraction } from "discord.js";
 import {
 	ActionRowBuilder,
@@ -7,7 +7,7 @@ import {
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
-import { Console, Effect, Layer } from "effect";
+import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 
 const medalMap = new Map<number, string>([
@@ -51,10 +51,10 @@ export function handleLeaderboardCommand(
 			return;
 		}
 
-		const serverLiveData = yield* Effect.scoped(
-			database.private.servers.getServerByDiscordId({
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
 				discordId: interaction.guildId,
-			}),
+			},
 		);
 
 		const server = serverLiveData;
@@ -70,12 +70,11 @@ export function handleLeaderboardCommand(
 			return;
 		}
 
-		const topSolversLiveData = yield* Effect.scoped(
-			database.private.messages.getTopQuestionSolversByServerId({
+		const topSolversLiveData =
+			yield* database.private.messages.getTopQuestionSolversByServerId({
 				serverId: server.discordId,
 				limit: 10,
-			}),
-		);
+			});
 
 		const topSolvers = topSolversLiveData ?? [];
 
@@ -134,14 +133,7 @@ export const LeaderboardCommandHandlerLayer = Layer.scopedDiscard(
 				) {
 					return;
 				}
-				yield* Effect.scoped(
-					handleLeaderboardCommand(interaction).pipe(
-						Effect.provide(DatabaseLayer),
-						Effect.catchAll((error) =>
-							Console.error("Error in leaderboard command:", error),
-						),
-					),
-				);
+				yield* handleLeaderboardCommand(interaction);
 			}),
 		);
 	}),

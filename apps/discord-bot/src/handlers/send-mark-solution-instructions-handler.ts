@@ -40,11 +40,10 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const parentChannel = yield* Effect.scoped(
-					database.private.channels.findChannelByDiscordId({
+				const parentChannel =
+					yield* database.private.channels.findChannelByDiscordId({
 						discordId: thread.parentId,
-					}),
-				);
+					});
 
 				if (!parentChannel) {
 					return;
@@ -81,22 +80,12 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* Effect.scoped(
-					handleSendMarkSolutionInstructions(
-						thread,
-						newlyCreated,
-						parentChannel,
-						questionAsker,
-						firstMessage ?? null,
-					).pipe(
-						Effect.provide(DatabaseLayer),
-						Effect.catchAll((error) =>
-							Console.error(
-								`Error sending mark solution instructions for thread ${thread.id}:`,
-								error,
-							),
-						),
-					),
+				yield* handleSendMarkSolutionInstructions(
+					thread,
+					newlyCreated,
+					parentChannel,
+					questionAsker,
+					firstMessage ?? null,
 				);
 			}).pipe(
 				Effect.catchAll((error) =>

@@ -64,9 +64,7 @@ const AppLayer = Layer.mergeAll(
 	ParityLayers.pipe(Layer.provide(BaseLayer)),
 );
 
-Effect.runPromise(Effect.scoped(program.pipe(Effect.provide(AppLayer)))).catch(
-	(error) => {
-		console.error("Fatal error:", error);
-		process.exit(1);
-	},
-);
+Effect.runPromise(program.pipe(Effect.provide(AppLayer))).catch((error) => {
+	console.error("Fatal error:", error);
+	process.exit(1);
+});

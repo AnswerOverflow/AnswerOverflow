@@ -1,4 +1,4 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import type { Message } from "discord.js";
 import { MessageType } from "discord.js";
 import { Data, Effect, Layer } from "effect";
@@ -114,12 +114,7 @@ export const AutoThreadHandlerLayer = Layer.scopedDiscard(
 		const discord = yield* Discord;
 
 		yield* discord.client.on("messageCreate", (message) =>
-			Effect.scoped(
-				handleAutoThread(message).pipe(
-					Effect.provide(DatabaseLayer),
-					Effect.ignore,
-				),
-			),
+			handleAutoThread(message),
 		);
 	}),
 );

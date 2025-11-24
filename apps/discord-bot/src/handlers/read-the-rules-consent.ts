@@ -1,4 +1,4 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import type { GuildMember, PartialGuildMember } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
@@ -30,11 +30,12 @@ export function handleReadTheRulesConsent(
 			return;
 		}
 
-		const serverPreferencesLiveData = yield* Effect.scoped(
-			database.private.server_preferences.getServerPreferencesByServerId({
-				serverId: server.discordId,
-			}),
-		);
+		const serverPreferencesLiveData =
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId: server.discordId,
+				},
+			);
 		const serverPreferences = serverPreferencesLiveData;
 
 		if (!serverPreferences?.readTheRulesConsentEnabled) {
@@ -52,12 +53,11 @@ export function handleReadTheRulesConsent(
 			return;
 		}
 
-		const userServerSettingsLiveData = yield* Effect.scoped(
-			database.private.user_server_settings.findUserServerSettingsById({
+		const userServerSettingsLiveData =
+			yield* database.private.user_server_settings.findUserServerSettingsById({
 				userId: newMember.user.id,
 				serverId: server.discordId,
-			}),
-		);
+			});
 		const userServerSettings = userServerSettingsLiveData;
 
 		if (userServerSettings?.canPubliclyDisplayMessages === true) {
@@ -110,12 +110,7 @@ export const ReadTheRulesConsentHandlerLayer = Layer.scopedDiscard(
 		const discord = yield* Discord;
 
 		yield* discord.client.on("guildMemberUpdate", (oldMember, newMember) =>
-			Effect.scoped(
-				handleReadTheRulesConsent(oldMember, newMember).pipe(
-					Effect.provide(DatabaseLayer),
-					Effect.ignore,
-				),
-			),
+			handleReadTheRulesConsent(oldMember, newMember),
 		);
 	}),
 );

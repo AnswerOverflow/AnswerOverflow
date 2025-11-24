@@ -5,6 +5,7 @@ import type {
 	FunctionReference,
 	FunctionReturnType,
 } from "convex/server";
+
 import { Config, Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Emoji, Message } from "../convex/schema";
@@ -206,44 +207,6 @@ export const DatabaseLayer = Layer.effect(Database, service).pipe(
 	Layer.provide(ConvexClientLiveUnifiedLayer),
 );
 
-export async function upsertMessage(
-	data: BaseMessageWithRelations,
-	opts?: {
-		ignoreChecks?: boolean;
-	},
-): Promise<void> {
-	const program = Effect.gen(function* () {
-		const db = yield* Database;
-		yield* db.private.messages.upsertMessage({
-			message: {
-				id: data.id,
-				authorId: data.authorId,
-				serverId: data.serverId,
-				channelId: data.channelId,
-				parentChannelId: data.parentChannelId,
-				childThreadId: data.childThreadId,
-				questionId: data.questionId,
-				referenceId: data.referenceId,
-				applicationId: data.applicationId,
-				interactionId: data.interactionId,
-				webhookId: data.webhookId,
-				content: data.content,
-				flags: data.flags,
-				type: data.type,
-				pinned: data.pinned,
-				nonce: data.nonce,
-				tts: data.tts,
-				embeds: data.embeds,
-			},
-			attachments: data.attachments,
-			reactions: data.reactions,
-			ignoreChecks: opts?.ignoreChecks,
-		});
-	}).pipe(Effect.provide(DatabaseLayer));
-
-	await Effect.runPromise(program);
-}
-
 export type BaseMessageWithRelations = Message & {
 	attachments?: DatabaseAttachment[];
 	reactions?: Array<{
@@ -251,45 +214,3 @@ export type BaseMessageWithRelations = Message & {
 		emoji: Emoji;
 	}>;
 };
-export async function upsertManyMessages(
-	data: BaseMessageWithRelations[],
-	opts?: {
-		ignoreChecks?: boolean;
-	},
-): Promise<BaseMessageWithRelations[]> {
-	if (data.length === 0) return Promise.resolve([]);
-
-	const program = Effect.gen(function* () {
-		const db = yield* Database;
-		yield* db.private.messages.upsertManyMessages({
-			messages: data.map((msg) => ({
-				message: {
-					id: msg.id,
-					authorId: msg.authorId,
-					serverId: msg.serverId,
-					channelId: msg.channelId,
-					parentChannelId: msg.parentChannelId,
-					childThreadId: msg.childThreadId,
-					questionId: msg.questionId,
-					referenceId: msg.referenceId,
-					applicationId: msg.applicationId,
-					interactionId: msg.interactionId,
-					webhookId: msg.webhookId,
-					content: msg.content,
-					flags: msg.flags,
-					type: msg.type,
-					pinned: msg.pinned,
-					nonce: msg.nonce,
-					tts: msg.tts,
-					embeds: msg.embeds,
-				},
-				attachments: msg.attachments,
-				reactions: msg.reactions,
-			})),
-			ignoreChecks: opts?.ignoreChecks,
-		});
-		return data; // Return the input data as the old API does
-	}).pipe(Effect.provide(DatabaseLayer));
-
-	return await Effect.runPromise(program);
-}

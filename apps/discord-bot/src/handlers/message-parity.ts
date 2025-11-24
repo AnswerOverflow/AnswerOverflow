@@ -1,4 +1,4 @@
-import { Database, upsertMessage } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { toAODiscordAccount, toAOMessage } from "../utils/conversions";
@@ -46,7 +46,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const aoMessage = yield* Effect.promise(() =>
+				const data = yield* Effect.promise(() =>
 					toAOMessage(newMessage, server.discordId),
 				);
 
@@ -70,8 +70,8 @@ export const MessageParityLayer = Layer.scopedDiscard(
 						});
 
 					for (const result of uploadResults) {
-						if (result.storageId && aoMessage.attachments) {
-							const attachment = aoMessage.attachments.find(
+						if (result.storageId && data.attachments) {
+							const attachment = data.attachments.find(
 								(a) => a.id === result.attachmentId,
 							);
 							if (attachment) {
@@ -81,24 +81,31 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					}
 				}
 
-				yield* Effect.promise(() =>
-					upsertMessage(
-						{
-							...aoMessage,
-							questionId: existingMessage.questionId,
-						},
-						{ ignoreChecks: false },
-					),
-				).pipe(
-					Effect.tap(() =>
-						Console.log(
-							`Updated message ${newMessage.id} from ${newMessage.author.tag}`,
-						),
-					),
-					Effect.catchAll((error) =>
-						Console.error(`Error updating message ${newMessage.id}:`, error),
-					),
-				);
+				yield* database.private.messages.upsertMessage({
+					message: {
+						id: data.id,
+						authorId: data.authorId,
+						serverId: data.serverId,
+						channelId: data.channelId,
+						parentChannelId: data.parentChannelId,
+						childThreadId: data.childThreadId,
+						questionId: data.questionId,
+						referenceId: data.referenceId,
+						applicationId: data.applicationId,
+						interactionId: data.interactionId,
+						webhookId: data.webhookId,
+						content: data.content,
+						flags: data.flags,
+						type: data.type,
+						pinned: data.pinned,
+						nonce: data.nonce,
+						tts: data.tts,
+						embeds: data.embeds,
+					},
+					attachments: data.attachments,
+					reactions: data.reactions,
+					ignoreChecks: false,
+				});
 
 				yield* database.private.discord_accounts
 					.upsertDiscordAccount({
@@ -190,7 +197,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const aoMessage = yield* Effect.promise(() =>
+				const data = yield* Effect.promise(() =>
 					toAOMessage(message, server.discordId),
 				);
 
@@ -214,8 +221,8 @@ export const MessageParityLayer = Layer.scopedDiscard(
 						});
 
 					for (const result of uploadResults) {
-						if (result.storageId && aoMessage.attachments) {
-							const attachment = aoMessage.attachments.find(
+						if (result.storageId && data.attachments) {
+							const attachment = data.attachments.find(
 								(a) => a.id === result.attachmentId,
 							);
 							if (attachment) {
@@ -225,22 +232,31 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					}
 				}
 
-				yield* Effect.promise(() =>
-					upsertMessage(aoMessage, { ignoreChecks: false }),
-				).pipe(
-					Effect.tap(() =>
-						Console.log(
-							`Maintained parity for message ${message.id} from ${message.author.tag}`,
-						),
-					),
-					Effect.catchAll((error) =>
-						Console.error(
-							`Error maintaining message parity ${message.id}:`,
-							error,
-						),
-					),
-				);
-
+				yield* database.private.messages.upsertMessage({
+					message: {
+						id: data.id,
+						authorId: data.authorId,
+						serverId: data.serverId,
+						channelId: data.channelId,
+						parentChannelId: data.parentChannelId,
+						childThreadId: data.childThreadId,
+						questionId: data.questionId,
+						referenceId: data.referenceId,
+						applicationId: data.applicationId,
+						interactionId: data.interactionId,
+						webhookId: data.webhookId,
+						content: data.content,
+						flags: data.flags,
+						type: data.type,
+						pinned: data.pinned,
+						nonce: data.nonce,
+						tts: data.tts,
+						embeds: data.embeds,
+					},
+					attachments: data.attachments,
+					reactions: data.reactions,
+					ignoreChecks: false,
+				});
 				yield* database.private.discord_accounts
 					.upsertDiscordAccount({ account: toAODiscordAccount(message.author) })
 					.pipe(

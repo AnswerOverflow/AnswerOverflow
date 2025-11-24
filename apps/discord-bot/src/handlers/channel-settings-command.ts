@@ -8,7 +8,7 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Console, Effect, Layer } from "effect";
-import { Discord } from "../core/discord-service";
+import { Discord, UnknownDiscordError } from "../core/discord-service";
 
 function getDashboardUrl(serverId: string, channelId: string): string {
 	const baseUrl =
@@ -20,7 +20,7 @@ function getDashboardUrl(serverId: string, channelId: string): string {
 
 export function handleChannelSettingsCommand(
 	interaction: ChatInputCommandInteraction,
-): Effect.Effect<void, unknown, Database> {
+) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
@@ -56,10 +56,10 @@ export function handleChannelSettingsCommand(
 			return;
 		}
 
-		const serverLiveData = yield* Effect.scoped(
-			database.private.servers.getServerByDiscordId({
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
 				discordId: interaction.guildId,
-			}),
+			},
 		);
 
 		const server = serverLiveData;
@@ -76,11 +76,10 @@ export function handleChannelSettingsCommand(
 			return;
 		}
 
-		const channelLiveData = yield* Effect.scoped(
-			database.private.channels.findChannelByDiscordId({
+		const channelLiveData =
+			yield* database.private.channels.findChannelByDiscordId({
 				discordId: targetChannelId,
-			}),
-		);
+			});
 
 		if (!channelLiveData) {
 			yield* Effect.tryPromise({
@@ -119,8 +118,7 @@ export function handleChannelSettingsCommand(
 					ephemeral: true,
 				}),
 			catch: (error) => {
-				console.error("Error replying to channel-settings command:", error);
-				return error;
+				return new UnknownDiscordError({ cause: error });
 			},
 		});
 	});
@@ -138,14 +136,7 @@ export const ChannelSettingsCommandHandlerLayer = Layer.scopedDiscard(
 				) {
 					return;
 				}
-				yield* Effect.scoped(
-					handleChannelSettingsCommand(interaction).pipe(
-						Effect.provide(DatabaseLayer),
-						Effect.catchAll((error) =>
-							Console.error("Error in channel-settings command:", error),
-						),
-					),
-				);
+				yield* handleChannelSettingsCommand(interaction);
 			}),
 		);
 	}),
