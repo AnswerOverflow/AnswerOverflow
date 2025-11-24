@@ -9,6 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { ChannelBotPermissionsStatus } from "@packages/ui/components/channel-bot-permissions-status";
 import { Checkbox } from "@packages/ui/components/checkbox";
 import {
 	DropdownMenu,
@@ -615,6 +616,14 @@ export default function ChannelsPage() {
 										/>
 									) : (
 										<div className="space-y-6">
+											{selectedChannels.length === 1 && selectedChannels[0] && (
+												<ChannelBotPermissionsStatus
+													botPermissions={
+														selectedChannels[0].flags.botPermissions
+													}
+													channelName={selectedChannels[0].name}
+												/>
+											)}
 											<ToggleChannelFlag
 												title="Indexing Enabled"
 												description="Enable indexing of a channel. Indexing can take up to 24 hours to collect initial data depending on the channel volume."

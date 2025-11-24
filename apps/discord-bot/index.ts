@@ -4,6 +4,7 @@ import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Console, Effect, Layer, Logger, LogLevel } from "effect";
 import { Discord, DiscordLayer } from "./src/core/discord-service";
 import { AutoThreadHandlerLayer } from "./src/handlers/auto-thread";
+import { BotPermissionsSyncLayer } from "./src/handlers/bot-permissions-sync";
 import { ChannelParityLayer } from "./src/handlers/channel-parity";
 import { ChannelSettingsCommandHandlerLayer } from "./src/handlers/channel-settings-command";
 import { DismissButtonHandlerLayer } from "./src/handlers/dismiss-button";
@@ -45,6 +46,7 @@ const ParityLayers = Layer.mergeAll(
 	ChannelParityLayer,
 	MessageParityLayer,
 	UserParityLayer,
+	BotPermissionsSyncLayer,
 	AutoThreadHandlerLayer,
 	DismissButtonHandlerLayer,
 	ForumGuidelinesConsentHandlerLayer,

@@ -8,6 +8,69 @@ import {
 	toAOChannel,
 } from "../utils/conversions";
 
+export function syncBotPermissionsForChannel(
+	discord: Effect.Effect.Success<typeof Discord>,
+	database: Effect.Effect.Success<typeof Database>,
+	channelId: string,
+	guildId: string,
+): Effect.Effect<void, unknown> {
+	return Effect.gen(function* () {
+		const botPermissions = yield* discord.getBotPermissionsForChannel(
+			channelId,
+			guildId,
+		);
+
+		if (botPermissions === null) {
+			return;
+		}
+
+		const existingChannel = yield* Effect.scoped(
+			database.private.channels.findChannelByDiscordId({
+				discordId: channelId,
+			}),
+		);
+
+		if (!existingChannel) {
+			return;
+		}
+
+		yield* database.private.channels.updateChannel({
+			id: channelId,
+			channel: {
+				id: existingChannel.id,
+				serverId: existingChannel.serverId,
+				name: existingChannel.name,
+				type: existingChannel.type,
+				parentId: existingChannel.parentId,
+				inviteCode: existingChannel.inviteCode,
+				archivedTimestamp: existingChannel.archivedTimestamp,
+				solutionTagId: existingChannel.solutionTagId,
+				lastIndexedSnowflake: existingChannel.lastIndexedSnowflake,
+			},
+			settings: {
+				channelId,
+				indexingEnabled: existingChannel.flags?.indexingEnabled ?? false,
+				markSolutionEnabled:
+					existingChannel.flags?.markSolutionEnabled ?? false,
+				sendMarkSolutionInstructionsInNewThreads:
+					existingChannel.flags?.sendMarkSolutionInstructionsInNewThreads ??
+					false,
+				autoThreadEnabled: existingChannel.flags?.autoThreadEnabled ?? false,
+				forumGuidelinesConsentEnabled:
+					existingChannel.flags?.forumGuidelinesConsentEnabled ?? false,
+				botPermissions,
+			},
+		});
+	}).pipe(
+		Effect.catchAll((error) =>
+			Console.warn(
+				`Failed to sync bot permissions for channel ${channelId}:`,
+				error,
+			),
+		),
+	);
+}
+
 export const ChannelParityLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
@@ -38,6 +101,12 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 						},
 					],
 				});
+				yield* syncBotPermissionsForChannel(
+					discord,
+					database,
+					channel.id,
+					channel.guild.id,
+				);
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(
@@ -138,6 +207,12 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 						lastIndexedSnowflake: existingChannel.lastIndexedSnowflake,
 					},
 				});
+				yield* syncBotPermissionsForChannel(
+					discord,
+					database,
+					newChannel.id,
+					newChannel.guild.id,
+				);
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error updating channel ${newChannel.id}:`, error),
