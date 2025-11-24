@@ -58,7 +58,7 @@ export function syncBotPermissionsForChannel(
 				autoThreadEnabled: existingChannel.flags?.autoThreadEnabled ?? false,
 				forumGuidelinesConsentEnabled:
 					existingChannel.flags?.forumGuidelinesConsentEnabled ?? false,
-				botPermissions,
+				botPermissions: botPermissions ?? undefined,
 			},
 		});
 	}).pipe(

@@ -3,6 +3,7 @@ import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
+import { anonymizeDiscordAccount } from "./anonymization.js";
 import type {
 	Attachment,
 	attachmentSchema,
@@ -846,6 +847,7 @@ export async function enrichMessagesWithData(
 export async function enrichMessageForDisplay(
 	ctx: QueryCtx | MutationCtx,
 	message: Message,
+	options?: { isAnonymous?: boolean },
 ): Promise<EnrichedMessage> {
 	const [author, server, attachments, reactions, solutions] = await Promise.all(
 		[
@@ -905,15 +907,34 @@ export async function enrichMessageForDisplay(
 		})
 		.filter((attachment): attachment is Attachment => attachment !== null);
 
-	const baseEnriched: EnrichedMessage = {
-		message,
-		author: author
-			? {
+	let authorData: { id: string; name: string; avatar?: string } | null = null;
+	if (author) {
+		if (options?.isAnonymous) {
+			const anonymized = anonymizeDiscordAccount(
+				{
 					id: author.id,
 					name: author.name,
 					avatar: author.avatar,
-				}
-			: null,
+				},
+				message.authorId,
+			);
+			authorData = {
+				id: anonymized.id,
+				name: anonymized.name,
+				avatar: anonymized.avatar ?? undefined,
+			};
+		} else {
+			authorData = {
+				id: author.id,
+				name: author.name,
+				avatar: author.avatar,
+			};
+		}
+	}
+
+	const baseEnriched: EnrichedMessage = {
+		message,
+		author: authorData,
 		attachments: attachmentsWithUrl,
 		reactions: formattedReactions,
 		solutions,

@@ -27,6 +27,7 @@ import type * as private_servers from "../private/servers.js";
 import type * as private_user_server_settings from "../private/user_server_settings.js";
 import type * as public_custom_functions from "../public/custom_functions.js";
 import type * as public_search from "../public/search.js";
+import type * as shared_anonymization from "../shared/anonymization.js";
 import type * as shared_auth from "../shared/auth.js";
 import type * as shared_authIdentity from "../shared/authIdentity.js";
 import type * as shared_betterAuth from "../shared/betterAuth.js";
@@ -62,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   "private/user_server_settings": typeof private_user_server_settings;
   "public/custom_functions": typeof public_custom_functions;
   "public/search": typeof public_search;
+  "shared/anonymization": typeof shared_anonymization;
   "shared/auth": typeof shared_auth;
   "shared/authIdentity": typeof shared_authIdentity;
   "shared/betterAuth": typeof shared_betterAuth;

@@ -75,7 +75,7 @@ async function enrichMessage(
 		return null;
 	}
 
-	return await enrichMessageForDisplay(ctx, message);
+	return await enrichMessageForDisplay(ctx, message, { isAnonymous });
 }
 
 export function hiddenMessageStub(): MessageWithPrivacyFlags {
