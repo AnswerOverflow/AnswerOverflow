@@ -7,6 +7,13 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 - https://www.convex.dev/components/aggregate use aggregate
 
 
+## Dashboard permissions
+- We need to make a 'withPermissions' / 'guildManagerOrHigherQuery/Mutation/Action'
+- This always takes in a server id
+- checks if the user has the right permissions
+- if not throws, otherwise good to go
+
+
 ## Sitemap
     /c/ sitemap
     /:domain sitemap
