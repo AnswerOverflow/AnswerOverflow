@@ -130,8 +130,12 @@ function UserMention({
 }) {
 	const userData = message.metadata?.users?.[children];
 
-	if (!userData) {
-		return <FallbackMention type="user">{children}</FallbackMention>;
+	if (!userData || userData.exists === false) {
+		return (
+			<span className={baseClassName}>
+				@{userData?.username ?? "Unknown user"}
+			</span>
+		);
 	}
 
 	const content = `@${userData.username ?? children}`;
