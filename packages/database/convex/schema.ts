@@ -202,9 +202,9 @@ export type Embed = Infer<typeof embedSchema>;
 
 export default defineSchema({
 	servers: defineTable(serverSchema).index("by_discordId", ["discordId"]),
-	serverPreferences: defineTable(serverPreferencesSchema).index("by_serverId", [
-		"serverId",
-	]),
+	serverPreferences: defineTable(serverPreferencesSchema)
+		.index("by_serverId", ["serverId"])
+		.index("by_customDomain", ["customDomain"]),
 	discordAccounts: defineTable(discordAccountSchema).index(
 		"by_discordAccountId",
 		["id"],

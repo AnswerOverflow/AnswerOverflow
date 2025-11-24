@@ -11,7 +11,7 @@ import {
 } from "@packages/ui/components/card";
 import { useQuery } from "convex/react";
 import { ExternalLink } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@packages/ui/components/link";
 import { useParams } from "next/navigation";
 
 export default function DashboardOverviewPage() {

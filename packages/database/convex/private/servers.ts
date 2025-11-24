@@ -195,6 +195,35 @@ export const getServerByDiscordId = privateQuery({
 	},
 });
 
+export const getServerByDomain = privateQuery({
+	args: {
+		domain: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_customDomain",
+			args.domain,
+			"customDomain",
+		);
+		if (!preferences) {
+			return null;
+		}
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			preferences.serverId,
+			"discordId",
+		);
+		return {
+			server,
+			preferences,
+		};
+	},
+});
+
 export const findManyServersById = privateQuery({
 	args: {
 		ids: v.array(v.id("servers")),

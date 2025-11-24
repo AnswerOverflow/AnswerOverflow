@@ -2,7 +2,7 @@ import type { Server } from "@packages/database/convex/schema";
 import { Button } from "@packages/ui/components/button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@packages/ui/components/link";
 
 const ServerCard = (props: { server: Server }) => {
 	const { server } = props;

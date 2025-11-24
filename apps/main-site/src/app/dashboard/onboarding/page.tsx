@@ -14,7 +14,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@packages/ui/components/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { authClient } from "../../../lib/auth-client";

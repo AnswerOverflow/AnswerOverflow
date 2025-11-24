@@ -2,7 +2,7 @@ import { Database, DatabaseLayer } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Effect, Layer } from "effect";
 import { Hash, MessageSquare } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@packages/ui/components/link";
 import { notFound } from "next/navigation";
 
 const OtelLayer = createOtelLayer("main-site");
