@@ -1,6 +1,7 @@
 import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import { ChannelType } from "discord-api-types/v10";
 import {
 	type MutationCtx,
 	privateMutation,
@@ -8,6 +9,7 @@ import {
 	type QueryCtx,
 } from "../client";
 import { channelSchema, channelSettingsSchema } from "../schema";
+import { enrichMessages } from "../shared/dataAccess";
 import {
 	CHANNEL_TYPE,
 	compareIds,
@@ -448,7 +450,13 @@ export const getChannelPageData = privateQuery({
 
 		if (!channel || channel.serverId !== server.discordId) return null;
 
-		const ROOT_CHANNEL_TYPES = [10, 11, 12, 13, 15] as const; // Forum, Announcement, Text, etc.
+		const ROOT_CHANNEL_TYPES = [
+			ChannelType.AnnouncementThread,
+			ChannelType.PublicThread,
+			ChannelType.PrivateThread,
+			ChannelType.GuildStageVoice,
+			ChannelType.GuildForum,
+		] as const;
 		const rootChannels = allChannels.filter((c) =>
 			ROOT_CHANNEL_TYPES.includes(
 				c.type as (typeof ROOT_CHANNEL_TYPES)[number],
@@ -470,10 +478,10 @@ export const getChannelPageData = privateQuery({
 			}))
 			.filter((c) => c.flags.indexingEnabled)
 			.sort((a, b) => {
-				if (a.type === 15) return -1; // GuildForum
-				if (b.type === 15) return 1;
-				if (a.type === 5) return -1; // GuildAnnouncement
-				if (b.type === 5) return 1;
+				if (a.type === ChannelType.GuildForum) return -1;
+				if (b.type === ChannelType.GuildForum) return 1;
+				if (a.type === ChannelType.GuildAnnouncement) return -1;
+				if (b.type === ChannelType.GuildAnnouncement) return 1;
 				return 0;
 			})
 			.map((c) => {
@@ -494,18 +502,34 @@ export const getChannelPageData = privateQuery({
 		const threadIds = sortedThreads.map((t) => t.id);
 		const firstMessages = await getFirstMessagesInChannels(ctx, threadIds);
 
+		const messages = sortedThreads
+			.map((thread) => firstMessages[thread.id] ?? null)
+			.filter((m): m is NonNullable<typeof m> => m !== null);
+
+		const enrichedMessages = await enrichMessages(ctx, messages);
+
+		const enrichedMessagesMap = new Map(
+			enrichedMessages.map((em) => [em.message.id, em]),
+		);
+
 		const threadsWithMessages = sortedThreads
-			.map((thread) => ({
-				thread,
-				message: firstMessages[thread.id] ?? null,
-			}))
+			.map((thread) => {
+				const message = firstMessages[thread.id];
+				if (!message) return null;
+				const enrichedMessage = enrichedMessagesMap.get(message.id);
+				if (!enrichedMessage) return null;
+				return {
+					thread,
+					message: enrichedMessage,
+				};
+			})
 			.filter(
 				(
 					tm,
 				): tm is {
 					thread: typeof tm.thread;
 					message: NonNullable<typeof tm.message>;
-				} => tm.message !== null,
+				} => tm !== null,
 			);
 
 		return {
