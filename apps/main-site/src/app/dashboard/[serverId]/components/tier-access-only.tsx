@@ -1,8 +1,8 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { useQuery } from "convex/react";
 import type { ReactNode } from "react";
+import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
 type Plan =
 	| "FREE"
@@ -21,7 +21,7 @@ export function TierAccessOnly({
 	enabledFor: Plan[];
 	serverId: string;
 }) {
-	const dashboardData = useQuery(
+	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
 			serverId,

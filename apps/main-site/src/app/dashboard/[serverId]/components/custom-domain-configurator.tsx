@@ -10,15 +10,16 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { Input } from "@packages/ui/components/input";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
+import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
 export function CustomDomainConfigurator({ serverId }: { serverId: string }) {
 	const [_domain, setDomain] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const dashboardData = useQuery(
+	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
 			serverId,

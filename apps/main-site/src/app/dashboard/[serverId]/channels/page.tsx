@@ -22,7 +22,7 @@ import { EmptyStateCard } from "@packages/ui/components/empty";
 import { Input } from "@packages/ui/components/input";
 import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import {
 	ChevronDown,
 	Hash,
@@ -34,6 +34,7 @@ import {
 import { useParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import React from "react";
+import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
 function ToggleChannelFlag({
 	title,
@@ -95,7 +96,6 @@ function ToggleChannelFlag({
 export default function ChannelsPage() {
 	const params = useParams();
 	const serverId = params.serverId as string;
-	const auth = useConvexAuth();
 
 	const [selectedChannelIdsParam, setSelectedChannelIdsParam] = useQueryState(
 		"channels",
@@ -140,13 +140,11 @@ export default function ChannelsPage() {
 		[selectedChannelIds, setSelectedChannelIdsParam],
 	);
 
-	const dashboardData = useQuery(
+	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
-		auth.isAuthenticated
-			? {
-					serverId,
-				}
-			: "skip",
+		{
+			serverId,
+		},
 	);
 
 	const filteredChannels = React.useMemo(() => {
