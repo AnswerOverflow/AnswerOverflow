@@ -7,10 +7,6 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 - https://www.convex.dev/components/aggregate use aggregate
 
 
-
-setup react grab
-
-
 ## Sitemap
     /c/ sitemap
     /:domain sitemap

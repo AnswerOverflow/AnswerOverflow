@@ -5,9 +5,8 @@ import {
 	DashboardNavbar,
 	type ServerSelectServer,
 } from "@packages/ui/components/navbar";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { usePathname } from "next/navigation";
-import { authClient } from "../../lib/auth-client";
 
 export default function DashboardLayout({
 	children,
@@ -15,8 +14,7 @@ export default function DashboardLayout({
 	children: React.ReactNode;
 }) {
 	const pathname = usePathname();
-	const { data: session, isPending: isSessionPending } =
-		authClient.useSession();
+	const { isLoading, isAuthenticated } = useConvexAuth();
 
 	const isOnboardingPage = pathname === "/dashboard/onboarding";
 	const serverIdMatch = pathname?.match(/^\/dashboard\/([^/]+)/);
@@ -29,7 +27,7 @@ export default function DashboardLayout({
 
 	const servers = useQuery(
 		api.authenticated.dashboard_queries.getUserServersForDropdown,
-		isSessionPending || !session?.user ? "skip" : {},
+		isLoading || !isAuthenticated ? "skip" : {},
 	);
 
 	const serversForDropdown: ServerSelectServer[] =
@@ -48,7 +46,7 @@ export default function DashboardLayout({
 					servers: serversForDropdown,
 					getServerHref: (id: string) => `/dashboard/${id}`,
 					addNewHref: "/dashboard/onboarding",
-					isLoading: isSessionPending || servers === undefined,
+					isLoading: isLoading || servers === undefined,
 				}
 			: undefined;
 

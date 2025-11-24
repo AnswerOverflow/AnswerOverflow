@@ -36,6 +36,23 @@ export function handleChannelSettingsCommand(
 			return;
 		}
 
+		const isThread = interaction.channel?.isThread() ?? false;
+		const targetChannelId = isThread
+			? (interaction.channel.parentId ?? interaction.channelId)
+			: interaction.channelId;
+
+		if (!targetChannelId) {
+			yield* Effect.tryPromise({
+				try: () =>
+					interaction.reply({
+						content: "Could not determine parent channel",
+						ephemeral: true,
+					}),
+				catch: () => undefined,
+			});
+			return;
+		}
+
 		const serverLiveData = yield* Effect.scoped(
 			database.private.servers.getServerByDiscordId({
 				discordId: interaction.guildId,
@@ -58,7 +75,7 @@ export function handleChannelSettingsCommand(
 
 		const channelLiveData = yield* Effect.scoped(
 			database.private.channels.findChannelByDiscordId({
-				discordId: interaction.channelId,
+				discordId: targetChannelId,
 			}),
 		);
 
@@ -74,15 +91,12 @@ export function handleChannelSettingsCommand(
 			return;
 		}
 
-		const dashboardUrl = getDashboardUrl(
-			interaction.guildId,
-			interaction.channelId,
-		);
+		const dashboardUrl = getDashboardUrl(interaction.guildId, targetChannelId);
 
 		const embed = new EmbedBuilder()
 			.setTitle("Channel Settings")
 			.setDescription(
-				`Configure settings for <#${interaction.channelId}> in the dashboard.`,
+				`Configure settings for <#${targetChannelId}> in the dashboard.`,
 			)
 			.setColor("#89D3F8");
 
