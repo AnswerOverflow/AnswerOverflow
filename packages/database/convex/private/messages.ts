@@ -260,27 +260,6 @@ export const findMessagesByChannelId = privateQuery({
 	},
 });
 
-export const findManyMessagesById = privateQuery({
-	args: {
-		ids: v.array(v.string()),
-	},
-	handler: async (ctx, args) => {
-		if (args.ids.length === 0) return [];
-
-		const messages: Message[] = [];
-		for (const id of args.ids) {
-			const message = await ctx.db
-				.query("messages")
-				.filter((q) => q.eq(q.field("id"), id))
-				.first();
-			if (message) {
-				messages.push(message);
-			}
-		}
-		return messages;
-	},
-});
-
 export const findMessagesByAuthorId = privateQuery({
 	args: {
 		authorId: v.string(),
@@ -288,88 +267,6 @@ export const findMessagesByAuthorId = privateQuery({
 	},
 	handler: async (ctx, args) => {
 		return await findMessagesByAuthorIdShared(ctx, args.authorId, args.limit);
-	},
-});
-
-export const findMessagesByServerId = privateQuery({
-	args: {
-		serverId: v.string(),
-		limit: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		const messages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_serverId",
-			args.serverId,
-		);
-
-		return messages.slice(0, args.limit ?? 100);
-	},
-});
-
-export const findMessagesByParentChannelId = privateQuery({
-	args: {
-		parentChannelId: v.string(),
-		limit: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		const messages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_parentChannelId",
-			args.parentChannelId,
-		);
-
-		return messages.slice(0, args.limit ?? 100);
-	},
-});
-
-export const findLatestMessageInChannel = privateQuery({
-	args: {
-		channelId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const messages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_channelId",
-			args.channelId,
-		);
-
-		if (messages.length === 0) return null;
-
-		messages.sort((a, b) => compareIds(b.id, a.id));
-
-		return messages[0] ?? null;
-	},
-});
-
-export const findLatestMessageInChannelAndThreads = privateQuery({
-	args: {
-		channelId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const channelMessages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_channelId",
-			args.channelId,
-		);
-
-		const threadMessages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_parentChannelId",
-			args.channelId,
-		);
-
-		const allMessages = [...channelMessages, ...threadMessages];
-		if (allMessages.length === 0) return null;
-
-		allMessages.sort((a, b) => compareIds(b.id, a.id));
-
-		return allMessages[0] ?? null;
 	},
 });
 
@@ -388,56 +285,6 @@ export const findReactionsByMessageId = privateQuery({
 	},
 	handler: async (ctx, args) => {
 		return await findReactionsByMessageIdShared(ctx, args.messageId);
-	},
-});
-
-export const findEmojiById = privateQuery({
-	args: {
-		id: v.string(),
-	},
-	handler: async (ctx, args) => {
-		return await ctx.db
-			.query("emojis")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
-	},
-});
-
-export const countMessagesInChannel = privateQuery({
-	args: {
-		channelId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const messages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_channelId",
-			args.channelId,
-		);
-
-		return messages.length;
-	},
-});
-
-export const countMessagesInManyChannels = privateQuery({
-	args: {
-		channelIds: v.array(v.string()),
-	},
-	handler: async (ctx, args) => {
-		if (args.channelIds.length === 0) return [];
-
-		const results: Array<{ channelId: string; count: number }> = [];
-
-		for (const channelId of args.channelIds) {
-			const messages = await ctx.db
-				.query("messages")
-				.withIndex("by_channelId", (q) => q.eq("channelId", channelId))
-				.collect();
-
-			results.push({ channelId, count: messages.length });
-		}
-
-		return results;
 	},
 });
 
@@ -463,6 +310,7 @@ export const findSolutionsByQuestionId = privateQuery({
 	},
 });
 
+// TODO: Probably use analytics from PostHog for this instead
 export const getTopQuestionSolversByServerId = privateQuery({
 	args: {
 		serverId: v.string(),
@@ -511,46 +359,6 @@ export const deleteManyMessages = privateMutation({
 		for (const id of args.ids) {
 			await deleteMessageInternalLogic(ctx, id);
 		}
-		return null;
-	},
-});
-
-export const deleteManyMessagesByChannelId = privateMutation({
-	args: {
-		channelId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const messages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_channelId",
-			args.channelId,
-		);
-
-		for (const message of messages) {
-			await deleteMessageInternalLogic(ctx, message.id);
-		}
-
-		return null;
-	},
-});
-
-export const deleteManyMessagesByUserId = privateMutation({
-	args: {
-		userId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const messages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_authorId",
-			args.userId,
-		);
-
-		for (const message of messages) {
-			await deleteMessageInternalLogic(ctx, message.id);
-		}
-
 		return null;
 	},
 });

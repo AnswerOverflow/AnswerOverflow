@@ -12,7 +12,6 @@ import {
 import { channelSchema, channelSettingsSchema } from "../schema";
 import { enrichMessages } from "../shared/dataAccess";
 import {
-	CHANNEL_TYPE,
 	compareIds,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
@@ -109,21 +108,6 @@ export const findAllChannelsByServerId = privateQuery({
 			"by_serverId",
 			args.serverId,
 		);
-
-		return await addSettingsToChannels(ctx, channels);
-	},
-});
-
-export const findLatestThreads = privateQuery({
-	args: {
-		take: v.number(),
-	},
-	handler: async (ctx, args) => {
-		const channels = await ctx.db
-			.query("channels")
-			.withIndex("by_type", (q) => q.eq("type", CHANNEL_TYPE.PublicThread))
-			.order("desc")
-			.take(args.take);
 
 		return await addSettingsToChannels(ctx, channels);
 	},
