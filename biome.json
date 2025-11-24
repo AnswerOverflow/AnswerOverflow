@@ -97,23 +97,6 @@
 			}
 		},
 		{
-			"includes": ["packages/analytics/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"paths": {
-									"@packages/analytics": "Do not import from '@packages/analytics' within the 'analytics/' package. Use relative imports instead."
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		{
 			"includes": ["**/*.test.ts", "**/*.test.tsx"],
 			"linter": {
 				"rules": {

@@ -25,7 +25,6 @@
 		"@convex-dev/action-cache": "^0.3.0",
 		"@convex-dev/better-auth": "catalog:",
 		"@effect/platform": "catalog:",
-		"@packages/analytics": "workspace:*",
 		"@packages/discord-api": "workspace:*",
 		"convex": "catalog:",
 		"convex-helpers": "^0.1.104",

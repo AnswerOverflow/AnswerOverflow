@@ -8,7 +8,7 @@ import {
 	Analytics,
 	AnalyticsLayer,
 	ServerAnalyticsLayer,
-} from "@packages/analytics/server/index";
+} from "@packages/database/analytics/server/index";
 import { make } from "@packages/discord-api/generated";
 import { v } from "convex/values";
 import { Effect } from "effect";
