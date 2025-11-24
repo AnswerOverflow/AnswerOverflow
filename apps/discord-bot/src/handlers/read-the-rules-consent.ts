@@ -1,10 +1,10 @@
 import { Database, DatabaseLayer } from "@packages/database/database";
-import type { GuildMember } from "discord.js";
+import type { GuildMember, PartialGuildMember } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 
 export function handleReadTheRulesConsent(
-	oldMember: GuildMember,
+	oldMember: GuildMember | PartialGuildMember,
 	newMember: GuildMember,
 ) {
 	return Effect.gen(function* () {
