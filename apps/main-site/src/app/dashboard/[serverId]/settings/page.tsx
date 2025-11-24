@@ -11,8 +11,9 @@ import {
 } from "@packages/ui/components/card";
 import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { useParams } from "next/navigation";
+import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 import { CustomDomainConfigurator } from "../components/custom-domain-configurator";
 import { TierAccessOnly } from "../components/tier-access-only";
 import { CurrentPlanCard } from "./components";
@@ -58,7 +59,7 @@ export default function SettingsPage() {
 	const params = useParams();
 	const serverId = params.serverId as string;
 
-	const dashboardData = useQuery(
+	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
 			serverId,

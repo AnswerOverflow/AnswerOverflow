@@ -10,15 +10,15 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { Link } from "@packages/ui/components/link";
-import { useQuery } from "convex/react";
 import { ExternalLink } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useAuthenticatedQuery } from "../../../lib/use-authenticated-query";
 
 export default function DashboardOverviewPage() {
 	const params = useParams();
 	const serverId = params.serverId as string;
 
-	const dashboardData = useQuery(
+	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
 			serverId,

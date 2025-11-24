@@ -8,7 +8,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
-import { useQuery } from "convex/react";
+import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
 type Plan =
 	| "FREE"
@@ -38,7 +38,7 @@ function planToPrettyText(plan: Plan): string {
 }
 
 export function CurrentPlanCard({ serverId }: { serverId: string }) {
-	const dashboardData = useQuery(
+	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
 			serverId,
