@@ -10,21 +10,6 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 
 setup react grab
 
-## urls & linking
-
-we need to get construction urls to work with:
-- local dev
-- custom domains
-- custom subpaths
-- main site (answeroverflow.com)
-right from the beginning
-
-potential URLs:
-    answeroverflow.com/:path
-    custom.domain.com
-    domain.com/prefix/:path
-
-maybe <base/> helps although it's never worked in the past
 
 ## Sitemap
     /c/ sitemap

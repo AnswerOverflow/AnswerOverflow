@@ -1,3 +1,5 @@
+import { normalizeSubpath } from "./links";
+
 type ServerWithCustomDomain = {
 	customDomain?: string;
 	subpath?: string;
@@ -5,6 +7,7 @@ type ServerWithCustomDomain = {
 };
 
 export function getServerHomepageUrl(server: ServerWithCustomDomain) {
+	const subpath = normalizeSubpath(server.subpath);
 	if (process.env.NODE_ENV !== "production" && !server.customDomain) {
 		return `/c/${server.discordId}`;
 	}
@@ -12,18 +15,19 @@ export function getServerHomepageUrl(server: ServerWithCustomDomain) {
 		return `https://www.answeroverflow.com/c/${server.discordId}`;
 	}
 	const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-	const subpath = server.subpath ? `/${server.subpath}` : "";
-	return `${protocol}://${server.customDomain}${subpath}`;
+	const subpathSuffix = subpath ? `/${subpath}` : "";
+	return `${protocol}://${server.customDomain}${subpathSuffix}`;
 }
 
 export function getServerCustomUrl(
 	server: ServerWithCustomDomain,
 	path: string = "",
 ) {
+	const subpath = normalizeSubpath(server.subpath);
 	if (!server.customDomain) {
 		return null;
 	}
 	const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-	const subpath = server.subpath ? `/${server.subpath}` : "";
-	return `${protocol}://${server.customDomain}${subpath}${path}`;
+	const subpathSuffix = subpath ? `/${subpath}` : "";
+	return `${protocol}://${server.customDomain}${subpathSuffix}${path}`;
 }

@@ -13,7 +13,7 @@ import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
-import Link from "next/link";
+import { Link } from "@packages/ui/components/link";
 import { useQueryState } from "nuqs";
 import { ServerCard } from "../../components/server-card";
 import { authClient } from "../../lib/auth-client";
