@@ -1,8 +1,8 @@
 import { Database, DatabaseLayer } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/effect-otel";
-import { ChannelPageContent } from "../../../components/channel-page-content";
 import { Effect, Layer } from "effect";
 import { notFound } from "next/navigation";
+import { ChannelPageContent } from "../../../components/channel-page-content";
 
 const OtelLayer = createOtelLayer("main-site");
 
@@ -65,6 +65,9 @@ export default async function ServerPage(props: Props) {
 	}
 
 	const defaultChannel = channels[0];
+	if (!defaultChannel) {
+		return notFound();
+	}
 
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
@@ -85,11 +88,7 @@ export default async function ServerPage(props: Props) {
 
 	return (
 		<ChannelPageContent
-			server={{
-				discordId: pageData.server.discordId,
-				name: pageData.server.name,
-				icon: pageData.server.icon ?? null,
-			}}
+			server={pageData.server}
 			channels={pageData.channels}
 			selectedChannel={pageData.selectedChannel}
 			threads={pageData.threads}
