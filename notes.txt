@@ -143,13 +143,6 @@ Flow is the following:
 6. Advanced config that lets them customize
 
 
-## Permissions
-
-sync the bot permissions for that channel to channel preferences under the 'botPermissions' category
-use this permisions value on the dashboard to show a 'red' 'yellow' 'green' on permissions if setup correctly
-instructions on how to fix
-
-
 ## Draft mode
 
 Communities should be able to turn on 'draft mode' that lets them see their server but not anyone else to make them more comfortable with getting context indexed
