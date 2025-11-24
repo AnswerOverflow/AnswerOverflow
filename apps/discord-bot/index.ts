@@ -9,6 +9,7 @@ import { ChannelSettingsCommandHandlerLayer } from "./src/handlers/channel-setti
 import { DismissButtonHandlerLayer } from "./src/handlers/dismiss-button";
 import { ForumGuidelinesConsentHandlerLayer } from "./src/handlers/forum-guidelines-consent";
 import { LeaderboardCommandHandlerLayer } from "./src/handlers/leaderboard-command";
+import { ReadTheRulesConsentHandlerLayer } from "./src/handlers/read-the-rules-consent";
 import { ManageAccountCommandHandlerLayer } from "./src/handlers/manage-account-command";
 import { MarkSolutionCommandHandlerLayer } from "./src/handlers/mark-solution-command";
 import { MessageParityLayer } from "./src/handlers/message-parity";
@@ -45,6 +46,7 @@ const ParityLayers = Layer.mergeAll(
 	AutoThreadHandlerLayer,
 	DismissButtonHandlerLayer,
 	ForumGuidelinesConsentHandlerLayer,
+	ReadTheRulesConsentHandlerLayer,
 	LeaderboardCommandHandlerLayer,
 	ManageAccountCommandHandlerLayer,
 	MarkSolutionCommandHandlerLayer,
