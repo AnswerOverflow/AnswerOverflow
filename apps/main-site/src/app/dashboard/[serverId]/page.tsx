@@ -9,9 +9,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { Link } from "@packages/ui/components/link";
 import { useQuery } from "convex/react";
 import { ExternalLink } from "lucide-react";
-import { Link } from "@packages/ui/components/link";
 import { useParams } from "next/navigation";
 
 export default function DashboardOverviewPage() {
