@@ -207,6 +207,7 @@ export const getServerByDomain = privateQuery({
 			args.domain,
 			"customDomain",
 		);
+		console.log("preferences", preferences);
 		if (!preferences) {
 			return null;
 		}
@@ -217,6 +218,9 @@ export const getServerByDomain = privateQuery({
 			preferences.serverId,
 			"discordId",
 		);
+		if (!server) {
+			return null;
+		}
 		return {
 			server,
 			preferences,

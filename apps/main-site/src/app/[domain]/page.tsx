@@ -1,9 +1,7 @@
 import { Database, DatabaseLayer } from "@packages/database/database";
-import { Providers } from "@packages/ui/components/providers";
 import type { Tenant } from "@packages/ui/components/tenant-context";
 import { normalizeSubpath } from "@packages/ui/utils/links";
 import { Effect } from "effect";
-import { notFound } from "next/navigation";
 
 const subpathTenants = [
 	{
@@ -20,29 +18,23 @@ const subpathTenants = [
 	},
 ];
 
-export default async function DomainLayout(props: {
+export default async function DomainPage(props: {
 	children: React.ReactNode;
 	params: Promise<{ domain: string }>;
 }) {
 	const params = await props.params;
 	const domain = decodeURIComponent(params.domain);
+
 	const tenantData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const tenant = yield* database.private.servers.getServerByDomain({
 			domain,
 		});
-		if (!tenant?.server || !tenant?.preferences) {
-			return null;
-		}
 		return {
 			...tenant?.server,
 			...tenant?.preferences,
 		};
 	}).pipe(Effect.provide(DatabaseLayer), Effect.runPromise);
-
-	if (!tenantData) {
-		return notFound();
-	}
 
 	const subpathTenant = subpathTenants.find(
 		(tenant) => tenant.rewriteDomain === domain,
@@ -59,6 +51,5 @@ export default async function DomainLayout(props: {
 		icon: tenantData.icon,
 		discordId: tenantData.discordId,
 	};
-
-	return <Providers tenant={tenant}>{props.children}</Providers>;
+	return <div>{tenant.name}</div>;
 }

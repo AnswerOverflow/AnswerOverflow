@@ -25,10 +25,7 @@ import {
 
 function getBackendAccessToken(): string {
 	const token = process.env.BACKEND_ACCESS_TOKEN;
-	if (!token) {
-		throw new Error("BACKEND_ACCESS_TOKEN not configured");
-	}
-	return token;
+	return token ?? "";
 }
 
 const discordApi = (token: string) =>
