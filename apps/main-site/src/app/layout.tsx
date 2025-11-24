@@ -3,6 +3,16 @@ import { Providers } from "@packages/ui/components/providers";
 import Script from "next/script";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { NavbarWrapper } from "../components/navbar-wrapper";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+	title: "Answer Overflow",
+	description: "Index Your Discord Content Into Google",
+	openGraph: {
+		title: "Answer Overflow",
+		description: "Index Your Discord Content Into Google",
+	},
+};
 
 export default function RootLayout({
 	children,

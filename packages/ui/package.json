@@ -102,6 +102,7 @@
 		"./components/answer-overflow-logo": "./src/components/answer-overflow-logo.tsx",
 		"./hooks/*": "./src/hooks/*.ts",
 		"./utils/*": "./src/utils/*.ts",
+		"./icons/index": "./src/icons/index.tsx",
 		"./markdown": "./src/markdown/index.tsx"
 	}
 }
