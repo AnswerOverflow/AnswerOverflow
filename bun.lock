@@ -122,6 +122,7 @@
         "@packages/discord-api": "workspace:*",
         "convex": "catalog:",
         "convex-helpers": "^0.1.104",
+        "discord-api-types": "^0.38.24",
         "effect": "catalog:",
         "unique-names-generator": "^4.7.1",
       },
