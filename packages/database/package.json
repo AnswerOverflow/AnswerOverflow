@@ -30,7 +30,9 @@
 		"convex-helpers": "^0.1.104",
 		"discord-api-types": "^0.38.24",
 		"effect": "catalog:",
-		"unique-names-generator": "^4.7.1"
+		"unique-names-generator": "^4.7.1",
+		"@typelytics/posthog": "^0.1.5",
+		"posthog-node": "^4.2.0"
 	},
 	"devDependencies": {
 		"@edge-runtime/vm": "catalog:",
@@ -42,5 +44,8 @@
 		"chokidar-cli": "^3.0.0",
 		"glob": "^11.0.3",
 		"vitest": "catalog:"
+	},
+	"peerDependencies": {
+		"discord.js": "^14.22.1"
 	}
 }

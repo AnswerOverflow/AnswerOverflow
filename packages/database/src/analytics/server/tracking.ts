@@ -1,3 +1,4 @@
+// todo move this into discord bot
 import type { Channel, Guild, ThreadChannel } from "discord.js";
 import { Effect } from "effect";
 import { PostHogCaptureClient } from "./capture-client";
