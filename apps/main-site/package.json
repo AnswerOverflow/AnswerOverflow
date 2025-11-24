@@ -4,11 +4,14 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"dev": "bun run --env-file=../../.env next dev --turbo",
-		"build": "next build",
-		"typecheck": "tsc -p tsconfig.json --noEmit",
-		"start": "next start",
-		"clean": "rm -rf .next .turbo node_modules"
+		"with-env": "bun run --env-file=../../.env --",
+		"dev-next": "bun with-env next dev --turbo",
+		"dev-proxy": "bun run scripts/proxy.ts",
+		"dev": "bun run dev-next & bun run dev-proxy; wait",
+		"build:prod": "bun with-env next build",
+		"start": "bun with-env next start",
+		"typecheck": "tsc --noEmit",
+		"clean": "rm -rf node_modules .next"
 	},
 	"dependencies": {
 		"@convex-dev/better-auth": "catalog:",
