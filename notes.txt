@@ -44,7 +44,7 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 Main Site:
     - [ ] /
     - [X] /robots.txt
-    - [ ] /about
+    - [X] /about
     - [X] /browse
     - [X] /contributors
     - [X] /cookies

@@ -28,11 +28,13 @@
 		"jose": "^6.1.2",
 		"lucide-react": "catalog:",
 		"next": "catalog:",
+		"next-themes": "^0.4.6",
 		"nuqs": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"react-social-icons": "^6.25.0",
 		"react-spring": "^10.0.3",
+		"react-xarrows": "^2.0.2",
 		"shiki": "^3.12.2",
 		"use-debounce": "^10.0.6"
 	},
