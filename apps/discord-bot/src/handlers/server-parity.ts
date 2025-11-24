@@ -10,6 +10,7 @@ import {
 } from "../utils/analytics";
 import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
+import { syncBotPermissionsForChannel } from "./channel-parity";
 import { startIndexingLoop } from "./indexing";
 
 function toAOServer(guild: Guild) {
@@ -122,6 +123,15 @@ export function syncGuild(guild: Guild) {
 			yield* Console.log(
 				`Maintained parity for ${rootChannels.length} channels for server ${guild.name}`,
 			);
+
+			for (const channel of rootChannels) {
+				yield* syncBotPermissionsForChannel(
+					discord,
+					database,
+					channel.id,
+					guild.id,
+				);
+			}
 		}
 	}).pipe(
 		Effect.catchAll((error) =>

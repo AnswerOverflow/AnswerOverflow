@@ -53,6 +53,7 @@ export const getDashboardData = authenticatedQuery({
 					autoThreadEnabled: settings?.autoThreadEnabled ?? false,
 					forumGuidelinesConsentEnabled:
 						settings?.forumGuidelinesConsentEnabled ?? false,
+					botPermissions: settings?.botPermissions ?? null,
 				},
 			};
 		});

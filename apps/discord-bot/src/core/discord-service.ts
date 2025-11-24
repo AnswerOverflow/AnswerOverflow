@@ -238,6 +238,27 @@ export const createDiscordService = Effect.gen(function* () {
 			return c.user?.setActivity(name, options);
 		});
 
+	const getBotPermissionsForChannel = (channelId: string, guildId: string) =>
+		use(async (c) => {
+			const guild = c.guilds.cache.get(guildId);
+			if (!guild) {
+				return null;
+			}
+			const channel = guild.channels.cache.get(channelId);
+			if (!channel) {
+				return null;
+			}
+			const botMember = guild.members.me;
+			if (!botMember) {
+				return null;
+			}
+			const permissions = channel.permissionsFor(botMember);
+			if (!permissions) {
+				return null;
+			}
+			return permissions.bitfield.toString();
+		});
+
 	return {
 		getGuild,
 		getGuilds,
@@ -248,6 +269,7 @@ export const createDiscordService = Effect.gen(function* () {
 		fetchArchivedThreads,
 		callClient,
 		setActivity,
+		getBotPermissionsForChannel,
 		client: {
 			login,
 			on,
