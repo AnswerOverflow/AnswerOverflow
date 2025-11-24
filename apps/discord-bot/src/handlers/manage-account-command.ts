@@ -8,8 +8,8 @@ import {
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
-import { Console, Effect, Layer } from "effect";
-import { Discord } from "../core/discord-service";
+import { Effect, Layer } from "effect";
+import { Discord, UnknownDiscordError } from "../core/discord-service";
 
 export const menuButtonIds = {
 	consentButton: "consent-button",
@@ -145,10 +145,10 @@ export function handleManageAccountCommand(
 			return;
 		}
 
-		const serverLiveData = yield* Effect.scoped(
-			database.private.servers.getServerByDiscordId({
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
 				discordId: interaction.guildId,
-			}),
+			},
 		);
 
 		const server = serverLiveData;
@@ -165,12 +165,11 @@ export function handleManageAccountCommand(
 			return;
 		}
 
-		const userServerSettingsLiveData = yield* Effect.scoped(
-			database.private.user_server_settings.findUserServerSettingsById({
+		const userServerSettingsLiveData =
+			yield* database.private.user_server_settings.findUserServerSettingsById({
 				userId: interaction.user.id,
 				serverId: server.discordId,
-			}),
-		);
+			});
 
 		const userServerSettingsRaw = userServerSettingsLiveData;
 
@@ -213,7 +212,7 @@ export function handleManageAccountCommand(
 					components: [actionRow],
 					ephemeral: true,
 				}),
-			catch: (error) => error,
+			catch: (error) => new UnknownDiscordError({ cause: error }),
 		});
 
 		if (
@@ -232,6 +231,7 @@ export function handleManageAccountCommand(
 			});
 
 			collector.on("collect", async (buttonInteraction) => {
+				// todo: use managed runtime
 				await Effect.runPromise(
 					Effect.scoped(
 						handleManageAccountButtonPress(
@@ -283,12 +283,13 @@ function handleManageAccountButtonPress(
 				const canPubliclyDisplayMessages =
 					customId === menuButtonIds.consentButton;
 
-				const existingSettingsLiveData = yield* Effect.scoped(
-					database.private.user_server_settings.findUserServerSettingsById({
-						userId,
-						serverId,
-					}),
-				);
+				const existingSettingsLiveData =
+					yield* database.private.user_server_settings.findUserServerSettingsById(
+						{
+							userId,
+							serverId,
+						},
+					);
 
 				const existingSettings = existingSettingsLiveData;
 
@@ -328,12 +329,13 @@ function handleManageAccountButtonPress(
 				const messageIndexingDisabled =
 					customId === menuButtonIds.disableMessageIndexingButton;
 
-				const existingSettingsLiveData = yield* Effect.scoped(
-					database.private.user_server_settings.findUserServerSettingsById({
-						userId,
-						serverId,
-					}),
-				);
+				const existingSettingsLiveData =
+					yield* database.private.user_server_settings.findUserServerSettingsById(
+						{
+							userId,
+							serverId,
+						},
+					);
 
 				const existingSettings = existingSettingsLiveData;
 
@@ -407,14 +409,7 @@ export const ManageAccountCommandHandlerLayer = Layer.scopedDiscard(
 				) {
 					return;
 				}
-				yield* Effect.scoped(
-					handleManageAccountCommand(interaction).pipe(
-						Effect.provide(DatabaseLayer),
-						Effect.catchAll((error) =>
-							Console.error("Error in manage account command:", error),
-						),
-					),
-				);
+				yield* handleManageAccountCommand(interaction);
 			}),
 		);
 	}),

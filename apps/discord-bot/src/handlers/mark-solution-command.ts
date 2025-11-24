@@ -1,8 +1,4 @@
-import {
-	Database,
-	DatabaseLayer,
-	upsertMessage,
-} from "@packages/database/database";
+import { Database, DatabaseLayer } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
@@ -63,10 +59,10 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		const serverLiveData = yield* Effect.scoped(
-			database.private.servers.getServerByDiscordId({
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
 				discordId: targetMessage.guildId,
-			}),
+			},
 		);
 
 		const server = serverLiveData;
@@ -107,11 +103,10 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		const channelLiveData = yield* Effect.scoped(
-			database.private.channels.findChannelByDiscordId({
+		const channelLiveData =
+			yield* database.private.channels.findChannelByDiscordId({
 				discordId: parentChannel.id,
-			}),
-		);
+			});
 
 		const channelSettings = channelLiveData;
 
@@ -210,26 +205,45 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		const serverPreferencesLiveData = yield* Effect.scoped(
-			database.private.server_preferences.getServerPreferencesByServerId({
-				serverId: server.discordId,
-			}),
-		);
+		const serverPreferencesLiveData =
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId: server.discordId,
+				},
+			);
 		const serverPreferences = serverPreferencesLiveData ?? null;
+		const data = yield* Effect.tryPromise({
+			try: () => toAOMessage(targetMessage, server.discordId),
+			catch: (error) => error,
+		});
+
+		yield* database.private.messages.upsertMessage({
+			message: {
+				id: data.id,
+				authorId: data.authorId,
+				serverId: data.serverId,
+				channelId: data.channelId,
+				parentChannelId: data.parentChannelId,
+				childThreadId: data.childThreadId,
+				questionId: data.questionId,
+				referenceId: data.referenceId,
+				applicationId: data.applicationId,
+				interactionId: data.interactionId,
+				webhookId: data.webhookId,
+				content: data.content,
+				flags: data.flags,
+				type: data.type,
+				pinned: data.pinned,
+				nonce: data.nonce,
+				tts: data.tts,
+				embeds: data.embeds,
+			},
+			attachments: data.attachments,
+			reactions: data.reactions,
+			ignoreChecks: false,
+		});
 
 		yield* Effect.promise(async () => {
-			const solutionMessage = await toAOMessage(
-				targetMessage,
-				server.discordId,
-			);
-			await upsertMessage(
-				{
-					...solutionMessage,
-					questionId: questionMessage.id,
-				},
-				{ ignoreChecks: false },
-			);
-
 			if (
 				parentChannel.type === 15 &&
 				channelSettings?.solutionTagId &&
@@ -310,14 +324,7 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 					interaction.isContextMenuCommand() &&
 					interaction.commandName === "✅ Mark Solution"
 				) {
-					yield* Effect.scoped(
-						handleMarkSolutionCommand(interaction).pipe(
-							Effect.provide(DatabaseLayer),
-							Effect.catchAll((error) =>
-								Console.error("Error in mark solution command:", error),
-							),
-						),
-					);
+					yield* handleMarkSolutionCommand(interaction);
 				}
 				return;
 			}),

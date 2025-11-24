@@ -1,7 +1,8 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import type { Tenant } from "@packages/ui/components/tenant-context";
 import { normalizeSubpath } from "@packages/ui/utils/links";
 import { Effect } from "effect";
+import { runtime } from "../../lib/runtime";
 
 const subpathTenants = [
 	{
@@ -34,7 +35,7 @@ export default async function DomainPage(props: {
 			...tenant?.server,
 			...tenant?.preferences,
 		};
-	}).pipe(Effect.provide(DatabaseLayer), Effect.runPromise);
+	}).pipe(runtime.runPromise);
 
 	const subpathTenant = subpathTenants.find(
 		(tenant) => tenant.rewriteDomain === domain,

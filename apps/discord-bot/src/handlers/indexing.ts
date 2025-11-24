@@ -1,5 +1,5 @@
 import type { BaseMessageWithRelations } from "@packages/database/database";
-import { Database, upsertMessage } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import type {
 	AnyThreadChannel,
 	Channel,
@@ -221,8 +221,32 @@ function storeMessages(
 
 		yield* Effect.forEach(
 			aoMessages,
-			(msg) =>
-				Effect.promise(() => upsertMessage(msg, { ignoreChecks: false })),
+			(data) =>
+				database.private.messages.upsertMessage({
+					message: {
+						id: data.id,
+						authorId: data.authorId,
+						serverId: data.serverId,
+						channelId: data.channelId,
+						parentChannelId: data.parentChannelId,
+						childThreadId: data.childThreadId,
+						questionId: data.questionId,
+						referenceId: data.referenceId,
+						applicationId: data.applicationId,
+						interactionId: data.interactionId,
+						webhookId: data.webhookId,
+						content: data.content,
+						flags: data.flags,
+						type: data.type,
+						pinned: data.pinned,
+						nonce: data.nonce,
+						tts: data.tts,
+						embeds: data.embeds,
+					},
+					attachments: data.attachments,
+					reactions: data.reactions,
+					ignoreChecks: false,
+				}),
 			{ concurrency: 5 },
 		);
 

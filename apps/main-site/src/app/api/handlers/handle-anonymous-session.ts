@@ -1,11 +1,9 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
-import { createOtelLayer } from "@packages/observability/effect-otel";
+import { Database } from "@packages/database/database";
 import { checkBotId } from "botid/server";
-import { Effect, Layer } from "effect";
+import { Effect } from "effect";
 import type { Context } from "hono";
 import { signAnonymousToken } from "../../../lib/anonymous-auth";
-
-const OtelLayer = createOtelLayer("main-site");
+import { runtime } from "../../../lib/runtime";
 
 export async function handleAnonymousSession(c: Context) {
 	const verification = await checkBotId({
@@ -20,10 +18,7 @@ export async function handleAnonymousSession(c: Context) {
 	const session = await Effect.gen(function* () {
 		const db = yield* Database;
 		return yield* db.private.anonymous_session.createAnonymousSession();
-	}).pipe(
-		Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)),
-		Effect.runPromise,
-	);
+	}).pipe(runtime.runPromise);
 
 	const token = await signAnonymousToken(session.sessionId);
 

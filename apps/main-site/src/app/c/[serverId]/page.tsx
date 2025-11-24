@@ -1,10 +1,8 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
-import { createOtelLayer } from "@packages/observability/effect-otel";
-import { Effect, Layer } from "effect";
+import { Database } from "@packages/database/database";
+import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { ChannelPageContent } from "../../../components/channel-page-content";
-
-const OtelLayer = createOtelLayer("main-site");
+import { runtime } from "../../../lib/runtime";
 
 type Props = {
 	params: Promise<{ serverId: string }>;
@@ -15,15 +13,12 @@ export default async function ServerPage(props: Props) {
 
 	const serverData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* Effect.scoped(
-			database.private.servers.getServerByDiscordIdWithChannels({
+		const liveData =
+			yield* database.private.servers.getServerByDiscordIdWithChannels({
 				discordId: params.serverId,
-			}),
-		);
+			});
 		return liveData;
-	})
-		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
-		.pipe(Effect.runPromise);
+	}).pipe(runtime.runPromise);
 
 	if (!serverData) {
 		return notFound();
@@ -71,16 +66,12 @@ export default async function ServerPage(props: Props) {
 
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* Effect.scoped(
-			database.private.channels.getChannelPageData({
-				serverDiscordId: params.serverId,
-				channelDiscordId: defaultChannel.id,
-			}),
-		);
+		const liveData = yield* database.private.channels.getChannelPageData({
+			serverDiscordId: params.serverId,
+			channelDiscordId: defaultChannel.id,
+		});
 		return liveData;
-	})
-		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
-		.pipe(Effect.runPromise);
+	}).pipe(runtime.runPromise);
 
 	if (!pageData) {
 		return notFound();

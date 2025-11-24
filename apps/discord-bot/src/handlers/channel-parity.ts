@@ -24,11 +24,10 @@ export function syncBotPermissionsForChannel(
 			return;
 		}
 
-		const existingChannel = yield* Effect.scoped(
-			database.private.channels.findChannelByDiscordId({
+		const existingChannel =
+			yield* database.private.channels.findChannelByDiscordId({
 				discordId: channelId,
-			}),
-		);
+			});
 
 		if (!existingChannel) {
 			return;

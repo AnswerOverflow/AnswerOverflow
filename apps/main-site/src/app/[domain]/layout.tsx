@@ -1,10 +1,11 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import { Providers } from "@packages/ui/components/providers";
 import type { Tenant } from "@packages/ui/components/tenant-context";
 import { normalizeSubpath } from "@packages/ui/utils/links";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { DomainNavbarFooterWrapper } from "../../components/domain-navbar-footer-wrapper";
+import { runtime } from "../../lib/runtime";
 
 const subpathTenants = [
 	{
@@ -39,7 +40,7 @@ export default async function DomainLayout(props: {
 			...tenant?.server,
 			...tenant?.preferences,
 		};
-	}).pipe(Effect.provide(DatabaseLayer), Effect.runPromise);
+	}).pipe(runtime.runPromise);
 
 	if (!tenantData) {
 		return notFound();

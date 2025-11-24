@@ -1,10 +1,8 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
-import { createOtelLayer } from "@packages/observability/effect-otel";
-import { Effect, Layer } from "effect";
+import { Database } from "@packages/database/database";
+import { Effect } from "effect";
 import type { Metadata } from "next";
+import { runtime } from "../../lib/runtime";
 import { ServerGrid } from "./client";
-
-const OtelLayer = createOtelLayer("main-site");
 
 export const metadata: Metadata = {
 	title: "Browse All Communities - Answer Overflow",
@@ -20,13 +18,9 @@ export const metadata: Metadata = {
 export default async function BrowsePage() {
 	const serversLiveData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* Effect.scoped(
-			database.private.servers.getBrowseServers(),
-		);
+		const liveData = yield* database.private.servers.getBrowseServers();
 		return liveData;
-	})
-		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
-		.pipe(Effect.runPromise);
+	}).pipe(runtime.runPromise);
 
 	const servers = serversLiveData ?? [];
 

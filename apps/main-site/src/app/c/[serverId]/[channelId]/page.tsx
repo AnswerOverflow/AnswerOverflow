@@ -3,6 +3,7 @@ import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Effect, Layer } from "effect";
 import { notFound } from "next/navigation";
 import { ChannelPageContent } from "../../../../components/channel-page-content";
+import { runtime } from "../../../../lib/runtime";
 
 const OtelLayer = createOtelLayer("main-site");
 
@@ -15,16 +16,14 @@ export default async function ChannelPage(props: Props) {
 
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* Effect.scoped(
-			database.private.channels.getChannelPageData({
-				serverDiscordId: params.serverId,
-				channelDiscordId: params.channelId,
-			}),
-		);
+		const liveData = yield* database.private.channels.getChannelPageData({
+			serverDiscordId: params.serverId,
+			channelDiscordId: params.channelId,
+		});
 		return liveData;
 	})
 		.pipe(Effect.provide(Layer.mergeAll(DatabaseLayer, OtelLayer)))
-		.pipe(Effect.runPromise);
+		.pipe(runtime.runPromise);
 
 	if (!pageData) {
 		return notFound();
