@@ -31,7 +31,8 @@ export function isOnMainSite(host: string | null | undefined) {
 		normalizedHost === bareMainHost ||
 		normalizedHost === "localhost" ||
 		normalizedHost === "127.0.0.1" ||
-		normalizedHost?.endsWith(".vercel.app")
+		normalizedHost?.endsWith(".vercel.app") ||
+		normalizedHost?.includes("ngrok-free.app")
 	);
 }
 

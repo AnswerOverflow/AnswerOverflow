@@ -9,13 +9,14 @@ import { ChannelSettingsCommandHandlerLayer } from "./src/handlers/channel-setti
 import { DismissButtonHandlerLayer } from "./src/handlers/dismiss-button";
 import { ForumGuidelinesConsentHandlerLayer } from "./src/handlers/forum-guidelines-consent";
 import { LeaderboardCommandHandlerLayer } from "./src/handlers/leaderboard-command";
-import { ReadTheRulesConsentHandlerLayer } from "./src/handlers/read-the-rules-consent";
 import { ManageAccountCommandHandlerLayer } from "./src/handlers/manage-account-command";
 import { MarkSolutionCommandHandlerLayer } from "./src/handlers/mark-solution-command";
 import { MessageParityLayer } from "./src/handlers/message-parity";
+import { ReadTheRulesConsentHandlerLayer } from "./src/handlers/read-the-rules-consent";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./src/handlers/send-mark-solution-instructions-handler";
 import { ServerParityLayer } from "./src/handlers/server-parity";
 import { StatusUpdateHandlerLayer } from "./src/handlers/status-update";
+import { UserParityLayer } from "./src/handlers/user-parity";
 
 const program = Effect.gen(function* () {
 	const discord = yield* Discord;
@@ -43,6 +44,7 @@ const ParityLayers = Layer.mergeAll(
 	ServerParityLayer,
 	ChannelParityLayer,
 	MessageParityLayer,
+	UserParityLayer,
 	AutoThreadHandlerLayer,
 	DismissButtonHandlerLayer,
 	ForumGuidelinesConsentHandlerLayer,
