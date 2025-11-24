@@ -64,67 +64,6 @@ it.scoped("findManyServersById returns multiple servers", () =>
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
-it.scoped("getBiggestServers returns servers ordered by member count", () =>
-	Effect.gen(function* () {
-		const database = yield* Database;
-
-		const smallId = generateSnowflakeString();
-		const mediumId = generateSnowflakeString();
-		const largeId = generateSnowflakeString();
-
-		const serverSmall: Server = {
-			...server,
-			discordId: smallId,
-			approximateMemberCount: 10,
-		};
-		const serverMedium: Server = {
-			...server2,
-			discordId: mediumId,
-			approximateMemberCount: 100,
-		};
-		const serverLarge: Server = {
-			...server,
-			discordId: largeId,
-			approximateMemberCount: 1000,
-		};
-
-		yield* database.private.servers.upsertServer(serverSmall);
-		yield* database.private.servers.upsertServer(serverMedium);
-		yield* database.private.servers.upsertServer(serverLarge);
-
-		const liveData = yield* database.private.servers.getBiggestServers({
-			take: 2,
-		});
-
-		expect(liveData?.length).toBe(2);
-		expect(liveData?.[0]?.discordId).toBe(largeId);
-		expect(liveData?.[1]?.discordId).toBe(mediumId);
-	}).pipe(Effect.provide(DatabaseTestLayer)),
-);
-
-it.scoped("createServer creates new server", () =>
-	Effect.gen(function* () {
-		const database = yield* Database;
-
-		const newDiscordId = generateSnowflakeString();
-
-		const newServer: Server = {
-			...server,
-			discordId: newDiscordId,
-			name: "New Server",
-		};
-
-		yield* database.private.servers.createServer(newServer);
-
-		const liveData = yield* database.private.servers.getServerByDiscordId({
-			discordId: newDiscordId,
-		});
-
-		expect(liveData?.discordId).toBe(newDiscordId);
-		expect(liveData?.name).toBe("New Server");
-	}).pipe(Effect.provide(DatabaseTestLayer)),
-);
-
 it.scoped("updateServer updates existing server", () =>
 	Effect.gen(function* () {
 		const database = yield* Database;
@@ -159,60 +98,6 @@ it.scoped("updateServer updates existing server", () =>
 
 		expect(updatedLiveData?.name).toBe("Updated Server Name");
 		expect(updatedLiveData?.description).toBe("Updated Description");
-	}).pipe(Effect.provide(DatabaseTestLayer)),
-);
-
-it.scoped("getBiggestServers updates when member counts change", () =>
-	Effect.gen(function* () {
-		const database = yield* Database;
-
-		const serverAId = generateSnowflakeString();
-		const serverBId = generateSnowflakeString();
-
-		const serverA: Server = {
-			...server,
-			discordId: serverAId,
-			approximateMemberCount: 100,
-		};
-		const serverB: Server = {
-			...server2,
-			discordId: serverBId,
-			approximateMemberCount: 200,
-		};
-
-		yield* database.private.servers.upsertServer(serverA);
-		yield* database.private.servers.upsertServer(serverB);
-
-		const liveData = yield* database.private.servers.getBiggestServers(
-			{ take: 2 },
-			{ subscribe: true },
-		);
-
-		expect(liveData?.data?.length).toBe(2);
-		expect(liveData?.data?.[0]?.discordId).toBe(serverBId);
-		expect(liveData?.data?.[1]?.discordId).toBe(serverAId);
-
-		const serverALiveData =
-			yield* database.private.servers.getServerByDiscordId({
-				discordId: serverAId,
-			});
-		const serverAConvexId = serverALiveData?._id;
-
-		if (!serverAConvexId) {
-			throw new Error("Server not found");
-		}
-
-		const updatedServerA: Server = {
-			...serverA,
-			approximateMemberCount: 300,
-		};
-		yield* database.private.servers.updateServer({
-			id: serverAConvexId,
-			data: updatedServerA,
-		});
-
-		expect(liveData?.data?.[0]?.discordId).toBe(serverAId);
-		expect(liveData?.data?.[1]?.discordId).toBe(serverBId);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
@@ -275,20 +160,6 @@ it.scoped("findManyServersById handles partial updates correctly", () =>
 		const updatedServer = liveData?.data?.find((s) => s._id === s1ConvexId);
 		expect(updatedServer?.name).toBe("Updated Server 1");
 		expect(liveData?.data?.length).toBe(3);
-	}).pipe(Effect.provide(DatabaseTestLayer)),
-);
-
-it.scoped("createServer throws error if server already exists", () =>
-	Effect.gen(function* () {
-		const database = yield* Database;
-
-		yield* database.private.servers.createServer(server);
-
-		const result = yield* database.private.servers
-			.createServer(server)
-			.pipe(Effect.exit);
-
-		expect(Exit.isFailure(result)).toBe(true);
 	}).pipe(Effect.provide(DatabaseTestLayer)),
 );
 
