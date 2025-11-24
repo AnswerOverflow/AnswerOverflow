@@ -4,6 +4,8 @@
 We can reduce a lot of complexity by using convex-helpers, things we should use from them:
 - rate limiting
 - https://www.convex.dev/components/workpool may be relevant
+- https://www.convex.dev/components/aggregate use aggregate
+
 
 
 setup react grab
@@ -34,20 +36,20 @@ maybe <base/> helps although it's never worked in the past
     - [X] Manage Account
     - [X] Mark Solution
     - [X] Leaderboard
-    - [ ] Quick Action
+    - ~~[ ] Quick Action~~ (removed)
 
     Events:
     - [X] Auto thread
     - [ ] Checkmark mark solution
     - [X] Forum post guidelines consent
-    - [ ] Read the rules consent
+    - [X] Read the rules consent
     - [X] Send mark solutions in new threads
-    - [ ] Update status
+    - [WIP] Update status
 
     Parity:
     - [ ] Cache parity
     - [X] Channel parity
-    - [ ] Guild parity
+    - [X] Guild parity
     - [ ] Message parity
     - [ ] User parity
 
@@ -62,7 +64,7 @@ Main Site:
     - [ ] /
     - [X] /robots.txt
     - [ ] /about
-    - [ ] /browse
+    - [X] /browse
     - [X] /contributors
     - [X] /cookies
     - [X] /eula
