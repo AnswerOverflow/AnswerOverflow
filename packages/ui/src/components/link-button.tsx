@@ -10,7 +10,7 @@ export interface LinkButtonProps
 	extends React.AnchorHTMLAttributes<HTMLAnchorElement>,
 		VariantProps<typeof buttonVariants> {
 	href: string;
-	children: React.ReactNode;
+	children?: React.ReactNode;
 	prefetch?: boolean;
 	selectedVariant?: VariantProps<typeof buttonVariants>["variant"];
 }

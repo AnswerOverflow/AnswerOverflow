@@ -2,6 +2,7 @@ import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { ChannelType } from "discord-api-types/v10";
+import { Array as Arr, Predicate } from "effect";
 import {
 	type MutationCtx,
 	privateMutation,
@@ -502,9 +503,10 @@ export const getChannelPageData = privateQuery({
 		const threadIds = sortedThreads.map((t) => t.id);
 		const firstMessages = await getFirstMessagesInChannels(ctx, threadIds);
 
-		const messages = sortedThreads
-			.map((thread) => firstMessages[thread.id] ?? null)
-			.filter((m): m is NonNullable<typeof m> => m !== null);
+		const messages = Arr.filter(
+			Arr.map(sortedThreads, (thread) => firstMessages[thread.id] ?? null),
+			Predicate.isNotNull,
+		);
 
 		const enrichedMessages = await enrichMessages(ctx, messages);
 
@@ -512,8 +514,8 @@ export const getChannelPageData = privateQuery({
 			enrichedMessages.map((em) => [em.message.id, em]),
 		);
 
-		const threadsWithMessages = sortedThreads
-			.map((thread) => {
+		const threadsWithMessages = Arr.filter(
+			Arr.map(sortedThreads, (thread) => {
 				const message = firstMessages[thread.id];
 				if (!message) return null;
 				const enrichedMessage = enrichedMessagesMap.get(message.id);
@@ -522,15 +524,9 @@ export const getChannelPageData = privateQuery({
 					thread,
 					message: enrichedMessage,
 				};
-			})
-			.filter(
-				(
-					tm,
-				): tm is {
-					thread: typeof tm.thread;
-					message: NonNullable<typeof tm.message>;
-				} => tm !== null,
-			);
+			}),
+			Predicate.isNotNull,
+		);
 
 		return {
 			server: {

@@ -32,11 +32,7 @@ export default async function ChannelPage(props: Props) {
 
 	return (
 		<ChannelPageContent
-			server={{
-				discordId: pageData.server.discordId,
-				name: pageData.server.name,
-				icon: pageData.server.icon ?? null,
-			}}
+			server={pageData.server}
 			channels={pageData.channels}
 			selectedChannel={pageData.selectedChannel}
 			threads={pageData.threads}

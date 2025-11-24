@@ -269,6 +269,7 @@ export const createDiscordService = Effect.gen(function* () {
 		fetchArchivedThreads,
 		callClient,
 		setActivity,
+		use,
 		getBotPermissionsForChannel,
 		client: {
 			login,

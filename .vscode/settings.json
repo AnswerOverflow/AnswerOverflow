@@ -25,5 +25,9 @@
 	"typescript.preferences.excludePackageJsonAutoImports": "on",
 	"typescript.tsserver.experimental.enableProjectDiagnostics": false,
 	"tailwindCSS.experimental.configFile": "packages/ui/src/styles/globals.css",
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"eslint.run": "onSave",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "never"
+	}
 }
