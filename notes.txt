@@ -82,7 +82,7 @@ Server Settings:
     - [ ] Set custom domain
     - [ ] Set custom subpath
     - [X] Enable / disable consider all messages public
-    - [ ] Enable / disable aonymize messages
+    - [X] Enable / disable aonymize messages
     - [ ] Enable / disable read the rules consent
     - [ ] Upgrade / downgrade plan
 
