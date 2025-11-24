@@ -25,7 +25,6 @@
     "apps/discord-bot": {
       "name": "@packages/discord-bot",
       "dependencies": {
-        "@packages/analytics": "workspace:*",
         "@packages/database": "workspace:*",
         "@packages/observability": "workspace:*",
         "discord.js": "^14.22.1",
@@ -86,18 +85,6 @@
         "postcss": "catalog:",
       },
     },
-    "packages/analytics": {
-      "name": "@packages/analytics",
-      "version": "1.0.0",
-      "dependencies": {
-        "@typelytics/posthog": "^0.1.5",
-        "effect": "catalog:",
-        "posthog-node": "^4.2.0",
-      },
-      "peerDependencies": {
-        "discord.js": "^14.22.1",
-      },
-    },
     "packages/convex-test": {
       "name": "@packages/convex-test",
       "version": "0.0.38",
@@ -118,12 +105,13 @@
         "@convex-dev/action-cache": "^0.3.0",
         "@convex-dev/better-auth": "catalog:",
         "@effect/platform": "catalog:",
-        "@packages/analytics": "workspace:*",
         "@packages/discord-api": "workspace:*",
+        "@typelytics/posthog": "^0.1.5",
         "convex": "catalog:",
         "convex-helpers": "^0.1.104",
         "discord-api-types": "^0.38.24",
         "effect": "catalog:",
+        "posthog-node": "^4.2.0",
         "unique-names-generator": "^4.7.1",
       },
       "devDependencies": {
@@ -136,6 +124,9 @@
         "chokidar-cli": "^3.0.0",
         "glob": "^11.0.3",
         "vitest": "catalog:",
+      },
+      "peerDependencies": {
+        "discord.js": "^14.22.1",
       },
     },
     "packages/database-utils": {
@@ -778,8 +769,6 @@
     "@oslojs/crypto": ["@oslojs/crypto@1.0.1", "", { "dependencies": { "@oslojs/asn1": "1.0.0", "@oslojs/binary": "1.0.0" } }, "sha512-7n08G8nWjAr/Yu3vu9zzrd0L9XnrJfpMioQcvCMxBIiF5orECHe5/3J0jmXRVvgfqMm/+4oxlQ+Sq39COYLcNQ=="],
 
     "@oslojs/encoding": ["@oslojs/encoding@1.1.0", "", {}, "sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ=="],
-
-    "@packages/analytics": ["@packages/analytics@workspace:packages/analytics"],
 
     "@packages/convex-test": ["@packages/convex-test@workspace:packages/convex-test"],
 

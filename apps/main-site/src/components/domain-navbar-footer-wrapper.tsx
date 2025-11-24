@@ -3,7 +3,6 @@
 import { Footer } from "@packages/ui/components/footer";
 import { Input } from "@packages/ui/components/input";
 import { Navbar } from "@packages/ui/components/navbar";
-import { ServerIcon } from "@packages/ui/components/server-icon";
 import { useTenant } from "@packages/ui/components/tenant-context";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
