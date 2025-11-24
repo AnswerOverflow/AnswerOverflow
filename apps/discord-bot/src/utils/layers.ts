@@ -1,4 +1,4 @@
-import { PostHogCaptureClientLayer } from "@packages/analytics/server/capture-client";
+import { PostHogCaptureClientLayer } from "@packages/database/analytics/server/capture-client";
 import { DatabaseTestLayer } from "@packages/database/database-test";
 import { Layer } from "effect";
 import { DiscordClientTestLayer } from "../core/discord-client-test-layer";

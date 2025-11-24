@@ -1,4 +1,4 @@
-import { PostHogCaptureClientLayer } from "@packages/analytics/server/capture-client";
+import { PostHogCaptureClientLayer } from "@packages/database/analytics/server/capture-client";
 import { DatabaseLayer } from "@packages/database/database";
 import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Console, Effect, Layer, Logger, LogLevel } from "effect";
