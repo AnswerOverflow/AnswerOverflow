@@ -81,7 +81,7 @@ Analytics:
 Server Settings:
     - [ ] Set custom domain
     - [ ] Set custom subpath
-    - [ ] Enable / disable consider all messages public
+    - [X] Enable / disable consider all messages public
     - [ ] Enable / disable aonymize messages
     - [ ] Enable / disable read the rules consent
     - [ ] Upgrade / downgrade plan

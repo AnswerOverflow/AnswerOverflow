@@ -72,7 +72,7 @@ export const channelSettingsSchema = v.object({
 	sendMarkSolutionInstructionsInNewThreads: v.boolean(),
 	autoThreadEnabled: v.boolean(),
 	forumGuidelinesConsentEnabled: v.boolean(),
-	botPermissions: v.optional(v.string()),
+	botPermissions: v.optional(v.union(v.string(), v.number())),
 });
 
 const embedFooterSchema = v.object({

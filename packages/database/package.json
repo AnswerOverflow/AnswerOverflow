@@ -29,7 +29,8 @@
 		"@packages/discord-api": "workspace:*",
 		"convex": "catalog:",
 		"convex-helpers": "^0.1.104",
-		"effect": "catalog:"
+		"effect": "catalog:",
+		"unique-names-generator": "^4.7.1"
 	},
 	"devDependencies": {
 		"@edge-runtime/vm": "catalog:",
