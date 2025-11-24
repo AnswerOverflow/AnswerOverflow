@@ -11,44 +11,6 @@ export const findIgnoredDiscordAccountById = privateQuery({
 	},
 });
 
-export const upsertIgnoredDiscordAccount = privateMutation({
-	args: {
-		id: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const existingAccount = await ctx.db
-			.query("discordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
-
-		if (existingAccount) {
-			throw new Error("Account is not ignored");
-		}
-
-		const existingIgnored = await ctx.db
-			.query("ignoredDiscordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
-
-		if (existingIgnored) {
-			return existingIgnored;
-		}
-
-		await ctx.db.insert("ignoredDiscordAccounts", { id: args.id });
-
-		const upserted = await ctx.db
-			.query("ignoredDiscordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
-			.first();
-
-		if (!upserted) {
-			throw new Error("Failed to upsert account");
-		}
-
-		return upserted;
-	},
-});
-
 export const deleteIgnoredDiscordAccount = privateMutation({
 	args: {
 		id: v.string(),

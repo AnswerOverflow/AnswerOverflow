@@ -12,7 +12,6 @@ import {
 import { channelSchema, channelSettingsSchema } from "../schema";
 import { enrichMessages } from "../shared/dataAccess";
 import {
-	compareIds,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
 	getFirstMessagesInChannels,
@@ -77,26 +76,6 @@ export const findChannelByDiscordId = privateQuery({
 	},
 });
 
-export const findAllThreadsByParentId = privateQuery({
-	args: {
-		parentId: v.string(),
-		limit: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		const allChannels = await getManyFrom(
-			ctx.db,
-			"channels",
-			"by_parentId",
-			args.parentId,
-		);
-		const channels = args.limit
-			? allChannels.slice(0, args.limit)
-			: allChannels;
-
-		return await addSettingsToChannels(ctx, channels);
-	},
-});
-
 export const findAllChannelsByServerId = privateQuery({
 	args: {
 		serverId: v.string(),
@@ -110,89 +89,6 @@ export const findAllChannelsByServerId = privateQuery({
 		);
 
 		return await addSettingsToChannels(ctx, channels);
-	},
-});
-
-export const findChannelsBeforeId = privateQuery({
-	args: {
-		serverId: v.string(),
-		id: v.string(),
-		take: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		const allChannels = await getManyFrom(
-			ctx.db,
-			"channels",
-			"by_serverId",
-			args.serverId,
-		);
-
-		const filtered = allChannels
-			.filter((c) => compareIds(c.id, args.id) < 0)
-			.sort((a, b) => compareIds(b.id, a.id))
-			.slice(0, args.take ?? 100);
-
-		return await addSettingsToChannels(ctx, filtered);
-	},
-});
-
-export const createChannel = privateMutation({
-	args: {
-		channel: channelSchema,
-		settings: v.optional(channelSettingsSchema),
-	},
-	handler: async (ctx, args) => {
-		await ctx.db.insert("channels", args.channel);
-
-		if (args.settings) {
-			const existingSettings = await getOneFrom(
-				ctx.db,
-				"channelSettings",
-				"by_channelId",
-				args.channel.id,
-			);
-
-			if (!existingSettings) {
-				await ctx.db.insert("channelSettings", args.settings);
-			} else {
-				await ctx.db.patch(existingSettings._id, args.settings);
-			}
-		}
-
-		return args.channel.id;
-	},
-});
-
-export const createManyChannels = privateMutation({
-	args: {
-		channels: v.array(
-			v.object({
-				channel: channelSchema,
-				settings: v.optional(channelSettingsSchema),
-			}),
-		),
-	},
-	handler: async (ctx, args) => {
-		const ids: string[] = [];
-		for (const item of args.channels) {
-			await ctx.db.insert("channels", item.channel);
-			if (item.settings) {
-				const existingSettings = await getOneFrom(
-					ctx.db,
-					"channelSettings",
-					"by_channelId",
-					item.channel.id,
-				);
-
-				if (!existingSettings) {
-					await ctx.db.insert("channelSettings", item.settings);
-				} else {
-					await ctx.db.patch(existingSettings._id, item.settings);
-				}
-			}
-			ids.push(item.channel.id);
-		}
-		return ids;
 	},
 });
 
@@ -374,41 +270,6 @@ export const upsertChannelWithSettings = privateMutation({
 		}
 
 		return args.channel.id;
-	},
-});
-
-export const findManyChannelsById = privateQuery({
-	args: {
-		ids: v.array(v.string()),
-	},
-	handler: async (ctx, args) => {
-		if (args.ids.length === 0) return [];
-
-		const channels = await asyncMap(args.ids, (id) =>
-			getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
-		);
-
-		const validChannels = channels.filter(
-			(channel): channel is NonNullable<(typeof channels)[0]> =>
-				channel !== null,
-		);
-
-		const channelsWithFlags = await addSettingsToChannels(
-			ctx,
-			validChannels.map((c) => ({
-				id: c.id,
-				serverId: c.serverId,
-				name: c.name,
-				type: c.type,
-				parentId: c.parentId,
-				inviteCode: c.inviteCode,
-				archivedTimestamp: c.archivedTimestamp,
-				solutionTagId: c.solutionTagId,
-				lastIndexedSnowflake: c.lastIndexedSnowflake,
-			})),
-		);
-
-		return channelsWithFlags;
 	},
 });
 

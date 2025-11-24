@@ -12,12 +12,8 @@ import { enrichMessages } from "../shared/dataAccess";
 import {
 	compareIds,
 	deleteMessageInternalLogic,
-	findAttachmentsByMessageId as findAttachmentsByMessageIdShared,
 	findIgnoredDiscordAccountById,
-	findMessagesByAuthorId as findMessagesByAuthorIdShared,
-	findMessagesByChannelId as findMessagesByChannelIdShared,
-	findReactionsByMessageId as findReactionsByMessageIdShared,
-	findSolutionsByQuestionId as findSolutionsByQuestionIdShared,
+	findMessagesByChannelId,
 	findUserServerSettingsById,
 	getChannelWithSettings,
 	getMessageById as getMessageByIdShared,
@@ -250,63 +246,11 @@ export const getMessageById = privateQuery({
 	},
 });
 
-export const findMessagesByChannelId = privateQuery({
-	args: {
-		channelId: v.string(),
-		limit: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		return await findMessagesByChannelIdShared(ctx, args.channelId, args.limit);
-	},
-});
-
-export const findMessagesByAuthorId = privateQuery({
-	args: {
-		authorId: v.string(),
-		limit: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		return await findMessagesByAuthorIdShared(ctx, args.authorId, args.limit);
-	},
-});
-
-export const findAttachmentsByMessageId = privateQuery({
-	args: {
-		messageId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		return await findAttachmentsByMessageIdShared(ctx, args.messageId);
-	},
-});
-
-export const findReactionsByMessageId = privateQuery({
-	args: {
-		messageId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		return await findReactionsByMessageIdShared(ctx, args.messageId);
-	},
-});
-
 export const getTotalMessageCount = privateQuery({
 	args: {},
 	handler: async (ctx) => {
 		const messages = await ctx.db.query("messages").collect();
 		return messages.length;
-	},
-});
-
-export const findSolutionsByQuestionId = privateQuery({
-	args: {
-		questionId: v.string(),
-		limit: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		return await findSolutionsByQuestionIdShared(
-			ctx,
-			args.questionId,
-			args.limit,
-		);
 	},
 });
 
@@ -413,7 +357,7 @@ export const getMessagePageData = privateQuery({
 				)
 			: null;
 
-		let allMessages = await findMessagesByChannelIdShared(
+		let allMessages = await findMessagesByChannelId(
 			ctx,
 			channelId,
 			threadId ? undefined : 50,
