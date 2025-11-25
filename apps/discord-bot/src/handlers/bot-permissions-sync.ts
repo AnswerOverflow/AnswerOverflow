@@ -8,7 +8,7 @@ function syncBotPermissionsForAllChannelsInGuild(
 	discord: Effect.Effect.Success<typeof Discord>,
 	database: Effect.Effect.Success<typeof Database>,
 	guildId: string,
-): Effect.Effect<void, unknown> {
+) {
 	return Effect.gen(function* () {
 		const channels = yield* discord.getChannels(guildId);
 		const rootChannels = channels.filter((channel) => {

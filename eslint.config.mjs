@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import tseslint from "typescript-eslint";
 import noStringComparison from "./eslint-rules/no-string-comparison.mjs";
+import noEffectUnknownError from "./eslint-rules/no-effect-unknown-error.mjs";
 
 function getGitignorePatterns() {
 	try {
@@ -52,9 +53,11 @@ export default tseslint.config(
 		},
 		plugins: {
 			"no-string-comparison": noStringComparison,
+			"no-effect-unknown-error": noEffectUnknownError,
 		},
 		rules: {
 			"no-string-comparison/no-string-comparison": "error",
+			"no-effect-unknown-error/no-effect-unknown-error": "error",
 		},
 	},
 	{
