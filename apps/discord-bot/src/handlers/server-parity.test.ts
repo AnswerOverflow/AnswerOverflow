@@ -32,11 +32,11 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: toBigIntIdRequired(guild.id),
+				discordId: BigInt(guild.id),
 			},
 		);
 		expect(serverLiveData).not.toBeNull();
-		expect(serverLiveData?.discordId).toBe(toBigIntIdRequired(guild.id));
+		expect(serverLiveData?.discordId).toBe(BigInt(guild.id));
 		expect(serverLiveData?.name).toBe(guild.name);
 		expect(serverLiveData?.description).toBe(guild.description);
 		expect(serverLiveData?.icon).toBe(guild.icon);
@@ -67,7 +67,7 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 
 		const textChannelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: toBigIntIdRequired(textChannel.id),
+				discordId: BigInt(textChannel.id),
 			});
 		expect(textChannelLiveData).not.toBeNull();
 		expect(textChannelLiveData?.name).toBe(textChannel.name);
@@ -75,7 +75,7 @@ it.scoped("guild-parity: syncs data on guild join", () =>
 
 		const forumChannelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: toBigIntIdRequired(forumChannel.id),
+				discordId: BigInt(forumChannel.id),
 			});
 		expect(forumChannelLiveData).not.toBeNull();
 		expect(forumChannelLiveData?.name).toBe(forumChannel.name);
@@ -108,10 +108,10 @@ it.scoped("guild-parity: runs first on guildCreate", () =>
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: toBigIntIdRequired(guild.id),
+				discordId: BigInt(guild.id),
 			},
 		);
 		expect(serverLiveData).not.toBeNull();
-		expect(serverLiveData?.discordId).toBe(toBigIntIdRequired(guild.id));
+		expect(serverLiveData?.discordId).toBe(BigInt(guild.id));
 	}).pipe(Effect.provide(TestLayerWithParity)),
 );
