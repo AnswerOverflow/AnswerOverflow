@@ -1,7 +1,6 @@
 "use client";
 
 import type { EnrichedMessage } from "@packages/database/convex/shared/shared";
-import { Attachments } from "./discord-message/attachments";
 import { DiscordUIMessage } from "./discord-message/renderer";
 import type { MessageWithMetadata } from "./discord-message/types";
 
@@ -26,9 +25,6 @@ export function MessageBody(props: {
 	return (
 		<div className="flex flex-col gap-2">
 			<DiscordUIMessage message={messageWithMetadata} />
-			{message.attachments.length > 0 && (
-				<Attachments attachments={message.attachments} />
-			)}
 		</div>
 	);
 }
