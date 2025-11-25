@@ -173,7 +173,7 @@ export default function DashboardHome() {
 						<ServerCard
 							key={server.discordId}
 							server={{
-								discordId: server.discordId,
+								discordId: BigInt(server.discordId),
 								name: server.name,
 								icon: server.icon,
 								highestRole: server.highestRole,

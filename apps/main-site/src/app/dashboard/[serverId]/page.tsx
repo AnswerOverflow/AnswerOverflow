@@ -21,7 +21,7 @@ export default function DashboardOverviewPage() {
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
-			serverId,
+			serverId: BigInt(serverId),
 		},
 	);
 

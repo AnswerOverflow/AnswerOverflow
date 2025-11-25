@@ -7,7 +7,7 @@ import Link from "next/link";
 
 type ServerCardProps = {
 	server: {
-		discordId: string;
+		discordId: bigint;
 		name: string;
 		icon: string | null;
 		highestRole: "Manage Guild" | "Administrator" | "Owner";
@@ -55,11 +55,15 @@ export function ServerCard({ server }: ServerCardProps) {
 				<div className="ml-auto">
 					{server.hasBot ? (
 						<Button asChild>
-							<Link href={`/dashboard/${server.discordId}`}>View</Link>
+							<Link href={`/dashboard/${server.discordId.toString()}`}>
+								View
+							</Link>
 						</Button>
 					) : (
 						<Button asChild variant="outline">
-							<Link href={`/dashboard/onboarding?serverId=${server.discordId}`}>
+							<Link
+								href={`/dashboard/onboarding?serverId=${server.discordId.toString()}`}
+							>
 								Setup
 							</Link>
 						</Button>

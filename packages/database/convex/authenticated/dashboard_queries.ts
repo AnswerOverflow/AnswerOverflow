@@ -84,7 +84,7 @@ export const getUserServersForDropdown = authenticatedQuery({
 	args: {},
 	returns: v.array(
 		v.object({
-			discordId: v.string(),
+			discordId: v.int64(),
 			name: v.string(),
 			icon: v.union(v.string(), v.null()),
 			highestRole: v.union(v.string(), v.null()),

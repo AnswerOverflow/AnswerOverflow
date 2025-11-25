@@ -18,14 +18,14 @@ export enum ChannelType {
 }
 
 type MessageWithServerAndChannel = {
-	serverId: string;
-	channelId: string;
-	id: string;
+	serverId: bigint;
+	channelId: bigint;
+	id: bigint;
 };
 
 export function getDiscordURLForMessage(message: MessageWithServerAndChannel) {
-	const serverId = message.serverId;
-	const channelId = message.channelId;
-	const messageId = message.id;
+	const serverId = message.serverId.toString();
+	const channelId = message.channelId.toString();
+	const messageId = message.id.toString();
 	return `https://discord.com/channels/${serverId}/${channelId}/${messageId}`;
 }

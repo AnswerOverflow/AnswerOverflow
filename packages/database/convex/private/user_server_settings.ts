@@ -11,8 +11,8 @@ type UserServerSettings = Infer<typeof userServerSettingsSchema>;
 
 export const findUserServerSettingsById = privateQuery({
 	args: {
-		userId: v.string(),
-		serverId: v.string(),
+		userId: v.int64(),
+		serverId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		return await findUserServerSettingsByIdShared(
@@ -27,8 +27,8 @@ export const findManyUserServerSettings = privateQuery({
 	args: {
 		settings: v.array(
 			v.object({
-				userId: v.string(),
-				serverId: v.string(),
+				userId: v.int64(),
+				serverId: v.int64(),
 			}),
 		),
 	},

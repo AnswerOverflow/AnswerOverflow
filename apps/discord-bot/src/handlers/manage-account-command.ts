@@ -10,6 +10,7 @@ import {
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { toBigIntIdRequired } from "../utils/conversions";
 
 export const menuButtonIds = {
 	consentButton: "consent-button",
@@ -146,7 +147,7 @@ export function handleManageAccountCommand(
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: interaction.guildId,
+				discordId: toBigIntIdRequired(interaction.guildId),
 			},
 		);
 
@@ -162,10 +163,13 @@ export function handleManageAccountCommand(
 			return;
 		}
 
+		const userIdBigInt = toBigIntIdRequired(interaction.user.id);
+		const serverIdBigInt = server.discordId;
+
 		const userServerSettingsLiveData =
 			yield* database.private.user_server_settings.findUserServerSettingsById({
-				userId: interaction.user.id,
-				serverId: server.discordId,
+				userId: userIdBigInt,
+				serverId: serverIdBigInt,
 			});
 
 		const userServerSettingsRaw = userServerSettingsLiveData;
@@ -174,6 +178,8 @@ export function handleManageAccountCommand(
 			userServerSettingsRaw
 				? {
 						...userServerSettingsRaw,
+						userId: userServerSettingsRaw.userId.toString(),
+						serverId: userServerSettingsRaw.serverId.toString(),
 						flags: {
 							canPubliclyDisplayMessages:
 								userServerSettingsRaw.canPubliclyDisplayMessages,
@@ -183,13 +189,13 @@ export function handleManageAccountCommand(
 					}
 				: getDefaultUserServerSettingsWithFlags({
 						userId: interaction.user.id,
-						serverId: server.discordId,
+						serverId: server.discordId.toString(),
 					});
 
 		const ignoredAccount =
 			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
 				{
-					id: interaction.user.id,
+					id: userIdBigInt,
 				},
 			);
 		const isIgnoredAccount = ignoredAccount !== null;
@@ -230,8 +236,8 @@ export function handleManageAccountCommand(
 					handleManageAccountButtonPress(
 						buttonInteraction,
 						database,
-						interaction.user.id,
-						server.discordId,
+						userIdBigInt,
+						serverIdBigInt,
 						state,
 					),
 				);
@@ -254,8 +260,8 @@ export function handleManageAccountCommand(
 function handleManageAccountButtonPress(
 	interaction: { customId: string },
 	database: Effect.Effect.Success<typeof Database>,
-	userId: string,
-	serverId: string,
+	userId: bigint,
+	serverId: bigint,
 	state: ManageAccountState,
 ) {
 	return Effect.gen(function* () {

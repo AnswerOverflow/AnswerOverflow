@@ -12,7 +12,7 @@ import {
 type DiscordAccount = Infer<typeof discordAccountSchema>;
 
 function getDefaultDiscordAccount(data: {
-	id: string;
+	id: bigint;
 	name: string;
 }): DiscordAccount {
 	return {
@@ -24,7 +24,7 @@ function getDefaultDiscordAccount(data: {
 
 export const getDiscordAccountById = privateQuery({
 	args: {
-		id: v.string(),
+		id: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		return await getDiscordAccountByIdShared(ctx, args.id);
@@ -108,7 +108,7 @@ export const upsertDiscordAccount = privateMutation({
 
 export const deleteDiscordAccount = privateMutation({
 	args: {
-		id: v.string(),
+		id: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const existing = await ctx.db

@@ -20,7 +20,7 @@ export interface ServerSelectServer {
 	name: string;
 	icon?: string | null;
 	hasBot?: boolean;
-	discordId?: string; // Discord ID for fetching icons
+	discordId?: bigint; // Discord ID for fetching icons
 }
 
 const ServerSelectRow = (props: {
@@ -30,7 +30,7 @@ const ServerSelectRow = (props: {
 	<div className="flex items-center gap-3 min-w-0">
 		<ServerIcon
 			server={{
-				discordId: props.server.discordId ?? props.server.id,
+				discordId: props.server.discordId ?? BigInt(props.server.id),
 				name: props.server.name,
 				icon: props.server.icon ?? undefined,
 			}}
@@ -84,7 +84,8 @@ export function ServerSelectDropdown({
 					>
 						<ServerIcon
 							server={{
-								discordId: selectedServer.discordId ?? selectedServer.id,
+								discordId:
+									selectedServer.discordId ?? BigInt(selectedServer.id),
 								name: selectedServer.name,
 								icon: selectedServer.icon ?? undefined,
 							}}
