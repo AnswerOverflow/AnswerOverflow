@@ -25,7 +25,7 @@ export function toBigIntId(id: string | undefined | null): bigint | undefined {
 	return id ? BigInt(id) : undefined;
 }
 
-export function toBigIntIdRequired(id: string): bigint {
+export function BigInt(id: string): bigint {
 	return BigInt(id);
 }
 
@@ -66,7 +66,7 @@ function _isAllowedChannelType(channelType: number): boolean {
 
 export function toAODiscordAccount(user: User): AODiscordAccount {
 	return {
-		id: toBigIntIdRequired(user.id),
+		id: BigInt(user.id),
 		name: user.displayName ?? user.username,
 		avatar: user.avatar ?? undefined,
 	};
@@ -88,8 +88,8 @@ export function toAOChannel(
 			: undefined;
 
 	return {
-		id: toBigIntIdRequired(channel.id),
-		serverId: toBigIntIdRequired(discordServerId),
+		id: BigInt(channel.id),
+		serverId: BigInt(discordServerId),
 		name: channel.name ?? "",
 		type: channel.type,
 		parentId: toBigIntId(parentId),
@@ -125,9 +125,9 @@ export async function toAOMessage(
 			const users = await reaction.users.fetch({ limit: 100 });
 			for (const user of users.values()) {
 				reactions.push({
-					userId: toBigIntIdRequired(user.id),
+					userId: BigInt(user.id),
 					emoji: {
-						id: toBigIntIdRequired(emoji.id),
+						id: BigInt(emoji.id),
 						name: emoji.name,
 						animated: emoji.animated ?? undefined,
 					},
@@ -140,8 +140,8 @@ export async function toAOMessage(
 
 	const attachments: DatabaseAttachment[] = message.attachments.map(
 		(attachment) => ({
-			id: toBigIntIdRequired(attachment.id),
-			messageId: toBigIntIdRequired(message.id),
+			id: BigInt(attachment.id),
+			messageId: BigInt(message.id),
 			contentType: attachment.contentType ?? undefined,
 			filename: attachment.name ?? "",
 			width: attachment.width ?? undefined,
@@ -224,10 +224,10 @@ export async function toAOMessage(
 			: undefined;
 
 	const convertedMessage: BaseMessageWithRelations = {
-		id: toBigIntIdRequired(message.id),
-		authorId: toBigIntIdRequired(message.author.id),
-		serverId: toBigIntIdRequired(discordServerId),
-		channelId: toBigIntIdRequired(message.channelId),
+		id: BigInt(message.id),
+		authorId: BigInt(message.author.id),
+		serverId: BigInt(discordServerId),
+		channelId: BigInt(message.channelId),
 		parentChannelId: toBigIntId(parentChannelId),
 		childThreadId: toBigIntId(childThreadId),
 		questionId: undefined,

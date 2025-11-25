@@ -915,7 +915,6 @@ export async function enrichMessageForDisplay(
 
 	const convexSiteUrl = process.env.CONVEX_SITE_URL;
 	const cdnDomain = process.env.CDN_DOMAIN ?? "cdn.answeroverflow.com";
-	console.log("attachments", attachments);
 
 	const attachmentsWithUrl = await Promise.all(
 		attachments.map(async (attachment) => {

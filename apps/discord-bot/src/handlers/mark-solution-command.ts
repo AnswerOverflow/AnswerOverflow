@@ -3,7 +3,7 @@ import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toAOMessage, toBigIntIdRequired } from "../utils/conversions";
+import { toAOMessage } from "../utils/conversions";
 import { makeMarkSolutionResponse } from "./mark-solution";
 
 export function handleMarkSolutionCommand(
@@ -46,7 +46,7 @@ export function handleMarkSolutionCommand(
 		}
 
 		const server = yield* database.private.servers.getServerByDiscordId({
-			discordId: toBigIntIdRequired(targetMessage.guildId),
+			discordId: BigInt(targetMessage.guildId),
 		});
 
 		if (!server) {
@@ -81,7 +81,7 @@ export function handleMarkSolutionCommand(
 
 		const channelSettings =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: toBigIntIdRequired(parentChannel.id),
+				discordId: BigInt(parentChannel.id),
 			});
 
 		if (!channelSettings || !channelSettings.flags?.markSolutionEnabled) {

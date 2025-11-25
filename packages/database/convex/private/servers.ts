@@ -102,10 +102,7 @@ export const getServerByDiscordId = privateQuery({
 		discordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.discordId))
-			.first();
+		return getOneFrom(ctx.db, "servers", "by_discordId", args.discordId);
 	},
 });
 
@@ -121,7 +118,6 @@ export const getServerByDomain = privateQuery({
 			args.domain,
 			"customDomain",
 		);
-		console.log("preferences", preferences);
 		if (!preferences) {
 			return null;
 		}
@@ -173,6 +169,20 @@ export const findManyServersByDiscordId = privateQuery({
 				.first(),
 		);
 		return Arr.filter(servers, Predicate.isNotNullable);
+	},
+});
+
+export const clearKickedTime = privateMutation({
+	args: {
+		id: v.id("servers"),
+	},
+	handler: async (ctx, args) => {
+		const existing = await ctx.db.get(args.id);
+		if (!existing) {
+			throw new Error(`Server with id ${args.id} not found`);
+		}
+		await ctx.db.patch(args.id, { kickedTime: undefined });
+		return args.id;
 	},
 });
 

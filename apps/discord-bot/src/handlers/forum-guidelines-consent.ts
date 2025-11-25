@@ -3,7 +3,6 @@ import type { Message } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toBigIntIdRequired } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 
 export function handleForumGuidelinesConsent(message: Message) {
@@ -33,7 +32,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: toBigIntIdRequired(message.guildId),
+				discordId: BigInt(message.guildId),
 			},
 		);
 		const server = serverLiveData;
@@ -44,7 +43,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 
 		const parentChannelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: toBigIntIdRequired(thread.parent.id),
+				discordId: BigInt(thread.parent.id),
 			});
 		const parentChannel = parentChannelLiveData;
 
@@ -59,7 +58,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 		const ignoredAccount =
 			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
 				{
-					id: toBigIntIdRequired(message.author.id),
+					id: BigInt(message.author.id),
 				},
 			);
 
@@ -69,7 +68,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 
 		const userServerSettingsLiveData =
 			yield* database.private.user_server_settings.findUserServerSettingsById({
-				userId: toBigIntIdRequired(message.author.id),
+				userId: BigInt(message.author.id),
 				serverId: server.discordId,
 			});
 		const userServerSettings = userServerSettingsLiveData;
@@ -94,7 +93,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 					botAddedTimestamp: userServerSettings.botAddedTimestamp,
 				}
 			: {
-					userId: toBigIntIdRequired(message.author.id),
+					userId: BigInt(message.author.id),
 					serverId: server.discordId,
 					permissions: 0,
 					canPubliclyDisplayMessages: true,

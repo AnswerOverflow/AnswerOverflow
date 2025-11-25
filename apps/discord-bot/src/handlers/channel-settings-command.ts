@@ -9,7 +9,6 @@ import {
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toBigIntIdRequired } from "../utils/conversions";
 
 function getDashboardUrl(serverId: string, channelId: string): string {
 	const baseUrl =
@@ -56,7 +55,7 @@ export function handleChannelSettingsCommand(
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: toBigIntIdRequired(interaction.guildId),
+				discordId: BigInt(interaction.guildId),
 			},
 		);
 
@@ -74,7 +73,7 @@ export function handleChannelSettingsCommand(
 
 		const channelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: toBigIntIdRequired(targetChannelId),
+				discordId: BigInt(targetChannelId),
 			});
 
 		if (!channelLiveData) {
