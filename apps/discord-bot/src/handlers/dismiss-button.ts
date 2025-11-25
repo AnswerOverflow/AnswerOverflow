@@ -1,7 +1,7 @@
 import type { ButtonInteraction, GuildMember } from "discord.js";
 import { Message, PermissionFlagsBits } from "discord.js";
 import { Console, Effect, Layer } from "effect";
-import { Discord } from "../core/discord-service";
+import { Discord, UnknownDiscordError } from "../core/discord-service";
 
 const DISMISS_ACTION_PREFIX = "dismiss";
 const DISMISS_OVERRIDE_PERMISSIONS = [
@@ -66,9 +66,7 @@ function handleDismissMessage({
 	});
 }
 
-export function handleDismissButtonInteraction(
-	interaction: ButtonInteraction,
-): Effect.Effect<void, unknown, Discord> {
+export function handleDismissButtonInteraction(interaction: ButtonInteraction) {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 
@@ -86,7 +84,7 @@ export function handleDismissButtonInteraction(
 		const guild = interaction.guild;
 		const dismisser = yield* Effect.tryPromise({
 			try: () => guild.members.fetch(interaction.user.id),
-			catch: (error) => error,
+			catch: (error) => new UnknownDiscordError({ cause: error }),
 		});
 
 		if (!dismisser) {

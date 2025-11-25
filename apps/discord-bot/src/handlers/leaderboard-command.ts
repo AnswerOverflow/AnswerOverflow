@@ -29,7 +29,7 @@ function makeDismissButton(dismisserId: string): ButtonBuilder {
 
 export function handleLeaderboardCommand(
 	interaction: ChatInputCommandInteraction,
-): Effect.Effect<void, unknown, Database | Discord> {
+) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		const discord = yield* Discord;

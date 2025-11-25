@@ -13,7 +13,7 @@ export function syncBotPermissionsForChannel(
 	database: Effect.Effect.Success<typeof Database>,
 	channelId: string,
 	guildId: string,
-): Effect.Effect<void, unknown> {
+) {
 	return Effect.gen(function* () {
 		const botPermissions = yield* discord.getBotPermissionsForChannel(
 			channelId,
