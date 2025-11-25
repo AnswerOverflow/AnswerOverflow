@@ -23,7 +23,7 @@ import {
 	sortServersByBotAndRole,
 } from "../shared/shared";
 
-function getBackendAccessToken(): string {
+export function getBackendAccessToken(): string {
 	const token = process.env.BACKEND_ACCESS_TOKEN;
 	return token ?? "";
 }

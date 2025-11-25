@@ -22,6 +22,7 @@ import {
 	Schedule,
 } from "effect";
 import { Discord } from "../core/discord-service";
+import { uploadAttachmentsInBatches } from "../utils/attachment-upload";
 import {
 	toAOChannel,
 	toAODiscordAccount,
@@ -189,35 +190,7 @@ function storeMessages(
 		);
 
 		if (allAttachments.length > 0) {
-			yield* Effect.logDebug(
-				`Uploading ${allAttachments.length} attachments...`,
-			);
-
-			const batchSize = 5;
-			for (let i = 0; i < allAttachments.length; i += batchSize) {
-				const batch = allAttachments.slice(i, i + batchSize);
-				const uploadResults =
-					yield* database.private.attachments.uploadManyAttachmentsFromUrls({
-						attachments: batch,
-					});
-
-				for (const result of uploadResults) {
-					if (result.storageId) {
-						for (const msg of aoMessages) {
-							const attachment = msg.attachments?.find(
-								(a) => a.id.toString() === result.attachmentId,
-							);
-							if (attachment) {
-								attachment.storageId = result.storageId;
-							}
-						}
-					}
-				}
-			}
-
-			yield* Effect.logDebug(
-				`Successfully uploaded ${allAttachments.length} attachments`,
-			);
+			yield* uploadAttachmentsInBatches(allAttachments);
 		}
 
 		yield* Effect.forEach(

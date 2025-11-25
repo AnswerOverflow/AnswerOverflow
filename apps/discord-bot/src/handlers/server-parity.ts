@@ -1,4 +1,5 @@
 import { Database } from "@packages/database/database";
+import { Storage } from "@packages/database/storage";
 import type { Guild, GuildChannel } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { registerCommands } from "../commands/register";
@@ -82,11 +83,13 @@ export function syncGuild(guild: Guild) {
 				);
 			const preferences = preferencesLiveData;
 			if (preferences?.customDomain && server.icon) {
-				yield* database.private.attachments
-					.uploadAttachmentFromUrl({
-						url: `https://cdn.discordapp.com/icons/${guild.id}/${server.icon}.png?size=48`,
-						filename: `${server.icon}/icon.png`,
+				const storage = yield* Storage;
+				yield* storage
+					.uploadFileFromUrl({
+						id: server.icon,
+						filename: "icon.png",
 						contentType: "image/png",
+						url: `https://cdn.discordapp.com/icons/${guild.id}/${server.icon}.png?size=48`,
 					})
 					.pipe(
 						Effect.tap(() =>

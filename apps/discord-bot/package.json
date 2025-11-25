@@ -4,7 +4,7 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"dev": "bun run --env-file=../../.env --watch index.ts",
+		"dev": "bun run --env-file=../../.env --watch index.dev.ts",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"clean": "rm -rf node_modules .turbo",
 		"test": "vitest run --no-watch --pool=forks",
