@@ -27,7 +27,6 @@ import {
 	toAODiscordAccount,
 	toAOMessage,
 	toBigIntIdRequired,
-	toBigIntId,
 } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 

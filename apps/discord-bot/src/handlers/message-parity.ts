@@ -2,9 +2,9 @@ import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import {
-	toBigIntIdRequired,
 	toAODiscordAccount,
 	toAOMessage,
+	toBigIntIdRequired,
 } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 

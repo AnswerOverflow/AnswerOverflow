@@ -3,9 +3,9 @@ import { Database } from "@packages/database/database";
 import { Effect, Layer } from "effect";
 import { DiscordClientMock } from "../core/discord-client-mock";
 import { Discord } from "../core/discord-service";
+import { toBigIntIdRequired } from "../utils/conversions";
 import { TestLayer } from "../utils/layers";
 import { ServerParityLayer, syncGuild } from "./server-parity";
-import { toBigIntIdRequired } from "../utils/conversions";
 
 const TestLayerWithParity = Layer.mergeAll(
 	TestLayer,

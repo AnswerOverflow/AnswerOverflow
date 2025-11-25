@@ -24,7 +24,7 @@ export function TierAccessOnly({
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
-			serverId,
+			serverId: BigInt(serverId),
 		},
 	);
 

@@ -15,7 +15,7 @@ export default async function ServerPage(props: Props) {
 		const database = yield* Database;
 		const liveData =
 			yield* database.private.servers.getServerByDiscordIdWithChannels({
-				discordId: params.serverId,
+				discordId: BigInt(params.serverId),
 			});
 		return liveData;
 	}).pipe(runtime.runPromise);
@@ -67,7 +67,7 @@ export default async function ServerPage(props: Props) {
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* database.private.channels.getChannelPageData({
-			serverDiscordId: params.serverId,
+			serverDiscordId: BigInt(params.serverId),
 			channelDiscordId: defaultChannel.id,
 		});
 		return liveData;
