@@ -42,7 +42,7 @@ export function handleSendMarkSolutionInstructions(
 	} | null,
 	threadOwner: GuildMember,
 	_question: Message | null,
-): Effect.Effect<void, unknown, Database> {
+) {
 	return Effect.gen(function* () {
 		if (!channelSettings?.flags.sendMarkSolutionInstructionsInNewThreads) {
 			return;
@@ -74,7 +74,10 @@ export function handleSendMarkSolutionInstructions(
 				}),
 			catch: (error) => {
 				console.error("Error sending mark solution instructions:", error);
-				return error;
+				return new SendMarkSolutionInstructionsError(
+					"send_failed",
+					"Failed to send mark solution instructions",
+				);
 			},
 		});
 

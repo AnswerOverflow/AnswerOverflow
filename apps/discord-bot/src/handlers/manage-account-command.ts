@@ -1,4 +1,4 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import type { ChatInputCommandInteraction } from "discord.js";
 import {
 	ActionRowBuilder,
@@ -9,7 +9,7 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Effect, Layer } from "effect";
-import { Discord, UnknownDiscordError } from "../core/discord-service";
+import { Discord } from "../core/discord-service";
 
 export const menuButtonIds = {
 	consentButton: "consent-button",
@@ -129,7 +129,7 @@ function generateManageAccountActionRow(
 
 export function handleManageAccountCommand(
 	interaction: ChatInputCommandInteraction,
-): Effect.Effect<void, unknown, Database> {
+) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		const discord = yield* Discord;
