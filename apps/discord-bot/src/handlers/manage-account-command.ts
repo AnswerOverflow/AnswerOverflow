@@ -129,7 +129,7 @@ function generateManageAccountActionRow(
 
 export function handleManageAccountCommand(
 	interaction: ChatInputCommandInteraction,
-): Effect.Effect<void, unknown, Database | Discord> {
+) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		const discord = yield* Discord;
