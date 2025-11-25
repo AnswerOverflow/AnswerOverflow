@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { authenticatedQuery } from "../client";
+import { guildManagerQuery } from "../client/guildManager";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
@@ -11,7 +12,7 @@ import {
 	sortServersByBotAndRole,
 } from "../shared/shared";
 
-export const getDashboardData = authenticatedQuery({
+export const getDashboardData = guildManagerQuery({
 	args: { serverId: v.string() },
 	handler: async (ctx, args) => {
 		const server = await getServerByDiscordId(ctx, args.serverId);
