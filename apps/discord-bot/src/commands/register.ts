@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandType,
 	ContextMenuCommandBuilder,
+	InteractionContextType,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from "discord.js";
@@ -11,11 +12,11 @@ const globalCommands = [
 	new ContextMenuCommandBuilder()
 		.setName("✅ Mark Solution")
 		.setType(ApplicationCommandType.Message)
-		.setDMPermission(false),
+		.setContexts(InteractionContextType.Guild),
 	new SlashCommandBuilder()
 		.setName("leaderboard")
 		.setDescription("See who has solved the most questions in the server.")
-		.setDMPermission(false)
+		.setContexts(InteractionContextType.Guild)
 		.addBooleanOption((option) =>
 			option
 				.setName("ephemeral")
@@ -24,12 +25,12 @@ const globalCommands = [
 	new SlashCommandBuilder()
 		.setName("manage-account")
 		.setDescription("Manage how Answer Overflow interacts with your account")
-		.setDMPermission(false),
+		.setContexts(InteractionContextType.Guild),
 	new SlashCommandBuilder()
 		.setName("channel-settings")
 		.setDescription("Configure channel settings in the dashboard")
-		.setDMPermission(false)
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+		.setContexts(InteractionContextType.Guild),
 ] as const;
 
 const guildCommands = [
@@ -38,7 +39,7 @@ const guildCommands = [
 		.setDescription(
 			"Debug command for testing latency and API status (Rhys only)",
 		)
-		.setDMPermission(false),
+		.setContexts(InteractionContextType.Guild),
 ] as const;
 
 export function registerCommands() {
