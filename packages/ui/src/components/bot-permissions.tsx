@@ -83,7 +83,7 @@ const BOT_PERMISSIONS: BotPermission[] = [
 ];
 
 interface ServerInfo {
-	discordId: string;
+	discordId: bigint;
 	name: string;
 	icon: string | null;
 }

@@ -114,8 +114,10 @@ export default function ChannelsPage() {
 	);
 
 	const selectedChannelIds = React.useMemo(() => {
-		if (!selectedChannelIdsParam) return new Set<string>();
-		return new Set(selectedChannelIdsParam.split(",").filter(Boolean));
+		if (!selectedChannelIdsParam) return new Set<bigint>();
+		return new Set(
+			selectedChannelIdsParam.split(",").filter(Boolean).map(BigInt),
+		);
 	}, [selectedChannelIdsParam]);
 
 	const channelTypeFilter = React.useMemo(() => {
@@ -129,12 +131,16 @@ export default function ChannelsPage() {
 	}, [channelTypeFilterParam]);
 
 	const setSelectedChannelIds = React.useCallback(
-		(updater: (prev: Set<string>) => Set<string>) => {
+		(updater: (prev: Set<bigint>) => Set<bigint>) => {
 			const newSet = updater(selectedChannelIds);
 			if (newSet.size === 0) {
 				setSelectedChannelIdsParam(null);
 			} else {
-				setSelectedChannelIdsParam(Array.from(newSet).join(","));
+				setSelectedChannelIdsParam(
+					Array.from(newSet)
+						.map((id) => id.toString())
+						.join(","),
+				);
 			}
 		},
 		[selectedChannelIds, setSelectedChannelIdsParam],
@@ -143,7 +149,7 @@ export default function ChannelsPage() {
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
-			serverId,
+			serverId: BigInt(serverId),
 		},
 	);
 
@@ -202,12 +208,12 @@ export default function ChannelsPage() {
 	).withOptimisticUpdate((localStore, args) => {
 		const currentData = localStore.getQuery(
 			api.authenticated.dashboard_queries.getDashboardData,
-			{ serverId },
+			{ serverId: BigInt(serverId) },
 		);
 		if (currentData !== undefined) {
 			localStore.setQuery(
 				api.authenticated.dashboard_queries.getDashboardData,
-				{ serverId },
+				{ serverId: BigInt(serverId) },
 				{
 					...currentData,
 					channels: currentData.channels.map((channel) =>
@@ -299,7 +305,7 @@ export default function ChannelsPage() {
 		return false;
 	};
 
-	const toggleChannelSelection = (channelId: string) => {
+	const toggleChannelSelection = (channelId: bigint) => {
 		setSelectedChannelIds((prev) => {
 			const next = new Set(prev);
 			if (next.has(channelId)) {
@@ -323,13 +329,13 @@ export default function ChannelsPage() {
 		if (selectedChannels.length === 0) return;
 		try {
 			await Promise.all(
-				selectedChannels.map((channel: { id: string }) =>
+				selectedChannels.map((channel: { id: bigint }) =>
 					updateChannelSettings({
 						channelId: channel.id,
 						flags: {
 							[flagKey]: checked,
 						},
-						serverId,
+						serverId: BigInt(serverId),
 					}),
 				),
 			);
@@ -418,7 +424,7 @@ export default function ChannelsPage() {
 											const isSelected = selectedChannelIds.has(channel.id);
 											return (
 												<label
-													key={channel.id}
+													key={channel.id.toString()}
 													className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors"
 												>
 													<Checkbox
@@ -550,7 +556,7 @@ export default function ChannelsPage() {
 													const isSelected = selectedChannelIds.has(channel.id);
 													return (
 														<DropdownMenuCheckboxItem
-															key={channel.id}
+															key={channel.id.toString()}
 															checked={isSelected}
 															onCheckedChange={() =>
 																toggleChannelSelection(channel.id)

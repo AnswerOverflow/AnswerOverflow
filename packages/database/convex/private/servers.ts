@@ -49,7 +49,7 @@ export const getBrowseServers = privateQuery({
 
 		const serverDiscordIds = nonKickedServers.map((server) => server.discordId);
 
-		const consentingUserCounts: Array<{ serverId: string; count: number }> = [];
+		const consentingUserCounts: Array<{ serverId: bigint; count: number }> = [];
 		for (const serverId of serverDiscordIds) {
 			const settings = await getManyFrom(
 				ctx.db,
@@ -99,7 +99,7 @@ export const getBrowseServers = privateQuery({
 
 export const getServerByDiscordId = privateQuery({
 	args: {
-		discordId: v.string(),
+		discordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		return await ctx.db
@@ -162,7 +162,7 @@ export const findManyServersById = privateQuery({
 
 export const findManyServersByDiscordId = privateQuery({
 	args: {
-		discordIds: v.array(v.string()),
+		discordIds: v.array(v.int64()),
 	},
 	handler: async (ctx, args) => {
 		if (args.discordIds.length === 0) return [];
@@ -195,7 +195,7 @@ export const updateServer = privateMutation({
 
 export const getServerByDiscordIdWithChannels = privateQuery({
 	args: {
-		discordId: v.string(),
+		discordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const server = await ctx.db

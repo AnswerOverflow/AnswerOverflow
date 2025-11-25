@@ -13,8 +13,8 @@ function getChannelIcon(type: number) {
 	return Hash;
 }
 
-function getSnowflakeDate(snowflake: string): Date {
-	const timestamp = BigInt(snowflake) >> 22n;
+function getSnowflakeDate(snowflake: bigint): Date {
+	const timestamp = snowflake >> 22n;
 	return new Date(Number(timestamp) + 1420070400000);
 }
 
@@ -82,8 +82,8 @@ export function ChannelPageContent({
 									const Icon = getChannelIcon(channel.type);
 									return (
 										<Link
-											key={channel.id}
-											href={`/c/${server.discordId}/${channel.id}`}
+											key={channel.id.toString()}
+											href={`/c/${server.discordId.toString()}/${channel.id.toString()}`}
 											className={`group flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
 												isSelected
 													? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
@@ -114,8 +114,8 @@ export function ChannelPageContent({
 									const formattedDate = formatRelativeTime(messageDate);
 									return (
 										<Link
-											key={thread.id}
-											href={`/m/${message.message.id}`}
+											key={thread.id.toString()}
+											href={`/m/${message.message.id.toString()}`}
 											className="block rounded-lg border border-border bg-card p-5 transition-all hover:border-sidebar-border hover:bg-accent/50"
 										>
 											<div className="flex flex-col gap-2">

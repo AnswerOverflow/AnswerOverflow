@@ -10,10 +10,10 @@ type Props = {
 };
 
 function getThreadIdOfMessage(message: {
-	channelId: string;
-	childThreadId?: string | null;
-	parentChannelId?: string | null;
-}): string | null {
+	channelId: bigint;
+	childThreadId?: bigint | null;
+	parentChannelId?: bigint | null;
+}): bigint | null {
 	if (message.childThreadId) {
 		return message.childThreadId;
 	}
@@ -29,7 +29,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* database.private.messages.getMessagePageData({
-			messageId: params.messageId,
+			messageId: BigInt(params.messageId),
 		});
 		return liveData;
 	}).pipe(runtime.runPromise);
@@ -57,7 +57,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 			description,
 		},
 		alternates: {
-			canonical: `/m/${pageData.thread?.id ?? params.messageId}`,
+			canonical: `/m/${pageData.thread?.id.toString() ?? params.messageId}`,
 		},
 	};
 }
@@ -69,7 +69,7 @@ export default async function Page(props: Props) {
 	const message = await Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.private.messages.getMessageById({
-			id: params.messageId,
+			id: BigInt(params.messageId),
 		});
 	}).pipe(runtime.runPromise);
 	const end = performance.now();
@@ -79,14 +79,14 @@ export default async function Page(props: Props) {
 	}
 
 	const threadId = getThreadIdOfMessage(message);
-	if (threadId && threadId !== params.messageId) {
-		redirect(`/m/${threadId}`);
+	if (threadId && threadId.toString() !== params.messageId) {
+		redirect(`/m/${threadId.toString()}`);
 	}
 
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* database.private.messages.getMessagePageData({
-			messageId: params.messageId,
+			messageId: BigInt(params.messageId),
 		});
 		return liveData;
 	}).pipe(runtime.runPromise);

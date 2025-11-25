@@ -11,16 +11,17 @@ export type DiscordAccountPublic = {
 	avatar?: string | null;
 };
 
-export function anonymizeDiscordAccount(seed: string): DiscordAccountPublic {
+export function anonymizeDiscordAccount(seed: bigint): DiscordAccountPublic {
+	const seedStr = seed.toString();
 	const shortName: string = uniqueNamesGenerator({
 		dictionaries: [adjectives, colors, animals],
 		separator: "-",
 		length: 2,
-		seed,
+		seed: seedStr,
 	});
 	return {
 		avatar: null,
 		name: shortName,
-		id: seed,
+		id: seedStr,
 	};
 }

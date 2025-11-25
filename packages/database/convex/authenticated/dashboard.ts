@@ -53,7 +53,7 @@ const discordApi = (token: string) =>
 
 export const fetchDiscordGuilds = internalAction({
 	args: {
-		discordAccountId: v.string(),
+		discordAccountId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const { discordAccountId } = args;
@@ -119,7 +119,7 @@ export const getUserServers = authenticatedAction({
 			);
 		});
 
-		const serverDiscordIds = manageableServers.map((g) => g.id);
+		const serverDiscordIds = manageableServers.map((g) => BigInt(g.id));
 		const aoServers = await ctx.runQuery(
 			api.private.servers.findManyServersByDiscordId,
 			{
@@ -134,7 +134,7 @@ export const getUserServers = authenticatedAction({
 			{
 				discordAccountId,
 				manageableServers: manageableServers.map((guild) => ({
-					id: guild.id,
+					id: BigInt(guild.id),
 					permissions: guild.permissions,
 				})),
 				aoServerIds: aoServers.map((server) => server._id),
@@ -142,7 +142,7 @@ export const getUserServers = authenticatedAction({
 		);
 
 		const aoServersByDiscordId = new Map(
-			aoServers.map((server) => [server.discordId, server]),
+			aoServers.map((server) => [server.discordId.toString(), server]),
 		);
 
 		const serversWithMetadata: ServerWithMetadata[] = manageableServers.map(
@@ -177,8 +177,8 @@ export const getUserServers = authenticatedAction({
 
 async function checkManageGuildPermission(
 	ctx: ActionCtx,
-	discordAccountId: string,
-	serverId: string,
+	discordAccountId: bigint,
+	serverId: bigint,
 ): Promise<void> {
 	const backendAccessToken = getBackendAccessToken();
 
@@ -210,7 +210,7 @@ async function checkManageGuildPermission(
 
 export const getTopQuestionSolversForServer = authenticatedAction({
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverId } = args;
@@ -230,7 +230,7 @@ export const getTopQuestionSolversForServer = authenticatedAction({
 
 export const getPageViewsForServer = authenticatedAction({
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 		from: v.optional(v.number()),
 		to: v.optional(v.number()),
 	},
@@ -250,7 +250,7 @@ export const getPageViewsForServer = authenticatedAction({
 
 export const getServerInvitesClicked = authenticatedAction({
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverId } = args;
@@ -260,7 +260,9 @@ export const getServerInvitesClicked = authenticatedAction({
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getServerInvitesClicked();
-		}).pipe(Effect.provide(ServerAnalyticsLayer({ serverId })));
+		}).pipe(
+			Effect.provide(ServerAnalyticsLayer({ serverId: serverId.toString() })),
+		);
 
 		return await Effect.runPromise(program);
 	},
@@ -268,7 +270,7 @@ export const getServerInvitesClicked = authenticatedAction({
 
 export const getQuestionsAndAnswers = authenticatedAction({
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 		from: v.optional(v.number()),
 		to: v.optional(v.number()),
 	},
@@ -280,7 +282,9 @@ export const getQuestionsAndAnswers = authenticatedAction({
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getQuestionsAndAnswers();
-		}).pipe(Effect.provide(ServerAnalyticsLayer({ serverId })));
+		}).pipe(
+			Effect.provide(ServerAnalyticsLayer({ serverId: serverId.toString() })),
+		);
 
 		return await Effect.runPromise(program);
 	},
@@ -288,7 +292,7 @@ export const getQuestionsAndAnswers = authenticatedAction({
 
 export const trackBotAddClick = authenticatedAction({
 	args: {
-		serverDiscordId: v.string(),
+		serverDiscordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const { discordAccountId, serverDiscordId } = args;
@@ -296,8 +300,8 @@ export const trackBotAddClick = authenticatedAction({
 		const server = await ctx.runQuery(
 			api.authenticated.servers.publicGetServerByDiscordId,
 			{
-				discordId: serverDiscordId,
 				serverId: serverDiscordId,
+				discordId: serverDiscordId,
 			},
 		);
 
@@ -312,12 +316,12 @@ export const trackBotAddClick = authenticatedAction({
 			{
 				backendAccessToken,
 				userId: discordAccountId,
-				serverId: server._id,
+				serverId: server.discordId,
 			},
 		);
 
 		const settings = {
-			serverId: server._id,
+			serverId: server.discordId,
 			userId: discordAccountId,
 			permissions: existingSettings?.permissions ?? 0,
 			canPubliclyDisplayMessages:
@@ -338,10 +342,10 @@ export const trackBotAddClick = authenticatedAction({
 
 export const syncUserServerSettingsBackground = internalAction({
 	args: {
-		discordAccountId: v.string(),
+		discordAccountId: v.int64(),
 		manageableServers: v.array(
 			v.object({
-				id: v.string(),
+				id: v.int64(),
 				permissions: v.string(),
 			}),
 		),
@@ -359,7 +363,7 @@ export const syncUserServerSettingsBackground = internalAction({
 			},
 		);
 
-		const aoServersByDiscordId = new Map<string, Doc<"servers">>(
+		const aoServersByDiscordId = new Map<bigint, Doc<"servers">>(
 			aoServers.map((server) => [server.discordId, server]),
 		);
 

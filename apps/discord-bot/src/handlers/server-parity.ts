@@ -8,14 +8,18 @@ import {
 	trackServerJoin,
 	trackServerLeave,
 } from "../utils/analytics";
-import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
+import {
+	isAllowedRootChannelType,
+	toAOChannel,
+	toBigIntIdRequired,
+} from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
 import { syncBotPermissionsForChannel } from "./channel-parity";
 import { startIndexingLoop } from "./indexing";
 
 function toAOServer(guild: Guild) {
 	return {
-		discordId: guild.id,
+		discordId: toBigIntIdRequired(guild.id),
 		name: guild.name,
 		icon: guild.icon ? guild.icon.toString() : undefined,
 		description: guild.description ?? undefined,
@@ -41,7 +45,7 @@ export function syncGuild(guild: Guild) {
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: guild.id,
+				discordId: toBigIntIdRequired(guild.id),
 			},
 		);
 
@@ -64,7 +68,7 @@ export function syncGuild(guild: Guild) {
 		}
 
 		if (wasNewServer) {
-			yield* registerServerGroup(guild, server.discordId).pipe(
+			yield* registerServerGroup(guild, server.discordId.toString()).pipe(
 				Effect.catchAll(() => Effect.void),
 			);
 		}
@@ -110,7 +114,7 @@ export function syncGuild(guild: Guild) {
 
 		if (rootChannels.length > 0) {
 			const channelsToUpsert = rootChannels.map((channel) => {
-				const aoChannel = toAOChannel(channel, server.discordId);
+				const aoChannel = toAOChannel(channel, server.discordId.toString());
 				return {
 					create: aoChannel,
 					update: aoChannel,
@@ -169,7 +173,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: newGuild.id,
+						discordId: toBigIntIdRequired(newGuild.id),
 					});
 				const existingServer = serverLiveData;
 
@@ -194,7 +198,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					id: existingServer._id,
 					data: {
 						...preservedFields,
-						discordId: newGuild.id,
+						discordId: toBigIntIdRequired(newGuild.id),
 						name: aoServerData.name,
 						icon: aoServerData.icon,
 						description: aoServerData.description,
@@ -213,7 +217,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: guild.id,
+						discordId: toBigIntIdRequired(guild.id),
 					});
 				const existingServer = serverLiveData;
 
@@ -281,7 +285,8 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				const allServers = servers ?? [];
 				const serversToMarkAsKicked = allServers.filter(
 					(server) =>
-						!activeServerIds.has(server.discordId) && !server.kickedTime,
+						!activeServerIds.has(server.discordId.toString()) &&
+						!server.kickedTime,
 				);
 
 				if (serversToMarkAsKicked.length > 0) {

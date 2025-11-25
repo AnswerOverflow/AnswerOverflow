@@ -104,7 +104,7 @@ export default function OnboardingPage() {
 		}
 
 		try {
-			await trackBotAddClick({ serverDiscordId: discordId });
+			await trackBotAddClick({ serverDiscordId: BigInt(discordId) });
 		} catch (error) {
 			console.error("Failed to track bot add click:", error);
 		}
@@ -193,7 +193,7 @@ export default function OnboardingPage() {
 				<div className="w-full max-w-2xl">
 					<BotPermissionsDisplay
 						server={{
-							discordId: selectedServer.discordId,
+							discordId: BigInt(selectedServer.discordId),
 							name: selectedServer.name,
 							icon: selectedServer.icon,
 						}}

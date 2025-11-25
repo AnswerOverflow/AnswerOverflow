@@ -45,14 +45,14 @@ function formatRelativeTime(date: Date): string {
 export type DiscordMessageProps = {
 	message: Message;
 	author: {
-		id: string;
+		id: bigint;
 		name: string;
 		avatar?: string;
 	} | null;
 	attachments?: Attachment[];
 	reactions?: Array<{
-		userId: string;
-		emoji: { id: string; name: string; animated?: boolean };
+		userId: bigint;
+		emoji: { id: bigint; name: string; animated?: boolean };
 	}>;
 	solutions?: Message[];
 	getMessageUrl?: (messageId: string) => string;
@@ -74,7 +74,7 @@ export function DiscordMessage({
 	poll,
 	snapshot,
 }: DiscordMessageProps) {
-	const messageDate = getSnowflakeDate(message.id);
+	const messageDate = getSnowflakeDate(message.id.toString());
 
 	const defaultGetMessageUrl = (messageId: string) => `/m/${messageId}`;
 	const defaultGetUserUrl = (userId: string) => `/u/${userId}`;
@@ -100,7 +100,7 @@ export function DiscordMessage({
 					<>
 						<Avatar className="w-10 h-10">
 							<AvatarImage
-								src={getDiscordAvatarUrl(author.id, author.avatar)}
+								src={getDiscordAvatarUrl(author.id.toString(), author.avatar)}
 								alt={author.name}
 							/>
 							<AvatarFallback>
@@ -109,7 +109,7 @@ export function DiscordMessage({
 						</Avatar>
 						<div className="flex-1 min-w-0">
 							<Link
-								href={userUrlGetter(author.id)}
+								href={userUrlGetter(author.id.toString())}
 								className="font-semibold text-card-foreground hover:underline"
 							>
 								{author.name}
@@ -157,8 +157,8 @@ export function DiscordMessage({
 					<div className="space-y-2">
 						{solutions.map((solution: Message) => (
 							<Link
-								key={solution.id}
-								href={messageUrlGetter(solution.id)}
+								key={solution.id.toString()}
+								href={messageUrlGetter(solution.id.toString())}
 								className="block p-3 rounded bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
 							>
 								<div className="text-sm text-card-foreground line-clamp-2">

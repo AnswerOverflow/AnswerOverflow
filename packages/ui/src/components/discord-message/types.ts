@@ -27,14 +27,14 @@ export type MessageMetadata = {
 	>;
 	internalLinks?: Array<{
 		original: string;
-		guild: { id: string; name: string };
+		guild: { id: bigint; name: string };
 		channel: {
-			parent?: { name?: string; type?: number; parentId?: string };
-			id: string;
+			parent?: { name?: string; type?: number; parentId?: bigint };
+			id: bigint;
 			type: number;
 			name: string;
 		};
-		message?: string;
+		message?: bigint;
 	}>;
 };
 

@@ -26,6 +26,7 @@ import {
 	toAOChannel,
 	toAODiscordAccount,
 	toAOMessage,
+	toBigIntIdRequired,
 } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 
@@ -204,7 +205,7 @@ function storeMessages(
 					if (result.storageId) {
 						for (const msg of aoMessages) {
 							const attachment = msg.attachments?.find(
-								(a) => a.id === result.attachmentId,
+								(a) => a.id.toString() === result.attachmentId,
 							);
 							if (attachment) {
 								attachment.storageId = result.storageId;
@@ -255,21 +256,21 @@ function storeMessages(
 			if (lastMessage) {
 				const channelLiveData =
 					yield* database.private.channels.findChannelByDiscordId({
-						discordId: channelId,
+						discordId: toBigIntIdRequired(channelId),
 					});
 				yield* Effect.sleep(Duration.millis(10));
 				const currentChannel = channelLiveData;
 
 				if (currentChannel) {
 					const oldLastIndexed = currentChannel.lastIndexedSnowflake;
-					const newLastIndexed = lastMessage.id;
+					const newLastIndexedBigInt = toBigIntIdRequired(lastMessage.id);
 
 					yield* Effect.logDebug(
-						`Updating lastIndexedSnowflake for channel ${channelId}: ${oldLastIndexed ?? "null"} -> ${newLastIndexed}`,
+						`Updating lastIndexedSnowflake for channel ${channelId}: ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt}`,
 					);
 
 					yield* database.private.channels.updateChannel({
-						id: channelId,
+						id: toBigIntIdRequired(channelId),
 						channel: {
 							id: currentChannel.id,
 							serverId: currentChannel.serverId,
@@ -279,7 +280,7 @@ function storeMessages(
 							inviteCode: currentChannel.inviteCode,
 							archivedTimestamp: currentChannel.archivedTimestamp,
 							solutionTagId: currentChannel.solutionTagId,
-							lastIndexedSnowflake: newLastIndexed,
+							lastIndexedSnowflake: newLastIndexedBigInt,
 						},
 					});
 
@@ -311,7 +312,7 @@ function indexTextChannel(
 
 		const channelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: channel.id,
+				discordId: toBigIntIdRequired(channel.id),
 			});
 		yield* Effect.sleep(Duration.millis(10));
 		const channelSettings = channelLiveData;
@@ -328,7 +329,7 @@ function indexTextChannel(
 		const messages = yield* fetchChannelMessages(
 			channel.id,
 			channel.name,
-			lastIndexedSnowflake ?? undefined,
+			lastIndexedSnowflake?.toString() ?? undefined,
 		);
 
 		if (messages.length > 0) {
@@ -374,7 +375,7 @@ function indexTextChannel(
 
 						const threadChannelLiveData =
 							yield* database.private.channels.findChannelByDiscordId({
-								discordId: thread.id,
+								discordId: toBigIntIdRequired(thread.id),
 							});
 						yield* Effect.sleep(Duration.millis(10));
 						const threadChannel = threadChannelLiveData;
@@ -383,7 +384,7 @@ function indexTextChannel(
 						const threadMessages = yield* fetchChannelMessages(
 							thread.id,
 							thread.name,
-							threadLastIndexed ?? undefined,
+							threadLastIndexed?.toString() ?? undefined,
 						);
 						yield* storeMessages(threadMessages, discordServerId, thread.id);
 					}).pipe(
@@ -406,7 +407,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 
 		const channelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: channel.id,
+				discordId: toBigIntIdRequired(channel.id),
 			});
 		yield* Effect.sleep(Duration.millis(10));
 		const channelSettings = channelLiveData;
@@ -425,7 +426,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 		const threadsToIndex = lastIndexedSnowflake
 			? Arr.filter(
 					threads,
-					(thread) => BigInt(thread.id) > BigInt(lastIndexedSnowflake),
+					(thread) => BigInt(thread.id) > lastIndexedSnowflake,
 				)
 			: threads;
 
@@ -448,7 +449,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 
 					const threadChannelLiveData =
 						yield* database.private.channels.findChannelByDiscordId({
-							discordId: thread.id,
+							discordId: toBigIntIdRequired(thread.id),
 						});
 					yield* Effect.sleep(Duration.millis(10));
 					const threadChannel = threadChannelLiveData;
@@ -457,7 +458,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 					const threadMessages = yield* fetchChannelMessages(
 						thread.id,
 						thread.name,
-						threadLastIndexed ?? undefined,
+						threadLastIndexed?.toString() ?? undefined,
 					);
 					yield* storeMessages(threadMessages, discordServerId, thread.id);
 
@@ -486,21 +487,21 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			if (latestThread) {
 				const channelLiveData =
 					yield* database.private.channels.findChannelByDiscordId({
-						discordId: channel.id,
+						discordId: toBigIntIdRequired(channel.id),
 					});
 				yield* Effect.sleep(Duration.millis(10));
 				const currentChannel = channelLiveData;
 
 				if (currentChannel) {
 					const oldLastIndexed = currentChannel.lastIndexedSnowflake;
-					const newLastIndexed = latestThread.id;
+					const newLastIndexedBigInt = toBigIntIdRequired(latestThread.id);
 
 					yield* Effect.logDebug(
-						`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexed} (latest thread: ${latestThread.name})`,
+						`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt} (latest thread: ${latestThread.name})`,
 					);
 
 					yield* database.private.channels.updateChannel({
-						id: channel.id,
+						id: toBigIntIdRequired(channel.id),
 						channel: {
 							id: currentChannel.id,
 							serverId: currentChannel.serverId,
@@ -510,7 +511,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 							inviteCode: currentChannel.inviteCode,
 							archivedTimestamp: currentChannel.archivedTimestamp,
 							solutionTagId: currentChannel.solutionTagId,
-							lastIndexedSnowflake: newLastIndexed,
+							lastIndexedSnowflake: newLastIndexedBigInt,
 						},
 					});
 
@@ -542,7 +543,7 @@ function indexGuild(guild: Guild) {
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: guild.id,
+				discordId: toBigIntIdRequired(guild.id),
 			},
 		);
 		yield* Effect.sleep(Duration.millis(10));
@@ -573,14 +574,17 @@ function indexGuild(guild: Guild) {
 			(channel: Channel) =>
 				Effect.gen(function* () {
 					if (channel.type === ChannelType.GuildForum) {
-						yield* indexForumChannel(channel as ForumChannel, server.discordId);
+						yield* indexForumChannel(
+							channel as ForumChannel,
+							server.discordId.toString(),
+						);
 					} else if (
 						channel.type === ChannelType.GuildText ||
 						channel.type === ChannelType.GuildAnnouncement
 					) {
 						yield* indexTextChannel(
 							channel as TextChannel | NewsChannel,
-							server.discordId,
+							server.discordId.toString(),
 						);
 					}
 

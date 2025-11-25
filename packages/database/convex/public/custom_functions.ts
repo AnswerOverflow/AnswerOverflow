@@ -40,7 +40,7 @@ export const publicQuery = customQuery(query, {
 			}
 		}
 
-		let discordAccountId: string | undefined;
+		let discordAccountId: bigint | undefined;
 		if (identityType !== "anonymous") {
 			const account = await getDiscordAccountWithToken(ctx);
 			discordAccountId = account?.accountId;
