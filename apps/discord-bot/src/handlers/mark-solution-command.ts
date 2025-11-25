@@ -1,5 +1,6 @@
 import { Database } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
+import { ChannelType } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { toAOMessage } from "../utils/conversions";
@@ -94,12 +95,15 @@ export function handleMarkSolutionCommand(
 
 		let questionMessage = null;
 
-		if (parentChannel.type === 15) {
+		if (parentChannel.type === ChannelType.GuildForum) {
 			const fetchedMessage = yield* discord
 				.callClient(() => thread.messages.fetch(thread.id))
 				.pipe(Effect.catchAll(() => Effect.succeed(null)));
 			questionMessage = fetchedMessage ?? null;
-		} else if (parentChannel.type === 0 || parentChannel.type === 5) {
+		} else if (
+			parentChannel.type === ChannelType.GuildText ||
+			parentChannel.type === ChannelType.GuildAnnouncement
+		) {
 			if ("messages" in parentChannel) {
 				const fetchedMessage = yield* discord
 					.callClient(() => parentChannel.messages.fetch(thread.id))
@@ -202,7 +206,7 @@ export function handleMarkSolutionCommand(
 
 		yield* Effect.promise(async () => {
 			if (
-				parentChannel.type === 15 &&
+				parentChannel.type === ChannelType.GuildForum &&
 				channelSettings?.solutionTagId &&
 				thread.appliedTags.length < 5
 			) {
