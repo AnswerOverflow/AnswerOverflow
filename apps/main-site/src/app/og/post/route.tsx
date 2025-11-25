@@ -2,17 +2,16 @@ import { Database } from "@packages/database/database";
 import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo";
 import { getSnowflakeUTCDate } from "@packages/ui/utils/snowflake";
 import { Effect } from "effect";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { runtime } from "../../../lib/runtime";
 
 export const preferredRegion = "iad1";
 
-const satoshiBold = fetch(
-	new URL("../../../styles/Satoshi-Black.ttf", import.meta.url),
-).then((res) => res.arrayBuffer());
-const interMedium = fetch(
-	new URL("../../../styles/Satoshi-Bold.ttf", import.meta.url),
-).then((res) => res.arrayBuffer());
+const fontDir = join(process.cwd(), "src/styles");
+const satoshiBold = readFile(join(fontDir, "Satoshi-Black.ttf"));
+const satoshiBoldFont = readFile(join(fontDir, "Satoshi-Bold.ttf"));
 
 const CalendarIcon = () => (
 	<svg
@@ -90,9 +89,9 @@ function makeServerIconLink(
 }
 
 export async function GET(req: Request) {
-	const [satoshiBoldData, interMediumData] = await Promise.all([
+	const [satoshiBoldData, satoshiBoldFontData] = await Promise.all([
 		satoshiBold,
-		interMedium,
+		satoshiBoldFont,
 	]);
 
 	const { searchParams } = new URL(req.url);
@@ -343,12 +342,12 @@ export async function GET(req: Request) {
 			height: 630,
 			fonts: [
 				{
-					name: "Satoshi Bold",
+					name: "Satoshi Black",
 					data: satoshiBoldData,
 				},
 				{
-					name: "Inter Medium",
-					data: interMediumData,
+					name: "Satoshi Bold",
+					data: satoshiBoldFontData,
 				},
 			],
 		},
