@@ -1,6 +1,5 @@
 import {
 	ApplicationCommandType,
-	Collection,
 	ContextMenuCommandBuilder,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
@@ -8,7 +7,7 @@ import {
 import { Effect } from "effect";
 import { Discord } from "../core/discord-service";
 
-const commands = [
+const globalCommands = [
 	new ContextMenuCommandBuilder()
 		.setName("✅ Mark Solution")
 		.setType(ApplicationCommandType.Message)
@@ -31,6 +30,9 @@ const commands = [
 		.setDescription("Configure channel settings in the dashboard")
 		.setDMPermission(false)
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+] as const;
+
+const guildCommands = [
 	new SlashCommandBuilder()
 		.setName("debug")
 		.setDescription(
@@ -43,24 +45,20 @@ export function registerCommands() {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 
-		// Register global commands (all except debug)
-		const globalCommands = commands.filter((cmd) => cmd.name !== "debug");
+		// Register global commands
 		yield* discord.use((client) =>
 			client.application?.commands.set(globalCommands),
 		);
 
-		// Register debug command only for specific server
-		const debugCommand = commands.find((cmd) => cmd.name === "debug");
-		if (debugCommand) {
-			yield* discord.use((client) => {
-				const targetGuildId = "1037547185492996207";
-				const guild = client.guilds.cache.get(targetGuildId);
-				if (guild) {
-					return guild.commands.set([debugCommand]);
-				}
-				// Return undefined if guild not found - this maintains the proper return type
-				return Promise.resolve(undefined);
-			});
-		}
+		// Register guild-specific commands for debug server
+		yield* discord.use((client) => {
+			const targetGuildId = "1037547185492996207";
+			const guild = client.guilds.cache.get(targetGuildId);
+			if (guild) {
+				return guild.commands.set(guildCommands);
+			}
+			// Return undefined if guild not found - this maintains the proper return type
+			return Promise.resolve(undefined);
+		});
 	}).pipe(Effect.mapError((error) => new Error(String(error))));
 }
