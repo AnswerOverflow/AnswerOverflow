@@ -1,30 +1,8 @@
 import { Database } from "@packages/database/database";
-import type { ThreadChannel } from "discord.js";
-import { DiscordAPIError } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { isAllowedThreadChannel } from "../utils/conversions";
 import { handleSendMarkSolutionInstructions } from "./send-mark-solution-instructions";
-
-function fetchStarterMessageWithRetry(
-	thread: ThreadChannel,
-	delayMs: number,
-): Effect.Effect<import("discord.js").Message | null, unknown> {
-	return Effect.tryPromise({
-		try: async () => {
-			if (process.env.NODE_ENV !== "test") {
-				await new Promise((resolve) => setTimeout(resolve, delayMs));
-			}
-			return await thread.fetchStarterMessage();
-		},
-		catch: (error) => {
-			if (error instanceof DiscordAPIError && error.status === 404) {
-				return null;
-			}
-			return error;
-		},
-	});
-}
 
 export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
@@ -59,9 +37,9 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const firstMessage =
-					(yield* fetchStarterMessageWithRetry(thread, 1000)) ||
-					(yield* fetchStarterMessageWithRetry(thread, 10000));
+				const firstMessage = yield* discord.callClient(() =>
+					thread.fetchStarterMessage(),
+				);
 
 				const questionAskerId = firstMessage?.author.id || thread.ownerId;
 
@@ -69,12 +47,11 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const questionAsker =
-					thread.guild.members.cache.get(questionAskerId) ||
-					(yield* Effect.tryPromise({
-						try: () => thread.guild.members.fetch(questionAskerId),
-						catch: (error) => error,
-					}));
+				const questionAsker = yield* discord.callClient(
+					() =>
+						thread.guild.members.cache.get(questionAskerId) ||
+						thread.guild.members.fetch(questionAskerId),
+				);
 
 				if (!questionAsker) {
 					return;

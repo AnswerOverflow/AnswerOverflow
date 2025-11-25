@@ -70,6 +70,8 @@ export function handleDismissButtonInteraction(
 	interaction: ButtonInteraction,
 ): Effect.Effect<void, unknown> {
 	return Effect.gen(function* () {
+		const discord = yield* Discord;
+
 		if (!interaction.guild || !interaction.member) {
 			return yield* Effect.fail(
 				new Error("Dismiss button can only be used in guilds"),
@@ -103,24 +105,21 @@ export function handleDismissButtonInteraction(
 		}).pipe(
 			Effect.catchAll((error) =>
 				Effect.gen(function* () {
+					const discord = yield* Discord;
 					if (interaction.deferred || interaction.replied) {
-						yield* Effect.tryPromise({
-							try: () =>
-								interaction.followUp({
-									content: error.message,
-									ephemeral: true,
-								}),
-							catch: () => undefined,
-						});
+						yield* discord.callClient(() =>
+							interaction.followUp({
+								content: error.message,
+								ephemeral: true,
+							}),
+						);
 					} else {
-						yield* Effect.tryPromise({
-							try: () =>
-								interaction.reply({
-									content: error.message,
-									ephemeral: true,
-								}),
-							catch: () => undefined,
-						});
+						yield* discord.callClient(() =>
+							interaction.reply({
+								content: error.message,
+								ephemeral: true,
+							}),
+						);
 					}
 					return yield* Effect.fail(error);
 				}),
@@ -128,23 +127,19 @@ export function handleDismissButtonInteraction(
 		);
 
 		if (interaction.deferred || interaction.replied) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.followUp({
-						content: "Dismissed message!",
-						ephemeral: true,
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.followUp({
+					content: "Dismissed message!",
+					ephemeral: true,
+				}),
+			);
 		} else {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.reply({
-						content: "Dismissed message!",
-						ephemeral: true,
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.reply({
+					content: "Dismissed message!",
+					ephemeral: true,
+				}),
+			);
 		}
 	});
 }

@@ -218,7 +218,7 @@ export const createDiscordService = Effect.gen(function* () {
 			});
 		});
 
-	const callClient = <T>(call: () => Promise<T>) =>
+	const callClient = <T>(call: () => T | Promise<T>) =>
 		Effect.gen(function* () {
 			return yield* Effect.tryPromise({
 				try: async () => {

@@ -23,20 +23,19 @@ export function handleChannelSettingsCommand(
 ) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
+		const discord = yield* Discord;
 
 		if (
 			!interaction.guildId ||
 			!interaction.channelId ||
 			!interaction.channel
 		) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.reply({
-						content: "This command can only be used in a server channel",
-						ephemeral: true,
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.reply({
+					content: "This command can only be used in a server channel",
+					ephemeral: true,
+				}),
+			);
 			return;
 		}
 
@@ -45,14 +44,12 @@ export function handleChannelSettingsCommand(
 			: interaction.channelId;
 
 		if (!targetChannelId) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.reply({
-						content: "Could not determine parent channel",
-						ephemeral: true,
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.reply({
+					content: "Could not determine parent channel",
+					ephemeral: true,
+				}),
+			);
 			return;
 		}
 
@@ -65,14 +62,12 @@ export function handleChannelSettingsCommand(
 		const server = serverLiveData;
 
 		if (!server) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.reply({
-						content: "Server not found in database",
-						ephemeral: true,
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.reply({
+					content: "Server not found in database",
+					ephemeral: true,
+				}),
+			);
 			return;
 		}
 
@@ -82,14 +77,12 @@ export function handleChannelSettingsCommand(
 			});
 
 		if (!channelLiveData) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.reply({
-						content: "Channel not found in database",
-						ephemeral: true,
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.reply({
+					content: "Channel not found in database",
+					ephemeral: true,
+				}),
+			);
 			return;
 		}
 
@@ -110,17 +103,13 @@ export function handleChannelSettingsCommand(
 					.setURL(dashboardUrl),
 			);
 
-		yield* Effect.tryPromise({
-			try: () =>
-				interaction.reply({
-					embeds: [embed],
-					components: [actionRow],
-					ephemeral: true,
-				}),
-			catch: (error) => {
-				return new UnknownDiscordError({ cause: error });
-			},
-		});
+		yield* discord.callClient(() =>
+			interaction.reply({
+				embeds: [embed],
+				components: [actionRow],
+				ephemeral: true,
+			}),
+		);
 	});
 }
 
