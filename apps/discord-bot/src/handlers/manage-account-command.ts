@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toBigIntIdRequired, toBigIntId } from "../utils/conversions";
+import { toBigIntIdRequired } from "../utils/conversions";
 
 export const menuButtonIds = {
 	consentButton: "consent-button",

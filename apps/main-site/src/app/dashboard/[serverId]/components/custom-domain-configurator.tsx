@@ -22,7 +22,7 @@ export function CustomDomainConfigurator({ serverId }: { serverId: string }) {
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
-			serverId,
+			serverId: BigInt(serverId),
 		},
 	);
 
@@ -41,7 +41,7 @@ export function CustomDomainConfigurator({ serverId }: { serverId: string }) {
 			const newDomain = (formData.get("customDomain") as string) || null;
 
 			await updateCustomDomain({
-				serverId,
+				serverId: BigInt(serverId),
 				customDomain: newDomain === "" ? null : newDomain,
 			});
 

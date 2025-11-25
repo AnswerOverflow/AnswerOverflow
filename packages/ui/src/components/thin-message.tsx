@@ -10,14 +10,14 @@ import { MessageBody } from "./message-body";
 import { TimeAgo } from "./time-ago";
 
 function getDiscordAvatarUrl(
-	userId: string,
+	userId: bigint,
 	avatar?: string,
 	size = 40,
 ): string {
 	if (avatar) {
 		return `https://cdn.discordapp.com/avatars/${userId}/${avatar}.webp?size=${size}`;
 	}
-	const defaultAvatar = (parseInt(userId) % 5).toString();
+	const defaultAvatar = (Number(userId) % 5).toString();
 	return `/discord/${defaultAvatar}.png`;
 }
 
@@ -51,7 +51,10 @@ export function ThinMessage(props: {
 				<div className="flex flex-col pl-2 pt-2">
 					<div className="flex flex-row items-center gap-2 text-muted-foreground">
 						{author ? (
-							<Link className="hover:underline" href={`/u/${author.id}`}>
+							<Link
+								className="hover:underline"
+								href={`/u/${author.id.toString()}`}
+							>
 								{author.name}
 							</Link>
 						) : (
@@ -66,7 +69,7 @@ export function ThinMessage(props: {
 							</Badge>
 						)}
 						<span className="text-sm">•</span>
-						<TimeAgo snowflake={message.message.id} />
+						<TimeAgo snowflake={message.message.id.toString()} />
 					</div>
 					<div>
 						<MessageBody message={message} />

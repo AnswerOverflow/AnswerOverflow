@@ -3,7 +3,7 @@ import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toBigIntIdRequired, toAOMessage } from "../utils/conversions";
+import { toAOMessage, toBigIntIdRequired } from "../utils/conversions";
 import { makeMarkSolutionResponse } from "./mark-solution";
 
 export function handleMarkSolutionCommand(

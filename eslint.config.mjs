@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import tseslint from "typescript-eslint";
-import noStringComparison from "./eslint-rules/no-string-comparison.mjs";
 import noEffectUnknownError from "./eslint-rules/no-effect-unknown-error.mjs";
+import noStringComparison from "./eslint-rules/no-string-comparison.mjs";
 
 function getGitignorePatterns() {
 	try {

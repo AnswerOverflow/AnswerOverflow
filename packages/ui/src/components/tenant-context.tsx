@@ -8,7 +8,7 @@ export type Tenant = {
 	icon?: string | null;
 	customDomain?: string | null;
 	subpath?: string | null;
-	discordId?: string;
+	discordId?: bigint;
 };
 
 const TenantContext = createContext<Tenant | null>(null);
