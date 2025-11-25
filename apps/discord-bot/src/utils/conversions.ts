@@ -25,10 +25,6 @@ export function toBigIntId(id: string | undefined | null): bigint | undefined {
 	return id ? BigInt(id) : undefined;
 }
 
-export function BigInt(id: string): bigint {
-	return BigInt(id);
-}
-
 const ALLOWED_ROOT_CHANNEL_TYPES = new Set([
 	ChannelType.GuildText,
 	ChannelType.GuildAnnouncement,
