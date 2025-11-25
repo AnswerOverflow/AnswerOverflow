@@ -297,6 +297,7 @@ export const trackBotAddClick = authenticatedAction({
 			api.authenticated.servers.publicGetServerByDiscordId,
 			{
 				discordId: serverDiscordId,
+				serverId: serverDiscordId,
 			},
 		);
 

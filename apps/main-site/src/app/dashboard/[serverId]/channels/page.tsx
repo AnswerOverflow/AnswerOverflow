@@ -329,6 +329,7 @@ export default function ChannelsPage() {
 						flags: {
 							[flagKey]: checked,
 						},
+						serverId,
 					}),
 				),
 			);
