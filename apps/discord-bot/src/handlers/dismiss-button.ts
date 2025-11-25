@@ -68,7 +68,7 @@ function handleDismissMessage({
 
 export function handleDismissButtonInteraction(
 	interaction: ButtonInteraction,
-): Effect.Effect<void, unknown> {
+): Effect.Effect<void, unknown, Discord> {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 
