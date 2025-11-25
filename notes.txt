@@ -166,3 +166,5 @@ Extend your existing customQuery/customMutation wrappers with customCtx to injec
 For the manual pagination/slicing helpers in packages/database/convex/shared/shared.ts (e.g. findMessagesByChannelId, findMessagesByAuthorId), swap the “collect then sort/slice” code for paginator/getPage on the relevant indexes; it trims boilerplate and reads closer to intent.
 
 Consider filter when you currently .collect() and then run JS filters (same shared helpers file); it keeps filtering colocated with the query chain and avoids extra local post-processing code.
+
+checkout ast grep
