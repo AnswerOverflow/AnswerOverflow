@@ -274,6 +274,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 						if (leftServer) {
 							return;
 						}
+						console.log("Syncing guild", guild.id);
 						yield* syncGuild(guild);
 					}).pipe(
 						Effect.catchAll((error) =>
