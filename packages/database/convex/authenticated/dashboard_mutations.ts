@@ -1,13 +1,10 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { authenticatedMutation } from "../client";
-import { assertCanEditServer } from "../shared/auth";
-import type { AuthorizedUser, CanEditServer } from "../shared/permissions";
+import { guildManagerMutation } from "../client/guildManager";
 import { getServerByDiscordId, validateCustomDomain } from "../shared/shared";
 
-export const updateServerPreferencesFlags = authenticatedMutation({
+export const updateServerPreferencesFlags = guildManagerMutation({
 	args: {
-		serverId: v.string(),
 		flags: v.object({
 			readTheRulesConsentEnabled: v.optional(v.boolean()),
 			considerAllMessagesPublicEnabled: v.optional(v.boolean()),
@@ -15,15 +12,10 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 		}),
 	},
 	handler: async (ctx, args) => {
-		const { discordAccountId } = args;
-
 		const server = await getServerByDiscordId(ctx, args.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
-
-		const _authorizedUser: AuthorizedUser<CanEditServer> =
-			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
 		let preferences: Awaited<
 			ReturnType<typeof ctx.db.get<"serverPreferences">>
@@ -76,7 +68,7 @@ export const updateServerPreferencesFlags = authenticatedMutation({
 	},
 });
 
-export const updateChannelSettingsFlags = authenticatedMutation({
+export const updateChannelSettingsFlags = guildManagerMutation({
 	args: {
 		channelId: v.string(),
 		flags: v.object({
@@ -88,8 +80,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 		}),
 	},
 	handler: async (ctx, args) => {
-		const { discordAccountId } = args;
-
 		const channel = await ctx.db
 			.query("channels")
 			.filter((q) => q.eq(q.field("id"), args.channelId))
@@ -103,9 +93,6 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 		if (!server) {
 			throw new Error("Server not found");
 		}
-
-		const _authorizedUser: AuthorizedUser<CanEditServer> =
-			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
 		let settings: Awaited<
 			ReturnType<typeof ctx.db.get<"channelSettings">>
@@ -161,21 +148,15 @@ export const updateChannelSettingsFlags = authenticatedMutation({
 	},
 });
 
-export const updateCustomDomain = authenticatedMutation({
+export const updateCustomDomain = guildManagerMutation({
 	args: {
-		serverId: v.string(),
 		customDomain: v.union(v.string(), v.null()),
 	},
 	handler: async (ctx, args) => {
-		const { discordAccountId } = args;
-
 		const server = await getServerByDiscordId(ctx, args.serverId);
 		if (!server) {
 			throw new Error("Server not found");
 		}
-
-		const _authorizedUser: AuthorizedUser<CanEditServer> =
-			await assertCanEditServer(ctx, server.discordId, discordAccountId);
 
 		const domainError = validateCustomDomain(args.customDomain);
 		if (domainError) {

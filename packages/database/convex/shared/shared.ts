@@ -196,7 +196,6 @@ export async function findUserServerSettingsById(
 			q.eq("userId", userId).eq("serverId", serverId),
 		)
 		.first();
-
 	return settings ?? null;
 }
 

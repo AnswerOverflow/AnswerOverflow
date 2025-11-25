@@ -1,12 +1,6 @@
 import { components } from "../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
 import { authComponent } from "../shared/betterAuth";
-import type {
-	AuthorizedUser,
-	CanEditServer,
-	IsAdminOrOwner,
-	IsAuthenticated,
-} from "../shared/permissions";
 import {
 	findUserServerSettingsById,
 	getServerByDiscordId,
@@ -79,149 +73,13 @@ export async function getUserServerSettingsForServerByDiscordId(
 		return null;
 	}
 
-	const settings = await findUserServerSettingsById(ctx, userId, server._id);
+	const settings = await findUserServerSettingsById(
+		ctx,
+		userId,
+		server.discordId,
+	);
 
 	return settings;
-}
-
-export async function assertCanEditServer(
-	ctx: QueryCtx | MutationCtx,
-	discordServerId: string,
-	discordAccountId: string | null,
-): Promise<AuthorizedUser<CanEditServer>> {
-	if (!discordAccountId) {
-		throw new Error("No discord id");
-	}
-
-	if (isSuperUser(discordAccountId)) {
-		const settings = await getUserServerSettingsForServerByDiscordId(
-			ctx,
-			discordAccountId,
-			discordServerId,
-		);
-		return {
-			discordAccountId,
-			userServerSettings: settings,
-		} as unknown as AuthorizedUser<CanEditServer>;
-	}
-
-	const settings = await getUserServerSettingsForServerByDiscordId(
-		ctx,
-		discordAccountId,
-		discordServerId,
-	);
-
-	if (!settings) {
-		throw new Error(
-			"You are not a member of the server you are trying to edit",
-		);
-	}
-
-	const ADMINISTRATOR = 0x8;
-	const MANAGE_GUILD = 0x20;
-
-	const hasAdminOrManageGuild =
-		(settings.permissions & ADMINISTRATOR) === ADMINISTRATOR ||
-		(settings.permissions & MANAGE_GUILD) === MANAGE_GUILD;
-
-	if (!hasAdminOrManageGuild) {
-		throw new Error(
-			"You are missing the required permissions to edit this server",
-		);
-	}
-
-	return {
-		discordAccountId,
-		userServerSettings: settings,
-	} as unknown as AuthorizedUser<CanEditServer>;
-}
-
-export async function assertIsAdminOrOwnerOfServer(
-	ctx: QueryCtx | MutationCtx,
-	discordServerId: string,
-	discordAccountId: string | null,
-): Promise<AuthorizedUser<IsAdminOrOwner>> {
-	if (!discordAccountId) {
-		throw new Error("Not authenticated");
-	}
-
-	if (isSuperUser(discordAccountId)) {
-		const settings = await getUserServerSettingsForServerByDiscordId(
-			ctx,
-			discordAccountId,
-			discordServerId,
-		);
-		return {
-			discordAccountId,
-			userServerSettings: settings,
-		} as unknown as AuthorizedUser<IsAdminOrOwner>;
-	}
-
-	const settings = await getUserServerSettingsForServerByDiscordId(
-		ctx,
-		discordAccountId,
-		discordServerId,
-	);
-
-	if (!settings) {
-		throw new Error("You are not a member of this server");
-	}
-
-	const ADMINISTRATOR = 0x8;
-	const hasAdmin = (settings.permissions & ADMINISTRATOR) === ADMINISTRATOR;
-
-	if (!hasAdmin) {
-		throw new Error("Only administrators or the server owner can do this");
-	}
-
-	return {
-		discordAccountId,
-		userServerSettings: settings,
-	} as unknown as AuthorizedUser<IsAdminOrOwner>;
-}
-
-export function assertIsUser(
-	discordAccountId: string | null,
-	targetUserId: string,
-): AuthorizedUser<IsAuthenticated> {
-	if (!discordAccountId) {
-		throw new Error("Not authenticated");
-	}
-
-	if (isSuperUser(discordAccountId)) {
-		return {
-			discordAccountId,
-			userServerSettings: null,
-		} as unknown as AuthorizedUser<IsAuthenticated>;
-	}
-
-	if (discordAccountId !== targetUserId) {
-		throw new Error("You are not authorized to do this");
-	}
-
-	return {
-		discordAccountId,
-		userServerSettings: null,
-	} as AuthorizedUser<IsAuthenticated>;
-}
-
-export async function requireAuth(
-	ctx: QueryCtx | MutationCtx,
-): Promise<AuthorizedUser<IsAuthenticated>> {
-	const identity = await ctx.auth.getUserIdentity();
-	if (!identity) {
-		throw new Error("Not authenticated");
-	}
-
-	const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-	if (!discordAccountId) {
-		throw new Error("Discord account not linked");
-	}
-
-	return {
-		discordAccountId,
-		userServerSettings: null,
-	} as AuthorizedUser<IsAuthenticated>;
 }
 
 export async function getDiscordAccountWithToken(
