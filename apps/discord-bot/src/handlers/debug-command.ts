@@ -74,7 +74,7 @@ export function handleDebugCommand(interaction: ChatInputCommandInteraction) {
 					value: [
 						`Guilds: \`${botStats.guildCount}\``,
 						`Cached Users: \`${botStats.userCount}\``,
-						`Uptime: \`${Math.floor(botStats.uptime! / 1000 / 60)} minutes\``,
+						`Uptime: \`${Math.floor((botStats.uptime ?? 0) / 1000 / 60)} minutes\``,
 						`Servers in DB: \`${serverCount.length}\``,
 					].join("\n"),
 					inline: false,
