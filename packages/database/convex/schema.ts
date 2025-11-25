@@ -166,7 +166,7 @@ export const attachmentSchema = v.object({
 	height: v.optional(v.number()),
 	size: v.number(),
 	description: v.optional(v.string()),
-	storageId: v.optional(v.id("_storage")), // Convex storage ID for the uploaded file
+	storageId: v.optional(v.id("_storage")), // Convex storage ID (dev/test only, for backwards compat)
 });
 
 export const emojiSchema = v.object({

@@ -1,6 +1,6 @@
 import { PostHogCaptureClientLayer } from "@packages/database/analytics/server";
 import { DatabaseLayer } from "@packages/database/database";
-import { S3StorageLayer } from "@packages/database/storage";
+import { ConvexStorageLayer } from "@packages/database/storage";
 import { createOtelLayer } from "@packages/observability/effect-otel";
 import { Effect, Layer, Logger, LogLevel } from "effect";
 import { BotLayers, program } from "./src/bot";
@@ -12,7 +12,7 @@ const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
 const BaseLayer = Layer.mergeAll(
 	DiscordLayer,
 	DatabaseLayer,
-	S3StorageLayer,
+	ConvexStorageLayer.pipe(Layer.provide(DatabaseLayer)),
 	PostHogCaptureClientLayer,
 	OtelLayer,
 	LoggerLayer,

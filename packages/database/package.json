@@ -22,17 +22,20 @@
 		"convex:knip": "bun scripts/find-unused-convex-functions.ts"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.940.0",
+		"@aws-sdk/lib-storage": "^3.940.0",
 		"@convex-dev/action-cache": "^0.3.0",
 		"@convex-dev/better-auth": "catalog:",
+		"@effect-aws/client-s3": "^1.10.6",
 		"@effect/platform": "catalog:",
 		"@packages/discord-api": "workspace:*",
+		"@typelytics/posthog": "^0.1.5",
 		"convex": "catalog:",
 		"convex-helpers": "^0.1.104",
 		"discord-api-types": "^0.38.24",
 		"effect": "catalog:",
-		"unique-names-generator": "^4.7.1",
-		"@typelytics/posthog": "^0.1.5",
-		"posthog-node": "^4.2.0"
+		"posthog-node": "^4.2.0",
+		"unique-names-generator": "^4.7.1"
 	},
 	"devDependencies": {
 		"@edge-runtime/vm": "catalog:",

@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { uploadAttachmentsInBatches } from "../utils/attachment-upload";
 import {
 	toAODiscordAccount,
 	toAOMessage,
@@ -64,25 +65,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 						contentType: att.contentType ?? undefined,
 					}));
 
-					yield* Console.log(
-						`Uploading ${attachmentsToUpload.length} attachments for updated message ${newMessage.id}`,
-					);
-
-					const uploadResults =
-						yield* database.private.attachments.uploadManyAttachmentsFromUrls({
-							attachments: attachmentsToUpload,
-						});
-
-					for (const result of uploadResults) {
-						if (result.storageId && data.attachments) {
-							const attachment = data.attachments.find(
-								(a) => a.id === toBigIntIdRequired(result.attachmentId),
-							);
-							if (attachment) {
-								attachment.storageId = result.storageId;
-							}
-						}
-					}
+					yield* uploadAttachmentsInBatches(attachmentsToUpload);
 				}
 
 				yield* database.private.messages.upsertMessage({
@@ -207,37 +190,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					toAOMessage(message, server.discordId.toString()),
 				);
 
-				if (message.attachments.size > 0) {
-					const attachmentsToUpload = Array.from(
-						message.attachments.values(),
-					).map((att) => ({
-						id: att.id,
-						url: att.url,
-						filename: att.name ?? "",
-						contentType: att.contentType ?? undefined,
-					}));
-
-					yield* Console.log(
-						`Uploading ${attachmentsToUpload.length} attachments for message ${message.id}`,
-					);
-
-					const uploadResults =
-						yield* database.private.attachments.uploadManyAttachmentsFromUrls({
-							attachments: attachmentsToUpload,
-						});
-
-					for (const result of uploadResults) {
-						if (result.storageId && data.attachments) {
-							const attachment = data.attachments.find(
-								(a) => a.id === toBigIntIdRequired(result.attachmentId),
-							);
-							if (attachment) {
-								attachment.storageId = result.storageId;
-							}
-						}
-					}
-				}
-
 				yield* database.private.messages.upsertMessage({
 					message: {
 						id: data.id,
@@ -263,6 +215,19 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					reactions: data.reactions,
 					ignoreChecks: false,
 				});
+
+				if (message.attachments.size > 0) {
+					const attachmentsToUpload = Array.from(
+						message.attachments.values(),
+					).map((att) => ({
+						id: att.id,
+						url: att.url,
+						filename: att.name ?? "",
+						contentType: att.contentType ?? undefined,
+					}));
+
+					yield* uploadAttachmentsInBatches(attachmentsToUpload);
+				}
 				yield* database.private.discord_accounts
 					.upsertDiscordAccount({ account: toAODiscordAccount(message.author) })
 					.pipe(

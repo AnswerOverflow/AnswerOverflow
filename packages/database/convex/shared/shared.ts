@@ -12,7 +12,9 @@ import type {
 import { anonymizeDiscordAccount } from "./anonymization.js";
 
 type Message = Infer<typeof messageSchema>;
-export type DatabaseAttachment = Infer<typeof attachmentSchema>;
+export type DatabaseAttachment = Infer<typeof attachmentSchema> & {
+	_id: Id<"_storage">;
+};
 
 export const DISCORD_PERMISSIONS = {
 	Administrator: 0x8,
@@ -915,17 +917,26 @@ export async function enrichMessageForDisplay(
 	});
 
 	const convexSiteUrl = process.env.CONVEX_SITE_URL;
-	const attachmentsWithUrl: Attachment[] = Arr.filter(
-		Arr.map(attachments, (attachment: DatabaseAttachment) => {
+	const cdnDomain = process.env.CDN_DOMAIN ?? "cdn.answeroverflow.com";
+	console.log("attachments", attachments);
+
+	const attachmentsWithUrl = await Promise.all(
+		attachments.map(async (attachment) => {
 			if (attachment.storageId && convexSiteUrl) {
+				const url = await ctx.storage.getUrl(attachment.storageId);
+				if (!url) {
+					return null;
+				}
 				return {
 					...attachment,
-					url: `${convexSiteUrl}/getAttachment?storageId=${attachment.storageId}`,
+					url,
 				};
 			}
-			return null;
+			return {
+				...attachment,
+				url: `https://${cdnDomain}/${attachment.id}/${attachment.filename}`,
+			};
 		}),
-		Predicate.isNotNull,
 	);
 
 	let authorData: { id: bigint; name: string; avatar?: string } | null = null;
@@ -949,7 +960,7 @@ export async function enrichMessageForDisplay(
 	const baseEnriched: EnrichedMessage = {
 		message,
 		author: authorData,
-		attachments: attachmentsWithUrl,
+		attachments: attachmentsWithUrl.filter(Predicate.isNotNullable),
 		reactions: formattedReactions,
 		solutions,
 	};
