@@ -32,7 +32,7 @@ export default function DashboardLayout({
 
 	const serversForDropdown: ServerSelectServer[] =
 		servers?.map((server) => ({
-			id: server.discordId,
+			id: server.discordId.toString(),
 			name: server.name,
 			icon: server.icon,
 			hasBot: server.hasBot,

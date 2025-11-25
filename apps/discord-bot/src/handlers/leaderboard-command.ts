@@ -9,6 +9,7 @@ import {
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { toBigIntIdRequired } from "../utils/conversions";
 
 const medalMap = new Map<number, string>([
 	[0, ":first_place:"],
@@ -51,7 +52,7 @@ export function handleLeaderboardCommand(
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: interaction.guildId,
+				discordId: toBigIntIdRequired(interaction.guildId),
 			},
 		);
 

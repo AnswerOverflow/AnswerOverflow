@@ -50,9 +50,9 @@ export function DomainNavbarFooterWrapper({
 		<>
 			<Navbar
 				server={
-					tenant
+					tenant?.discordId
 						? {
-								discordId: tenant.discordId ?? "",
+								discordId: tenant.discordId,
 								name: tenant.name ?? "",
 								icon: tenant.icon ?? "",
 							}

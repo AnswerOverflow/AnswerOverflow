@@ -1,7 +1,11 @@
 import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toAODiscordAccount, toAOMessage } from "../utils/conversions";
+import {
+	toAODiscordAccount,
+	toAOMessage,
+	toBigIntIdRequired,
+} from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 
 export const MessageParityLayer = Layer.scopedDiscard(
@@ -24,7 +28,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: newMessage.guildId ?? "",
+						discordId: toBigIntIdRequired(newMessage.guildId ?? ""),
 					});
 				const server = serverLiveData;
 
@@ -37,7 +41,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				const messageLiveData = yield* database.private.messages.getMessageById(
 					{
-						id: newMessage.id,
+						id: toBigIntIdRequired(newMessage.id),
 					},
 				);
 				const existingMessage = messageLiveData;
@@ -47,7 +51,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				const data = yield* Effect.promise(() =>
-					toAOMessage(newMessage, server.discordId),
+					toAOMessage(newMessage, server.discordId.toString()),
 				);
 
 				if (newMessage.attachments.size > 0) {
@@ -72,7 +76,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					for (const result of uploadResults) {
 						if (result.storageId && data.attachments) {
 							const attachment = data.attachments.find(
-								(a) => a.id === result.attachmentId,
+								(a) => a.id === toBigIntIdRequired(result.attachmentId),
 							);
 							if (attachment) {
 								attachment.storageId = result.storageId;
@@ -130,7 +134,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				const messageLiveData = yield* database.private.messages.getMessageById(
 					{
-						id: message.id,
+						id: toBigIntIdRequired(message.id),
 					},
 				);
 				const existingMessage = messageLiveData;
@@ -139,7 +143,9 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* database.private.messages.deleteMessage({ id: message.id });
+				yield* database.private.messages.deleteMessage({
+					id: toBigIntIdRequired(message.id),
+				});
 				yield* Console.log(`Deleted message ${message.id}`);
 			}).pipe(
 				Effect.catchAll((error) =>
@@ -150,9 +156,9 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("messageDeleteBulk", (messages) =>
 			Effect.gen(function* () {
-				const messageIds: string[] = [];
+				const messageIds: bigint[] = [];
 				for (const [id] of messages) {
-					messageIds.push(id);
+					messageIds.push(toBigIntIdRequired(id));
 				}
 
 				if (messageIds.length === 0) {
@@ -186,7 +192,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: message.guildId ?? "",
+						discordId: toBigIntIdRequired(message.guildId ?? ""),
 					});
 				const server = serverLiveData;
 
@@ -198,7 +204,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				const data = yield* Effect.promise(() =>
-					toAOMessage(message, server.discordId),
+					toAOMessage(message, server.discordId.toString()),
 				);
 
 				if (message.attachments.size > 0) {
@@ -223,7 +229,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					for (const result of uploadResults) {
 						if (result.storageId && data.attachments) {
 							const attachment = data.attachments.find(
-								(a) => a.id === result.attachmentId,
+								(a) => a.id === toBigIntIdRequired(result.attachmentId),
 							);
 							if (attachment) {
 								attachment.storageId = result.storageId;

@@ -7,7 +7,7 @@ import {
 } from "../shared/shared";
 
 const serverPreferencesSchema = v.object({
-	serverId: v.string(),
+	serverId: v.int64(),
 	readTheRulesConsentEnabled: v.optional(v.boolean()),
 	considerAllMessagesPublicEnabled: v.optional(v.boolean()),
 	anonymizeMessagesEnabled: v.optional(v.boolean()),
@@ -17,7 +17,7 @@ const serverPreferencesSchema = v.object({
 
 export const getServerPreferencesByServerId = privateQuery({
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const preferences = await getOneFrom(

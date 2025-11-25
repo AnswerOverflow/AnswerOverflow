@@ -20,6 +20,15 @@ import {
 	type User,
 } from "discord.js";
 
+// Helper functions to convert Discord string IDs to bigint
+export function toBigIntId(id: string | undefined | null): bigint | undefined {
+	return id ? BigInt(id) : undefined;
+}
+
+export function toBigIntIdRequired(id: string): bigint {
+	return BigInt(id);
+}
+
 const ALLOWED_ROOT_CHANNEL_TYPES = new Set([
 	ChannelType.GuildText,
 	ChannelType.GuildAnnouncement,
@@ -57,7 +66,7 @@ function _isAllowedChannelType(channelType: number): boolean {
 
 export function toAODiscordAccount(user: User): AODiscordAccount {
 	return {
-		id: user.id,
+		id: toBigIntIdRequired(user.id),
 		name: user.displayName ?? user.username,
 		avatar: user.avatar ?? undefined,
 	};
@@ -79,11 +88,11 @@ export function toAOChannel(
 			: undefined;
 
 	return {
-		id: channel.id,
-		serverId: discordServerId,
+		id: toBigIntIdRequired(channel.id),
+		serverId: toBigIntIdRequired(discordServerId),
 		name: channel.name ?? "",
 		type: channel.type,
-		parentId: parentId,
+		parentId: toBigIntId(parentId),
 		inviteCode: undefined,
 		archivedTimestamp: archivedTimestamp,
 		solutionTagId: undefined,
@@ -104,7 +113,7 @@ export async function toAOMessage(
 	}
 
 	const reactions: Array<{
-		userId: string;
+		userId: bigint;
 		emoji: AOEmoji;
 	}> = [];
 
@@ -116,9 +125,9 @@ export async function toAOMessage(
 			const users = await reaction.users.fetch({ limit: 100 });
 			for (const user of users.values()) {
 				reactions.push({
-					userId: user.id,
+					userId: toBigIntIdRequired(user.id),
 					emoji: {
-						id: emoji.id,
+						id: toBigIntIdRequired(emoji.id),
 						name: emoji.name,
 						animated: emoji.animated ?? undefined,
 					},
@@ -131,8 +140,8 @@ export async function toAOMessage(
 
 	const attachments: DatabaseAttachment[] = message.attachments.map(
 		(attachment) => ({
-			id: attachment.id,
-			messageId: message.id,
+			id: toBigIntIdRequired(attachment.id),
+			messageId: toBigIntIdRequired(message.id),
 			contentType: attachment.contentType ?? undefined,
 			filename: attachment.name ?? "",
 			width: attachment.width ?? undefined,
@@ -215,17 +224,17 @@ export async function toAOMessage(
 			: undefined;
 
 	const convertedMessage: BaseMessageWithRelations = {
-		id: message.id,
-		authorId: message.author.id,
-		serverId: discordServerId,
-		channelId: message.channelId,
-		parentChannelId: parentChannelId,
-		childThreadId: childThreadId,
+		id: toBigIntIdRequired(message.id),
+		authorId: toBigIntIdRequired(message.author.id),
+		serverId: toBigIntIdRequired(discordServerId),
+		channelId: toBigIntIdRequired(message.channelId),
+		parentChannelId: toBigIntId(parentChannelId),
+		childThreadId: toBigIntId(childThreadId),
 		questionId: undefined,
-		referenceId: message.reference?.messageId ?? undefined,
-		applicationId: message.applicationId ?? undefined,
-		interactionId: message.interaction?.id ?? undefined,
-		webhookId: message.webhookId ?? undefined,
+		referenceId: toBigIntId(message.reference?.messageId),
+		applicationId: toBigIntId(message.applicationId),
+		interactionId: toBigIntId(message.interaction?.id),
+		webhookId: toBigIntId(message.webhookId),
 		content: message.content,
 		flags: message.flags.bitfield,
 		type: message.type,

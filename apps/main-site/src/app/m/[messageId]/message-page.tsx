@@ -152,7 +152,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 			)
 				return false;
 		}
-		if (DISCORD_CLIENT_ID && message.author?.id === DISCORD_CLIENT_ID)
+		if (DISCORD_CLIENT_ID && message.author?.id === BigInt(DISCORD_CLIENT_ID))
 			return false;
 		return true;
 	});
@@ -196,7 +196,10 @@ export function MessagePage(props: { data: MessagePageData }) {
 
 	const UserLink = () =>
 		firstMessage.author ? (
-			<Link href={`/u/${firstMessage.author.id}`} className="hover:underline">
+			<Link
+				href={`/u/${firstMessage.author.id.toString()}`}
+				className="hover:underline"
+			>
 				{firstMessage.author.name}
 			</Link>
 		) : (
@@ -207,19 +210,19 @@ export function MessagePage(props: { data: MessagePageData }) {
 		<main className="flex w-full max-w-3xl grow flex-col gap-4">
 			<div className="flex flex-col gap-2 pl-2">
 				<div className="flex flex-row items-center gap-2">
-					<Link href={`/c/${data.server.discordId}`}>
+					<Link href={`/c/${data.server.discordId.toString()}`}>
 						<ServerIcon server={data.server} size={48} />
 					</Link>
 					<div className="flex flex-col">
 						<div className="flex flex-row items-center gap-2">
 							<Link
-								href={`/c/${data.server.discordId}`}
+								href={`/c/${data.server.discordId.toString()}`}
 								className="hover:underline"
 							>
 								{data.server.name}
 							</Link>
 							<span className="text-sm text-muted-foreground">•</span>
-							<TimeAgo snowflake={firstMessage.message.id} />
+							<TimeAgo snowflake={firstMessage.message.id.toString()} />
 						</div>
 						<UserLink />
 					</div>
@@ -239,7 +242,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 								<MessageBody message={solution} collapseContent={true} />
 							</MessageBlurrer>
 
-							<JumpToSolution id={solution.message.id} />
+							<JumpToSolution id={solution.message.id.toString()} />
 						</div>
 					)}
 				</div>
@@ -340,7 +343,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 		if (data.server.customDomain) {
 			const customUrl = getServerCustomUrl(
 				data.server,
-				`/m/${data.thread?.id ?? firstMessage.message.id}`,
+				`/m/${(data.thread?.id ?? firstMessage.message.id).toString()}`,
 			);
 			if (customUrl) return customUrl;
 		}
@@ -348,7 +351,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 			typeof window !== "undefined"
 				? window.location.hostname
 				: "www.answeroverflow.com";
-		return `https://${hostname}/m/${data.thread?.id ?? firstMessage.message.id}`;
+		return `https://${hostname}/m/${(data.thread?.id ?? firstMessage.message.id).toString()}`;
 	};
 
 	return (
@@ -366,8 +369,8 @@ export function MessagePage(props: { data: MessagePageData }) {
 								? {
 										"@type": "Person",
 										name: firstMessage.author.name,
-										identifier: firstMessage.author.id,
-										url: `/u/${firstMessage.author.id}`,
+										identifier: firstMessage.author.id.toString(),
+										url: `/u/${firstMessage.author.id.toString()}`,
 									}
 								: undefined,
 							image: firstMessageMedia?.url ? firstMessageMedia.url : undefined,
@@ -377,7 +380,9 @@ export function MessagePage(props: { data: MessagePageData }) {
 							dateModified: data.thread?.archivedTimestamp
 								? new Date(Number(data.thread.archivedTimestamp)).toISOString()
 								: undefined,
-							identifier: data.thread?.id ?? firstMessage.message.id,
+							identifier: (
+								data.thread?.id ?? firstMessage.message.id
+							).toString(),
 							commentCount: messagesToDisplay.length,
 							comment: messagesToDisplay.map((message, index) => ({
 								"@type":
@@ -385,15 +390,15 @@ export function MessagePage(props: { data: MessagePageData }) {
 										? "Answer"
 										: "Comment",
 								text: message.message.content,
-								identifier: message.message.id,
+								identifier: message.message.id.toString(),
 								datePublished: getDate(message.message.id).toISOString(),
 								position: index + 1,
 								author: message.author
 									? {
 											"@type": "Person",
 											name: message.author.name,
-											identifier: message.author.id,
-											url: `/u/${message.author.id}`,
+											identifier: message.author.id.toString(),
+											url: `/u/${message.author.id.toString()}`,
 										}
 									: undefined,
 							})),

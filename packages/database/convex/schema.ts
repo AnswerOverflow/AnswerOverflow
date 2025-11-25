@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { type Infer, v } from "convex/values";
 
 const serverPreferencesSchema = v.object({
-	serverId: v.string(),
+	serverId: v.int64(),
 	readTheRulesConsentEnabled: v.optional(v.boolean()),
 	considerAllMessagesPublicEnabled: v.optional(v.boolean()),
 	anonymizeMessagesEnabled: v.optional(v.boolean()),
@@ -11,7 +11,7 @@ const serverPreferencesSchema = v.object({
 });
 
 export const serverSchema = v.object({
-	discordId: v.string(),
+	discordId: v.int64(),
 	name: v.string(),
 	icon: v.optional(v.string()),
 	description: v.optional(v.string()),
@@ -33,14 +33,14 @@ export const serverSchema = v.object({
 });
 
 export const discordAccountSchema = v.object({
-	id: v.string(), // Discord snowflake ID
+	id: v.int64(), // Discord snowflake ID
 	name: v.string(),
 	avatar: v.optional(v.string()),
 });
 
 export const userServerSettingsSchema = v.object({
-	serverId: v.string(),
-	userId: v.string(), // Discord account ID (snowflake), not BetterAuth user ID
+	serverId: v.int64(),
+	userId: v.int64(), // Discord account ID (snowflake), not BetterAuth user ID
 	permissions: v.number(), // Bitfield of permissions for the user in the server, this comes from Discord and is not allowed to be modified by the user
 	canPubliclyDisplayMessages: v.boolean(),
 	messageIndexingDisabled: v.boolean(),
@@ -50,23 +50,23 @@ export const userServerSettingsSchema = v.object({
 });
 
 export const ignoredDiscordAccountSchema = v.object({
-	id: v.string(), // Discord snowflake ID
+	id: v.int64(), // Discord snowflake ID
 });
 
 export const channelSchema = v.object({
-	id: v.string(),
-	serverId: v.string(),
+	id: v.int64(),
+	serverId: v.int64(),
 	name: v.string(),
 	type: v.number(),
-	parentId: v.optional(v.string()),
+	parentId: v.optional(v.int64()),
 	inviteCode: v.optional(v.string()),
 	archivedTimestamp: v.optional(v.number()),
-	solutionTagId: v.optional(v.string()),
-	lastIndexedSnowflake: v.optional(v.string()),
+	solutionTagId: v.optional(v.int64()),
+	lastIndexedSnowflake: v.optional(v.int64()),
 });
 
 export const channelSettingsSchema = v.object({
-	channelId: v.string(),
+	channelId: v.int64(),
 	indexingEnabled: v.boolean(),
 	markSolutionEnabled: v.boolean(),
 	sendMarkSolutionInstructionsInNewThreads: v.boolean(),
@@ -137,17 +137,17 @@ const embedSchema = v.object({
 });
 
 export const messageSchema = v.object({
-	id: v.string(), // Discord snowflake ID
-	authorId: v.string(), // Discord account ID
-	serverId: v.string(), // Discord server ID
-	channelId: v.string(), // Discord channel ID
-	parentChannelId: v.optional(v.string()), // If message is in a thread, parent channel ID
-	childThreadId: v.optional(v.string()), // Thread started by this message
-	questionId: v.optional(v.string()), // If this is a solution, the question message ID
-	referenceId: v.optional(v.string()), // Referenced message ID
-	applicationId: v.optional(v.string()),
-	interactionId: v.optional(v.string()),
-	webhookId: v.optional(v.string()),
+	id: v.int64(), // Discord snowflake ID
+	authorId: v.int64(), // Discord account ID
+	serverId: v.int64(), // Discord server ID
+	channelId: v.int64(), // Discord channel ID
+	parentChannelId: v.optional(v.int64()), // If message is in a thread, parent channel ID
+	childThreadId: v.optional(v.int64()), // Thread started by this message
+	questionId: v.optional(v.int64()), // If this is a solution, the question message ID
+	referenceId: v.optional(v.int64()), // Referenced message ID
+	applicationId: v.optional(v.int64()),
+	interactionId: v.optional(v.int64()),
+	webhookId: v.optional(v.int64()),
 	content: v.string(),
 	flags: v.optional(v.number()),
 	type: v.optional(v.number()),
@@ -158,8 +158,8 @@ export const messageSchema = v.object({
 });
 
 export const attachmentSchema = v.object({
-	id: v.string(), // Discord attachment ID
-	messageId: v.string(), // Discord message ID
+	id: v.int64(), // Discord attachment ID
+	messageId: v.int64(), // Discord message ID
 	contentType: v.optional(v.string()),
 	filename: v.string(),
 	width: v.optional(v.number()),
@@ -170,15 +170,15 @@ export const attachmentSchema = v.object({
 });
 
 export const emojiSchema = v.object({
-	id: v.string(), // Discord emoji ID (snowflake)
+	id: v.int64(), // Discord emoji ID (snowflake)
 	name: v.string(),
 	animated: v.optional(v.boolean()),
 });
 
 export const reactionSchema = v.object({
-	messageId: v.string(), // Discord message ID
-	userId: v.string(), // Discord account ID
-	emojiId: v.string(), // Discord emoji ID
+	messageId: v.int64(), // Discord message ID
+	userId: v.int64(), // Discord account ID
+	emojiId: v.int64(), // Discord emoji ID
 });
 
 export const anonymousSessionSchema = v.object({
