@@ -13,7 +13,7 @@ import {
 } from "../shared/shared";
 
 export const getDashboardData = guildManagerQuery({
-	args: { serverId: v.string() },
+	args: {},
 	handler: async (ctx, args) => {
 		const server = await getServerByDiscordId(ctx, args.serverId);
 		if (!server) {

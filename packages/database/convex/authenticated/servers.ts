@@ -1,8 +1,8 @@
 import { v } from "convex/values";
-import { authenticatedQuery } from "../client";
+import { guildManagerQuery } from "../client/guildManager";
 import { getServerByDiscordId as getServerByDiscordIdShared } from "../shared/shared";
 
-export const publicGetServerByDiscordId = authenticatedQuery({
+export const publicGetServerByDiscordId = guildManagerQuery({
 	args: {
 		discordId: v.string(),
 	},

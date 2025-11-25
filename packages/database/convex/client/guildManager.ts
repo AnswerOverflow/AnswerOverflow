@@ -1,10 +1,12 @@
 import { v } from "convex/values";
 import {
+	customAction,
 	customMutation,
 	customQuery,
 } from "convex-helpers/server/customFunctions";
 import {
 	type ActionCtx,
+	action,
 	type MutationCtx,
 	mutation,
 	type QueryCtx,
@@ -13,6 +15,7 @@ import {
 import {
 	getDiscordAccountWithToken,
 	getUserServerSettingsForServerByDiscordId,
+	isSuperUser,
 } from "../shared/auth";
 
 async function getDiscordAccountIdForWrapper(
@@ -65,11 +68,44 @@ export const guildManagerMutation = customMutation(mutation, {
 			discordAccountId,
 			args.serverId,
 		);
+
 		if (!userServerSettings) {
 			throw new Error(
 				"You are not a member of the server you are trying to manage",
 			);
 		}
+		const ADMINISTRATOR = 0x8;
+		const MANAGE_GUILD = 0x20;
+
+		const hasAdminOrManageGuild =
+			(userServerSettings.permissions & ADMINISTRATOR) === ADMINISTRATOR ||
+			(userServerSettings.permissions & MANAGE_GUILD) === MANAGE_GUILD;
+
+		if (!hasAdminOrManageGuild && !isSuperUser(discordAccountId)) {
+			throw new Error(
+				"You are not a member of the server you are trying to manage",
+			);
+		}
+		return {
+			ctx,
+			args: {
+				...args,
+				discordAccountId,
+			},
+		};
+	},
+});
+
+export const guildManagerAction = customAction(action, {
+	args: {
+		serverId: v.string(),
+	},
+	input: async (ctx, args) => {
+		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
+		if (!discordAccountId) {
+			throw new Error("Not authenticated or Discord account not linked");
+		}
+
 		return {
 			ctx,
 			args: {
