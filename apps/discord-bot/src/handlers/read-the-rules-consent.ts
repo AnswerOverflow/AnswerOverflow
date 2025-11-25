@@ -2,6 +2,7 @@ import { Database } from "@packages/database/database";
 import type { GuildMember, PartialGuildMember } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { toBigIntIdRequired } from "../utils/conversions";
 
 export function handleReadTheRulesConsent(
 	oldMember: GuildMember | PartialGuildMember,
@@ -21,7 +22,7 @@ export function handleReadTheRulesConsent(
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: newMember.guild.id,
+				discordId: toBigIntIdRequired(newMember.guild.id),
 			},
 		);
 		const server = serverLiveData;
@@ -45,7 +46,7 @@ export function handleReadTheRulesConsent(
 		const ignoredAccount =
 			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
 				{
-					id: newMember.user.id,
+					id: toBigIntIdRequired(newMember.user.id),
 				},
 			);
 
@@ -55,7 +56,7 @@ export function handleReadTheRulesConsent(
 
 		const userServerSettingsLiveData =
 			yield* database.private.user_server_settings.findUserServerSettingsById({
-				userId: newMember.user.id,
+				userId: toBigIntIdRequired(newMember.user.id),
 				serverId: server.discordId,
 			});
 		const userServerSettings = userServerSettingsLiveData;
@@ -80,7 +81,7 @@ export function handleReadTheRulesConsent(
 					botAddedTimestamp: userServerSettings.botAddedTimestamp,
 				}
 			: {
-					userId: newMember.user.id,
+					userId: toBigIntIdRequired(newMember.user.id),
 					serverId: server.discordId,
 					permissions: 0,
 					canPubliclyDisplayMessages: true,

@@ -4,7 +4,7 @@ import { getServerByDiscordId as getServerByDiscordIdShared } from "../shared/sh
 
 export const publicGetServerByDiscordId = guildManagerQuery({
 	args: {
-		discordId: v.string(),
+		discordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		return await getServerByDiscordIdShared(ctx, args.discordId);

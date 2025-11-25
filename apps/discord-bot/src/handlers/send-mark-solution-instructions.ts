@@ -1,4 +1,3 @@
-import type { Database } from "@packages/database/database";
 import type { GuildMember, Message, ThreadChannel } from "discord.js";
 import {
 	ActionRowBuilder,

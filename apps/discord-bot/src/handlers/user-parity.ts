@@ -1,7 +1,7 @@
 import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toAODiscordAccount } from "../utils/conversions";
+import { toAODiscordAccount, toBigIntIdRequired } from "../utils/conversions";
 
 export const UserParityLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
@@ -12,7 +12,7 @@ export const UserParityLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				const existing =
 					yield* database.private.discord_accounts.getDiscordAccountById({
-						id: newUser.id,
+						id: toBigIntIdRequired(newUser.id),
 					});
 
 				if (!existing) {

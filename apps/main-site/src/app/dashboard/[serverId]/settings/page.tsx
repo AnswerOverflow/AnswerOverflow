@@ -62,7 +62,7 @@ export default function SettingsPage() {
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
-			serverId,
+			serverId: BigInt(serverId),
 		},
 	);
 
@@ -109,7 +109,7 @@ export default function SettingsPage() {
 	) => {
 		try {
 			await updateServerPreferences({
-				serverId,
+				serverId: BigInt(serverId),
 				flags: {
 					[flagKey]: checked,
 				},

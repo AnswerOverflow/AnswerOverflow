@@ -40,8 +40,8 @@ export function LinkMessage({
 					<AvatarImage
 						src={
 							author.avatar
-								? `https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.webp?size=40`
-								: `/discord/${(parseInt(author.id) % 5).toString()}.png`
+								? `https://cdn.discordapp.com/avatars/${author.id.toString()}/${author.avatar}.webp?size=40`
+								: `/discord/${(Number(author.id) % 5).toString()}.png`
 						}
 						alt={author.name}
 					/>

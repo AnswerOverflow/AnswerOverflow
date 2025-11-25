@@ -17,8 +17,8 @@ export default async function ChannelPage(props: Props) {
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* database.private.channels.getChannelPageData({
-			serverDiscordId: params.serverId,
-			channelDiscordId: params.channelId,
+			serverDiscordId: BigInt(params.serverId),
+			channelDiscordId: BigInt(params.channelId),
 		});
 		return liveData;
 	})

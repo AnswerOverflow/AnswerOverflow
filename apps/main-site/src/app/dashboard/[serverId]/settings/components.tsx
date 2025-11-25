@@ -41,7 +41,7 @@ export function CurrentPlanCard({ serverId }: { serverId: string }) {
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
-			serverId,
+			serverId: BigInt(serverId),
 		},
 	);
 

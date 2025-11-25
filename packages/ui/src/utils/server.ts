@@ -3,7 +3,7 @@ import { normalizeSubpath } from "./links";
 type ServerWithCustomDomain = {
 	customDomain?: string;
 	subpath?: string;
-	discordId: string;
+	discordId: bigint;
 };
 
 export function getServerHomepageUrl(server: ServerWithCustomDomain) {
