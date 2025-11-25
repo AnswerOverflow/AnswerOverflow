@@ -21,7 +21,7 @@ type Channel = Infer<typeof channelSchema>;
 type ChannelSettings = Infer<typeof channelSettingsSchema>;
 
 const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
-	channelId: "",
+	channelId: 0n,
 	indexingEnabled: false,
 	markSolutionEnabled: false,
 	sendMarkSolutionInstructionsInNewThreads: false,
@@ -69,7 +69,7 @@ export const findChannelByInviteCode = privateQuery({
 
 export const findChannelByDiscordId = privateQuery({
 	args: {
-		discordId: v.string(),
+		discordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		return await getChannelWithSettings(ctx, args.discordId);
@@ -78,7 +78,7 @@ export const findChannelByDiscordId = privateQuery({
 
 export const findAllChannelsByServerId = privateQuery({
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const channels = await getManyFrom(
@@ -94,7 +94,7 @@ export const findAllChannelsByServerId = privateQuery({
 
 export const updateChannel = privateMutation({
 	args: {
-		id: v.string(),
+		id: v.int64(),
 		channel: channelSchema,
 		settings: v.optional(channelSettingsSchema),
 	},
@@ -138,7 +138,7 @@ export const updateManyChannels = privateMutation({
 		channels: v.array(channelSchema),
 	},
 	handler: async (ctx, args) => {
-		const ids: string[] = [];
+		const ids: bigint[] = [];
 		for (const channel of args.channels) {
 			const existing = await ctx.db
 				.query("channels")
@@ -158,7 +158,7 @@ export const updateManyChannels = privateMutation({
 
 export const deleteChannel = privateMutation({
 	args: {
-		id: v.string(),
+		id: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		await deleteChannelInternalLogic(ctx, args.id);
@@ -177,7 +177,7 @@ export const upsertManyChannels = privateMutation({
 		),
 	},
 	handler: async (ctx, args) => {
-		const ids: string[] = [];
+		const ids: bigint[] = [];
 
 		const existingChannels = await Promise.all(
 			args.channels.map((item) =>
@@ -275,8 +275,8 @@ export const upsertChannelWithSettings = privateMutation({
 
 export const getChannelPageData = privateQuery({
 	args: {
-		serverDiscordId: v.string(),
-		channelDiscordId: v.string(),
+		serverDiscordId: v.int64(),
+		channelDiscordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const server = await getOneFrom(
@@ -349,7 +349,10 @@ export const getChannelPageData = privateQuery({
 		const firstMessages = await getFirstMessagesInChannels(ctx, threadIds);
 
 		const messages = Arr.filter(
-			Arr.map(sortedThreads, (thread) => firstMessages[thread.id] ?? null),
+			Arr.map(
+				sortedThreads,
+				(thread) => firstMessages[thread.id.toString()] ?? null,
+			),
 			Predicate.isNotNull,
 		);
 
@@ -361,7 +364,7 @@ export const getChannelPageData = privateQuery({
 
 		const threadsWithMessages = Arr.filter(
 			Arr.map(sortedThreads, (thread) => {
-				const message = firstMessages[thread.id];
+				const message = firstMessages[thread.id.toString()];
 				if (!message) return null;
 				const enrichedMessage = enrichedMessagesMap.get(message.id);
 				if (!enrichedMessage) return null;

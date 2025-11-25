@@ -210,7 +210,7 @@ export const DatabaseLayer = Layer.effect(Database, service).pipe(
 export type BaseMessageWithRelations = Message & {
 	attachments?: DatabaseAttachment[];
 	reactions?: Array<{
-		userId: string;
+		userId: bigint;
 		emoji: Emoji;
 	}>;
 };

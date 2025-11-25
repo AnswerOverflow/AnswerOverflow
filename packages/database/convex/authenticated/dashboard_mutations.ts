@@ -70,7 +70,7 @@ export const updateServerPreferencesFlags = guildManagerMutation({
 
 export const updateChannelSettingsFlags = guildManagerMutation({
 	args: {
-		channelId: v.string(),
+		channelId: v.int64(),
 		flags: v.object({
 			indexingEnabled: v.optional(v.boolean()),
 			markSolutionEnabled: v.optional(v.boolean()),

@@ -3,6 +3,7 @@ import type { Message } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { toBigIntIdRequired } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 
 export function handleForumGuidelinesConsent(message: Message) {
@@ -32,7 +33,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: message.guildId,
+				discordId: toBigIntIdRequired(message.guildId),
 			},
 		);
 		const server = serverLiveData;
@@ -43,7 +44,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 
 		const parentChannelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: thread.parent.id,
+				discordId: toBigIntIdRequired(thread.parent.id),
 			});
 		const parentChannel = parentChannelLiveData;
 
@@ -58,7 +59,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 		const ignoredAccount =
 			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
 				{
-					id: message.author.id,
+					id: toBigIntIdRequired(message.author.id),
 				},
 			);
 
@@ -68,7 +69,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 
 		const userServerSettingsLiveData =
 			yield* database.private.user_server_settings.findUserServerSettingsById({
-				userId: message.author.id,
+				userId: toBigIntIdRequired(message.author.id),
 				serverId: server.discordId,
 			});
 		const userServerSettings = userServerSettingsLiveData;
@@ -93,7 +94,7 @@ export function handleForumGuidelinesConsent(message: Message) {
 					botAddedTimestamp: userServerSettings.botAddedTimestamp,
 				}
 			: {
-					userId: message.author.id,
+					userId: toBigIntIdRequired(message.author.id),
 					serverId: server.discordId,
 					permissions: 0,
 					canPubliclyDisplayMessages: true,

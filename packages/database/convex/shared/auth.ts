@@ -8,7 +8,7 @@ import {
 
 export async function getDiscordAccountIdFromAuth(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
-): Promise<string | null> {
+): Promise<bigint | null> {
 	const user = await authComponent.safeGetAuthUser(ctx);
 
 	if (!user) {
@@ -54,18 +54,18 @@ export async function getDiscordAccountIdFromAuth(
 		return null;
 	}
 
-	return accountId;
+	return BigInt(accountId);
 }
 
-export function isSuperUser(discordAccountId: string | null): boolean {
-	const SUPER_USER_IDS = ["523949187663134754"]; // Rhys's Discord ID
+export function isSuperUser(discordAccountId: bigint | null): boolean {
+	const SUPER_USER_IDS = [BigInt("523949187663134754")]; // Rhys's Discord ID
 	return discordAccountId !== null && SUPER_USER_IDS.includes(discordAccountId);
 }
 
 export async function getUserServerSettingsForServerByDiscordId(
 	ctx: QueryCtx | MutationCtx,
-	userId: string,
-	discordServerId: string,
+	userId: bigint,
+	discordServerId: bigint,
 ) {
 	const server = await getServerByDiscordId(ctx, discordServerId);
 
@@ -84,7 +84,7 @@ export async function getUserServerSettingsForServerByDiscordId(
 
 export async function getDiscordAccountWithToken(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
-): Promise<{ accountId: string; accessToken: string } | null> {
+): Promise<{ accountId: bigint; accessToken: string } | null> {
 	const user = await authComponent.getAuthUser(ctx);
 	if (!user) {
 		return null;
@@ -122,7 +122,7 @@ export async function getDiscordAccountWithToken(
 	}
 
 	return {
-		accountId: accountResult.accountId,
+		accountId: BigInt(accountResult.accountId),
 		accessToken: accountResult.accessToken,
 	};
 }

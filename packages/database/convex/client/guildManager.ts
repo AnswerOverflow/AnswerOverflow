@@ -20,14 +20,14 @@ import {
 
 async function getDiscordAccountIdForWrapper(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
-): Promise<string | null> {
+): Promise<bigint | null> {
 	const account = await getDiscordAccountWithToken(ctx);
 	return account?.accountId ?? null;
 }
 
 export const guildManagerQuery = customQuery(query, {
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 	},
 	input: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
@@ -56,7 +56,7 @@ export const guildManagerQuery = customQuery(query, {
 
 export const guildManagerMutation = customMutation(mutation, {
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 	},
 	input: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
@@ -98,7 +98,7 @@ export const guildManagerMutation = customMutation(mutation, {
 
 export const guildManagerAction = customAction(action, {
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 	},
 	input: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);

@@ -111,7 +111,7 @@ export function validateCustomDomain(domain: string | null): string | null {
 export async function validateCustomDomainUniqueness(
 	ctx: QueryCtx | MutationCtx,
 	customDomain: string | null | undefined,
-	excludeServerId?: string,
+	excludeServerId?: bigint,
 	excludePreferencesId?: Id<"serverPreferences">,
 ): Promise<string | null> {
 	if (!customDomain) {
@@ -140,7 +140,7 @@ export async function validateCustomDomainUniqueness(
 
 export async function getServerByDiscordId(
 	ctx: QueryCtx | MutationCtx,
-	discordId: string,
+	discordId: bigint,
 ) {
 	return await ctx.db
 		.query("servers")
@@ -150,7 +150,7 @@ export async function getServerByDiscordId(
 
 export async function findIgnoredDiscordAccountById(
 	ctx: QueryCtx | MutationCtx,
-	id: string,
+	id: bigint,
 ) {
 	return await ctx.db
 		.query("ignoredDiscordAccounts")
@@ -160,7 +160,7 @@ export async function findIgnoredDiscordAccountById(
 
 export async function upsertIgnoredDiscordAccountInternalLogic(
 	ctx: MutationCtx,
-	id: string,
+	id: bigint,
 ) {
 	const existingIgnored = await ctx.db
 		.query("ignoredDiscordAccounts")
@@ -187,8 +187,8 @@ export async function upsertIgnoredDiscordAccountInternalLogic(
 
 export async function findUserServerSettingsById(
 	ctx: QueryCtx | MutationCtx,
-	userId: string,
-	serverId: string,
+	userId: bigint,
+	serverId: bigint,
 ) {
 	const settings = await ctx.db
 		.query("userServerSettings")
@@ -201,7 +201,7 @@ export async function findUserServerSettingsById(
 
 export async function deleteUserServerSettingsByUserIdLogic(
 	ctx: MutationCtx,
-	userId: string,
+	userId: bigint,
 ): Promise<void> {
 	const settings = await ctx.db
 		.query("userServerSettings")
@@ -214,7 +214,7 @@ export async function deleteUserServerSettingsByUserIdLogic(
 }
 
 const DEFAULT_CHANNEL_SETTINGS = {
-	channelId: "",
+	channelId: 0n,
 	indexingEnabled: false,
 	markSolutionEnabled: false,
 	sendMarkSolutionInstructionsInNewThreads: false,
@@ -224,7 +224,7 @@ const DEFAULT_CHANNEL_SETTINGS = {
 
 export async function getChannelWithSettings(
 	ctx: QueryCtx | MutationCtx,
-	channelId: string,
+	channelId: bigint,
 ) {
 	const channel = await ctx.db
 		.query("channels")
@@ -250,7 +250,7 @@ export async function getChannelWithSettings(
 
 export async function deleteChannelInternalLogic(
 	ctx: MutationCtx,
-	id: string,
+	id: bigint,
 ): Promise<void> {
 	const threads = await ctx.db
 		.query("channels")
@@ -282,7 +282,7 @@ export async function deleteChannelInternalLogic(
 
 export async function getDiscordAccountById(
 	ctx: QueryCtx | MutationCtx,
-	id: string,
+	id: bigint,
 ) {
 	return await ctx.db
 		.query("discordAccounts")
@@ -291,24 +291,24 @@ export async function getDiscordAccountById(
 }
 
 export function extractMentionIds(content: string): {
-	userIds: string[];
-	channelIds: string[];
+	userIds: bigint[];
+	channelIds: bigint[];
 } {
-	const userIds = new Set<string>();
-	const channelIds = new Set<string>();
+	const userIds = new Set<bigint>();
+	const channelIds = new Set<bigint>();
 
 	const userMentionRegex = /<@(\d+)>/g;
 	const channelMentionRegex = /<#(\d+)>/g;
 
 	for (const match of content.matchAll(userMentionRegex)) {
 		if (match[1]) {
-			userIds.add(match[1]);
+			userIds.add(BigInt(match[1]));
 		}
 	}
 
 	for (const match of content.matchAll(channelMentionRegex)) {
 		if (match[1]) {
-			channelIds.add(match[1]);
+			channelIds.add(BigInt(match[1]));
 		}
 	}
 
@@ -320,9 +320,9 @@ export function extractMentionIds(content: string): {
 
 export function extractDiscordLinks(content: string): Array<{
 	original: string;
-	guildId: string;
-	channelId: string;
-	messageId?: string;
+	guildId: bigint;
+	channelId: bigint;
+	messageId?: bigint;
 }> {
 	const discordLinkRegex =
 		/https:\/\/discord\.com\/channels\/(\d+)\/(\d+)(?:\/(\d+))?/g;
@@ -335,15 +335,20 @@ export function extractDiscordLinks(content: string): Array<{
 		if (!guildId || !channelId) {
 			return undefined;
 		}
-		return { original: match[0], guildId, channelId, messageId };
+		return {
+			original: match[0],
+			guildId: BigInt(guildId),
+			channelId: BigInt(channelId),
+			messageId: messageId ? BigInt(messageId) : undefined,
+		};
 	}).filter(Predicate.isNotNullable);
 }
 
 export async function getMentionMetadata(
 	ctx: QueryCtx | MutationCtx,
-	userIds: string[],
-	channelIds: string[],
-	serverDiscordId: string,
+	userIds: bigint[],
+	channelIds: bigint[],
+	serverDiscordId: bigint,
 ) {
 	const users: Record<
 		string,
@@ -367,15 +372,16 @@ export async function getMentionMetadata(
 
 	for (const userId of userIds) {
 		const account = await getDiscordAccountById(ctx, userId);
+		const userIdStr = userId.toString();
 		if (account) {
-			users[userId] = {
+			users[userIdStr] = {
 				username: account.name,
 				globalName: null,
 				url: `/u/${userId}`,
 				exists: true,
 			};
 		} else {
-			users[userId] = {
+			users[userIdStr] = {
 				username: "Unknown user",
 				globalName: null,
 				url: "",
@@ -390,9 +396,10 @@ export async function getMentionMetadata(
 			getOneFrom(ctx.db, "channelSettings", "by_channelId", channelId),
 		]);
 
+		const channelIdStr = channelId.toString();
 		if (channel) {
 			const indexingEnabled = settings?.indexingEnabled ?? false;
-			channels[channelId] = {
+			channels[channelIdStr] = {
 				name: channel.name,
 				type: channel.type,
 				url: indexingEnabled
@@ -402,7 +409,7 @@ export async function getMentionMetadata(
 				exists: true,
 			};
 		} else {
-			channels[channelId] = {
+			channels[channelIdStr] = {
 				name: "Unknown Channel",
 				type: 0,
 				url: `https://discord.com/channels/${serverDiscordId}/${channelId}`,
@@ -419,9 +426,9 @@ export async function getInternalLinksMetadata(
 	ctx: QueryCtx | MutationCtx,
 	discordLinks: Array<{
 		original: string;
-		guildId: string;
-		channelId: string;
-		messageId?: string;
+		guildId: bigint;
+		channelId: bigint;
+		messageId?: bigint;
 	}>,
 ) {
 	if (discordLinks.length === 0) {
@@ -485,22 +492,22 @@ export async function getInternalLinksMetadata(
 	return Arr.filter(results, Predicate.isNotNullable);
 }
 
-export async function getMessageById(ctx: QueryCtx | MutationCtx, id: string) {
+export async function getMessageById(ctx: QueryCtx | MutationCtx, id: bigint) {
 	return await ctx.db
 		.query("messages")
 		.filter((q) => q.eq(q.field("id"), id))
 		.first();
 }
 
-export function compareIds(a: string, b: string): number {
-	return BigInt(a) > BigInt(b) ? 1 : BigInt(a) < BigInt(b) ? -1 : 0;
+export function compareIds(a: bigint, b: bigint): number {
+	return a > b ? 1 : a < b ? -1 : 0;
 }
 
 export async function findMessagesByChannelId(
 	ctx: QueryCtx | MutationCtx,
-	channelId: string,
+	channelId: bigint,
 	limit?: number,
-	after?: string,
+	after?: bigint,
 ) {
 	const allMessages = await getManyFrom(
 		ctx.db,
@@ -522,7 +529,7 @@ export async function findMessagesByChannelId(
 
 export async function getFirstMessageInChannel(
 	ctx: QueryCtx | MutationCtx,
-	channelId: string,
+	channelId: bigint,
 ): Promise<Message | null> {
 	const allMessages = await getManyFrom(
 		ctx.db,
@@ -541,11 +548,11 @@ export async function getFirstMessageInChannel(
 
 export async function getFirstMessagesInChannels(
 	ctx: QueryCtx | MutationCtx,
-	channelIds: string[],
+	channelIds: bigint[],
 ): Promise<Record<string, Message | null>> {
 	const results: Record<string, Message | null> = {};
 	for (const channelId of channelIds) {
-		results[channelId] = null;
+		results[channelId.toString()] = null;
 	}
 
 	if (channelIds.length === 0) {
@@ -572,7 +579,7 @@ export async function getFirstMessagesInChannels(
 	);
 
 	for (const { channelId, firstMessage } of channelMessages) {
-		results[channelId] = firstMessage;
+		results[channelId.toString()] = firstMessage;
 	}
 
 	return results;
@@ -580,7 +587,7 @@ export async function getFirstMessagesInChannels(
 
 export async function findAttachmentsByMessageId(
 	ctx: QueryCtx | MutationCtx,
-	messageId: string,
+	messageId: bigint,
 ) {
 	return await getManyFrom(
 		ctx.db,
@@ -593,7 +600,7 @@ export async function findAttachmentsByMessageId(
 
 export async function findReactionsByMessageId(
 	ctx: QueryCtx | MutationCtx,
-	messageId: string,
+	messageId: bigint,
 ) {
 	return await getManyFrom(
 		ctx.db,
@@ -606,7 +613,7 @@ export async function findReactionsByMessageId(
 
 export async function findMessagesByAuthorId(
 	ctx: QueryCtx | MutationCtx,
-	authorId: string,
+	authorId: bigint,
 	limit?: number,
 ) {
 	const messages = await getManyFrom(
@@ -621,7 +628,7 @@ export async function findMessagesByAuthorId(
 
 export async function findSolutionsByQuestionId(
 	ctx: QueryCtx | MutationCtx,
-	questionId: string,
+	questionId: bigint,
 	limit?: number,
 ) {
 	const messages = await getManyFrom(
@@ -636,7 +643,7 @@ export async function findSolutionsByQuestionId(
 
 export async function deleteMessageInternalLogic(
 	ctx: MutationCtx,
-	id: string,
+	id: bigint,
 ): Promise<void> {
 	const attachments = await getManyFrom(
 		ctx.db,
@@ -678,7 +685,7 @@ export async function upsertMessageInternalLogic(
 		message: Message;
 		attachments?: DatabaseAttachment[];
 		reactions?: Array<{
-			userId: string;
+			userId: bigint;
 			emoji: Infer<typeof emojiSchema>;
 		}>;
 	},
@@ -729,7 +736,7 @@ export async function upsertMessageInternalLogic(
 			const emojiIds = new Set(
 				reactionsWithEmojiId
 					.map((r) => r.emoji.id)
-					.filter((id): id is string => !!id),
+					.filter((id): id is bigint => !!id),
 			);
 
 			for (const emojiId of emojiIds) {
@@ -792,15 +799,15 @@ export async function uploadAttachmentFromUrlLogic(
 export type EnrichedMessage = {
 	message: Message;
 	author: {
-		id: string;
+		id: bigint;
 		name: string;
 		avatar?: string;
 	} | null;
 	attachments: Attachment[];
 	reactions: Array<{
-		userId: string;
+		userId: bigint;
 		emoji: {
-			id: string;
+			id: bigint;
 			name: string;
 			animated?: boolean;
 		};
@@ -828,14 +835,14 @@ export type EnrichedMessage = {
 		>;
 		internalLinks?: Array<{
 			original: string;
-			guild: { id: string; name: string };
+			guild: { id: bigint; name: string };
 			channel: {
-				parent?: { name?: string; type?: number; parentId?: string };
-				id: string;
+				parent?: { name?: string; type?: number; parentId?: bigint };
+				id: bigint;
 				type: number;
 				name: string;
 			};
-			message?: string;
+			message?: bigint;
 		}>;
 	};
 };
@@ -875,12 +882,12 @@ export async function enrichMessageForDisplay(
 	);
 
 	const emojiIds = new Set(
-		reactions.map((r) => r.emojiId).filter((id): id is string => !!id),
+		reactions.map((r) => r.emojiId).filter((id): id is bigint => !!id),
 	);
 
 	const emojiMap = new Map<
 		string,
-		{ id: string; name: string; animated?: boolean }
+		{ id: bigint; name: string; animated?: boolean }
 	>();
 	for (const emojiId of emojiIds) {
 		const emoji = await ctx.db
@@ -888,7 +895,7 @@ export async function enrichMessageForDisplay(
 			.filter((q) => q.eq(q.field("id"), emojiId))
 			.first();
 		if (emoji) {
-			emojiMap.set(emojiId, {
+			emojiMap.set(emojiId.toString(), {
 				id: emoji.id,
 				name: emoji.name,
 				animated: emoji.animated,
@@ -897,7 +904,7 @@ export async function enrichMessageForDisplay(
 	}
 
 	const formattedReactions = reactions.map((reaction) => {
-		const emoji = emojiMap.get(reaction.emojiId);
+		const emoji = emojiMap.get(reaction.emojiId.toString());
 		return {
 			userId: reaction.userId,
 			emoji: emoji ?? {
@@ -921,12 +928,12 @@ export async function enrichMessageForDisplay(
 		Predicate.isNotNull,
 	);
 
-	let authorData: { id: string; name: string; avatar?: string } | null = null;
+	let authorData: { id: bigint; name: string; avatar?: string } | null = null;
 	if (author) {
 		if (options?.isAnonymous) {
 			const anonymized = anonymizeDiscordAccount(message.authorId);
 			authorData = {
-				id: anonymized.id,
+				id: BigInt(anonymized.id),
 				name: anonymized.name,
 				avatar: anonymized.avatar ?? undefined,
 			};
@@ -972,23 +979,27 @@ export async function enrichMessageForDisplay(
 		}
 	> = {};
 	for (const userId of userIds) {
-		const user = mentionMetadata.users[userId];
+		const userIdStr = userId.toString();
+		const user = mentionMetadata.users[userIdStr];
 		if (user) {
-			messageUsers[userId] = user;
+			messageUsers[userIdStr] = user;
 		}
 	}
 
 	const messageChannels = Object.fromEntries(
-		channelIds.map((id) => [
-			id,
-			mentionMetadata.channels[id] ?? {
-				name: "Unknown Channel",
-				type: 0,
-				url: `https://discord.com/channels/${serverDiscordId}/${id}`,
-				indexingEnabled: false,
-				exists: false,
-			},
-		]),
+		channelIds.map((id) => {
+			const idStr = id.toString();
+			return [
+				idStr,
+				mentionMetadata.channels[idStr] ?? {
+					name: "Unknown Channel",
+					type: 0,
+					url: `https://discord.com/channels/${serverDiscordId}/${id}`,
+					indexingEnabled: false,
+					exists: false,
+				},
+			];
+		}),
 	);
 
 	const messageInternalLinks = await getInternalLinksMetadata(
