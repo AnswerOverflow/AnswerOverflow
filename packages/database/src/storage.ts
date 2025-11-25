@@ -17,19 +17,12 @@ export interface UploadFileInput {
 	stream: Readable | ReadableStream | Blob;
 }
 
-export interface GetFileUrlInput {
-	id: string;
-	filename: string;
-}
-
 export class Storage extends Context.Tag("Storage")<
 	Storage,
 	{
 		uploadFileFromUrl: (
 			input: UploadFileFromUrlInput,
 		) => Effect.Effect<void, Error>;
-		uploadFile: (input: UploadFileInput) => Effect.Effect<void, Error>;
-		getFileUrl: (input: GetFileUrlInput) => Effect.Effect<string | null>;
 	}
 >() {}
 
@@ -77,35 +70,8 @@ const S3StorageServiceLive = Effect.gen(function* () {
 			});
 		});
 
-	const uploadFile = (input: UploadFileInput) =>
-		Effect.gen(function* () {
-			const key = input.filename;
-
-			yield* Effect.tryPromise({
-				try: () =>
-					new Upload({
-						client: rawS3Client,
-						params: {
-							Bucket: bucketName,
-							Key: key,
-							Body: input.stream,
-							ContentDisposition: "inline",
-							ContentType: input.contentType,
-						},
-					}).done(),
-				catch: (error) => new Error(`Failed to upload file to S3: ${error}`),
-			});
-		});
-
-	const getFileUrl = (input: GetFileUrlInput): Effect.Effect<string | null> => {
-		const key = `${input.id}/${input.filename}`;
-		return Effect.succeed(`https://${bucketName}.s3.amazonaws.com/${key}`);
-	};
-
 	return {
 		uploadFileFromUrl,
-		uploadFile,
-		getFileUrl,
 	};
 });
 
@@ -140,24 +106,8 @@ const ConvexStorageServiceLive = Effect.gen(function* () {
 			return storageId;
 		});
 
-	const uploadFile = (input: UploadFileInput): Effect.Effect<string, Error> =>
-		Effect.gen(function* () {
-			yield* Effect.logDebug(
-				`ConvexStorage: uploadFile not implemented for ${input.filename}`,
-			);
-			return yield* Effect.fail(
-				new Error("uploadFile not implemented for Convex"),
-			);
-		});
-
-	const getFileUrl = (input: GetFileUrlInput): Effect.Effect<string | null> => {
-		return Effect.succeed(null);
-	};
-
 	return {
 		uploadFileFromUrl,
-		uploadFile,
-		getFileUrl,
 	};
 });
 
