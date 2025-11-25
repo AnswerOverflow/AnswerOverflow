@@ -30,6 +30,12 @@ const commands = [
 		.setDescription("Configure channel settings in the dashboard")
 		.setDMPermission(false)
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+	new SlashCommandBuilder()
+		.setName("debug")
+		.setDescription(
+			"Debug command for testing latency and API status (Rhys only)",
+		)
+		.setDMPermission(false),
 ] as const;
 
 export function registerCommands() {
