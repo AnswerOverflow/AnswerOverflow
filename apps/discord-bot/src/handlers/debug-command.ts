@@ -6,9 +6,7 @@ import { Discord } from "../core/discord-service";
 
 const RHYS_USER_ID = "523949187663134754";
 
-export function handleDebugCommand(
-	interaction: ChatInputCommandInteraction,
-): Effect.Effect<void, unknown, Database | Discord> {
+export function handleDebugCommand(interaction: ChatInputCommandInteraction) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		const discord = yield* Discord;
