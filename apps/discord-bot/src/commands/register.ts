@@ -7,7 +7,7 @@ import {
 import { Effect } from "effect";
 import { Discord } from "../core/discord-service";
 
-const commands = [
+const globalCommands = [
 	new ContextMenuCommandBuilder()
 		.setName("✅ Mark Solution")
 		.setType(ApplicationCommandType.Message)
@@ -32,9 +32,33 @@ const commands = [
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 ] as const;
 
+const guildCommands = [
+	new SlashCommandBuilder()
+		.setName("debug")
+		.setDescription(
+			"Debug command for testing latency and API status (Rhys only)",
+		)
+		.setDMPermission(false),
+] as const;
+
 export function registerCommands() {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
-		yield* discord.use((client) => client.application?.commands.set(commands));
+
+		// Register global commands
+		yield* discord.use((client) =>
+			client.application?.commands.set(globalCommands),
+		);
+
+		// Register guild-specific commands for debug server
+		yield* discord.use((client) => {
+			const targetGuildId = "1037547185492996207";
+			const guild = client.guilds.cache.get(targetGuildId);
+			if (guild) {
+				return guild.commands.set(guildCommands);
+			}
+			// Return undefined if guild not found - this maintains the proper return type
+			return Promise.resolve(undefined);
+		});
 	}).pipe(Effect.mapError((error) => new Error(String(error))));
 }
