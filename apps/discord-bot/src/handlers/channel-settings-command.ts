@@ -8,7 +8,7 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Effect, Layer } from "effect";
-import { Discord, UnknownDiscordError } from "../core/discord-service";
+import { Discord } from "../core/discord-service";
 
 function getDashboardUrl(serverId: string, channelId: string): string {
 	const baseUrl =
