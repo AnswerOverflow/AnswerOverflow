@@ -2,11 +2,7 @@ import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { uploadAttachmentsInBatches } from "../utils/attachment-upload";
-import {
-	toAODiscordAccount,
-	toAOMessage,
-	toBigIntIdRequired,
-} from "../utils/conversions";
+import { toAODiscordAccount, toAOMessage } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 
 export const MessageParityLayer = Layer.scopedDiscard(
@@ -29,7 +25,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: toBigIntIdRequired(newMessage.guildId ?? ""),
+						discordId: BigInt(newMessage.guildId ?? ""),
 					});
 				const server = serverLiveData;
 
@@ -42,7 +38,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				const messageLiveData = yield* database.private.messages.getMessageById(
 					{
-						id: toBigIntIdRequired(newMessage.id),
+						id: BigInt(newMessage.id),
 					},
 				);
 				const existingMessage = messageLiveData;
@@ -117,7 +113,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				const messageLiveData = yield* database.private.messages.getMessageById(
 					{
-						id: toBigIntIdRequired(message.id),
+						id: BigInt(message.id),
 					},
 				);
 				const existingMessage = messageLiveData;
@@ -127,7 +123,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				yield* database.private.messages.deleteMessage({
-					id: toBigIntIdRequired(message.id),
+					id: BigInt(message.id),
 				});
 				yield* Console.log(`Deleted message ${message.id}`);
 			}).pipe(
@@ -141,7 +137,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				const messageIds: bigint[] = [];
 				for (const [id] of messages) {
-					messageIds.push(toBigIntIdRequired(id));
+					messageIds.push(BigInt(id));
 				}
 
 				if (messageIds.length === 0) {
@@ -175,7 +171,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: toBigIntIdRequired(message.guildId ?? ""),
+						discordId: BigInt(message.guildId ?? ""),
 					});
 				const server = serverLiveData;
 

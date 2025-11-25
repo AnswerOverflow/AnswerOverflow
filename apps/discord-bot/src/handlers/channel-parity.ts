@@ -6,7 +6,6 @@ import {
 	isAllowedRootChannel,
 	isAllowedThreadChannel,
 	toAOChannel,
-	toBigIntIdRequired,
 } from "../utils/conversions";
 
 export function syncBotPermissionsForChannel(
@@ -27,7 +26,7 @@ export function syncBotPermissionsForChannel(
 
 		const existingChannel =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: toBigIntIdRequired(channelId),
+				discordId: BigInt(channelId),
 			});
 
 		if (!existingChannel) {
@@ -35,7 +34,7 @@ export function syncBotPermissionsForChannel(
 		}
 
 		yield* database.private.channels.updateChannel({
-			id: toBigIntIdRequired(channelId),
+			id: BigInt(channelId),
 			channel: {
 				id: existingChannel.id,
 				serverId: existingChannel.serverId,
@@ -48,7 +47,7 @@ export function syncBotPermissionsForChannel(
 				lastIndexedSnowflake: existingChannel.lastIndexedSnowflake,
 			},
 			settings: {
-				channelId: toBigIntIdRequired(channelId),
+				channelId: BigInt(channelId),
 				indexingEnabled: existingChannel.flags?.indexingEnabled ?? false,
 				markSolutionEnabled:
 					existingChannel.flags?.markSolutionEnabled ?? false,
@@ -83,7 +82,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: toBigIntIdRequired(channel.guild.id),
+						discordId: BigInt(channel.guild.id),
 					});
 				const server = serverLiveData;
 				if (!server) {
@@ -127,7 +126,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				const parentChannelLiveData =
 					yield* database.private.channels.findChannelByDiscordId({
-						discordId: toBigIntIdRequired(thread.parentId),
+						discordId: BigInt(thread.parentId),
 					});
 				const parentChannel = parentChannelLiveData;
 				if (!parentChannel) {
@@ -138,7 +137,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: toBigIntIdRequired(thread.guild.id),
+						discordId: BigInt(thread.guild.id),
 					});
 				const server = serverLiveData;
 				if (!server) {
@@ -170,7 +169,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				const channelLiveData =
 					yield* database.private.channels.findChannelByDiscordId({
-						discordId: toBigIntIdRequired(newChannel.id),
+						discordId: BigInt(newChannel.id),
 					});
 				const existingChannel = channelLiveData;
 
@@ -183,7 +182,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: toBigIntIdRequired(newChannel.guild.id),
+						discordId: BigInt(newChannel.guild.id),
 					});
 				const server = serverLiveData;
 				if (!server) {
@@ -199,7 +198,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				);
 
 				yield* database.private.channels.updateChannel({
-					id: toBigIntIdRequired(newChannel.id),
+					id: BigInt(newChannel.id),
 					channel: {
 						...discordChannelData,
 						inviteCode: existingChannel.inviteCode,
@@ -226,7 +225,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 				yield* database.private.channels.deleteChannel({
-					id: toBigIntIdRequired(channel.id),
+					id: BigInt(channel.id),
 				});
 			}).pipe(
 				Effect.catchAll((error) =>
@@ -242,7 +241,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				const channelLiveData =
 					yield* database.private.channels.findChannelByDiscordId({
-						discordId: toBigIntIdRequired(newThread.id),
+						discordId: BigInt(newThread.id),
 					});
 				const existingChannel = channelLiveData;
 
@@ -255,7 +254,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: toBigIntIdRequired(newThread.guild.id),
+						discordId: BigInt(newThread.guild.id),
 					});
 
 				const server = serverLiveData;
@@ -273,7 +272,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				);
 
 				yield* database.private.channels.updateChannel({
-					id: toBigIntIdRequired(newThread.id),
+					id: BigInt(newThread.id),
 					channel: {
 						...discordThreadData,
 						inviteCode: existingChannel.inviteCode,
@@ -295,7 +294,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				const channelLiveData =
 					yield* database.private.channels.findChannelByDiscordId({
-						discordId: toBigIntIdRequired(thread.id),
+						discordId: BigInt(thread.id),
 					});
 				const existingChannel = channelLiveData;
 
@@ -307,7 +306,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 
 				yield* database.private.channels.deleteChannel({
-					id: toBigIntIdRequired(thread.id),
+					id: BigInt(thread.id),
 				});
 			}).pipe(
 				Effect.catchAll((error) =>

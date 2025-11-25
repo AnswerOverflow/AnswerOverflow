@@ -1,10 +1,7 @@
 import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import {
-	isAllowedThreadChannel,
-	toBigIntIdRequired,
-} from "../utils/conversions";
+import { isAllowedThreadChannel } from "../utils/conversions";
 import { handleSendMarkSolutionInstructions } from "./send-mark-solution-instructions";
 
 export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
@@ -23,7 +20,7 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 
 				const parentChannel =
 					yield* database.private.channels.findChannelByDiscordId({
-						discordId: toBigIntIdRequired(thread.parentId),
+						discordId: BigInt(thread.parentId),
 					});
 
 				if (!parentChannel) {

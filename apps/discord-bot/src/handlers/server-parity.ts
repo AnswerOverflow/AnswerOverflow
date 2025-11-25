@@ -9,18 +9,14 @@ import {
 	trackServerJoin,
 	trackServerLeave,
 } from "../utils/analytics";
-import {
-	isAllowedRootChannelType,
-	toAOChannel,
-	toBigIntIdRequired,
-} from "../utils/conversions";
+import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
 import { syncBotPermissionsForChannel } from "./channel-parity";
 import { startIndexingLoop } from "./indexing";
 
 function toAOServer(guild: Guild) {
 	return {
-		discordId: toBigIntIdRequired(guild.id),
+		discordId: BigInt(guild.id),
 		name: guild.name,
 		icon: guild.icon ? guild.icon.toString() : undefined,
 		description: guild.description ?? undefined,
@@ -39,27 +35,28 @@ export function syncGuild(guild: Guild) {
 		yield* Console.log(`Syncing server ${guild.id} ${guild.name}`);
 
 		const aoServerData = toAOServer(guild);
-		yield* database.private.servers.upsertServer({
-			...aoServerData,
-			kickedTime: undefined,
+		yield* database.private.servers.upsertServer(aoServerData);
+
+		const serverData = yield* database.private.servers.getServerByDiscordId({
+			discordId: BigInt(guild.id),
 		});
 
-		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
-			{
-				discordId: toBigIntIdRequired(guild.id),
-			},
-		);
+		if (serverData) {
+			yield* database.private.servers.clearKickedTime({
+				id: serverData._id,
+			});
+		}
 
-		const wasNewServer = !serverLiveData;
+		const wasNewServer = !serverData;
 
-		if (serverLiveData?.discordId) {
+		if (serverData?.discordId) {
 			yield* database.private.server_preferences.upsertServerPreferences({
-				serverId: serverLiveData.discordId,
+				serverId: serverData.discordId,
 				considerAllMessagesPublicEnabled: true,
 			});
 		}
 
-		const server = serverLiveData;
+		const server = serverData;
 
 		if (!server) {
 			yield* Console.warn(
@@ -176,7 +173,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: toBigIntIdRequired(newGuild.id),
+						discordId: BigInt(newGuild.id),
 					});
 				const existingServer = serverLiveData;
 
@@ -194,6 +191,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					description: _description,
 					vanityInviteCode: _vanityInviteCode,
 					approximateMemberCount: _approximateMemberCount,
+					kickedTime: _kickedTime,
 					...preservedFields
 				} = existingServer;
 
@@ -201,7 +199,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					id: existingServer._id,
 					data: {
 						...preservedFields,
-						discordId: toBigIntIdRequired(newGuild.id),
+						discordId: BigInt(newGuild.id),
 						name: aoServerData.name,
 						icon: aoServerData.icon,
 						description: aoServerData.description,
@@ -209,6 +207,15 @@ export const ServerParityLayer = Layer.scopedDiscard(
 						approximateMemberCount: aoServerData.approximateMemberCount,
 					},
 				});
+
+				if (
+					existingServer.kickedTime !== undefined &&
+					existingServer.kickedTime !== null
+				) {
+					yield* database.private.servers.clearKickedTime({
+						id: existingServer._id,
+					});
+				}
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error updating guild ${newGuild.id}:`, error),
@@ -220,7 +227,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				const serverLiveData =
 					yield* database.private.servers.getServerByDiscordId({
-						discordId: toBigIntIdRequired(guild.id),
+						discordId: BigInt(guild.id),
 					});
 				const existingServer = serverLiveData;
 
@@ -277,6 +284,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 						if (leftServer) {
 							return;
 						}
+						console.log("syncing guild", guild.name);
 						yield* syncGuild(guild);
 					}).pipe(
 						Effect.catchAll((error) =>
@@ -286,6 +294,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				);
 
 				const allServers = servers ?? [];
+
 				const serversToMarkAsKicked = allServers.filter(
 					(server) =>
 						!activeServerIds.has(server.discordId.toString()) &&

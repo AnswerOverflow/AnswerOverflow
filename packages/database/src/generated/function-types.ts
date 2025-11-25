@@ -30,6 +30,7 @@ export const FUNCTION_TYPE_MAP = {
   "messages.upsertMessage": "mutation",
   "server_preferences.getServerPreferencesByServerId": "query",
   "server_preferences.upsertServerPreferences": "mutation",
+  "servers.clearKickedTime": "mutation",
   "servers.findManyServersByDiscordId": "query",
   "servers.findManyServersById": "query",
   "servers.getAllServers": "query",
@@ -54,7 +55,7 @@ export const NAMESPACE_STRUCTURE = {
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageData","getTopQuestionSolversByServerId","getTotalMessageCount","upsertManyMessages","upsertMessage"],
   "server_preferences": ["getServerPreferencesByServerId","upsertServerPreferences"],
-  "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
+  "servers": ["clearKickedTime","findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertUserServerSettings"]
 } as const;
 

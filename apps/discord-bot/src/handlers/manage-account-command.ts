@@ -10,7 +10,6 @@ import {
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toBigIntIdRequired } from "../utils/conversions";
 
 export const menuButtonIds = {
 	consentButton: "consent-button",
@@ -147,7 +146,7 @@ export function handleManageAccountCommand(
 
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: toBigIntIdRequired(interaction.guildId),
+				discordId: BigInt(interaction.guildId),
 			},
 		);
 
@@ -163,7 +162,7 @@ export function handleManageAccountCommand(
 			return;
 		}
 
-		const userIdBigInt = toBigIntIdRequired(interaction.user.id);
+		const userIdBigInt = BigInt(interaction.user.id);
 		const serverIdBigInt = server.discordId;
 
 		const userServerSettingsLiveData =

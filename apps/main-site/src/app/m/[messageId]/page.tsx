@@ -65,15 +65,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function Page(props: Props) {
 	const params = await props.params;
 
-	const start = performance.now();
 	const message = await Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.private.messages.getMessageById({
 			id: BigInt(params.messageId),
 		});
 	}).pipe(runtime.runPromise);
-	const end = performance.now();
-	console.log(`getMessageById took ${end - start}ms`);
+
 	if (!message) {
 		return notFound();
 	}
