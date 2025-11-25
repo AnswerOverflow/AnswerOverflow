@@ -1,5 +1,6 @@
 import {
 	ApplicationCommandType,
+	Collection,
 	ContextMenuCommandBuilder,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
@@ -41,6 +42,25 @@ const commands = [
 export function registerCommands() {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
-		yield* discord.use((client) => client.application?.commands.set(commands));
+
+		// Register global commands (all except debug)
+		const globalCommands = commands.filter((cmd) => cmd.name !== "debug");
+		yield* discord.use((client) =>
+			client.application?.commands.set(globalCommands),
+		);
+
+		// Register debug command only for specific server
+		const debugCommand = commands.find((cmd) => cmd.name === "debug");
+		if (debugCommand) {
+			yield* discord.use((client) => {
+				const targetGuildId = "1037547185492996207";
+				const guild = client.guilds.cache.get(targetGuildId);
+				if (guild) {
+					return guild.commands.set([debugCommand]);
+				}
+				// Return undefined if guild not found - this maintains the proper return type
+				return Promise.resolve(undefined);
+			});
+		}
 	}).pipe(Effect.mapError((error) => new Error(String(error))));
 }
