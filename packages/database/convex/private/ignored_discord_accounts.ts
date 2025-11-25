@@ -4,7 +4,7 @@ import { findIgnoredDiscordAccountById as findIgnoredDiscordAccountByIdShared } 
 
 export const findIgnoredDiscordAccountById = privateQuery({
 	args: {
-		id: v.string(),
+		id: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		return await findIgnoredDiscordAccountByIdShared(ctx, args.id);
@@ -13,7 +13,7 @@ export const findIgnoredDiscordAccountById = privateQuery({
 
 export const deleteIgnoredDiscordAccount = privateMutation({
 	args: {
-		id: v.string(),
+		id: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const existing = await ctx.db

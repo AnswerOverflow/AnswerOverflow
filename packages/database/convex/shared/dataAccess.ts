@@ -80,20 +80,20 @@ async function enrichMessage(
 
 export function hiddenMessageStub(): MessageWithPrivacyFlags {
 	return {
-		authorId: "",
+		authorId: 0n,
 		type: 0,
-		parentChannelId: "",
-		childThreadId: "",
-		questionId: "",
-		referenceId: "",
-		applicationId: "",
-		webhookId: "",
-		channelId: "",
+		parentChannelId: 0n,
+		childThreadId: 0n,
+		questionId: 0n,
+		referenceId: 0n,
+		applicationId: 0n,
+		webhookId: 0n,
+		channelId: 0n,
 		content: "",
-		id: "",
+		id: 0n,
 		isAnonymous: true,
 		public: false,
-		serverId: "",
+		serverId: 0n,
 	};
 }
 

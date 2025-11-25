@@ -10,14 +10,14 @@ import { getDiscordAccountWithToken } from "../shared/auth";
 
 async function getDiscordAccountIdForWrapper(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
-): Promise<string | null> {
+): Promise<bigint | null> {
 	const account = await getDiscordAccountWithToken(ctx);
 	return account?.accountId ?? null;
 }
 
 export const authenticatedQuery = customQuery(query, {
 	args: {
-		discordAccountId: v.optional(v.string()),
+		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
@@ -38,7 +38,7 @@ export const authenticatedQuery = customQuery(query, {
 
 export const authenticatedMutation = customMutation(mutation, {
 	args: {
-		discordAccountId: v.optional(v.string()),
+		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
@@ -59,7 +59,7 @@ export const authenticatedMutation = customMutation(mutation, {
 
 export const authenticatedAction = customAction(action, {
 	args: {
-		discordAccountId: v.optional(v.string()),
+		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
 		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);

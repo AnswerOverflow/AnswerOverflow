@@ -31,13 +31,13 @@ const setupTestChannel = (
 		discordMock.utilities.seedChannel(channel);
 		yield* database.private.servers.upsertServer({
 			name: guild.name,
-			discordId: guild.id,
+			discordId: BigInt(guild.id),
 			plan: "FREE",
 			approximateMemberCount: 0,
 		});
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
 			{
-				discordId: guild.id,
+				discordId: BigInt(guild.id),
 			},
 		);
 		if (!serverLiveData?._id) {
@@ -45,13 +45,13 @@ const setupTestChannel = (
 		}
 		yield* database.private.channels.upsertChannelWithSettings({
 			channel: {
-				id: channel.id,
+				id: BigInt(channel.id),
 				serverId: serverLiveData.discordId,
 				name: channel.name,
 				type: channel.type,
 			},
 			settings: {
-				channelId: channel.id,
+				channelId: BigInt(channel.id),
 				autoThreadEnabled,
 				indexingEnabled: false,
 				markSolutionEnabled: false,

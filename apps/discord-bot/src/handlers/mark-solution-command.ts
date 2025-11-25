@@ -3,7 +3,7 @@ import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toAOMessage } from "../utils/conversions";
+import { toBigIntIdRequired, toAOMessage } from "../utils/conversions";
 import { makeMarkSolutionResponse } from "./mark-solution";
 
 export function handleMarkSolutionCommand(
@@ -46,7 +46,7 @@ export function handleMarkSolutionCommand(
 		}
 
 		const server = yield* database.private.servers.getServerByDiscordId({
-			discordId: targetMessage.guildId,
+			discordId: toBigIntIdRequired(targetMessage.guildId),
 		});
 
 		if (!server) {
@@ -81,7 +81,7 @@ export function handleMarkSolutionCommand(
 
 		const channelSettings =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: parentChannel.id,
+				discordId: toBigIntIdRequired(parentChannel.id),
 			});
 
 		if (!channelSettings || !channelSettings.flags?.markSolutionEnabled) {
@@ -175,7 +175,7 @@ export function handleMarkSolutionCommand(
 			);
 		const serverPreferences = serverPreferencesLiveData ?? null;
 		const data = yield* discord.callClient(() =>
-			toAOMessage(targetMessage, server.discordId),
+			toAOMessage(targetMessage, server.discordId.toString()),
 		);
 
 		yield* database.private.messages.upsertMessage({
@@ -212,7 +212,7 @@ export function handleMarkSolutionCommand(
 			) {
 				await thread.setAppliedTags([
 					...thread.appliedTags,
-					channelSettings.solutionTagId,
+					channelSettings.solutionTagId.toString(),
 				]);
 			} else {
 				await questionMessage.react("✅");

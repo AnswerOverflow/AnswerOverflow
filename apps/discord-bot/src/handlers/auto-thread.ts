@@ -4,6 +4,7 @@ import { MessageType } from "discord.js";
 import { Data, Effect, Layer } from "effect";
 import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from "../constants/channel-types";
 import { Discord } from "../core/discord-service";
+import { toBigIntIdRequired } from "../utils/conversions";
 import { isHumanMessage, removeDiscordMarkdown } from "../utils/message-utils";
 
 export enum AutoThreadErrorCode {
@@ -70,7 +71,7 @@ export function handleAutoThread(message: Message) {
 		}
 		const channelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
-				discordId: message.channel.id,
+				discordId: toBigIntIdRequired(message.channel.id),
 			});
 
 		const channelSettings = channelLiveData ?? null;

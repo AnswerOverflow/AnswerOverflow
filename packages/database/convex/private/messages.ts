@@ -24,7 +24,7 @@ type Message = Infer<typeof messageSchema>;
 
 async function isIgnoredAccount(
 	ctx: QueryCtx | MutationCtx,
-	authorId: string,
+	authorId: bigint,
 ): Promise<boolean> {
 	const ignoredAccount = await findIgnoredDiscordAccountById(ctx, authorId);
 	return ignoredAccount !== null;
@@ -32,8 +32,8 @@ async function isIgnoredAccount(
 
 async function hasMessageIndexingDisabled(
 	ctx: QueryCtx | MutationCtx,
-	authorId: string,
-	serverId: string,
+	authorId: bigint,
+	serverId: bigint,
 ): Promise<boolean> {
 	const settings = await findUserServerSettingsById(ctx, authorId, serverId);
 	return settings?.messageIndexingDisabled === true;
@@ -41,8 +41,8 @@ async function hasMessageIndexingDisabled(
 
 function selectMessagesForDisplay(
 	messages: Array<Message>,
-	threadId: string | null,
-	targetMessageId: string,
+	threadId: bigint | null,
+	targetMessageId: bigint,
 ) {
 	if (threadId) {
 		return messages;
@@ -60,7 +60,7 @@ export const upsertMessage = privateMutation({
 		reactions: v.optional(
 			v.array(
 				v.object({
-					userId: v.string(),
+					userId: v.int64(),
 					emoji: emojiSchema,
 				}),
 			),
@@ -135,7 +135,7 @@ export const upsertMessage = privateMutation({
 			}
 
 			if (reactions.length > 0) {
-				const emojiSet = new Set<string>();
+				const emojiSet = new Set<bigint>();
 				for (const reaction of reactions) {
 					emojiSet.add(reaction.emoji.id);
 				}
@@ -178,7 +178,7 @@ export const upsertManyMessages = privateMutation({
 				reactions: v.optional(
 					v.array(
 						v.object({
-							userId: v.string(),
+							userId: v.int64(),
 							emoji: emojiSchema,
 						}),
 					),
@@ -239,7 +239,7 @@ export const upsertManyMessages = privateMutation({
 
 export const getMessageById = privateQuery({
 	args: {
-		id: v.string(),
+		id: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		return await getMessageByIdShared(ctx, args.id);
@@ -257,7 +257,7 @@ export const getTotalMessageCount = privateQuery({
 // TODO: Probably use analytics from PostHog for this instead
 export const getTopQuestionSolversByServerId = privateQuery({
 	args: {
-		serverId: v.string(),
+		serverId: v.int64(),
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
@@ -270,7 +270,7 @@ export const getTopQuestionSolversByServerId = privateQuery({
 
 		const solutions = allMessages.filter((msg) => msg.questionId !== undefined);
 
-		const solutionCounts = new Map<string, number>();
+		const solutionCounts = new Map<bigint, number>();
 		for (const solution of solutions) {
 			const current = solutionCounts.get(solution.authorId) ?? 0;
 			solutionCounts.set(solution.authorId, current + 1);
@@ -287,7 +287,7 @@ export const getTopQuestionSolversByServerId = privateQuery({
 
 export const deleteMessage = privateMutation({
 	args: {
-		id: v.string(),
+		id: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		await deleteMessageInternalLogic(ctx, args.id);
@@ -297,7 +297,7 @@ export const deleteMessage = privateMutation({
 
 export const deleteManyMessages = privateMutation({
 	args: {
-		ids: v.array(v.string()),
+		ids: v.array(v.int64()),
 	},
 	handler: async (ctx, args) => {
 		for (const id of args.ids) {
@@ -310,7 +310,7 @@ export const deleteManyMessages = privateMutation({
 function getThreadIdOfMessage(
 	message: Pick<Message, "channelId"> &
 		Partial<Pick<Message, "childThreadId" | "parentChannelId">>,
-): string | null {
+): bigint | null {
 	if (message.childThreadId) {
 		return message.childThreadId;
 	}
@@ -323,13 +323,13 @@ function getThreadIdOfMessage(
 function getParentChannelOfMessage(
 	message: Pick<Message, "channelId"> &
 		Partial<Pick<Message, "parentChannelId">>,
-): string {
+): bigint {
 	return message.parentChannelId ?? message.channelId;
 }
 
 export const getMessagePageData = privateQuery({
 	args: {
-		messageId: v.string(),
+		messageId: v.int64(),
 	},
 	handler: async (ctx, args) => {
 		const targetMessage = await getMessageByIdShared(ctx, args.messageId);
