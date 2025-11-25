@@ -13,6 +13,7 @@ import type * as authenticated_dashboard_mutations from "../authenticated/dashbo
 import type * as authenticated_dashboard_queries from "../authenticated/dashboard_queries.js";
 import type * as authenticated_servers from "../authenticated/servers.js";
 import type * as client_authenticated from "../client/authenticated.js";
+import type * as client_guildManager from "../client/guildManager.js";
 import type * as client_index from "../client/index.js";
 import type * as client_private from "../client/private.js";
 import type * as http from "../http.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   "authenticated/dashboard_queries": typeof authenticated_dashboard_queries;
   "authenticated/servers": typeof authenticated_servers;
   "client/authenticated": typeof client_authenticated;
+  "client/guildManager": typeof client_guildManager;
   "client/index": typeof client_index;
   "client/private": typeof client_private;
   http: typeof http;

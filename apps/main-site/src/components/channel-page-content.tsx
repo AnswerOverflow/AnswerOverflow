@@ -6,9 +6,7 @@ import { Hash, MessageSquare } from "lucide-react";
 
 type ChannelPageData = NonNullable<
 	FunctionReturnType<typeof api.private.channels.getChannelPageData>
-> & {
-	showBackLink?: boolean;
-};
+>;
 
 function getChannelIcon(type: number) {
 	if (type === 15) return MessageSquare;
@@ -40,23 +38,12 @@ export function ChannelPageContent({
 	channels,
 	selectedChannel,
 	threads,
-	showBackLink = true,
 }: ChannelPageData) {
 	const serverIcon = server.icon ?? null;
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
 				<div className="mb-8 pb-6 border-b border-border">
-					{showBackLink && (
-						<div className="flex items-center gap-4 mb-2">
-							<Link
-								href={`/c/${server.discordId}`}
-								className="text-muted-foreground hover:text-foreground transition-colors"
-							>
-								← Back to {server.name}
-							</Link>
-						</div>
-					)}
 					<div className="flex items-center gap-4">
 						{serverIcon && (
 							<img

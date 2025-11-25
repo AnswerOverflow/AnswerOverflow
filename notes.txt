@@ -158,3 +158,18 @@ Communities should be able to turn on 'draft mode' that lets them see their serv
 
 - Global search
 - Search a community (needs to pass an id, get from search communities), searches name + description
+
+
+
+
+
+## Maybe:
+Lean on convex-helpers/server/validators: literals and nullable would shorten enums/nullables in packages/database/convex/schema.ts (e.g. plan union, customDomain args), and typedV(schema)/doc would let you reuse table validators in args instead of re-spelling shapes across mutations.
+
+Use getOneFromOrThrow/getManyVia from the relationship helpers to replace the repeated “withIndex().unique() + try/catch” patterns in packages/database/convex/authenticated/dashboard_mutations.ts and other helpers—reads clearer and centralizes the duplicate-detection error.
+
+Extend your existing customQuery/customMutation wrappers with customCtx to inject common auth/permission context (e.g. authorizedUser from assertCanEditServer in dashboard_mutations.ts) so handlers can stay focused on business logic instead of re-running the same guards.
+
+For the manual pagination/slicing helpers in packages/database/convex/shared/shared.ts (e.g. findMessagesByChannelId, findMessagesByAuthorId), swap the “collect then sort/slice” code for paginator/getPage on the relevant indexes; it trims boilerplate and reads closer to intent.
+
+Consider filter when you currently .collect() and then run JS filters (same shared helpers file); it keeps filtering colocated with the query chain and avoids extra local post-processing code.
