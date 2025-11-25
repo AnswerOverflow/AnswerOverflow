@@ -1,6 +1,6 @@
 import { Database } from "@packages/database/database";
 import type { ChatInputCommandInteraction } from "discord.js";
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 
@@ -16,7 +16,7 @@ export function handleDebugCommand(interaction: ChatInputCommandInteraction) {
 			yield* discord.callClient(() =>
 				interaction.reply({
 					content: "This command is only available to Rhys.",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 			);
 			return;
@@ -24,7 +24,7 @@ export function handleDebugCommand(interaction: ChatInputCommandInteraction) {
 
 		// Defer the reply to allow time for API calls
 		yield* discord.callClient(() =>
-			interaction.deferReply({ ephemeral: true }),
+			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 		);
 
 		const startTime = Date.now();
