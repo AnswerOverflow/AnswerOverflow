@@ -12,10 +12,7 @@ import type {
 import { anonymizeDiscordAccount } from "./anonymization.js";
 
 type Message = Infer<typeof messageSchema>;
-export type DatabaseAttachment = Infer<typeof attachmentSchema> & {
-	_id: Id<"_storage">;
-};
-
+export type DatabaseAttachment = Infer<typeof attachmentSchema>;
 export const DISCORD_PERMISSIONS = {
 	Administrator: 0x8,
 	ManageGuild: 0x20,
