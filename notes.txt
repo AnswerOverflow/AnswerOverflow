@@ -168,3 +168,8 @@ For the manual pagination/slicing helpers in packages/database/convex/shared/sha
 Consider filter when you currently .collect() and then run JS filters (same shared helpers file); it keeps filtering colocated with the query chain and avoids extra local post-processing code.
 
 checkout ast grep
+
+
+## Emails
+
+- we should probably email people
