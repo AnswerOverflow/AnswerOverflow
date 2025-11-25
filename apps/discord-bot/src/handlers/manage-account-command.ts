@@ -132,16 +132,15 @@ export function handleManageAccountCommand(
 ): Effect.Effect<void, unknown, Database> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
+		const discord = yield* Discord;
 
 		if (!interaction.guildId || !interaction.member) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.reply({
-						content: "This command can only be used in a server",
-						ephemeral: true,
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.reply({
+					content: "This command can only be used in a server",
+					ephemeral: true,
+				}),
+			);
 			return;
 		}
 
@@ -154,14 +153,12 @@ export function handleManageAccountCommand(
 		const server = serverLiveData;
 
 		if (!server) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.reply({
-						content: "Server not found in database",
-						ephemeral: true,
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.reply({
+					content: "Server not found in database",
+					ephemeral: true,
+				}),
+			);
 			return;
 		}
 
@@ -205,15 +202,13 @@ export function handleManageAccountCommand(
 		const embed = generateManageAccountEmbed(state);
 		const actionRow = generateManageAccountActionRow(state);
 
-		const reply = yield* Effect.tryPromise({
-			try: () =>
-				interaction.reply({
-					embeds: [embed],
-					components: [actionRow],
-					ephemeral: true,
-				}),
-			catch: (error) => new UnknownDiscordError({ cause: error }),
-		});
+		const reply = yield* discord.callClient(() =>
+			interaction.reply({
+				embeds: [embed],
+				components: [actionRow],
+				ephemeral: true,
+			}),
+		);
 
 		if (
 			reply &&

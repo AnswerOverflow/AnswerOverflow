@@ -2,11 +2,10 @@ import {
 	ApplicationCommandType,
 	ContextMenuCommandBuilder,
 	PermissionFlagsBits,
-	REST,
-	Routes,
 	SlashCommandBuilder,
 } from "discord.js";
-import { Config, Console, Effect } from "effect";
+import { Effect } from "effect";
+import { Discord } from "../core/discord-service";
 
 const commands = [
 	new ContextMenuCommandBuilder()
@@ -33,25 +32,9 @@ const commands = [
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 ] as const;
 
-export function registerCommands(): Effect.Effect<void, Error> {
+export function registerCommands() {
 	return Effect.gen(function* () {
-		const token = yield* Config.string("DISCORD_BOT_TOKEN");
-		const clientId = yield* Config.string("DISCORD_CLIENT_ID");
-
-		const rest = new REST().setToken(token);
-
-		const commandData = commands.map((command) => command.toJSON());
-		const result = (yield* Effect.tryPromise({
-			try: () =>
-				rest.put(Routes.applicationCommands(clientId), {
-					body: commandData,
-				}),
-			catch: (error) =>
-				error instanceof Error ? error : new Error(String(error)),
-		})) as unknown[];
-
-		yield* Console.log(
-			`Successfully registered ${result.length} application (/) commands.`,
-		);
+		const discord = yield* Discord;
+		yield* discord.use((client) => client.application?.commands.set(commands));
 	}).pipe(Effect.mapError((error) => new Error(String(error))));
 }

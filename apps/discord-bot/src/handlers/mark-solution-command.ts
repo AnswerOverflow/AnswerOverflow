@@ -7,85 +7,62 @@ import { makeMarkSolutionResponse } from "./mark-solution";
 
 export function handleMarkSolutionCommand(
 	interaction: ContextMenuCommandInteraction,
-): Effect.Effect<void, unknown, Database> {
+) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
+		const discord = yield* Discord;
 
-		yield* Effect.tryPromise({
-			try: () => interaction.deferReply({ ephemeral: false }),
-			catch: (error) => error,
-		});
+		yield* discord.callClient(() =>
+			interaction.deferReply({ ephemeral: false }),
+		);
 
 		if (!interaction.channel) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Channel not found",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({ content: "Channel not found" }),
+			);
 			return;
 		}
 
-		const targetMessage = yield* Effect.tryPromise({
-			try: () => {
-				if (!interaction.channel) {
-					return Promise.resolve(undefined);
-				}
-				return interaction.channel.messages.fetch(interaction.targetId);
-			},
-			catch: (error) => error,
-		});
-
+		const targetMessage = yield* discord.callClient(() =>
+			interaction.channel?.messages.fetch(interaction.targetId),
+		);
 		if (!targetMessage) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Failed to fetch the target message",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "Failed to fetch the target message",
+				}),
+			);
 			return;
 		}
 
 		if (!targetMessage.guildId) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "This command can only be used in a server",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "This command can only be used in a server",
+				}),
+			);
 			return;
 		}
 
-		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
-			{
-				discordId: targetMessage.guildId,
-			},
-		);
-
-		const server = serverLiveData;
+		const server = yield* database.private.servers.getServerByDiscordId({
+			discordId: targetMessage.guildId,
+		});
 
 		if (!server) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Server not found in database",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "Server not found in database",
+				}),
+			);
 			return;
 		}
 
 		if (!targetMessage.channel.isThread()) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "This command can only be used in a thread",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "This command can only be used in a thread",
+				}),
+			);
 			return;
 		}
 
@@ -93,99 +70,82 @@ export function handleMarkSolutionCommand(
 		const parentChannel = thread.parent;
 
 		if (!parentChannel) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Parent channel not found",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "Parent channel not found",
+				}),
+			);
 			return;
 		}
 
-		const channelLiveData =
+		const channelSettings =
 			yield* database.private.channels.findChannelByDiscordId({
 				discordId: parentChannel.id,
 			});
 
-		const channelSettings = channelLiveData;
-
 		if (!channelSettings || !channelSettings.flags?.markSolutionEnabled) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Mark solution is not enabled for this channel",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "Mark solution is not enabled for this channel",
+				}),
+			);
 			return;
 		}
 
 		let questionMessage = null;
 
 		if (parentChannel.type === 15) {
-			const fetchedMessage = yield* Effect.tryPromise({
-				try: () => thread.messages.fetch(thread.id),
-				catch: () => null,
-			});
+			const fetchedMessage = yield* discord
+				.callClient(() => thread.messages.fetch(thread.id))
+				.pipe(Effect.catchAll(() => Effect.succeed(null)));
 			questionMessage = fetchedMessage ?? null;
 		} else if (parentChannel.type === 0 || parentChannel.type === 5) {
 			if ("messages" in parentChannel) {
-				const fetchedMessage = yield* Effect.tryPromise({
-					try: () => parentChannel.messages.fetch(thread.id),
-					catch: () => null,
-				});
+				const fetchedMessage = yield* discord
+					.callClient(() => parentChannel.messages.fetch(thread.id))
+					.pipe(Effect.catchAll(() => Effect.succeed(null)));
 				questionMessage = fetchedMessage ?? null;
 			}
 		}
 
 		if (!questionMessage) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Could not find the question message",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "Could not find the question message",
+				}),
+			);
 			return;
 		}
 
 		if (questionMessage.id === targetMessage.id) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "You cannot mark the question as its own solution",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "You cannot mark the question as its own solution",
+				}),
+			);
 			return;
 		}
 
 		const guild = targetMessage.guild;
 		if (!guild) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Guild not found",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "Guild not found",
+				}),
+			);
 			return;
 		}
 
-		const guildMember = yield* Effect.tryPromise({
-			try: () => guild.members.fetch(interaction.user.id),
-			catch: () => null,
-		});
+		const guildMember = yield* discord
+			.callClient(() => guild.members.fetch(interaction.user.id))
+			.pipe(Effect.catchAll(() => Effect.succeed(null)));
 
 		if (!guildMember) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Could not fetch your member information",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "Could not fetch your member information",
+				}),
+			);
 			return;
 		}
 
@@ -194,14 +154,12 @@ export function handleMarkSolutionCommand(
 			parentChannel.permissionsFor(guildMember)?.has("ManageThreads") ?? false;
 
 		if (!isQuestionAuthor && !hasPermission) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content:
-							"You must be the question author or have ManageThreads permission to mark a solution",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content:
+						"You must be the question author or have ManageThreads permission to mark a solution",
+				}),
+			);
 			return;
 		}
 
@@ -212,10 +170,9 @@ export function handleMarkSolutionCommand(
 				},
 			);
 		const serverPreferences = serverPreferencesLiveData ?? null;
-		const data = yield* Effect.tryPromise({
-			try: () => toAOMessage(targetMessage, server.discordId),
-			catch: (error) => error,
-		});
+		const data = yield* discord.callClient(() =>
+			toAOMessage(targetMessage, server.discordId),
+		);
 
 		yield* database.private.messages.upsertMessage({
 			message: {
@@ -264,26 +221,22 @@ export function handleMarkSolutionCommand(
 			Effect.catchAll((error) =>
 				Effect.gen(function* () {
 					console.error("Error marking solution:", error);
-					yield* Effect.tryPromise({
-						try: () =>
-							interaction.editReply({
-								content: "An error occurred while marking the solution",
-							}),
-						catch: () => undefined,
-					});
+					yield* discord.callClient(() =>
+						interaction.editReply({
+							content: "An error occurred while marking the solution",
+						}),
+					);
 					return yield* Effect.fail(error);
 				}),
 			),
 		);
 
 		if (!channelSettings || !channelSettings.flags) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Channel settings not found",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "Channel settings not found",
+				}),
+			);
 			return;
 		}
 
@@ -300,17 +253,12 @@ export function handleMarkSolutionCommand(
 			},
 		});
 
-		yield* Effect.tryPromise({
-			try: () =>
-				interaction.editReply({
-					embeds: [embed],
-					components: components ? [components] : undefined,
-				}),
-			catch: (error) => {
-				console.error("Error editing reply:", error);
-				return error;
-			},
-		});
+		yield* discord.callClient(() =>
+			interaction.editReply({
+				embeds: [embed],
+				components: components ? [components] : undefined,
+			}),
+		);
 	});
 }
 

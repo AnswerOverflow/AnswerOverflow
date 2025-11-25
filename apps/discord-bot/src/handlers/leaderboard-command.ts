@@ -32,22 +32,20 @@ export function handleLeaderboardCommand(
 ): Effect.Effect<void, unknown, Database> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
+		const discord = yield* Discord;
 
 		const isEphemeral = interaction.options.getBoolean("ephemeral") ?? false;
 
-		yield* Effect.tryPromise({
-			try: () => interaction.deferReply({ ephemeral: isEphemeral }),
-			catch: (error) => error,
-		});
+		yield* discord.callClient(() =>
+			interaction.deferReply({ ephemeral: isEphemeral }),
+		);
 
 		if (!interaction.guildId) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "This command can only be used in a server",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "This command can only be used in a server",
+				}),
+			);
 			return;
 		}
 
@@ -60,13 +58,11 @@ export function handleLeaderboardCommand(
 		const server = serverLiveData;
 
 		if (!server) {
-			yield* Effect.tryPromise({
-				try: () =>
-					interaction.editReply({
-						content: "Server not found in database",
-					}),
-				catch: () => undefined,
-			});
+			yield* discord.callClient(() =>
+				interaction.editReply({
+					content: "Server not found in database",
+				}),
+			);
 			return;
 		}
 
@@ -107,17 +103,12 @@ export function handleLeaderboardCommand(
 					),
 				];
 
-		yield* Effect.tryPromise({
-			try: () =>
-				interaction.editReply({
-					embeds: [embed],
-					components,
-				}),
-			catch: (error) => {
-				console.error("Error editing reply:", error);
-				return error;
-			},
-		});
+		yield* discord.callClient(() =>
+			interaction.editReply({
+				embeds: [embed],
+				components,
+			}),
+		);
 	});
 }
 
