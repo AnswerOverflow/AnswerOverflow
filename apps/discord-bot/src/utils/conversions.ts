@@ -13,6 +13,7 @@ import {
 	type GuildBasedChannel,
 	type GuildChannel,
 	type Message,
+	MessageType,
 	type NewsChannel,
 	type PublicThreadChannel,
 	type TextChannel,
@@ -208,7 +209,8 @@ export async function toAOMessage(
 		: undefined;
 
 	const childThreadId =
-		message.type === 18 && message.channel.isThread()
+		message.type === MessageType.ThreadStarterMessage &&
+		message.channel.isThread()
 			? message.channelId
 			: undefined;
 
