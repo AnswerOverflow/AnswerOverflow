@@ -126,3 +126,13 @@ export async function getDiscordAccountWithToken(
 		accessToken: accountResult.accessToken,
 	};
 }
+
+export async function requireAuth(
+	ctx: QueryCtx | MutationCtx | ActionCtx,
+): Promise<{ accountId: bigint; accessToken: string }> {
+	const account = await getDiscordAccountWithToken(ctx);
+	if (!account) {
+		throw new Error("Not authenticated");
+	}
+	return account;
+}
