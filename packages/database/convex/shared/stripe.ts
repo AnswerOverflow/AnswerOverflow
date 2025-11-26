@@ -29,6 +29,7 @@ export function getPlanFromPriceId(priceId: string): Plan {
 export async function createStripeCustomer(input: {
 	name: string;
 	serverId: string;
+	initiatedByUserId?: string;
 }): Promise<Stripe.Customer> {
 	const stripe = getStripeClient();
 	return stripe.customers.create({
@@ -37,6 +38,7 @@ export async function createStripeCustomer(input: {
 		metadata: {
 			server_name: input.name,
 			server_id: input.serverId,
+			initiated_by_user_id: input.initiatedByUserId ?? "",
 		},
 	});
 }
@@ -45,12 +47,14 @@ export async function updateStripeCustomerMetadata(input: {
 	customerId: string;
 	name: string;
 	serverId: string;
+	initiatedByUserId?: string;
 }): Promise<Stripe.Customer> {
 	const stripe = getStripeClient();
 	return stripe.customers.update(input.customerId, {
 		metadata: {
 			server_name: input.name,
 			server_id: input.serverId,
+			initiated_by_user_id: input.initiatedByUserId ?? "",
 		},
 	});
 }

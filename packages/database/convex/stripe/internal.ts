@@ -1,15 +1,14 @@
 import { v } from "convex/values";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { internalMutation, internalQuery } from "../_generated/server";
+import { planValidator } from "../schema";
 
 export const getServerForStripe = internalQuery({
 	args: {
 		discordServerId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		return ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.discordServerId))
-			.first();
+		return getOneFrom(ctx.db, "servers", "by_discordId", args.discordServerId);
 	},
 });
 
@@ -19,10 +18,12 @@ export const updateServerStripeCustomer = internalMutation({
 		stripeCustomerId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const server = await ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.serverId))
-			.first();
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.serverId,
+		);
 
 		if (!server) {
 			throw new Error("Server not found");
@@ -38,14 +39,7 @@ export const updateServerSubscription = internalMutation({
 	args: {
 		stripeCustomerId: v.string(),
 		stripeSubscriptionId: v.union(v.string(), v.null()),
-		plan: v.union(
-			v.literal("FREE"),
-			v.literal("STARTER"),
-			v.literal("ADVANCED"),
-			v.literal("PRO"),
-			v.literal("ENTERPRISE"),
-			v.literal("OPEN_SOURCE"),
-		),
+		plan: planValidator,
 	},
 	handler: async (ctx, args) => {
 		const servers = await ctx.db.query("servers").collect();
