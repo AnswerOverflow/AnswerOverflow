@@ -32,7 +32,7 @@ export class UnknownDiscordError extends Data.TaggedError(
 
 export const createDiscordService = Effect.gen(function* () {
 	const client = yield* DiscordClient;
-	const token = yield* Config.string("DISCORD_BOT_TOKEN");
+	const token = yield* Config.string("DISCORD_TOKEN");
 
 	const activeHandlers = yield* Ref.make(
 		HashMap.empty<string, ReadonlyArray<Fiber.RuntimeFiber<void, unknown>>>(),
