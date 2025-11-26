@@ -1,11 +1,17 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import {
 	enrichedMessageWithServerAndChannels,
 	searchMessages,
 } from "../shared/dataAccess";
-import { CHANNEL_TYPE, getFirstMessageInChannel } from "../shared/shared";
+import {
+	CHANNEL_TYPE,
+	getDiscordAccountById,
+	getFirstMessageInChannel,
+	isThreadType,
+} from "../shared/shared";
 import { publicQuery } from "./custom_functions";
 
 export const publicSearch = publicQuery({
@@ -69,5 +75,194 @@ export const getRecentThreads = publicQuery({
 			isDone: paginatedResult.isDone,
 			continueCursor: paginatedResult.continueCursor,
 		};
+	},
+});
+
+export const getUserById = publicQuery({
+	args: {
+		userId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const userId = BigInt(args.userId);
+		const user = await getDiscordAccountById(ctx, userId);
+		if (!user) {
+			return null;
+		}
+		return {
+			id: user.id.toString(),
+			name: user.name,
+			avatar: user.avatar,
+		};
+	},
+});
+
+export const getUserPosts = publicQuery({
+	args: {
+		userId: v.string(),
+		serverId: v.optional(v.string()),
+		paginationOpts: paginationOptsValidator,
+	},
+	handler: async (ctx, args) => {
+		const userId = BigInt(args.userId);
+
+		const paginatedResult = await ctx.db
+			.query("messages")
+			.withIndex("by_authorId", (q) => q.eq("authorId", userId))
+			.order("desc")
+			.paginate(args.paginationOpts);
+
+		const serverIdFilter = args.serverId ? BigInt(args.serverId) : null;
+
+		const results = Arr.filter(
+			await Promise.all(
+				paginatedResult.page.map(async (message) => {
+					if (serverIdFilter && message.serverId !== serverIdFilter) {
+						return null;
+					}
+
+					const channel = await getOneFrom(
+						ctx.db,
+						"channels",
+						"by_discordChannelId",
+						message.channelId,
+						"id",
+					);
+
+					if (!channel || !isThreadType(channel.type)) {
+						return null;
+					}
+
+					const firstMessage = await getFirstMessageInChannel(ctx, channel.id);
+					if (!firstMessage || firstMessage.id !== message.id) {
+						return null;
+					}
+
+					const enriched = await enrichedMessageWithServerAndChannels(
+						ctx,
+						message,
+					);
+					if (!enriched) {
+						return null;
+					}
+					return enriched;
+				}),
+			),
+			Predicate.isNotNullable,
+		);
+
+		return {
+			page: results,
+			isDone: paginatedResult.isDone,
+			continueCursor: paginatedResult.continueCursor,
+		};
+	},
+});
+
+export const getUserComments = publicQuery({
+	args: {
+		userId: v.string(),
+		serverId: v.optional(v.string()),
+		paginationOpts: paginationOptsValidator,
+	},
+	handler: async (ctx, args) => {
+		const userId = BigInt(args.userId);
+
+		const paginatedResult = await ctx.db
+			.query("messages")
+			.withIndex("by_authorId", (q) => q.eq("authorId", userId))
+			.order("desc")
+			.paginate(args.paginationOpts);
+
+		const serverIdFilter = args.serverId ? BigInt(args.serverId) : null;
+
+		const results = Arr.filter(
+			await Promise.all(
+				paginatedResult.page.map(async (message) => {
+					if (serverIdFilter && message.serverId !== serverIdFilter) {
+						return null;
+					}
+
+					const channel = await getOneFrom(
+						ctx.db,
+						"channels",
+						"by_discordChannelId",
+						message.channelId,
+						"id",
+					);
+
+					if (!channel || !isThreadType(channel.type)) {
+						return null;
+					}
+
+					const firstMessage = await getFirstMessageInChannel(ctx, channel.id);
+					if (!firstMessage || firstMessage.id === message.id) {
+						return null;
+					}
+
+					const enriched = await enrichedMessageWithServerAndChannels(
+						ctx,
+						message,
+					);
+					if (!enriched) {
+						return null;
+					}
+					return enriched;
+				}),
+			),
+			Predicate.isNotNullable,
+		);
+
+		return {
+			page: results,
+			isDone: paginatedResult.isDone,
+			continueCursor: paginatedResult.continueCursor,
+		};
+	},
+});
+
+export const getServersUserHasPostedIn = publicQuery({
+	args: {
+		userId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const userId = BigInt(args.userId);
+
+		const messages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_authorId",
+			userId,
+			"authorId",
+		);
+
+		const serverIds = new Set<bigint>();
+		for (const message of messages) {
+			serverIds.add(message.serverId);
+		}
+
+		const servers = Arr.filter(
+			await Promise.all(
+				Array.from(serverIds).map(async (serverId) => {
+					const server = await getOneFrom(
+						ctx.db,
+						"servers",
+						"by_discordId",
+						serverId,
+					);
+					if (!server || server.kickedTime) {
+						return null;
+					}
+					return {
+						id: server.discordId.toString(),
+						name: server.name,
+						icon: server.icon,
+						discordId: server.discordId,
+					};
+				}),
+			),
+			Predicate.isNotNullable,
+		);
+
+		return servers;
 	},
 });

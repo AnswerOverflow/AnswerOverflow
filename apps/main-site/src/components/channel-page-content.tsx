@@ -1,8 +1,19 @@
+"use client";
+
 import type { api } from "@packages/database/convex/_generated/api";
+import { Button } from "@packages/ui/components/button";
 import { Link } from "@packages/ui/components/link";
 import { MessageBody } from "@packages/ui/components/message-body";
+import {
+	Sheet,
+	SheetContent,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "@packages/ui/components/sheet";
 import type { FunctionReturnType } from "convex/server";
-import { Hash, MessageSquare } from "lucide-react";
+import { ChevronDown, Hash, MessageSquare } from "lucide-react";
+import { useState } from "react";
 
 type ChannelPageData = NonNullable<
 	FunctionReturnType<typeof api.private.channels.getChannelPageData>
@@ -33,6 +44,64 @@ function formatRelativeTime(date: Date): string {
 	return date.toLocaleDateString();
 }
 
+function MobileChannelSelector({
+	channels,
+	selectedChannel,
+	serverDiscordId,
+}: {
+	channels: ChannelPageData["channels"];
+	selectedChannel: ChannelPageData["selectedChannel"];
+	serverDiscordId: bigint;
+}) {
+	const [open, setOpen] = useState(false);
+
+	return (
+		<Sheet open={open} onOpenChange={setOpen}>
+			<SheetTrigger asChild>
+				<Button variant="outline" className="md:hidden flex items-center gap-2">
+					{selectedChannel &&
+						(() => {
+							const Icon = getChannelIcon(selectedChannel.type);
+							return <Icon className="h-4 w-4" />;
+						})()}
+					<span className="truncate max-w-[150px]">
+						{selectedChannel?.name ?? "Select channel"}
+					</span>
+					<ChevronDown className="h-4 w-4 shrink-0" />
+				</Button>
+			</SheetTrigger>
+			<SheetContent side="left" className="w-[280px] p-0">
+				<SheetHeader className="border-b border-border">
+					<SheetTitle>Channels</SheetTitle>
+				</SheetHeader>
+				<nav className="flex-1 overflow-y-auto p-2">
+					<div className="space-y-1">
+						{channels.map((channel) => {
+							const isSelected = channel.id === selectedChannel?.id;
+							const Icon = getChannelIcon(channel.type);
+							return (
+								<Link
+									key={channel.id.toString()}
+									href={`/c/${serverDiscordId.toString()}/${channel.id.toString()}`}
+									onClick={() => setOpen(false)}
+									className={`group flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+										isSelected
+											? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+											: "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
+									}`}
+								>
+									<Icon className="h-4 w-4 shrink-0" />
+									<span className="truncate flex-1">{channel.name}</span>
+								</Link>
+							);
+						})}
+					</div>
+				</nav>
+			</SheetContent>
+		</Sheet>
+	);
+}
+
 export function ChannelPageContent({
 	server,
 	channels,
@@ -52,19 +121,30 @@ export function ChannelPageContent({
 								className="w-16 h-16 rounded-full"
 							/>
 						)}
-						<div>
+						<div className="flex-1 min-w-0">
 							<div className="flex items-center gap-2">
 								{selectedChannel &&
 									(() => {
 										const Icon = getChannelIcon(selectedChannel.type);
-										return <Icon className="h-5 w-5 text-muted-foreground" />;
+										return (
+											<Icon className="h-5 w-5 text-muted-foreground hidden md:block" />
+										);
 									})()}
-								<h1 className="text-3xl font-bold text-foreground">
+								<h1 className="text-2xl md:text-3xl font-bold text-foreground truncate">
 									{selectedChannel?.name ?? "Channel"}
 								</h1>
 							</div>
-							<p className="text-muted-foreground mt-1">in {server.name}</p>
+							<p className="text-muted-foreground mt-1 text-sm md:text-base">
+								in {server.name}
+							</p>
 						</div>
+					</div>
+					<div className="mt-4">
+						<MobileChannelSelector
+							channels={channels}
+							selectedChannel={selectedChannel}
+							serverDiscordId={server.discordId}
+						/>
 					</div>
 				</div>
 
@@ -116,14 +196,14 @@ export function ChannelPageContent({
 										<Link
 											key={thread.id.toString()}
 											href={`/m/${message.message.id.toString()}`}
-											className="block rounded-lg border border-border bg-card p-5 transition-all hover:border-sidebar-border hover:bg-accent/50"
+											className="block rounded-lg border border-border bg-card p-4 md:p-5 transition-all hover:border-sidebar-border hover:bg-accent/50"
 										>
 											<div className="flex flex-col gap-2">
-												<div className="flex items-center justify-between">
-													<h3 className="font-semibold text-card-foreground line-clamp-2">
+												<div className="flex items-start justify-between gap-2">
+													<h3 className="font-semibold text-card-foreground line-clamp-2 text-sm md:text-base">
 														{thread.name}
 													</h3>
-													<div className="text-xs text-muted-foreground shrink-0 ml-2">
+													<div className="text-xs text-muted-foreground shrink-0">
 														{formattedDate}
 													</div>
 												</div>

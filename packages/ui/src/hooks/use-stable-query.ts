@@ -1,4 +1,4 @@
-import { usePaginatedQuery, useQuery } from "convex/react";
+import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
 import { useRef } from "react";
 
 /**
@@ -15,17 +15,23 @@ import { useRef } from "react";
  */
 export const useStableQuery = ((name, ...args) => {
 	const result = useQuery(name, ...args);
-	const stored = useRef(result); // ref objects are stable between rerenders
+	const stored = useRef(result);
 
-	// result is only undefined while data is loading
-	// if a freshly loaded result is available, use the ref to store it
 	if (result !== undefined) {
 		stored.current = result;
 	}
 
-	// undefined on first load, stale data while loading, fresh data after loading
 	return stored.current;
 }) as typeof useQuery;
+
+/**
+ * Hook that waits for authentication before returning true.
+ * Used to skip queries until auth is ready.
+ */
+export function useIsAuthReady() {
+	const { isAuthenticated, isLoading } = useConvexAuth();
+	return !isLoading && isAuthenticated;
+}
 
 /**
  * Drop-in replacement for usePaginatedQuery for use with a parametrized query.
@@ -34,18 +40,31 @@ export const useStableQuery = ((name, ...args) => {
  * to return the previously loaded results until the new results have finished
  * loading.
  *
- * See https://stack.convex.dev/help-my-app-is-overreacting for details.
- *
  * @param name - string naming the query function
- * @param ...args - arguments to be passed to the query function
+ * @param args - arguments to be passed to the query function
+ * @param options - pagination options including initialNumItems
  * @returns UsePaginatedQueryResult
  */
-export const useStablePaginatedQuery = ((name, ...args) => {
-	const result = usePaginatedQuery(name, ...args);
-	const stored = useRef(result); // ref objects are stable between rerenders
+export const useStablePaginatedQuery = ((name, args, options) => {
+	const result = usePaginatedQuery(name, args, options);
+	const stored = useRef(result);
 
-	// If data is still loading, wait and do nothing
-	// If data has finished loading, store the result
+	if (result.status !== "LoadingMore" && result.status !== "LoadingFirstPage") {
+		stored.current = result;
+	}
+
+	return stored.current;
+}) as typeof usePaginatedQuery;
+
+/**
+ * Authenticated version of useStablePaginatedQuery.
+ * Waits for authentication before making queries to avoid "Not authenticated" errors.
+ */
+export const useAuthenticatedStablePaginatedQuery = ((name, args, options) => {
+	const isAuthReady = useIsAuthReady();
+	const result = usePaginatedQuery(name, isAuthReady ? args : "skip", options);
+	const stored = useRef(result);
+
 	if (result.status !== "LoadingMore" && result.status !== "LoadingFirstPage") {
 		stored.current = result;
 	}
