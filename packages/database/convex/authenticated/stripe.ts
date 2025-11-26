@@ -1,16 +1,17 @@
-import { v } from "convex/values";
-import { action } from "../_generated/server";
-import { internal } from "../_generated/api";
-import { getDiscordAccountWithToken } from "../shared/auth";
-import type { ActionCtx } from "../client";
+"use node";
 
-async function requireAuth(ctx: ActionCtx) {
-	const account = await getDiscordAccountWithToken(ctx);
-	if (!account) {
-		throw new Error("Not authenticated");
-	}
-	return account;
-}
+import { v } from "convex/values";
+import { internal } from "../_generated/api";
+import { authenticatedAction } from "../client";
+import { requireAuthWithManageGuild } from "../shared/auth";
+import {
+	createStripeCustomer,
+	createCheckoutSession as createStripeCheckoutSession,
+	createBillingPortalSession as createStripeBillingPortalSession,
+	fetchSubscriptionInfo,
+	STRIPE_PLAN_PRICE_IDS,
+	updateStripeCustomerMetadata,
+} from "../shared/stripe";
 
 type CheckoutResult = {
 	url: string | null;
@@ -38,72 +39,138 @@ type SubscriptionInfoResult =
 			hasSubscribedBefore: boolean;
 	  };
 
-export const createCheckoutSession = action({
+export const createCheckoutSession = authenticatedAction({
 	args: {
 		serverId: v.int64(),
 		plan: v.union(v.literal("STARTER"), v.literal("ADVANCED")),
 		successUrl: v.string(),
 		cancelUrl: v.string(),
 	},
-	returns: v.object({
-		url: v.union(v.string(), v.null()),
-		sessionId: v.string(),
-		hasSubscribedInPast: v.boolean(),
-	}),
 	handler: async (ctx, args): Promise<CheckoutResult> => {
-		await requireAuth(ctx);
-		const result: CheckoutResult = await ctx.runAction(
-			internal.authenticated.stripe_actions.createCheckoutSessionAction,
-			args,
+		const { discordAccountId, serverId, plan, successUrl, cancelUrl } = args;
+
+		await requireAuthWithManageGuild(ctx, serverId);
+
+		const server = await ctx.runQuery(
+			internal.stripe.internal.getServerForStripe,
+			{ discordServerId: serverId },
 		);
-		return result;
+
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		let customerId = server.stripeCustomerId;
+		if (!customerId) {
+			const customer = await createStripeCustomer({
+				name: server.name,
+				serverId: String(server.discordId),
+				initiatedByUserId: String(discordAccountId),
+			});
+			customerId = customer.id;
+
+			await ctx.runMutation(
+				internal.stripe.internal.updateServerStripeCustomer,
+				{
+					serverId,
+					stripeCustomerId: customerId,
+				},
+			);
+		} else {
+			await updateStripeCustomerMetadata({
+				customerId,
+				name: server.name,
+				serverId: String(server.discordId),
+				initiatedByUserId: String(discordAccountId),
+			});
+		}
+
+		const priceId =
+			plan === "STARTER"
+				? STRIPE_PLAN_PRICE_IDS.STARTER
+				: STRIPE_PLAN_PRICE_IDS.ADVANCED;
+
+		if (!priceId) {
+			throw new Error(`Price ID for plan ${plan} not configured`);
+		}
+
+		return createStripeCheckoutSession({
+			customerId,
+			priceId,
+			successUrl,
+			cancelUrl,
+		});
 	},
 });
 
-export const createBillingPortalSession = action({
+export const createBillingPortalSession = authenticatedAction({
 	args: {
 		serverId: v.int64(),
 		returnUrl: v.string(),
 	},
-	returns: v.object({
-		url: v.string(),
-	}),
 	handler: async (ctx, args): Promise<BillingPortalResult> => {
-		await requireAuth(ctx);
-		const result: BillingPortalResult = await ctx.runAction(
-			internal.authenticated.stripe_actions.createBillingPortalSessionAction,
-			args,
+		const { serverId, returnUrl } = args;
+
+		await requireAuthWithManageGuild(ctx, serverId);
+
+		const server = await ctx.runQuery(
+			internal.stripe.internal.getServerForStripe,
+			{ discordServerId: serverId },
 		);
-		return result;
+
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		if (!server.stripeCustomerId) {
+			throw new Error("Server does not have a Stripe customer");
+		}
+
+		return createStripeBillingPortalSession({
+			customerId: server.stripeCustomerId,
+			returnUrl,
+		});
 	},
 });
 
-export const getSubscriptionInfo = action({
+export const getSubscriptionInfo = authenticatedAction({
 	args: {
 		serverId: v.int64(),
 	},
-	returns: v.union(
-		v.object({
-			status: v.literal("active"),
-			subscriptionId: v.string(),
-			subscriptionStatus: v.string(),
-			cancelAt: v.union(v.number(), v.null()),
-			currentPeriodEnd: v.number(),
-			trialEnd: v.union(v.number(), v.null()),
-			isTrialActive: v.boolean(),
-			cancelAtPeriodEnd: v.boolean(),
-		}),
-		v.object({
-			status: v.literal("inactive"),
-			hasSubscribedBefore: v.boolean(),
-		}),
-	),
 	handler: async (ctx, args): Promise<SubscriptionInfoResult> => {
-		await requireAuth(ctx);
-		const result: SubscriptionInfoResult = await ctx.runAction(
-			internal.authenticated.stripe_actions.getSubscriptionInfoAction,
-			args,
+		const { serverId } = args;
+
+		await requireAuthWithManageGuild(ctx, serverId);
+
+		const server = await ctx.runQuery(
+			internal.stripe.internal.getServerForStripe,
+			{ discordServerId: serverId },
 		);
-		return result;
+
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		if (!server.stripeSubscriptionId) {
+			return {
+				status: "inactive" as const,
+				hasSubscribedBefore: !!server.stripeCustomerId,
+			};
+		}
+
+		const subscriptionInfo = await fetchSubscriptionInfo(
+			server.stripeSubscriptionId,
+		);
+
+		return {
+			status: "active" as const,
+			subscriptionId: subscriptionInfo.id,
+			subscriptionStatus: subscriptionInfo.status,
+			cancelAt: subscriptionInfo.cancelAt,
+			currentPeriodEnd: subscriptionInfo.currentPeriodEnd,
+			trialEnd: subscriptionInfo.trialEnd,
+			isTrialActive: subscriptionInfo.isTrialActive,
+			cancelAtPeriodEnd: subscriptionInfo.cancelAtPeriodEnd,
+		};
 	},
 });

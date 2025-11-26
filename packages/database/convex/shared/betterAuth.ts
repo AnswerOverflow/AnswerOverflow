@@ -3,6 +3,9 @@ import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
+import type { Plan } from "../schema";
+
+export type { Plan };
 
 const getTrustedOrigins = (siteUrl: string): string[] => {
 	const origins = [siteUrl];
@@ -17,14 +20,6 @@ const getTrustedOrigins = (siteUrl: string): string[] => {
 };
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
-
-export type Plan =
-	| "FREE"
-	| "STARTER"
-	| "ADVANCED"
-	| "PRO"
-	| "ENTERPRISE"
-	| "OPEN_SOURCE";
 
 export const PLAN_LIMITS: Record<
 	Plan,
