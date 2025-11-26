@@ -217,7 +217,7 @@ export const DiscordMarkdown = ({
 	}
 	const parsed = parse(children, "normal");
 	return (
-		<div className="prose">
+		<div>
 			{renderASTNode(
 				parsed,
 				0,
@@ -270,7 +270,7 @@ export function DiscordUIMessage({
 	}
 
 	return (
-		<div className="prose">
+		<div>
 			<blockquote className="quote">
 				<div className="space-x-1">
 					<CornerUpRight className="inline-flex size-4" />
