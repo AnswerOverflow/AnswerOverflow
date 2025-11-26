@@ -11,12 +11,7 @@ export function SiteNavbar() {
 	const router = useRouter();
 	const pathname = usePathname();
 	const { data: session } = authClient.useSession();
-	const [mounted, setMounted] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
-
-	useEffect(() => {
-		setMounted(true);
-	}, []);
 
 	if (pathname?.startsWith("/dashboard")) {
 		return null;
@@ -48,7 +43,7 @@ export function SiteNavbar() {
 			searchBar={searchBar}
 			showSearch={true}
 			searchHref="/search"
-			showGetStarted={mounted ? !session?.user : true}
+			showGetStarted={!session?.user}
 			getStartedProps={{
 				href: "/dashboard",
 				children: "Get Started",
