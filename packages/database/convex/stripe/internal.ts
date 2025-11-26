@@ -42,9 +42,11 @@ export const updateServerSubscription = internalMutation({
 		plan: planValidator,
 	},
 	handler: async (ctx, args) => {
-		const servers = await ctx.db.query("servers").collect();
-		const server = servers.find(
-			(s) => s.stripeCustomerId === args.stripeCustomerId,
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_stripeCustomerId",
+			args.stripeCustomerId,
 		);
 
 		if (!server) {

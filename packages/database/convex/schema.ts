@@ -206,7 +206,9 @@ export type Reaction = Infer<typeof reactionSchema>;
 export type Embed = Infer<typeof embedSchema>;
 
 export default defineSchema({
-	servers: defineTable(serverSchema).index("by_discordId", ["discordId"]),
+	servers: defineTable(serverSchema)
+		.index("by_discordId", ["discordId"])
+		.index("by_stripeCustomerId", ["stripeCustomerId"]),
 	serverPreferences: defineTable(serverPreferencesSchema)
 		.index("by_serverId", ["serverId"])
 		.index("by_customDomain", ["customDomain"]),

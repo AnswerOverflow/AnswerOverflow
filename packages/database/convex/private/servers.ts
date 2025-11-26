@@ -3,7 +3,7 @@ import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { privateMutation, privateQuery } from "../client";
-import { serverSchema } from "../schema";
+import { planValidator, serverSchema } from "../schema";
 import { CHANNEL_TYPE, isThreadType } from "../shared/shared";
 
 const DEFAULT_CHANNEL_SETTINGS = {
@@ -260,10 +260,7 @@ export const findByDiscordId = privateQuery({
 		discordServerId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		return ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.discordServerId))
-			.first();
+		return getOneFrom(ctx.db, "servers", "by_discordId", args.discordServerId);
 	},
 });
 
@@ -273,10 +270,12 @@ export const updateStripeCustomer = privateMutation({
 		stripeCustomerId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const server = await ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.serverId))
-			.first();
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.serverId,
+		);
 
 		if (!server) {
 			throw new Error("Server not found");
@@ -292,20 +291,15 @@ export const updateStripeSubscription = privateMutation({
 	args: {
 		serverId: v.int64(),
 		stripeSubscriptionId: v.union(v.string(), v.null()),
-		plan: v.union(
-			v.literal("FREE"),
-			v.literal("STARTER"),
-			v.literal("ADVANCED"),
-			v.literal("PRO"),
-			v.literal("ENTERPRISE"),
-			v.literal("OPEN_SOURCE"),
-		),
+		plan: planValidator,
 	},
 	handler: async (ctx, args) => {
-		const server = await ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.serverId))
-			.first();
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.serverId,
+		);
 
 		if (!server) {
 			throw new Error("Server not found");
@@ -323,21 +317,11 @@ export const findServerByStripeCustomerId = privateQuery({
 		stripeCustomerId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const servers = await ctx.db.query("servers").collect();
-		return servers.find(
-			(server) => server.stripeCustomerId === args.stripeCustomerId,
-		);
-	},
-});
-
-export const findServerByStripeSubscriptionId = privateQuery({
-	args: {
-		stripeSubscriptionId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const servers = await ctx.db.query("servers").collect();
-		return servers.find(
-			(server) => server.stripeSubscriptionId === args.stripeSubscriptionId,
+		return getOneFrom(
+			ctx.db,
+			"servers",
+			"by_stripeCustomerId",
+			args.stripeCustomerId,
 		);
 	},
 });
