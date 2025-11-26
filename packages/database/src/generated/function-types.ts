@@ -31,14 +31,18 @@ export const FUNCTION_TYPE_MAP = {
   "server_preferences.getServerPreferencesByServerId": "query",
   "server_preferences.upsertServerPreferences": "mutation",
   "servers.clearKickedTime": "mutation",
+  "servers.findByDiscordId": "query",
   "servers.findManyServersByDiscordId": "query",
   "servers.findManyServersById": "query",
+  "servers.findServerByStripeCustomerId": "query",
   "servers.getAllServers": "query",
   "servers.getBrowseServers": "query",
   "servers.getServerByDiscordId": "query",
   "servers.getServerByDiscordIdWithChannels": "query",
   "servers.getServerByDomain": "query",
   "servers.updateServer": "mutation",
+  "servers.updateStripeCustomer": "mutation",
+  "servers.updateStripeSubscription": "mutation",
   "servers.upsertServer": "mutation",
   "user_server_settings.findManyUserServerSettings": "query",
   "user_server_settings.findUserServerSettingsById": "query",
@@ -55,7 +59,7 @@ export const NAMESPACE_STRUCTURE = {
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageData","getTopQuestionSolversByServerId","getTotalMessageCount","upsertManyMessages","upsertMessage"],
   "server_preferences": ["getServerPreferencesByServerId","upsertServerPreferences"],
-  "servers": ["clearKickedTime","findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
+  "servers": ["clearKickedTime","findByDiscordId","findManyServersByDiscordId","findManyServersById","findServerByStripeCustomerId","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","updateStripeCustomer","updateStripeSubscription","upsertServer"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertUserServerSettings"]
 } as const;
 
