@@ -7,7 +7,6 @@
 | **Stripe Billing Integration** | Subscription management, checkout, customer portal, plan enforcement      | Schema exists, no implementation   |
 | **Custom Domain Routing**      | Multi-tenant routing for custom domains (Vercel domain API)               | UI exists, routing not implemented |
 | **Sitemap Generation**         | Per-server sitemaps for SEO (`/sitemap.xml`, `/c/[serverId]/sitemap.xml`) | Not implemented                    |
-| **OG Image Generation**        | Dynamic Open Graph images for message pages                               | Not implemented                    |
 
 ## Priority 2: High (User-Facing Features)
 
@@ -60,16 +59,6 @@
 - Robots.txt updates
 
 **Old code location:** `.context/AnswerOverflow/apps/main-site/src/app/sitemap.ts`
-
-### 4. OG Images (Critical for Social Sharing)
-
-**What's needed:**
-
-- Dynamic OG image generation for message pages
-- Server branding in images
-- Edge function for image generation (`@vercel/og`)
-
-**Old code location:** `.context/AnswerOverflow/apps/main-site/src/app/og/`
 
 ### 5. Analytics Dashboard UI (High)
 
