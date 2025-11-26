@@ -254,3 +254,90 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 		};
 	},
 });
+
+export const findByDiscordId = privateQuery({
+	args: {
+		discordServerId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		return ctx.db
+			.query("servers")
+			.withIndex("by_discordId", (q) => q.eq("discordId", args.discordServerId))
+			.first();
+	},
+});
+
+export const updateStripeCustomer = privateMutation({
+	args: {
+		serverId: v.int64(),
+		stripeCustomerId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const server = await ctx.db
+			.query("servers")
+			.withIndex("by_discordId", (q) => q.eq("discordId", args.serverId))
+			.first();
+
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		await ctx.db.patch(server._id, {
+			stripeCustomerId: args.stripeCustomerId,
+		});
+	},
+});
+
+export const updateStripeSubscription = privateMutation({
+	args: {
+		serverId: v.int64(),
+		stripeSubscriptionId: v.union(v.string(), v.null()),
+		plan: v.union(
+			v.literal("FREE"),
+			v.literal("STARTER"),
+			v.literal("ADVANCED"),
+			v.literal("PRO"),
+			v.literal("ENTERPRISE"),
+			v.literal("OPEN_SOURCE"),
+		),
+	},
+	handler: async (ctx, args) => {
+		const server = await ctx.db
+			.query("servers")
+			.withIndex("by_discordId", (q) => q.eq("discordId", args.serverId))
+			.first();
+
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		await ctx.db.patch(server._id, {
+			stripeSubscriptionId: args.stripeSubscriptionId ?? undefined,
+			plan: args.plan,
+		});
+	},
+});
+
+export const findServerByStripeCustomerId = privateQuery({
+	args: {
+		stripeCustomerId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const servers = await ctx.db.query("servers").collect();
+		return servers.find(
+			(server) => server.stripeCustomerId === args.stripeCustomerId,
+		);
+	},
+});
+
+export const findServerByStripeSubscriptionId = privateQuery({
+	args: {
+		stripeSubscriptionId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const servers = await ctx.db.query("servers").collect();
+		return servers.find(
+			(server) => server.stripeSubscriptionId === args.stripeSubscriptionId,
+		);
+	},
+});
