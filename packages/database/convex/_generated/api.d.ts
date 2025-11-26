@@ -12,6 +12,7 @@ import type * as authenticated_dashboard from "../authenticated/dashboard.js";
 import type * as authenticated_dashboard_mutations from "../authenticated/dashboard_mutations.js";
 import type * as authenticated_dashboard_queries from "../authenticated/dashboard_queries.js";
 import type * as authenticated_servers from "../authenticated/servers.js";
+import type * as authenticated_stripe_actions from "../authenticated/stripe_actions.js";
 import type * as client_authenticated from "../client/authenticated.js";
 import type * as client_guildManager from "../client/guildManager.js";
 import type * as client_index from "../client/index.js";
@@ -37,6 +38,8 @@ import type * as shared_messagePrivacy from "../shared/messagePrivacy.js";
 import type * as shared_permissions from "../shared/permissions.js";
 import type * as shared_publicSchemas from "../shared/publicSchemas.js";
 import type * as shared_shared from "../shared/shared.js";
+import type * as shared_stripe from "../shared/stripe.js";
+import type * as stripe_internal from "../stripe/internal.js";
 
 import type {
   ApiFromModules,
@@ -49,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   "authenticated/dashboard_mutations": typeof authenticated_dashboard_mutations;
   "authenticated/dashboard_queries": typeof authenticated_dashboard_queries;
   "authenticated/servers": typeof authenticated_servers;
+  "authenticated/stripe_actions": typeof authenticated_stripe_actions;
   "client/authenticated": typeof client_authenticated;
   "client/guildManager": typeof client_guildManager;
   "client/index": typeof client_index;
@@ -74,6 +78,8 @@ declare const fullApi: ApiFromModules<{
   "shared/permissions": typeof shared_permissions;
   "shared/publicSchemas": typeof shared_publicSchemas;
   "shared/shared": typeof shared_shared;
+  "shared/stripe": typeof shared_stripe;
+  "stripe/internal": typeof stripe_internal;
 }>;
 
 /**

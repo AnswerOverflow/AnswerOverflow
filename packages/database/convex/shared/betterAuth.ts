@@ -18,6 +18,61 @@ const getTrustedOrigins = (siteUrl: string): string[] => {
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
+export type Plan =
+	| "FREE"
+	| "STARTER"
+	| "ADVANCED"
+	| "PRO"
+	| "ENTERPRISE"
+	| "OPEN_SOURCE";
+
+export const PLAN_LIMITS: Record<
+	Plan,
+	{
+		customDomain: boolean;
+		subpath: boolean;
+		adFree: boolean;
+		prioritySupport: boolean;
+	}
+> = {
+	FREE: {
+		customDomain: false,
+		subpath: false,
+		adFree: false,
+		prioritySupport: false,
+	},
+	STARTER: {
+		customDomain: true,
+		subpath: false,
+		adFree: true,
+		prioritySupport: false,
+	},
+	ADVANCED: {
+		customDomain: true,
+		subpath: true,
+		adFree: true,
+		prioritySupport: true,
+	},
+	PRO: {
+		customDomain: true,
+		subpath: false,
+		adFree: true,
+		prioritySupport: false,
+	},
+	ENTERPRISE: {
+		customDomain: true,
+		subpath: true,
+		adFree: true,
+		prioritySupport: true,
+	},
+	OPEN_SOURCE: {
+		customDomain: true,
+		subpath: true,
+		adFree: true,
+		prioritySupport: true,
+	},
+};
+
 export const createAuth = (
 	ctx: GenericCtx<DataModel>,
 	{ optionsOnly } = { optionsOnly: false },
