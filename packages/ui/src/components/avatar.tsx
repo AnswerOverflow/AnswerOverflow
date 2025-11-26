@@ -45,7 +45,9 @@ function AvatarImage({
 					alt={props.alt}
 					width={props.width}
 					height={props.height}
-					className={cn("aspect-square size-full", className)}
+					className={cn("aspect-square m-0 size-full", className)}
+					// i dunno man, i dunno
+					style={{ margin: 0 }}
 					onError={() => setImageError(true)}
 				/>
 			)}
