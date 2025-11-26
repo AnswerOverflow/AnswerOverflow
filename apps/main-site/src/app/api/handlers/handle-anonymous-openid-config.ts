@@ -2,8 +2,7 @@ import type { Context } from "hono";
 import { getJWKSUri } from "../../../lib/anonymous-auth";
 
 export async function handleAnonymousOpenIDConfig(c: Context) {
-	const issuer =
-		process.env.ANONYMOUS_AUTH_DOMAIN ?? process.env.NEXT_PUBLIC_SITE_URL ?? "";
+	const issuer = process.env.ANONYMOUS_AUTH_DOMAIN ?? "";
 	const jwksUri = getJWKSUri();
 
 	return c.json({

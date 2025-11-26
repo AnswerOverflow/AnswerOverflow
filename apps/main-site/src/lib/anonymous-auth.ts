@@ -2,8 +2,7 @@ import { importJWK, type JWK, SignJWT } from "jose";
 
 const ANONYMOUS_AUTH_PRIVATE_KEY = process.env.ANONYMOUS_AUTH_PRIVATE_KEY;
 const ANONYMOUS_AUTH_KID = "anonymous-key-1";
-const ANONYMOUS_AUTH_DOMAIN =
-	process.env.ANONYMOUS_AUTH_DOMAIN ?? process.env.NEXT_PUBLIC_SITE_URL ?? "";
+const ANONYMOUS_AUTH_DOMAIN = process.env.ANONYMOUS_AUTH_DOMAIN ?? "";
 const ANONYMOUS_AUTH_APPLICATION_ID = "anonymous";
 
 let privateKeyPromise: Promise<CryptoKey> | null = null;

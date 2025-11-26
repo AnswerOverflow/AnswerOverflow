@@ -3,7 +3,7 @@ const stripTrailingSlash = (value: string) => {
 };
 
 export function getBaseUrl(hostOverride?: string) {
-	const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+	const siteUrl = process.env.ANONYMOUS_AUTH_DOMAIN;
 	if (siteUrl) {
 		return stripTrailingSlash(siteUrl);
 	}
