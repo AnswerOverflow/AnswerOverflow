@@ -2,7 +2,11 @@
 
 import { convexClient } from "@convex-dev/better-auth/client/plugins";
 import { ConvexQueryClient } from "@convex-dev/react-query";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+	QueryClient,
+	QueryClientProvider,
+	useQuery,
+} from "@tanstack/react-query";
 import { createAuthClient } from "better-auth/react";
 import {
 	ConvexProvider,
@@ -10,7 +14,7 @@ import {
 	ConvexReactClient,
 } from "convex/react";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 // biome-ignore lint/style/noNonNullAssertion: Setup
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
@@ -32,53 +36,38 @@ export const authClient = createAuthClient({
 	plugins: [convexClient()],
 });
 
-type AnonymousTokenCache = {
+type AnonymousTokenResponse = {
 	token: string;
+	sessionId: string;
 	expiresAt: number;
 };
 
 function useHybridAuth() {
 	const { data: session, isPending: isSessionPending } =
 		authClient.useSession();
-	const [anonymousTokenCache, setAnonymousTokenCache] =
-		useState<AnonymousTokenCache | null>(null);
-	const [isFetchingAnonymousToken, setIsFetchingAnonymousToken] =
-		useState(false);
-	const fetchPromiseRef = useRef<Promise<string | null> | null>(null);
 
-	const fetchAnonymousToken = useCallback(async (): Promise<string | null> => {
-		if (fetchPromiseRef.current) {
-			return fetchPromiseRef.current;
-		}
-
-		const promise = (async () => {
-			try {
-				setIsFetchingAnonymousToken(true);
+	const { data: anonymousTokenData, isPending: isAnonymousTokenPending } =
+		useQuery({
+			queryKey: ["anonymous-session"],
+			queryFn: async (): Promise<AnonymousTokenResponse | null> => {
 				const response = await fetch("/api/auth/anonymous-session");
 				if (!response.ok) {
 					return null;
 				}
-				const data = (await response.json()) as {
-					token: string;
-					sessionId: string;
-					expiresAt: number;
-				};
-				setAnonymousTokenCache({
-					token: data.token,
-					expiresAt: data.expiresAt,
-				});
-				return data.token;
-			} catch {
-				return null;
-			} finally {
-				setIsFetchingAnonymousToken(false);
-				fetchPromiseRef.current = null;
-			}
-		})();
-
-		fetchPromiseRef.current = promise;
-		return promise;
-	}, []);
+				return (await response.json()) as AnonymousTokenResponse;
+			},
+			enabled: !session,
+			staleTime: (query) => {
+				const data = query.state.data;
+				if (!data) return 0;
+				const now = Date.now();
+				const bufferTime = 30 * 1000;
+				const timeUntilExpiry = data.expiresAt - now - bufferTime;
+				return Math.max(0, timeUntilExpiry);
+			},
+			gcTime: Infinity,
+			retry: false,
+		});
 
 	const fetchAccessToken = useCallback(
 		async (_args: { forceRefreshToken: boolean }) => {
@@ -91,51 +80,35 @@ function useHybridAuth() {
 				}
 			}
 
-			const now = Date.now();
-			const bufferTime = 30 * 1000;
-
-			if (
-				anonymousTokenCache &&
-				anonymousTokenCache.expiresAt > now + bufferTime
-			) {
-				return anonymousTokenCache.token;
-			}
-
-			const token = await fetchAnonymousToken();
-			return token;
+			return anonymousTokenData?.token || null;
 		},
-		[session, anonymousTokenCache, fetchAnonymousToken],
+		[session, anonymousTokenData],
 	);
-
-	useEffect(() => {
-		if (!session && !anonymousTokenCache && !isFetchingAnonymousToken) {
-			fetchAnonymousToken();
-		}
-	}, [
-		session,
-		anonymousTokenCache,
-		isFetchingAnonymousToken,
-		fetchAnonymousToken,
-	]);
 
 	return useMemo(
 		() => ({
-			isLoading: isSessionPending || (!session && !anonymousTokenCache),
-			isAuthenticated: session !== null || anonymousTokenCache !== null,
+			isLoading: isSessionPending || (!session && isAnonymousTokenPending),
+			isAuthenticated: session !== null || anonymousTokenData !== null,
 			fetchAccessToken,
 		}),
-		[isSessionPending, session, anonymousTokenCache, fetchAccessToken],
+		[
+			isSessionPending,
+			session,
+			isAnonymousTokenPending,
+			anonymousTokenData,
+			fetchAccessToken,
+		],
 	);
 }
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
 	return (
-		<ConvexProvider client={convex}>
-			<ConvexProviderWithAuth client={convex} useAuth={useHybridAuth}>
-				<QueryClientProvider client={queryClient}>
+		<QueryClientProvider client={queryClient}>
+			<ConvexProvider client={convex}>
+				<ConvexProviderWithAuth client={convex} useAuth={useHybridAuth}>
 					{children}
-				</QueryClientProvider>
-			</ConvexProviderWithAuth>
-		</ConvexProvider>
+				</ConvexProviderWithAuth>
+			</ConvexProvider>
+		</QueryClientProvider>
 	);
 }
