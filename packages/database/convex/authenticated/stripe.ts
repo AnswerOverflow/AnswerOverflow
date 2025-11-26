@@ -2,8 +2,7 @@
 
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { authenticatedAction } from "../client";
-import { requireAuthWithManageGuild } from "../shared/auth";
+import { manageGuildAction } from "../client";
 import {
 	createStripeCustomer,
 	createCheckoutSession as createStripeCheckoutSession,
@@ -39,17 +38,14 @@ type SubscriptionInfoResult =
 			hasSubscribedBefore: boolean;
 	  };
 
-export const createCheckoutSession = authenticatedAction({
+export const createCheckoutSession = manageGuildAction({
 	args: {
-		serverId: v.int64(),
 		plan: v.union(v.literal("STARTER"), v.literal("ADVANCED")),
 		successUrl: v.string(),
 		cancelUrl: v.string(),
 	},
 	handler: async (ctx, args): Promise<CheckoutResult> => {
 		const { discordAccountId, serverId, plan, successUrl, cancelUrl } = args;
-
-		await requireAuthWithManageGuild(ctx, serverId);
 
 		const server = await ctx.runQuery(
 			internal.stripe.internal.getServerForStripe,
@@ -103,15 +99,12 @@ export const createCheckoutSession = authenticatedAction({
 	},
 });
 
-export const createBillingPortalSession = authenticatedAction({
+export const createBillingPortalSession = manageGuildAction({
 	args: {
-		serverId: v.int64(),
 		returnUrl: v.string(),
 	},
 	handler: async (ctx, args): Promise<BillingPortalResult> => {
 		const { serverId, returnUrl } = args;
-
-		await requireAuthWithManageGuild(ctx, serverId);
 
 		const server = await ctx.runQuery(
 			internal.stripe.internal.getServerForStripe,
@@ -133,14 +126,10 @@ export const createBillingPortalSession = authenticatedAction({
 	},
 });
 
-export const getSubscriptionInfo = authenticatedAction({
-	args: {
-		serverId: v.int64(),
-	},
+export const getSubscriptionInfo = manageGuildAction({
+	args: {},
 	handler: async (ctx, args): Promise<SubscriptionInfoResult> => {
 		const { serverId } = args;
-
-		await requireAuthWithManageGuild(ctx, serverId);
 
 		const server = await ctx.runQuery(
 			internal.stripe.internal.getServerForStripe,
@@ -158,19 +147,17 @@ export const getSubscriptionInfo = authenticatedAction({
 			};
 		}
 
-		const subscriptionInfo = await fetchSubscriptionInfo(
-			server.stripeSubscriptionId,
-		);
+		const info = await fetchSubscriptionInfo(server.stripeSubscriptionId);
 
 		return {
 			status: "active" as const,
-			subscriptionId: subscriptionInfo.id,
-			subscriptionStatus: subscriptionInfo.status,
-			cancelAt: subscriptionInfo.cancelAt,
-			currentPeriodEnd: subscriptionInfo.currentPeriodEnd,
-			trialEnd: subscriptionInfo.trialEnd,
-			isTrialActive: subscriptionInfo.isTrialActive,
-			cancelAtPeriodEnd: subscriptionInfo.cancelAtPeriodEnd,
+			subscriptionId: info.id,
+			subscriptionStatus: info.status,
+			cancelAt: info.cancelAt,
+			currentPeriodEnd: info.currentPeriodEnd,
+			trialEnd: info.trialEnd,
+			isTrialActive: info.isTrialActive,
+			cancelAtPeriodEnd: info.cancelAtPeriodEnd,
 		};
 	},
 });

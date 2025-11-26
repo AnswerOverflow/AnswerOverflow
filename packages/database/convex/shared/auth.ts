@@ -1,11 +1,9 @@
-import { api, components } from "../_generated/api";
+import { components } from "../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import {
-	DISCORD_PERMISSIONS,
 	findUserServerSettingsById,
 	getServerByDiscordId,
-	hasPermission,
 } from "../shared/shared";
 
 export async function getDiscordAccountIdFromAuth(
@@ -129,11 +127,6 @@ export async function getDiscordAccountWithToken(
 	};
 }
 
-function getBackendAccessToken(): string {
-	const token = process.env.BACKEND_ACCESS_TOKEN;
-	return token ?? "";
-}
-
 export async function requireAuth(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
 ): Promise<{ accountId: bigint; accessToken: string }> {
@@ -141,38 +134,5 @@ export async function requireAuth(
 	if (!account) {
 		throw new Error("Not authenticated");
 	}
-	return account;
-}
-
-export async function requireAuthWithManageGuild(
-	ctx: ActionCtx,
-	serverId: bigint,
-): Promise<{ accountId: bigint; accessToken: string }> {
-	const account = await requireAuth(ctx);
-	const backendAccessToken = getBackendAccessToken();
-
-	const settings = await ctx.runQuery(
-		api.private.user_server_settings.findUserServerSettingsById,
-		{
-			backendAccessToken,
-			userId: account.accountId,
-			serverId,
-		},
-	);
-
-	if (!settings) {
-		throw new Error("You are not a member of this server");
-	}
-
-	const hasAdminOrManageGuild =
-		hasPermission(settings.permissions, DISCORD_PERMISSIONS.Administrator) ||
-		hasPermission(settings.permissions, DISCORD_PERMISSIONS.ManageGuild);
-
-	if (!hasAdminOrManageGuild) {
-		throw new Error(
-			"You need Manage Guild or Administrator permission to perform this action",
-		);
-	}
-
 	return account;
 }
