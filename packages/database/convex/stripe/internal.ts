@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { internalMutation, internalQuery } from "../_generated/server";
+import { internalMutation, internalQuery } from "../client";
 import { planValidator } from "../schema";
 
 export const getServerForStripe = internalQuery({

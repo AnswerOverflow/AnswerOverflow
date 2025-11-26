@@ -1,10 +1,10 @@
 "use node";
 
 import { v } from "convex/values";
-import { internalAction } from "../_generated/server";
-import { internal } from "../_generated/api";
-import { verifyWebhookSignature, getPlanFromPriceId } from "../shared/stripe";
 import type Stripe from "stripe";
+import { internal } from "../_generated/api";
+import { internalAction } from "../client";
+import { getPlanFromPriceId, verifyWebhookSignature } from "../shared/stripe";
 
 export const handleStripeWebhook = internalAction({
 	args: {

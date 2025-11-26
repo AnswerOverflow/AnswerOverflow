@@ -1,7 +1,7 @@
 import { httpRouter } from "convex/server";
-import { httpAction } from "./_generated/server";
-import { authComponent, createAuth } from "./shared/betterAuth";
 import { internal } from "./_generated/api";
+import { httpAction } from "./client";
+import { authComponent, createAuth } from "./shared/betterAuth";
 
 const http = httpRouter();
 
