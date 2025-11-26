@@ -19,7 +19,8 @@
 		"clean": "rm -rf node_modules .turbo",
 		"test": "vitest run --no-watch --pool=forks",
 		"test:watch": "vitest",
-		"convex:knip": "bun scripts/find-unused-convex-functions.ts"
+		"convex:knip": "bun scripts/find-unused-convex-functions.ts",
+		"env:sync:prod": "bun run scripts/sync-env-prod.ts"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.940.0",
@@ -47,6 +48,7 @@
 		"@packages/observability": "workspace:*",
 		"@packages/test-utils": "workspace:*",
 		"chokidar-cli": "^3.0.0",
+		"dotenv": "^17.2.3",
 		"glob": "^11.0.3",
 		"vitest": "catalog:"
 	},
