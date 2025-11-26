@@ -12,14 +12,54 @@ import {
 } from "../shared/auth";
 import { getAuthIdentity } from "../shared/authIdentity";
 
+function validateBackendAccessToken(token: string | undefined): boolean {
+	if (!token) {
+		return false;
+	}
+
+	const expectedToken = process.env.BACKEND_ACCESS_TOKEN;
+	const isDev =
+		process.env.CONVEX_DEPLOYMENT === "dev" || !process.env.CONVEX_DEPLOYMENT;
+
+	if (!expectedToken) {
+		return false;
+	}
+
+	if (isDev && token === "TESTING") {
+		return true;
+	}
+
+	return token === expectedToken;
+}
+
 export const publicQuery = customQuery(query, {
 	args: {
 		discordAccountId: v.optional(v.string()),
 		anonymousSessionId: v.optional(v.string()),
-		type: v.optional(v.union(v.literal("signed-in"), v.literal("anonymous"))),
+		type: v.optional(
+			v.union(
+				v.literal("signed-in"),
+				v.literal("anonymous"),
+				v.literal("admin"),
+			),
+		),
 		rateLimitKey: v.optional(v.string()),
+		backendAccessToken: v.optional(v.string()),
 	},
 	input: async (ctx, args) => {
+		if (validateBackendAccessToken(args.backendAccessToken)) {
+			return {
+				ctx,
+				args: {
+					...args,
+					rateLimitKey: "admin",
+					discordAccountId: undefined,
+					anonymousSessionId: undefined,
+					type: "admin" as const,
+				},
+			};
+		}
+
 		const identity = await getAuthIdentity(ctx);
 		let anonymousSessionId: string | undefined;
 		if (!identity) {
@@ -65,17 +105,28 @@ export const publicQuery = customQuery(query, {
 export const publicMutation = customMutation(mutation, {
 	args: {
 		discordAccountId: v.optional(v.string()),
+		backendAccessToken: v.optional(v.string()),
+		type: v.optional(v.union(v.literal("signed-in"), v.literal("admin"))),
 	},
 	input: async (ctx, args) => {
-		const identity = await getAuthIdentity(ctx);
+		let discordAccountId: bigint | undefined;
+		let type: "signed-in" | "admin";
 
-		if (!identity || identity.audience !== "convex") {
-			throw new Error("Not authenticated or Discord account not linked");
-		}
+		if (validateBackendAccessToken(args.backendAccessToken)) {
+			discordAccountId = undefined;
+			type = "admin";
+		} else {
+			const identity = await getAuthIdentity(ctx);
 
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		if (!discordAccountId) {
-			throw new Error("Not authenticated or Discord account not linked");
+			if (!identity || identity.audience !== "convex") {
+				throw new Error("Not authenticated or Discord account not linked");
+			}
+
+			discordAccountId = (await getDiscordAccountIdFromAuth(ctx)) ?? undefined;
+			if (!discordAccountId) {
+				throw new Error("Not authenticated or Discord account not linked");
+			}
+			type = "signed-in";
 		}
 
 		return {
@@ -83,6 +134,7 @@ export const publicMutation = customMutation(mutation, {
 			args: {
 				...args,
 				discordAccountId,
+				type,
 			},
 		};
 	},
@@ -91,17 +143,28 @@ export const publicMutation = customMutation(mutation, {
 export const publicAction = customAction(action, {
 	args: {
 		discordAccountId: v.optional(v.string()),
+		backendAccessToken: v.optional(v.string()),
+		type: v.optional(v.union(v.literal("signed-in"), v.literal("admin"))),
 	},
 	input: async (ctx, args) => {
-		const identity = await getAuthIdentity(ctx);
+		let discordAccountId: bigint | undefined;
+		let type: "signed-in" | "admin";
 
-		if (!identity || identity.audience !== "convex") {
-			throw new Error("Not authenticated or Discord account not linked");
-		}
+		if (validateBackendAccessToken(args.backendAccessToken)) {
+			discordAccountId = undefined;
+			type = "admin";
+		} else {
+			const identity = await getAuthIdentity(ctx);
 
-		const discordAccountId = await getDiscordAccountIdFromAuth(ctx);
-		if (!discordAccountId) {
-			throw new Error("Not authenticated or Discord account not linked");
+			if (!identity || identity.audience !== "convex") {
+				throw new Error("Not authenticated or Discord account not linked");
+			}
+
+			discordAccountId = (await getDiscordAccountIdFromAuth(ctx)) ?? undefined;
+			if (!discordAccountId) {
+				throw new Error("Not authenticated or Discord account not linked");
+			}
+			type = "signed-in";
 		}
 
 		return {
@@ -109,6 +172,7 @@ export const publicAction = customAction(action, {
 			args: {
 				...args,
 				discordAccountId,
+				type,
 			},
 		};
 	},
