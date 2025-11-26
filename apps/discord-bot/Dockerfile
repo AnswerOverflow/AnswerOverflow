@@ -1,4 +1,4 @@
-FROM oven/bun:1.1.40 AS builder
+FROM oven/bun:1.3.3 AS builder
 
 
 # Set working directory
@@ -12,7 +12,7 @@ RUN bun --version
 RUN bun install --frozen-lockfile
 
 # Start a new stage for a smaller final image
-FROM oven/bun:1.1.40-slim
+FROM oven/bun:1.3.3-slim
 
 
 # Set working directory
