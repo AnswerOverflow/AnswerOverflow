@@ -3,6 +3,9 @@ import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
+import type { Plan } from "../schema";
+
+export type { Plan };
 
 const getTrustedOrigins = (siteUrl: string): string[] => {
 	const origins = [siteUrl];
@@ -17,6 +20,53 @@ const getTrustedOrigins = (siteUrl: string): string[] => {
 };
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
+
+export const PLAN_LIMITS: Record<
+	Plan,
+	{
+		customDomain: boolean;
+		subpath: boolean;
+		adFree: boolean;
+		prioritySupport: boolean;
+	}
+> = {
+	FREE: {
+		customDomain: false,
+		subpath: false,
+		adFree: false,
+		prioritySupport: false,
+	},
+	STARTER: {
+		customDomain: true,
+		subpath: false,
+		adFree: true,
+		prioritySupport: false,
+	},
+	ADVANCED: {
+		customDomain: true,
+		subpath: true,
+		adFree: true,
+		prioritySupport: true,
+	},
+	PRO: {
+		customDomain: true,
+		subpath: false,
+		adFree: true,
+		prioritySupport: false,
+	},
+	ENTERPRISE: {
+		customDomain: true,
+		subpath: true,
+		adFree: true,
+		prioritySupport: true,
+	},
+	OPEN_SOURCE: {
+		customDomain: true,
+		subpath: true,
+		adFree: true,
+		prioritySupport: true,
+	},
+};
 
 export const createAuth = (
 	ctx: GenericCtx<DataModel>,

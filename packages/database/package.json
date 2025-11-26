@@ -24,6 +24,7 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.940.0",
 		"@aws-sdk/lib-storage": "^3.940.0",
+		"@better-auth/stripe": "^1.4.2",
 		"@convex-dev/action-cache": "^0.3.0",
 		"@convex-dev/better-auth": "catalog:",
 		"@effect-aws/client-s3": "^1.10.6",
@@ -35,6 +36,7 @@
 		"discord-api-types": "^0.38.24",
 		"effect": "catalog:",
 		"posthog-node": "^4.2.0",
+		"stripe": "^20",
 		"unique-names-generator": "^4.7.1"
 	},
 	"devDependencies": {

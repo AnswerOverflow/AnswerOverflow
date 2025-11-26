@@ -10,6 +10,17 @@ const serverPreferencesSchema = v.object({
 	subpath: v.optional(v.string()),
 });
 
+export const planValidator = v.union(
+	v.literal("FREE"),
+	v.literal("STARTER"),
+	v.literal("ADVANCED"),
+	v.literal("PRO"),
+	v.literal("ENTERPRISE"),
+	v.literal("OPEN_SOURCE"),
+);
+
+export type Plan = Infer<typeof planValidator>;
+
 export const serverSchema = v.object({
 	discordId: v.int64(),
 	name: v.string(),
@@ -20,14 +31,7 @@ export const serverSchema = v.object({
 	vanityUrl: v.optional(v.string()),
 	stripeCustomerId: v.optional(v.string()),
 	stripeSubscriptionId: v.optional(v.string()),
-	plan: v.union(
-		v.literal("FREE"),
-		v.literal("STARTER"),
-		v.literal("ADVANCED"),
-		v.literal("PRO"),
-		v.literal("ENTERPRISE"),
-		v.literal("OPEN_SOURCE"),
-	),
+	plan: planValidator,
 	approximateMemberCount: v.number(),
 	preferencesId: v.optional(v.id("serverPreferences")),
 });
@@ -202,7 +206,9 @@ export type Reaction = Infer<typeof reactionSchema>;
 export type Embed = Infer<typeof embedSchema>;
 
 export default defineSchema({
-	servers: defineTable(serverSchema).index("by_discordId", ["discordId"]),
+	servers: defineTable(serverSchema)
+		.index("by_discordId", ["discordId"])
+		.index("by_stripeCustomerId", ["stripeCustomerId"]),
 	serverPreferences: defineTable(serverPreferencesSchema)
 		.index("by_serverId", ["serverId"])
 		.index("by_customDomain", ["customDomain"]),

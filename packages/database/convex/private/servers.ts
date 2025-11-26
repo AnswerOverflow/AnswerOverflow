@@ -3,7 +3,7 @@ import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { privateMutation, privateQuery } from "../client";
-import { serverSchema } from "../schema";
+import { planValidator, serverSchema } from "../schema";
 import { CHANNEL_TYPE, isThreadType } from "../shared/shared";
 
 const DEFAULT_CHANNEL_SETTINGS = {
@@ -252,5 +252,76 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 			server,
 			channels,
 		};
+	},
+});
+
+export const findByDiscordId = privateQuery({
+	args: {
+		discordServerId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		return getOneFrom(ctx.db, "servers", "by_discordId", args.discordServerId);
+	},
+});
+
+export const updateStripeCustomer = privateMutation({
+	args: {
+		serverId: v.int64(),
+		stripeCustomerId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.serverId,
+		);
+
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		await ctx.db.patch(server._id, {
+			stripeCustomerId: args.stripeCustomerId,
+		});
+	},
+});
+
+export const updateStripeSubscription = privateMutation({
+	args: {
+		serverId: v.int64(),
+		stripeSubscriptionId: v.union(v.string(), v.null()),
+		plan: planValidator,
+	},
+	handler: async (ctx, args) => {
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.serverId,
+		);
+
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		await ctx.db.patch(server._id, {
+			stripeSubscriptionId: args.stripeSubscriptionId ?? undefined,
+			plan: args.plan,
+		});
+	},
+});
+
+export const findServerByStripeCustomerId = privateQuery({
+	args: {
+		stripeCustomerId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		return getOneFrom(
+			ctx.db,
+			"servers",
+			"by_stripeCustomerId",
+			args.stripeCustomerId,
+		);
 	},
 });
