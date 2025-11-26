@@ -1,15 +1,15 @@
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
-import { runtime } from "../../../lib/runtime";
-import { UserPageClient } from "./user-page-client";
+import { runtime } from "../../../../lib/runtime";
+import { UserCommentsPageClient } from "./user-comments-client";
 
 type Props = {
 	params: Promise<{ userId: string }>;
 	searchParams: Promise<{ s?: string }>;
 };
 
-export default async function UserPage(props: Props) {
+export default async function UserCommentsPage(props: Props) {
 	const params = await props.params;
 	const searchParams = await props.searchParams;
 
@@ -30,10 +30,10 @@ export default async function UserPage(props: Props) {
 	}
 
 	return (
-		<UserPageClient
+		<UserCommentsPageClient
 			user={pageData.user}
 			servers={pageData.servers}
-			posts={pageData.posts}
+			comments={pageData.comments}
 			userId={params.userId}
 			serverId={searchParams.s}
 		/>
