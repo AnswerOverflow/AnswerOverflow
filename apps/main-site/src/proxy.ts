@@ -3,8 +3,6 @@ import { isOnMainSite, normalizeSubpath } from "@packages/ui/utils/links";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/notes"];
-
 const subpathTenants = [
 	{
 		contentDomain: "community.migaku.com",
@@ -23,10 +21,6 @@ const subpathTenants = [
 	},
 ];
 
-const isProtectedRoute = (pathname: string) => {
-	return PROTECTED_PREFIXES.some((route) => pathname.startsWith(route));
-};
-
 export function proxy(request: NextRequest) {
 	const url = request.nextUrl;
 	const { pathname } = url;
@@ -35,15 +29,6 @@ export function proxy(request: NextRequest) {
 
 	if (pathname.startsWith("/og") || pathname.startsWith("/ingest")) {
 		return NextResponse.next();
-	}
-
-	if (isProtectedRoute(pathname)) {
-		const sessionCookie = request.cookies.get("better-auth.session_token");
-		if (!sessionCookie) {
-			const signInUrl = new URL("/api/auth/sign-in", request.url);
-			signInUrl.searchParams.set("redirect", pathname + url.search);
-			return NextResponse.redirect(signInUrl);
-		}
 	}
 
 	const subpathTenant = subpathTenants.find(
