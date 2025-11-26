@@ -266,3 +266,113 @@ export const getServersUserHasPostedIn = publicQuery({
 		return servers;
 	},
 });
+
+export const getUserPageData = publicQuery({
+	args: {
+		userId: v.string(),
+		serverId: v.optional(v.string()),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const userId = BigInt(args.userId);
+		const user = await getDiscordAccountById(ctx, userId);
+		if (!user) {
+			return null;
+		}
+
+		const allMessages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_authorId",
+			userId,
+			"authorId",
+		);
+
+		const serverIds = new Set<bigint>();
+		for (const message of allMessages) {
+			serverIds.add(message.serverId);
+		}
+
+		const servers = Arr.filter(
+			await Promise.all(
+				Array.from(serverIds).map(async (serverId) => {
+					const server = await getOneFrom(
+						ctx.db,
+						"servers",
+						"by_discordId",
+						serverId,
+					);
+					if (!server || server.kickedTime) {
+						return null;
+					}
+					return {
+						id: server.discordId.toString(),
+						name: server.name,
+						icon: server.icon,
+						discordId: server.discordId,
+					};
+				}),
+			),
+			Predicate.isNotNullable,
+		);
+
+		const serverIdFilter = args.serverId ? BigInt(args.serverId) : null;
+		const limit = args.limit ?? 10;
+
+		const filteredMessages = serverIdFilter
+			? allMessages.filter((m) => m.serverId === serverIdFilter)
+			: allMessages;
+
+		const sortedMessages = filteredMessages.sort((a, b) =>
+			a.id > b.id ? -1 : a.id < b.id ? 1 : 0,
+		);
+
+		const posts = [];
+		const comments = [];
+
+		for (const message of sortedMessages) {
+			if (posts.length >= limit && comments.length >= limit) {
+				break;
+			}
+
+			const channel = await getOneFrom(
+				ctx.db,
+				"channels",
+				"by_discordChannelId",
+				message.channelId,
+				"id",
+			);
+
+			if (!channel || !isThreadType(channel.type)) {
+				continue;
+			}
+
+			const firstMessage = await getFirstMessageInChannel(ctx, channel.id);
+			if (!firstMessage) {
+				continue;
+			}
+
+			const enriched = await enrichedMessageWithServerAndChannels(ctx, message);
+			if (!enriched) {
+				continue;
+			}
+
+			if (firstMessage.id === message.id && posts.length < limit) {
+				posts.push(enriched);
+			} else if (firstMessage.id !== message.id && comments.length < limit) {
+				comments.push(enriched);
+			}
+		}
+
+		return {
+			user: {
+				id: user.id.toString(),
+				name: user.name,
+				avatar: user.avatar,
+			},
+			servers,
+			posts,
+			comments,
+		};
+	},
+});
