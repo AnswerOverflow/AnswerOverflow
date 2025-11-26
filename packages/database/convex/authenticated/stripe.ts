@@ -56,30 +56,35 @@ export const createCheckoutSession = manageGuildAction({
 			throw new Error("Server not found");
 		}
 
-		let customerId = server.stripeCustomerId;
-		if (!customerId) {
+		const ensureStripeCustomer = async (): Promise<string> => {
+			if (server.stripeCustomerId) {
+				await updateStripeCustomerMetadata({
+					customerId: server.stripeCustomerId,
+					name: server.name,
+					serverId: String(server.discordId),
+					initiatedByUserId: String(discordAccountId),
+				});
+				return server.stripeCustomerId;
+			}
+
 			const customer = await createStripeCustomer({
 				name: server.name,
 				serverId: String(server.discordId),
 				initiatedByUserId: String(discordAccountId),
 			});
-			customerId = customer.id;
 
 			await ctx.runMutation(
 				internal.stripe.internal.updateServerStripeCustomer,
 				{
 					serverId,
-					stripeCustomerId: customerId,
+					stripeCustomerId: customer.id,
 				},
 			);
-		} else {
-			await updateStripeCustomerMetadata({
-				customerId,
-				name: server.name,
-				serverId: String(server.discordId),
-				initiatedByUserId: String(discordAccountId),
-			});
-		}
+
+			return customer.id;
+		};
+
+		const customerId = await ensureStripeCustomer();
 
 		const priceId =
 			plan === "STARTER"
