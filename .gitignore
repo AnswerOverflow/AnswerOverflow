@@ -46,3 +46,5 @@ temp-*
 
 # eslint
 .eslintcache
+.vercel
+.env*.local
