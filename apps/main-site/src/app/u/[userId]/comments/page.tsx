@@ -13,13 +13,11 @@ export default async function UserCommentsPage(props: Props) {
 	const params = await props.params;
 	const searchParams = await props.searchParams;
 
-	const serverId = searchParams.s ? BigInt(searchParams.s) : undefined;
-
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* database.private.discord_accounts.getUserPageData({
-			userId: BigInt(params.userId),
-			serverId,
+		const liveData = yield* database.public.search.getUserPageData({
+			userId: params.userId,
+			serverId: searchParams.s,
 			limit: 10,
 		});
 		return liveData;
