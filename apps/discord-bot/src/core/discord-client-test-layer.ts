@@ -8,7 +8,7 @@ import { createDiscordService, Discord } from "./discord-service";
 
 const DiscordTokenLayer = Layer.setConfigProvider(
 	ConfigProvider.fromJson({
-		DISCORD_BOT_TOKEN: "mock-token-not-used",
+		DISCORD_TOKEN: "mock-token-not-used",
 	}),
 );
 

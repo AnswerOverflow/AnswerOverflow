@@ -33,6 +33,7 @@ const nextConfig: NextConfig = {
 	reactCompiler: true,
 	experimental: {
 		turbopackFileSystemCacheForDev: true,
+		turbopackFileSystemCacheForBuild: true,
 	},
 	productionBrowserSourceMaps: true,
 	rewrites: async () => {
