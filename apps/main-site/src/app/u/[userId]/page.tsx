@@ -1,172 +1,41 @@
-"use client";
+import { Database } from "@packages/database/database";
+import { Effect } from "effect";
+import { notFound } from "next/navigation";
+import { runtime } from "../../../lib/runtime";
+import { UserPageClient } from "./user-page-client";
 
-import { api } from "@packages/database/convex/_generated/api";
-import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
-import {
-	DiscordAvatar,
-	type DiscordUser,
-} from "@packages/ui/components/discord-avatar";
-import { LinkButton } from "@packages/ui/components/link-button";
-import { ServerIcon } from "@packages/ui/components/server-icon";
-import { Skeleton } from "@packages/ui/components/skeleton";
-import {
-	ThreadCard,
-	ThreadCardSkeletonList,
-} from "@packages/ui/components/thread-card";
-import { useConvexAuth, useQuery } from "convex/react";
-import { useParams, useSearchParams } from "next/navigation";
-import { GiSpiderWeb } from "react-icons/gi";
+type Props = {
+	params: Promise<{ userId: string }>;
+	searchParams: Promise<{ s?: string }>;
+};
 
-function UserHeader({ user }: { user: DiscordUser }) {
+export default async function UserPage(props: Props) {
+	const params = await props.params;
+	const searchParams = await props.searchParams;
+
+	const serverId = searchParams.s ? BigInt(searchParams.s) : undefined;
+
+	const pageData = await Effect.gen(function* () {
+		const database = yield* Database;
+		const liveData = yield* database.private.discord_accounts.getUserPageData({
+			userId: BigInt(params.userId),
+			serverId,
+			limit: 10,
+		});
+		return liveData;
+	}).pipe(runtime.runPromise);
+
+	if (!pageData) {
+		return notFound();
+	}
+
 	return (
-		<div className="flex flex-row items-center gap-4">
-			<DiscordAvatar user={user} size={64} />
-			<span className="text-4xl font-semibold">{user.name}</span>
-		</div>
-	);
-}
-
-function ServerSelect({
-	server,
-	userId,
-	selected,
-}: {
-	server: { id: string; name: string; icon?: string; discordId: bigint };
-	userId: string;
-	selected: boolean;
-}) {
-	return (
-		<LinkButton
-			href={selected ? `/u/${userId}` : `/u/${userId}?s=${server.id}`}
-			variant={selected ? "secondary" : "outline"}
-			className="gap-2"
-		>
-			<ServerIcon server={server} size={24} />
-			<span>{server.name}</span>
-		</LinkButton>
-	);
-}
-
-function UserTabs({ userId }: { userId: string }) {
-	return (
-		<div className="flex flex-row gap-4">
-			<LinkButton
-				variant="outline"
-				selectedVariant="secondary"
-				href={`/u/${userId}`}
-			>
-				Posts
-			</LinkButton>
-			<LinkButton
-				variant="outline"
-				selectedVariant="secondary"
-				href={`/u/${userId}/comments`}
-			>
-				Comments
-			</LinkButton>
-		</div>
-	);
-}
-
-function UserPostsList({
-	userId,
-	serverId,
-}: {
-	userId: string;
-	serverId?: string;
-}) {
-	return (
-		<ConvexInfiniteList
-			query={api.public.search.getUserPosts}
-			queryArgs={{ userId, serverId }}
-			pageSize={10}
-			loader={<ThreadCardSkeletonList />}
-			renderItem={(result) => (
-				<ThreadCard
-					key={result.message.message.id.toString()}
-					result={result}
-				/>
-			)}
+		<UserPageClient
+			user={pageData.user}
+			servers={pageData.servers}
+			posts={pageData.posts}
+			userId={params.userId}
+			serverId={searchParams.s}
 		/>
-	);
-}
-
-function EmptyState({ message }: { message: string }) {
-	return (
-		<div className="flex flex-row items-center justify-start gap-4 py-8">
-			<GiSpiderWeb size={64} className="text-muted-foreground" />
-			<span className="text-xl">{message}</span>
-		</div>
-	);
-}
-
-export default function UserPage() {
-	const params = useParams<{ userId: string }>();
-	const searchParams = useSearchParams();
-	const auth = useConvexAuth();
-
-	const userId = params.userId;
-	const serverId = searchParams.get("s") ?? undefined;
-
-	const user = useQuery(
-		api.public.search.getUserById,
-		auth.isAuthenticated ? { userId } : "skip",
-	);
-
-	const servers = useQuery(
-		api.public.search.getServersUserHasPostedIn,
-		auth.isAuthenticated ? { userId } : "skip",
-	);
-
-	if (!auth.isAuthenticated) {
-		return (
-			<div className="rounded-lg border border-border bg-card p-8 text-center">
-				<p className="text-muted-foreground">
-					Please sign in to view user profiles.
-				</p>
-			</div>
-		);
-	}
-
-	if (user === undefined || servers === undefined) {
-		return (
-			<div className="flex flex-col gap-4">
-				<div className="flex flex-row items-center gap-4">
-					<Skeleton className="size-16 rounded-full" />
-					<Skeleton className="h-10 w-48" />
-				</div>
-				<ThreadCardSkeletonList />
-			</div>
-		);
-	}
-
-	if (user === null) {
-		return <EmptyState message="User not found" />;
-	}
-
-	return (
-		<div className="flex flex-col gap-4">
-			<UserHeader user={user} />
-
-			{servers.length > 1 && (
-				<>
-					<span className="text-xl">Explore posts from servers</span>
-					<div className="flex flex-row flex-wrap items-center gap-2">
-						{servers.map((server) => (
-							<ServerSelect
-								server={server}
-								key={server.id}
-								userId={userId}
-								selected={server.id === serverId}
-							/>
-						))}
-					</div>
-				</>
-			)}
-
-			<UserTabs userId={userId} />
-
-			<UserPostsList userId={userId} serverId={serverId} />
-		</div>
 	);
 }

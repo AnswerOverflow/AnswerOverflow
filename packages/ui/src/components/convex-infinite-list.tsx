@@ -9,7 +9,10 @@ import type {
 import type { ReactNode } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Virtuoso } from "react-virtuoso";
-import { useStablePaginatedQuery } from "../hooks/use-stable-query";
+import {
+	useAuthenticatedStablePaginatedQuery,
+	useStablePaginatedQuery,
+} from "../hooks/use-stable-query";
 
 type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	query: Query;
@@ -20,6 +23,7 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	height?: number;
 	loader?: ReactNode;
 	scrollThreshold?: number;
+	authenticated?: boolean;
 };
 
 export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
@@ -31,8 +35,12 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	height = 600,
 	loader = <div className="py-2 text-sm text-gray-500">Loading…</div>,
 	scrollThreshold = 0.8,
+	authenticated = true,
 }: ConvexInfiniteListProps<Query>) {
-	const { results, status, loadMore, isLoading } = useStablePaginatedQuery(
+	const useQueryHook = authenticated
+		? useAuthenticatedStablePaginatedQuery
+		: useStablePaginatedQuery;
+	const { results, status, loadMore, isLoading } = useQueryHook(
 		query,
 		queryArgs,
 		{ initialNumItems: pageSize },
