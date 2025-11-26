@@ -54,7 +54,14 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 		}
 	};
 
+	const isInitialLoading =
+		status === "LoadingFirstPage" && results.length === 0;
+
 	if (!virtualized) {
+		if (isInitialLoading) {
+			return <>{loader}</>;
+		}
+
 		return (
 			<InfiniteScroll
 				dataLength={results.length}
