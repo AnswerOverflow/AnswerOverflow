@@ -2,11 +2,10 @@
 
 ## Priority 1: Critical for Launch (Core Functionality)
 
-| Feature                        | Description                                                               | Status                             |
-| ------------------------------ | ------------------------------------------------------------------------- | ---------------------------------- |
-| **Stripe Billing Integration** | Subscription management, checkout, customer portal, plan enforcement      | Schema exists, no implementation   |
-| **Custom Domain Routing**      | Multi-tenant routing for custom domains (Vercel domain API)               | UI exists, routing not implemented |
-| **Sitemap Generation**         | Per-server sitemaps for SEO (`/sitemap.xml`, `/c/[serverId]/sitemap.xml`) | Not implemented                    |
+| Feature                   | Description                                                               | Status                             |
+| ------------------------- | ------------------------------------------------------------------------- | ---------------------------------- |
+| **Custom Domain Routing** | Multi-tenant routing for custom domains (Vercel domain API)               | UI exists, routing not implemented |
+| **Sitemap Generation**    | Per-server sitemaps for SEO (`/sitemap.xml`, `/c/[serverId]/sitemap.xml`) | Not implemented                    |
 
 ## Priority 2: High (User-Facing Features)
 
@@ -24,19 +23,6 @@
 ---
 
 ## Detailed Breakdown
-
-### 1. Stripe Billing (Critical)
-
-**What's needed:**
-
-- Stripe webhook handler (`/api/stripe/webhook`)
-- Checkout session creation
-- Customer portal redirect
-- Plan enforcement (gate features by plan)
-- Trial period handling (14 days)
-- Subscription status sync
-
-**Old code location:** `.context/AnswerOverflow/packages/payments/`
 
 ### 2. Custom Domain Routing (Critical)
 
@@ -79,10 +65,8 @@
 ## Recommended Implementation Order
 
 1. **Sitemap Generation** - Quick win, essential for SEO
-2. **OG Image Generation** - Quick win, essential for social sharing
-3. **Stripe Billing** - Required for monetization
-4. **Custom Domain Routing** - Paid feature, depends on Stripe
-5. **Analytics Dashboard UI** - Backend ready, just needs UI
+2. **Custom Domain Routing** - Paid feature, depends on Stripe
+3. **Analytics Dashboard UI** - Backend ready, just needs UI
 
 ---
 

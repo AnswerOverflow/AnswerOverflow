@@ -33,7 +33,6 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 								<Link
 									href={`/c/${result.server.discordId}`}
 									className="font-semibold text-foreground hover:underline"
-									onClick={(e) => e.stopPropagation()}
 								>
 									{result.server.name}
 								</Link>
@@ -64,14 +63,16 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 					)}
 				</div>
 			</div>
-			<Link
-				href={`/m/${result.message.message.id}`}
-				className="block hover:bg-accent/50 transition-colors"
-			>
-				<div className="p-4">
+			<div className="relative hover:bg-accent/50 transition-colors">
+				<Link
+					href={`/m/${result.message.message.id}`}
+					className="absolute inset-0 z-0"
+					aria-label={`Open message ${result.thread?.name || result.message.message.content?.slice(0, 30) || "Untitled thread"}`}
+				/>
+				<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto p-4">
 					<DiscordMessage enrichedMessage={result.message} />
 				</div>
-			</Link>
+			</div>
 		</div>
 	);
 }

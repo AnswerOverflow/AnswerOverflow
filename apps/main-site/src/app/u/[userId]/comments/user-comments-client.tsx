@@ -4,7 +4,10 @@ import { api } from "@packages/database/convex/_generated/api";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import type { DiscordUser } from "@packages/ui/components/discord-avatar";
-import { ThreadCardSkeletonList } from "@packages/ui/components/thread-card";
+import {
+	ThreadCard,
+	ThreadCardSkeletonList,
+} from "@packages/ui/components/thread-card";
 import {
 	EmptyState,
 	InitialResults,
@@ -33,7 +36,12 @@ function UserCommentsContent({
 				queryArgs={{ userId, serverId }}
 				pageSize={10}
 				loader={<ThreadCardSkeletonList />}
-				renderItem={(result) => <InitialResults results={[result]} />}
+				renderItem={(result) => (
+					<ThreadCard
+						key={result.message.message.id.toString()}
+						result={result}
+					/>
+				)}
 			/>
 		</>
 	);
