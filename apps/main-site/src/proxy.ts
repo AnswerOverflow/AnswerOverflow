@@ -1,6 +1,7 @@
 import { isOnMainSite, normalizeSubpath } from "@packages/ui/utils/links";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { isIP } from "node:net";
 
 const PROTECTED_PREFIXES = ["/dashboard", "/notes"];
 
@@ -76,7 +77,7 @@ export function proxy(request: NextRequest) {
 		}
 	}
 
-	if (!isOnMainSite(normalizedHost)) {
+	if (!isOnMainSite(normalizedHost) && isIP(normalizedHost ?? "") === 0) {
 		const rewritten = new URL(
 			`/${normalizedHost}${pathname}${url.search}`,
 			request.url,
