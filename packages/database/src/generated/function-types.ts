@@ -29,6 +29,13 @@ export const FUNCTION_TYPE_MAP = {
   "messages.getTotalMessageCount": "query",
   "messages.upsertManyMessages": "mutation",
   "messages.upsertMessage": "mutation",
+  "search.getRecentThreads": "query",
+  "search.getServersUserHasPostedIn": "query",
+  "search.getUserById": "query",
+  "search.getUserComments": "query",
+  "search.getUserPageData": "query",
+  "search.getUserPosts": "query",
+  "search.publicSearch": "query",
   "server_preferences.getServerPreferencesByServerId": "query",
   "server_preferences.upsertServerPreferences": "mutation",
   "servers.clearKickedTime": "mutation",
@@ -50,7 +57,7 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
-export const PRIVATE_NAMESPACES = ["anonymous_session","attachments","channels","discord_accounts","ignored_discord_accounts","messages","server_preferences","servers","user_server_settings"] as const;
+export const NAMESPACES = ["anonymous_session","attachments","channels","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","user_server_settings"] as const;
 
 export const NAMESPACE_STRUCTURE = {
   "anonymous_session": ["createAnonymousSession"],
@@ -59,6 +66,7 @@ export const NAMESPACE_STRUCTURE = {
   "discord_accounts": ["deleteDiscordAccount","getDiscordAccountById","getUserPageData","updateDiscordAccount","upsertDiscordAccount"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageData","getTopQuestionSolversByServerId","getTotalMessageCount","upsertManyMessages","upsertMessage"],
+  "search": ["getRecentThreads","getServersUserHasPostedIn","getUserById","getUserComments","getUserPageData","getUserPosts","publicSearch"],
   "server_preferences": ["getServerPreferencesByServerId","upsertServerPreferences"],
   "servers": ["clearKickedTime","findByDiscordId","findManyServersByDiscordId","findManyServersById","findServerByStripeCustomerId","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","updateStripeCustomer","updateStripeSubscription","upsertServer"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertUserServerSettings"]

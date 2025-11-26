@@ -3,7 +3,7 @@
 /**
  * Codegen script to extract function types from Convex API
  *
- * This script analyzes the private modules to determine which functions
+ * This script analyzes the private and public modules to determine which functions
  * are queries, mutations, or actions, and generates a runtime mapping.
  */
 
@@ -16,6 +16,7 @@ const __dirname = dirname(__filename);
 
 const PACKAGE_ROOT = join(__dirname, "..");
 const PRIVATE_DIR = join(PACKAGE_ROOT, "convex/private");
+const PUBLIC_DIR = join(PACKAGE_ROOT, "convex/public");
 const OUTPUT_FILE = join(PACKAGE_ROOT, "src/generated/function-types.ts");
 
 interface FunctionInfo {
@@ -26,17 +27,25 @@ interface FunctionInfo {
 async function extractFunctionsFromFile(
 	filePath: string,
 	namespace: string,
+	isPublic: boolean,
 ): Promise<FunctionInfo[]> {
 	const content = await readFile(filePath, "utf-8");
 	const functions: FunctionInfo[] = [];
 
-	// Match exported functions that use privateQuery, privateMutation, or privateAction
-	const queryRegex = /export\s+(?:const|function)\s+(\w+)\s*=\s*privateQuery/;
-	const mutationRegex =
-		/export\s+(?:const|function)\s+(\w+)\s*=\s*privateMutation/;
-	const actionRegex = /export\s+(?:const|function)\s+(\w+)\s*=\s*privateAction/;
+	const queryPattern = isPublic ? "publicQuery" : "privateQuery";
+	const mutationPattern = isPublic ? "publicMutation" : "privateMutation";
+	const actionPattern = isPublic ? "publicAction" : "privateAction";
 
-	// Find all matches
+	const queryRegex = new RegExp(
+		`export\\s+(?:const|function)\\s+(\\w+)\\s*=\\s*${queryPattern}`,
+	);
+	const mutationRegex = new RegExp(
+		`export\\s+(?:const|function)\\s+(\\w+)\\s*=\\s*${mutationPattern}`,
+	);
+	const actionRegex = new RegExp(
+		`export\\s+(?:const|function)\\s+(\\w+)\\s*=\\s*${actionPattern}`,
+	);
+
 	const queryMatches = [
 		...content.matchAll(new RegExp(queryRegex.source, "g")),
 	];
@@ -74,41 +83,67 @@ async function extractFunctionsFromFile(
 	return functions;
 }
 
+async function scanDirectory(
+	dir: string,
+	isPublic: boolean,
+	allFunctions: FunctionInfo[],
+	namespaces: Set<string>,
+	namespaceToFunctions: Map<string, FunctionInfo[]>,
+): Promise<void> {
+	const files = await readdir(dir);
+
+	for (const file of files) {
+		if (file.endsWith(".test.ts") || !file.endsWith(".ts")) {
+			continue;
+		}
+		if (file === "custom_functions.ts") {
+			continue;
+		}
+
+		const filePath = join(dir, file);
+		const namespace = file.replace(".ts", "");
+		namespaces.add(namespace);
+
+		const functions = await extractFunctionsFromFile(
+			filePath,
+			namespace,
+			isPublic,
+		);
+		allFunctions.push(...functions);
+
+		const existing = namespaceToFunctions.get(namespace) || [];
+		namespaceToFunctions.set(namespace, [...existing, ...functions]);
+	}
+}
+
 async function generateFunctionTypes(): Promise<void> {
 	const allFunctions: FunctionInfo[] = [];
 	const namespaces = new Set<string>();
 	const namespaceToFunctions = new Map<string, FunctionInfo[]>();
 
-	// Read all files in private directory
-	const files = await readdir(PRIVATE_DIR);
+	await scanDirectory(
+		PRIVATE_DIR,
+		false,
+		allFunctions,
+		namespaces,
+		namespaceToFunctions,
+	);
+	await scanDirectory(
+		PUBLIC_DIR,
+		true,
+		allFunctions,
+		namespaces,
+		namespaceToFunctions,
+	);
 
-	for (const file of files) {
-		// Skip test files and non-TypeScript files
-		if (file.endsWith(".test.ts") || !file.endsWith(".ts")) {
-			continue;
-		}
-
-		const filePath = join(PRIVATE_DIR, file);
-		// Extract namespace from filename (e.g., "servers.ts" -> "servers")
-		const namespace = file.replace(".ts", "");
-		namespaces.add(namespace);
-
-		const functions = await extractFunctionsFromFile(filePath, namespace);
-		allFunctions.push(...functions);
-		namespaceToFunctions.set(namespace, functions);
-	}
-
-	// Sort functions by path for consistent output
 	allFunctions.sort((a, b) => a.path.localeCompare(b.path));
 
-	// Generate the output file
 	const typeMapEntries = allFunctions
 		.map((f) => `  "${f.path}": "${f.type}"`)
 		.join(",\n");
 
 	const namespaceArray = Array.from(namespaces).sort();
 
-	// Generate namespace structure map
 	const namespaceStructureEntries = namespaceArray
 		.map((ns) => {
 			const functions = namespaceToFunctions.get(ns) || [];
@@ -124,7 +159,7 @@ export const FUNCTION_TYPE_MAP = {
 ${typeMapEntries}
 } as const;
 
-export const PRIVATE_NAMESPACES = ${JSON.stringify(namespaceArray)} as const;
+export const NAMESPACES = ${JSON.stringify(namespaceArray)} as const;
 
 export const NAMESPACE_STRUCTURE = {
 ${namespaceStructureEntries}
