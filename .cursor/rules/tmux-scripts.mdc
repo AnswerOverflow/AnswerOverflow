@@ -1,0 +1,97 @@
+---
+alwaysApply: true
+---
+
+# Running Scripts in tmux Sessions
+
+When running long-running or watch scripts (like `bun run dev`, `bun run test:watch`, etc.), run them in tmux sessions so they don't block the terminal but can still be monitored.
+
+## Guidelines
+
+- **Prefer watch scripts** over one-time runs when available (e.g., `bun run test:watch` over `bun run test`)
+- **Use tmux sessions** for any long-running or watch scripts
+- **Name sessions descriptively** based on what's running (e.g., "dev", "test", "build-watch")
+- **Check for existing sessions** before creating new ones to avoid duplicates
+
+## Common Commands
+
+### Starting a script in tmux
+```bash
+# Start a new named session running a command
+tmux new-session -d -s session-name 'bun run dev'
+
+# Start test watch in tmux
+tmux new-session -d -s test 'bun run test:watch'
+
+# Start dev server in tmux
+tmux new-session -d -s dev 'bun run dev'
+```
+
+### Monitoring tmux sessions
+```bash
+# List all running sessions
+tmux list-sessions
+
+# Attach to a session to view output
+tmux attach -t session-name
+
+# View session output without attaching
+tmux capture-pane -pt session-name
+```
+
+### Managing sessions
+```bash
+# Kill a specific session
+tmux kill-session -t session-name
+
+# Kill all sessions
+tmux kill-server
+
+# Detach from current session (while attached)
+# Press: Ctrl+b then d
+```
+
+## Examples
+
+### Running tests in watch mode
+```bash
+# Start test watcher in background
+tmux new-session -d -s test 'bun run test:watch'
+
+# Check if tests are passing
+tmux capture-pane -pt test
+
+# View live output
+tmux attach -t test
+```
+
+### Running dev server
+```bash
+# Start dev server in background
+tmux new-session -d -s dev 'bun run dev'
+
+# Monitor server logs
+tmux capture-pane -pt dev | tail -20
+
+# Attach to see live logs
+tmux attach -t dev
+```
+
+### Running multiple services
+```bash
+# Start multiple services in separate sessions
+tmux new-session -d -s dev 'cd apps/main-site && bun run dev'
+tmux new-session -d -s bot 'cd apps/discord-bot && bun run dev'
+tmux new-session -d -s test 'bun run test:watch'
+
+# View all running services
+tmux list-sessions
+```
+
+## Best Practices
+
+1. **Always use descriptive session names** - makes it easy to identify what's running
+2. **Check existing sessions first** - avoid running duplicate services
+3. **Prefer watch mode** - faster feedback loops (e.g., `test:watch` over `test`)
+4. **Clean up sessions** - kill sessions when done to free resources
+5. **Monitor output periodically** - use `capture-pane` to check status without attaching
