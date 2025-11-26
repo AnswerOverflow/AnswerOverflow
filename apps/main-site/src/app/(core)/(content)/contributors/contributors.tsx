@@ -4,7 +4,7 @@ import {
 	AvatarImage,
 } from "@packages/ui/components/avatar";
 import { SocialIcon } from "react-social-icons"; // TODO: use our own social icon component
-import { FollowCursor } from "../../../components/follow";
+import { FollowCursor } from "../../../../components/follow";
 
 export interface ContributorData {
 	name: string;
@@ -81,13 +81,19 @@ export const Contributor = ({
 	</div>
 );
 
-export const Contributors = ({
-	contributors,
-}: {
-	contributors: ContributorData[];
-}) => (
+export const CoreContributors = () => (
 	<div className="mx-auto my-16 grid w-max grid-cols-1 gap-8 md:mx-0 md:mr-auto md:grid-flow-col md:grid-cols-2">
-		{contributors.map((contributor) => (
+		{coreTeamContributors.map((contributor) => (
+			<FollowCursor key={`${contributor.name}`} intensity={25}>
+				<Contributor {...contributor} />
+			</FollowCursor>
+		))}
+	</div>
+);
+
+export const OpenSourceContributors = () => (
+	<div className="mx-auto my-16 grid w-max grid-cols-1 gap-8 md:mx-0 md:mr-auto md:grid-flow-col md:grid-cols-2">
+		{openSourceContributors.map((contributor) => (
 			<FollowCursor key={`${contributor.name}`} intensity={25}>
 				<Contributor {...contributor} />
 			</FollowCursor>
