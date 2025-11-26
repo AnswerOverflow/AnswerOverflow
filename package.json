@@ -20,7 +20,8 @@
 		"format": "biome format --write .",
 		"knip": "bunx knip",
 		"ngrok": "bun scripts/start-ngrok.ts",
-		"prepare": "husky"
+		"prepare": "husky",
+		"env:pull:prod": "vercel env pull .env.production --environment production"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.4",
