@@ -4,22 +4,11 @@ import type { EnrichedMessage } from "@packages/database/convex/shared/shared";
 import { cn } from "../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { Badge } from "./badge";
+import { makeUserIconLink } from "./discord-avatar";
 import { Link } from "./link";
 import { MessageBlurrer } from "./message-blurrer";
 import { MessageBody } from "./message-body";
 import { TimeAgo } from "./time-ago";
-
-function getDiscordAvatarUrl(
-	userId: bigint,
-	avatar?: string,
-	size = 40,
-): string {
-	if (avatar) {
-		return `https://cdn.discordapp.com/avatars/${userId}/${avatar}.webp?size=${size}`;
-	}
-	const defaultAvatar = (Number(userId) % 5).toString();
-	return `/discord/${defaultAvatar}.png`;
-}
 
 export function ThinMessage(props: {
 	message: EnrichedMessage;
@@ -36,7 +25,14 @@ export function ThinMessage(props: {
 					{author ? (
 						<Avatar className="h-10 w-10">
 							<AvatarImage
-								src={getDiscordAvatarUrl(author.id, author.avatar)}
+								src={makeUserIconLink(
+									{
+										id: author.id.toString(),
+										name: author.name,
+										avatar: author.avatar,
+									},
+									40,
+								)}
 								alt={author.name}
 							/>
 							<AvatarFallback>

@@ -36,6 +36,7 @@
 		"nuqs": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
+		"react-icons": "^5.5.0",
 		"react-social-icons": "^6.25.0",
 		"react-spring": "^10.0.3",
 		"react-xarrows": "^2.0.2",
