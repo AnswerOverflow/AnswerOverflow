@@ -50,8 +50,7 @@ export const publicQuery = customQuery(query, {
 		let anonymousSessionId: string | undefined;
 		let discordAccountId: bigint | undefined;
 		if (!identity) {
-			// throw new Error("Not authenticated");
-			anonymousSessionId = "testing";
+			throw new Error("Not authenticated");
 		}
 		if (identity?.isAnonymous) {
 			anonymousSessionId = identity.subject;
