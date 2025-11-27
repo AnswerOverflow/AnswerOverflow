@@ -2,8 +2,6 @@
 	"$schema": "https://turbo.build/schema.json",
 	"globalDependencies": ["**/.env.*local"],
 	"globalEnv": [
-		"ANONYMOUS_AUTH_DOMAIN",
-		"ANONYMOUS_AUTH_PRIVATE_KEY",
 		"AUTH_BEARER_TOKEN_VERCEL",
 		"AXIOM_API_KEY",
 		"BACKEND_ACCESS_TOKEN",

@@ -6,11 +6,11 @@ import {
 	ThreadCard,
 	ThreadCardSkeletonList,
 } from "@packages/ui/components/thread-card";
-import { useConvexAuth } from "convex/react";
+import { authClient } from "../lib/auth-client";
 
 export function HomePageClient() {
-	const auth = useConvexAuth();
-
+	const auth = authClient.useSession();
+	console.log("homepage auth", auth);
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -23,7 +23,7 @@ export function HomePageClient() {
 					</p>
 				</div>
 
-				{auth.isAuthenticated ? (
+				{auth.data?.session ? (
 					<ConvexInfiniteList
 						query={api.public.search.getRecentThreads}
 						queryArgs={{}}

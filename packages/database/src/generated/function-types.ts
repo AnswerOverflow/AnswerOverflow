@@ -2,7 +2,6 @@
 // DO NOT EDIT MANUALLY
 
 export const FUNCTION_TYPE_MAP = {
-  "anonymous_session.createAnonymousSession": "mutation",
   "attachments.updateAttachmentStorageId": "mutation",
   "attachments.uploadAttachmentFromUrl": "action",
   "channels.deleteChannel": "mutation",
@@ -57,10 +56,9 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
-export const NAMESPACES = ["anonymous_session","attachments","channels","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","user_server_settings"] as const;
+export const NAMESPACES = ["attachments","channels","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","user_server_settings"] as const;
 
 export const NAMESPACE_STRUCTURE = {
-  "anonymous_session": ["createAnonymousSession"],
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl"],
   "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelByInviteCode","getChannelPageData","updateChannel","updateManyChannels","upsertChannelWithSettings","upsertManyChannels"],
   "discord_accounts": ["deleteDiscordAccount","getDiscordAccountById","getUserPageData","updateDiscordAccount","upsertDiscordAccount"],

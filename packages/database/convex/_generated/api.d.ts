@@ -19,7 +19,6 @@ import type * as client_guildManager from "../client/guildManager.js";
 import type * as client_index from "../client/index.js";
 import type * as client_private from "../client/private.js";
 import type * as http from "../http.js";
-import type * as private_anonymous_session from "../private/anonymous_session.js";
 import type * as private_attachments from "../private/attachments.js";
 import type * as private_channels from "../private/channels.js";
 import type * as private_discord_accounts from "../private/discord_accounts.js";
@@ -60,7 +59,6 @@ declare const fullApi: ApiFromModules<{
   "client/index": typeof client_index;
   "client/private": typeof client_private;
   http: typeof http;
-  "private/anonymous_session": typeof private_anonymous_session;
   "private/attachments": typeof private_attachments;
   "private/channels": typeof private_channels;
   "private/discord_accounts": typeof private_discord_accounts;
