@@ -36,8 +36,8 @@ async function getConvexJwt() {
 	if (!cookieHeader?.startsWith("better-auth.convex_jwt=")) {
 		return null;
 	}
-
 	jwt = cookieHeader.split(";")[0]?.split("=")[1] ?? null;
+	console.log("jwt", jwt);
 	return jwt;
 }
 
