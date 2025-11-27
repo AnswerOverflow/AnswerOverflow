@@ -34,13 +34,13 @@ function validateBackendAccessToken(token: string | undefined): boolean {
 
 export const publicQuery = customQuery(query, {
 	args: {
-		discordAccountId: v.optional(v.int64()),
+		discordAccountId: v.optional(v.string()),
 		anonymousSessionId: v.optional(v.string()),
 		type: v.optional(
 			v.union(
 				v.literal("signed-in"),
-				v.literal("admin"),
 				v.literal("anonymous"),
+				v.literal("admin"),
 			),
 		),
 		rateLimitKey: v.optional(v.string()),
@@ -51,51 +51,41 @@ export const publicQuery = customQuery(query, {
 			return {
 				ctx,
 				args: {
+					...args,
+					rateLimitKey: "admin",
 					discordAccountId: undefined,
 					anonymousSessionId: undefined,
 					type: "admin" as const,
-					rateLimitKey: "admin",
-					backendAccessToken: args.backendAccessToken,
 				},
 			};
 		}
 
 		const identity = await getAuthIdentity(ctx);
-
+		let anonymousSessionId: string | undefined;
+		let discordAccountId: bigint | undefined;
 		if (!identity) {
 			throw new Error("Not authenticated");
 		}
-
-		if (identity.isAnonymous) {
-			const anonymousSessionId = identity.subject;
-			if (!anonymousSessionId) {
-				throw new Error("Anonymous session ID not found");
-			}
-			return {
-				ctx,
-				args: {
-					discordAccountId: undefined,
-					anonymousSessionId,
-					type: "anonymous" as const,
-					rateLimitKey: "testing",
-					backendAccessToken: args.backendAccessToken,
-				},
-			};
+		if (identity?.isAnonymous) {
+			anonymousSessionId = identity.subject;
+		} else {
+			const account = await getDiscordAccountWithToken(ctx);
+			discordAccountId = account?.accountId;
 		}
+		const identityType = identity?.isAnonymous ? "anonymous" : "signed-in";
 
-		const account = await getDiscordAccountWithToken(ctx);
-		const discordAccountId = account?.accountId;
-		if (!discordAccountId) {
-			throw new Error("Signed in but no Discord account found");
+		const rateLimitKey = discordAccountId ?? anonymousSessionId;
+		if (!rateLimitKey) {
+			throw new Error("Not authenticated");
 		}
 		return {
 			ctx,
 			args: {
-				discordAccountId,
-				anonymousSessionId: undefined,
-				type: "signed-in" as const,
+				...args,
 				rateLimitKey: "testing",
-				backendAccessToken: args.backendAccessToken,
+				discordAccountId,
+				anonymousSessionId,
+				type: identityType,
 			},
 		};
 	},
