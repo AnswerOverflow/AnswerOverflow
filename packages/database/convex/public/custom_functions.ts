@@ -50,7 +50,7 @@ export const publicQuery = customQuery(query, {
 		let anonymousSessionId: string | undefined;
 		let discordAccountId: bigint | undefined;
 		if (!identity) {
-			throw new Error("Not authenticated");
+			throw new Error("No identity found");
 		}
 		if (identity?.isAnonymous) {
 			anonymousSessionId = identity.subject;
@@ -62,7 +62,7 @@ export const publicQuery = customQuery(query, {
 
 		const rateLimitKey = discordAccountId ?? anonymousSessionId;
 		if (!rateLimitKey) {
-			throw new Error("Not authenticated");
+			throw new Error("Not discord account or anonymous session found");
 		}
 		return {
 			ctx,
