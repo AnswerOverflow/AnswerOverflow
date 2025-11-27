@@ -44,22 +44,8 @@ export const publicQuery = customQuery(query, {
 			),
 		),
 		rateLimitKey: v.optional(v.string()),
-		backendAccessToken: v.optional(v.string()),
 	},
 	input: async (ctx, args) => {
-		if (validateBackendAccessToken(args.backendAccessToken)) {
-			return {
-				ctx,
-				args: {
-					...args,
-					rateLimitKey: "admin",
-					discordAccountId: undefined,
-					anonymousSessionId: undefined,
-					type: "admin" as const,
-				},
-			};
-		}
-
 		const identity = await getAuthIdentity(ctx);
 		let anonymousSessionId: string | undefined;
 		let discordAccountId: bigint | undefined;

@@ -11,11 +11,39 @@ import {
 
 const createLiveService = Effect.gen(function* () {
 	const convexUrl = yield* Config.string("CONVEX_URL");
-	const backendAccessToken = yield* Config.string("BACKEND_ACCESS_TOKEN");
-
 	const client = new ConvexClient(convexUrl);
 
-	client.setAuth(async () => backendAccessToken);
+	// TODO: Use some persistent session and also create this sooner or have better bypasses, maybe keep the backendToken bypass logic, but have this as a fallback when the user is signed out
+	client.setAuth(
+		async () => {
+			const response = await fetch(
+				`${process.env.SITE_URL}/api/auth/sign-in/anonymous`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Cookie: "auth-bypass=true",
+					},
+					body: JSON.stringify({ redirectTo: "/" }),
+				},
+			);
+
+			const cookieHeader =
+				response.headers
+					.getSetCookie?.()
+					.find((c) => c.startsWith("better-auth.convex_jwt=")) ??
+				response.headers.get("set-cookie");
+
+			if (!cookieHeader?.startsWith("better-auth.convex_jwt=")) {
+				return null;
+			}
+
+			const jwt = cookieHeader.split(";")[0]?.split("=")[1] ?? null;
+			console.log("convexJwt", jwt);
+			return jwt;
+		},
+		(isAuthed) => console.log("isAuthed", isAuthed),
+	);
 
 	const wrappedClient: ConvexClientShared = {
 		query: client.query.bind(client),

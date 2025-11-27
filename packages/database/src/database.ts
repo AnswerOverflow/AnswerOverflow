@@ -104,6 +104,7 @@ export const service = Effect.gen(function* () {
 	const createProxy = <T extends Record<string, any>>(
 		target: T,
 		namespacePath: string[],
+		isPublic: boolean,
 	): TransformToFunctions<T> => {
 		return new Proxy(target, {
 			get(innerTarget, prop: string | symbol) {
@@ -121,10 +122,11 @@ export const service = Effect.gen(function* () {
 				}
 
 				if (isNamespace(prop)) {
-					return createProxy(value, [
-						...namespacePath,
-						prop,
-					]) as TransformToFunctions<T>[typeof prop];
+					return createProxy(
+						value,
+						[...namespacePath, prop],
+						isPublic,
+					) as TransformToFunctions<T>[typeof prop];
 				}
 
 				const functionPath = buildFunctionPath(namespacePath, prop);
@@ -141,7 +143,9 @@ export const service = Effect.gen(function* () {
 
 				if (funcType === "query") {
 					const wrappedFunction = ((args?: any, options: QueryOptions = {}) => {
-						const fullArgs = { ...(args ?? {}), backendAccessToken };
+						const fullArgs = isPublic
+							? (args ?? {})
+							: { ...(args ?? {}), backendAccessToken };
 
 						if (options.subscribe === true) {
 							return Effect.gen(function* () {
@@ -166,7 +170,9 @@ export const service = Effect.gen(function* () {
 				}
 
 				const wrappedFunction = ((args?: any) => {
-					const fullArgs = { ...(args ?? {}), backendAccessToken };
+					const fullArgs = isPublic
+						? (args ?? {})
+						: { ...(args ?? {}), backendAccessToken };
 					return callClientMethod(
 						funcType,
 						funcRef,
@@ -186,9 +192,9 @@ export const service = Effect.gen(function* () {
 		}) as TransformToFunctions<T>;
 	};
 
-	const privateProxy = createProxy(api.private, []);
-	const publicProxy = createProxy(api.public, []);
-	const authenticatedProxy = createProxy(api.authenticated, []);
+	const privateProxy = createProxy(api.private, [], false);
+	const publicProxy = createProxy(api.public, [], true);
+	const authenticatedProxy = createProxy(api.authenticated, [], false);
 
 	const result = {
 		public: publicProxy,
