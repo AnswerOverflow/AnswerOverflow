@@ -10,6 +10,7 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { useSession } from "@packages/ui/components/convex-client-provider";
+import { DevLoginButton } from "@packages/ui/components/dev-login-button";
 import { Input } from "@packages/ui/components/input";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
@@ -98,7 +99,7 @@ export default function DashboardHome() {
 							Please sign in with Discord to manage your servers.
 						</CardDescription>
 					</CardHeader>
-					<CardContent>
+					<CardContent className="flex flex-col gap-2">
 						<Button
 							onClick={async () => {
 								await authClient.signIn.social({
@@ -109,6 +110,7 @@ export default function DashboardHome() {
 						>
 							Sign in with Discord
 						</Button>
+						<DevLoginButton />
 					</CardContent>
 				</Card>
 			</main>
