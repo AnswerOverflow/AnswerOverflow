@@ -1,5 +1,6 @@
 import { ConvexClient } from "convex/browser";
 import type { FunctionReference } from "convex/server";
+import { parse } from "cookie";
 import { Config, Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import {
@@ -9,12 +10,26 @@ import {
 	type WrappedUnifiedClient,
 } from "./convex-unified-client";
 
-let jwt: string | null = null;
-async function getConvexJwt() {
-	if (jwt) {
-		return jwt;
+const JWT_COOKIE_NAMES = [
+	"better-auth.convex_jwt",
+	"__Secure-better-auth.convex_jwt",
+] as const;
+
+function extractJwtFromCookie(setCookieString: string): string | null {
+	const nameValuePart = setCookieString.split(";")[0];
+	if (!nameValuePart) return null;
+	const parsed = parse(nameValuePart);
+	for (const name of JWT_COOKIE_NAMES) {
+		if (parsed[name]) return parsed[name];
 	}
-	console.log("getting convex jwt");
+	return null;
+}
+
+let cachedJwt: string | null = null;
+
+async function getConvexJwt(): Promise<string | null> {
+	if (cachedJwt) return cachedJwt;
+
 	const response = await fetch(
 		`${process.env.SITE_URL}/api/auth/sign-in/anonymous`,
 		{
@@ -26,19 +41,21 @@ async function getConvexJwt() {
 			body: JSON.stringify({ redirectTo: "/" }),
 		},
 	);
-	console.log("response", response);
-	const cookieHeader =
-		response.headers
-			.getSetCookie?.()
-			.find((c) => c.startsWith("better-auth.convex_jwt=")) ??
-		response.headers.get("set-cookie");
-	console.log("cookieHeader", cookieHeader);
-	if (!cookieHeader?.startsWith("better-auth.convex_jwt=")) {
-		return null;
+
+	const cookies =
+		response.headers.getSetCookie?.() ??
+		response.headers.get("set-cookie")?.split(", ") ??
+		[];
+
+	for (const cookie of cookies) {
+		const extracted = extractJwtFromCookie(cookie);
+		if (extracted) {
+			cachedJwt = extracted;
+			return cachedJwt;
+		}
 	}
-	jwt = cookieHeader.split(";")[0]?.split("=")[1] ?? null;
-	console.log("jwt", jwt);
-	return jwt;
+
+	return null;
 }
 
 const createLiveService = Effect.gen(function* () {

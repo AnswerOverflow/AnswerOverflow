@@ -36,6 +36,7 @@
 		"@typelytics/posthog": "^0.1.5",
 		"convex": "catalog:",
 		"convex-helpers": "^0.1.104",
+		"cookie": "^1.1.1",
 		"discord-api-types": "^0.38.24",
 		"effect": "catalog:",
 		"posthog-node": "^4.2.0",
