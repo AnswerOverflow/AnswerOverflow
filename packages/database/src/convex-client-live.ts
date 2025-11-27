@@ -24,16 +24,6 @@ const createLiveService = Effect.gen(function* () {
 			args: Parameters<ConvexClient["mutation"]>[1],
 			options?: Parameters<ConvexClient["mutation"]>[2],
 		) => {
-			if (
-				typeof mutation === "object" &&
-				mutation !== null &&
-				"_visibility" in mutation &&
-				(mutation as { _visibility?: string })._visibility === "internal"
-			) {
-				throw new Error(
-					"Internal mutations cannot be called from live client. Use test client for internal mutations.",
-				);
-			}
 			return client.mutation(mutation, args, options);
 		},
 		action: client.action.bind(client),
