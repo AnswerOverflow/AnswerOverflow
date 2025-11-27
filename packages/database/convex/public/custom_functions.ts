@@ -34,13 +34,13 @@ function validateBackendAccessToken(token: string | undefined): boolean {
 
 export const publicQuery = customQuery(query, {
 	args: {
-		discordAccountId: v.optional(v.string()),
+		discordAccountId: v.optional(v.int64()),
 		anonymousSessionId: v.optional(v.string()),
 		type: v.optional(
 			v.union(
 				v.literal("signed-in"),
-				v.literal("anonymous"),
 				v.literal("admin"),
+				v.literal("anonymous"),
 			),
 		),
 		rateLimitKey: v.optional(v.string()),
@@ -51,52 +51,51 @@ export const publicQuery = customQuery(query, {
 			return {
 				ctx,
 				args: {
-					...args,
-					rateLimitKey: "admin",
 					discordAccountId: undefined,
 					anonymousSessionId: undefined,
 					type: "admin" as const,
+					rateLimitKey: "admin",
+					backendAccessToken: args.backendAccessToken,
 				},
 			};
 		}
 
 		const identity = await getAuthIdentity(ctx);
-		let anonymousSessionId: string | undefined;
+
 		if (!identity) {
 			throw new Error("Not authenticated");
 		}
-		const identityType = identity.type;
-		const subject = identity.subject;
-		if (identityType === "anonymous" && subject) {
-			const anonymousSession = await ctx.db
-				.query("anonymousSessions")
-				.withIndex("by_sessionId", (q) => q.eq("sessionId", subject))
-				.first();
 
-			if (!anonymousSession) {
-				throw new Error("Not authenticated");
-			} else {
-				anonymousSessionId = anonymousSession._id;
+		if (identity.isAnonymous) {
+			const anonymousSessionId = identity.subject;
+			if (!anonymousSessionId) {
+				throw new Error("Anonymous session ID not found");
 			}
+			return {
+				ctx,
+				args: {
+					discordAccountId: undefined,
+					anonymousSessionId,
+					type: "anonymous" as const,
+					rateLimitKey: "testing",
+					backendAccessToken: args.backendAccessToken,
+				},
+			};
 		}
 
-		let discordAccountId: bigint | undefined;
-		if (identityType !== "anonymous") {
-			const account = await getDiscordAccountWithToken(ctx);
-			discordAccountId = account?.accountId;
-		}
-		const rateLimitKey = discordAccountId ?? anonymousSessionId;
-		if (!rateLimitKey) {
-			throw new Error("Not authenticated");
+		const account = await getDiscordAccountWithToken(ctx);
+		const discordAccountId = account?.accountId;
+		if (!discordAccountId) {
+			throw new Error("Signed in but no Discord account found");
 		}
 		return {
 			ctx,
 			args: {
-				...args,
-				rateLimitKey: "testing",
 				discordAccountId,
-				anonymousSessionId,
-				type: identityType,
+				anonymousSessionId: undefined,
+				type: "signed-in" as const,
+				rateLimitKey: "testing",
+				backendAccessToken: args.backendAccessToken,
 			},
 		};
 	},

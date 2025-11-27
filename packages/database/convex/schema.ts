@@ -185,12 +185,6 @@ export const reactionSchema = v.object({
 	emojiId: v.int64(), // Discord emoji ID
 });
 
-export const anonymousSessionSchema = v.object({
-	sessionId: v.string(), // Session ID
-	createdAt: v.number(), // Timestamp when the session was created
-	expiresAt: v.number(), // Timestamp when the session will expire
-});
-
 export type ServerPreferences = Infer<typeof serverPreferencesSchema>;
 export type Server = Infer<typeof serverSchema>;
 export type Channel = Infer<typeof channelSchema>;
@@ -251,7 +245,4 @@ export default defineSchema({
 		.index("by_messageId", ["messageId"])
 		.index("by_userId", ["userId"])
 		.index("by_emojiId", ["emojiId"]),
-	anonymousSessions: defineTable(anonymousSessionSchema).index("by_sessionId", [
-		"sessionId",
-	]),
 });

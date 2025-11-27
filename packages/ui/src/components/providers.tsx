@@ -3,6 +3,7 @@
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type * as React from "react";
 import { ConvexClientProvider } from "./convex-client-provider";
+import { SignInIfAnon } from "./sign-in-if-anon";
 import { type Tenant, TenantProvider } from "./tenant-context";
 
 export function Providers({
@@ -21,7 +22,10 @@ export function Providers({
 			enableColorScheme
 		>
 			<TenantProvider tenant={tenant}>
-				<ConvexClientProvider>{children}</ConvexClientProvider>
+				<ConvexClientProvider>
+					<SignInIfAnon />
+					{children}
+				</ConvexClientProvider>
 			</TenantProvider>
 		</NextThemesProvider>
 	);
