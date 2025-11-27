@@ -10,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
@@ -25,8 +26,9 @@ export default function OnboardingPage() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const serverId = searchParams.get("serverId");
-	const { data: session, isPending: isSessionPending } =
-		authClient.useSession();
+	const { data: session, isPending: isSessionPending } = useSession({
+		allowAnonymous: false,
+	});
 	const getUserServers = useAction(api.authenticated.dashboard.getUserServers);
 	const trackBotAddClick = useAction(
 		api.authenticated.dashboard.trackBotAddClick,

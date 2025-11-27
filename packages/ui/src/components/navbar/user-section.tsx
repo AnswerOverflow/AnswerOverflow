@@ -4,7 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
-import { authClient } from "../convex-client-provider";
+import { authClient, useSession } from "../convex-client-provider";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -123,7 +123,7 @@ function SignInButton({
 
 export function UserSection({ showSignIn = true }: UserSectionProps) {
 	const router = useRouter();
-	const { data: session } = authClient.useSession();
+	const { data: session } = useSession({ allowAnonymous: false });
 
 	const handleSignIn = async () => {
 		await authClient.signIn.social({

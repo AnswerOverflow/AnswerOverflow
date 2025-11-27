@@ -7,7 +7,7 @@ import { DiscordMessage } from "@packages/ui/components/discord-message";
 import { Input } from "@packages/ui/components/input";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useConvexAuth } from "convex/react";
+
 import { useQueryState } from "nuqs";
 import { useDebounce } from "use-debounce";
 
@@ -16,16 +16,13 @@ type Props = {
 };
 
 function SearchInput() {
-	const auth = useConvexAuth();
 	const [searchQuery, setSearchQuery] = useQueryState("q", {
 		defaultValue: "",
 	});
 	const [debouncedSearchQuery] = useDebounce(searchQuery, 250);
 
 	const hasQuery =
-		auth.isAuthenticated &&
-		debouncedSearchQuery &&
-		debouncedSearchQuery.trim().length > 0;
+		debouncedSearchQuery && debouncedSearchQuery.trim().length > 0;
 
 	return (
 		<div className="min-h-screen bg-background">

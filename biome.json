@@ -40,7 +40,11 @@
 					"options": {
 						"paths": {
 							"../../../../packages/database/convex/_generated/api": "Do not use relative paths across packages. Use '@packages/database/convex/_generated/api' instead.",
-							"../../../../../packages/database/convex/_generated/api": "Do not use relative paths across packages. Use '@packages/database/convex/_generated/api' instead."
+							"../../../../../packages/database/convex/_generated/api": "Do not use relative paths across packages. Use '@packages/database/convex/_generated/api' instead.",
+							"convex/react": {
+								"importNames": ["useConvexAuth"],
+								"message": "Do not use 'useConvexAuth'. Use the appropriate alternative authentication hook instead."
+							}
 						}
 					}
 				}

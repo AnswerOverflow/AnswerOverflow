@@ -9,10 +9,8 @@ import type {
 import type { ReactNode } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Virtuoso } from "react-virtuoso";
-import {
-	useAuthenticatedStablePaginatedQuery,
-	useStablePaginatedQuery,
-} from "../hooks/use-stable-query";
+import { useStablePaginatedQuery } from "../hooks/use-stable-query";
+import { useSession } from "./convex-client-provider";
 
 type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	query: Query;
@@ -23,7 +21,7 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	height?: number;
 	loader?: ReactNode;
 	scrollThreshold?: number;
-	authenticated?: boolean;
+	authenticationType?: "all" | "non-anonymous";
 };
 
 export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
@@ -35,14 +33,12 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	height = 600,
 	loader = <div className="py-2 text-sm text-gray-500">Loading…</div>,
 	scrollThreshold = 0.8,
-	authenticated = true,
+	authenticationType = "all",
 }: ConvexInfiniteListProps<Query>) {
-	const useQueryHook = authenticated
-		? useAuthenticatedStablePaginatedQuery
-		: useStablePaginatedQuery;
-	const { results, status, loadMore, isLoading } = useQueryHook(
+	const session = useSession({ allowAnonymous: authenticationType === "all" });
+	const { results, status, loadMore, isLoading } = useStablePaginatedQuery(
 		query,
-		queryArgs,
+		session?.data ? queryArgs : "skip",
 		{ initialNumItems: pageSize },
 	);
 

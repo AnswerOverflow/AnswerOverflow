@@ -6,11 +6,8 @@ import {
 	ThreadCard,
 	ThreadCardSkeletonList,
 } from "@packages/ui/components/thread-card";
-import { authClient } from "../lib/auth-client";
 
 export function HomePageClient() {
-	const auth = authClient.useSession();
-	console.log("homepage auth", auth);
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -23,29 +20,21 @@ export function HomePageClient() {
 					</p>
 				</div>
 
-				{auth.data?.session ? (
-					<ConvexInfiniteList
-						query={api.public.search.getRecentThreads}
-						queryArgs={{}}
-						pageSize={20}
-						renderItem={(threadData) => {
-							if (!threadData.thread) return null;
-							return (
-								<ThreadCard
-									key={threadData.thread.id.toString()}
-									result={threadData}
-								/>
-							);
-						}}
-						loader={<ThreadCardSkeletonList />}
-					/>
-				) : (
-					<div className="rounded-lg border border-border bg-card p-8 text-center">
-						<p className="text-muted-foreground">
-							Please sign in to view recent threads.
-						</p>
-					</div>
-				)}
+				<ConvexInfiniteList
+					query={api.public.search.getRecentThreads}
+					queryArgs={{}}
+					pageSize={20}
+					renderItem={(threadData) => {
+						if (!threadData.thread) return null;
+						return (
+							<ThreadCard
+								key={threadData.thread.id.toString()}
+								result={threadData}
+							/>
+						);
+					}}
+					loader={<ThreadCardSkeletonList />}
+				/>
 			</div>
 		</div>
 	);
