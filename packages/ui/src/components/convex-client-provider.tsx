@@ -40,7 +40,7 @@ export const useSession = (
 			data: null,
 		};
 	}
-	return authClient.useSession();
+	return session;
 };
 
 export const useNonAnonymousSession = () => {
