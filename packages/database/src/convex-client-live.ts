@@ -59,7 +59,7 @@ async function getConvexJwt(): Promise<string | null> {
 }
 
 const createLiveService = Effect.gen(function* () {
-	const convexUrl = yield* Config.string("CONVEX_URL");
+	const convexUrl = yield* Config.string("NEXT_PUBLIC_CONVEX_URL");
 	const client = new ConvexClient(convexUrl);
 
 	// TODO: Use some persistent session and also create this sooner or have better bypasses, maybe keep the backendToken bypass logic, but have this as a fallback when the user is signed out

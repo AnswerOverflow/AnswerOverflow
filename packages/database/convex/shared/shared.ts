@@ -913,12 +913,11 @@ export async function enrichMessageForDisplay(
 		};
 	});
 
-	const convexSiteUrl = process.env.CONVEX_SITE_URL;
 	const cdnDomain = process.env.CDN_DOMAIN ?? "cdn.answeroverflow.com";
 
 	const attachmentsWithUrl = await Promise.all(
 		attachments.map(async (attachment) => {
-			if (attachment.storageId && convexSiteUrl) {
+			if (attachment.storageId) {
 				const url = await ctx.storage.getUrl(attachment.storageId);
 				if (!url) {
 					return null;
