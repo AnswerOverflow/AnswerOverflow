@@ -30,6 +30,23 @@ export const authClient = createAuthClient({
 	plugins: [anonymousClient(), convexClient()],
 });
 
+export const useSession = (
+	props: { allowAnonymous?: boolean } = { allowAnonymous: true },
+) => {
+	const session = authClient.useSession();
+	if (!props.allowAnonymous && session?.data?.user?.isAnonymous) {
+		return {
+			...session,
+			data: null,
+		};
+	}
+	return authClient.useSession();
+};
+
+export const useNonAnonymousSession = () => {
+	return useSession({ allowAnonymous: false });
+};
+
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
 	return (
 		<QueryClientProvider client={queryClient}>

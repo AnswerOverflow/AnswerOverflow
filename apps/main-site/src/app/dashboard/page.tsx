@@ -9,6 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Input } from "@packages/ui/components/input";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
@@ -19,7 +20,7 @@ import { ServerCard } from "../../components/server-card";
 import { authClient } from "../../lib/auth-client";
 
 export default function DashboardHome() {
-	const { data: session, isPending } = authClient.useSession();
+	const { data: session, isPending } = useSession({ allowAnonymous: false });
 	const getUserServers = useAction(api.authenticated.dashboard.getUserServers);
 	const [searchQuery, setSearchQuery] = useQueryState("search", {
 		defaultValue: "",

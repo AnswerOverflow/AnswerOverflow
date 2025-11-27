@@ -13,11 +13,9 @@ export function SignInIfAnon() {
 			!isSigningIn &&
 			!hasAttemptedSignIn.current
 		) {
-			console.log("signing in anonymously");
 			setIsSigningIn(true);
-			authClient.signIn.anonymous().then((sess) => {
+			authClient.signIn.anonymous().then(() => {
 				setIsSigningIn(false);
-				console.log("session", sess);
 			});
 		}
 	}, [auth.isPending, auth.data, isSigningIn, auth.refetch]);

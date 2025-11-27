@@ -1,7 +1,7 @@
 "use client";
 
 import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo";
-import { authClient } from "@packages/ui/components/convex-client-provider";
+import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Input } from "@packages/ui/components/input";
 import { Navbar } from "@packages/ui/components/navbar";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import { useState } from "react";
 export function SiteNavbar() {
 	const router = useRouter();
 	const pathname = usePathname();
-	const { data: session } = authClient.useSession();
+	const { data: session } = useSession({ allowAnonymous: false });
 	const [searchQuery, setSearchQuery] = useState("");
 
 	if (pathname?.startsWith("/dashboard")) {

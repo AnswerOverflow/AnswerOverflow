@@ -1,4 +1,4 @@
-import { useConvexAuth, usePaginatedQuery, useQuery } from "convex/react";
+import { usePaginatedQuery, useQuery } from "convex/react";
 import { useRef } from "react";
 
 /**
@@ -24,45 +24,8 @@ export const useStableQuery = ((name, ...args) => {
 	return stored.current;
 }) as typeof useQuery;
 
-/**
- * Hook that waits for authentication before returning true.
- * Used to skip queries until auth is ready.
- */
-export function useIsAuthReady() {
-	const { isAuthenticated, isLoading } = useConvexAuth();
-	return !isLoading && isAuthenticated;
-}
-
-/**
- * Drop-in replacement for usePaginatedQuery for use with a parametrized query.
- * Unlike usePaginatedQuery, when query arguments change useStablePaginatedQuery
- * does not return empty results and 'LoadingMore' status. Instead, it continues
- * to return the previously loaded results until the new results have finished
- * loading.
- *
- * @param name - string naming the query function
- * @param args - arguments to be passed to the query function
- * @param options - pagination options including initialNumItems
- * @returns UsePaginatedQueryResult
- */
 export const useStablePaginatedQuery = ((name, args, options) => {
 	const result = usePaginatedQuery(name, args, options);
-	const stored = useRef(result);
-
-	if (result.status !== "LoadingMore" && result.status !== "LoadingFirstPage") {
-		stored.current = result;
-	}
-
-	return stored.current;
-}) as typeof usePaginatedQuery;
-
-/**
- * Authenticated version of useStablePaginatedQuery.
- * Waits for authentication before making queries to avoid "Not authenticated" errors.
- */
-export const useAuthenticatedStablePaginatedQuery = ((name, args, options) => {
-	const isAuthReady = useIsAuthReady();
-	const result = usePaginatedQuery(name, isAuthReady ? args : "skip", options);
 	const stored = useRef(result);
 
 	if (result.status !== "LoadingMore" && result.status !== "LoadingFirstPage") {
