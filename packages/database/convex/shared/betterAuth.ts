@@ -11,10 +11,8 @@ export type { Plan };
 const getTrustedOrigins = (siteUrl: string): string[] => {
 	const origins = [siteUrl];
 
-	if (siteUrl.includes("localhost")) {
-		if (!origins.includes("http://localhost:3000")) {
-			origins.push("http://localhost:3000");
-		}
+	if (!origins.includes("http://localhost:3000")) {
+		origins.push("http://localhost:3000");
 	}
 
 	return origins;
