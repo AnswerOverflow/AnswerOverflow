@@ -34,9 +34,6 @@ app.get("/dev/auth/get-jwt", async (c) => {
 });
 
 app.get("/dev/auth/redirect", async (c) => {
-	// pass token in query params as base64 encoded json
-	// parse query params
-	// redirect to redirect url with token set as cookie
 	const token = c.req.query("token");
 	const redirect = c.req.query("redirect");
 	if (!token || !redirect) {
@@ -48,16 +45,19 @@ app.get("/dev/auth/redirect", async (c) => {
 			Buffer.from(token, "base64url").toString("utf-8"),
 		);
 		const isLocalhost = c.req.url.includes("localhost");
+
 		for (const [key, value] of Object.entries(cookies)) {
-			setCookie(c, key, value as string, {
+			const cookieName = key.replace("__Secure-", "");
+			setCookie(c, cookieName, value as string, {
 				path: "/",
 				secure: !isLocalhost,
 				httpOnly: true,
 				sameSite: "Lax",
 			});
 		}
-	} catch {
-		return c.json({ error: "Invalid token" }, 400);
+	} catch (error) {
+		console.error("Error parsing token:", error);
+		return c.json({ error: "Invalid token", details: String(error) }, 400);
 	}
 
 	return c.redirect(redirect);
