@@ -11,15 +11,21 @@ app.post("/v1/webhooks/convex", handleConvexWebhook);
 app.on(["GET", "POST"], "/auth/*", handleAuth);
 
 app.get("/dev/auth/get-jwt", async (c) => {
-	c.req.raw.headers.getSetCookie;
-	const jwt = getConvexJwtFromHeaders(
-		c.req.raw.headers.get("cookie")?.split(";") ?? [],
-	);
-	// return as set-cookie header
-	if (!jwt) {
-		return c.json({ error: "No JWT found" }, 400);
+	const reqCookies = c.req.raw.headers.get("cookie")?.split(";") ?? [];
+	const authCookieNames = [
+		"better-auth.session_token",
+		"better-auth.convex_jwt",
+		"better-auth.state",
+	];
+	let setCookieHeader = "";
+	for (const cookie of reqCookies) {
+		const name = cookie.split("=")[0];
+		if (name && authCookieNames.includes(name)) {
+			setCookieHeader += `${name}=${cookie.split("=")[1]}; `;
+		}
 	}
-	return c.text(`${jwt.name}=${jwt.value}`);
+
+	return c.text(setCookieHeader);
 });
 
 app.get("/dev/auth/redirect", async (c) => {
