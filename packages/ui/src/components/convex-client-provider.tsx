@@ -26,7 +26,6 @@ const queryClient = new QueryClient({
 convexQueryClient.connect(queryClient);
 
 export const authClient = createAuthClient({
-	baseURL: process.env.NEXT_PUBLIC_SITE_URL,
 	plugins: [anonymousClient(), convexClient()],
 });
 
