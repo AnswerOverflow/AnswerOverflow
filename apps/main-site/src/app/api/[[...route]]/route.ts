@@ -1,5 +1,5 @@
-import { getConvexJwtFromHeaders } from "@packages/database/convex-client-live";
 import { Hono } from "hono";
+import { getCookie, setCookie } from "hono/cookie";
 import { handle } from "hono/vercel";
 import { handleAuth } from "../handlers/auth";
 import { handleConvexWebhook } from "../handlers/convex-webhooks";
@@ -11,33 +11,52 @@ app.post("/v1/webhooks/convex", handleConvexWebhook);
 app.on(["GET", "POST"], "/auth/*", handleAuth);
 
 app.get("/dev/auth/get-jwt", async (c) => {
-	const reqCookies = c.req.raw.headers.get("cookie")?.split(";") ?? [];
+	const cookies = getCookie(c);
 	const authCookieNames = [
 		"better-auth.session_token",
 		"better-auth.convex_jwt",
 		"better-auth.state",
 	];
-	let setCookieHeader = "";
-	for (const cookie of reqCookies) {
-		const name = cookie.split("=")[0];
-		if (name && authCookieNames.includes(name)) {
-			setCookieHeader += `${name}=${cookie.split("=")[1]}; `;
+
+	const authCookies: Record<string, string> = {};
+	for (const [key, value] of Object.entries(cookies)) {
+		if (authCookieNames.includes(key)) {
+			authCookies[key] = value;
 		}
 	}
 
-	return c.text(setCookieHeader);
+	// Serialize to Base64 URL safe string to be passed in query param
+	const token = Buffer.from(JSON.stringify(authCookies)).toString("base64url");
+
+	return c.text(token);
 });
 
 app.get("/dev/auth/redirect", async (c) => {
-	// pass token in query params as ?={cookie name}={cookie value}
+	// pass token in query params as base64 encoded json
 	// parse query params
 	// redirect to redirect url with token set as cookie
-	const cookie = c.req.query("token");
+	const token = c.req.query("token");
 	const redirect = c.req.query("redirect");
-	if (!cookie || !redirect) {
+	if (!token || !redirect) {
 		return c.json({ error: "No token provided" }, 400);
 	}
-	c.res.headers.set("Set-Cookie", cookie);
+
+	try {
+		const cookies = JSON.parse(
+			Buffer.from(token, "base64url").toString("utf-8"),
+		);
+		for (const [key, value] of Object.entries(cookies)) {
+			setCookie(c, key, value as string, {
+				path: "/",
+				secure: true,
+				httpOnly: true, // better-auth cookies are generally httpOnly
+				sameSite: "Lax",
+			});
+		}
+	} catch {
+		return c.json({ error: "Invalid token" }, 400);
+	}
+
 	return c.redirect(redirect);
 });
 
