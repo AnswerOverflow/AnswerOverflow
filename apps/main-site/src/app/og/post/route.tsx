@@ -314,7 +314,7 @@ export async function GET(req: Request) {
 			>
 				<AnswerOverflowLogo
 					style={{
-						fill: 'none',
+						fill: '#000',
 						stroke: '#000',
 						strokeWidth: 13,
 						strokeMiterlimit: 10,
