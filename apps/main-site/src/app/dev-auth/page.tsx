@@ -49,16 +49,24 @@ function DevAuthContent() {
 		) {
 			setIsRedirecting(true);
 			(async () => {
-				const { data } = await authClient.convex.token();
-				if (data?.token) {
+				try {
+					const { data, error: ottError } =
+						await authClient.oneTimeToken.generate();
+					if (ottError || !data?.token) {
+						setError(ottError?.message || "Failed to generate one-time token");
+						setIsRedirecting(false);
+						return;
+					}
+
 					const url = new URL(redirect);
 					const originalPath = url.pathname + url.search;
 					url.pathname = "/auth/dev-callback";
-					url.search = "";
-					url.hash = `token=${data.token}&redirect=${encodeURIComponent(originalPath)}`;
+					url.search = `?ott=${encodeURIComponent(data.token)}&redirect=${encodeURIComponent(originalPath)}`;
 					window.location.href = url.toString();
-				} else {
-					setError("Failed to generate token");
+				} catch (err) {
+					setError(
+						err instanceof Error ? err.message : "Failed to generate token",
+					);
 					setIsRedirecting(false);
 				}
 			})();

@@ -1,7 +1,7 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth";
-import { anonymous } from "better-auth/plugins";
+import { anonymous, oneTimeToken } from "better-auth/plugins";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import type { Plan } from "../schema";
@@ -9,14 +9,7 @@ import type { Plan } from "../schema";
 export type { Plan };
 
 const getTrustedOrigins = (siteUrl: string): string[] => {
-	const origins = [siteUrl];
-
-	if (siteUrl.includes("localhost")) {
-		if (!origins.includes("http://localhost:3000")) {
-			origins.push("http://localhost:3000");
-		}
-	}
-
+	const origins = [siteUrl, "http://localhost:3000", "http://localhost:3001"];
 	return origins;
 };
 
@@ -70,9 +63,9 @@ export const createAuth = (
 		plugins: [
 			convex(),
 			anonymous({
-				// https://github.com/better-auth/better-auth/pull/5825 anon users with convex is partly bugged
 				disableDeleteAnonymousUser: true,
 			}),
+			oneTimeToken(),
 		],
 	});
 };

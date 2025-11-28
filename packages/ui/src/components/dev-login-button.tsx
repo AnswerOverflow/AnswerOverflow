@@ -1,10 +1,7 @@
 "use client";
 
 import { Button } from "./button";
-import { useDevAuth } from "./convex-client-provider";
-
-const PROD_URL =
-	process.env.NEXT_PUBLIC_PROD_SITE_URL || "https://answeroverflow.com";
+import { useDevAuth, PROD_AUTH_URL } from "./convex-client-provider";
 
 export function DevLoginButton({
 	className,
@@ -13,13 +10,13 @@ export function DevLoginButton({
 	className?: string;
 	variant?: "outline" | "default" | "secondary" | "ghost" | "link";
 }) {
-	const { isDevMode, devToken, clearToken } = useDevAuth();
+	const { isDevMode, devSession, clearSession } = useDevAuth();
 
 	if (!isDevMode) return null;
 
-	if (devToken) {
+	if (devSession) {
 		return (
-			<Button variant={variant} className={className} onClick={clearToken}>
+			<Button variant={variant} className={className} onClick={clearSession}>
 				Clear Dev Auth
 			</Button>
 		);
@@ -27,7 +24,7 @@ export function DevLoginButton({
 
 	const handleDevLogin = () => {
 		const currentUrl = window.location.href;
-		window.location.href = `${PROD_URL}/dev-auth?redirect=${encodeURIComponent(currentUrl)}`;
+		window.location.href = `${PROD_AUTH_URL}/dev-auth?redirect=${encodeURIComponent(currentUrl)}`;
 	};
 
 	return (
@@ -38,17 +35,17 @@ export function DevLoginButton({
 }
 
 export function DevAuthStatus({ className }: { className?: string }) {
-	const { isDevMode, devToken, clearToken } = useDevAuth();
+	const { isDevMode, devSession, clearSession } = useDevAuth();
 
 	if (!isDevMode) return null;
 
-	if (devToken) {
+	if (devSession) {
 		return (
 			<div className={className}>
 				<span className="text-xs text-muted-foreground">
 					Using production auth
 				</span>
-				<Button variant="ghost" size="sm" onClick={clearToken}>
+				<Button variant="ghost" size="sm" onClick={clearSession}>
 					Clear
 				</Button>
 			</div>
