@@ -82,7 +82,7 @@ export const updateChannelSettingsFlags = guildManagerMutation({
 	handler: async (ctx, args) => {
 		const channel = await ctx.db
 			.query("channels")
-			.filter((q) => q.eq(q.field("id"), args.channelId))
+			.withIndex("by_discordChannelId", (q) => q.eq("id", args.channelId))
 			.first();
 
 		if (!channel) {

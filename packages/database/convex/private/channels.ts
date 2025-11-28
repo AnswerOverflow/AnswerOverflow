@@ -56,7 +56,7 @@ export const findChannelByInviteCode = privateQuery({
 	handler: async (ctx, args) => {
 		const channel = await ctx.db
 			.query("channels")
-			.filter((q) => q.eq(q.field("inviteCode"), args.inviteCode))
+			.withIndex("by_inviteCode", (q) => q.eq("inviteCode", args.inviteCode))
 			.first();
 
 		if (!channel) {
@@ -101,7 +101,7 @@ export const updateChannel = privateMutation({
 	handler: async (ctx, args) => {
 		const existing = await ctx.db
 			.query("channels")
-			.filter((q) => q.eq(q.field("id"), args.id))
+			.withIndex("by_discordChannelId", (q) => q.eq("id", args.id))
 			.first();
 
 		if (!existing) {
@@ -142,7 +142,7 @@ export const updateManyChannels = privateMutation({
 		for (const channel of args.channels) {
 			const existing = await ctx.db
 				.query("channels")
-				.filter((q) => q.eq(q.field("id"), channel.id))
+				.withIndex("by_discordChannelId", (q) => q.eq("id", channel.id))
 				.first();
 
 			if (existing) {
@@ -183,7 +183,7 @@ export const upsertManyChannels = privateMutation({
 			args.channels.map((item) =>
 				ctx.db
 					.query("channels")
-					.filter((q) => q.eq(q.field("id"), item.create.id))
+					.withIndex("by_discordChannelId", (q) => q.eq("id", item.create.id))
 					.first(),
 			),
 		);
@@ -245,7 +245,7 @@ export const upsertChannelWithSettings = privateMutation({
 	handler: async (ctx, args) => {
 		const existingChannel = await ctx.db
 			.query("channels")
-			.filter((q) => q.eq(q.field("id"), args.channel.id))
+			.withIndex("by_discordChannelId", (q) => q.eq("id", args.channel.id))
 			.first();
 
 		if (existingChannel) {

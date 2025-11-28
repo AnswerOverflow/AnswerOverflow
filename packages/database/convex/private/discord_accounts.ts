@@ -42,7 +42,7 @@ export const updateDiscordAccount = privateMutation({
 	handler: async (ctx, args) => {
 		const existing = await ctx.db
 			.query("discordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.account.id))
+			.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
 			.first();
 
 		if (!existing) {
@@ -53,7 +53,7 @@ export const updateDiscordAccount = privateMutation({
 
 		const updated = await ctx.db
 			.query("discordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.account.id))
+			.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
 			.first();
 
 		if (!updated) {
@@ -71,14 +71,14 @@ export const upsertDiscordAccount = privateMutation({
 	handler: async (ctx, args) => {
 		const existing = await ctx.db
 			.query("discordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.account.id))
+			.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
 			.first();
 
 		if (existing) {
 			await ctx.db.patch(existing._id, args.account);
 			const updated = await ctx.db
 				.query("discordAccounts")
-				.filter((q) => q.eq(q.field("id"), args.account.id))
+				.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
 				.first();
 			if (!updated) {
 				throw new Error("Failed to update account");
@@ -87,7 +87,7 @@ export const upsertDiscordAccount = privateMutation({
 		} else {
 			const ignored = await ctx.db
 				.query("ignoredDiscordAccounts")
-				.filter((q) => q.eq(q.field("id"), args.account.id))
+				.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
 				.first();
 
 			if (ignored) {
@@ -100,7 +100,7 @@ export const upsertDiscordAccount = privateMutation({
 			await ctx.db.insert("discordAccounts", args.account);
 			const created = await ctx.db
 				.query("discordAccounts")
-				.filter((q) => q.eq(q.field("id"), args.account.id))
+				.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
 				.first();
 			if (!created) {
 				throw new Error("Failed to create account");
@@ -117,7 +117,7 @@ export const deleteDiscordAccount = privateMutation({
 	handler: async (ctx, args) => {
 		const existing = await ctx.db
 			.query("discordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
+			.withIndex("by_discordAccountId", (q) => q.eq("id", args.id))
 			.first();
 
 		if (existing) {

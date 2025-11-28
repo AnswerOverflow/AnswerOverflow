@@ -18,7 +18,7 @@ export const deleteIgnoredDiscordAccount = privateMutation({
 	handler: async (ctx, args) => {
 		const existing = await ctx.db
 			.query("ignoredDiscordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
+			.withIndex("by_discordAccountId", (q) => q.eq("id", args.id))
 			.first();
 
 		if (existing) {
@@ -27,7 +27,7 @@ export const deleteIgnoredDiscordAccount = privateMutation({
 
 		const deleted = await ctx.db
 			.query("ignoredDiscordAccounts")
-			.filter((q) => q.eq(q.field("id"), args.id))
+			.withIndex("by_discordAccountId", (q) => q.eq("id", args.id))
 			.first();
 
 		if (deleted) {

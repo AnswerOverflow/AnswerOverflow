@@ -47,11 +47,7 @@ export const upsertServerPreferences = privateMutation({
 			) {
 				const domainError = await validateCustomDomainUniqueness(
 					ctx,
-
 					preferences.customDomain,
-
-					undefined,
-
 					existing._id,
 				);
 
@@ -69,10 +65,7 @@ export const upsertServerPreferences = privateMutation({
 		} else {
 			const domainError = await validateCustomDomainUniqueness(
 				ctx,
-
 				preferences.customDomain,
-
-				serverId,
 			);
 
 			if (domainError) {

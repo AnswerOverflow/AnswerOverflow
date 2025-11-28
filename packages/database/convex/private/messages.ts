@@ -146,7 +146,7 @@ export const upsertMessage = privateMutation({
 
 					const existingEmoji = await ctx.db
 						.query("emojis")
-						.filter((q) => q.eq(q.field("id"), emojiId))
+						.withIndex("by_emojiId", (q) => q.eq("id", emojiId))
 						.first();
 
 					if (!existingEmoji) {

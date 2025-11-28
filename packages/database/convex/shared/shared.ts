@@ -110,28 +110,19 @@ export function validateCustomDomain(domain: string | null): string | null {
 export async function validateCustomDomainUniqueness(
 	ctx: QueryCtx | MutationCtx,
 	customDomain: string | null | undefined,
-	excludeServerId?: bigint,
 	excludePreferencesId?: Id<"serverPreferences">,
 ): Promise<string | null> {
 	if (!customDomain) {
 		return null;
 	}
 
-	const allServers = await ctx.db.query("servers").collect();
-	for (const server of allServers) {
-		if (excludeServerId && server.discordId === excludeServerId) {
-			continue;
-		}
+	const existing = await ctx.db
+		.query("serverPreferences")
+		.withIndex("by_customDomain", (q) => q.eq("customDomain", customDomain))
+		.first();
 
-		if (server.preferencesId) {
-			const prefs = await ctx.db.get(server.preferencesId);
-			if (
-				prefs?.customDomain === customDomain &&
-				(!excludePreferencesId || prefs._id !== excludePreferencesId)
-			) {
-				return `Server with custom domain ${customDomain} already exists`;
-			}
-		}
+	if (existing && existing._id !== excludePreferencesId) {
+		return `Server with custom domain ${customDomain} already exists`;
 	}
 
 	return null;
@@ -153,7 +144,7 @@ export async function findIgnoredDiscordAccountById(
 ) {
 	return await ctx.db
 		.query("ignoredDiscordAccounts")
-		.filter((q) => q.eq(q.field("id"), id))
+		.withIndex("by_discordAccountId", (q) => q.eq("id", id))
 		.first();
 }
 
@@ -163,7 +154,7 @@ export async function upsertIgnoredDiscordAccountInternalLogic(
 ) {
 	const existingIgnored = await ctx.db
 		.query("ignoredDiscordAccounts")
-		.filter((q) => q.eq(q.field("id"), id))
+		.withIndex("by_discordAccountId", (q) => q.eq("id", id))
 		.first();
 
 	if (existingIgnored) {
@@ -174,7 +165,7 @@ export async function upsertIgnoredDiscordAccountInternalLogic(
 
 	const upserted = await ctx.db
 		.query("ignoredDiscordAccounts")
-		.filter((q) => q.eq(q.field("id"), id))
+		.withIndex("by_discordAccountId", (q) => q.eq("id", id))
 		.first();
 
 	if (!upserted) {
@@ -271,7 +262,7 @@ export async function deleteChannelInternalLogic(
 
 	const channel = await ctx.db
 		.query("channels")
-		.filter((q) => q.eq(q.field("id"), id))
+		.withIndex("by_discordChannelId", (q) => q.eq("id", id))
 		.first();
 
 	if (channel) {
@@ -285,7 +276,7 @@ export async function getDiscordAccountById(
 ) {
 	return await ctx.db
 		.query("discordAccounts")
-		.filter((q) => q.eq(q.field("id"), id))
+		.withIndex("by_discordAccountId", (q) => q.eq("id", id))
 		.first();
 }
 
@@ -494,7 +485,7 @@ export async function getInternalLinksMetadata(
 export async function getMessageById(ctx: QueryCtx | MutationCtx, id: bigint) {
 	return await ctx.db
 		.query("messages")
-		.filter((q) => q.eq(q.field("id"), id))
+		.withIndex("by_messageId", (q) => q.eq("id", id))
 		.first();
 }
 
@@ -670,7 +661,7 @@ export async function deleteMessageInternalLogic(
 
 	const message = await ctx.db
 		.query("messages")
-		.filter((q) => q.eq(q.field("id"), id))
+		.withIndex("by_messageId", (q) => q.eq("id", id))
 		.first();
 
 	if (message) {
@@ -738,11 +729,11 @@ export async function upsertMessageInternalLogic(
 					.filter((id): id is bigint => !!id),
 			);
 
-			for (const emojiId of emojiIds) {
-				const existingEmoji = await ctx.db
-					.query("emojis")
-					.filter((q) => q.eq(q.field("id"), emojiId))
-					.first();
+		for (const emojiId of emojiIds) {
+			const existingEmoji = await ctx.db
+				.query("emojis")
+				.withIndex("by_emojiId", (q) => q.eq("id", emojiId))
+				.first();
 
 				if (!existingEmoji) {
 					const reaction = reactionsWithEmojiId.find(
@@ -891,7 +882,7 @@ export async function enrichMessageForDisplay(
 	for (const emojiId of emojiIds) {
 		const emoji = await ctx.db
 			.query("emojis")
-			.filter((q) => q.eq(q.field("id"), emojiId))
+			.withIndex("by_emojiId", (q) => q.eq("id", emojiId))
 			.first();
 		if (emoji) {
 			emojiMap.set(emojiId.toString(), {
