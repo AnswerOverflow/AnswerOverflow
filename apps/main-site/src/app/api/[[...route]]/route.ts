@@ -45,11 +45,12 @@ app.get("/dev/auth/redirect", async (c) => {
 		const cookies = JSON.parse(
 			Buffer.from(token, "base64url").toString("utf-8"),
 		);
+		const isLocalhost = c.req.url.includes("localhost");
 		for (const [key, value] of Object.entries(cookies)) {
 			setCookie(c, key, value as string, {
 				path: "/",
-				secure: true,
-				httpOnly: true, // better-auth cookies are generally httpOnly
+				secure: !isLocalhost,
+				httpOnly: true,
 				sameSite: "Lax",
 			});
 		}
