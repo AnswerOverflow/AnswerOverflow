@@ -17,6 +17,16 @@ const getTrustedOrigins = (siteUrl: string): string[] => {
 		}
 	}
 
+	const additionalOrigins = process.env.ADDITIONAL_TRUSTED_ORIGINS;
+	if (additionalOrigins) {
+		for (const origin of additionalOrigins.split(",")) {
+			const trimmed = origin.trim();
+			if (trimmed && !origins.includes(trimmed)) {
+				origins.push(trimmed);
+			}
+		}
+	}
+
 	return origins;
 };
 
