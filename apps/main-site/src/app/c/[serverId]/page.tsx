@@ -1,5 +1,6 @@
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChannelPageContent } from "../../../components/channel-page-content";
 import { runtime } from "../../../lib/runtime";
@@ -7,6 +8,41 @@ import { runtime } from "../../../lib/runtime";
 type Props = {
 	params: Promise<{ serverId: string }>;
 };
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const params = await props.params;
+
+	const serverData = await Effect.gen(function* () {
+		const database = yield* Database;
+		const liveData =
+			yield* database.private.servers.getServerByDiscordIdWithChannels({
+				discordId: BigInt(params.serverId),
+			});
+		return liveData;
+	}).pipe(runtime.runPromise);
+
+	if (!serverData) {
+		return {};
+	}
+
+	const { server, channels } = serverData;
+	const description =
+		server.description ??
+		`Browse ${channels.length} indexed channels from the ${server.name} Discord community`;
+
+	return {
+		title: `${server.name} - AnswerOverflow`,
+		description,
+		openGraph: {
+			images: [`/og/community?id=${params.serverId}`],
+			title: `${server.name} - AnswerOverflow`,
+			description,
+		},
+		alternates: {
+			canonical: `/c/${params.serverId}`,
+		},
+	};
+}
 
 export default async function ServerPage(props: Props) {
 	const params = await props.params;
