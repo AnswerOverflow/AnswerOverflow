@@ -1,6 +1,5 @@
 import "@packages/ui/globals.css";
 import { Providers } from "@packages/ui/components/providers";
-import { DevAuthHandler } from "@packages/ui/components/dev-auth-handler";
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { NavbarWrapper } from "../components/navbar-wrapper";
@@ -24,7 +23,6 @@ export default function RootLayout({
 			<body>
 				<NuqsAdapter>
 					<Providers tenant={null}>
-						<DevAuthHandler />
 						<NavbarWrapper>{children}</NavbarWrapper>
 					</Providers>
 				</NuqsAdapter>
