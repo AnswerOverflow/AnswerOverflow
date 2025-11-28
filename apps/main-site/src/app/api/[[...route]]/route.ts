@@ -47,10 +47,10 @@ app.get("/dev/auth/redirect", async (c) => {
 		const isLocalhost = c.req.url.includes("localhost");
 
 		for (const [key, value] of Object.entries(cookies)) {
-			const cookieName = key.replace("__Secure-", "");
-			setCookie(c, cookieName, value as string, {
+			const isSecureCookie = key.startsWith("__Secure-");
+			setCookie(c, key, value as string, {
 				path: "/",
-				secure: !isLocalhost,
+				secure: isSecureCookie ? true : !isLocalhost,
 				httpOnly: true,
 				sameSite: "Lax",
 			});
