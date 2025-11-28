@@ -1,5 +1,5 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
-import { convex, crossDomain } from "@convex-dev/better-auth/plugins";
+import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth";
 import { anonymous } from "better-auth/plugins";
 import { components } from "../_generated/api";
@@ -69,7 +69,6 @@ export const createAuth = (
 		},
 		plugins: [
 			convex(),
-			crossDomain({ siteUrl }),
 			anonymous({
 				// https://github.com/better-auth/better-auth/pull/5825 anon users with convex is partly bugged
 				disableDeleteAnonymousUser: true,
