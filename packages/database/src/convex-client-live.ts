@@ -15,17 +15,32 @@ const JWT_COOKIE_NAMES = [
 	"__Secure-better-auth.convex_jwt",
 ] as const;
 
-function extractJwtFromCookie(setCookieString: string): string | null {
+function extractJwtFromCookie(setCookieString: string) {
 	const nameValuePart = setCookieString.split(";")[0];
 	if (!nameValuePart) return null;
 	const parsed = parse(nameValuePart);
 	for (const name of JWT_COOKIE_NAMES) {
-		if (parsed[name]) return parsed[name];
+		if (parsed[name])
+			return {
+				name: name,
+				value: parsed[name],
+			};
 	}
 	return null;
 }
 
 let cachedJwt: string | null = null;
+
+export function getConvexJwtFromHeaders(cookies: string[]) {
+	for (const cookie of cookies) {
+		const extracted = extractJwtFromCookie(cookie);
+		if (extracted) {
+			return extracted;
+		}
+	}
+
+	return null;
+}
 
 async function getConvexJwt(): Promise<string | null> {
 	if (cachedJwt) return cachedJwt;
@@ -42,17 +57,12 @@ async function getConvexJwt(): Promise<string | null> {
 		},
 	);
 
-	const cookies =
-		response.headers.getSetCookie?.() ??
-		response.headers.get("set-cookie")?.split(", ") ??
-		[];
-
-	for (const cookie of cookies) {
-		const extracted = extractJwtFromCookie(cookie);
-		if (extracted) {
-			cachedJwt = extracted;
-			return cachedJwt;
-		}
+	const headers = response.headers;
+	const jwt = getConvexJwtFromHeaders(
+		headers.getSetCookie?.() ?? headers.get("set-cookie")?.split(", ") ?? [],
+	);
+	if (jwt) {
+		cachedJwt = jwt.value;
 	}
 
 	return null;
