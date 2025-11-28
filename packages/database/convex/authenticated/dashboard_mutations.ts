@@ -80,10 +80,13 @@ export const updateChannelSettingsFlags = guildManagerMutation({
 		}),
 	},
 	handler: async (ctx, args) => {
-		const channel = await ctx.db
-			.query("channels")
-			.withIndex("by_discordChannelId", (q) => q.eq("id", args.channelId))
-			.first();
+		const channel = await getOneFrom(
+			ctx.db,
+			"channels",
+			"by_discordChannelId",
+			args.channelId,
+			"id",
+		);
 
 		if (!channel) {
 			throw new Error("Channel not found");

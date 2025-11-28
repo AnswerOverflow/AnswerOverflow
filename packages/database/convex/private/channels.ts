@@ -54,10 +54,13 @@ export const findChannelByInviteCode = privateQuery({
 		inviteCode: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const channel = await ctx.db
-			.query("channels")
-			.withIndex("by_inviteCode", (q) => q.eq("inviteCode", args.inviteCode))
-			.first();
+		const channel = await getOneFrom(
+			ctx.db,
+			"channels",
+			"by_inviteCode",
+			args.inviteCode,
+			"inviteCode",
+		);
 
 		if (!channel) {
 			return null;
@@ -99,10 +102,13 @@ export const updateChannel = privateMutation({
 		settings: v.optional(channelSettingsSchema),
 	},
 	handler: async (ctx, args) => {
-		const existing = await ctx.db
-			.query("channels")
-			.withIndex("by_discordChannelId", (q) => q.eq("id", args.id))
-			.first();
+		const existing = await getOneFrom(
+			ctx.db,
+			"channels",
+			"by_discordChannelId",
+			args.id,
+			"id",
+		);
 
 		if (!existing) {
 			throw new Error(`Channel with id ${args.id} not found`);
@@ -140,10 +146,13 @@ export const updateManyChannels = privateMutation({
 	handler: async (ctx, args) => {
 		const ids: bigint[] = [];
 		for (const channel of args.channels) {
-			const existing = await ctx.db
-				.query("channels")
-				.withIndex("by_discordChannelId", (q) => q.eq("id", channel.id))
-				.first();
+			const existing = await getOneFrom(
+				ctx.db,
+				"channels",
+				"by_discordChannelId",
+				channel.id,
+				"id",
+			);
 
 			if (existing) {
 				await ctx.db.patch(existing._id, channel);
@@ -181,10 +190,7 @@ export const upsertManyChannels = privateMutation({
 
 		const existingChannels = await Promise.all(
 			args.channels.map((item) =>
-				ctx.db
-					.query("channels")
-					.withIndex("by_discordChannelId", (q) => q.eq("id", item.create.id))
-					.first(),
+				getOneFrom(ctx.db, "channels", "by_discordChannelId", item.create.id, "id"),
 			),
 		);
 
@@ -243,10 +249,13 @@ export const upsertChannelWithSettings = privateMutation({
 		settings: v.optional(channelSettingsSchema),
 	},
 	handler: async (ctx, args) => {
-		const existingChannel = await ctx.db
-			.query("channels")
-			.withIndex("by_discordChannelId", (q) => q.eq("id", args.channel.id))
-			.first();
+		const existingChannel = await getOneFrom(
+			ctx.db,
+			"channels",
+			"by_discordChannelId",
+			args.channel.id,
+			"id",
+		);
 
 		if (existingChannel) {
 			await ctx.db.patch(existingChannel._id, args.channel);

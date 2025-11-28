@@ -40,10 +40,13 @@ export const updateDiscordAccount = privateMutation({
 		account: discordAccountSchema,
 	},
 	handler: async (ctx, args) => {
-		const existing = await ctx.db
-			.query("discordAccounts")
-			.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
-			.first();
+		const existing = await getOneFrom(
+			ctx.db,
+			"discordAccounts",
+			"by_discordAccountId",
+			args.account.id,
+			"id",
+		);
 
 		if (!existing) {
 			throw new Error("Account not found");
@@ -51,10 +54,13 @@ export const updateDiscordAccount = privateMutation({
 
 		await ctx.db.patch(existing._id, args.account);
 
-		const updated = await ctx.db
-			.query("discordAccounts")
-			.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
-			.first();
+		const updated = await getOneFrom(
+			ctx.db,
+			"discordAccounts",
+			"by_discordAccountId",
+			args.account.id,
+			"id",
+		);
 
 		if (!updated) {
 			throw new Error("Failed to update account");
@@ -69,26 +75,35 @@ export const upsertDiscordAccount = privateMutation({
 		account: discordAccountSchema,
 	},
 	handler: async (ctx, args) => {
-		const existing = await ctx.db
-			.query("discordAccounts")
-			.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
-			.first();
+		const existing = await getOneFrom(
+			ctx.db,
+			"discordAccounts",
+			"by_discordAccountId",
+			args.account.id,
+			"id",
+		);
 
 		if (existing) {
 			await ctx.db.patch(existing._id, args.account);
-			const updated = await ctx.db
-				.query("discordAccounts")
-				.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
-				.first();
+			const updated = await getOneFrom(
+				ctx.db,
+				"discordAccounts",
+				"by_discordAccountId",
+				args.account.id,
+				"id",
+			);
 			if (!updated) {
 				throw new Error("Failed to update account");
 			}
 			return updated;
 		} else {
-			const ignored = await ctx.db
-				.query("ignoredDiscordAccounts")
-				.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
-				.first();
+			const ignored = await getOneFrom(
+				ctx.db,
+				"ignoredDiscordAccounts",
+				"by_discordAccountId",
+				args.account.id,
+				"id",
+			);
 
 			if (ignored) {
 				return getDefaultDiscordAccount({
@@ -98,10 +113,13 @@ export const upsertDiscordAccount = privateMutation({
 			}
 
 			await ctx.db.insert("discordAccounts", args.account);
-			const created = await ctx.db
-				.query("discordAccounts")
-				.withIndex("by_discordAccountId", (q) => q.eq("id", args.account.id))
-				.first();
+			const created = await getOneFrom(
+				ctx.db,
+				"discordAccounts",
+				"by_discordAccountId",
+				args.account.id,
+				"id",
+			);
 			if (!created) {
 				throw new Error("Failed to create account");
 			}
@@ -115,10 +133,13 @@ export const deleteDiscordAccount = privateMutation({
 		id: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		const existing = await ctx.db
-			.query("discordAccounts")
-			.withIndex("by_discordAccountId", (q) => q.eq("id", args.id))
-			.first();
+		const existing = await getOneFrom(
+			ctx.db,
+			"discordAccounts",
+			"by_discordAccountId",
+			args.id,
+			"id",
+		);
 
 		if (existing) {
 			await ctx.db.delete(existing._id);

@@ -116,10 +116,12 @@ export async function validateCustomDomainUniqueness(
 		return null;
 	}
 
-	const existing = await ctx.db
-		.query("serverPreferences")
-		.withIndex("by_customDomain", (q) => q.eq("customDomain", customDomain))
-		.first();
+	const existing = await getOneFrom(
+		ctx.db,
+		"serverPreferences",
+		"by_customDomain",
+		customDomain,
+	);
 
 	if (existing && existing._id !== excludePreferencesId) {
 		return `Server with custom domain ${customDomain} already exists`;
@@ -132,30 +134,33 @@ export async function getServerByDiscordId(
 	ctx: QueryCtx | MutationCtx,
 	discordId: bigint,
 ) {
-	return await ctx.db
-		.query("servers")
-		.withIndex("by_discordId", (q) => q.eq("discordId", discordId))
-		.first();
+	return await getOneFrom(ctx.db, "servers", "by_discordId", discordId);
 }
 
 export async function findIgnoredDiscordAccountById(
 	ctx: QueryCtx | MutationCtx,
 	id: bigint,
 ) {
-	return await ctx.db
-		.query("ignoredDiscordAccounts")
-		.withIndex("by_discordAccountId", (q) => q.eq("id", id))
-		.first();
+	return await getOneFrom(
+		ctx.db,
+		"ignoredDiscordAccounts",
+		"by_discordAccountId",
+		id,
+		"id",
+	);
 }
 
 export async function upsertIgnoredDiscordAccountInternalLogic(
 	ctx: MutationCtx,
 	id: bigint,
 ) {
-	const existingIgnored = await ctx.db
-		.query("ignoredDiscordAccounts")
-		.withIndex("by_discordAccountId", (q) => q.eq("id", id))
-		.first();
+	const existingIgnored = await getOneFrom(
+		ctx.db,
+		"ignoredDiscordAccounts",
+		"by_discordAccountId",
+		id,
+		"id",
+	);
 
 	if (existingIgnored) {
 		return existingIgnored;
@@ -163,10 +168,13 @@ export async function upsertIgnoredDiscordAccountInternalLogic(
 
 	await ctx.db.insert("ignoredDiscordAccounts", { id });
 
-	const upserted = await ctx.db
-		.query("ignoredDiscordAccounts")
-		.withIndex("by_discordAccountId", (q) => q.eq("id", id))
-		.first();
+	const upserted = await getOneFrom(
+		ctx.db,
+		"ignoredDiscordAccounts",
+		"by_discordAccountId",
+		id,
+		"id",
+	);
 
 	if (!upserted) {
 		throw new Error("Failed to upsert account");
@@ -260,10 +268,13 @@ export async function deleteChannelInternalLogic(
 		await ctx.db.delete(setting._id);
 	}
 
-	const channel = await ctx.db
-		.query("channels")
-		.withIndex("by_discordChannelId", (q) => q.eq("id", id))
-		.first();
+	const channel = await getOneFrom(
+		ctx.db,
+		"channels",
+		"by_discordChannelId",
+		id,
+		"id",
+	);
 
 	if (channel) {
 		await ctx.db.delete(channel._id);
@@ -274,10 +285,13 @@ export async function getDiscordAccountById(
 	ctx: QueryCtx | MutationCtx,
 	id: bigint,
 ) {
-	return await ctx.db
-		.query("discordAccounts")
-		.withIndex("by_discordAccountId", (q) => q.eq("id", id))
-		.first();
+	return await getOneFrom(
+		ctx.db,
+		"discordAccounts",
+		"by_discordAccountId",
+		id,
+		"id",
+	);
 }
 
 export function extractMentionIds(content: string): {
@@ -483,10 +497,7 @@ export async function getInternalLinksMetadata(
 }
 
 export async function getMessageById(ctx: QueryCtx | MutationCtx, id: bigint) {
-	return await ctx.db
-		.query("messages")
-		.withIndex("by_messageId", (q) => q.eq("id", id))
-		.first();
+	return await getOneFrom(ctx.db, "messages", "by_messageId", id, "id");
 }
 
 export function compareIds(a: bigint, b: bigint): number {
@@ -659,10 +670,7 @@ export async function deleteMessageInternalLogic(
 		await ctx.db.delete(reaction._id);
 	}
 
-	const message = await ctx.db
-		.query("messages")
-		.withIndex("by_messageId", (q) => q.eq("id", id))
-		.first();
+	const message = await getOneFrom(ctx.db, "messages", "by_messageId", id, "id");
 
 	if (message) {
 		await ctx.db.delete(message._id);
@@ -683,10 +691,13 @@ export async function upsertMessageInternalLogic(
 	const { attachments, reactions } = args;
 	const messageData = args.message;
 
-	const existing = await ctx.db
-		.query("messages")
-		.withIndex("by_messageId", (q) => q.eq("id", messageData.id))
-		.first();
+	const existing = await getOneFrom(
+		ctx.db,
+		"messages",
+		"by_messageId",
+		messageData.id,
+		"id",
+	);
 
 	if (existing) {
 		await ctx.db.replace(existing._id, messageData);
@@ -730,20 +741,23 @@ export async function upsertMessageInternalLogic(
 			);
 
 		for (const emojiId of emojiIds) {
-			const existingEmoji = await ctx.db
-				.query("emojis")
-				.withIndex("by_emojiId", (q) => q.eq("id", emojiId))
-				.first();
+			const existingEmoji = await getOneFrom(
+				ctx.db,
+				"emojis",
+				"by_emojiId",
+				emojiId,
+				"id",
+			);
 
-				if (!existingEmoji) {
-					const reaction = reactionsWithEmojiId.find(
-						(r) => r.emoji.id === emojiId,
-					);
-					if (reaction) {
-						await ctx.db.insert("emojis", reaction.emoji);
-					}
+			if (!existingEmoji) {
+				const reaction = reactionsWithEmojiId.find(
+					(r) => r.emoji.id === emojiId,
+				);
+				if (reaction) {
+					await ctx.db.insert("emojis", reaction.emoji);
 				}
 			}
+		}
 
 			for (const reaction of reactionsWithEmojiId) {
 				if (!reaction.emoji.id) continue;
@@ -880,10 +894,7 @@ export async function enrichMessageForDisplay(
 		{ id: bigint; name: string; animated?: boolean }
 	>();
 	for (const emojiId of emojiIds) {
-		const emoji = await ctx.db
-			.query("emojis")
-			.withIndex("by_emojiId", (q) => q.eq("id", emojiId))
-			.first();
+		const emoji = await getOneFrom(ctx.db, "emojis", "by_emojiId", emojiId, "id");
 		if (emoji) {
 			emojiMap.set(emojiId.toString(), {
 				id: emoji.id,

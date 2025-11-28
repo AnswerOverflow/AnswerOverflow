@@ -144,10 +144,13 @@ export const upsertMessage = privateMutation({
 					const emojiId = reaction.emoji.id;
 					if (!emojiId) continue;
 
-					const existingEmoji = await ctx.db
-						.query("emojis")
-						.withIndex("by_emojiId", (q) => q.eq("id", emojiId))
-						.first();
+					const existingEmoji = await getOneFrom(
+						ctx.db,
+						"emojis",
+						"by_emojiId",
+						emojiId,
+						"id",
+					);
 
 					if (!existingEmoji) {
 						await ctx.db.insert("emojis", reaction.emoji);

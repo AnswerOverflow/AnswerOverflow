@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { privateMutation, privateQuery } from "../client";
 import { findIgnoredDiscordAccountById as findIgnoredDiscordAccountByIdShared } from "../shared/shared";
 
@@ -16,19 +17,25 @@ export const deleteIgnoredDiscordAccount = privateMutation({
 		id: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		const existing = await ctx.db
-			.query("ignoredDiscordAccounts")
-			.withIndex("by_discordAccountId", (q) => q.eq("id", args.id))
-			.first();
+		const existing = await getOneFrom(
+			ctx.db,
+			"ignoredDiscordAccounts",
+			"by_discordAccountId",
+			args.id,
+			"id",
+		);
 
 		if (existing) {
 			await ctx.db.delete(existing._id);
 		}
 
-		const deleted = await ctx.db
-			.query("ignoredDiscordAccounts")
-			.withIndex("by_discordAccountId", (q) => q.eq("id", args.id))
-			.first();
+		const deleted = await getOneFrom(
+			ctx.db,
+			"ignoredDiscordAccounts",
+			"by_discordAccountId",
+			args.id,
+			"id",
+		);
 
 		if (deleted) {
 			throw new Error("Failed to delete account");
