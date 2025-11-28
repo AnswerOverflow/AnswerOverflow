@@ -12,6 +12,7 @@ app.on(["GET", "POST"], "/auth/*", handleAuth);
 
 app.get("/dev/auth/get-jwt", async (c) => {
 	const cookies = getCookie(c);
+	console.log("All cookies:", cookies);
 	const authCookieNames = [
 		"better-auth.session_token",
 		"better-auth.convex_jwt",
@@ -25,8 +26,9 @@ app.get("/dev/auth/get-jwt", async (c) => {
 		}
 	}
 
-	// Serialize to Base64 URL safe string to be passed in query param
+	console.log("Auth cookies:", authCookies);
 	const token = Buffer.from(JSON.stringify(authCookies)).toString("base64url");
+	console.log("Token:", token);
 
 	return c.text(token);
 });
