@@ -31,12 +31,9 @@ export default function DevAuthPage() {
 
 	const handleAllow = async () => {
 		if (session?.user) {
-			// redirect to redirect with the session token
 			const jwt = await fetch(`/api/dev/auth/get-jwt`, {
 				method: "GET",
-				headers: {
-					Cookie: document.cookie,
-				},
+				credentials: "include",
 			});
 			const text = await jwt.text();
 			if (jwt.status !== 200) {
