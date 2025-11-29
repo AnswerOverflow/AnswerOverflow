@@ -4,16 +4,13 @@ import { api } from "@packages/database/convex/_generated/api";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import type { DiscordUser } from "@packages/ui/components/discord-avatar";
+import { EmptyStateCard } from "@packages/ui/components/empty";
 import {
 	ThreadCard,
 	ThreadCardSkeletonList,
 } from "@packages/ui/components/thread-card";
-import {
-	EmptyState,
-	InitialResults,
-	type ServerInfo,
-	UserPageLayout,
-} from "../components";
+import { MessageSquare } from "lucide-react";
+import { InitialResults, type ServerInfo, UserPageLayout } from "../components";
 
 function UserCommentsContent({
 	userId,
@@ -25,7 +22,13 @@ function UserCommentsContent({
 	initialComments: SearchResult[];
 }) {
 	if (initialComments.length === 0) {
-		return <EmptyState message="No comments found" />;
+		return (
+			<EmptyStateCard
+				icon={MessageSquare}
+				title="No comments found"
+				description="This user hasn't made any comments yet."
+			/>
+		);
 	}
 
 	return (
