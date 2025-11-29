@@ -1,3 +1,4 @@
+import React from "react";
 import { blog } from "@/.source/server";
 import { parseDate, formatDate } from "@/lib/date-utils";
 import { notFound } from "next/navigation";
@@ -6,6 +7,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { BlogTOC } from "@/components/blog-toc";
 import { CodeBlock } from "@packages/ui/markdown/render/code-block";
+
+const AUTHORS: Record<string, { name: string; role: string; image: string }> = {
+	"AnswerOverflow Team": {
+		name: "Rhys Sullivan",
+		role: "Founder",
+		image: "/rhys_icon.png",
+	},
+};
+
+const DEFAULT_AUTHOR = {
+	name: "Rhys Sullivan",
+	role: "Founder",
+	image: "/rhys_icon.png",
+};
+
+function getAuthorInfo(author: string | undefined) {
+	if (author && author in AUTHORS) {
+		return AUTHORS[author] ?? DEFAULT_AUTHOR;
+	}
+	return DEFAULT_AUTHOR;
+}
 
 interface BlogPostPageProps {
 	params: Promise<{
@@ -87,19 +109,28 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
 								{post.description}
 							</p>
 						)}
-						<div className="flex items-center gap-3 pb-6 border-b">
-							<Image
-								src="/rhys_icon.png"
-								alt="Rhys Sullivan"
-								width={40}
-								height={40}
-								className="rounded-full"
-							/>
-							<div>
-								<div className="font-semibold text-sm">Rhys Sullivan</div>
-								<div className="text-xs text-muted-foreground">Founder</div>
-							</div>
-						</div>
+						{(() => {
+							const authorInfo = getAuthorInfo(post.author);
+							return (
+								<div className="flex items-center gap-3 pb-6 border-b">
+									<Image
+										src={authorInfo.image}
+										alt={authorInfo.name}
+										width={40}
+										height={40}
+										className="rounded-full"
+									/>
+									<div>
+										<div className="font-semibold text-sm">
+											{authorInfo.name}
+										</div>
+										<div className="text-xs text-muted-foreground">
+											{authorInfo.role}
+										</div>
+									</div>
+								</div>
+							);
+						})()}
 					</header>
 					<div className="prose prose-neutral dark:prose-invert max-w-none prose-p:my-3 prose-headings:mt-6 prose-headings:mb-3 prose-li:my-1 prose-ul:my-3 prose-ol:my-3">
 						<Content
@@ -134,9 +165,15 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
 									);
 								},
 								pre: ({ children, ...props }) => {
-									const codeElement = children as any;
-									const code = codeElement?.props?.children;
-									const className = codeElement?.props?.className || "";
+									if (!React.isValidElement(children)) {
+										return <pre {...props}>{children}</pre>;
+									}
+									const codeElement = children as React.ReactElement<{
+										children?: string;
+										className?: string;
+									}>;
+									const code = codeElement.props?.children;
+									const className = codeElement.props?.className || "";
 									const lang = className.replace(/language-/, "");
 
 									if (typeof code === "string") {

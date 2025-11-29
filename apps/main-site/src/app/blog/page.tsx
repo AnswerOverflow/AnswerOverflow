@@ -2,6 +2,18 @@ import { blog } from "@/.source/server";
 import { parseDate, formatDate } from "@/lib/date-utils";
 import { Card, CardContent, CardHeader } from "@packages/ui/components/card";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+	title: "Blog | AnswerOverflow",
+	description:
+		"Insights, updates, and best practices for making Discord knowledge accessible",
+	openGraph: {
+		title: "Blog | AnswerOverflow",
+		description:
+			"Insights, updates, and best practices for making Discord knowledge accessible",
+	},
+};
 
 export default async function BlogPage() {
 	const sortedPosts = [...blog].sort((a, b) => {
