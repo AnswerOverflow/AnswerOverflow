@@ -69,13 +69,24 @@ app.post("/dev/auth/set-token", async (c) => {
 		return c.json({ error: "No token provided" }, 400);
 	}
 
+	if (typeof token !== "string") {
+		return c.json({ error: "Token must be a string" }, 400);
+	}
+
 	try {
-		const cookies = JSON.parse(
-			Buffer.from(token, "base64url").toString("utf-8"),
-		);
+		const decoded = Buffer.from(token, "base64url").toString("utf-8");
+		const cookies = JSON.parse(decoded);
+
+		if (typeof cookies !== "object" || cookies === null) {
+			return c.json({ error: "Invalid token format: expected object" }, 400);
+		}
 
 		for (const [key, value] of Object.entries(cookies)) {
-			setCookie(c, key, value as string, {
+			if (typeof value !== "string") {
+				console.warn(`Skipping non-string cookie value for key: ${key}`);
+				continue;
+			}
+			setCookie(c, key, value, {
 				path: "/",
 				secure: false,
 				httpOnly: true,
@@ -85,7 +96,12 @@ app.post("/dev/auth/set-token", async (c) => {
 
 		return c.json({ success: true });
 	} catch (error) {
-		console.error("Error parsing token:", error);
+		console.error(
+			"Error parsing token:",
+			error,
+			"Token preview:",
+			token.slice(0, 50),
+		);
 		return c.json({ error: "Invalid token", details: String(error) }, 400);
 	}
 });
