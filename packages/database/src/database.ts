@@ -192,7 +192,7 @@ export const service = Effect.gen(function* () {
 		}) as TransformToFunctions<T>;
 	};
 
-	const privateProxy = createProxy(api.private, [], false);
+	const privateProxy = createProxy(api.private, [], true);
 	const publicProxy = createProxy(api.public, [], true);
 	const authenticatedProxy = createProxy(api.authenticated, [], false);
 
