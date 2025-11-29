@@ -24,12 +24,19 @@ function isAllowedDevOrigin(origin: string | undefined): boolean {
 app.get("/dev/auth/get-jwt", async (c) => {
 	const cookies = getCookie(c);
 
+	console.log("[dev-auth] get-jwt - All cookies:", Object.keys(cookies));
+
 	const sessionToken =
 		cookies["better-auth.session_token"] ??
 		cookies["__Secure-better-auth.session_token"];
 	if (!sessionToken) {
 		return c.text("Unauthorized: No session found", 401);
 	}
+
+	console.log(
+		"[dev-auth] get-jwt - Session token found, length:",
+		sessionToken.length,
+	);
 
 	const authCookieNames = [
 		"better-auth.session_token",
@@ -44,11 +51,15 @@ app.get("/dev/auth/get-jwt", async (c) => {
 	for (const [key, value] of Object.entries(cookies)) {
 		if (authCookieNames.includes(key)) {
 			authCookies[key] = value;
+			console.log(
+				`[dev-auth] get-jwt - Including cookie: ${key}, value length: ${value.length}, preview: ${value.slice(0, 30)}`,
+			);
 		}
 	}
 
 	const token = Buffer.from(JSON.stringify(authCookies)).toString("base64url");
 
+	console.log("[dev-auth] get-jwt - Encoded token length:", token.length);
 	return c.text(token);
 });
 
@@ -92,6 +103,21 @@ app.post("/dev/auth/set-token", async (c) => {
 
 		console.log("[dev-auth] Setting cookies:", Object.keys(cookies));
 
+		const { deleteCookie } = await import("hono/cookie");
+
+		const secureCookieNames = [
+			"__Secure-better-auth.session_token",
+			"__Secure-better-auth.convex_jwt",
+			"__Secure-better-auth.state",
+		];
+		for (const cookieName of secureCookieNames) {
+			console.log(`[dev-auth] Deleting existing secure cookie: ${cookieName}`);
+			deleteCookie(c, cookieName, {
+				path: "/",
+				secure: true,
+			});
+		}
+
 		for (const [key, value] of Object.entries(cookies)) {
 			if (typeof value !== "string") {
 				console.warn(`Skipping non-string cookie value for key: ${key}`);
@@ -103,7 +129,7 @@ app.post("/dev/auth/set-token", async (c) => {
 				: key;
 
 			console.log(
-				`[dev-auth] Setting cookie: ${cookieName} (from ${key}), value length: ${value.length}`,
+				`[dev-auth] Setting cookie: ${cookieName} (from ${key}), value length: ${value.length}, preview: ${value.slice(0, 30)}`,
 			);
 			setCookie(c, cookieName, value, {
 				path: "/",
@@ -113,6 +139,7 @@ app.post("/dev/auth/set-token", async (c) => {
 			});
 		}
 
+		console.log("[dev-auth] Successfully set all cookies");
 		return c.json({ success: true });
 	} catch (error) {
 		console.error(
