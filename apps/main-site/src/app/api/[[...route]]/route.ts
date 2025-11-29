@@ -70,11 +70,20 @@ app.post("/dev/auth/set-token", async (c) => {
 	}
 
 	if (typeof token !== "string") {
+		console.error("[dev-auth] Token is not a string:", typeof token);
 		return c.json({ error: "Token must be a string" }, 400);
 	}
 
+	console.log(
+		"[dev-auth] Token received, length:",
+		token.length,
+		"preview:",
+		token.slice(0, 30),
+	);
+
 	try {
 		const decoded = Buffer.from(token, "base64url").toString("utf-8");
+		console.log("[dev-auth] Decoded token preview:", decoded.slice(0, 100));
 		const cookies = JSON.parse(decoded);
 
 		if (typeof cookies !== "object" || cookies === null) {
