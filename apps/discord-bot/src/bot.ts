@@ -11,6 +11,7 @@ import { LeaderboardCommandHandlerLayer } from "./handlers/leaderboard-command";
 import { ManageAccountCommandHandlerLayer } from "./handlers/manage-account-command";
 import { MarkSolutionCommandHandlerLayer } from "./handlers/mark-solution-command";
 import { MessageParityLayer } from "./handlers/message-parity";
+import { QuickActionCommandHandlerLayer } from "./handlers/quick-action";
 import { ReadTheRulesConsentHandlerLayer } from "./handlers/read-the-rules-consent";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./handlers/send-mark-solution-instructions-handler";
 import { ServerParityLayer } from "./handlers/server-parity";
@@ -30,6 +31,7 @@ export const BotLayers = Layer.mergeAll(
 	LeaderboardCommandHandlerLayer,
 	ManageAccountCommandHandlerLayer,
 	MarkSolutionCommandHandlerLayer,
+	QuickActionCommandHandlerLayer,
 	ChannelSettingsCommandHandlerLayer,
 	DebugCommandHandlerLayer,
 	SendMarkSolutionInstructionsHandlerLayer,
