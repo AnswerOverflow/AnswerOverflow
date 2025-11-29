@@ -130,9 +130,7 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 			window.location.href.includes("localhost") &&
 			process.env.NEXT_PUBLIC_CONVEX_URL?.includes("api.answeroverflow.com")
 		) {
-			window.location.href =
-				"https://new.answeroverflow.com/dev-auth?redirect=" +
-				window.location.href;
+			window.location.href = `/dev-auth/receive?redirect=${encodeURIComponent(window.location.pathname)}`;
 			return;
 		}
 		await authClient.signIn.social({
