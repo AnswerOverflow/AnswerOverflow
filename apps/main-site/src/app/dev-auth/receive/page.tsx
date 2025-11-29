@@ -31,12 +31,6 @@ export default function DevAuthReceivePage() {
 			if (processing) return;
 
 			const token = event.data.token;
-			console.log(
-				"[dev-auth] Received token, length:",
-				token?.length,
-				"type:",
-				typeof token,
-			);
 
 			if (!token) {
 				setStatus("error");
@@ -58,7 +52,6 @@ export default function DevAuthReceivePage() {
 
 				if (!response.ok) {
 					const data = await response.json();
-					console.error("[dev-auth] set-token failed:", data);
 					throw new Error(data.error ?? "Failed to set authentication token");
 				}
 
