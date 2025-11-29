@@ -126,15 +126,15 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 	const { data: session } = useSession({ allowAnonymous: false });
 
 	const handleSignIn = async () => {
-		// if (
-		// 	window.location.href.includes("localhost") &&
-		// 	process.env.NEXT_PUBLIC_CONVEX_URL?.includes("api.answeroverflow.com")
-		// ) {
-		// 	window.location.href =
-		// 		"https://new.answeroverflow.com/dev-auth?redirect=" +
-		// 		window.location.href;
-		// 	return;
-		// }
+		if (
+			window.location.href.includes("localhost") &&
+			process.env.NEXT_PUBLIC_CONVEX_URL?.includes("api.answeroverflow.com")
+		) {
+			window.location.href =
+				"https://new.answeroverflow.com/dev-auth?redirect=" +
+				window.location.href;
+			return;
+		}
 		await authClient.signIn.social({
 			provider: "discord",
 			callbackURL: window.location.href,
