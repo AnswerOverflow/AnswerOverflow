@@ -30,15 +30,23 @@ import type * as private_user_server_settings from "../private/user_server_setti
 import type * as public_custom_functions from "../public/custom_functions.js";
 import type * as public_search from "../public/search.js";
 import type * as shared_anonymization from "../shared/anonymization.js";
+import type * as shared_attachments from "../shared/attachments.js";
 import type * as shared_auth from "../shared/auth.js";
 import type * as shared_authIdentity from "../shared/authIdentity.js";
 import type * as shared_betterAuth from "../shared/betterAuth.js";
+import type * as shared_channels from "../shared/channels.js";
 import type * as shared_dataAccess from "../shared/dataAccess.js";
+import type * as shared_index from "../shared/index.js";
+import type * as shared_mentions from "../shared/mentions.js";
 import type * as shared_messagePrivacy from "../shared/messagePrivacy.js";
+import type * as shared_messages from "../shared/messages.js";
 import type * as shared_permissions from "../shared/permissions.js";
+import type * as shared_permissionsShared from "../shared/permissionsShared.js";
 import type * as shared_publicSchemas from "../shared/publicSchemas.js";
+import type * as shared_servers from "../shared/servers.js";
 import type * as shared_shared from "../shared/shared.js";
 import type * as shared_stripe from "../shared/stripe.js";
+import type * as shared_users from "../shared/users.js";
 import type * as stripe_internal from "../stripe/internal.js";
 
 import type {
@@ -70,15 +78,23 @@ declare const fullApi: ApiFromModules<{
   "public/custom_functions": typeof public_custom_functions;
   "public/search": typeof public_search;
   "shared/anonymization": typeof shared_anonymization;
+  "shared/attachments": typeof shared_attachments;
   "shared/auth": typeof shared_auth;
   "shared/authIdentity": typeof shared_authIdentity;
   "shared/betterAuth": typeof shared_betterAuth;
+  "shared/channels": typeof shared_channels;
   "shared/dataAccess": typeof shared_dataAccess;
+  "shared/index": typeof shared_index;
+  "shared/mentions": typeof shared_mentions;
   "shared/messagePrivacy": typeof shared_messagePrivacy;
+  "shared/messages": typeof shared_messages;
   "shared/permissions": typeof shared_permissions;
+  "shared/permissionsShared": typeof shared_permissionsShared;
   "shared/publicSchemas": typeof shared_publicSchemas;
+  "shared/servers": typeof shared_servers;
   "shared/shared": typeof shared_shared;
   "shared/stripe": typeof shared_stripe;
+  "shared/users": typeof shared_users;
   "stripe/internal": typeof stripe_internal;
 }>;
 
