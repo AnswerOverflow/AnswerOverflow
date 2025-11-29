@@ -369,8 +369,7 @@ export const getMessagePageData = privateQuery({
 		if (threadId) {
 			const threadStarterMessages = await ctx.db
 				.query("messages")
-				.withIndex("by_channelId", (q) => q.eq("channelId", parentId))
-				.filter((q) => q.eq(q.field("childThreadId"), threadId))
+				.withIndex("by_childThreadId", (q) => q.eq("childThreadId", threadId))
 				.collect();
 
 			const existingIds = new Set(allMessages.map((m) => m.id));

@@ -510,41 +510,29 @@ export async function findMessagesByChannelId(
 	limit?: number,
 	after?: bigint,
 ) {
-	const allMessages = await getManyFrom(
-		ctx.db,
-		"messages",
-		"by_channelId",
-		channelId,
-		"channelId",
-	);
-
-	let messages = allMessages.sort((a, b) => compareIds(a.id, b.id));
-
-	if (after) {
-		messages = messages.filter((msg) => compareIds(msg.id, after) > 0);
-	}
+	let query = ctx.db
+		.query("messages")
+		.withIndex("by_channelId_and_id", (q) => {
+			const base = q.eq("channelId", channelId);
+			return after ? base.gt("id", after) : base;
+		})
+		.order("asc");
 
 	const effectiveLimit = limit ?? 100;
-	return messages.slice(0, effectiveLimit);
+	return await query.take(effectiveLimit);
 }
 
 export async function getFirstMessageInChannel(
 	ctx: QueryCtx | MutationCtx,
 	channelId: bigint,
 ): Promise<Message | null> {
-	const allMessages = await getManyFrom(
-		ctx.db,
-		"messages",
-		"by_channelId",
-		channelId,
-		"channelId",
-	);
+	const firstMessage = await ctx.db
+		.query("messages")
+		.withIndex("by_channelId_and_id", (q) => q.eq("channelId", channelId))
+		.order("asc")
+		.first();
 
-	if (allMessages.length === 0) {
-		return null;
-	}
-
-	return allMessages.sort((a, b) => compareIds(a.id, b.id))[0] ?? null;
+	return firstMessage ?? null;
 }
 
 export async function getFirstMessagesInChannels(
@@ -562,19 +550,14 @@ export async function getFirstMessagesInChannels(
 
 	const channelMessages = await Promise.all(
 		channelIds.map(async (channelId) => {
-			const messages = await getManyFrom(
-				ctx.db,
-				"messages",
-				"by_channelId",
-				channelId,
-				"channelId",
-			);
+			const firstMessage = await ctx.db
+				.query("messages")
+				.withIndex("by_channelId_and_id", (q) => q.eq("channelId", channelId))
+				.order("asc")
+				.first();
 			return {
 				channelId,
-				firstMessage:
-					messages.length === 0
-						? null
-						: (messages.sort((a, b) => compareIds(a.id, b.id))[0] ?? null),
+				firstMessage: firstMessage ?? null,
 			};
 		}),
 	);
