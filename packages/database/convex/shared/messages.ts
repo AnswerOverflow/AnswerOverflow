@@ -27,7 +27,7 @@ export async function findMessagesByChannelId(
 	limit?: number,
 	after?: bigint,
 ) {
-	let query = ctx.db
+	const query = ctx.db
 		.query("messages")
 		.withIndex("by_channelId_and_id", (q) => {
 			const base = q.eq("channelId", channelId);
