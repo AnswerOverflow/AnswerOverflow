@@ -85,7 +85,7 @@ export function BlogTOC({ headings }: BlogTOCProps) {
 
 			<Card className="p-0">
 				<Link href={"/dashboard"}>
-					<CardContent className="hover:underline p-4">
+					<CardContent className="hover:underline p-4 hover:cursor-pointer">
 						<Image
 							src="/answer-overflow-banner-v3.png"
 							alt="AnswerOverflow"
