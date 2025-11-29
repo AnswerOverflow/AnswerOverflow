@@ -95,7 +95,13 @@ app.post("/dev/auth/set-token", async (c) => {
 				console.warn(`Skipping non-string cookie value for key: ${key}`);
 				continue;
 			}
-			setCookie(c, key, value, {
+
+			let cookieName = key;
+			if (key.startsWith("__Secure-")) {
+				cookieName = key.replace("__Secure-", "");
+			}
+
+			setCookie(c, cookieName, value, {
 				path: "/",
 				secure: false,
 				httpOnly: true,
