@@ -670,7 +670,13 @@ export async function deleteMessageInternalLogic(
 		await ctx.db.delete(reaction._id);
 	}
 
-	const message = await getOneFrom(ctx.db, "messages", "by_messageId", id, "id");
+	const message = await getOneFrom(
+		ctx.db,
+		"messages",
+		"by_messageId",
+		id,
+		"id",
+	);
 
 	if (message) {
 		await ctx.db.delete(message._id);
@@ -740,24 +746,24 @@ export async function upsertMessageInternalLogic(
 					.filter((id): id is bigint => !!id),
 			);
 
-		for (const emojiId of emojiIds) {
-			const existingEmoji = await getOneFrom(
-				ctx.db,
-				"emojis",
-				"by_emojiId",
-				emojiId,
-				"id",
-			);
-
-			if (!existingEmoji) {
-				const reaction = reactionsWithEmojiId.find(
-					(r) => r.emoji.id === emojiId,
+			for (const emojiId of emojiIds) {
+				const existingEmoji = await getOneFrom(
+					ctx.db,
+					"emojis",
+					"by_emojiId",
+					emojiId,
+					"id",
 				);
-				if (reaction) {
-					await ctx.db.insert("emojis", reaction.emoji);
+
+				if (!existingEmoji) {
+					const reaction = reactionsWithEmojiId.find(
+						(r) => r.emoji.id === emojiId,
+					);
+					if (reaction) {
+						await ctx.db.insert("emojis", reaction.emoji);
+					}
 				}
 			}
-		}
 
 			for (const reaction of reactionsWithEmojiId) {
 				if (!reaction.emoji.id) continue;
@@ -894,7 +900,13 @@ export async function enrichMessageForDisplay(
 		{ id: bigint; name: string; animated?: boolean }
 	>();
 	for (const emojiId of emojiIds) {
-		const emoji = await getOneFrom(ctx.db, "emojis", "by_emojiId", emojiId, "id");
+		const emoji = await getOneFrom(
+			ctx.db,
+			"emojis",
+			"by_emojiId",
+			emojiId,
+			"id",
+		);
 		if (emoji) {
 			emojiMap.set(emojiId.toString(), {
 				id: emoji.id,
