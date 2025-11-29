@@ -190,7 +190,13 @@ export const upsertManyChannels = privateMutation({
 
 		const existingChannels = await Promise.all(
 			args.channels.map((item) =>
-				getOneFrom(ctx.db, "channels", "by_discordChannelId", item.create.id, "id"),
+				getOneFrom(
+					ctx.db,
+					"channels",
+					"by_discordChannelId",
+					item.create.id,
+					"id",
+				),
 			),
 		);
 
