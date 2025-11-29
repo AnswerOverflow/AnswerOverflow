@@ -90,17 +90,29 @@ app.post("/dev/auth/set-token", async (c) => {
 			return c.json({ error: "Invalid token format: expected object" }, 400);
 		}
 
+		const cookiesToSet: Record<string, string> = {};
+
 		for (const [key, value] of Object.entries(cookies)) {
 			if (typeof value !== "string") {
 				console.warn(`Skipping non-string cookie value for key: ${key}`);
 				continue;
 			}
 
-			let cookieName = key;
-			if (key.startsWith("__Secure-")) {
-				cookieName = key.replace("__Secure-", "");
-			}
+			const cookieName = key.startsWith("__Secure-")
+				? key.replace("__Secure-", "")
+				: key;
 
+			if (!cookiesToSet[cookieName]) {
+				cookiesToSet[cookieName] = value;
+			}
+		}
+
+		console.log("[dev-auth] Setting cookies:", Object.keys(cookiesToSet));
+
+		for (const [cookieName, value] of Object.entries(cookiesToSet)) {
+			console.log(
+				`[dev-auth] Setting cookie: ${cookieName}, value length: ${value.length}`,
+			);
 			setCookie(c, cookieName, value, {
 				path: "/",
 				secure: false,
