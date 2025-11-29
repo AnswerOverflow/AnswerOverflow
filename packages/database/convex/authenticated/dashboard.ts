@@ -6,7 +6,6 @@ import {
 } from "@effect/platform";
 import {
 	Analytics,
-	AnalyticsLayer,
 	ServerAnalyticsLayer,
 } from "@packages/database/analytics/server/index";
 import { make } from "@packages/discord-api/generated";
@@ -14,7 +13,8 @@ import { v } from "convex/values";
 import { Effect } from "effect";
 import { api, components, internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
-import { type ActionCtx, authenticatedAction, internalAction } from "../client";
+import { authenticatedAction, internalAction } from "../client";
+import { guildManagerAction, guildManagerQuery } from "../client/guildManager";
 import { getDiscordAccountWithToken } from "../shared/auth";
 import {
 	DISCORD_PERMISSIONS,
@@ -175,140 +175,82 @@ export const getUserServers = authenticatedAction({
 	},
 });
 
-async function checkManageGuildPermission(
-	ctx: ActionCtx,
-	discordAccountId: bigint,
-	serverId: bigint,
-): Promise<void> {
-	const backendAccessToken = getBackendAccessToken();
-
-	const settings = await ctx.runQuery(
-		api.private.user_server_settings.findUserServerSettingsById,
-		{
-			backendAccessToken,
-			userId: discordAccountId,
-			serverId,
-		},
-	);
-
-	if (!settings) {
-		throw new Error(
-			"You are not a member of the server you are trying to view analytics for",
-		);
-	}
-
-	const hasAdminOrManageGuild =
-		hasPermission(settings.permissions, DISCORD_PERMISSIONS.Administrator) ||
-		hasPermission(settings.permissions, DISCORD_PERMISSIONS.ManageGuild);
-
-	if (!hasAdminOrManageGuild) {
-		throw new Error(
-			"You are missing the required permissions (Manage Guild or Administrator) to view analytics for this server",
-		);
-	}
-}
-
-export const getTopQuestionSolversForServer = authenticatedAction({
-	args: {
-		serverId: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		const { discordAccountId, serverId } = args;
-
-		await checkManageGuildPermission(ctx, discordAccountId, serverId);
-
+export const getTopQuestionSolversForServer = guildManagerQuery({
+	args: {},
+	handler: async (_ctx, args) => {
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getTopQuestionSolversForServer();
 		});
 
 		return await Effect.runPromise(
-			program.pipe(Effect.provide(AnalyticsLayer)),
+			program.pipe(
+				Effect.provide(
+					ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
+				),
+			),
 		);
 	},
 });
 
-export const getPageViewsForServer = authenticatedAction({
+export const getPageViewsForServer = guildManagerAction({
 	args: {
-		serverId: v.int64(),
 		from: v.optional(v.number()),
 		to: v.optional(v.number()),
 	},
-	handler: async (ctx, args) => {
-		const { discordAccountId, serverId } = args;
-
-		await checkManageGuildPermission(ctx, discordAccountId, serverId);
-
+	handler: async (_ctx, args) => {
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getPageViewsForServer();
-		}).pipe(Effect.provide(AnalyticsLayer));
+		}).pipe(
+			Effect.provide(
+				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
+			),
+		);
 
 		return await Effect.runPromise(program);
 	},
 });
 
-export const getServerInvitesClicked = authenticatedAction({
-	args: {
-		serverId: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		const { discordAccountId, serverId } = args;
-
-		await checkManageGuildPermission(ctx, discordAccountId, serverId);
-
+export const getServerInvitesClicked = guildManagerAction({
+	args: {},
+	handler: async (_ctx, args) => {
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getServerInvitesClicked();
 		}).pipe(
-			Effect.provide(ServerAnalyticsLayer({ serverId: serverId.toString() })),
+			Effect.provide(
+				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
+			),
 		);
 
 		return await Effect.runPromise(program);
 	},
 });
 
-export const getQuestionsAndAnswers = authenticatedAction({
+export const getQuestionsAndAnswers = guildManagerAction({
 	args: {
-		serverId: v.int64(),
 		from: v.optional(v.number()),
 		to: v.optional(v.number()),
 	},
-	handler: async (ctx, args) => {
-		const { discordAccountId, serverId } = args;
-
-		await checkManageGuildPermission(ctx, discordAccountId, serverId);
-
+	handler: async (_ctx, args) => {
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getQuestionsAndAnswers();
 		}).pipe(
-			Effect.provide(ServerAnalyticsLayer({ serverId: serverId.toString() })),
+			Effect.provide(
+				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
+			),
 		);
 
 		return await Effect.runPromise(program);
 	},
 });
 
-export const trackBotAddClick = authenticatedAction({
-	args: {
-		serverDiscordId: v.int64(),
-	},
+export const trackBotAddClick = guildManagerAction({
+	args: {},
 	handler: async (ctx, args) => {
-		const { discordAccountId, serverDiscordId } = args;
-
-		const server = await ctx.runQuery(
-			api.authenticated.servers.publicGetServerByDiscordId,
-			{
-				serverId: serverDiscordId,
-				discordId: serverDiscordId,
-			},
-		);
-
-		if (!server) {
-			return;
-		}
-
+		const { discordAccountId } = args;
 		const backendAccessToken = getBackendAccessToken();
 
 		const existingSettings = await ctx.runQuery(
@@ -316,12 +258,12 @@ export const trackBotAddClick = authenticatedAction({
 			{
 				backendAccessToken,
 				userId: discordAccountId,
-				serverId: server.discordId,
+				serverId: args.serverId,
 			},
 		);
 
 		const settings = {
-			serverId: server.discordId,
+			serverId: args.serverId,
 			userId: discordAccountId,
 			permissions: existingSettings?.permissions ?? 0,
 			canPubliclyDisplayMessages:
