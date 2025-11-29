@@ -16,6 +16,16 @@ import { Effect, Exit } from "effect";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+const ALLOWED_DEV_ORIGINS = [
+	/^http:\/\/localhost(:\d+)?$/,
+	/^http:\/\/127\.0\.0\.1(:\d+)?$/,
+	/^http:\/\/\[::1\](:\d+)?$/,
+];
+
+function isAllowedOrigin(origin: string): boolean {
+	return ALLOWED_DEV_ORIGINS.some((pattern) => pattern.test(origin));
+}
+
 export default function DevAuthPage() {
 	const searchParams = useSearchParams();
 	const { data: session, isPending } = useSession({ allowAnonymous: false });
@@ -32,9 +42,13 @@ export default function DevAuthPage() {
 		},
 	}).pipe(Effect.runSyncExit);
 
+	const isOriginAllowed =
+		Exit.isSuccess(url) && isAllowedOrigin(url.value.origin);
+
 	useEffect(() => {
 		if (isPending) return;
 		if (!Exit.isSuccess(url)) return;
+		if (!isOriginAllowed) return;
 		if (!session?.user) return;
 		if (status !== "idle") return;
 
@@ -76,7 +90,7 @@ export default function DevAuthPage() {
 		}
 
 		sendTokenToOpener();
-	}, [session, isPending, url, redirect, status]);
+	}, [session, isPending, url, redirect, status, isOriginAllowed]);
 
 	if (!Exit.isSuccess(url)) {
 		return (
@@ -84,6 +98,20 @@ export default function DevAuthPage() {
 				<Card className="w-full max-w-md">
 					<CardContent className="pt-6">
 						<p className="text-red-600">Invalid redirect URL</p>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
+	if (!isOriginAllowed) {
+		return (
+			<div className="flex h-[calc(100vh-64px)] items-center justify-center p-4">
+				<Card className="w-full max-w-md">
+					<CardContent className="pt-6">
+						<p className="text-red-600">
+							Origin not allowed. Dev auth is only available for localhost.
+						</p>
 					</CardContent>
 				</Card>
 			</div>

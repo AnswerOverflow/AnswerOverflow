@@ -12,11 +12,11 @@ import { Link } from "@packages/ui/components/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+const MAIN_SITE_ORIGIN = "https://www.answeroverflow.com";
+
 export default function DevAuthReceivePage() {
 	const searchParams = useSearchParams();
 	const redirect = searchParams.get("redirect") ?? "/";
-	const mainSiteOrigin =
-		searchParams.get("origin") ?? "https://www.answeroverflow.com";
 	const [status, setStatus] = useState<
 		"idle" | "pending" | "success" | "error"
 	>("idle");
@@ -24,7 +24,7 @@ export default function DevAuthReceivePage() {
 
 	const handleMessage = useCallback(
 		async (event: MessageEvent) => {
-			if (event.origin !== mainSiteOrigin) return;
+			if (event.origin !== MAIN_SITE_ORIGIN) return;
 			if (event.data?.type !== "dev-auth-token") return;
 
 			const token = event.data.token;
@@ -60,7 +60,7 @@ export default function DevAuthReceivePage() {
 				);
 			}
 		},
-		[mainSiteOrigin, redirect],
+		[redirect],
 	);
 
 	useEffect(() => {
@@ -70,7 +70,7 @@ export default function DevAuthReceivePage() {
 
 	const handleOpenPopup = () => {
 		setStatus("pending");
-		const callbackUrl = `${mainSiteOrigin}/dev-auth?redirect=${encodeURIComponent(window.location.origin + redirect)}`;
+		const callbackUrl = `${MAIN_SITE_ORIGIN}/dev-auth?redirect=${encodeURIComponent(window.location.origin + redirect)}`;
 		const popup = window.open(
 			callbackUrl,
 			"dev-auth-popup",

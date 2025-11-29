@@ -10,8 +10,27 @@ app.post("/v1/webhooks/convex", handleConvexWebhook);
 
 app.on(["GET", "POST"], "/auth/*", handleAuth);
 
+const ALLOWED_DEV_ORIGINS = [
+	/^http:\/\/localhost(:\d+)?$/,
+	/^http:\/\/127\.0\.0\.1(:\d+)?$/,
+	/^http:\/\/\[::1\](:\d+)?$/,
+];
+
+function isAllowedDevOrigin(origin: string | undefined): boolean {
+	if (!origin) return false;
+	return ALLOWED_DEV_ORIGINS.some((pattern) => pattern.test(origin));
+}
+
 app.get("/dev/auth/get-jwt", async (c) => {
 	const cookies = getCookie(c);
+
+	const sessionToken =
+		cookies["better-auth.session_token"] ??
+		cookies["__Secure-better-auth.session_token"];
+	if (!sessionToken) {
+		return c.text("Unauthorized: No session found", 401);
+	}
+
 	const authCookieNames = [
 		"better-auth.session_token",
 		"better-auth.convex_jwt",
@@ -34,6 +53,14 @@ app.get("/dev/auth/get-jwt", async (c) => {
 });
 
 app.post("/dev/auth/set-token", async (c) => {
+	const origin = c.req.header("Origin");
+	if (!isAllowedDevOrigin(origin)) {
+		return c.json(
+			{ error: "Forbidden: This endpoint is only available for localhost" },
+			403,
+		);
+	}
+
 	const { setCookie } = await import("hono/cookie");
 	const body = await c.req.json();
 	const token = body.token;
@@ -46,13 +73,11 @@ app.post("/dev/auth/set-token", async (c) => {
 		const cookies = JSON.parse(
 			Buffer.from(token, "base64url").toString("utf-8"),
 		);
-		const isLocalhost = c.req.url.includes("localhost");
 
 		for (const [key, value] of Object.entries(cookies)) {
-			const isSecureCookie = key.startsWith("__Secure-");
 			setCookie(c, key, value as string, {
 				path: "/",
-				secure: isSecureCookie ? true : !isLocalhost,
+				secure: false,
 				httpOnly: true,
 				sameSite: "Lax",
 			});
