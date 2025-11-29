@@ -16,12 +16,42 @@ const ALLOWED_DEV_ORIGINS = [
 	/^http:\/\/\[::1\](:\d+)?$/,
 ];
 
+const PRODUCTION_ORIGIN = "https://new.answeroverflow.com";
+
 function isAllowedDevOrigin(origin: string | undefined): boolean {
 	if (!origin) return false;
 	return ALLOWED_DEV_ORIGINS.some((pattern) => pattern.test(origin));
 }
 
+function isProductionReferer(referer: string | undefined): boolean {
+	if (!referer) return false;
+	try {
+		const url = new URL(referer);
+		return url.origin === PRODUCTION_ORIGIN;
+	} catch {
+		return false;
+	}
+}
+
+function isLocalhostRequest(requestUrl: string): boolean {
+	try {
+		const url = new URL(requestUrl);
+		return (
+			url.hostname === "localhost" ||
+			url.hostname === "127.0.0.1" ||
+			url.hostname === "::1"
+		);
+	} catch {
+		return false;
+	}
+}
+
 app.get("/dev/auth/get-jwt", async (c) => {
+	const referer = c.req.header("Referer");
+	if (!isProductionReferer(referer)) {
+		return c.text("Forbidden: Invalid referer", 403);
+	}
+
 	const cookies = getCookie(c);
 
 	const sessionToken =
@@ -75,7 +105,7 @@ app.post("/dev/auth/set-token", async (c) => {
 			return c.json({ error: "Invalid token format: expected object" }, 400);
 		}
 
-		const isLocalhost = c.req.url.includes("localhost");
+		const isLocalhost = isLocalhostRequest(c.req.url);
 		const setCookieHeaders: string[] = [];
 
 		for (const [key, value] of Object.entries(cookies)) {
