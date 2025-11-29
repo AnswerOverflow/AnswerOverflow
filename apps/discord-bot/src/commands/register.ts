@@ -13,6 +13,10 @@ const globalCommands = [
 		.setName("✅ Mark Solution")
 		.setType(ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild),
+	new ContextMenuCommandBuilder()
+		.setName("Quick Action")
+		.setType(ApplicationCommandType.Message)
+		.setContexts(InteractionContextType.Guild),
 	new SlashCommandBuilder()
 		.setName("leaderboard")
 		.setDescription("See who has solved the most questions in the server.")
