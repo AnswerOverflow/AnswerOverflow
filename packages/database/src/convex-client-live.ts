@@ -72,9 +72,6 @@ const createLiveService = Effect.gen(function* () {
 	const convexUrl = yield* Config.string("NEXT_PUBLIC_CONVEX_URL");
 	const client = new ConvexClient(convexUrl);
 
-	// TODO: Use some persistent session and also create this sooner or have better bypasses, maybe keep the backendToken bypass logic, but have this as a fallback when the user is signed out
-	client.setAuth(getConvexJwt, (isAuthed) => console.log("isAuthed", isAuthed));
-
 	const wrappedClient: ConvexClientShared = {
 		query: client.query.bind(client),
 		mutation: <Mutation extends FunctionReference<"mutation">>(
