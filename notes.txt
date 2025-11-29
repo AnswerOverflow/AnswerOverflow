@@ -17,11 +17,9 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
     - [X] Manage Account
     - [X] Mark Solution
     - [X] Leaderboard
-    - ~~[ ] Quick Action~~ (removed)
 
     Events:
     - [X] Auto thread
-    - ~~[ ] Checkmark mark solution~~ (removed)
     - [X] Forum post guidelines consent
     - [X] Read the rules consent
     - [X] Send mark solutions in new threads
@@ -42,7 +40,7 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 ## Website Features:
 
 Main Site:
-    - [ ] /
+    - [X] /
     - [X] /robots.txt
     - [X] /about
     - [X] /browse
@@ -51,12 +49,12 @@ Main Site:
     - [X] /eula
     - [X] /privacy
     - [X] /tos
-    - [ ] /c/:serverId
-    - [ ] /c/:serverId/:channelId
-    - [ ] /m/:messageId
-    - [ ] /og/post?id
-    - [ ] /u/:userId
-    - [ ] /u/:userId/comments
+    - [X] /c/:serverId
+    - [X] /c/:serverId/:channelId
+    - [X] /m/:messageId
+    - [X] /og/post?id
+    - [X] /u/:userId
+    - [X] /u/:userId/comments
 
 Tenant Site:
     - [ ] /:domain
