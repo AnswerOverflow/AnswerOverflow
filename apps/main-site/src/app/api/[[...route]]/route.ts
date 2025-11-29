@@ -111,6 +111,41 @@ app.post("/dev/auth/set-token", async (c) => {
 	}
 });
 
+app.post("/dev/auth/clear-cookies", async (c) => {
+	const origin = c.req.header("Origin");
+	if (!isAllowedDevOrigin(origin)) {
+		return c.json(
+			{ error: "Forbidden: This endpoint is only available for localhost" },
+			403,
+		);
+	}
+
+	const authCookieNames = [
+		"better-auth.session_token",
+		"better-auth.convex_jwt",
+		"better-auth.state",
+		"__Secure-better-auth.session_token",
+		"__Secure-better-auth.convex_jwt",
+		"__Secure-better-auth.state",
+	];
+
+	const setCookieHeaders: string[] = [];
+	for (const cookieName of authCookieNames) {
+		const needsSecure = cookieName.startsWith("__Secure-");
+		const cookieAttrs = ["Path=/", "Expires=Thu, 01 Jan 1970 00:00:01 GMT"];
+		if (needsSecure) {
+			cookieAttrs.push("Secure");
+		}
+		setCookieHeaders.push(`${cookieName}=; ${cookieAttrs.join("; ")}`);
+	}
+
+	const response = c.json({ success: true });
+	for (const header of setCookieHeaders) {
+		response.headers.append("Set-Cookie", header);
+	}
+	return response;
+});
+
 export const GET = handle(app);
 export const POST = handle(app);
 export const PUT = handle(app);

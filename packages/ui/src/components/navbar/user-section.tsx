@@ -123,7 +123,7 @@ function SignInButton({
 
 export function UserSection({ showSignIn = true }: UserSectionProps) {
 	const router = useRouter();
-	const { data: session } = useSession({ allowAnonymous: false });
+	const { data: session, refetch } = useSession({ allowAnonymous: false });
 
 	const handleSignIn = async () => {
 		if (
@@ -141,6 +141,19 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 
 	const handleSignOut = async () => {
 		await authClient.signOut();
+
+		const isDevAuth =
+			window.location.href.includes("localhost") &&
+			process.env.NEXT_PUBLIC_CONVEX_URL?.includes("api.answeroverflow.com");
+
+		if (isDevAuth) {
+			await fetch("/api/dev/auth/clear-cookies", {
+				method: "POST",
+				credentials: "include",
+			});
+		}
+
+		await refetch();
 		router.push("/");
 	};
 
