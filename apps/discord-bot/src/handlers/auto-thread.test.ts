@@ -1,11 +1,9 @@
 import { expect, it } from "@effect/vitest";
 import { assertLeft } from "@effect/vitest/utils";
-import { Database } from "@packages/database/database";
-import type { GuildBasedChannel, Message } from "discord.js";
-import { ChannelType, type Guild, MessageType } from "discord.js";
+import { ChannelType, MessageType } from "discord.js";
 import { Effect, type Either } from "effect";
 import { describe } from "vitest";
-import { DiscordClientMock } from "../core/discord-client-mock";
+import { DiscordScenario } from "../test/discord-scenario.ts";
 import { TestLayer } from "../utils/layers";
 import {
 	AutoThreadError,
@@ -13,71 +11,17 @@ import {
 	handleAutoThread,
 } from "./auto-thread";
 
-const setupTestChannel = (
-	autoThreadEnabled = true,
-	channelFactory?: (
-		guild: Guild,
-		utilities: Effect.Effect.Success<typeof DiscordClientMock>["utilities"],
-	) => GuildBasedChannel,
-) =>
-	Effect.gen(function* () {
-		const database = yield* Database;
-		const discordMock = yield* DiscordClientMock;
-		const guild = discordMock.utilities.createMockGuild();
-		discordMock.utilities.seedGuild(guild);
-		const channel = channelFactory
-			? channelFactory(guild, discordMock.utilities)
-			: discordMock.utilities.createMockTextChannel(guild);
-		discordMock.utilities.seedChannel(channel);
-		yield* database.private.servers.upsertServer({
-			name: guild.name,
-			discordId: BigInt(guild.id),
-			plan: "FREE",
-			approximateMemberCount: 0,
-		});
-		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
-			{
-				discordId: BigInt(guild.id),
-			},
-		);
-		if (!serverLiveData?._id) {
-			throw new Error("Server not found");
-		}
-		yield* database.private.channels.upsertChannelWithSettings({
-			channel: {
-				id: BigInt(channel.id),
-				serverId: serverLiveData.discordId,
-				name: channel.name,
-				type: channel.type,
-			},
-			settings: {
-				channelId: BigInt(channel.id),
-				autoThreadEnabled,
-				indexingEnabled: false,
-				markSolutionEnabled: false,
-				sendMarkSolutionInstructionsInNewThreads: false,
-				forumGuidelinesConsentEnabled: false,
-			},
-		});
-		return { guild, channel, discordMock };
-	});
-
 const expectError = <E>(result: Either.Either<unknown, E>, expectedError: E) =>
 	assertLeft(result, expectedError);
 
 describe("handleAutoThread", () => {
 	it.scoped("returns early for DM channel", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				channelOverride: {
-					id: channel.id,
-					type: ChannelType.DM,
-					isDMBased: () => true,
-					isVoiceBased: () => false,
-				} as unknown as Message["channel"],
+			const { messages } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ inDM: true }],
 			});
-			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			const result = yield* handleAutoThread(messages[0]!).pipe(Effect.either);
 			expectError(
 				result,
 				new AutoThreadError({
@@ -90,16 +34,11 @@ describe("handleAutoThread", () => {
 
 	it.scoped("returns early for voice channel", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				channelOverride: {
-					id: channel.id,
-					type: ChannelType.GuildVoice,
-					isDMBased: () => false,
-					isVoiceBased: () => true,
-				} as unknown as Message["channel"],
+			const { messages } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ inVoice: true }],
 			});
-			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			const result = yield* handleAutoThread(messages[0]!).pipe(Effect.either);
 			expectError(
 				result,
 				new AutoThreadError({
@@ -112,16 +51,12 @@ describe("handleAutoThread", () => {
 
 	it.scoped("returns early for unsupported channel type", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				channelOverride: {
-					id: channel.id,
-					type: ChannelType.GuildForum,
-					isDMBased: () => false,
-					isVoiceBased: () => false,
-				} as unknown as Message["channel"],
+			const { messages } = yield* DiscordScenario.textChannel({
+				channel: { type: ChannelType.GuildForum },
+				settings: { autoThreadEnabled: true },
+				messages: [{}],
 			});
-			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			const result = yield* handleAutoThread(messages[0]!).pipe(Effect.either);
 			expectError(
 				result,
 				new AutoThreadError({
@@ -134,14 +69,11 @@ describe("handleAutoThread", () => {
 
 	it.scoped("returns early for bot message", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				authorId: "bot123",
-				authorBot: true,
-				authorSystem: false,
-				authorDisplayName: "BotUser",
+			const { messages } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ author: { bot: true, username: "BotUser" } }],
 			});
-			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			const result = yield* handleAutoThread(messages[0]!).pipe(Effect.either);
 			expectError(
 				result,
 				new AutoThreadError({
@@ -154,11 +86,11 @@ describe("handleAutoThread", () => {
 
 	it.scoped("returns early for non-default message type", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				type: MessageType.Reply,
+			const { messages } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ type: MessageType.Reply }],
 			});
-			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			const result = yield* handleAutoThread(messages[0]!).pipe(Effect.either);
 			expectError(
 				result,
 				new AutoThreadError({
@@ -171,13 +103,11 @@ describe("handleAutoThread", () => {
 
 	it.scoped("returns early when message already has a thread", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				thread: {
-					id: "existing-thread",
-				} as unknown as Message["thread"],
+			const { messages } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ hasThread: true }],
 			});
-			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			const result = yield* handleAutoThread(messages[0]!).pipe(Effect.either);
 			expectError(
 				result,
 				new AutoThreadError({
@@ -190,9 +120,11 @@ describe("handleAutoThread", () => {
 
 	it.scoped("returns early when auto-thread is disabled", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel(false);
-			const message = discordMock.utilities.createMockMessage(channel);
-			const result = yield* handleAutoThread(message).pipe(Effect.either);
+			const { messages } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: false },
+				messages: [{}],
+			});
+			const result = yield* handleAutoThread(messages[0]!).pipe(Effect.either);
 			expectError(
 				result,
 				new AutoThreadError({
@@ -205,61 +137,51 @@ describe("handleAutoThread", () => {
 
 	it.scoped("creates thread when all conditions are met", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				cleanContent: "Hello world",
-				content: "Hello world",
-				startThread: threadHelper.wrappedStartThread,
+			const { messages, threadTrackers } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ content: "Hello world" }],
 			});
-			yield* handleAutoThread(message);
-			expect(threadHelper.threadCreated()).toBe(true);
-			expect(threadHelper.threadName()).toBe("TestUser - Hello world");
+			yield* handleAutoThread(messages[0]!);
+			const tracker = threadTrackers.get(messages[0]!.id)!;
+			expect(tracker.wasCreated()).toBe(true);
+			expect(tracker.name()).toBe("TestUser - Hello world");
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
 	it.scoped("uses nickname when available", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				memberNickname: "CoolNickname",
-				cleanContent: "Test message",
-				startThread: threadHelper.wrappedStartThread,
+			const { messages, threadTrackers } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ content: "Test message", memberNickname: "CoolNickname" }],
 			});
-			yield* handleAutoThread(message);
-			expect(threadHelper.threadName()).toBe("CoolNickname - Test message");
+			yield* handleAutoThread(messages[0]!);
+			const tracker = threadTrackers.get(messages[0]!.id)!;
+			expect(tracker.name()).toBe("CoolNickname - Test message");
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
 	it.scoped("removes Discord markdown from thread title", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				cleanContent: "*bold* _italic_ ~strike~ `code`",
-				content: "*bold* _italic_ ~strike~ `code`",
-				startThread: threadHelper.wrappedStartThread,
+			const { messages, threadTrackers } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ content: "*bold* _italic_ ~strike~ `code`" }],
 			});
-			yield* handleAutoThread(message);
-			expect(threadHelper.threadName()).toBe(
-				"TestUser - bold italic strike code",
-			);
+			yield* handleAutoThread(messages[0]!);
+			const tracker = threadTrackers.get(messages[0]!.id)!;
+			expect(tracker.name()).toBe("TestUser - bold italic strike code");
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
 	it.scoped("truncates long thread titles", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
 			const longContent = "a".repeat(100);
-			const message = discordMock.utilities.createMockMessage(channel, {
-				cleanContent: longContent,
-				content: longContent,
-				startThread: threadHelper.wrappedStartThread,
+			const { messages, threadTrackers } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ content: longContent }],
 			});
-			yield* handleAutoThread(message);
-			const threadName = threadHelper.threadName();
+			yield* handleAutoThread(messages[0]!);
+			const tracker = threadTrackers.get(messages[0]!.id)!;
+			const threadName = tracker.name();
 			expect(threadName.length).toBeLessThanOrEqual(50);
 			expect(threadName).toContain("...");
 			expect(threadName.startsWith("TestUser -")).toBe(true);
@@ -268,49 +190,37 @@ describe("handleAutoThread", () => {
 
 	it.scoped("uses attachment name when message has no content", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				cleanContent: "",
-				content: "",
-				attachmentsSize: 1,
-				attachmentName: "document.pdf",
-				startThread: threadHelper.wrappedStartThread,
+			const { messages, threadTrackers } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ content: "", attachments: [{ name: "document.pdf" }] }],
 			});
-			yield* handleAutoThread(message);
-			expect(threadHelper.threadName()).toBe("TestUser - document.pdf");
+			yield* handleAutoThread(messages[0]!);
+			const tracker = threadTrackers.get(messages[0]!.id)!;
+			expect(tracker.name()).toBe("TestUser - document.pdf");
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
 	it.scoped("uses 'Attachment' fallback when attachment has no name", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel();
-			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				cleanContent: "",
-				content: "",
-				attachmentsSize: 1,
-				attachmentName: null,
-				startThread: threadHelper.wrappedStartThread,
+			const { messages, threadTrackers } = yield* DiscordScenario.textChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ content: "", attachments: [{ name: null }] }],
 			});
-			yield* handleAutoThread(message);
-			expect(threadHelper.threadName()).toBe("TestUser - Attachment");
+			yield* handleAutoThread(messages[0]!);
+			const tracker = threadTrackers.get(messages[0]!.id)!;
+			expect(tracker.name()).toBe("TestUser - Attachment");
 		}).pipe(Effect.provide(TestLayer)),
 	);
 
 	it.scoped("works with GuildAnnouncement channel type", () =>
 		Effect.gen(function* () {
-			const { channel, discordMock } = yield* setupTestChannel(
-				true,
-				(guild, utilities) => utilities.createMockNewsChannel(guild),
-			);
-			const threadHelper = discordMock.utilities.createThreadTrackingHelper();
-			const message = discordMock.utilities.createMockMessage(channel, {
-				cleanContent: "Announcement message",
-				startThread: threadHelper.wrappedStartThread,
+			const { messages, threadTrackers } = yield* DiscordScenario.newsChannel({
+				settings: { autoThreadEnabled: true },
+				messages: [{ content: "Announcement message" }],
 			});
-			yield* handleAutoThread(message);
-			expect(threadHelper.threadCreated()).toBe(true);
+			yield* handleAutoThread(messages[0]!);
+			const tracker = threadTrackers.get(messages[0]!.id)!;
+			expect(tracker.wasCreated()).toBe(true);
 		}).pipe(Effect.provide(TestLayer)),
 	);
 });
