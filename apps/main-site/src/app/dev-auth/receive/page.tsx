@@ -12,7 +12,7 @@ import { Link } from "@packages/ui/components/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-const MAIN_SITE_ORIGIN = "https://www.answeroverflow.com";
+const MAIN_SITE_ORIGIN = "https://new.answeroverflow.com";
 
 export default function DevAuthReceivePage() {
 	const searchParams = useSearchParams();
