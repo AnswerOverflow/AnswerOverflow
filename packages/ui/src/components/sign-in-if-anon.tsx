@@ -11,7 +11,6 @@ export function SignInIfAnon() {
 		}
 
 		signInAttempted.current = true;
-		authClient.signIn.anonymous();
 	}, [auth.isPending, auth.data]);
 
 	return null;
