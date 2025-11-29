@@ -4,6 +4,7 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
+		"postinstall": "fumadocs-mdx",
 		"with-env": "bun run --env-file=../../.env --",
 		"dev-next": "bun with-env next dev --turbo",
 		"dev-proxy": "bun run scripts/proxy.ts",
@@ -30,6 +31,8 @@
 		"convex": "catalog:",
 		"discord-api-types": "^0.38.24",
 		"effect": "catalog:",
+		"fumadocs-core": "^16.2.0",
+		"fumadocs-mdx": "^14.0.4",
 		"hono": "^4.10.6",
 		"jose": "^6.1.2",
 		"lucide-react": "catalog:",
@@ -43,7 +46,8 @@
 		"react-spring": "^10.0.3",
 		"react-xarrows": "^2.0.2",
 		"shiki": "^3.12.2",
-		"use-debounce": "^10.0.6"
+		"use-debounce": "^10.0.6",
+		"zod": "^4.1.13"
 	},
 	"devDependencies": {
 		"@packages/typescript-config": "workspace:*",

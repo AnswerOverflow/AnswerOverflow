@@ -1,0 +1,145 @@
+import { blog } from "@/.source/server";
+import { parseDate, formatDate } from "@/lib/date-utils";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { BlogTOC } from "@/components/blog-toc";
+
+interface BlogPostPageProps {
+	params: Promise<{
+		slug: string;
+	}>;
+}
+
+export async function generateStaticParams() {
+	return blog.map((post) => ({
+		slug: post.info.path.replace(/\.mdx?$/, ""),
+	}));
+}
+
+export async function generateMetadata(
+	props: BlogPostPageProps,
+): Promise<Metadata> {
+	const params = await props.params;
+	const post = blog.find(
+		(p) => p.info.path.replace(/\.mdx?$/, "") === params.slug,
+	);
+
+	if (!post) {
+		return {};
+	}
+
+	return {
+		title: post.title,
+		description: post.description,
+		openGraph: {
+			title: post.title,
+			description: post.description,
+			type: "article",
+			publishedTime: parseDate(post.date).toISOString(),
+			authors: post.author ? [post.author] : undefined,
+		},
+	};
+}
+
+export default async function BlogPostPage(props: BlogPostPageProps) {
+	const params = await props.params;
+	const post = blog.find(
+		(p) => p.info.path.replace(/\.mdx?$/, "") === params.slug,
+	);
+
+	if (!post) {
+		notFound();
+	}
+
+	const Content = post.body;
+
+	const headings =
+		post.toc
+			?.filter((item) => item.depth === 2)
+			.map((item) => ({
+				id: item.url.replace("#", ""),
+				text: item.title,
+			})) || [];
+
+	return (
+		<div className="container mx-auto px-4 py-12 max-w-7xl">
+			<div className="flex gap-8 justify-center">
+				<article className="flex-1 max-w-[720px]">
+					<header className="mb-8">
+						<Link
+							href="/blog"
+							className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-block mb-6"
+						>
+							← All blogs
+						</Link>
+						<time
+							dateTime={parseDate(post.date).toISOString()}
+							className="text-sm text-muted-foreground block mb-3"
+						>
+							{formatDate(post.date)}
+						</time>
+						<h1 className="text-4xl font-bold mb-3">{post.title}</h1>
+						{post.description && (
+							<p className="text-xl text-muted-foreground mb-6">
+								{post.description}
+							</p>
+						)}
+						<div className="flex items-center gap-3 pb-6 border-b">
+							<Image
+								src="/rhys_icon.png"
+								alt="Rhys Sullivan"
+								width={40}
+								height={40}
+								className="rounded-full"
+							/>
+							<div>
+								<div className="font-semibold text-sm">Rhys Sullivan</div>
+								<div className="text-xs text-muted-foreground">Founder</div>
+							</div>
+						</div>
+					</header>
+					<div className="prose prose-neutral dark:prose-invert max-w-none prose-p:my-3 prose-headings:mt-6 prose-headings:mb-3 prose-li:my-1 prose-ul:my-3 prose-ol:my-3">
+						<Content
+							components={{
+								a: ({ href, children, ...props }) => {
+									if (href?.startsWith("/")) {
+										return (
+											<Link href={href} {...props}>
+												{children}
+											</Link>
+										);
+									}
+									return (
+										<a
+											href={href}
+											target="_blank"
+											rel="noopener noreferrer"
+											{...props}
+										>
+											{children}
+										</a>
+									);
+								},
+								blockquote: ({ children, ...props }) => {
+									return (
+										<blockquote
+											className="border-l-4 border-primary pl-4 italic my-4"
+											{...props}
+										>
+											{children}
+										</blockquote>
+									);
+								},
+							}}
+						/>
+					</div>
+				</article>
+				<aside className="hidden xl:block w-64 shrink-0 sticky top-24 h-fit">
+					<BlogTOC headings={headings} />
+				</aside>
+			</div>
+		</div>
+	);
+}
