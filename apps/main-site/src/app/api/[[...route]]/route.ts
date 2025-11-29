@@ -8,6 +8,25 @@ const app = new Hono().basePath("/api");
 
 app.post("/v1/webhooks/convex", handleConvexWebhook);
 
+app.use("/auth/*", async (c, next) => {
+	const path = c.req.path;
+	if (path.includes("/get-session") || path.includes("/convex/token")) {
+		const cookies = getCookie(c);
+		console.log(`[auth] ${path} - cookies:`, {
+			session: cookies["better-auth.session_token"]?.slice(0, 20),
+			secureSession: cookies["__Secure-better-auth.session_token"]?.slice(
+				0,
+				20,
+			),
+			jwt: cookies["better-auth.convex_jwt"] ? "present" : "missing",
+			secureJwt: cookies["__Secure-better-auth.convex_jwt"]
+				? "present"
+				: "missing",
+		});
+	}
+	await next();
+});
+
 app.on(["GET", "POST"], "/auth/*", handleAuth);
 
 const ALLOWED_DEV_ORIGINS = [
@@ -103,20 +122,8 @@ app.post("/dev/auth/set-token", async (c) => {
 
 		console.log("[dev-auth] Setting cookies:", Object.keys(cookies));
 
-		const { deleteCookie } = await import("hono/cookie");
-
-		const secureCookieNames = [
-			"__Secure-better-auth.session_token",
-			"__Secure-better-auth.convex_jwt",
-			"__Secure-better-auth.state",
-		];
-		for (const cookieName of secureCookieNames) {
-			console.log(`[dev-auth] Deleting existing secure cookie: ${cookieName}`);
-			deleteCookie(c, cookieName, {
-				path: "/",
-				secure: true,
-			});
-		}
+		const isLocalhost = c.req.url.includes("localhost");
+		const setCookieHeaders: string[] = [];
 
 		for (const [key, value] of Object.entries(cookies)) {
 			if (typeof value !== "string") {
@@ -124,23 +131,32 @@ app.post("/dev/auth/set-token", async (c) => {
 				continue;
 			}
 
-			const cookieName = key.startsWith("__Secure-")
-				? key.replace("__Secure-", "")
-				: key;
+			const cookieAttrs = [
+				"Path=/",
+				"HttpOnly",
+				"SameSite=Lax",
+				`Max-Age=${60 * 60 * 24 * 7}`,
+			];
+
+			if (!isLocalhost) {
+				cookieAttrs.push("Secure");
+			}
+
+			const cookieHeader = `${key}=${value}; ${cookieAttrs.join("; ")}`;
+			setCookieHeaders.push(cookieHeader);
 
 			console.log(
-				`[dev-auth] Setting cookie: ${cookieName} (from ${key}), value length: ${value.length}, preview: ${value.slice(0, 30)}`,
+				`[dev-auth] Setting cookie: ${key}, secure: ${!isLocalhost}, value length: ${value.length}, preview: ${value.slice(0, 30)}`,
 			);
-			setCookie(c, cookieName, value, {
-				path: "/",
-				secure: false,
-				httpOnly: true,
-				sameSite: "Lax",
-			});
 		}
 
 		console.log("[dev-auth] Successfully set all cookies");
-		return c.json({ success: true });
+
+		const response = c.json({ success: true });
+		for (const header of setCookieHeaders) {
+			response.headers.append("Set-Cookie", header);
+		}
+		return response;
 	} catch (error) {
 		console.error(
 			"Error parsing token:",
