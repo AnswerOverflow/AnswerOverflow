@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { type Infer, v } from "convex/values";
+import { literals } from "convex-helpers/validators";
 
 const serverPreferencesSchema = v.object({
 	serverId: v.int64(),
@@ -10,13 +11,13 @@ const serverPreferencesSchema = v.object({
 	subpath: v.optional(v.string()),
 });
 
-export const planValidator = v.union(
-	v.literal("FREE"),
-	v.literal("STARTER"),
-	v.literal("ADVANCED"),
-	v.literal("PRO"),
-	v.literal("ENTERPRISE"),
-	v.literal("OPEN_SOURCE"),
+export const planValidator = literals(
+	"FREE",
+	"STARTER",
+	"ADVANCED",
+	"PRO",
+	"ENTERPRISE",
+	"OPEN_SOURCE",
 );
 
 export type Plan = Infer<typeof planValidator>;
