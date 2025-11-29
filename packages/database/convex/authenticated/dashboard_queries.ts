@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
+import { Array as Arr, Predicate } from "effect";
 import { authenticatedQuery } from "../client";
 import { guildManagerQuery } from "../client/guildManager";
 import {
@@ -11,7 +12,6 @@ import {
 	isThreadType,
 	sortServersByBotAndRole,
 } from "../shared/shared";
-
 export const getDashboardData = guildManagerQuery({
 	args: {},
 	handler: async (ctx, args) => {
@@ -124,9 +124,7 @@ export const getUserServersForDropdown = authenticatedQuery({
 			};
 		});
 
-		const validServers = servers.filter(
-			(server): server is NonNullable<(typeof servers)[0]> => server !== null,
-		);
+		const validServers = Arr.filter(servers, Predicate.isNotNull);
 
 		return sortServersByBotAndRole(validServers);
 	},
