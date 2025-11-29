@@ -13,6 +13,15 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const MAIN_SITE_ORIGIN = "https://new.answeroverflow.com";
+const STATE_STORAGE_KEY = "dev-auth-state";
+
+function generateState(): string {
+	const array = new Uint8Array(32);
+	crypto.getRandomValues(array);
+	return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
+		"",
+	);
+}
 
 export default function DevAuthReceivePage() {
 	const searchParams = useSearchParams();
@@ -31,6 +40,16 @@ export default function DevAuthReceivePage() {
 			if (processing) return;
 
 			const token = event.data.token;
+			const receivedState = event.data.state;
+			const expectedState = sessionStorage.getItem(STATE_STORAGE_KEY);
+
+			sessionStorage.removeItem(STATE_STORAGE_KEY);
+
+			if (!expectedState || receivedState !== expectedState) {
+				setStatus("error");
+				setErrorMessage("Invalid state parameter - possible CSRF attack");
+				return;
+			}
 
 			if (!token) {
 				setStatus("error");
@@ -77,7 +96,11 @@ export default function DevAuthReceivePage() {
 
 	const handleOpenPopup = () => {
 		setStatus("pending");
-		const callbackUrl = `${MAIN_SITE_ORIGIN}/dev-auth?redirect=${encodeURIComponent(window.location.origin + redirect)}`;
+
+		const state = generateState();
+		sessionStorage.setItem(STATE_STORAGE_KEY, state);
+
+		const callbackUrl = `${MAIN_SITE_ORIGIN}/dev-auth?redirect=${encodeURIComponent(window.location.origin + redirect)}&state=${encodeURIComponent(state)}`;
 		const popup = window.open(
 			callbackUrl,
 			"dev-auth-popup",
@@ -85,6 +108,7 @@ export default function DevAuthReceivePage() {
 		);
 
 		if (!popup) {
+			sessionStorage.removeItem(STATE_STORAGE_KEY);
 			setStatus("error");
 			setErrorMessage(
 				"Failed to open popup. Please allow popups for this site.",

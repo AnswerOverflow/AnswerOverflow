@@ -26,10 +26,19 @@ function isAllowedOrigin(origin: string): boolean {
 	return ALLOWED_DEV_ORIGINS.some((pattern) => pattern.test(origin));
 }
 
+function isValidState(state: string | null): state is string {
+	return (
+		typeof state === "string" &&
+		state.length === 64 &&
+		/^[0-9a-f]+$/.test(state)
+	);
+}
+
 export default function DevAuthPage() {
 	const searchParams = useSearchParams();
 	const { data: session, isPending } = useSession({ allowAnonymous: false });
 	const redirect = searchParams.get("redirect") ?? "";
+	const state = searchParams.get("state");
 	const [status, setStatus] = useState<
 		"idle" | "pending" | "success" | "error"
 	>("idle");
@@ -45,10 +54,13 @@ export default function DevAuthPage() {
 	const isOriginAllowed =
 		Exit.isSuccess(url) && isAllowedOrigin(url.value.origin);
 
+	const isStateValid = isValidState(state);
+
 	useEffect(() => {
 		if (isPending) return;
 		if (!Exit.isSuccess(url)) return;
 		if (!isOriginAllowed) return;
+		if (!isStateValid) return;
 		if (!session?.user) return;
 		if (status !== "idle") return;
 
@@ -71,7 +83,7 @@ export default function DevAuthPage() {
 
 				if (window.opener) {
 					window.opener.postMessage(
-						{ type: "dev-auth-token", token, redirect },
+						{ type: "dev-auth-token", token, redirect, state },
 						url.value.origin,
 					);
 					setStatus("success");
@@ -90,7 +102,16 @@ export default function DevAuthPage() {
 		}
 
 		sendTokenToOpener();
-	}, [session, isPending, url, redirect, status, isOriginAllowed]);
+	}, [
+		session,
+		isPending,
+		url,
+		redirect,
+		status,
+		isOriginAllowed,
+		isStateValid,
+		state,
+	]);
 
 	if (!Exit.isSuccess(url)) {
 		return (
@@ -111,6 +132,21 @@ export default function DevAuthPage() {
 					<CardContent className="pt-6">
 						<p className="text-red-600">
 							Origin not allowed. Dev auth is only available for localhost.
+						</p>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
+	if (!isStateValid) {
+		return (
+			<div className="flex h-[calc(100vh-64px)] items-center justify-center p-4">
+				<Card className="w-full max-w-md">
+					<CardContent className="pt-6">
+						<p className="text-red-600">
+							Invalid or missing state parameter. This request may have been
+							tampered with.
 						</p>
 					</CardContent>
 				</Card>
