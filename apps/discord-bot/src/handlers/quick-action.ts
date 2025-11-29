@@ -1,5 +1,5 @@
 import { Database } from "@packages/database/database";
-import type { ContextMenuCommandInteraction, GuildMember } from "discord.js";
+import type { ContextMenuCommandInteraction } from "discord.js";
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -10,7 +10,14 @@ import {
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from "discord.js";
-import { Array as Arr, Console, Effect, Layer, Predicate } from "effect";
+import {
+	Array as Arr,
+	Console,
+	Effect,
+	Layer,
+	Option,
+	Predicate,
+} from "effect";
 import { Discord } from "../core/discord-service";
 
 const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
@@ -73,17 +80,17 @@ export function handleQuickActionCommand(
 			}),
 		);
 
-		const selectedAction = yield* Effect.tryPromise({
-			try: () =>
+		const selectedAction = yield* discord
+			.callClient(() =>
 				interactionReply.awaitMessageComponent({
 					componentType: ComponentType.StringSelect,
 					time: 5 * 60 * 1000,
 					filter: (i) => i.user.id === interaction.user.id,
 				}),
-			catch: () => null,
-		});
+			)
+			.pipe(Effect.option);
 
-		if (!selectedAction) {
+		if (Option.isNone(selectedAction)) {
 			return;
 		}
 
@@ -107,48 +114,44 @@ export function handleQuickActionCommand(
 			return;
 		}
 
-		const channelsTargetAuthorCanSee = yield* Effect.tryPromise({
-			try: async () => {
-				const results = await Promise.all(
-					indexedChannels.map(async (channel) => {
-						try {
-							const discordChannel = await guild.channels.fetch(
-								channel.id.toString(),
-							);
-							if (!discordChannel) return null;
-							if (!targetMessage.author) return null;
+		if (!targetMessage.author) {
+			return;
+		}
 
-							let authorMember: GuildMember;
-							try {
-								authorMember = await guild.members.fetch(
-									targetMessage.author.id,
-								);
-							} catch {
-								return null;
-							}
+		const authorMember = yield* discord
+			.callClient(() => guild.members.fetch(targetMessage.author.id))
+			.pipe(Effect.option);
 
-							const canView =
-								discordChannel
-									.permissionsFor(authorMember)
-									?.has("ViewChannel") ?? false;
-							const canSend =
-								discordChannel
-									.permissionsFor(authorMember)
-									?.has("SendMessages") ?? false;
+		if (Option.isNone(authorMember)) {
+			return;
+		}
 
-							if (canView && canSend) {
-								return channel;
-							}
-							return null;
-						} catch {
-							return null;
-						}
-					}),
-				);
-				return results;
-			},
-			catch: (error) => new Error(`Failed to fetch channels: ${error}`),
-		});
+		const member = authorMember.value;
+
+		const checkChannelAccess = (channel: (typeof indexedChannels)[number]) =>
+			discord
+				.callClient(async () => {
+					const discordChannel = await guild.channels.fetch(
+						channel.id.toString(),
+					);
+					if (!discordChannel) return null;
+
+					const canView =
+						discordChannel.permissionsFor(member)?.has("ViewChannel") ?? false;
+					const canSend =
+						discordChannel.permissionsFor(member)?.has("SendMessages") ?? false;
+
+					if (canView && canSend) {
+						return channel;
+					}
+					return null;
+				})
+				.pipe(Effect.catchAll(() => Effect.succeed(null)));
+
+		const channelsTargetAuthorCanSee = yield* Effect.all(
+			Arr.map(indexedChannels, checkChannelAccess),
+			{ concurrency: "unbounded" },
+		);
 
 		const filteredChannels = Arr.filter(
 			channelsTargetAuthorCanSee,
