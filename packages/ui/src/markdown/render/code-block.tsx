@@ -10,19 +10,17 @@ interface CodeBlockProps {
 	key?: string;
 }
 
-interface CodeBlockInternalProps {
-	lang?: string;
-	content: string;
-	theme: "light" | "dark";
-	className?: string;
-}
-
 function CodeBlockInternal({
 	lang,
 	content,
 	theme,
 	className,
-}: CodeBlockInternalProps) {
+}: {
+	lang?: string;
+	content: string;
+	theme: "light" | "dark";
+	className?: string;
+}) {
 	const { data: html } = useSuspenseQuery({
 		queryKey: ["code-highlight", content, lang, theme],
 		queryFn: async () => {
@@ -40,7 +38,7 @@ function CodeBlockInternal({
 				)}</code></pre>`;
 			}
 		},
-		staleTime: Infinity, // Code highlighting results don't change, so cache indefinitely
+		staleTime: Infinity,
 	});
 
 	return (

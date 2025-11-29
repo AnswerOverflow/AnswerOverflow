@@ -15,13 +15,7 @@ var blog = defineCollections({
 });
 var source_config_default = defineConfig({
 	mdxOptions: {
-		rehypeCodeOptions: {
-			themes: {
-				light: "github-light",
-				dark: "github-dark",
-			},
-			defaultColor: false,
-		},
+		rehypeCodeOptions: false,
 	},
 });
 export { blog, source_config_default as default };

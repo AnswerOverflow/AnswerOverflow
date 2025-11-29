@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { BlogTOC } from "@/components/blog-toc";
+import { CodeBlock } from "@packages/ui/markdown/render/code-block";
 
 interface BlogPostPageProps {
 	params: Promise<{
@@ -130,6 +131,35 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
 										>
 											{children}
 										</blockquote>
+									);
+								},
+								pre: ({ children, ...props }) => {
+									const codeElement = children as any;
+									const code = codeElement?.props?.children;
+									const className = codeElement?.props?.className || "";
+									const lang = className.replace(/language-/, "");
+
+									if (typeof code === "string") {
+										return <CodeBlock lang={lang} content={code.trim()} />;
+									}
+
+									return <pre {...props}>{children}</pre>;
+								},
+								code: ({ children, className, ...props }) => {
+									if (className?.startsWith("language-")) {
+										return (
+											<code className={className} {...props}>
+												{children}
+											</code>
+										);
+									}
+									return (
+										<code
+											className="bg-muted px-1.5 py-0.5 rounded text-sm"
+											{...props}
+										>
+											{children}
+										</code>
 									);
 								},
 							}}
