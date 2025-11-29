@@ -25,6 +25,11 @@ app.use("/auth/*", async (c, next) => {
 		});
 	}
 	await next();
+	if (path.includes("/get-session")) {
+		const response = c.res;
+		const text = await response.clone().text();
+		console.log(`[auth] ${path} - response:`, text.slice(0, 200));
+	}
 });
 
 app.on(["GET", "POST"], "/auth/*", handleAuth);
@@ -131,6 +136,8 @@ app.post("/dev/auth/set-token", async (c) => {
 				continue;
 			}
 
+			const decodedValue = decodeURIComponent(value);
+
 			const cookieAttrs = [
 				"Path=/",
 				"HttpOnly",
@@ -138,15 +145,15 @@ app.post("/dev/auth/set-token", async (c) => {
 				`Max-Age=${60 * 60 * 24 * 7}`,
 			];
 
-			if (!isLocalhost) {
+			const needsSecure = key.startsWith("__Secure-") || !isLocalhost;
+			if (needsSecure) {
 				cookieAttrs.push("Secure");
 			}
 
-			const cookieHeader = `${key}=${value}; ${cookieAttrs.join("; ")}`;
+			const cookieHeader = `${key}=${decodedValue}; ${cookieAttrs.join("; ")}`;
 			setCookieHeaders.push(cookieHeader);
-
 			console.log(
-				`[dev-auth] Setting cookie: ${key}, secure: ${!isLocalhost}, value length: ${value.length}, preview: ${value.slice(0, 30)}`,
+				`[dev-auth] Setting cookie: ${key}, secure: ${needsSecure}, value length: ${decodedValue.length}`,
 			);
 		}
 
