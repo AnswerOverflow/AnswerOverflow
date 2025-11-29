@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Card, CardContent } from "@packages/ui/components/card";
 import { Button } from "@packages/ui/components/button";
+import { Card, CardContent } from "@packages/ui/components/card";
+import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 interface TOCItem {
 	id: string;
@@ -83,23 +83,22 @@ export function BlogTOC({ headings }: BlogTOCProps) {
 				</nav>
 			</div>
 
-			<Card>
-				<CardContent className="p-4">
-					<Image
-						src="/answer-overflow-banner-v3.png"
-						alt="AnswerOverflow"
-						width={300}
-						height={150}
-						className="w-full h-auto rounded-lg mb-4"
-					/>
-					<h4 className="font-semibold mb-2">Try AnswerOverflow</h4>
-					<p className="text-sm text-muted-foreground mb-4">
-						Make your Discord community knowledge searchable
-					</p>
-					<Button asChild className="w-full">
-						<Link href="/dashboard">Get Started</Link>
-					</Button>
-				</CardContent>
+			<Card className="p-0">
+				<Link href={"/dashboard"}>
+					<CardContent className="hover:underline p-4">
+						<Image
+							src="/answer-overflow-banner-v3.png"
+							alt="AnswerOverflow"
+							width={300}
+							height={150}
+							className="w-full h-auto rounded-lg"
+						/>
+						<h4 className="font-semibold mb-2">Try AnswerOverflow</h4>
+						<p className="text-sm text-muted-foreground mb-4">
+							Make your Discord community knowledge searchable
+						</p>
+					</CardContent>
+				</Link>
 			</Card>
 		</div>
 	);
