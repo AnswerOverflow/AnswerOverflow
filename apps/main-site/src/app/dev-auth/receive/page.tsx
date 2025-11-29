@@ -22,10 +22,13 @@ export default function DevAuthReceivePage() {
 	>("idle");
 	const [errorMessage, setErrorMessage] = useState<string>("");
 
+	const [processing, setProcessing] = useState(false);
+
 	const handleMessage = useCallback(
 		async (event: MessageEvent) => {
 			if (event.origin !== MAIN_SITE_ORIGIN) return;
 			if (event.data?.type !== "dev-auth-token") return;
+			if (processing) return;
 
 			const token = event.data.token;
 			if (!token) {
@@ -33,6 +36,8 @@ export default function DevAuthReceivePage() {
 				setErrorMessage("No token received from authentication popup");
 				return;
 			}
+
+			setProcessing(true);
 
 			try {
 				const response = await fetch("/api/dev/auth/set-token", {
@@ -58,9 +63,10 @@ export default function DevAuthReceivePage() {
 				setErrorMessage(
 					error instanceof Error ? error.message : "Unknown error",
 				);
+				setProcessing(false);
 			}
 		},
-		[redirect],
+		[redirect, processing],
 	);
 
 	useEffect(() => {
