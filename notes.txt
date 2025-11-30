@@ -1,4 +1,5 @@
 - there's probably a bug in our onUpdate implementation where null should be part of live data, depends how convex handles onUpdate when the first value is null
+- lint should block deploy
 
 
 We can reduce a lot of complexity by using convex-helpers, things we should use from them:

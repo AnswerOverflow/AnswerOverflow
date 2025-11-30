@@ -42,7 +42,7 @@ export function getConvexJwtFromHeaders(cookies: string[]) {
 	return null;
 }
 
-async function getConvexJwt(): Promise<string | null> {
+async function _getConvexJwt(): Promise<string | null> {
 	if (cachedJwt) return cachedJwt;
 
 	const response = await fetch(

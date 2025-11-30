@@ -1,8 +1,8 @@
 "use node";
 
-import { v } from "convex/values";
-import { action } from "../_generated/server";
 import { Vercel } from "@vercel/sdk";
+import { v } from "convex/values";
+import { authenticatedAction } from "../client";
 
 const vercel = new Vercel({
 	bearerToken: process.env.VERCEL_AUTH_TOKEN,
@@ -144,7 +144,7 @@ const domainStatusReturnValidator = v.union(
 	}),
 );
 
-export const getDomainStatus = action({
+export const getDomainStatus = authenticatedAction({
 	args: { domain: v.string() },
 	returns: domainStatusReturnValidator,
 	handler: async (_ctx, args) => {
@@ -152,7 +152,7 @@ export const getDomainStatus = action({
 	},
 });
 
-export const addDomain = action({
+export const addDomain = authenticatedAction({
 	args: { domain: v.string() },
 	returns: domainStatusReturnValidator,
 	handler: async (_ctx, args) => {
