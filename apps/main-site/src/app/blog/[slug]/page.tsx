@@ -1,12 +1,12 @@
-import React from "react";
-import { blog } from "@/.source/server";
-import { parseDate, formatDate } from "@/lib/date-utils";
-import { notFound } from "next/navigation";
+import { CodeBlock } from "@packages/ui/markdown/render/code-block";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import React from "react";
+import { blog } from "@/.source/server";
 import { BlogTOC } from "@/components/blog-toc";
-import { CodeBlock } from "@packages/ui/markdown/render/code-block";
+import { formatDate, parseDate } from "@/lib/date-utils";
 
 const AUTHORS: Record<string, { name: string; role: string; image: string }> = {
 	"AnswerOverflow Team": {
@@ -57,6 +57,7 @@ export async function generateMetadata(
 		title: post.title,
 		description: post.description,
 		openGraph: {
+			images: [`/og/blog?slug=${params.slug}`],
 			title: post.title,
 			description: post.description,
 			type: "article",
