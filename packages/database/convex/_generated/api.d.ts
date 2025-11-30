@@ -11,7 +11,6 @@
 import type * as authenticated_dashboard from "../authenticated/dashboard.js";
 import type * as authenticated_dashboard_mutations from "../authenticated/dashboard_mutations.js";
 import type * as authenticated_dashboard_queries from "../authenticated/dashboard_queries.js";
-import type * as authenticated_servers from "../authenticated/servers.js";
 import type * as authenticated_stripe from "../authenticated/stripe.js";
 import type * as authenticated_stripe_actions from "../authenticated/stripe_actions.js";
 import type * as client_authenticated from "../client/authenticated.js";
@@ -59,7 +58,6 @@ declare const fullApi: ApiFromModules<{
   "authenticated/dashboard": typeof authenticated_dashboard;
   "authenticated/dashboard_mutations": typeof authenticated_dashboard_mutations;
   "authenticated/dashboard_queries": typeof authenticated_dashboard_queries;
-  "authenticated/servers": typeof authenticated_servers;
   "authenticated/stripe": typeof authenticated_stripe;
   "authenticated/stripe_actions": typeof authenticated_stripe_actions;
   "client/authenticated": typeof client_authenticated;
