@@ -6,7 +6,7 @@ const createPostHogService = Effect.gen(function* () {
 	const posthogPersonalApiKey = yield* Config.string(
 		"POSTHOG_PERSONAL_API_KEY",
 	);
-	const posthogProjectId = yield* Config.string("POSTHOG_PROJECT_ID");
+	const posthogProjectId = process.env.POSTHOG_PROJECT_ID!;
 
 	const posthogQueryClient = new PostHogQueryClient({
 		events: events,
@@ -30,8 +30,9 @@ export const PostHogClientLayer = Layer.effect(
 
 export const makeServerAnalyticsClient = (opts: ServerAnalyticsOptions) =>
 	Effect.gen(function* () {
-		const apiKey = yield* Config.string("POSTHOG_PERSONAL_API_KEY");
-		const projectId = yield* Config.string("POSTHOG_PROJECT_ID");
+		yield* Effect.void;
+		const apiKey = process.env.POSTHOG_PERSONAL_API_KEY!;
+		const projectId = process.env.POSTHOG_PROJECT_ID!;
 		return new PostHogQueryClient({
 			events,
 			apiKey,
