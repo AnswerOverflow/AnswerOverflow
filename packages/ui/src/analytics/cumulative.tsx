@@ -129,6 +129,7 @@ export function PieChart<
 					cy="50%"
 					innerRadius={60}
 					outerRadius={80}
+					isAnimationActive={false}
 				>
 					{data.map((entry, index) => (
 						<Cell

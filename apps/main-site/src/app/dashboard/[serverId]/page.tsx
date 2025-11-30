@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { Chart } from "@packages/ui/analytics";
+import { Chart, type ChartData } from "@packages/ui/analytics";
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,
@@ -21,7 +21,7 @@ import {
 	TableRow,
 } from "@packages/ui/components/table";
 import { useQuery } from "@tanstack/react-query";
-import { useAction, useQuery as useConvexQuery } from "convex/react";
+import { useAction } from "convex/react";
 import { ExternalLink } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -184,12 +184,16 @@ function QuestionsAndAnswersChart(props: {
 }
 
 function TopQuestionSolversTable(props: { serverId: bigint }) {
-	const data = useConvexQuery(
+	const getTopQuestionSolvers = useAction(
 		api.authenticated.dashboard.getTopQuestionSolversForServer,
-		{ serverId: props.serverId },
 	);
 
-	if (data === undefined) {
+	const { data, isLoading, error } = useQuery({
+		queryKey: ["top-question-solvers", props.serverId.toString()],
+		queryFn: () => getTopQuestionSolvers({ serverId: props.serverId }),
+	});
+
+	if (isLoading) {
 		return (
 			<Card>
 				<CardHeader>
@@ -198,6 +202,21 @@ function TopQuestionSolversTable(props: { serverId: bigint }) {
 				<CardContent>
 					<div className="flex h-40 items-center justify-center">
 						<Spinner />
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	if (error) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Top Question Solvers</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="text-muted-foreground flex h-40 items-center justify-center px-6">
+						Sorry we encountered an error loading the data.
 					</div>
 				</CardContent>
 			</Card>
@@ -219,7 +238,7 @@ function TopQuestionSolversTable(props: { serverId: bigint }) {
 		);
 	}
 
-	const sortedEntries = Object.entries(data)
+	const sortedEntries = Object.entries(data as Record<string, ChartData>)
 		.map(([solverId, chartData]) => ({
 			solverId,
 			count: chartData.aggregated_value,
@@ -319,6 +338,7 @@ function TopPagesTable(props: { serverId: bigint }) {
 		.map(([messageId, chartData]) => ({
 			messageId,
 			views: chartData.aggregated_value,
+			name: chartData.name,
 		}))
 		.sort((a, b) => b.views - a.views)
 		.slice(0, 10);
@@ -333,7 +353,7 @@ function TopPagesTable(props: { serverId: bigint }) {
 					<TableHeader>
 						<TableRow>
 							<TableHead className="w-12">#</TableHead>
-							<TableHead>Message</TableHead>
+							<TableHead>Thread</TableHead>
 							<TableHead className="text-right">Views</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -345,9 +365,9 @@ function TopPagesTable(props: { serverId: bigint }) {
 									<Link
 										href={`/m/${entry.messageId}`}
 										target="_blank"
-										className="text-blue-500 hover:underline font-mono text-sm"
+										className="text-blue-500 hover:underline"
 									>
-										{entry.messageId}
+										{entry.name}
 									</Link>
 								</TableCell>
 								<TableCell className="text-right">
@@ -409,17 +429,15 @@ export default function DashboardOverviewPage() {
 				</div>
 			</div>
 
-			<div className="space-y-6">
+			<div className="grid gap-6 lg:grid-cols-2">
 				<PageViewsChart serverId={serverIdBigInt} dateRange={dateRange} />
 				<ServerInvitesChart serverId={serverIdBigInt} />
 				<QuestionsAndAnswersChart
 					serverId={serverIdBigInt}
 					dateRange={dateRange}
 				/>
-				<div className="grid gap-6 lg:grid-cols-2">
-					<TopQuestionSolversTable serverId={serverIdBigInt} />
-					<TopPagesTable serverId={serverIdBigInt} />
-				</div>
+				<TopQuestionSolversTable serverId={serverIdBigInt} />
+				<TopPagesTable serverId={serverIdBigInt} />
 			</div>
 		</div>
 	);
