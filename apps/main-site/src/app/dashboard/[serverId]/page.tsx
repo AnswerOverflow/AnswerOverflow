@@ -3,6 +3,7 @@
 import { api } from "@packages/database/convex/_generated/api";
 import { Chart, type ChartData } from "@packages/ui/analytics";
 import { Button } from "@packages/ui/components/button";
+import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import {
 	Card,
 	CardContent,
@@ -238,10 +239,17 @@ function TopQuestionSolversTable(props: { serverId: bigint }) {
 		);
 	}
 
-	const sortedEntries = Object.entries(data as Record<string, ChartData>)
-		.map(([solverId, chartData]) => ({
+	const sortedEntries = Object.entries(
+		data as Record<
+			string,
+			{ aggregated_value: number; name: string; avatar: string | null }
+		>,
+	)
+		.map(([solverId, solverData]) => ({
 			solverId,
-			count: chartData.aggregated_value,
+			count: solverData.aggregated_value,
+			name: solverData.name,
+			avatar: solverData.avatar,
 		}))
 		.sort((a, b) => b.count - a.count)
 		.slice(0, 10);
@@ -255,17 +263,28 @@ function TopQuestionSolversTable(props: { serverId: bigint }) {
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead className="w-12">#</TableHead>
-							<TableHead>User ID</TableHead>
+							<TableHead className="max-w-[200px]">User</TableHead>
 							<TableHead className="text-right">Solutions</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{sortedEntries.map((entry, index) => (
+						{sortedEntries.map((entry) => (
 							<TableRow key={entry.solverId}>
-								<TableCell className="font-medium">{index + 1}</TableCell>
-								<TableCell className="font-mono text-sm">
-									{entry.solverId}
+								<TableCell className="max-w-[200px]">
+									<Link
+										href={`/u/${entry.solverId}`}
+										className="flex items-center gap-2 hover:underline"
+									>
+										<DiscordAvatar
+											user={{
+												id: entry.solverId,
+												name: entry.name,
+												avatar: entry.avatar ?? undefined,
+											}}
+											size={24}
+										/>
+										<span className="truncate">{entry.name}</span>
+									</Link>
 								</TableCell>
 								<TableCell className="text-right">
 									{entry.count.toLocaleString()}
