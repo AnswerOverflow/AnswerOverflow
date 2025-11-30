@@ -1,13 +1,5 @@
 import { type ActivityOptions, ActivityType } from "discord.js";
-import {
-	Config,
-	Console,
-	Duration,
-	Effect,
-	Layer,
-	Ref,
-	Schedule,
-} from "effect";
+import { Console, Duration, Effect, Layer, Ref, Schedule } from "effect";
 import { Discord } from "../core/discord-service";
 
 type StatusUpdate = {
@@ -96,9 +88,9 @@ function updateStatus(statusIndex: Ref.Ref<number>) {
 
 function startStatusUpdateLoop() {
 	return Effect.gen(function* () {
-		const statusUpdateIntervalHours = yield* Config.number(
-			"STATUS_UPDATE_INTERVAL_IN_HOURS",
-		).pipe(Config.withDefault(1));
+		const statusUpdateIntervalHours = Number(
+			process.env.STATUS_UPDATE_INTERVAL_IN_HOURS ?? "1",
+		);
 
 		const statusIndex = yield* Ref.make(0);
 

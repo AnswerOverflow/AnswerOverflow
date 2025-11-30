@@ -1,7 +1,7 @@
 import { ConvexClient } from "convex/browser";
 import type { FunctionReference } from "convex/server";
 import { parse } from "cookie";
-import { Config, Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import {
 	type ConvexClientShared,
@@ -69,7 +69,7 @@ async function _getConvexJwt(): Promise<string | null> {
 }
 
 const createLiveService = Effect.gen(function* () {
-	const convexUrl = yield* Config.string("NEXT_PUBLIC_CONVEX_URL");
+	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL!;
 	const client = new ConvexClient(convexUrl);
 
 	const wrappedClient: ConvexClientShared = {

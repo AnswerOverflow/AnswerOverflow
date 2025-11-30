@@ -1,7 +1,12 @@
-Here is the high level summary of sitemap generation functionality I need:
+# Sitemap Implementation Plan
+
+> **Status**: NOT IMPLEMENTED - This is the next major feature to build.
+> **Priority**: Critical for SEO
+
+## Requirements Summary
 
 <start>
-# Sitemap Generation in Old Answer Overflow
+# Sitemap Generation Requirements
 
 The sitemap system enables search engines to discover and index Discord threads that have been made public on Answer Overflow.
 

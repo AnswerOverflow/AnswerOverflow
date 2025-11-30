@@ -16,7 +16,10 @@ export function toShadcnTimeseriesData<
 		IsBreakdown extends true ? Record<string, ChartData> : ChartData
 	>,
 >(unformattedData: T) {
-	const values = Object.values(unformattedData);
+	const values = Object.values(unformattedData) as (
+		| ChartData
+		| Record<string, ChartData>
+	)[];
 	if (values.length === 0) {
 		return { data: [], categories: [], labels: [] };
 	}
