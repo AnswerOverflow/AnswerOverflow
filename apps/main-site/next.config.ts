@@ -1,6 +1,8 @@
-import createMDX from "@next/mdx";
 import { withBotId } from "botid/next/config";
+import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
+
+const withMDX = createMDX();
 
 const nextConfig: NextConfig = {
 	pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
@@ -84,7 +86,5 @@ const nextConfig: NextConfig = {
 		];
 	},
 };
-
-const withMDX = createMDX({});
 
 export default withBotId(withMDX(nextConfig));
