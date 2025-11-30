@@ -6,7 +6,7 @@ import type {
 	FunctionReturnType,
 } from "convex/server";
 
-import { Config, Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Emoji, Message } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
@@ -93,7 +93,7 @@ function callClientMethod(
 }
 
 export const service = Effect.gen(function* () {
-	const backendAccessToken = yield* Config.string("BACKEND_ACCESS_TOKEN");
+	const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN!;
 	const convexClient = yield* ConvexClientUnified;
 
 	const watchQueryToLiveData = createWatchQueryToLiveData(convexClient, {

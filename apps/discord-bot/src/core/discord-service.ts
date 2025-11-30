@@ -7,7 +7,6 @@ import {
 } from "discord.js";
 import {
 	Array as Arr,
-	Config,
 	Context,
 	Data,
 	Effect,
@@ -32,7 +31,7 @@ export class UnknownDiscordError extends Data.TaggedError(
 
 export const createDiscordService = Effect.gen(function* () {
 	const client = yield* DiscordClient;
-	const token = yield* Config.string("DISCORD_TOKEN");
+	const token = process.env.DISCORD_TOKEN!;
 
 	const activeHandlers = yield* Ref.make(
 		HashMap.empty<string, ReadonlyArray<Fiber.RuntimeFiber<void, unknown>>>(),

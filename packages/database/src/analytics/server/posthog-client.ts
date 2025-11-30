@@ -1,11 +1,10 @@
 import { PostHog as PostHogQueryClient } from "@typelytics/posthog";
-import { Config, Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { events } from "./events";
 
 const createPostHogService = Effect.gen(function* () {
-	const posthogPersonalApiKey = yield* Config.string(
-		"POSTHOG_PERSONAL_API_KEY",
-	);
+	yield* Effect.void;
+	const posthogPersonalApiKey = process.env.POSTHOG_PERSONAL_API_KEY!;
 	const posthogProjectId = process.env.POSTHOG_PROJECT_ID!;
 
 	const posthogQueryClient = new PostHogQueryClient({
