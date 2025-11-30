@@ -14,7 +14,7 @@ import { Effect } from "effect";
 import { api, components, internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { authenticatedAction, internalAction } from "../client";
-import { guildManagerAction, guildManagerQuery } from "../client/guildManager";
+import { guildManagerAction } from "../client/guildManager";
 import { getDiscordAccountWithToken } from "../shared/auth";
 import {
 	DISCORD_PERMISSIONS,
@@ -175,7 +175,7 @@ export const getUserServers = authenticatedAction({
 	},
 });
 
-export const getTopQuestionSolversForServer = guildManagerQuery({
+export const getTopQuestionSolversForServer = guildManagerAction({
 	args: {},
 	handler: async (_ctx, args) => {
 		const program = Effect.gen(function* () {
