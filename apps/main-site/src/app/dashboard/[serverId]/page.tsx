@@ -352,20 +352,18 @@ function TopPagesTable(props: { serverId: bigint }) {
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead className="w-12">#</TableHead>
-							<TableHead>Thread</TableHead>
+							<TableHead className="max-w-[300px]">Title</TableHead>
 							<TableHead className="text-right">Views</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{sortedEntries.map((entry, index) => (
+						{sortedEntries.map((entry) => (
 							<TableRow key={entry.messageId}>
-								<TableCell className="font-medium">{index + 1}</TableCell>
-								<TableCell>
+								<TableCell className="max-w-[300px]">
 									<Link
 										href={`/m/${entry.messageId}`}
 										target="_blank"
-										className="text-blue-500 hover:underline"
+										className="block truncate text-blue-500 hover:underline"
 									>
 										{entry.name}
 									</Link>
