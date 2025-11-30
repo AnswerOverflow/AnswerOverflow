@@ -47,8 +47,7 @@ export function BlogTOC({ headings }: BlogTOCProps) {
 		if (element) {
 			const headerOffset = 80;
 			const elementPosition = element.getBoundingClientRect().top;
-			const offsetPosition =
-				elementPosition + window.pageYOffset - headerOffset;
+			const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
 			window.scrollTo({
 				top: offsetPosition,
