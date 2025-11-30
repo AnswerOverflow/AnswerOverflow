@@ -164,6 +164,18 @@ export const deleteDiscordAccount = privateMutation({
 	},
 });
 
+export const findManyDiscordAccountsByIds = privateQuery({
+	args: {
+		ids: v.array(v.int64()),
+	},
+	handler: async (ctx, args) => {
+		const accounts = await Promise.all(
+			args.ids.map((id) => getDiscordAccountByIdShared(ctx, id)),
+		);
+		return Arr.filter(accounts, Predicate.isNotNullable);
+	},
+});
+
 export const getUserPageData = privateQuery({
 	args: {
 		userId: v.int64(),

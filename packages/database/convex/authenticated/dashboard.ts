@@ -177,19 +177,51 @@ export const getUserServers = authenticatedAction({
 
 export const getTopQuestionSolversForServer = guildManagerAction({
 	args: {},
-	handler: async (_ctx, args) => {
+	handler: async (ctx, args) => {
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getTopQuestionSolversForServer();
 		});
 
-		return await Effect.runPromise(
+		const analyticsData = await Effect.runPromise(
 			program.pipe(
 				Effect.provide(
 					ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
 				),
 			),
 		);
+
+		if (!analyticsData) return {};
+
+		const userIds = Object.keys(analyticsData).map((id) => BigInt(id));
+
+		const discordAccounts = await ctx.runQuery(
+			api.private.discord_accounts.findManyDiscordAccountsByIds,
+			{
+				ids: userIds,
+				backendAccessToken: getBackendAccessToken(),
+			},
+		);
+
+		const accountMap = new Map(
+			discordAccounts.map((a) => [a.id.toString(), a]),
+		);
+
+		const enrichedData: Record<
+			string,
+			{ aggregated_value: number; name: string; avatar: string | null }
+		> = {};
+
+		for (const [userId, data] of Object.entries(analyticsData)) {
+			const account = accountMap.get(userId);
+			enrichedData[userId] = {
+				aggregated_value: data.aggregated_value,
+				name: account?.name ?? userId,
+				avatar: account?.avatar ?? null,
+			};
+		}
+
+		return enrichedData;
 	},
 });
 
