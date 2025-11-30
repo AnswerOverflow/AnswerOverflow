@@ -106,7 +106,7 @@ export default function OnboardingPage() {
 		}
 
 		try {
-			await trackBotAddClick({ serverDiscordId: BigInt(discordId) });
+			await trackBotAddClick({ serverId: BigInt(discordId) });
 		} catch (error) {
 			console.error("Failed to track bot add click:", error);
 		}
