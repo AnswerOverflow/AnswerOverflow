@@ -1,0 +1,63 @@
+---
+alwaysApply: true
+---
+
+# Research Subagents
+
+When the user says "spawn a research subagent" or similar, use the Task tool to launch a research agent with the appropriate model configuration.
+
+## Command Pattern
+
+Use this pattern to spawn a research subagent:
+
+```bash
+opencode run "YOUR RESEARCH PROMPT HERE" --model=openai/gpt-5.1-codex-max-xhigh
+```
+
+## Model Selection for Research
+
+**Always use `openai/gpt-5.1-codex-max-xhigh`** for research subagents:
+- Maximum reasoning capability
+- Large context window (272k tokens)
+- Deep agent loops and research tasks
+- Most thorough analysis
+
+## Guidelines
+
+1. **Model prefix**: Always include `openai/` prefix (e.g., `openai/gpt-5.1-codex-max-xhigh`)
+2. **Research prompts**: Make prompts specific and detailed about what to research
+3. **Context**: Provide necessary context in the prompt (file paths, concepts, goals)
+4. **Scope**: Define clear boundaries for the research task
+
+## Examples
+
+### Researching a codebase pattern
+```bash
+opencode run "Research how authentication is implemented across the codebase in .context/better-auth and our packages/database. Focus on session management and token handling patterns." --model=openai/gpt-5.1-codex-max-xhigh
+```
+
+### Investigating a problem
+```bash
+opencode run "Research why the Discord bot message sync is failing. Check packages/discord-bot and packages/database for race conditions or timing issues." --model=openai/gpt-5.1-codex-max-xhigh
+```
+
+### Deep analysis
+```bash
+opencode run "Analyze the Effect usage patterns in packages/database and identify areas where we're not following Effect best practices. Provide specific recommendations." --model=openai/gpt-5.1-codex-max-xhigh
+```
+
+## Alternative Models
+
+For different research needs:
+
+- **Fast exploratory**: `openai/gpt-5.1-codex-max-low` - Quick scans
+- **Balanced research**: `openai/gpt-5.1-codex-max-medium` - Standard investigations
+- **Deep analysis**: `openai/gpt-5.1-codex-max-high` - Complex problems
+- **Maximum reasoning**: `openai/gpt-5.1-codex-max-xhigh` - Deep research (default)
+
+## Important Notes
+
+- Research subagents run independently in their own process
+- They have full access to the codebase
+- Results are returned when complete
+- No need to worry about context limits with max models
