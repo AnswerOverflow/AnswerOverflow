@@ -89,6 +89,7 @@ export function LineChart<
 						stroke={`var(--color-${category})`}
 						strokeWidth={2}
 						dot={false}
+						isAnimationActive={false}
 					/>
 				))}
 			</RechartsLineChart>
@@ -151,6 +152,7 @@ export function BarChart<
 						dataKey={category}
 						fill={`var(--color-${category})`}
 						radius={4}
+						isAnimationActive={false}
 					/>
 				))}
 			</RechartsBarChart>
@@ -216,6 +218,7 @@ export function AreaChart<
 						fillOpacity={0.4}
 						stroke={`var(--color-${category})`}
 						strokeWidth={2}
+						isAnimationActive={false}
 					/>
 				))}
 			</RechartsAreaChart>

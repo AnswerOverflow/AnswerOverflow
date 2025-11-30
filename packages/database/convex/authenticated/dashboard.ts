@@ -249,7 +249,7 @@ export const getQuestionsAndAnswers = guildManagerAction({
 
 export const getTopPagesForServer = guildManagerAction({
 	args: {},
-	handler: async (_ctx, args) => {
+	handler: async (ctx, args) => {
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getTopPages();
@@ -259,7 +259,35 @@ export const getTopPagesForServer = guildManagerAction({
 			),
 		);
 
-		return await Effect.runPromise(program);
+		const analyticsData = await Effect.runPromise(program);
+
+		if (!analyticsData) return {};
+
+		const messageIds = Object.keys(analyticsData).map((id) => BigInt(id));
+
+		const channels = await ctx.runQuery(
+			api.private.channels.findManyChannelsByDiscordIds,
+			{
+				discordIds: messageIds,
+				backendAccessToken: getBackendAccessToken(),
+			},
+		);
+
+		const channelMap = new Map(channels.map((c) => [c.id.toString(), c.name]));
+
+		const enrichedData: Record<
+			string,
+			{ aggregated_value: number; name: string }
+		> = {};
+
+		for (const [messageId, data] of Object.entries(analyticsData)) {
+			enrichedData[messageId] = {
+				aggregated_value: data.aggregated_value,
+				name: channelMap.get(messageId) ?? messageId,
+			};
+		}
+
+		return enrichedData;
 	},
 });
 
