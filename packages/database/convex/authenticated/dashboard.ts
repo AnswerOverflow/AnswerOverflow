@@ -247,6 +247,22 @@ export const getQuestionsAndAnswers = guildManagerAction({
 	},
 });
 
+export const getTopPagesForServer = guildManagerAction({
+	args: {},
+	handler: async (_ctx, args) => {
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopPages();
+		}).pipe(
+			Effect.provide(
+				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
+			),
+		);
+
+		return await Effect.runPromise(program);
+	},
+});
+
 export const trackBotAddClick = guildManagerAction({
 	args: {},
 	handler: async (ctx, args) => {

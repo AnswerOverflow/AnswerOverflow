@@ -6,13 +6,6 @@
 | ---------------------- | ------------------------------------------------------------------------- | --------------- |
 | **Sitemap Generation** | Per-server sitemaps for SEO (`/sitemap.xml`, `/c/[serverId]/sitemap.xml`) | Not implemented |
 
-## Priority 2: High (User-Facing Features)
-
-| Feature               | Description                                    | Status                                       |
-| --------------------- | ---------------------------------------------- | -------------------------------------------- |
-| **Date Range Picker** | Allow users to select date range for analytics | Not implemented - charts have args but no UI |
-| **Top Solvers UI**    | Show top question solvers leaderboard          | Backend ready, UI not implemented            |
-
 ## Detailed Breakdown
 
 ### 1. Sitemap Generation (Critical for SEO)
@@ -26,27 +19,15 @@
 
 **Implementation plan exists:** See `notes/new-sitemap.md` for detailed implementation plan using `@convex-dev/aggregate`
 
-### 3. Date Range Picker for Analytics
+## Recently Implemented
 
-**Current state:**
-
-- Chart components accept `from`/`to` parameters
-- Backend queries support date filtering
-
-**What's needed:**
-
-- Date picker UI component in dashboard
-- Wire picker to chart components
-
-### 4. Top Solvers UI
-
-**Current state:**
-
-- Backend query exists: `getTopQuestionSolversForServer`
-
-**What's needed:**
-
-- Leaderboard component in dashboard
+| Feature                  | Description                                        | Status      |
+| ------------------------ | -------------------------------------------------- | ----------- |
+| **Date Range Picker**    | Date range picker for filtering analytics          | Implemented |
+| **Top Solvers UI**       | Top question solvers leaderboard table             | Implemented |
+| **Popular Pages Table**  | Table showing most viewed pages                    | Implemented |
+| **Stripe Billing UI**    | Subscription status, upgrade buttons, manage billing | Implemented |
+| **Domain Removal**       | Clearing custom domain by saving empty value       | Implemented |
 
 ## Intentionally Omitted
 

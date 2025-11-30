@@ -9,12 +9,23 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { DateRangePicker } from "@packages/ui/components/date-range-picker";
 import { Link } from "@packages/ui/components/link";
 import { Spinner } from "@packages/ui/components/spinner";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@packages/ui/components/table";
 import { useQuery } from "@tanstack/react-query";
-import { useAction } from "convex/react";
+import { useAction, useQuery as useConvexQuery } from "convex/react";
 import { ExternalLink } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useState } from "react";
+import type { DateRange } from "react-day-picker";
 import { useAuthenticatedQuery } from "../../../lib/use-authenticated-query";
 
 function ChartWrapper(props: {
@@ -54,14 +65,24 @@ function LoadingErrorChart<T>(props: {
 	return props.children(props.data);
 }
 
-function PageViewsChart(props: { serverId: bigint }) {
+function PageViewsChart(props: { serverId: bigint; dateRange?: DateRange }) {
 	const getPageViews = useAction(
 		api.authenticated.dashboard.getPageViewsForServer,
 	);
 
 	const { data, isLoading, error } = useQuery({
-		queryKey: ["page-views", props.serverId.toString()],
-		queryFn: () => getPageViews({ serverId: props.serverId }),
+		queryKey: [
+			"page-views",
+			props.serverId.toString(),
+			props.dateRange?.from?.getTime(),
+			props.dateRange?.to?.getTime(),
+		],
+		queryFn: () =>
+			getPageViews({
+				serverId: props.serverId,
+				from: props.dateRange?.from?.getTime(),
+				to: props.dateRange?.to?.getTime(),
+			}),
 	});
 
 	const isError = !!error;
@@ -125,14 +146,27 @@ function ServerInvitesChart(props: { serverId: bigint }) {
 	);
 }
 
-function QuestionsAndAnswersChart(props: { serverId: bigint }) {
+function QuestionsAndAnswersChart(props: {
+	serverId: bigint;
+	dateRange?: DateRange;
+}) {
 	const getQuestionsAndAnswers = useAction(
 		api.authenticated.dashboard.getQuestionsAndAnswers,
 	);
 
 	const { data, isLoading, error } = useQuery({
-		queryKey: ["questions-and-answers", props.serverId.toString()],
-		queryFn: () => getQuestionsAndAnswers({ serverId: props.serverId }),
+		queryKey: [
+			"questions-and-answers",
+			props.serverId.toString(),
+			props.dateRange?.from?.getTime(),
+			props.dateRange?.to?.getTime(),
+		],
+		queryFn: () =>
+			getQuestionsAndAnswers({
+				serverId: props.serverId,
+				from: props.dateRange?.from?.getTime(),
+				to: props.dateRange?.to?.getTime(),
+			}),
 	});
 
 	const isError = !!error;
@@ -149,9 +183,189 @@ function QuestionsAndAnswersChart(props: { serverId: bigint }) {
 	);
 }
 
+function TopQuestionSolversTable(props: { serverId: bigint }) {
+	const data = useConvexQuery(
+		api.authenticated.dashboard.getTopQuestionSolversForServer,
+		{ serverId: props.serverId },
+	);
+
+	if (data === undefined) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Top Question Solvers</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="flex h-40 items-center justify-center">
+						<Spinner />
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	if (!data || Object.keys(data).length === 0) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Top Question Solvers</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="text-muted-foreground flex h-40 items-center justify-center">
+						No data available yet
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	const sortedEntries = Object.entries(data)
+		.map(([solverId, chartData]) => ({
+			solverId,
+			count: chartData.aggregated_value,
+		}))
+		.sort((a, b) => b.count - a.count)
+		.slice(0, 10);
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Top Question Solvers</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead className="w-12">#</TableHead>
+							<TableHead>User ID</TableHead>
+							<TableHead className="text-right">Solutions</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{sortedEntries.map((entry, index) => (
+							<TableRow key={entry.solverId}>
+								<TableCell className="font-medium">{index + 1}</TableCell>
+								<TableCell className="font-mono text-sm">
+									{entry.solverId}
+								</TableCell>
+								<TableCell className="text-right">
+									{entry.count.toLocaleString()}
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</CardContent>
+		</Card>
+	);
+}
+
+function TopPagesTable(props: { serverId: bigint }) {
+	const getTopPages = useAction(
+		api.authenticated.dashboard.getTopPagesForServer,
+	);
+
+	const { data, isLoading, error } = useQuery({
+		queryKey: ["top-pages", props.serverId.toString()],
+		queryFn: () => getTopPages({ serverId: props.serverId }),
+	});
+
+	if (isLoading) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Popular Pages</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="flex h-40 items-center justify-center">
+						<Spinner />
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	if (error) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Popular Pages</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="text-muted-foreground flex h-40 items-center justify-center px-6">
+						Sorry we encountered an error loading the data.
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	if (!data || Object.keys(data).length === 0) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle>Popular Pages</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<div className="text-muted-foreground flex h-40 items-center justify-center">
+						No data available yet
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	const sortedEntries = Object.entries(data)
+		.map(([messageId, chartData]) => ({
+			messageId,
+			views: chartData.aggregated_value,
+		}))
+		.sort((a, b) => b.views - a.views)
+		.slice(0, 10);
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Popular Pages</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead className="w-12">#</TableHead>
+							<TableHead>Message</TableHead>
+							<TableHead className="text-right">Views</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{sortedEntries.map((entry, index) => (
+							<TableRow key={entry.messageId}>
+								<TableCell className="font-medium">{index + 1}</TableCell>
+								<TableCell>
+									<Link
+										href={`/m/${entry.messageId}`}
+										target="_blank"
+										className="text-blue-500 hover:underline font-mono text-sm"
+									>
+										{entry.messageId}
+									</Link>
+								</TableCell>
+								<TableCell className="text-right">
+									{entry.views.toLocaleString()}
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</CardContent>
+		</Card>
+	);
+}
+
 export default function DashboardOverviewPage() {
 	const params = useParams();
 	const serverId = params.serverId as string;
+	const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
@@ -169,29 +383,43 @@ export default function DashboardOverviewPage() {
 
 	return (
 		<div className="w-full max-w-[1200px]">
-			<div className="mb-6 flex items-start justify-between">
+			<div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 				<div>
 					<h1 className="text-3xl font-bold">{server.name}</h1>
 					<p className="text-muted-foreground mt-2">
 						Dashboard overview and analytics
 					</p>
 				</div>
-				<Button asChild variant="outline">
-					<Link
-						href={`/c/${server.discordId}`}
-						target="_blank"
-						className="flex items-center gap-2"
-					>
-						View Community
-						<ExternalLink className="h-4 w-4" />
-					</Link>
-				</Button>
+				<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+					<DateRangePicker
+						value={dateRange}
+						onChange={setDateRange}
+						placeholder="Select date range"
+					/>
+					<Button asChild variant="outline">
+						<Link
+							href={`/c/${server.discordId}`}
+							target="_blank"
+							className="flex items-center gap-2"
+						>
+							View Community
+							<ExternalLink className="h-4 w-4" />
+						</Link>
+					</Button>
+				</div>
 			</div>
 
 			<div className="space-y-6">
-				<PageViewsChart serverId={serverIdBigInt} />
+				<PageViewsChart serverId={serverIdBigInt} dateRange={dateRange} />
 				<ServerInvitesChart serverId={serverIdBigInt} />
-				<QuestionsAndAnswersChart serverId={serverIdBigInt} />
+				<QuestionsAndAnswersChart
+					serverId={serverIdBigInt}
+					dateRange={dateRange}
+				/>
+				<div className="grid gap-6 lg:grid-cols-2">
+					<TopQuestionSolversTable serverId={serverIdBigInt} />
+					<TopPagesTable serverId={serverIdBigInt} />
+				</div>
 			</div>
 		</div>
 	);

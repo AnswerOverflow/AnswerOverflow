@@ -202,6 +202,7 @@ export type CustomDomainProps = {
 	defaultDomain?: string;
 	addDomainAction: (typeof api)["authenticated"]["vercel_domains"]["addDomain"];
 	getDomainStatusAction: (typeof api)["authenticated"]["vercel_domains"]["getDomainStatus"];
+	onDomainUpdate?: (domain: string | null) => Promise<void>;
 };
 
 export const CustomDomain = (props: CustomDomainProps) => {
@@ -218,16 +219,27 @@ export const CustomDomain = (props: CustomDomainProps) => {
 				event.preventDefault();
 				setSubmitting(true);
 				const data = new FormData(event.currentTarget);
-				const customDomain = (data.get("customDomain") as string).toLowerCase();
-				await addDomain({ domain: customDomain });
-				setDomain(customDomain);
+				const customDomain = (data.get("customDomain") as string)
+					.toLowerCase()
+					.trim();
+
+				if (customDomain === "") {
+					await props.onDomainUpdate?.(null);
+					setDomain(null);
+				} else {
+					await addDomain({ domain: customDomain });
+					await props.onDomainUpdate?.(customDomain);
+					setDomain(customDomain);
+				}
 				setSubmitting(false);
 			}}
 		>
 			<Card className="flex flex-col">
 				<CardHeader className="flex flex-col text-left">
 					<CardTitle>Custom Domain</CardTitle>
-					<CardDescription>The custom domain for your site.</CardDescription>
+					<CardDescription>
+						The custom domain for your site. Leave empty to remove.
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="relative flex w-full @sm:flex-row flex-col items-center justify-start @sm:justify-between gap-2">
 					<Input
