@@ -1,18 +1,153 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import { Chart } from "@packages/ui/analytics";
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,
 	CardContent,
-	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
 import { Link } from "@packages/ui/components/link";
+import { Spinner } from "@packages/ui/components/spinner";
+import { useQuery } from "@tanstack/react-query";
+import { useAction } from "convex/react";
 import { ExternalLink } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useAuthenticatedQuery } from "../../../lib/use-authenticated-query";
+
+function ChartWrapper(props: {
+	label: React.ReactNode;
+	chart: React.ReactNode;
+}) {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>{props.label}</CardTitle>
+			</CardHeader>
+			<CardContent>{props.chart}</CardContent>
+		</Card>
+	);
+}
+
+function LoadingErrorChart<T>(props: {
+	isError: boolean;
+	isLoading: boolean;
+	data: T | null;
+	children: (data: NonNullable<T>) => React.ReactNode;
+}) {
+	if (props.isError)
+		return (
+			<div className="text-muted-foreground flex h-80 items-center justify-center px-6">
+				Sorry we encountered an error loading the data. We've tracked the error
+				and will look into it. If the issue persists, please join the Discord.
+			</div>
+		);
+	if (props.isLoading)
+		return (
+			<div className="flex h-80 items-center justify-center">
+				<Spinner />
+			</div>
+		);
+	if (!props.data) return <div>No data</div>;
+	return props.children(props.data);
+}
+
+function PageViewsChart(props: { serverId: bigint }) {
+	const getPageViews = useAction(
+		api.authenticated.dashboard.getPageViewsForServer,
+	);
+
+	const { data, isLoading, error } = useQuery({
+		queryKey: ["page-views", props.serverId.toString()],
+		queryFn: () => getPageViews({ serverId: props.serverId }),
+	});
+
+	const isError = !!error;
+
+	return (
+		<ChartWrapper
+			label={`Page Views: ${
+				!data
+					? ""
+					: (data.results["Page Views"]?.aggregated_value?.toLocaleString() ??
+						"0")
+			}`}
+			chart={
+				<LoadingErrorChart isError={isError} isLoading={isLoading} data={data}>
+					{(chartData) => (
+						<Chart
+							{...chartData}
+							showLegend={false}
+							valueFormatter={(value) => value.toLocaleString()}
+						/>
+					)}
+				</LoadingErrorChart>
+			}
+		/>
+	);
+}
+
+function ServerInvitesChart(props: { serverId: bigint }) {
+	const getServerInvites = useAction(
+		api.authenticated.dashboard.getServerInvitesClicked,
+	);
+
+	const { data, isLoading, error } = useQuery({
+		queryKey: ["server-invites", props.serverId.toString()],
+		queryFn: () => getServerInvites({ serverId: props.serverId }),
+	});
+
+	const isError = !!error;
+
+	return (
+		<ChartWrapper
+			label={`Server Invite Clicks: ${
+				!data
+					? ""
+					: (data.results[
+							"Invite Clicked"
+						]?.aggregated_value?.toLocaleString() ?? "0")
+			}`}
+			chart={
+				<LoadingErrorChart isError={isError} isLoading={isLoading} data={data}>
+					{(chartData) => (
+						<Chart
+							{...chartData}
+							showLegend={false}
+							valueFormatter={(value) => value.toLocaleString()}
+						/>
+					)}
+				</LoadingErrorChart>
+			}
+		/>
+	);
+}
+
+function QuestionsAndAnswersChart(props: { serverId: bigint }) {
+	const getQuestionsAndAnswers = useAction(
+		api.authenticated.dashboard.getQuestionsAndAnswers,
+	);
+
+	const { data, isLoading, error } = useQuery({
+		queryKey: ["questions-and-answers", props.serverId.toString()],
+		queryFn: () => getQuestionsAndAnswers({ serverId: props.serverId }),
+	});
+
+	const isError = !!error;
+
+	return (
+		<ChartWrapper
+			label="Questions & Answers"
+			chart={
+				<LoadingErrorChart isError={isError} isLoading={isLoading} data={data}>
+					{(chartData) => <Chart {...chartData} />}
+				</LoadingErrorChart>
+			}
+		/>
+	);
+}
 
 export default function DashboardOverviewPage() {
 	const params = useParams();
@@ -30,6 +165,7 @@ export default function DashboardOverviewPage() {
 	}
 
 	const { server } = dashboardData;
+	const serverIdBigInt = BigInt(serverId);
 
 	return (
 		<div className="w-full max-w-[1200px]">
@@ -52,27 +188,11 @@ export default function DashboardOverviewPage() {
 				</Button>
 			</div>
 
-			{/* TODO: Add analytics dashboard components here */}
-			<Card>
-				<CardHeader>
-					<CardTitle>Analytics Dashboard</CardTitle>
-					<CardDescription>
-						Analytics charts and insights will be displayed here.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="text-muted-foreground">
-						Analytics dashboard coming soon. This will include:
-						<ul className="list-disc list-inside mt-2 space-y-1">
-							<li>Page views over time</li>
-							<li>Popular pages</li>
-							<li>Questions and answers</li>
-							<li>Top question solvers</li>
-							<li>Server invite clicks</li>
-						</ul>
-					</div>
-				</CardContent>
-			</Card>
+			<div className="space-y-6">
+				<PageViewsChart serverId={serverIdBigInt} />
+				<ServerInvitesChart serverId={serverIdBigInt} />
+				<QuestionsAndAnswersChart serverId={serverIdBigInt} />
+			</div>
 		</div>
 	);
 }

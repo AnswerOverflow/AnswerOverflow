@@ -16,3 +16,6 @@
 [submodule ".context/convex-js"]
 	path = .context/convex-js
 	url = https://github.com/get-convex/convex-js.git
+[submodule ".context/typelytics"]
+	path = .context/typelytics
+	url = https://github.com/RhysSullivan/typelytics
