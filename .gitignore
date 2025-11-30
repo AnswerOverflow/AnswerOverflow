@@ -48,3 +48,6 @@ temp-*
 .eslintcache
 .vercel
 .env*.local
+
+# fumadocs generated files
+.source/

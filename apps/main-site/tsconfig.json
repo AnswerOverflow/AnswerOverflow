@@ -11,7 +11,12 @@
 		],
 		"jsx": "preserve",
 		"esModuleInterop": true,
-		"moduleResolution": "bundler"
+		"moduleResolution": "bundler",
+		"baseUrl": ".",
+		"paths": {
+			"@/.source/*": [".source/*"],
+			"@/*": ["./src/*"]
+		}
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
 	"exclude": ["node_modules"]

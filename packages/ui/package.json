@@ -104,6 +104,7 @@
 		"./hooks/*": "./src/hooks/*.ts",
 		"./utils/*": "./src/utils/*.ts",
 		"./icons/index": "./src/icons/index.tsx",
-		"./markdown": "./src/markdown/index.tsx"
+		"./markdown": "./src/markdown/index.tsx",
+		"./markdown/render/code-block": "./src/markdown/render/code-block.tsx"
 	}
 }
