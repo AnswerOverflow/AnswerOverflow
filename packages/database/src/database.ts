@@ -6,7 +6,7 @@ import type {
 	FunctionReturnType,
 } from "convex/server";
 
-import { Config, Context, Effect, Layer } from "effect";
+import { Cache, Config, Context, Duration, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Emoji, Message } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
@@ -71,6 +71,13 @@ function buildFunctionPath(
 	return `${namespacePath.join(".")}.${functionName}`;
 }
 
+function createQueryCacheKey(
+	functionPath: string,
+	args: Record<string, unknown>,
+): string {
+	return JSON.stringify({ functionPath, args });
+}
+
 function callClientMethod(
 	funcType: "query" | "mutation" | "action",
 	funcRef: FunctionReference<any, any>,
@@ -100,6 +107,36 @@ export const service = Effect.gen(function* () {
 		api,
 		internal,
 	});
+
+	const queryCacheLookupContexts = new Map<
+		string,
+		{ funcRef: FunctionReference<any, any>; args: Record<string, unknown> }
+	>();
+
+	const queryCache = Effect.gen(function* () {
+		return yield* Cache.make({
+			capacity: 500,
+			timeToLive: Duration.minutes(5),
+			lookup: (cacheKey: string) =>
+				Effect.gen(function* () {
+					const context = queryCacheLookupContexts.get(cacheKey);
+					if (!context) {
+						return yield* Effect.fail(
+							new ConvexError({
+								cause: new Error(`Query context missing for key: ${cacheKey}`),
+							}),
+						);
+					}
+
+					return yield* callClientMethod(
+						"query",
+						context.funcRef,
+						convexClient.client,
+						context.args,
+					);
+				}),
+		});
+	}).pipe(Effect.runSync);
 
 	const createProxy = <T extends Record<string, any>>(
 		target: T,
@@ -143,9 +180,10 @@ export const service = Effect.gen(function* () {
 
 				if (funcType === "query") {
 					const wrappedFunction = ((args?: any, options: QueryOptions = {}) => {
-						const fullArgs = isPublic
+						const fullArgs: Record<string, unknown> = isPublic
 							? (args ?? {})
 							: { ...(args ?? {}), backendAccessToken };
+						const cacheKey = createQueryCacheKey(functionPath, fullArgs);
 
 						if (options.subscribe === true) {
 							return Effect.gen(function* () {
@@ -158,12 +196,14 @@ export const service = Effect.gen(function* () {
 							});
 						}
 
-						return callClientMethod(
-							funcType,
-							funcRef,
-							convexClient.client,
-							fullArgs,
-						);
+						if (!queryCacheLookupContexts.has(cacheKey)) {
+							queryCacheLookupContexts.set(cacheKey, {
+								funcRef,
+								args: fullArgs,
+							});
+						}
+
+						return queryCache.get(cacheKey);
 					}) as TransformToFunctions<T>[typeof prop];
 
 					return wrappedFunction;
