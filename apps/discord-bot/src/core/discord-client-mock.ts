@@ -1,11 +1,14 @@
 import {
 	Client,
+	type ForumChannel,
 	GatewayIntentBits,
 	type Guild,
 	type GuildBasedChannel,
 	type Message,
 	MessageType,
+	type NewsChannel,
 	Partials,
+	type TextChannel,
 } from "discord.js";
 import { Context, Effect, Layer } from "effect";
 import {
@@ -161,15 +164,11 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				topic: null,
 				last_message_id: null,
 				default_auto_archive_duration: null,
+				guild_id: guild.id,
 			};
 			// @ts-expect-error - _add is private but we need it for testing
-			const channel = guild.channels._add(channelData);
-			Object.defineProperty(channel, "guild", {
-				value: guild,
-				writable: false,
-				enumerable: true,
-				configurable: true,
-			});
+			const channel = client.channels._add(channelData, guild) as TextChannel;
+			guild.channels.cache.set(channel.id, channel);
 			return channel;
 		};
 
@@ -205,15 +204,11 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				default_thread_rate_limit_per_user: 0,
 				default_sort_order: null,
 				default_forum_layout: 0,
+				guild_id: guild.id,
 			};
 			// @ts-expect-error - _add is private but we need it for testing
-			const channel = guild.channels._add(channelData);
-			Object.defineProperty(channel, "guild", {
-				value: guild,
-				writable: false,
-				enumerable: true,
-				configurable: true,
-			});
+			const channel = client.channels._add(channelData, guild) as ForumChannel;
+			guild.channels.cache.set(channel.id, channel);
 			return channel;
 		};
 
@@ -248,15 +243,11 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				topic: null,
 				last_message_id: null,
 				default_auto_archive_duration: null,
+				guild_id: guild.id,
 			};
 			// @ts-expect-error - _add is private but we need it for testing
-			const channel = guild.channels._add(channelData);
-			Object.defineProperty(channel, "guild", {
-				value: guild,
-				writable: false,
-				enumerable: true,
-				configurable: true,
-			});
+			const channel = client.channels._add(channelData, guild) as NewsChannel;
+			guild.channels.cache.set(channel.id, channel);
 			return channel;
 		};
 
