@@ -14,7 +14,7 @@ import { Spinner } from "@packages/ui/components/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import dayjs from "dayjs";
-import { CreditCard, Sparkles } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
 type Plan =
@@ -114,7 +114,6 @@ function UpgradeButton(props: {
 
 	return (
 		<Button onClick={handleUpgrade} className="gap-2">
-			<Sparkles className="h-4 w-4" />
 			Upgrade to {props.plan === "STARTER" ? "Starter" : "Advanced"}
 		</Button>
 	);
@@ -197,7 +196,8 @@ export function CurrentPlanCard({ serverId }: { serverId: string }) {
 				{!isPaidPlan && (
 					<>
 						<UpgradeButton serverId={serverIdBigInt} plan="STARTER" />
-						<UpgradeButton serverId={serverIdBigInt} plan="ADVANCED" />
+						{/* We will re enable this once subpath is configurable in dashboard */}
+						{/* <UpgradeButton serverId={serverIdBigInt} plan="ADVANCED" /> */}
 					</>
 				)}
 				{(isPaidPlan || hasActiveSubscription) && (

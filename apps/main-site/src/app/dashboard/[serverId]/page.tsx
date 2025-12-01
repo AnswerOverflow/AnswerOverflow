@@ -1,9 +1,8 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { Chart, type ChartData } from "@packages/ui/analytics";
+import { Chart } from "@packages/ui/analytics";
 import { Button } from "@packages/ui/components/button";
-import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import {
 	Card,
 	CardContent,
@@ -11,6 +10,7 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { DateRangePicker } from "@packages/ui/components/date-range-picker";
+import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import { Link } from "@packages/ui/components/link";
 import { Spinner } from "@packages/ui/components/spinner";
 import {
