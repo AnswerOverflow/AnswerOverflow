@@ -19,7 +19,7 @@ const serverPreferencesSchema = v.object({
 const DEFAULT_SERVER_PREFERENCES = {
 	plan: "FREE" as const,
 	readTheRulesConsentEnabled: false,
-	considerAllMessagesPublicEnabled: false,
+	considerAllMessagesPublicEnabled: true,
 	anonymizeMessagesEnabled: false,
 };
 
