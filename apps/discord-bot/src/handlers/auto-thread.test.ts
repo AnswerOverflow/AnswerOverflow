@@ -33,7 +33,6 @@ const setupTestChannel = (
 		yield* database.private.servers.upsertServer({
 			name: guild.name,
 			discordId: BigInt(guild.id),
-			plan: "FREE",
 			approximateMemberCount: 0,
 		});
 		const serverLiveData = yield* database.private.servers.getServerByDiscordId(

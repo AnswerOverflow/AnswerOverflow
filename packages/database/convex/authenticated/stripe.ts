@@ -47,14 +47,20 @@ export const createCheckoutSession = manageGuildAction({
 	handler: async (ctx, args): Promise<CheckoutResult> => {
 		const { discordAccountId, serverId, plan, successUrl, cancelUrl } = args;
 
-		const server = await ctx.runQuery(
+		const serverResult = await ctx.runQuery(
 			internal.stripe.internal.getServerForStripe,
 			{ discordServerId: serverId },
 		);
 
-		if (!server) {
+		if (!serverResult) {
 			throw new Error("Server not found");
 		}
+
+		const server = serverResult as typeof serverResult & {
+			stripeCustomerId?: string;
+			stripeSubscriptionId?: string;
+			plan: string;
+		};
 
 		const ensureStripeCustomer = async (): Promise<string> => {
 			if (server.stripeCustomerId) {
@@ -111,14 +117,18 @@ export const createBillingPortalSession = manageGuildAction({
 	handler: async (ctx, args): Promise<BillingPortalResult> => {
 		const { serverId, returnUrl } = args;
 
-		const server = await ctx.runQuery(
+		const serverResult = await ctx.runQuery(
 			internal.stripe.internal.getServerForStripe,
 			{ discordServerId: serverId },
 		);
 
-		if (!server) {
+		if (!serverResult) {
 			throw new Error("Server not found");
 		}
+
+		const server = serverResult as typeof serverResult & {
+			stripeCustomerId?: string;
+		};
 
 		if (!server.stripeCustomerId) {
 			throw new Error("Server does not have a Stripe customer");
@@ -136,14 +146,19 @@ export const getSubscriptionInfo = manageGuildAction({
 	handler: async (ctx, args): Promise<SubscriptionInfoResult> => {
 		const { serverId } = args;
 
-		const server = await ctx.runQuery(
+		const serverResult = await ctx.runQuery(
 			internal.stripe.internal.getServerForStripe,
 			{ discordServerId: serverId },
 		);
 
-		if (!server) {
+		if (!serverResult) {
 			throw new Error("Server not found");
 		}
+
+		const server = serverResult as typeof serverResult & {
+			stripeCustomerId?: string;
+			stripeSubscriptionId?: string;
+		};
 
 		if (!server.stripeSubscriptionId) {
 			return {

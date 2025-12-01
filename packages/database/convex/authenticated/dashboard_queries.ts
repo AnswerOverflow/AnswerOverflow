@@ -66,7 +66,7 @@ export const getDashboardData = guildManagerQuery({
 				discordId: server.discordId,
 				name: server.name,
 				icon: server.icon ?? null,
-				plan: server.plan,
+				plan: preferences?.plan ?? "FREE",
 				customDomain: preferences?.customDomain ?? null,
 				preferences: {
 					readTheRulesConsentEnabled:

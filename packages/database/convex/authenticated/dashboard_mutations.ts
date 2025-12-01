@@ -35,10 +35,9 @@ export const updateServerPreferencesFlags = guildManagerMutation({
 		if (!preferences) {
 			const preferencesId = await ctx.db.insert("serverPreferences", {
 				serverId: args.serverId,
+				plan: "FREE",
 				...args.flags,
 			});
-
-			await ctx.db.patch(server._id, { preferencesId });
 
 			try {
 				preferences =
@@ -176,9 +175,9 @@ export const updateCustomDomain = guildManagerMutation({
 		if (!preferences) {
 			const preferencesId = await ctx.db.insert("serverPreferences", {
 				serverId: args.serverId,
+				plan: "FREE",
 				customDomain: args.customDomain ?? undefined,
 			});
-			await ctx.db.patch(server._id, { preferencesId });
 			preferences = await ctx.db.get(preferencesId);
 		} else {
 			await ctx.db.patch(preferences._id, {

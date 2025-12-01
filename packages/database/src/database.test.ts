@@ -17,7 +17,6 @@ describe("Database query caching", () => {
 					discordId: testDiscordId,
 					name: "Test Server",
 					approximateMemberCount: 100,
-					plan: "FREE",
 				});
 
 				database.metrics.resetQueryMetrics();
@@ -77,14 +76,12 @@ describe("Database query caching", () => {
 				discordId: testDiscordId1,
 				name: "Server One",
 				approximateMemberCount: 50,
-				plan: "FREE",
 			});
 
 			yield* database.private.servers.upsertServer({
 				discordId: testDiscordId2,
 				name: "Server Two",
 				approximateMemberCount: 75,
-				plan: "FREE",
 			});
 
 			database.metrics.resetQueryMetrics();
@@ -171,7 +168,6 @@ describe("Database query caching", () => {
 				discordId: testDiscordId,
 				name: "Cached Server",
 				approximateMemberCount: 200,
-				plan: "FREE",
 			});
 
 			database.metrics.resetQueryMetrics();
@@ -212,7 +208,6 @@ describe("Database query caching", () => {
 				discordId: testDiscordId,
 				name: "Concurrent Server",
 				approximateMemberCount: 100,
-				plan: "FREE",
 			});
 
 			database.metrics.resetQueryMetrics();
