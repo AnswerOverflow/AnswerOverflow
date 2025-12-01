@@ -11,7 +11,7 @@
 		"clean": "rm -rf node_modules"
 	},
 	"dependencies": {
-		"@tsconfig/node20": "20.1.4",
+		"@tsconfig/node20": "20.1.8",
 		"lorem-ipsum": "^2.0.8"
 	},
 	"devDependencies": {

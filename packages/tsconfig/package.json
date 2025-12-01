@@ -6,7 +6,7 @@
 		"clean": "rm -rf node_modules"
 	},
 	"dependencies": {
-		"@tsconfig/node20": "20.1.4"
+		"@tsconfig/node20": "20.1.8"
 	},
 	"files": ["base.json", "nextjs.json", "react-library.json"]
 }
