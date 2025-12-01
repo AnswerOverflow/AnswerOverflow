@@ -354,57 +354,48 @@ export function MessagePage(props: { data: MessagePageData }) {
 		return `https://${hostname}/m/${(data.thread?.id ?? firstMessage.message.id).toString()}`;
 	};
 
+	const jsonLdData = {
+		"@context": "https://schema.org",
+		"@type": "DiscussionForumPosting",
+		url: getSchemaUrl(),
+		author: firstMessage.author
+			? {
+					"@type": "Person",
+					name: firstMessage.author.name,
+					identifier: firstMessage.author.id.toString(),
+					url: `/u/${firstMessage.author.id.toString()}`,
+				}
+			: undefined,
+		image: firstMessageMedia?.url ? firstMessageMedia.url : undefined,
+		headline: title,
+		articleBody: firstMessage.message.content,
+		datePublished: getDate(firstMessage.message.id).toISOString(),
+		dateModified: data.thread?.archivedTimestamp
+			? new Date(Number(data.thread.archivedTimestamp)).toISOString()
+			: undefined,
+		identifier: (data.thread?.id ?? firstMessage.message.id).toString(),
+		commentCount: messagesToDisplay.length,
+		comment: messagesToDisplay.map((message, index) => ({
+			"@type": message.message.id === solutionMessageId ? "Answer" : "Comment",
+			text: message.message.content,
+			identifier: message.message.id.toString(),
+			datePublished: getDate(message.message.id).toISOString(),
+			position: index + 1,
+			author: message.author
+				? {
+						"@type": "Person",
+						name: message.author.name,
+						identifier: message.author.id.toString(),
+						url: `/u/${message.author.id.toString()}`,
+					}
+				: undefined,
+		})),
+	};
+
 	return (
 		<MessageResultPageProvider>
 			<div className="mx-auto pt-2">
-				<script
-					type="application/ld+json"
-					// biome-ignore lint/security/noDangerouslySetInnerHtml: is fine
-					dangerouslySetInnerHTML={{
-						__html: JSON.stringify({
-							"@context": "https://schema.org",
-							"@type": "DiscussionForumPosting",
-							url: getSchemaUrl(),
-							author: firstMessage.author
-								? {
-										"@type": "Person",
-										name: firstMessage.author.name,
-										identifier: firstMessage.author.id.toString(),
-										url: `/u/${firstMessage.author.id.toString()}`,
-									}
-								: undefined,
-							image: firstMessageMedia?.url ? firstMessageMedia.url : undefined,
-							headline: title,
-							articleBody: firstMessage.message.content,
-							datePublished: getDate(firstMessage.message.id).toISOString(),
-							dateModified: data.thread?.archivedTimestamp
-								? new Date(Number(data.thread.archivedTimestamp)).toISOString()
-								: undefined,
-							identifier: (
-								data.thread?.id ?? firstMessage.message.id
-							).toString(),
-							commentCount: messagesToDisplay.length,
-							comment: messagesToDisplay.map((message, index) => ({
-								"@type":
-									message.message.id === solutionMessageId
-										? "Answer"
-										: "Comment",
-								text: message.message.content,
-								identifier: message.message.id.toString(),
-								datePublished: getDate(message.message.id).toISOString(),
-								position: index + 1,
-								author: message.author
-									? {
-											"@type": "Person",
-											name: message.author.name,
-											identifier: message.author.id.toString(),
-											url: `/u/${message.author.id.toString()}`,
-										}
-									: undefined,
-							})),
-						}),
-					}}
-				/>
+				<script type="application/ld+json">{JSON.stringify(jsonLdData)}</script>
 
 				<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
 					<Main />
