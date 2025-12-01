@@ -5,8 +5,21 @@ import type {
 	FunctionReference,
 	FunctionReturnType,
 } from "convex/server";
+import { getFunctionName } from "convex/server";
+import type { Value } from "convex/values";
+import { convexToJson } from "convex/values";
 
-import { Context, Effect, Layer } from "effect";
+import {
+	Cache,
+	Config,
+	Context,
+	Duration,
+	Effect,
+	HashMap,
+	Layer,
+	Option,
+	Ref,
+} from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Emoji, Message } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
@@ -71,6 +84,16 @@ function buildFunctionPath(
 	return `${namespacePath.join(".")}.${functionName}`;
 }
 
+export function createQueryCacheKey(
+	functionPath: string,
+	args: Record<string, unknown>,
+): string {
+	return JSON.stringify({
+		args: convexToJson(args as unknown as Value),
+		functionPath,
+	});
+}
+
 function callClientMethod(
 	funcType: "query" | "mutation" | "action",
 	funcRef: FunctionReference<any, any>,
@@ -100,6 +123,77 @@ export const service = Effect.gen(function* () {
 		api,
 		internal,
 	});
+
+	type QueryMetricsState = {
+		hits: HashMap.HashMap<string, number>;
+		misses: HashMap.HashMap<string, number>;
+	};
+
+	const metricsRef = yield* Ref.make<QueryMetricsState>({
+		hits: HashMap.empty(),
+		misses: HashMap.empty(),
+	});
+
+	const incrementCacheHit = (cacheKey: string) =>
+		Ref.update(metricsRef, (state) => ({
+			...state,
+			hits: HashMap.set(
+				state.hits,
+				cacheKey,
+				Option.getOrElse(HashMap.get(state.hits, cacheKey), () => 0) + 1,
+			),
+		}));
+
+	const incrementCacheMiss = (cacheKey: string) =>
+		Ref.update(metricsRef, (state) => ({
+			...state,
+			misses: HashMap.set(
+				state.misses,
+				cacheKey,
+				Option.getOrElse(HashMap.get(state.misses, cacheKey), () => 0) + 1,
+			),
+		}));
+
+	const lookupContexts = new Map<
+		string,
+		{ funcRef: FunctionReference<any, any>; args: Record<string, unknown> }
+	>();
+
+	const queryCache = yield* Cache.make({
+		capacity: 500,
+		timeToLive: Duration.minutes(5),
+		lookup: (cacheKey: string) =>
+			Effect.gen(function* () {
+				const context = lookupContexts.get(cacheKey);
+				if (!context) {
+					throw new Error(`Lookup context not found for key: ${cacheKey}`);
+				}
+				yield* incrementCacheMiss(cacheKey);
+				return yield* callClientMethod(
+					"query",
+					context.funcRef,
+					convexClient.client,
+					context.args,
+				);
+			}),
+	});
+
+	const getCachedOrFetch = (
+		cacheKey: string,
+		funcRef: FunctionReference<any, any>,
+		args: Record<string, unknown>,
+	): Effect.Effect<unknown, ConvexError> => {
+		lookupContexts.set(cacheKey, { funcRef, args });
+
+		return Effect.gen(function* () {
+			const isCached = yield* queryCache.contains(cacheKey);
+			const result = yield* queryCache.get(cacheKey);
+			if (isCached) {
+				yield* incrementCacheHit(cacheKey);
+			}
+			return result;
+		});
+	};
 
 	const createProxy = <T extends Record<string, any>>(
 		target: T,
@@ -143,9 +237,13 @@ export const service = Effect.gen(function* () {
 
 				if (funcType === "query") {
 					const wrappedFunction = ((args?: any, options: QueryOptions = {}) => {
-						const fullArgs = isPublic
+						const fullArgs: Record<string, unknown> = isPublic
 							? (args ?? {})
 							: { ...(args ?? {}), backendAccessToken };
+						const cacheKey = createQueryCacheKey(
+							getFunctionName(funcRef),
+							fullArgs,
+						);
 
 						if (options.subscribe === true) {
 							return Effect.gen(function* () {
@@ -158,12 +256,7 @@ export const service = Effect.gen(function* () {
 							});
 						}
 
-						return callClientMethod(
-							funcType,
-							funcRef,
-							convexClient.client,
-							fullArgs,
-						);
+						return getCachedOrFetch(cacheKey, funcRef, fullArgs);
 					}) as TransformToFunctions<T>[typeof prop];
 
 					return wrappedFunction;
@@ -196,13 +289,49 @@ export const service = Effect.gen(function* () {
 	const publicProxy = createProxy(api.public, [], false);
 	const authenticatedProxy = createProxy(api.authenticated, [], false);
 
-	const result = {
+	const getQueryMetricsByKey = (cacheKey: string) => {
+		const state = Ref.get(metricsRef).pipe(Effect.runSync);
+		return {
+			hits: Option.getOrElse(HashMap.get(state.hits, cacheKey), () => 0),
+			misses: Option.getOrElse(HashMap.get(state.misses, cacheKey), () => 0),
+		};
+	};
+
+	const getQueryMetrics = <Query extends FunctionReference<"query", any>>(
+		query: Query,
+		args: Omit<FunctionArgs<Query>, "backendAccessToken">,
+	) => {
+		const functionName = getFunctionName(query);
+		const fullArgs = { ...args, backendAccessToken };
+		const cacheKey = createQueryCacheKey(functionName, fullArgs);
+		return getQueryMetricsByKey(cacheKey);
+	};
+
+	const getAllQueryMetrics = () => {
+		const state = Ref.get(metricsRef).pipe(Effect.runSync);
+		return {
+			hits: new Map(HashMap.toEntries(state.hits)),
+			misses: new Map(HashMap.toEntries(state.misses)),
+		};
+	};
+
+	const resetQueryMetrics = () => {
+		Ref.set(metricsRef, {
+			hits: HashMap.empty(),
+			misses: HashMap.empty(),
+		}).pipe(Effect.runSync);
+	};
+
+	return {
 		public: publicProxy,
 		authenticated: authenticatedProxy,
 		private: privateProxy,
+		metrics: {
+			getQueryMetrics,
+			getAllQueryMetrics,
+			resetQueryMetrics,
+		},
 	};
-
-	return result;
 });
 export class Database extends Context.Tag("Database")<
 	Database,
