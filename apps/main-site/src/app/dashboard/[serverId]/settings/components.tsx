@@ -14,8 +14,8 @@ import { Spinner } from "@packages/ui/components/spinner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import dayjs from "dayjs";
-import { CreditCard, CheckCircle } from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { CheckCircle, CreditCard } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
 type Plan =
