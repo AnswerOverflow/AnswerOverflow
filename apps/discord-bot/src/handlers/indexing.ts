@@ -241,17 +241,8 @@ function storeMessages(
 						`Updating lastIndexedSnowflake for channel ${channelId}: ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt}`,
 					);
 
-					yield* database.private.channels.updateChannel({
-						id: BigInt(channelId),
-						channel: {
-							id: currentChannel.id,
-							serverId: currentChannel.serverId,
-							name: currentChannel.name,
-							type: currentChannel.type,
-							parentId: currentChannel.parentId,
-							inviteCode: currentChannel.inviteCode,
-							archivedTimestamp: currentChannel.archivedTimestamp,
-						},
+					yield* database.private.channels.updateChannelSettings({
+						channelId: BigInt(channelId),
 						settings: {
 							lastIndexedSnowflake: newLastIndexedBigInt,
 						},
@@ -474,17 +465,8 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 						`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt} (latest thread: ${latestThread.name})`,
 					);
 
-					yield* database.private.channels.updateChannel({
-						id: BigInt(channel.id),
-						channel: {
-							id: currentChannel.id,
-							serverId: currentChannel.serverId,
-							name: currentChannel.name,
-							type: currentChannel.type,
-							parentId: currentChannel.parentId,
-							inviteCode: currentChannel.inviteCode,
-							archivedTimestamp: currentChannel.archivedTimestamp,
-						},
+					yield* database.private.channels.updateChannelSettings({
+						channelId: BigInt(channel.id),
 						settings: {
 							lastIndexedSnowflake: newLastIndexedBigInt,
 						},

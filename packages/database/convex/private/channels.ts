@@ -114,7 +114,6 @@ export const updateChannel = privateMutation({
 	args: {
 		id: v.int64(),
 		channel: v.optional(channelSchema.partial()),
-		settings: v.optional(channelSettingsSchema.partial()),
 	},
 	handler: async (ctx, args) => {
 		const existing = await getOneFrom(
@@ -135,24 +134,6 @@ export const updateChannel = privateMutation({
 			_id: existing._id,
 			_creationTime: existing._creationTime,
 		});
-
-		if (args.settings) {
-			const existingSettings = await getOneFrom(
-				ctx.db,
-				"channelSettings",
-				"by_channelId",
-				args.id,
-			);
-
-			if (existingSettings) {
-				await ctx.db.patch(existingSettings._id, args.settings);
-			} else {
-				await ctx.db.insert("channelSettings", {
-					...DEFAULT_CHANNEL_SETTINGS,
-					...args.settings,
-				});
-			}
-		}
 
 		return args.id;
 	},
@@ -310,7 +291,7 @@ export const upsertChannelWithSettings = privateMutation({
 export const updateChannelSettings = privateMutation({
 	args: {
 		channelId: v.int64(),
-		settings: channelSettingsSchema,
+		settings: channelSettingsSchema.partial(),
 	},
 	handler: async (ctx, args) => {
 		const existingSettings = await getOneFrom(
@@ -321,9 +302,17 @@ export const updateChannelSettings = privateMutation({
 		);
 
 		if (existingSettings) {
-			await ctx.db.patch(existingSettings._id, args.settings);
+			await ctx.db.patch(existingSettings._id, {
+				...existingSettings,
+				...args.settings,
+				channelId: args.channelId,
+			});
 		} else {
-			await ctx.db.insert("channelSettings", args.settings);
+			await ctx.db.insert("channelSettings", {
+				...DEFAULT_CHANNEL_SETTINGS,
+				...args.settings,
+				channelId: args.channelId,
+			});
 		}
 
 		return args.channelId;
