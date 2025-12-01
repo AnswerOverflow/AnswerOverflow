@@ -31,17 +31,19 @@ export function syncGuild(guild: Guild) {
 
 		yield* Console.log(`Syncing server ${guild.id} ${guild.name}`);
 
-		const existing = yield* database.private.servers.getServerByDiscordId({
-			discordId: BigInt(guild.id),
-		});
-
 		const aoServerData = toAOServer(guild);
-		yield* database.private.servers.upsertServer(aoServerData);
+		const { isNew } =
+			yield* database.private.servers.upsertServer(aoServerData);
 
-		if (!existing) {
+		if (isNew) {
 			yield* registerServerGroup(guild, guild.id).pipe(
 				Effect.catchAll(() => Effect.void),
 			);
+
+			yield* database.private.server_preferences.updateServerPreferences({
+				serverId: BigInt(guild.id),
+				preferences: {},
+			});
 		}
 
 		const preferencesLiveData =

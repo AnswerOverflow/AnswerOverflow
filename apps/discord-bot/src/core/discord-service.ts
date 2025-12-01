@@ -238,6 +238,9 @@ export const createDiscordService = Effect.gen(function* () {
 			if (!channel) {
 				return null;
 			}
+			if (!c.user) {
+				return null;
+			}
 			const botMember = guild.members.me;
 			if (!botMember) {
 				return null;

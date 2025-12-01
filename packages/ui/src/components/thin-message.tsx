@@ -20,7 +20,7 @@ export function ThinMessage(props: {
 
 	return (
 		<MessageBlurrer message={message}>
-			<div className="flex flex-row">
+			<div className="flex flex-row min-w-0">
 				<div className="mb-8 w-[40px] flex-shrink-0">
 					{author ? (
 						<Avatar className="h-10 w-10">
@@ -44,7 +44,7 @@ export function ThinMessage(props: {
 					)}
 					<div className={cn("mx-auto h-full w-0 rounded-full border-1")} />
 				</div>
-				<div className="flex flex-col pl-2 pt-2">
+				<div className="flex flex-col pl-2 pt-2 min-w-0 flex-1">
 					<div className="flex flex-row items-center gap-2 text-muted-foreground">
 						{author ? (
 							<Link

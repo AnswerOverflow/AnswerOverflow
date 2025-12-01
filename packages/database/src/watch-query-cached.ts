@@ -5,6 +5,8 @@ import type {
 	OptionalRestArgs,
 } from "convex/server";
 import { getFunctionName } from "convex/server";
+import type { Value } from "convex/values";
+import { convexToJson } from "convex/values";
 import { Cache, Duration, Effect } from "effect";
 import type { WrappedUnifiedClient } from "./convex-unified-client";
 import { LiveData } from "./live-data";
@@ -18,7 +20,10 @@ const createCacheKey = <Query extends FunctionReference<"query">>(
 	args: FunctionArgs<Query>,
 ): string => {
 	const functionName = getFunctionName(query);
-	return JSON.stringify({ functionName, args });
+	return JSON.stringify({
+		functionName,
+		args: convexToJson(args as unknown as Value),
+	});
 };
 
 type CachedWatch<Query extends FunctionReference<"query">> = {

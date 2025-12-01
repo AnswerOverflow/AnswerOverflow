@@ -20,15 +20,17 @@ export const upsertServer = privateMutation({
 			args.discordId,
 		);
 		if (existing) {
-			return await ctx.db.patch(existing._id, {
+			await ctx.db.patch(existing._id, {
 				...args,
 				kickedTime: undefined,
 			});
+			return { isNew: false };
 		}
-		return await ctx.db.insert("servers", {
+		await ctx.db.insert("servers", {
 			...args,
 			kickedTime: undefined,
 		});
+		return { isNew: true };
 	},
 });
 

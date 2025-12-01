@@ -15,6 +15,7 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 - load all messages for a message page
 - SEO friendly infinite scroll
 - Non jank page naivigation
+- Message pages can return the 'id' or whatever and check if it matches and if doesnt then rediret this saves us one nextwork hop
 
 
 
