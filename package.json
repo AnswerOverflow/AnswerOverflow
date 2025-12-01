@@ -30,7 +30,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.3",
-		"@cloudflare/workers-types": "4.20240924.0",
+		"@cloudflare/workers-types": "4.20251128.0",
 		"dotenv": "^16.4.5"
 	},
 	"overrides": {
