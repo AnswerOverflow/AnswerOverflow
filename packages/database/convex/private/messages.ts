@@ -410,6 +410,7 @@ export const getMessagePageData = privateQuery({
 		);
 
 		return {
+			canonicalId: threadId ?? targetMessage.id,
 			messages: enrichedMessages,
 			server: {
 				_id: server._id,
