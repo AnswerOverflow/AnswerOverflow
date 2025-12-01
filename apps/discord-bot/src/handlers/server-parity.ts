@@ -117,9 +117,17 @@ export function syncGuild(guild: Guild) {
 				};
 			});
 
-			yield* database.private.channels.upsertManyChannels({
-				channels: channelsToUpsert,
-			});
+			yield* Effect.forEach(
+				channelsToUpsert,
+				(channel) =>
+					Effect.gen(function* () {
+						yield* database.private.channels.upsertChannel({
+							channel: channel.create,
+						});
+					}),
+				{ concurrency: 10 },
+			);
+
 			yield* Console.log(
 				`Maintained parity for ${rootChannels.length} channels for server ${guild.name}`,
 			);

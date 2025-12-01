@@ -89,6 +89,7 @@ export const channelSettingsSchema = v.object({
 	forumGuidelinesConsentEnabled: v.boolean(),
 	solutionTagId: v.optional(v.int64()),
 	lastIndexedSnowflake: v.optional(v.int64()),
+	botPermissions: v.optional(v.union(v.string(), v.number())),
 });
 
 const embedFooterSchema = v.object({
