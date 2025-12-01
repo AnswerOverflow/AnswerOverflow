@@ -23,6 +23,7 @@ import {
 	Schedule,
 } from "effect";
 import { Discord } from "../core/discord-service";
+import { syncChannel } from "../sync/channel";
 import { uploadAttachmentsInBatches } from "../utils/attachment-upload";
 import {
 	toAODiscordAccount,
@@ -30,7 +31,6 @@ import {
 	toUpsertMessageArgs,
 } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
-import { syncChannel } from "../sync/channel";
 
 const INDEXING_CONFIG = {
 	scheduleInterval: Duration.hours(6),

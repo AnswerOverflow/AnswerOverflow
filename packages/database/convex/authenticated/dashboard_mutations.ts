@@ -212,7 +212,7 @@ export const updateChannelSolutionTag = guildManagerMutation({
 			}
 		}
 
-		let settings = await getOneFrom(
+		const settings = await getOneFrom(
 			ctx.db,
 			"channelSettings",
 			"by_channelId",

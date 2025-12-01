@@ -3,8 +3,8 @@ import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toAOMessage, toUpsertMessageArgs } from "../utils/conversions";
 import { makeMarkSolutionResponse } from "../services/mark-solution";
+import { toAOMessage, toUpsertMessageArgs } from "../utils/conversions";
 
 export function handleMarkSolutionCommand(
 	interaction: ContextMenuCommandInteraction,
