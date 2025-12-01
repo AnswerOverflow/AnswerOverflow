@@ -17,6 +17,16 @@ export const handleStripeWebhook = internalAction({
 	handler: async (ctx, args) => {
 		const event = verifyWebhookSignature(args.payload, args.signature);
 
+		const handledEvents = [
+			"customer.subscription.created",
+			"customer.subscription.updated",
+			"customer.subscription.deleted",
+		] as const;
+
+		if (!handledEvents.includes(event.type as (typeof handledEvents)[number])) {
+			return { success: true };
+		}
+
 		const subscription = event.data.object as Stripe.Subscription;
 		const customerId =
 			typeof subscription.customer === "string"
