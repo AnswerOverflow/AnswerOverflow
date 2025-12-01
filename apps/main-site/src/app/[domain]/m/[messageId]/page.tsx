@@ -2,8 +2,8 @@ import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { runtime } from "../../../../lib/runtime";
 import { MessagePage } from "../../../../components/message-page";
+import { runtime } from "../../../../lib/runtime";
 
 type Props = {
 	params: Promise<{ domain: string; messageId: string }>;

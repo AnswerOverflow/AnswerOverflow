@@ -149,15 +149,6 @@ export const createDiscordService = Effect.gen(function* () {
 			return channel ?? null;
 		});
 
-	const getChannels = (guildId: string) =>
-		Effect.gen(function* () {
-			const guild = yield* getGuild(guildId);
-			if (!guild) {
-				return [];
-			}
-			return Arr.fromIterable(guild.channels.cache.values());
-		});
-
 	const fetchChannelMessages = (
 		channelId: string,
 		options: { limit: number; after?: string },
@@ -262,7 +253,6 @@ export const createDiscordService = Effect.gen(function* () {
 		getGuild,
 		getGuilds,
 		getChannel,
-		getChannels,
 		fetchChannelMessages,
 		fetchActiveThreads,
 		fetchArchivedThreads,

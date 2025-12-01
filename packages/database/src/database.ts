@@ -11,7 +11,6 @@ import { convexToJson } from "convex/values";
 
 import {
 	Cache,
-	Config,
 	Context,
 	Duration,
 	Effect,

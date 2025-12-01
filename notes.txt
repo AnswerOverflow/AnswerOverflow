@@ -58,14 +58,14 @@ Main Site:
     - [X] /u/:userId/comments
 
 Tenant Site:
-    - [ ] /:domain
-    - [ ] /:domain/m/:messageId
-    - [ ] /:domain/search
+    - [X] /:domain
+    - [X] /:domain/m/:messageId
+    - [X] /:domain/search
     - [ ] /:domain/u/:userId
     - [ ] /:domain/u/:userId/comments
-    - [ ] /:domain/c/:channelId
-    - [ ] /:domain/og/post?id
-    - [ ] /:domain/robots.txt
+    - [X] /:domain/c/:channelId
+    - [X] /:domain/og/post?id
+    - [X] /:domain/robots.txt
     
 
 ## Dashboard Features:

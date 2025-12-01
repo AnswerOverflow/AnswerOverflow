@@ -115,7 +115,7 @@ function ChooseSolvedTagCard({
 }) {
 	const tags = channel.availableTags ?? [];
 	const currentTag = tags.find((t) => t.id === channel.solutionTagId);
-	const currentTagInvalid = channel.solutionTagId && !currentTag ? true : false;
+	const currentTagInvalid = !!(channel.solutionTagId && !currentTag);
 
 	return (
 		<Card>
