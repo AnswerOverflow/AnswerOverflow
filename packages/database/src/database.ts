@@ -8,7 +8,19 @@ import type {
 import type { Value } from "convex/values";
 import { convexToJson } from "convex/values";
 
-import { Config, Context, Effect, Equal, Hash, Layer } from "effect";
+import {
+	Cache,
+	Config,
+	Context,
+	Duration,
+	Effect,
+	Equal,
+	Hash,
+	HashMap,
+	Layer,
+	Option,
+	Ref,
+} from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Emoji, Message } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
@@ -113,21 +125,35 @@ export const service = Effect.gen(function* () {
 		internal,
 	});
 
-	const queryMetrics = {
-		hits: new Map<string, number>(),
-		misses: new Map<string, number>(),
+	type QueryMetricsState = {
+		hits: HashMap.HashMap<string, number>;
+		misses: HashMap.HashMap<string, number>;
 	};
 
-	const incrementCacheHit = (cacheKey: string) => {
-		queryMetrics.hits.set(cacheKey, (queryMetrics.hits.get(cacheKey) ?? 0) + 1);
-	};
+	const metricsRef = yield* Ref.make<QueryMetricsState>({
+		hits: HashMap.empty(),
+		misses: HashMap.empty(),
+	});
 
-	const incrementCacheMiss = (cacheKey: string) => {
-		queryMetrics.misses.set(
-			cacheKey,
-			(queryMetrics.misses.get(cacheKey) ?? 0) + 1,
-		);
-	};
+	const incrementCacheHit = (cacheKey: string) =>
+		Ref.update(metricsRef, (state) => ({
+			...state,
+			hits: HashMap.set(
+				state.hits,
+				cacheKey,
+				Option.getOrElse(HashMap.get(state.hits, cacheKey), () => 0) + 1,
+			),
+		}));
+
+	const incrementCacheMiss = (cacheKey: string) =>
+		Ref.update(metricsRef, (state) => ({
+			...state,
+			misses: HashMap.set(
+				state.misses,
+				cacheKey,
+				Option.getOrElse(HashMap.get(state.misses, cacheKey), () => 0) + 1,
+			),
+		}));
 
 	class QueryCacheKey {
 		constructor(
@@ -145,23 +171,20 @@ export const service = Effect.gen(function* () {
 		}
 	}
 
-	const completedQueries = new Set<string>();
-
-	const cachedQuery = Effect.runSync(
-		Effect.cachedFunction((key: QueryCacheKey) =>
+	const queryCache = yield* Cache.make({
+		capacity: 500,
+		timeToLive: Duration.minutes(5),
+		lookup: (key: QueryCacheKey) =>
 			Effect.gen(function* () {
-				incrementCacheMiss(key.cacheKey);
-				const result = yield* callClientMethod(
+				yield* incrementCacheMiss(key.cacheKey);
+				return yield* callClientMethod(
 					"query",
 					key.funcRef,
 					convexClient.client,
 					key.args,
 				);
-				completedQueries.add(key.cacheKey);
-				return result;
 			}),
-		),
-	);
+	});
 
 	const getCachedOrFetch = (
 		cacheKey: string,
@@ -169,12 +192,12 @@ export const service = Effect.gen(function* () {
 		args: Record<string, unknown>,
 	): Effect.Effect<unknown, ConvexError> => {
 		const key = new QueryCacheKey(cacheKey, funcRef, args);
-		const wasCompleted = completedQueries.has(cacheKey);
 
 		return Effect.gen(function* () {
-			const result = yield* cachedQuery(key);
-			if (wasCompleted) {
-				incrementCacheHit(cacheKey);
+			const isCached = yield* queryCache.contains(key);
+			const result = yield* queryCache.get(key);
+			if (isCached) {
+				yield* incrementCacheHit(cacheKey);
 			}
 			return result;
 		});
@@ -271,19 +294,27 @@ export const service = Effect.gen(function* () {
 	const publicProxy = createProxy(api.public, [], false);
 	const authenticatedProxy = createProxy(api.authenticated, [], false);
 
-	const getQueryMetrics = (cacheKey: string) => ({
-		hits: queryMetrics.hits.get(cacheKey) ?? 0,
-		misses: queryMetrics.misses.get(cacheKey) ?? 0,
-	});
+	const getQueryMetrics = (cacheKey: string) => {
+		const state = Ref.get(metricsRef).pipe(Effect.runSync);
+		return {
+			hits: Option.getOrElse(HashMap.get(state.hits, cacheKey), () => 0),
+			misses: Option.getOrElse(HashMap.get(state.misses, cacheKey), () => 0),
+		};
+	};
 
-	const getAllQueryMetrics = () => ({
-		hits: new Map(queryMetrics.hits),
-		misses: new Map(queryMetrics.misses),
-	});
+	const getAllQueryMetrics = () => {
+		const state = Ref.get(metricsRef).pipe(Effect.runSync);
+		return {
+			hits: new Map(HashMap.toEntries(state.hits)),
+			misses: new Map(HashMap.toEntries(state.misses)),
+		};
+	};
 
 	const resetQueryMetrics = () => {
-		queryMetrics.hits.clear();
-		queryMetrics.misses.clear();
+		Ref.set(metricsRef, {
+			hits: HashMap.empty(),
+			misses: HashMap.empty(),
+		}).pipe(Effect.runSync);
 	};
 
 	return {

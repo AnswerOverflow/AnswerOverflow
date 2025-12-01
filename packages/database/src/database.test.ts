@@ -220,7 +220,7 @@ describe("Database query caching", () => {
 
 			const metrics = database.metrics.getQueryMetrics(cacheKey);
 			expect(metrics.misses).toBe(1);
-			expect(metrics.hits).toBe(0);
+			expect(metrics.hits).toBe(1);
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 	);
 });
