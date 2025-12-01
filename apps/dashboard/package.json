@@ -26,7 +26,7 @@
 		"@opentelemetry/exporter-trace-otlp-http": "^0.52.0",
 		"@opentelemetry/sdk-trace-node": "^1.25.0",
 		"@tailwindcss/typography": "^0.5.10",
-		"@trpc/server": "^10.45.2",
+		"@trpc/server": "^11.7.2",
 		"@typelytics/tremor": "^0.1.6",
 		"@vercel/otel": "^1.8.3",
 		"discord-api-types": "^0.37.101",

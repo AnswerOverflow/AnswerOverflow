@@ -23,7 +23,7 @@
 		"@answeroverflow/utils": "workspace:*",
 		"@sapphire/bitfield": "^1.2.0",
 		"@trpc/client": "^10.45.2",
-		"@trpc/server": "^10.45.2",
+		"@trpc/server": "^11.7.2",
 		"@types/qs": "^6.9.7",
 		"dayjs": "^1.11.9",
 		"discord-api-types": "^0.37.67",

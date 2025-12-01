@@ -38,7 +38,7 @@
 		"@tanstack/react-query-persist-client": "^5.28.9",
 		"@trpc/client": "^10.45.2",
 		"@trpc/react-query": "^10.45.2",
-		"@trpc/server": "^10.45.2",
+		"@trpc/server": "^11.7.2",
 		"@types/memoizee": "^0.4.9",
 		"@types/ramda": "^0.29.6",
 		"@vercel/speed-insights": "^1.0.10",
