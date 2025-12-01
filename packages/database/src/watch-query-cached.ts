@@ -43,7 +43,7 @@ export const createWatchQueryToLiveData = <
 	const cache = Effect.gen(function* () {
 		return yield* Cache.make({
 			capacity: 100,
-			timeToLive: Duration.hours(1),
+			timeToLive: Duration.minutes(5),
 			lookup: (cacheKey: string) =>
 				Effect.gen(function* () {
 					const context = lookupContexts.get(cacheKey);
