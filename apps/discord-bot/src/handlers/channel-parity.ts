@@ -30,8 +30,6 @@ export function syncChannel(
 			id: BigInt(channel.id),
 			channel: {
 				...discordChannelData,
-			},
-			settings: {
 				botPermissions: botPermissions ?? undefined,
 			},
 		});
@@ -69,7 +67,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					channel.guild.id,
 				);
 				yield* database.private.channels.upsertChannelWithSettings({
-					channel: aoChannel,
+					channel: {
+						...aoChannel,
+						botPermissions: botPermissions ?? undefined,
+					},
 					settings: {
 						channelId: BigInt(channel.id),
 						indexingEnabled: false,
@@ -77,7 +78,6 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 						sendMarkSolutionInstructionsInNewThreads: false,
 						autoThreadEnabled: false,
 						forumGuidelinesConsentEnabled: false,
-						botPermissions: botPermissions ?? undefined,
 					},
 				});
 			}).pipe(

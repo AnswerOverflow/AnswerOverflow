@@ -27,6 +27,8 @@ const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
 	sendMarkSolutionInstructionsInNewThreads: false,
 	autoThreadEnabled: false,
 	forumGuidelinesConsentEnabled: false,
+	solutionTagId: undefined,
+	lastIndexedSnowflake: undefined,
 };
 
 async function addSettingsToChannels(

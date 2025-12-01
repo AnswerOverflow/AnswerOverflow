@@ -27,13 +27,13 @@ type ChannelWithSettings = {
 	type: number;
 	serverId: string;
 	inviteCode?: string;
-	solutionTagId?: string;
 	flags: {
 		indexingEnabled: boolean;
 		markSolutionEnabled: boolean;
 		sendMarkSolutionInstructionsInNewThreads: boolean;
 		autoThreadEnabled: boolean;
 		forumGuidelinesConsentEnabled: boolean;
+		solutionTagId?: string;
 	};
 };
 
@@ -98,7 +98,7 @@ export function channelWithDiscordInfoToAnalyticsData(args: {
 		"Channel Server Id": args.answerOverflowChannel.serverId,
 		"Channel Invite Code": args.answerOverflowChannel.inviteCode ?? undefined,
 		"Channel Solution Tag Id":
-			args.answerOverflowChannel.solutionTagId ?? undefined,
+			args.answerOverflowChannel.flags.solutionTagId ?? undefined,
 		"Indexing Enabled": args.answerOverflowChannel.flags.indexingEnabled,
 		"Mark Solution Enabled":
 			args.answerOverflowChannel.flags.markSolutionEnabled,

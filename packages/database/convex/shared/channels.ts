@@ -31,6 +31,8 @@ const DEFAULT_CHANNEL_SETTINGS = {
 	sendMarkSolutionInstructionsInNewThreads: false,
 	autoThreadEnabled: false,
 	forumGuidelinesConsentEnabled: false,
+	solutionTagId: undefined,
+	lastIndexedSnowflake: undefined,
 };
 
 export async function getChannelWithSettings(

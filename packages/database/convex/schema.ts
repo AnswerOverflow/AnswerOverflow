@@ -76,9 +76,8 @@ export const channelSchema = v.object({
 	parentId: v.optional(v.int64()),
 	inviteCode: v.optional(v.string()),
 	archivedTimestamp: v.optional(v.number()),
-	solutionTagId: v.optional(v.int64()),
-	lastIndexedSnowflake: v.optional(v.int64()),
 	availableTags: v.optional(v.array(forumTagSchema)),
+	botPermissions: v.optional(v.union(v.string(), v.number())),
 });
 
 export const channelSettingsSchema = v.object({
@@ -88,7 +87,8 @@ export const channelSettingsSchema = v.object({
 	sendMarkSolutionInstructionsInNewThreads: v.boolean(),
 	autoThreadEnabled: v.boolean(),
 	forumGuidelinesConsentEnabled: v.boolean(),
-	botPermissions: v.optional(v.union(v.string(), v.number())),
+	solutionTagId: v.optional(v.int64()),
+	lastIndexedSnowflake: v.optional(v.int64()),
 });
 
 const embedFooterSchema = v.object({

@@ -228,10 +228,30 @@ export const updateChannelSolutionTag = guildManagerMutation({
 			}
 		}
 
-		await ctx.db.patch(channel._id, {
+		let settings = await getOneFrom(
+			ctx.db,
+			"channelSettings",
+			"by_channelId",
+			args.channelId,
+		);
+
+		if (!settings) {
+			const settingsId = await ctx.db.insert("channelSettings", {
+				channelId: args.channelId,
+				indexingEnabled: false,
+				markSolutionEnabled: false,
+				sendMarkSolutionInstructionsInNewThreads: false,
+				autoThreadEnabled: false,
+				forumGuidelinesConsentEnabled: false,
+				solutionTagId: args.solutionTagId ?? undefined,
+			});
+			return settingsId;
+		}
+
+		await ctx.db.patch(settings._id, {
 			solutionTagId: args.solutionTagId ?? undefined,
 		});
 
-		return channel._id;
+		return settings._id;
 	},
 });
