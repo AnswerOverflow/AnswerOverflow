@@ -217,7 +217,7 @@ export const DiscordMarkdown = ({
 	}
 	const parsed = parse(children, "normal");
 	return (
-		<div>
+		<div className="min-w-0 break-words">
 			{renderASTNode(
 				parsed,
 				0,
