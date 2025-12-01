@@ -14,7 +14,7 @@ import { Effect } from "effect";
 import { api, components, internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { authenticatedAction, internalAction } from "../client";
-import { guildManagerAction, guildManagerQuery } from "../client/guildManager";
+import { guildManagerAction } from "../client/guildManager";
 import { getDiscordAccountWithToken } from "../shared/auth";
 import {
 	DISCORD_PERMISSIONS,
@@ -175,21 +175,53 @@ export const getUserServers = authenticatedAction({
 	},
 });
 
-export const getTopQuestionSolversForServer = guildManagerQuery({
+export const getTopQuestionSolversForServer = guildManagerAction({
 	args: {},
-	handler: async (_ctx, args) => {
+	handler: async (ctx, args) => {
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getTopQuestionSolversForServer();
 		});
 
-		return await Effect.runPromise(
+		const analyticsData = await Effect.runPromise(
 			program.pipe(
 				Effect.provide(
 					ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
 				),
 			),
 		);
+
+		if (!analyticsData) return {};
+
+		const userIds = Object.keys(analyticsData).map((id) => BigInt(id));
+
+		const discordAccounts = await ctx.runQuery(
+			api.private.discord_accounts.findManyDiscordAccountsByIds,
+			{
+				ids: userIds,
+				backendAccessToken: getBackendAccessToken(),
+			},
+		);
+
+		const accountMap = new Map(
+			discordAccounts.map((a) => [a.id.toString(), a]),
+		);
+
+		const enrichedData: Record<
+			string,
+			{ aggregated_value: number; name: string; avatar: string | null }
+		> = {};
+
+		for (const [userId, data] of Object.entries(analyticsData)) {
+			const account = accountMap.get(userId);
+			enrichedData[userId] = {
+				aggregated_value: data.aggregated_value,
+				name: account?.name ?? userId,
+				avatar: account?.avatar ?? null,
+			};
+		}
+
+		return enrichedData;
 	},
 });
 
@@ -244,6 +276,50 @@ export const getQuestionsAndAnswers = guildManagerAction({
 		);
 
 		return await Effect.runPromise(program);
+	},
+});
+
+export const getTopPagesForServer = guildManagerAction({
+	args: {},
+	handler: async (ctx, args) => {
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopPages();
+		}).pipe(
+			Effect.provide(
+				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
+			),
+		);
+
+		const analyticsData = await Effect.runPromise(program);
+
+		if (!analyticsData) return {};
+
+		const messageIds = Object.keys(analyticsData).map((id) => BigInt(id));
+
+		const channels = await ctx.runQuery(
+			api.private.channels.findManyChannelsByDiscordIds,
+			{
+				discordIds: messageIds,
+				backendAccessToken: getBackendAccessToken(),
+			},
+		);
+
+		const channelMap = new Map(channels.map((c) => [c.id.toString(), c.name]));
+
+		const enrichedData: Record<
+			string,
+			{ aggregated_value: number; name: string }
+		> = {};
+
+		for (const [messageId, data] of Object.entries(analyticsData)) {
+			enrichedData[messageId] = {
+				aggregated_value: data.aggregated_value,
+				name: channelMap.get(messageId) ?? messageId,
+			};
+		}
+
+		return enrichedData;
 	},
 });
 

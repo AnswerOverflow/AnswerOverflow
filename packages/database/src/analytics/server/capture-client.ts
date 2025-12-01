@@ -1,10 +1,9 @@
-import { Config, Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { PostHog } from "posthog-node";
 
 const createPostHogCaptureClient = Effect.gen(function* () {
-	const apiKey = yield* Config.string("POSTHOG_API_KEY").pipe(
-		Effect.catchAll(() => Effect.succeed(undefined)),
-	);
+	yield* Effect.void;
+	const apiKey = process.env.POSTHOG_API_KEY;
 	if (!apiKey) {
 		return undefined;
 	}

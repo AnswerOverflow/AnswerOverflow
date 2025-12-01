@@ -1,7 +1,7 @@
 import type { Readable } from "node:stream";
 import { S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { Config, Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { Database } from "./database";
 
 export interface UploadFileFromUrlInput {
@@ -27,9 +27,9 @@ export class Storage extends Context.Tag("Storage")<
 >() {}
 
 const S3StorageServiceLive = Effect.gen(function* () {
-	const bucketName = yield* Config.string("BUCKET_NAME");
-	const accessKeyId = yield* Config.string("IAM_USER_KEY");
-	const secretAccessKey = yield* Config.string("IAM_USER_SECRET");
+	const bucketName = process.env.BUCKET_NAME!;
+	const accessKeyId = process.env.IAM_USER_KEY!;
+	const secretAccessKey = process.env.IAM_USER_SECRET!;
 
 	const rawS3Client = new S3Client({
 		credentials: {

@@ -116,7 +116,7 @@ function callClientMethod(
 }
 
 export const service = Effect.gen(function* () {
-	const backendAccessToken = yield* Config.string("BACKEND_ACCESS_TOKEN");
+	const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN!;
 	const convexClient = yield* ConvexClientUnified;
 
 	const watchQueryToLiveData = createWatchQueryToLiveData(convexClient, {
