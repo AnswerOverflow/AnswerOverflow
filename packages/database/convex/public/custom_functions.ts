@@ -47,22 +47,39 @@ export const publicQuery = customQuery(query, {
 		rateLimitKey: v.optional(v.string()),
 	},
 	input: async (ctx, args) => {
+		const isBackendRequest = validateBackendAccessToken(
+			args.backendAccessToken,
+		);
+
+		if (isBackendRequest) {
+			return {
+				ctx,
+				args: {
+					...args,
+					rateLimitKey: "backend",
+					discordAccountId: undefined,
+					anonymousSessionId: undefined,
+					type: "admin" as const,
+				},
+			};
+		}
+
 		const identity = await getAuthIdentity(ctx);
 		let anonymousSessionId: string | undefined;
 		let discordAccountId: bigint | undefined;
-		if (!identity && !validateBackendAccessToken(args.backendAccessToken)) {
+		if (!identity) {
 			throw new Error("No identity found");
 		}
-		if (identity?.isAnonymous) {
+		if (identity.isAnonymous) {
 			anonymousSessionId = identity.subject;
 		} else {
 			const account = await getDiscordAccountWithToken(ctx);
 			discordAccountId = account?.accountId;
 		}
-		const identityType = identity?.isAnonymous ? "anonymous" : "signed-in";
+		const identityType = identity.isAnonymous ? "anonymous" : "signed-in";
 
 		const rateLimitKey = discordAccountId ?? anonymousSessionId;
-		if (!rateLimitKey && !validateBackendAccessToken(args.backendAccessToken)) {
+		if (!rateLimitKey) {
 			throw new Error("Not discord account or anonymous session found");
 		}
 		return {
