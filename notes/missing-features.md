@@ -10,12 +10,11 @@
 
 ## Priority 2: High (User-Facing Features)
 
-| Feature                     | Description                                                   | Status                               |
-| --------------------------- | ------------------------------------------------------------- | ------------------------------------ |
-| **User Consent Mutations**  | User-facing mutations to grant/deny consent, disable indexing | Missing - only backend upsert exists |
-| **Solved Tag Selection**    | Dashboard UI to select solved tag per forum channel           | Missing from channel settings page   |
-| **PRO/ENTERPRISE Checkout** | Stripe checkout for higher-tier plans                         | Only STARTER/ADVANCED supported      |
-| **Client-side Analytics**   | PostHog JS initialization and event capture                   | TrackLoad only logs to console       |
+| Feature                    | Description                                                   | Status                               |
+| -------------------------- | ------------------------------------------------------------- | ------------------------------------ |
+| **User Consent Mutations** | User-facing mutations to grant/deny consent, disable indexing | Missing - only backend upsert exists |
+| **Solved Tag Selection**   | Dashboard UI to select solved tag per forum channel           | Missing from channel settings page   |
+| **Client-side Analytics**  | PostHog JS initialization and event capture                   | TrackLoad only logs to console       |
 
 ## Priority 3: Medium (Bot Features)
 
@@ -71,13 +70,14 @@
 
 ## Intentionally Omitted
 
-| Feature                   | Reason                             |
-| ------------------------- | ---------------------------------- |
-| **Elasticsearch**         | Using Convex search for simplicity |
-| **Email Notifications**   | Original didn't have this          |
-| **Webhook Notifications** | Not needed for launch              |
-| **GDPR Export**           | Can add later                      |
-| **Rate Limiting**         | Can add later                      |
+| Feature                     | Reason                                |
+| --------------------------- | ------------------------------------- | ------------------------------- |
+| **Elasticsearch**           | Using Convex search for simplicity    |
+| **Email Notifications**     | Original didn't have this             |
+| **Webhook Notifications**   | Not needed for launch                 |
+| **GDPR Export**             | Can add later                         |
+| **Rate Limiting**           | Can add later                         |
+| **PRO/ENTERPRISE Checkout** | Stripe checkout for higher-tier plans | Only STARTER/ADVANCED supported |
 
 ## Recently Implemented
 
