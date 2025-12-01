@@ -2,45 +2,9 @@
 
 Found during server/serverPreferences schema split refactoring.
 
-## Medium Priority (Function Consolidation)
-
-### 3. Duplicate `DEFAULT_CHANNEL_SETTINGS` (3 files)
-
-Same defaults defined in:
-
-- `packages/database/convex/shared/channels.ts` (lines 27-36)
-- `packages/database/convex/private/channels.ts` (lines 23-32)
-- `packages/database/convex/private/servers.ts` (lines 9-16) - **BUG: uses `channelId: ""`** instead of `0n`
-
-**Recommendation**: Single source of truth in `shared/channels.ts`.
-
-### 6. Duplicate Consent Update Logic (2 files, identical code)
-
-Same pattern in:
-
-- `apps/discord-bot/src/handlers/forum-guidelines-consent.ts` (lines 84-106)
-- `apps/discord-bot/src/handlers/read-the-rules-consent.ts` (lines 71-93)
-
-**Recommendation**: Extract `grantPublicDisplayConsent(userId, serverId)` helper.
-
-### 7. Duplicate `makeDismissButton` (2 files, identical function)
-
-- `apps/discord-bot/src/handlers/quick-action.ts` (lines 27-33)
-- `apps/discord-bot/src/handlers/send-mark-solution-instructions.ts` (lines 16-22)
-
-**Recommendation**: Extract to shared utility like `apps/discord-bot/src/utils/discord-components.ts`.
-
 ---
 
 ## Low Priority (Nice to Have)
-
-### 8. Duplicate Discord Account Functions
-
-**File**: `packages/database/convex/private/discord_accounts.ts`
-
-`updateDiscordAccount` and `upsertDiscordAccount` do nearly the same thing.
-
-**Recommendation**: Consolidate to just upsert.
 
 ### 9. Missing Composite Index for Reactions
 
@@ -49,12 +13,6 @@ Same pattern in:
 No efficient way to look up a specific reaction by `messageId + userId + emojiId`.
 
 **Recommendation**: Add composite index `by_messageId_userId_emojiId`.
-
-### 10. Inconsistent Query Patterns
-
-Mix of `getOneFrom()` vs manual `.query().withIndex().unique()` patterns for the same lookups.
-
-**Recommendation**: Standardize on `getOneFrom()` everywhere.
 
 ### 11. Duplicate Message Upsert Object Construction
 
