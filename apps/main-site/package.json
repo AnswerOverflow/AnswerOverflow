@@ -47,6 +47,7 @@
 		"react-social-icons": "^6.25.0",
 		"react-spring": "^10.0.3",
 		"react-xarrows": "^2.0.2",
+		"serialize-javascript": "^7.0.1",
 		"shiki": "^3.12.2",
 		"use-debounce": "^10.0.6",
 		"zod": "^4.1.13"
@@ -59,6 +60,7 @@
 		"@types/node": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
+		"@types/serialize-javascript": "^5.0.4",
 		"http-proxy": "^1.18.1",
 		"postcss": "catalog:"
 	}
