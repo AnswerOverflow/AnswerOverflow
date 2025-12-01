@@ -207,12 +207,12 @@ export function handleMarkSolutionCommand(
 		yield* Effect.promise(async () => {
 			if (
 				parentChannel.type === ChannelType.GuildForum &&
-				channelSettings?.solutionTagId &&
+				channelSettings?.flags?.solutionTagId &&
 				thread.appliedTags.length < 5
 			) {
 				await thread.setAppliedTags([
 					...thread.appliedTags,
-					channelSettings.solutionTagId.toString(),
+					channelSettings.flags.solutionTagId.toString(),
 				]);
 			} else {
 				await questionMessage.react("✅");

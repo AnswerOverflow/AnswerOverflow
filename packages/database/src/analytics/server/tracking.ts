@@ -21,13 +21,13 @@ type ChannelWithSettings = {
 	type: number;
 	serverId: string;
 	inviteCode?: string;
-	solutionTagId?: string;
 	flags: {
 		indexingEnabled: boolean;
 		markSolutionEnabled: boolean;
 		sendMarkSolutionInstructionsInNewThreads: boolean;
 		autoThreadEnabled: boolean;
 		forumGuidelinesConsentEnabled: boolean;
+		solutionTagId?: string;
 	};
 };
 

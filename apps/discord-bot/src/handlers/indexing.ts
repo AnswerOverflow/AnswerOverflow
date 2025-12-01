@@ -234,7 +234,7 @@ function storeMessages(
 				const currentChannel = channelLiveData;
 
 				if (currentChannel) {
-					const oldLastIndexed = currentChannel.lastIndexedSnowflake;
+					const oldLastIndexed = currentChannel.flags?.lastIndexedSnowflake;
 					const newLastIndexedBigInt = BigInt(lastMessage.id);
 
 					yield* Effect.logDebug(
@@ -251,7 +251,8 @@ function storeMessages(
 							parentId: currentChannel.parentId,
 							inviteCode: currentChannel.inviteCode,
 							archivedTimestamp: currentChannel.archivedTimestamp,
-							solutionTagId: currentChannel.solutionTagId,
+						},
+						settings: {
 							lastIndexedSnowflake: newLastIndexedBigInt,
 						},
 					});
@@ -293,7 +294,7 @@ function indexTextChannel(
 			return;
 		}
 
-		const lastIndexedSnowflake = channelSettings.lastIndexedSnowflake;
+		const lastIndexedSnowflake = channelSettings.flags.lastIndexedSnowflake;
 		yield* Effect.logDebug(
 			`Indexing text channel ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null (starting from beginning)"}`,
 		);
@@ -351,7 +352,8 @@ function indexTextChannel(
 							});
 						yield* Effect.sleep(Duration.millis(10));
 						const threadChannel = threadChannelLiveData;
-						const threadLastIndexed = threadChannel?.lastIndexedSnowflake;
+						const threadLastIndexed =
+							threadChannel?.flags?.lastIndexedSnowflake;
 
 						const threadMessages = yield* fetchChannelMessages(
 							thread.id,
@@ -388,7 +390,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			return;
 		}
 
-		const lastIndexedSnowflake = channelSettings.lastIndexedSnowflake;
+		const lastIndexedSnowflake = channelSettings.flags.lastIndexedSnowflake;
 		yield* Effect.logDebug(
 			`Indexing forum ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"}`,
 		);
@@ -425,7 +427,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 						});
 					yield* Effect.sleep(Duration.millis(10));
 					const threadChannel = threadChannelLiveData;
-					const threadLastIndexed = threadChannel?.lastIndexedSnowflake;
+					const threadLastIndexed = threadChannel?.flags?.lastIndexedSnowflake;
 
 					const threadMessages = yield* fetchChannelMessages(
 						thread.id,
@@ -465,7 +467,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 				const currentChannel = channelLiveData;
 
 				if (currentChannel) {
-					const oldLastIndexed = currentChannel.lastIndexedSnowflake;
+					const oldLastIndexed = currentChannel.flags?.lastIndexedSnowflake;
 					const newLastIndexedBigInt = BigInt(latestThread.id);
 
 					yield* Effect.logDebug(
@@ -482,7 +484,8 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 							parentId: currentChannel.parentId,
 							inviteCode: currentChannel.inviteCode,
 							archivedTimestamp: currentChannel.archivedTimestamp,
-							solutionTagId: currentChannel.solutionTagId,
+						},
+						settings: {
 							lastIndexedSnowflake: newLastIndexedBigInt,
 						},
 					});

@@ -46,7 +46,7 @@ export const getDashboardData = guildManagerQuery({
 				id: channel.id,
 				name: channel.name,
 				type: channel.type,
-				solutionTagId: channel.solutionTagId,
+				botPermissions: channel.botPermissions ?? null,
 				availableTags: channel.availableTags,
 				flags: {
 					indexingEnabled: settings?.indexingEnabled ?? false,
@@ -56,7 +56,7 @@ export const getDashboardData = guildManagerQuery({
 					autoThreadEnabled: settings?.autoThreadEnabled ?? false,
 					forumGuidelinesConsentEnabled:
 						settings?.forumGuidelinesConsentEnabled ?? false,
-					botPermissions: settings?.botPermissions ?? null,
+					solutionTagId: settings?.solutionTagId,
 				},
 			};
 		});

@@ -101,8 +101,7 @@ export function toAOChannel(
 		parentId: toBigIntId(parentId),
 		inviteCode: undefined,
 		archivedTimestamp: archivedTimestamp,
-		solutionTagId: undefined,
-		lastIndexedSnowflake: undefined,
+		botPermissions: undefined,
 		availableTags,
 	};
 }

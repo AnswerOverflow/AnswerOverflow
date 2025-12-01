@@ -107,15 +107,18 @@ function ChooseSolvedTagCard({
 }: {
 	channel: {
 		id: bigint;
-		solutionTagId?: bigint;
+		flags: {
+			solutionTagId?: bigint;
+		};
 		availableTags?: ForumTag[];
 	};
 	serverId: string;
 	onUpdate: (solutionTagId: bigint | null) => Promise<void>;
 }) {
 	const tags = channel.availableTags ?? [];
-	const currentTag = tags.find((t) => t.id === channel.solutionTagId);
-	const currentTagInvalid = !!(channel.solutionTagId && !currentTag);
+	const solutionTagId = channel.flags.solutionTagId;
+	const currentTag = tags.find((t) => t.id === solutionTagId);
+	const currentTagInvalid = !!(solutionTagId && !currentTag);
 
 	return (
 		<Card>
@@ -134,7 +137,7 @@ function ChooseSolvedTagCard({
 					</p>
 				) : (
 					<Select
-						value={channel.solutionTagId?.toString() ?? "none"}
+						value={solutionTagId?.toString() ?? "none"}
 						onValueChange={async (value) => {
 							const tagId = value === "none" ? null : BigInt(value);
 							await onUpdate(tagId);
@@ -344,7 +347,10 @@ export default function ChannelsPage() {
 						channel.id === args.channelId
 							? {
 									...channel,
-									solutionTagId: args.solutionTagId ?? undefined,
+									flags: {
+										...channel.flags,
+										solutionTagId: args.solutionTagId ?? undefined,
+									},
 								}
 							: channel,
 					),
@@ -744,7 +750,7 @@ export default function ChannelsPage() {
 										<div className="space-y-6">
 											{selectedChannels.length === 1 && selectedChannels[0] && (
 												<ChannelBotPermissionsStatus
-													botPermissions={selectedChannels[0].flags.botPermissions?.toString()}
+													botPermissions={selectedChannels[0].botPermissions?.toString()}
 													channelName={selectedChannels[0].name}
 												/>
 											)}
