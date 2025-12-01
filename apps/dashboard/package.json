@@ -38,7 +38,7 @@
 		"posthog-js": "^1.83.0",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
-		"react-icons": "^4.10.1",
+		"react-icons": "^5.5.0",
 		"react-toastify": "^10.0.5",
 		"sharp": "^0.32.5",
 		"stripe": "^12.18.0",
