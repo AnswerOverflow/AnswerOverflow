@@ -17,16 +17,34 @@ import { publicQuery } from "./custom_functions";
 export const publicSearch = publicQuery({
 	args: {
 		query: v.string(),
+		serverId: v.optional(v.string()),
 		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
-		return searchMessages(ctx, {
+		const results = await searchMessages(ctx, {
 			query: args.query,
 			paginationOpts: {
-				numItems: Math.min(args.paginationOpts.numItems, 10),
+				numItems: Math.min(args.paginationOpts.numItems, 50),
 				cursor: args.paginationOpts.cursor,
 			},
 		});
+
+		if (!args.serverId) {
+			return {
+				...results,
+				page: results.page.slice(0, 10),
+			};
+		}
+
+		const serverIdFilter = BigInt(args.serverId);
+		const filteredPage = results.page.filter(
+			(result) => result.server.discordId === serverIdFilter,
+		);
+
+		return {
+			...results,
+			page: filteredPage.slice(0, 10),
+		};
 	},
 });
 
