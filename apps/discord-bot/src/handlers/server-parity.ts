@@ -12,7 +12,6 @@ import {
 import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
 import { syncChannel } from "./channel-parity";
-import { startIndexingLoop } from "./indexing";
 
 function toAOServer(guild: Guild) {
 	return {
@@ -21,7 +20,6 @@ function toAOServer(guild: Guild) {
 		icon: guild.icon ? guild.icon.toString() : undefined,
 		description: guild.description ?? undefined,
 		vanityInviteCode: guild.vanityURLCode ?? undefined,
-		plan: "FREE" as const,
 		approximateMemberCount:
 			guild.approximateMemberCount ?? guild.memberCount ?? 0,
 	};
@@ -33,74 +31,48 @@ export function syncGuild(guild: Guild) {
 
 		yield* Console.log(`Syncing server ${guild.id} ${guild.name}`);
 
-		const aoServerData = toAOServer(guild);
-		yield* database.private.servers.upsertServer(aoServerData);
-
-		const serverData = yield* database.private.servers.getServerByDiscordId({
+		const existing = yield* database.private.servers.getServerByDiscordId({
 			discordId: BigInt(guild.id),
 		});
 
-		if (serverData) {
-			yield* database.private.servers.clearKickedTime({
-				id: serverData._id,
-			});
-		}
+		const aoServerData = toAOServer(guild);
+		yield* database.private.servers.upsertServer(aoServerData);
 
-		const wasNewServer = !serverData;
-
-		if (serverData?.discordId) {
-			yield* database.private.server_preferences.upsertServerPreferences({
-				serverId: serverData.discordId,
-				considerAllMessagesPublicEnabled: true,
-			});
-		}
-
-		const server = serverData;
-
-		if (!server) {
-			yield* Console.warn(
-				`Server ${guild.id} not found after upsert, skipping channel parity`,
-			);
-			return;
-		}
-
-		if (wasNewServer) {
-			yield* registerServerGroup(guild, server.discordId.toString()).pipe(
+		if (!existing) {
+			yield* registerServerGroup(guild, guild.id).pipe(
 				Effect.catchAll(() => Effect.void),
 			);
 		}
 
-		if (server.preferencesId) {
-			const preferencesLiveData =
-				yield* database.private.server_preferences.getServerPreferencesByServerId(
-					{
-						serverId: server.discordId,
-					},
+		const preferencesLiveData =
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId: BigInt(guild.id),
+				},
+			);
+		const preferences = preferencesLiveData;
+		if (preferences?.customDomain && guild.icon) {
+			const storage = yield* Storage;
+			yield* storage
+				.uploadFileFromUrl({
+					id: guild.icon,
+					filename: "icon.png",
+					contentType: "image/png",
+					url: `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=48`,
+				})
+				.pipe(
+					Effect.tap(() =>
+						Console.log(
+							`Uploaded server icon for ${guild.name} (custom domain: ${preferences.customDomain})`,
+						),
+					),
+					Effect.catchAll((error) =>
+						Console.warn(
+							`Failed to upload server icon for ${guild.name}:`,
+							error,
+						),
+					),
 				);
-			const preferences = preferencesLiveData;
-			if (preferences?.customDomain && server.icon) {
-				const storage = yield* Storage;
-				yield* storage
-					.uploadFileFromUrl({
-						id: server.icon,
-						filename: "icon.png",
-						contentType: "image/png",
-						url: `https://cdn.discordapp.com/icons/${guild.id}/${server.icon}.png?size=48`,
-					})
-					.pipe(
-						Effect.tap(() =>
-							Console.log(
-								`Uploaded server icon for ${guild.name} (custom domain: ${preferences.customDomain})`,
-							),
-						),
-						Effect.catchAll((error) =>
-							Console.warn(
-								`Failed to upload server icon for ${guild.name}:`,
-								error,
-							),
-						),
-					);
-			}
 		}
 
 		const channels = Arr.fromIterable(guild.channels.cache.values());
@@ -170,51 +142,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildUpdate", (_oldGuild, newGuild) =>
 			Effect.gen(function* () {
-				const serverLiveData =
-					yield* database.private.servers.getServerByDiscordId({
-						discordId: BigInt(newGuild.id),
-					});
-				const existingServer = serverLiveData;
-
-				if (!existingServer) {
-					return;
-				}
-
-				const aoServerData = toAOServer(newGuild);
-				const {
-					_id,
-					_creationTime,
-					discordId: _discordId,
-					name: _name,
-					icon: _icon,
-					description: _description,
-					vanityInviteCode: _vanityInviteCode,
-					approximateMemberCount: _approximateMemberCount,
-					kickedTime: _kickedTime,
-					...preservedFields
-				} = existingServer;
-
-				yield* database.private.servers.updateServer({
-					id: existingServer._id,
-					data: {
-						...preservedFields,
-						discordId: BigInt(newGuild.id),
-						name: aoServerData.name,
-						icon: aoServerData.icon,
-						description: aoServerData.description,
-						vanityInviteCode: aoServerData.vanityInviteCode,
-						approximateMemberCount: aoServerData.approximateMemberCount,
-					},
-				});
-
-				if (
-					existingServer.kickedTime !== undefined &&
-					existingServer.kickedTime !== null
-				) {
-					yield* database.private.servers.clearKickedTime({
-						id: existingServer._id,
-					});
-				}
+				yield* syncGuild(newGuild);
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error updating guild ${newGuild.id}:`, error),
@@ -224,22 +152,9 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
-				const serverLiveData =
-					yield* database.private.servers.getServerByDiscordId({
-						discordId: BigInt(guild.id),
-					});
-				const existingServer = serverLiveData;
-
-				if (!existingServer) {
-					return;
-				}
-
-				const { _id, _creationTime, ...serverData } = existingServer;
-
 				yield* database.private.servers.updateServer({
-					id: existingServer._id,
-					data: {
-						...serverData,
+					serverId: BigInt(guild.id),
+					server: {
 						kickedTime: Date.now(),
 					},
 				});
@@ -265,17 +180,15 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				yield* Console.log(
 					`Logged in as ${client.user.tag}! ${serverCount} servers`,
 				);
-
-				yield* Console.log("Starting indexing loop...");
-				yield* startIndexingLoop(true).pipe(
-					Effect.tap(() => Console.log("Indexing loop started")),
-					Effect.catchAllCause((cause) =>
-						Console.error("Error starting indexing loop:", cause),
-					),
-				);
-
 				const guilds = yield* discord.getGuilds();
 				const activeServerIds = new Set(guilds.map((guild) => guild.id));
+
+				yield* Console.table([
+					{
+						"Total Servers": serverCount,
+						"Active Servers": activeServerIds.size,
+					},
+				]);
 
 				yield* Effect.forEach(guilds, (guild) =>
 					Effect.gen(function* () {
@@ -306,11 +219,9 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					);
 					yield* Effect.forEach(serversToMarkAsKicked, (server) =>
 						Effect.gen(function* () {
-							const { _id, _creationTime, ...serverData } = server;
 							yield* database.private.servers.updateServer({
-								id: server._id,
-								data: {
-									...serverData,
+								serverId: server.discordId,
+								server: {
 									kickedTime: Date.now(),
 								},
 							});

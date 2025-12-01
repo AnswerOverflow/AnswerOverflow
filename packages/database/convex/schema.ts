@@ -12,15 +12,6 @@ export const forumTagSchema = v.object({
 
 export type ForumTag = Infer<typeof forumTagSchema>;
 
-const serverPreferencesSchema = v.object({
-	serverId: v.int64(),
-	readTheRulesConsentEnabled: v.optional(v.boolean()),
-	considerAllMessagesPublicEnabled: v.optional(v.boolean()),
-	anonymizeMessagesEnabled: v.optional(v.boolean()),
-	customDomain: v.optional(v.string()),
-	subpath: v.optional(v.string()),
-});
-
 export const planValidator = literals(
 	"FREE",
 	"STARTER",
@@ -32,6 +23,18 @@ export const planValidator = literals(
 
 export type Plan = Infer<typeof planValidator>;
 
+const serverPreferencesSchema = v.object({
+	serverId: v.int64(),
+	stripeCustomerId: v.optional(v.string()),
+	stripeSubscriptionId: v.optional(v.string()),
+	plan: planValidator,
+	readTheRulesConsentEnabled: v.optional(v.boolean()),
+	considerAllMessagesPublicEnabled: v.optional(v.boolean()),
+	anonymizeMessagesEnabled: v.optional(v.boolean()),
+	customDomain: v.optional(v.string()),
+	subpath: v.optional(v.string()),
+});
+
 export const serverSchema = v.object({
 	discordId: v.int64(),
 	name: v.string(),
@@ -39,12 +42,7 @@ export const serverSchema = v.object({
 	description: v.optional(v.string()),
 	vanityInviteCode: v.optional(v.string()),
 	kickedTime: v.optional(v.number()),
-	vanityUrl: v.optional(v.string()),
-	stripeCustomerId: v.optional(v.string()),
-	stripeSubscriptionId: v.optional(v.string()),
-	plan: planValidator,
 	approximateMemberCount: v.number(),
-	preferencesId: v.optional(v.id("serverPreferences")),
 });
 
 export const discordAccountSchema = v.object({
@@ -89,7 +87,6 @@ export const channelSettingsSchema = v.object({
 	forumGuidelinesConsentEnabled: v.boolean(),
 	solutionTagId: v.optional(v.int64()),
 	lastIndexedSnowflake: v.optional(v.int64()),
-	botPermissions: v.optional(v.union(v.string(), v.number())),
 });
 
 const embedFooterSchema = v.object({
@@ -213,12 +210,11 @@ export type Reaction = Infer<typeof reactionSchema>;
 export type Embed = Infer<typeof embedSchema>;
 
 export default defineSchema({
-	servers: defineTable(serverSchema)
-		.index("by_discordId", ["discordId"])
-		.index("by_stripeCustomerId", ["stripeCustomerId"]),
+	servers: defineTable(serverSchema).index("by_discordId", ["discordId"]),
 	serverPreferences: defineTable(serverPreferencesSchema)
 		.index("by_serverId", ["serverId"])
-		.index("by_customDomain", ["customDomain"]),
+		.index("by_customDomain", ["customDomain"])
+		.index("by_stripeCustomerId", ["stripeCustomerId"]),
 	discordAccounts: defineTable(discordAccountSchema).index(
 		"by_discordAccountId",
 		["id"],

@@ -402,9 +402,12 @@ export const getMessagePageData = privateQuery({
 			return null;
 		}
 
-		const serverPreferences = server.preferencesId
-			? await ctx.db.get(server.preferencesId)
-			: null;
+		const serverPreferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			server.discordId,
+		);
 
 		return {
 			messages: enrichedMessages,

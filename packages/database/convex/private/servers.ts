@@ -3,7 +3,7 @@ import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { privateMutation, privateQuery } from "../client";
-import { planValidator, serverSchema } from "../schema";
+import { serverSchema } from "../schema";
 import { CHANNEL_TYPE, isThreadType } from "../shared/shared";
 
 const DEFAULT_CHANNEL_SETTINGS = {
@@ -25,9 +25,34 @@ export const upsertServer = privateMutation({
 			args.discordId,
 		);
 		if (existing) {
-			return await ctx.db.patch(existing._id, args);
+			return await ctx.db.patch(existing._id, {
+				...args,
+				kickedTime: undefined,
+			});
 		}
-		return await ctx.db.insert("servers", args);
+		return await ctx.db.insert("servers", {
+			...args,
+			kickedTime: undefined,
+		});
+	},
+});
+
+export const updateServer = privateMutation({
+	args: {
+		serverId: v.int64(),
+		server: serverSchema.partial(),
+	},
+	handler: async (ctx, args) => {
+		const existing = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.serverId,
+		);
+		if (!existing) {
+			throw new Error(`Server with id ${args.serverId} not found`);
+		}
+		return await ctx.db.patch(existing._id, args.server);
 	},
 });
 
@@ -70,11 +95,13 @@ export const getBrowseServers = privateQuery({
 		);
 
 		const preferencesPromises = nonKickedServers.map(async (server) => {
-			if (server.preferencesId) {
-				const preferences = await ctx.db.get(server.preferencesId);
-				return { serverId: server.discordId, preferences };
-			}
-			return { serverId: server.discordId, preferences: null };
+			const preferences = await getOneFrom(
+				ctx.db,
+				"serverPreferences",
+				"by_serverId",
+				server.discordId,
+			);
+			return { serverId: server.discordId, preferences };
 		});
 
 		const preferencesResults = await Promise.all(preferencesPromises);
@@ -172,37 +199,6 @@ export const findManyServersByDiscordId = privateQuery({
 	},
 });
 
-export const clearKickedTime = privateMutation({
-	args: {
-		id: v.id("servers"),
-	},
-	handler: async (ctx, args) => {
-		const existing = await ctx.db.get(args.id);
-		if (!existing) {
-			throw new Error(`Server with id ${args.id} not found`);
-		}
-		await ctx.db.patch(args.id, { kickedTime: undefined });
-		return args.id;
-	},
-});
-
-// TODO: Just have upsert get rid of this
-export const updateServer = privateMutation({
-	args: {
-		id: v.id("servers"),
-		data: serverSchema,
-	},
-	handler: async (ctx, args) => {
-		const existing = await ctx.db.get(args.id);
-		if (!existing) {
-			throw new Error(`Server with id ${args.id} not found`);
-		}
-
-		await ctx.db.patch(args.id, args.data);
-		return args.id;
-	},
-});
-
 export const getServerByDiscordIdWithChannels = privateQuery({
 	args: {
 		discordId: v.int64(),
@@ -261,67 +257,5 @@ export const findByDiscordId = privateQuery({
 	},
 	handler: async (ctx, args) => {
 		return getOneFrom(ctx.db, "servers", "by_discordId", args.discordServerId);
-	},
-});
-
-export const updateStripeCustomer = privateMutation({
-	args: {
-		serverId: v.int64(),
-		stripeCustomerId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const server = await getOneFrom(
-			ctx.db,
-			"servers",
-			"by_discordId",
-			args.serverId,
-		);
-
-		if (!server) {
-			throw new Error("Server not found");
-		}
-
-		await ctx.db.patch(server._id, {
-			stripeCustomerId: args.stripeCustomerId,
-		});
-	},
-});
-
-export const updateStripeSubscription = privateMutation({
-	args: {
-		serverId: v.int64(),
-		stripeSubscriptionId: v.union(v.string(), v.null()),
-		plan: planValidator,
-	},
-	handler: async (ctx, args) => {
-		const server = await getOneFrom(
-			ctx.db,
-			"servers",
-			"by_discordId",
-			args.serverId,
-		);
-
-		if (!server) {
-			throw new Error("Server not found");
-		}
-
-		await ctx.db.patch(server._id, {
-			stripeSubscriptionId: args.stripeSubscriptionId ?? undefined,
-			plan: args.plan,
-		});
-	},
-});
-
-export const findServerByStripeCustomerId = privateQuery({
-	args: {
-		stripeCustomerId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		return getOneFrom(
-			ctx.db,
-			"servers",
-			"by_stripeCustomerId",
-			args.stripeCustomerId,
-		);
 	},
 });

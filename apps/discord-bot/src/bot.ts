@@ -7,6 +7,7 @@ import { ChannelSettingsCommandHandlerLayer } from "./handlers/channel-settings-
 import { DebugCommandHandlerLayer } from "./handlers/debug-command";
 import { DismissButtonHandlerLayer } from "./handlers/dismiss-button";
 import { ForumGuidelinesConsentHandlerLayer } from "./handlers/forum-guidelines-consent";
+import { IndexingHandlerLayer } from "./handlers/indexing";
 import { LeaderboardCommandHandlerLayer } from "./handlers/leaderboard-command";
 import { ManageAccountCommandHandlerLayer } from "./handlers/manage-account-command";
 import { MarkSolutionCommandHandlerLayer } from "./handlers/mark-solution-command";
@@ -36,6 +37,7 @@ export const BotLayers = Layer.mergeAll(
 	DebugCommandHandlerLayer,
 	SendMarkSolutionInstructionsHandlerLayer,
 	StatusUpdateHandlerLayer,
+	IndexingHandlerLayer,
 );
 
 export const program = Effect.gen(function* () {

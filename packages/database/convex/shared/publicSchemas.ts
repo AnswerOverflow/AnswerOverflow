@@ -12,7 +12,6 @@ export const PublicServer = serverSchema.pick(
 	"icon",
 	"description",
 	"vanityInviteCode",
-	"vanityUrl",
 	"approximateMemberCount",
 );
 

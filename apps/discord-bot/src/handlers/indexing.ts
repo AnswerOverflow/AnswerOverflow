@@ -18,6 +18,7 @@ import {
 	Duration,
 	Effect,
 	HashMap,
+	Layer,
 	Order,
 	Schedule,
 } from "effect";
@@ -614,3 +615,21 @@ export function startIndexingLoop(runImmediately = true) {
 		yield* Effect.logDebug("Indexing loop started successfully");
 	});
 }
+
+export const IndexingHandlerLayer = Layer.scopedDiscard(
+	Effect.gen(function* () {
+		const discord = yield* Discord;
+
+		yield* discord.client.on("clientReady", () =>
+			Effect.gen(function* () {
+				yield* Console.log("Starting indexing loop...");
+				yield* startIndexingLoop(true).pipe(
+					Effect.tap(() => Console.log("Indexing loop started")),
+					Effect.catchAllCause((cause) =>
+						Console.error("Error starting indexing loop:", cause),
+					),
+				);
+			}),
+		);
+	}),
+);

@@ -3,12 +3,36 @@ import { getOneFrom } from "convex-helpers/server/relationships";
 import { internalMutation, internalQuery } from "../client";
 import { planValidator } from "../schema";
 
+const DEFAULT_SERVER_PREFERENCES = {
+	plan: "FREE" as const,
+};
+
 export const getServerForStripe = internalQuery({
 	args: {
 		discordServerId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		return getOneFrom(ctx.db, "servers", "by_discordId", args.discordServerId);
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.discordServerId,
+		);
+		if (!server) {
+			return null;
+		}
+		const preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.discordServerId,
+		);
+		return {
+			...server,
+			stripeCustomerId: preferences?.stripeCustomerId,
+			stripeSubscriptionId: preferences?.stripeSubscriptionId,
+			plan: preferences?.plan ?? "FREE",
+		};
 	},
 });
 
@@ -18,20 +42,24 @@ export const updateServerStripeCustomer = internalMutation({
 		stripeCustomerId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const server = await getOneFrom(
+		const existing = await getOneFrom(
 			ctx.db,
-			"servers",
-			"by_discordId",
+			"serverPreferences",
+			"by_serverId",
 			args.serverId,
 		);
 
-		if (!server) {
-			throw new Error("Server not found");
+		if (existing) {
+			await ctx.db.patch(existing._id, {
+				stripeCustomerId: args.stripeCustomerId,
+			});
+		} else {
+			await ctx.db.insert("serverPreferences", {
+				...DEFAULT_SERVER_PREFERENCES,
+				serverId: args.serverId,
+				stripeCustomerId: args.stripeCustomerId,
+			});
 		}
-
-		await ctx.db.patch(server._id, {
-			stripeCustomerId: args.stripeCustomerId,
-		});
 	},
 });
 
@@ -42,20 +70,21 @@ export const updateServerSubscription = internalMutation({
 		plan: planValidator,
 	},
 	handler: async (ctx, args) => {
-		const server = await getOneFrom(
+		const preferences = await getOneFrom(
 			ctx.db,
-			"servers",
+			"serverPreferences",
 			"by_stripeCustomerId",
 			args.stripeCustomerId,
+			"stripeCustomerId",
 		);
 
-		if (!server) {
+		if (!preferences) {
 			throw new Error(
-				`Server not found for stripe customer ${args.stripeCustomerId}`,
+				`Server preferences not found for stripe customer ${args.stripeCustomerId}`,
 			);
 		}
 
-		await ctx.db.patch(server._id, {
+		await ctx.db.patch(preferences._id, {
 			stripeSubscriptionId: args.stripeSubscriptionId ?? undefined,
 			plan: args.plan,
 		});
