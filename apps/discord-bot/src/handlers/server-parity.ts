@@ -9,7 +9,7 @@ import {
 	trackServerJoin,
 	trackServerLeave,
 } from "../utils/analytics";
-import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
+import { isAllowedRootChannelType } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
 import { syncChannel } from "./channel-parity";
 
@@ -80,34 +80,7 @@ export function syncGuild(guild: Guild) {
 			return isAllowedRootChannelType(channel.type);
 		});
 
-		if (rootChannels.length > 0) {
-			const channelsToUpsert = rootChannels.map((channel) => {
-				const aoChannel = toAOChannel(channel);
-				return {
-					create: aoChannel,
-					update: aoChannel,
-				};
-			});
-
-			yield* Effect.forEach(
-				channelsToUpsert,
-				(channel) =>
-					Effect.gen(function* () {
-						yield* database.private.channels.upsertChannel({
-							channel: channel.create,
-						});
-					}),
-				{ concurrency: 10 },
-			);
-
-			yield* Console.log(
-				`Maintained parity for ${rootChannels.length} channels for server ${guild.name}`,
-			);
-
-			for (const channel of rootChannels) {
-				yield* syncChannel(channel);
-			}
-		}
+		yield* Effect.forEach(rootChannels, (channel) => syncChannel(channel));
 	}).pipe(
 		Effect.catchAll((error) =>
 			Console.error(`Error syncing guild ${guild.id}:`, error),

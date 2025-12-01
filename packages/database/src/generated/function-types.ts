@@ -40,7 +40,6 @@ export const FUNCTION_TYPE_MAP = {
   "server_preferences.updateStripeCustomer": "mutation",
   "server_preferences.updateStripeSubscription": "mutation",
   "server_preferences.upsertServerPreferences": "mutation",
-  "servers.findByDiscordId": "query",
   "servers.findManyServersByDiscordId": "query",
   "servers.findManyServersById": "query",
   "servers.getAllServers": "query",
@@ -65,7 +64,7 @@ export const NAMESPACE_STRUCTURE = {
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageData","getTopQuestionSolversByServerId","getTotalMessageCount","upsertManyMessages","upsertMessage"],
   "search": ["getRecentThreads","getServersUserHasPostedIn","getUserById","getUserComments","getUserPageData","getUserPosts","publicSearch"],
   "server_preferences": ["findServerPreferencesByStripeCustomerId","getServerPreferencesByServerId","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
-  "servers": ["findByDiscordId","findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
+  "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertUserServerSettings"]
 } as const;
 

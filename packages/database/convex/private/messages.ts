@@ -426,7 +426,7 @@ export const getMessagePageData = privateQuery({
 				id: channel.id,
 				name: channel.name,
 				type: channel.type,
-				inviteCode: channel.inviteCode,
+				inviteCode: channel.flags.inviteCode,
 			},
 			thread,
 		};

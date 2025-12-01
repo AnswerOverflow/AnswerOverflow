@@ -33,6 +33,7 @@ const DEFAULT_CHANNEL_SETTINGS = {
 	forumGuidelinesConsentEnabled: false,
 	solutionTagId: undefined,
 	lastIndexedSnowflake: undefined,
+	inviteCode: undefined,
 };
 
 export async function getChannelWithSettings(
