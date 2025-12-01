@@ -12,6 +12,7 @@ import {
 import { channelSchema, channelSettingsSchema } from "../schema";
 import { enrichMessages } from "../shared/dataAccess";
 import {
+	DEFAULT_CHANNEL_SETTINGS,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
 	getFirstMessagesInChannels,
@@ -19,17 +20,6 @@ import {
 
 type Channel = Infer<typeof channelSchema>;
 type ChannelSettings = Infer<typeof channelSettingsSchema>;
-
-const DEFAULT_CHANNEL_SETTINGS: ChannelSettings = {
-	channelId: 0n,
-	indexingEnabled: false,
-	markSolutionEnabled: false,
-	sendMarkSolutionInstructionsInNewThreads: false,
-	autoThreadEnabled: false,
-	forumGuidelinesConsentEnabled: false,
-	solutionTagId: undefined,
-	lastIndexedSnowflake: undefined,
-};
 
 async function addSettingsToChannels(
 	ctx: QueryCtx | MutationCtx,

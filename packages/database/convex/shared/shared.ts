@@ -2,6 +2,7 @@ export {
 	CHANNEL_TYPE,
 	compareIds,
 	type DatabaseAttachment,
+	DEFAULT_CHANNEL_SETTINGS,
 	DISCORD_PERMISSIONS,
 	deleteChannelInternalLogic,
 	deleteMessageInternalLogic,
