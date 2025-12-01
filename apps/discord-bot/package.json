@@ -20,7 +20,7 @@
 		"@sapphire/time-utilities": "^1.7.10",
 		"@sapphire/type": "^2.4.0",
 		"@sapphire/utilities": "^3.13.0",
-		"@sentry/node": "^8.32.0",
+		"@sentry/node": "^10.27.0",
 		"@sentry/tracing": "^7.64.0",
 		"@trpc/server": "^10.45.2",
 		"colorette": "^2.0.20",
