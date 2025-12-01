@@ -262,3 +262,30 @@ export async function toAOMessage(
 
 	return convertedMessage;
 }
+
+export function toUpsertMessageArgs(data: BaseMessageWithRelations) {
+	return {
+		message: {
+			id: data.id,
+			authorId: data.authorId,
+			serverId: data.serverId,
+			channelId: data.channelId,
+			parentChannelId: data.parentChannelId,
+			childThreadId: data.childThreadId,
+			questionId: data.questionId,
+			referenceId: data.referenceId,
+			applicationId: data.applicationId,
+			interactionId: data.interactionId,
+			webhookId: data.webhookId,
+			content: data.content,
+			flags: data.flags,
+			type: data.type,
+			pinned: data.pinned,
+			nonce: data.nonce,
+			tts: data.tts,
+			embeds: data.embeds,
+		},
+		attachments: data.attachments,
+		reactions: data.reactions,
+	};
+}

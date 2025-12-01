@@ -24,7 +24,11 @@ import {
 } from "effect";
 import { Discord } from "../core/discord-service";
 import { uploadAttachmentsInBatches } from "../utils/attachment-upload";
-import { toAODiscordAccount, toAOMessage } from "../utils/conversions";
+import {
+	toAODiscordAccount,
+	toAOMessage,
+	toUpsertMessageArgs,
+} from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
 import { syncChannel } from "./channel-parity";
 
@@ -190,28 +194,7 @@ function storeMessages(
 			aoMessages,
 			(data) =>
 				database.private.messages.upsertMessage({
-					message: {
-						id: data.id,
-						authorId: data.authorId,
-						serverId: data.serverId,
-						channelId: data.channelId,
-						parentChannelId: data.parentChannelId,
-						childThreadId: data.childThreadId,
-						questionId: data.questionId,
-						referenceId: data.referenceId,
-						applicationId: data.applicationId,
-						interactionId: data.interactionId,
-						webhookId: data.webhookId,
-						content: data.content,
-						flags: data.flags,
-						type: data.type,
-						pinned: data.pinned,
-						nonce: data.nonce,
-						tts: data.tts,
-						embeds: data.embeds,
-					},
-					attachments: data.attachments,
-					reactions: data.reactions,
+					...toUpsertMessageArgs(data),
 					ignoreChecks: false,
 				}),
 			{ concurrency: 5 },
