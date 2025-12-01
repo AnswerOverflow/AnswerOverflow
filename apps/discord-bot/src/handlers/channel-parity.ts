@@ -1,5 +1,9 @@
 import { Database } from "@packages/database/database";
-import type { AnyThreadChannel, GuildChannel } from "discord.js";
+import type {
+	AnyThreadChannel,
+	GuildBasedChannel,
+	GuildChannel,
+} from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import {
@@ -8,64 +12,32 @@ import {
 	toAOChannel,
 } from "../utils/conversions";
 
-export function syncBotPermissionsForChannel(
-	discord: Effect.Effect.Success<typeof Discord>,
-	database: Effect.Effect.Success<typeof Database>,
-	channelId: string,
-	guildId: string,
+export function syncChannel(
+	channel: GuildBasedChannel | GuildChannel | AnyThreadChannel,
 ) {
 	return Effect.gen(function* () {
+		const discord = yield* Discord;
+		const database = yield* Database;
+
+		const discordChannelData = toAOChannel(channel);
+
 		const botPermissions = yield* discord.getBotPermissionsForChannel(
-			channelId,
-			guildId,
+			channel.id,
+			channel.guild.id,
 		);
 
-		if (botPermissions === null) {
-			return;
-		}
-
-		const existingChannel =
-			yield* database.private.channels.findChannelByDiscordId({
-				discordId: BigInt(channelId),
-			});
-
-		if (!existingChannel) {
-			return;
-		}
-
 		yield* database.private.channels.updateChannel({
-			id: BigInt(channelId),
+			id: BigInt(channel.id),
 			channel: {
-				id: existingChannel.id,
-				serverId: existingChannel.serverId,
-				name: existingChannel.name,
-				type: existingChannel.type,
-				parentId: existingChannel.parentId,
-				inviteCode: existingChannel.inviteCode,
-				archivedTimestamp: existingChannel.archivedTimestamp,
-				solutionTagId: existingChannel.solutionTagId,
-				lastIndexedSnowflake: existingChannel.lastIndexedSnowflake,
+				...discordChannelData,
 			},
 			settings: {
-				channelId: BigInt(channelId),
-				indexingEnabled: existingChannel.flags?.indexingEnabled ?? false,
-				markSolutionEnabled:
-					existingChannel.flags?.markSolutionEnabled ?? false,
-				sendMarkSolutionInstructionsInNewThreads:
-					existingChannel.flags?.sendMarkSolutionInstructionsInNewThreads ??
-					false,
-				autoThreadEnabled: existingChannel.flags?.autoThreadEnabled ?? false,
-				forumGuidelinesConsentEnabled:
-					existingChannel.flags?.forumGuidelinesConsentEnabled ?? false,
 				botPermissions: botPermissions ?? undefined,
 			},
 		});
 	}).pipe(
 		Effect.catchAll((error) =>
-			Console.warn(
-				`Failed to sync bot permissions for channel ${channelId}:`,
-				error,
-			),
+			Console.warn(`Failed to sync channel ${channel.id}:`, error),
 		),
 	);
 }
@@ -91,21 +63,23 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					);
 					return;
 				}
-				const aoChannel = toAOChannel(channel, server.discordId.toString());
-				yield* database.private.channels.upsertManyChannels({
-					channels: [
-						{
-							create: aoChannel,
-							update: aoChannel,
-						},
-					],
-				});
-				yield* syncBotPermissionsForChannel(
-					discord,
-					database,
+				const aoChannel = toAOChannel(channel);
+				const botPermissions = yield* discord.getBotPermissionsForChannel(
 					channel.id,
 					channel.guild.id,
 				);
+				yield* database.private.channels.upsertChannelWithSettings({
+					channel: aoChannel,
+					settings: {
+						channelId: BigInt(channel.id),
+						indexingEnabled: false,
+						markSolutionEnabled: false,
+						sendMarkSolutionInstructionsInNewThreads: false,
+						autoThreadEnabled: false,
+						forumGuidelinesConsentEnabled: false,
+						botPermissions: botPermissions ?? undefined,
+					},
+				});
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(
@@ -146,7 +120,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					);
 					return;
 				}
-				const aoThread = toAOChannel(thread, server.discordId.toString());
+				const aoThread = toAOChannel(thread);
 				yield* database.private.channels.upsertManyChannels({
 					channels: [
 						{
@@ -167,51 +141,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(newChannel)) {
 					return;
 				}
-				const channelLiveData =
-					yield* database.private.channels.findChannelByDiscordId({
-						discordId: BigInt(newChannel.id),
-					});
-				const existingChannel = channelLiveData;
-
-				if (!existingChannel) {
-					yield* Console.warn(
-						`Channel ${newChannel.id} not found, skipping channel update`,
-					);
-					return;
-				}
-
-				const serverLiveData =
-					yield* database.private.servers.getServerByDiscordId({
-						discordId: BigInt(newChannel.guild.id),
-					});
-				const server = serverLiveData;
-				if (!server) {
-					yield* Console.warn(
-						`Server ${newChannel.guild.id} not found, skipping channel update`,
-					);
-					return;
-				}
-
-				const discordChannelData = toAOChannel(
-					newChannel as GuildChannel,
-					server.discordId.toString(),
-				);
-
-				yield* database.private.channels.updateChannel({
-					id: BigInt(newChannel.id),
-					channel: {
-						...discordChannelData,
-						inviteCode: existingChannel.inviteCode,
-						solutionTagId: existingChannel.solutionTagId,
-						lastIndexedSnowflake: existingChannel.lastIndexedSnowflake,
-					},
-				});
-				yield* syncBotPermissionsForChannel(
-					discord,
-					database,
-					newChannel.id,
-					newChannel.guild.id,
-				);
+				yield* syncChannel(newChannel);
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error updating channel ${newChannel.id}:`, error),
@@ -239,47 +169,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedThreadChannel(newThread)) {
 					return;
 				}
-				const channelLiveData =
-					yield* database.private.channels.findChannelByDiscordId({
-						discordId: BigInt(newThread.id),
-					});
-				const existingChannel = channelLiveData;
-
-				if (!existingChannel) {
-					yield* Console.warn(
-						`Thread ${newThread.id} not found, skipping thread update`,
-					);
-					return;
-				}
-
-				const serverLiveData =
-					yield* database.private.servers.getServerByDiscordId({
-						discordId: BigInt(newThread.guild.id),
-					});
-
-				const server = serverLiveData;
-
-				if (!server) {
-					yield* Console.warn(
-						`Server ${newThread.guild.id} not found, skipping thread update`,
-					);
-					return;
-				}
-
-				const discordThreadData = toAOChannel(
-					newThread as AnyThreadChannel,
-					server.discordId.toString(),
-				);
-
-				yield* database.private.channels.updateChannel({
-					id: BigInt(newThread.id),
-					channel: {
-						...discordThreadData,
-						inviteCode: existingChannel.inviteCode,
-						solutionTagId: existingChannel.solutionTagId,
-						lastIndexedSnowflake: existingChannel.lastIndexedSnowflake,
-					},
-				});
+				yield* syncChannel(newThread);
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error updating thread ${newThread.id}:`, error),
@@ -317,30 +207,10 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("inviteDelete", (invite) =>
 			Effect.gen(function* () {
-				const channelLiveData =
-					yield* database.private.channels.findChannelByInviteCode({
-						inviteCode: invite.code,
-					});
-				const channelWithSettings = channelLiveData;
-
-				if (!channelWithSettings) {
+				if (!invite.channel || invite.channel.isDMBased()) {
 					return;
 				}
-
-				const {
-					flags: _flags,
-					_id,
-					_creationTime,
-					inviteCode: _inviteCode,
-					...channel
-				} = channelWithSettings;
-
-				yield* database.private.channels.updateChannel({
-					id: channel.id,
-					channel: {
-						...channel,
-					},
-				});
+				yield* syncChannel(invite.channel);
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(

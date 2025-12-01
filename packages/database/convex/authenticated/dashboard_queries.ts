@@ -46,6 +46,8 @@ export const getDashboardData = guildManagerQuery({
 				id: channel.id,
 				name: channel.name,
 				type: channel.type,
+				solutionTagId: channel.solutionTagId,
+				availableTags: channel.availableTags,
 				flags: {
 					indexingEnabled: settings?.indexingEnabled ?? false,
 					markSolutionEnabled: settings?.markSolutionEnabled ?? false,

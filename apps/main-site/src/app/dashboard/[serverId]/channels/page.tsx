@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import type { ForumTag } from "@packages/database/convex/schema";
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,
@@ -21,6 +22,13 @@ import {
 import { EmptyStateCard } from "@packages/ui/components/empty";
 import { Input } from "@packages/ui/components/input";
 import { Label } from "@packages/ui/components/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@packages/ui/components/select";
 import { Switch } from "@packages/ui/components/switch";
 import { useMutation } from "convex/react";
 import {
@@ -88,6 +96,93 @@ function ToggleChannelFlag({
 						</span>
 					)}
 				</div>
+			</CardContent>
+		</Card>
+	);
+}
+function ChooseSolvedTagCard({
+	channel,
+	serverId,
+	onUpdate,
+}: {
+	channel: {
+		id: bigint;
+		solutionTagId?: bigint;
+		availableTags?: ForumTag[];
+	};
+	serverId: string;
+	onUpdate: (solutionTagId: bigint | null) => Promise<void>;
+}) {
+	const tags = channel.availableTags ?? [];
+	const currentTag = tags.find((t) => t.id === channel.solutionTagId);
+	const currentTagInvalid = channel.solutionTagId && !currentTag ? true : false;
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Choose Solved Tag</CardTitle>
+				<CardDescription>
+					Pick the tag that will be applied when a message is marked as the
+					solution.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				{tags.length === 0 ? (
+					<p className="text-sm text-muted-foreground">
+						No tags available. Tags will appear after the forum channel is
+						synced.
+					</p>
+				) : (
+					<Select
+						value={channel.solutionTagId?.toString() ?? "none"}
+						onValueChange={async (value) => {
+							const tagId = value === "none" ? null : BigInt(value);
+							await onUpdate(tagId);
+						}}
+					>
+						<SelectTrigger className="max-w-[250px]">
+							<SelectValue placeholder="Select a tag">
+								{currentTagInvalid ? (
+									<span className="text-muted-foreground">(Unknown tag)</span>
+								) : currentTag ? (
+									<span className="flex items-center gap-2">
+										{currentTag.emojiName && (
+											<span>{currentTag.emojiName}</span>
+										)}
+										{currentTag.emojiId && !currentTag.emojiName && (
+											<img
+												src={`https://cdn.discordapp.com/emojis/${currentTag.emojiId}.webp?size=16`}
+												alt=""
+												className="size-4"
+											/>
+										)}
+										<span>{currentTag.name}</span>
+									</span>
+								) : (
+									"(No tag)"
+								)}
+							</SelectValue>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="none">(No tag)</SelectItem>
+							{tags.map((tag) => (
+								<SelectItem key={tag.id.toString()} value={tag.id.toString()}>
+									<span className="flex items-center gap-2">
+										{tag.emojiName && <span>{tag.emojiName}</span>}
+										{tag.emojiId && !tag.emojiName && (
+											<img
+												src={`https://cdn.discordapp.com/emojis/${tag.emojiId}.webp?size=16`}
+												alt=""
+												className="size-4"
+											/>
+										)}
+										<span>{tag.name}</span>
+									</span>
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				)}
 			</CardContent>
 		</Card>
 	);
@@ -224,6 +319,32 @@ export default function ChannelsPage() {
 										...channel.flags,
 										...args.flags,
 									},
+								}
+							: channel,
+					),
+				},
+			);
+		}
+	});
+
+	const updateSolutionTag = useMutation(
+		api.authenticated.dashboard_mutations.updateChannelSolutionTag,
+	).withOptimisticUpdate((localStore, args) => {
+		const currentData = localStore.getQuery(
+			api.authenticated.dashboard_queries.getDashboardData,
+			{ serverId: BigInt(serverId) },
+		);
+		if (currentData !== undefined) {
+			localStore.setQuery(
+				api.authenticated.dashboard_queries.getDashboardData,
+				{ serverId: BigInt(serverId) },
+				{
+					...currentData,
+					channels: currentData.channels.map((channel) =>
+						channel.id === args.channelId
+							? {
+									...channel,
+									solutionTagId: args.solutionTagId ?? undefined,
 								}
 							: channel,
 					),
@@ -650,6 +771,24 @@ export default function ChannelsPage() {
 													handleChannelToggle("markSolutionEnabled", checked)
 												}
 											/>
+
+											{selectedChannels.length === 1 &&
+												selectedChannels[0] &&
+												selectedChannels[0].type === 15 && (
+													<ChooseSolvedTagCard
+														channel={selectedChannels[0]}
+														serverId={serverId}
+														onUpdate={async (solutionTagId) => {
+															const channel = selectedChannels[0];
+															if (!channel) return;
+															await updateSolutionTag({
+																channelId: channel.id,
+																solutionTagId,
+																serverId: BigInt(serverId),
+															});
+														}}
+													/>
+												)}
 
 											{!selectedChannels.some(
 												(c: { type: number }) => c.type === 15,

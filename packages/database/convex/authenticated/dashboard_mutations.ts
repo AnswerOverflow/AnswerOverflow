@@ -194,3 +194,44 @@ export const updateCustomDomain = guildManagerMutation({
 		return preferences;
 	},
 });
+
+export const updateChannelSolutionTag = guildManagerMutation({
+	args: {
+		channelId: v.int64(),
+		solutionTagId: v.union(v.int64(), v.null()),
+	},
+	handler: async (ctx, args) => {
+		const channel = await getOneFrom(
+			ctx.db,
+			"channels",
+			"by_discordChannelId",
+			args.channelId,
+			"id",
+		);
+
+		if (!channel) {
+			throw new Error("Channel not found");
+		}
+
+		if (channel.type !== 15) {
+			throw new Error("Solution tags can only be set on forum channels");
+		}
+
+		if (args.solutionTagId !== null) {
+			const tagExists = channel.availableTags?.some(
+				(tag) => tag.id === args.solutionTagId,
+			);
+			if (!tagExists) {
+				throw new Error(
+					"Selected tag does not exist in this channel's available tags",
+				);
+			}
+		}
+
+		await ctx.db.patch(channel._id, {
+			solutionTagId: args.solutionTagId ?? undefined,
+		});
+
+		return channel._id;
+	},
+});

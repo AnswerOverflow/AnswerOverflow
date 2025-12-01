@@ -10,35 +10,27 @@
 
 ## Priority 2: High (User-Facing Features)
 
-| Feature                    | Description                                                   | Status                               |
-| -------------------------- | ------------------------------------------------------------- | ------------------------------------ |
-| **User Consent Mutations** | User-facing mutations to grant/deny consent, disable indexing | Missing - only backend upsert exists |
-| **Solved Tag Selection**   | Dashboard UI to select solved tag per forum channel           | Missing from channel settings page   |
-| **Client-side Analytics**  | PostHog JS initialization and event capture                   | TrackLoad only logs to console       |
+| Feature                   | Description                                         | Status                             |
+| ------------------------- | --------------------------------------------------- | ---------------------------------- |
+| **Solved Tag Selection**  | Dashboard UI to select solved tag per forum channel | Missing from channel settings page |
+| **Client-side Analytics** | PostHog JS initialization and event capture         | TrackLoad only logs to console     |
 
 ## Priority 3: Medium (Bot Features)
 
-| Feature                              | Description                                                                  | Status          |
-| ------------------------------------ | ---------------------------------------------------------------------------- | --------------- |
-| **`/consent` Slash Command**         | Standalone consent command (not just via /manage-account)                    | Removed         |
-| **Consent Button in Mark Solution**  | CTA button to grant consent after marking solution                           | Missing         |
-| **Checkmark Reaction Mark Solution** | ✅ reaction to mark solution (Reactiflux feature)                            | Not implemented |
-| **Mark Solution Guards**             | Prevent marking question itself, handle already-solved, change-solution flow | Missing         |
-| **Mark Solution Post-Actions**       | Archive thread after 5min, re-index, add solver emoji/tag                    | Missing         |
-| **Question/Solve Analytics**         | "Asked Question" and "Solved Question" PostHog events                        | Missing         |
-| **Bot Status Rotation**              | Dynamic status with message counts (only static status now)                  | Partial         |
+| Feature | Description | Status |
+| ------- | ----------- | ------ |
+
+| **Mark Solution Guards** | Prevent marking question itself, handle already-solved, change-solution flow
+| **Mark Solution Post-Actions** | Archive thread after 5min, re-index, add solver emoji/tag
+| **Question/Solve Analytics** | "Asked Question" and "Solved Question" PostHog events
+| **Bot Status Rotation** | Dynamic status with message counts (only static status now)
 
 ## Priority 4: Lower Priority
 
-| Feature                         | Description                                      | Status                     |
-| ------------------------------- | ------------------------------------------------ | -------------------------- |
-| **Vestaboard Stats Reporter**   | Daily stats to Vestaboard display                | Not implemented            |
-| **Sentry Error Logging**        | Bot error reporting to Sentry                    | Not implemented            |
-| **Command Lifecycle Logging**   | Success/denied/error listeners for commands      | Not implemented            |
-| **Leave Server Button**         | Admin button to DM owner and leave server        | Not implemented            |
-| **Mention Prefix Response**     | Response when bot is mentioned                   | Not implemented            |
-| **API Key Refresh**             | Generate/refresh per-server API keys             | Schema exists, no mutation |
-| **Integrations Dashboard Page** | `/dashboard/[serverId]/integrations` with InKeep | Not implemented            |
+| Feature                         | Description                                      | Status          |
+| ------------------------------- | ------------------------------------------------ | --------------- |
+| **Vestaboard Stats Reporter**   | Daily stats to Vestaboard display                | Not implemented |
+| **Integrations Dashboard Page** | `/dashboard/[serverId]/integrations` with InKeep | Not implemented |
 
 ## Schema/Database Gaps
 
@@ -50,14 +42,12 @@
 
 ## API/Backend Gaps
 
-| Feature                           | Description                                         | Status                           |
-| --------------------------------- | --------------------------------------------------- | -------------------------------- |
-| **Public Message Page Query**     | `threadFromMessageId` was public, now only private  | Client can't fetch directly      |
-| **Channel-filtered Search**       | Old search supported channel filter                 | Only server filter (post-search) |
-| **Bot-assisted Indexing**         | Enable indexing + fetch forum tags via bot          | Just toggles flags now           |
-| **Vercel Domain Hook**            | Actually call Vercel API when setting custom domain | Only saves to DB, no API call    |
-| **Custom Domain Plan Gating**     | Require PRO+ plan for custom domains                | No plan check                    |
-| **Consolidated Dashboard+Stripe** | Single endpoint returning dashboard + billing state | Split into multiple calls        |
+| Feature                           | Description                                         | Status                        |
+| --------------------------------- | --------------------------------------------------- | ----------------------------- |
+| **Bot-assisted Indexing**         | Enable indexing + fetch forum tags via bot          | Just toggles flags now        |
+| **Vercel Domain Hook**            | Actually call Vercel API when setting custom domain | Only saves to DB, no API call |
+| **Custom Domain Plan Gating**     | Require PRO+ plan for custom domains                | No plan check                 |
+| **Consolidated Dashboard+Stripe** | Single endpoint returning dashboard + billing state | Split into multiple calls     |
 
 ## Web App Gaps
 
@@ -70,14 +60,21 @@
 
 ## Intentionally Omitted
 
-| Feature                     | Reason                                |
-| --------------------------- | ------------------------------------- | ------------------------------- |
-| **Elasticsearch**           | Using Convex search for simplicity    |
-| **Email Notifications**     | Original didn't have this             |
-| **Webhook Notifications**   | Not needed for launch                 |
-| **GDPR Export**             | Can add later                         |
-| **Rate Limiting**           | Can add later                         |
-| **PRO/ENTERPRISE Checkout** | Stripe checkout for higher-tier plans | Only STARTER/ADVANCED supported |
+| Feature                              | Reason                                                                       |
+| ------------------------------------ | ---------------------------------------------------------------------------- |
+| **Elasticsearch**                    | Using Convex search for simplicity                                           |
+| **Email Notifications**              | Original didn't have this                                                    |
+| **Webhook Notifications**            | Not needed for launch                                                        |
+| **GDPR Export**                      | Can add later                                                                |
+| **Rate Limiting**                    | Can add later                                                                |
+| **PRO/ENTERPRISE Checkout**          | Stripe checkout for higher-tier plans                                        |
+| **`/consent` Slash Command**         | handled via /manage-account                                                  |
+| **Consent Button in Mark Solution**  | CTA button to grant consent after marking solution, removed due to low usage |
+| **Checkmark Reaction Mark Solution** | ✅ reaction to mark solution (Reactiflux feature)                            |
+| **Sentry Error Logging**             | May add back later                                                           |
+| **Command Lifecycle Logging**        | Not needed                                                                   |
+| **Leave Server Button**              | Not needed                                                                   |
+| **API Key Refresh**                  | Not needed                                                                   |
 
 ## Recently Implemented
 

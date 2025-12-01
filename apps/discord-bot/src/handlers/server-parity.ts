@@ -11,7 +11,7 @@ import {
 } from "../utils/analytics";
 import { isAllowedRootChannelType, toAOChannel } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
-import { syncBotPermissionsForChannel } from "./channel-parity";
+import { syncChannel } from "./channel-parity";
 import { startIndexingLoop } from "./indexing";
 
 function toAOServer(guild: Guild) {
@@ -114,7 +114,7 @@ export function syncGuild(guild: Guild) {
 
 		if (rootChannels.length > 0) {
 			const channelsToUpsert = rootChannels.map((channel) => {
-				const aoChannel = toAOChannel(channel, server.discordId.toString());
+				const aoChannel = toAOChannel(channel);
 				return {
 					create: aoChannel,
 					update: aoChannel,
@@ -129,12 +129,7 @@ export function syncGuild(guild: Guild) {
 			);
 
 			for (const channel of rootChannels) {
-				yield* syncBotPermissionsForChannel(
-					discord,
-					database,
-					channel.id,
-					guild.id,
-				);
+				yield* syncChannel(channel);
 			}
 		}
 	}).pipe(
