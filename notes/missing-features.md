@@ -17,13 +17,12 @@
 
 ## Priority 3: Medium (Bot Features)
 
-| Feature | Description | Status |
-| ------- | ----------- | ------ |
-
-| **Mark Solution Guards** | Prevent marking question itself, handle already-solved, change-solution flow
-| **Mark Solution Post-Actions** | Archive thread after 5min, re-index, add solver emoji/tag
-| **Question/Solve Analytics** | "Asked Question" and "Solved Question" PostHog events
-| **Bot Status Rotation** | Dynamic status with message counts (only static status now)
+| Feature                        | Description                                                                  | Status |
+| ------------------------------ | ---------------------------------------------------------------------------- | ------ |
+| **Mark Solution Guards**       | Prevent marking question itself, handle already-solved, change-solution flow |
+| **Mark Solution Post-Actions** | Archive thread after 5min, re-index, add solver emoji/tag                    |
+| **Question/Solve Analytics**   | "Asked Question" and "Solved Question" PostHog events                        |
+| **Bot Status Rotation**        | Dynamic status with message counts (only static status now)                  |
 
 ## Priority 4: Lower Priority
 
@@ -34,11 +33,10 @@
 
 ## Schema/Database Gaps
 
-| Issue                          | Description                                                     | Impact                 |
-| ------------------------------ | --------------------------------------------------------------- | ---------------------- |
-| **No Unique Constraints**      | vanityUrl, customDomain, inviteCode, apiKey not enforced unique | Potential duplicates   |
-| **Missing referenceId Index**  | Messages table lacks index on referenceId                       | Slow reference lookups |
-| **Attachment URLs Not Stored** | Only storageId stored, not original Discord URLs                | May need URL on-demand |
+| Issue                         | Description                                                     | Impact                 |
+| ----------------------------- | --------------------------------------------------------------- | ---------------------- |
+| **No Unique Constraints**     | vanityUrl, customDomain, inviteCode, apiKey not enforced unique | Potential duplicates   |
+| **Missing referenceId Index** | Messages table lacks index on referenceId                       | Slow reference lookups |
 
 ## API/Backend Gaps
 
