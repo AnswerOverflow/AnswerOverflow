@@ -49,7 +49,7 @@
 	},
 	"devDependencies": {
 		"@answeroverflow/tsconfig": "workspace:*",
-		"@edge-runtime/vm": "^2.1.2",
+		"@edge-runtime/vm": "^5.0.0",
 		"@types/http-proxy": "^1.17.11",
 		"@types/mdx": "^2.0.13",
 		"@types/react": "^19.0.2",
