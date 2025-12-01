@@ -11,10 +11,11 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { Spinner } from "@packages/ui/components/spinner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import dayjs from "dayjs";
-import { CreditCard } from "lucide-react";
+import { CreditCard, CheckCircle } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
 type Plan =
@@ -141,7 +142,39 @@ function ManageBillingButton(props: { serverId: bigint }) {
 	);
 }
 
+function useSyncAfterCheckout(serverId: string) {
+	const searchParams = useSearchParams();
+	const router = useRouter();
+	const queryClient = useQueryClient();
+	const syncAfterCheckout = useAction(
+		api.authenticated.stripe.syncAfterCheckout,
+	);
+
+	const hasSuccess = searchParams.get("success") === "true";
+
+	const { isLoading: isSyncing, isSuccess: syncSuccess } = useQuery({
+		queryKey: ["sync-after-checkout", serverId],
+		queryFn: async () => {
+			const result = await syncAfterCheckout({ serverId: BigInt(serverId) });
+			queryClient.invalidateQueries({
+				queryKey: ["subscription-info", serverId],
+			});
+			const url = new URL(window.location.href);
+			url.searchParams.delete("success");
+			router.replace(url.pathname + url.search);
+			return result;
+		},
+		enabled: hasSuccess,
+		staleTime: Number.POSITIVE_INFINITY,
+		retry: false,
+	});
+
+	return { isSyncing, syncSuccess };
+}
+
 export function CurrentPlanCard({ serverId }: { serverId: string }) {
+	const { isSyncing, syncSuccess } = useSyncAfterCheckout(serverId);
+
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{
@@ -189,6 +222,18 @@ export function CurrentPlanCard({ serverId }: { serverId: string }) {
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-2">
+				{isSyncing && (
+					<div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+						<Spinner className="h-4 w-4" />
+						Syncing subscription...
+					</div>
+				)}
+				{syncSuccess && (
+					<div className="flex items-center gap-2 text-green-600 text-sm mb-2">
+						<CheckCircle className="h-4 w-4" />
+						Subscription updated successfully!
+					</div>
+				)}
 				<span className="text-2xl font-semibold">{planToPrettyText(plan)}</span>
 				<SubscriptionStatus serverId={serverIdBigInt} />
 			</CardContent>

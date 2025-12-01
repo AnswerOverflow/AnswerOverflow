@@ -9,6 +9,7 @@ import {
 	createStripeCustomer,
 	fetchSubscriptionInfo,
 	STRIPE_PLAN_PRICE_IDS,
+	syncStripeSubscription,
 	updateStripeCustomerMetadata,
 } from "../shared/stripe";
 
@@ -179,5 +180,54 @@ export const getSubscriptionInfo = manageGuildAction({
 			isTrialActive: info.isTrialActive,
 			cancelAtPeriodEnd: info.cancelAtPeriodEnd,
 		};
+	},
+});
+
+type SyncResult = {
+	success: boolean;
+	plan: string;
+};
+
+export const syncAfterCheckout = manageGuildAction({
+	args: {},
+	handler: async (ctx, args): Promise<SyncResult> => {
+		const { serverId } = args;
+
+		const serverResult = await ctx.runQuery(
+			internal.stripe.internal.getServerForStripe,
+			{ discordServerId: serverId },
+		);
+
+		if (!serverResult) {
+			throw new Error("Server not found");
+		}
+
+		const server = serverResult as typeof serverResult & {
+			stripeCustomerId?: string;
+		};
+
+		if (!server.stripeCustomerId) {
+			return { success: true, plan: "FREE" };
+		}
+
+		const subscriptionData = await syncStripeSubscription(
+			server.stripeCustomerId,
+		);
+
+		if (subscriptionData.status === "active") {
+			await ctx.runMutation(internal.stripe.internal.updateServerSubscription, {
+				stripeCustomerId: server.stripeCustomerId,
+				stripeSubscriptionId: subscriptionData.subscriptionId,
+				plan: subscriptionData.plan,
+			});
+			return { success: true, plan: subscriptionData.plan };
+		}
+
+		await ctx.runMutation(internal.stripe.internal.updateServerSubscription, {
+			stripeCustomerId: server.stripeCustomerId,
+			stripeSubscriptionId: null,
+			plan: "FREE",
+		});
+		return { success: true, plan: "FREE" };
 	},
 });

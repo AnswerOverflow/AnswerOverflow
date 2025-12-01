@@ -4,7 +4,43 @@ import { v } from "convex/values";
 import type Stripe from "stripe";
 import { internal } from "../_generated/api";
 import { internalAction } from "../client";
-import { getPlanFromPriceId, verifyWebhookSignature } from "../shared/stripe";
+import {
+	syncStripeSubscription,
+	verifyWebhookSignature,
+} from "../shared/stripe";
+
+const HANDLED_EVENTS = [
+	"checkout.session.completed",
+	"customer.subscription.created",
+	"customer.subscription.updated",
+	"customer.subscription.deleted",
+	"customer.subscription.paused",
+	"customer.subscription.resumed",
+	"customer.subscription.pending_update_applied",
+	"customer.subscription.pending_update_expired",
+	"customer.subscription.trial_will_end",
+	"invoice.paid",
+	"invoice.payment_failed",
+	"invoice.payment_action_required",
+	"invoice.upcoming",
+	"invoice.marked_uncollectible",
+	"invoice.payment_succeeded",
+	"payment_intent.succeeded",
+	"payment_intent.payment_failed",
+	"payment_intent.canceled",
+] as const;
+
+type HandledEvent = (typeof HANDLED_EVENTS)[number];
+
+function extractCustomerId(event: Stripe.Event): string | null {
+	const obj = event.data.object;
+
+	if ("customer" in obj && obj.customer) {
+		return typeof obj.customer === "string" ? obj.customer : obj.customer.id;
+	}
+
+	return null;
+}
 
 export const handleStripeWebhook = internalAction({
 	args: {
@@ -17,54 +53,62 @@ export const handleStripeWebhook = internalAction({
 	handler: async (ctx, args) => {
 		const event = verifyWebhookSignature(args.payload, args.signature);
 
-		const handledEvents = [
-			"customer.subscription.created",
-			"customer.subscription.updated",
-			"customer.subscription.deleted",
-		] as const;
-
-		if (!handledEvents.includes(event.type as (typeof handledEvents)[number])) {
+		if (!HANDLED_EVENTS.includes(event.type as HandledEvent)) {
 			return { success: true };
 		}
 
-		const subscription = event.data.object as Stripe.Subscription;
-		const customerId =
-			typeof subscription.customer === "string"
-				? subscription.customer
-				: subscription.customer.id;
+		const customerId = extractCustomerId(event);
+		if (!customerId) {
+			console.error(
+				`[STRIPE HOOK] No customer ID found for event type: ${event.type}`,
+			);
+			return { success: true };
+		}
 
-		switch (event.type) {
-			case "customer.subscription.created":
-			case "customer.subscription.updated": {
-				const priceId = subscription.items.data[0]?.plan.id;
-				if (!priceId) {
-					throw new Error("No price ID found in subscription");
-				}
+		const subscriptionData = await syncStripeSubscription(customerId);
 
-				const plan = getPlanFromPriceId(priceId);
+		if (subscriptionData.status === "active") {
+			await ctx.runMutation(internal.stripe.internal.updateServerSubscription, {
+				stripeCustomerId: customerId,
+				stripeSubscriptionId: subscriptionData.subscriptionId,
+				plan: subscriptionData.plan,
+			});
+		} else {
+			await ctx.runMutation(internal.stripe.internal.updateServerSubscription, {
+				stripeCustomerId: customerId,
+				stripeSubscriptionId: null,
+				plan: "FREE",
+			});
+		}
 
-				await ctx.runMutation(
-					internal.stripe.internal.updateServerSubscription,
-					{
-						stripeCustomerId: customerId,
-						stripeSubscriptionId: subscription.id,
-						plan,
-					},
-				);
-				break;
-			}
+		return { success: true };
+	},
+});
 
-			case "customer.subscription.deleted": {
-				await ctx.runMutation(
-					internal.stripe.internal.updateServerSubscription,
-					{
-						stripeCustomerId: customerId,
-						stripeSubscriptionId: null,
-						plan: "FREE",
-					},
-				);
-				break;
-			}
+export const syncStripeSubscriptionAction = internalAction({
+	args: {
+		stripeCustomerId: v.string(),
+	},
+	returns: v.object({
+		success: v.boolean(),
+	}),
+	handler: async (ctx, args) => {
+		const subscriptionData = await syncStripeSubscription(
+			args.stripeCustomerId,
+		);
+
+		if (subscriptionData.status === "active") {
+			await ctx.runMutation(internal.stripe.internal.updateServerSubscription, {
+				stripeCustomerId: args.stripeCustomerId,
+				stripeSubscriptionId: subscriptionData.subscriptionId,
+				plan: subscriptionData.plan,
+			});
+		} else {
+			await ctx.runMutation(internal.stripe.internal.updateServerSubscription, {
+				stripeCustomerId: args.stripeCustomerId,
+				stripeSubscriptionId: null,
+				plan: "FREE",
+			});
 		}
 
 		return { success: true };
