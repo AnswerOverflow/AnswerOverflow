@@ -214,45 +214,38 @@ export function handleManageAccountCommand(
 				ephemeral: true,
 			}),
 		);
+		const collector = reply.createMessageComponentCollector({
+			componentType: ComponentType.Button,
+			time: 5 * 60 * 1000, // 5 minutes
+			filter: (i) =>
+				i.user.id === interaction.user.id &&
+				Object.values(menuButtonIds).includes(
+					i.customId as (typeof menuButtonIds)[keyof typeof menuButtonIds],
+				),
+		});
 
-		if (
-			reply &&
-			typeof reply === "object" &&
-			"createMessageComponentCollector" in reply
-		) {
-			const collector = reply.createMessageComponentCollector({
-				componentType: ComponentType.Button,
-				time: 5 * 60 * 1000, // 5 minutes
-				filter: (i) =>
-					i.user.id === interaction.user.id &&
-					Object.values(menuButtonIds).includes(
-						i.customId as (typeof menuButtonIds)[keyof typeof menuButtonIds],
-					),
-			});
+		collector.on("collect", async (buttonInteraction) => {
+			await Effect.runPromise(
+				handleManageAccountButtonPress(
+					buttonInteraction,
+					database,
+					userIdBigInt,
+					serverIdBigInt,
+					state,
+				),
+			);
 
-			collector.on("collect", async (buttonInteraction) => {
-				await Effect.runPromise(
-					handleManageAccountButtonPress(
-						buttonInteraction,
-						database,
-						userIdBigInt,
-						serverIdBigInt,
-						state,
-					),
-				);
-
-				const updatedEmbed = generateManageAccountEmbed(state);
-				const updatedActionRow = generateManageAccountActionRow(state);
-				await buttonInteraction
-					.update({
-						embeds: [updatedEmbed],
-						components: [updatedActionRow],
-					})
-					.catch((error) => {
-						console.error("Error updating interaction:", error);
-					});
-			});
-		}
+			const updatedEmbed = generateManageAccountEmbed(state);
+			const updatedActionRow = generateManageAccountActionRow(state);
+			await buttonInteraction
+				.update({
+					embeds: [updatedEmbed],
+					components: [updatedActionRow],
+				})
+				.catch((error) => {
+					console.error("Error updating interaction:", error);
+				});
+		});
 	});
 }
 

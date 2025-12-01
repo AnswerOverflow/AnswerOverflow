@@ -104,12 +104,10 @@ export function handleMarkSolutionCommand(
 			parentChannel.type === ChannelType.GuildText ||
 			parentChannel.type === ChannelType.GuildAnnouncement
 		) {
-			if ("messages" in parentChannel) {
-				const fetchedMessage = yield* discord
-					.callClient(() => parentChannel.messages.fetch(thread.id))
-					.pipe(Effect.catchAll(() => Effect.succeed(null)));
-				questionMessage = fetchedMessage ?? null;
-			}
+			const fetchedMessage = yield* discord
+				.callClient(() => parentChannel.messages.fetch(thread.id))
+				.pipe(Effect.catchAll(() => Effect.succeed(null)));
+			questionMessage = fetchedMessage ?? null;
 		}
 
 		if (!questionMessage) {
