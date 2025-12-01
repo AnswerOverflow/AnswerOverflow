@@ -45,7 +45,7 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 
 		const seedChannel = (channel: GuildBasedChannel) => {
 			client.channels.cache.set(channel.id, channel);
-			if ("guild" in channel && channel.guild) {
+			if (channel.guild) {
 				channel.guild.channels.cache.set(channel.id, channel);
 			}
 		};

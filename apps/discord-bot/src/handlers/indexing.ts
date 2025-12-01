@@ -499,10 +499,9 @@ function indexGuild(guild: Guild) {
 		const indexableChannels = Arr.filter(
 			channels,
 			(channel) =>
-				"type" in channel &&
-				(channel.type === ChannelType.GuildText ||
-					channel.type === ChannelType.GuildAnnouncement ||
-					channel.type === ChannelType.GuildForum),
+				channel.type === ChannelType.GuildText ||
+				channel.type === ChannelType.GuildAnnouncement ||
+				channel.type === ChannelType.GuildForum,
 		);
 
 		yield* Effect.logDebug(
@@ -531,12 +530,8 @@ function indexGuild(guild: Guild) {
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
 					Effect.catchAll((error) => {
-						const channelId = "id" in channel ? channel.id : "unknown";
-						const channelName = "name" in channel ? channel.name : channelId;
-						return Console.error(
-							`Error indexing channel ${channelName}:`,
-							error,
-						);
+						const channelId = channel.isDMBased() ? channel.id : channel.name;
+						return Console.error(`Error indexing channel ${channelId}:`, error);
 					}),
 				),
 			{ concurrency: 2 },
