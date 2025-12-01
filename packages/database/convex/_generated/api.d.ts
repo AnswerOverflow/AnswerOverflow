@@ -13,6 +13,7 @@ import type * as authenticated_dashboard_mutations from "../authenticated/dashbo
 import type * as authenticated_dashboard_queries from "../authenticated/dashboard_queries.js";
 import type * as authenticated_stripe from "../authenticated/stripe.js";
 import type * as authenticated_stripe_actions from "../authenticated/stripe_actions.js";
+import type * as authenticated_vercel_domains from "../authenticated/vercel_domains.js";
 import type * as client_authenticated from "../client/authenticated.js";
 import type * as client_guildManager from "../client/guildManager.js";
 import type * as client_index from "../client/index.js";
@@ -60,6 +61,7 @@ declare const fullApi: ApiFromModules<{
   "authenticated/dashboard_queries": typeof authenticated_dashboard_queries;
   "authenticated/stripe": typeof authenticated_stripe;
   "authenticated/stripe_actions": typeof authenticated_stripe_actions;
+  "authenticated/vercel_domains": typeof authenticated_vercel_domains;
   "client/authenticated": typeof client_authenticated;
   "client/guildManager": typeof client_guildManager;
   "client/index": typeof client_index;

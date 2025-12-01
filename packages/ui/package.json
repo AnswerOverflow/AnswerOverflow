@@ -65,7 +65,7 @@
 		"react-infinite-scroll-component": "^6.1.0",
 		"react-resizable-panels": "^3.0.6",
 		"react-virtuoso": "^4.14.1",
-		"recharts": "2.15.4",
+		"recharts": "^3.5.1",
 		"remark-gfm": "^4.0.1",
 		"shiki": "^3.12.2",
 		"simple-markdown": "^0.7.3",
@@ -105,6 +105,7 @@
 		"./utils/*": "./src/utils/*.ts",
 		"./icons/index": "./src/icons/index.tsx",
 		"./markdown": "./src/markdown/index.tsx",
-		"./markdown/render/code-block": "./src/markdown/render/code-block.tsx"
+		"./markdown/render/code-block": "./src/markdown/render/code-block.tsx",
+		"./analytics": "./src/analytics/index.ts"
 	}
 }

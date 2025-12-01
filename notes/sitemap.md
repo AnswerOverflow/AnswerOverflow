@@ -1,5 +1,7 @@
 # Sitemap Generation in Old Answer Overflow
 
+> **Note**: This is reference documentation for the OLD codebase. See `new-sitemap.md` for the implementation plan for the rewrite using `@convex-dev/aggregate`.
+
 ## Overview
 
 The sitemap system has two main parts:

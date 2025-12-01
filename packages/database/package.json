@@ -34,6 +34,7 @@
 		"@effect/platform": "catalog:",
 		"@packages/discord-api": "workspace:*",
 		"@typelytics/posthog": "^0.1.5",
+		"@vercel/sdk": "^1.17.7",
 		"convex": "catalog:",
 		"convex-helpers": "^0.1.104",
 		"cookie": "^1.1.1",

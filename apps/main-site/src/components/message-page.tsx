@@ -34,6 +34,7 @@ import { getDate } from "@packages/ui/utils/snowflake";
 import type { FunctionReturnType } from "convex/server";
 import { Array as Arr, Predicate } from "effect";
 import { ExternalLink, MessageSquare } from "lucide-react";
+import { JsonLdScript } from "@/components/json-ld-script";
 
 type MessagePageData = NonNullable<
 	FunctionReturnType<typeof api.private.messages.getMessagePageData>
@@ -335,64 +336,53 @@ export function MessagePage(props: { data: MessagePageData }) {
 			);
 			if (customUrl) return customUrl;
 		}
-		const hostname =
-			typeof window !== "undefined"
-				? window.location.hostname
-				: "www.answeroverflow.com";
-		return `https://${hostname}/m/${(data.thread?.id ?? firstMessage.message.id).toString()}`;
+		const baseUrl =
+			process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.answeroverflow.com";
+		return `${baseUrl}/m/${(data.thread?.id ?? firstMessage.message.id).toString()}`;
+	};
+
+	const jsonLdData = {
+		"@context": "https://schema.org",
+		"@type": "DiscussionForumPosting",
+		url: getSchemaUrl(),
+		author: firstMessage.author
+			? {
+					"@type": "Person",
+					name: firstMessage.author.name,
+					identifier: firstMessage.author.id.toString(),
+					url: `/u/${firstMessage.author.id.toString()}`,
+				}
+			: undefined,
+		image: firstMessageMedia?.url ? firstMessageMedia.url : undefined,
+		headline: title,
+		articleBody: firstMessage.message.content,
+		datePublished: getDate(firstMessage.message.id).toISOString(),
+		dateModified: data.thread?.archivedTimestamp
+			? new Date(Number(data.thread.archivedTimestamp)).toISOString()
+			: undefined,
+		identifier: (data.thread?.id ?? firstMessage.message.id).toString(),
+		commentCount: messagesToDisplay.length,
+		comment: messagesToDisplay.map((message, index) => ({
+			"@type": message.message.id === solutionMessageId ? "Answer" : "Comment",
+			text: message.message.content,
+			identifier: message.message.id.toString(),
+			datePublished: getDate(message.message.id).toISOString(),
+			position: index + 1,
+			author: message.author
+				? {
+						"@type": "Person",
+						name: message.author.name,
+						identifier: message.author.id.toString(),
+						url: `/u/${message.author.id.toString()}`,
+					}
+				: undefined,
+		})),
 	};
 
 	return (
 		<MessageResultPageProvider>
 			<div className="mx-auto pt-2">
-				<script
-					type="application/ld+json"
-					// biome-ignore lint/security/noDangerouslySetInnerHtml: is fine
-					dangerouslySetInnerHTML={{
-						__html: JSON.stringify({
-							"@context": "https://schema.org",
-							"@type": "DiscussionForumPosting",
-							url: getSchemaUrl(),
-							author: firstMessage.author
-								? {
-										"@type": "Person",
-										name: firstMessage.author.name,
-										identifier: firstMessage.author.id.toString(),
-										url: `/u/${firstMessage.author.id.toString()}`,
-									}
-								: undefined,
-							image: firstMessageMedia?.url ? firstMessageMedia.url : undefined,
-							headline: title,
-							articleBody: firstMessage.message.content,
-							datePublished: getDate(firstMessage.message.id).toISOString(),
-							dateModified: data.thread?.archivedTimestamp
-								? new Date(Number(data.thread.archivedTimestamp)).toISOString()
-								: undefined,
-							identifier: (
-								data.thread?.id ?? firstMessage.message.id
-							).toString(),
-							commentCount: messagesToDisplay.length,
-							comment: messagesToDisplay.map((message, index) => ({
-								"@type":
-									message.message.id === solutionMessageId
-										? "Answer"
-										: "Comment",
-								text: message.message.content,
-								identifier: message.message.id.toString(),
-								datePublished: getDate(message.message.id).toISOString(),
-								position: index + 1,
-								author: message.author
-									? {
-											"@type": "Person",
-											name: message.author.name,
-											identifier: message.author.id.toString(),
-											url: `/u/${message.author.id.toString()}`,
-										}
-									: undefined,
-							})),
-						}),
-					}}
-				/>
+				<JsonLdScript data={jsonLdData} scriptKey="message-jsonld" />
 
 				<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
 					<Main />
