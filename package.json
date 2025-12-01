@@ -19,6 +19,7 @@
 		"format": "biome format --write .",
 		"knip": "bunx knip",
 		"ngrok": "bun scripts/start-ngrok.ts",
+		"stripe:listen": "bash -c 'export $(grep ^NEXT_PUBLIC_CONVEX_SITE_URL .env | xargs) && stripe listen --forward-to $NEXT_PUBLIC_CONVEX_SITE_URL/stripe/webhook'",
 		"prepare": "husky",
 		"env:pull:prod": "vercel env pull .env.production --environment production"
 	},
