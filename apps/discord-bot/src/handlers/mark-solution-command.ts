@@ -3,7 +3,7 @@ import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { toAOMessage } from "../utils/conversions";
+import { toAOMessage, toUpsertMessageArgs } from "../utils/conversions";
 import { makeMarkSolutionResponse } from "./mark-solution";
 
 export function handleMarkSolutionCommand(
@@ -177,28 +177,7 @@ export function handleMarkSolutionCommand(
 		);
 
 		yield* database.private.messages.upsertMessage({
-			message: {
-				id: data.id,
-				authorId: data.authorId,
-				serverId: data.serverId,
-				channelId: data.channelId,
-				parentChannelId: data.parentChannelId,
-				childThreadId: data.childThreadId,
-				questionId: data.questionId,
-				referenceId: data.referenceId,
-				applicationId: data.applicationId,
-				interactionId: data.interactionId,
-				webhookId: data.webhookId,
-				content: data.content,
-				flags: data.flags,
-				type: data.type,
-				pinned: data.pinned,
-				nonce: data.nonce,
-				tts: data.tts,
-				embeds: data.embeds,
-			},
-			attachments: data.attachments,
-			reactions: data.reactions,
+			...toUpsertMessageArgs(data),
 			ignoreChecks: false,
 		});
 

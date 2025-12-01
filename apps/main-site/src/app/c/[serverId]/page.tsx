@@ -56,7 +56,7 @@ export default async function ServerPage(props: Props) {
 		return liveData;
 	}).pipe(runtime.runPromise);
 
-	if (!serverData) {
+	if (!serverData || serverData?.server.kickedTime) {
 		return notFound();
 	}
 
