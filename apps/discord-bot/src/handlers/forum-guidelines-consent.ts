@@ -3,6 +3,7 @@ import type { Message } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
 import { isHumanMessage } from "../utils/message-utils";
 
 export function handleForumGuidelinesConsent(message: Message) {
@@ -55,59 +56,21 @@ export function handleForumGuidelinesConsent(message: Message) {
 			return;
 		}
 
-		const ignoredAccount =
-			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
-				{
-					id: BigInt(message.author.id),
-				},
-			);
-
-		if (ignoredAccount !== null) {
+		const ignored = yield* isAccountIgnored(BigInt(message.author.id));
+		if (ignored) {
 			return;
 		}
 
-		const userServerSettingsLiveData =
-			yield* database.private.user_server_settings.findUserServerSettingsById({
-				userId: BigInt(message.author.id),
-				serverId: server.discordId,
-			});
-		const userServerSettings = userServerSettingsLiveData;
-
-		if (userServerSettings?.canPubliclyDisplayMessages === true) {
-			return;
-		}
-
-		if (userServerSettings?.messageIndexingDisabled === true) {
-			return;
-		}
-
-		const existingSettings = userServerSettings
-			? {
-					userId: userServerSettings.userId,
-					serverId: userServerSettings.serverId,
-					permissions: userServerSettings.permissions,
-					canPubliclyDisplayMessages: true,
-					messageIndexingDisabled: userServerSettings.messageIndexingDisabled,
-					apiKey: userServerSettings.apiKey,
-					apiCallsUsed: userServerSettings.apiCallsUsed,
-					botAddedTimestamp: userServerSettings.botAddedTimestamp,
-				}
-			: {
-					userId: BigInt(message.author.id),
-					serverId: server.discordId,
-					permissions: 0,
-					canPubliclyDisplayMessages: true,
-					messageIndexingDisabled: false,
-					apiCallsUsed: 0,
-				};
-
-		yield* database.private.user_server_settings.upsertUserServerSettings({
-			settings: existingSettings,
-		});
-
-		yield* Console.log(
-			`Granted forum guidelines consent for user ${message.author.id} in server ${server.discordId}`,
+		const granted = yield* grantPublicDisplayConsent(
+			BigInt(message.author.id),
+			server.discordId,
 		);
+
+		if (granted) {
+			yield* Console.log(
+				`Granted forum guidelines consent for user ${message.author.id} in server ${server.discordId}`,
+			);
+		}
 	}).pipe(
 		Effect.catchAll((error) =>
 			Console.error(

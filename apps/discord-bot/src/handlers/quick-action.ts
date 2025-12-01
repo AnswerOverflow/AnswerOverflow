@@ -2,8 +2,6 @@ import { Database } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
 import {
 	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
 	ComponentType,
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
@@ -19,18 +17,10 @@ import {
 	Predicate,
 } from "effect";
 import { Discord } from "../core/discord-service";
-
-const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
-const DISMISS_ACTION_PREFIX = "dismiss";
-const DISMISS_BUTTON_LABEL = "Dismiss";
-
-function makeDismissButton(dismisserId: string): ButtonBuilder {
-	return new ButtonBuilder({
-		label: DISMISS_BUTTON_LABEL,
-		style: ButtonStyle.Secondary,
-		customId: `${DISMISS_ACTION_PREFIX}:${dismisserId}`,
-	});
-}
+import {
+	ANSWER_OVERFLOW_BLUE_HEX,
+	makeDismissButton,
+} from "../utils/discord-components";
 
 export function handleQuickActionCommand(
 	interaction: ContextMenuCommandInteraction,

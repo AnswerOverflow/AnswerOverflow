@@ -2,6 +2,7 @@ import { Database } from "@packages/database/database";
 import type { GuildMember, PartialGuildMember } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
 
 export function handleReadTheRulesConsent(
 	oldMember: GuildMember | PartialGuildMember,
@@ -42,59 +43,21 @@ export function handleReadTheRulesConsent(
 			return;
 		}
 
-		const ignoredAccount =
-			yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
-				{
-					id: BigInt(newMember.user.id),
-				},
-			);
-
-		if (ignoredAccount !== null) {
+		const ignored = yield* isAccountIgnored(BigInt(newMember.user.id));
+		if (ignored) {
 			return;
 		}
 
-		const userServerSettingsLiveData =
-			yield* database.private.user_server_settings.findUserServerSettingsById({
-				userId: BigInt(newMember.user.id),
-				serverId: server.discordId,
-			});
-		const userServerSettings = userServerSettingsLiveData;
-
-		if (userServerSettings?.canPubliclyDisplayMessages === true) {
-			return;
-		}
-
-		if (userServerSettings?.messageIndexingDisabled === true) {
-			return;
-		}
-
-		const existingSettings = userServerSettings
-			? {
-					userId: userServerSettings.userId,
-					serverId: userServerSettings.serverId,
-					permissions: userServerSettings.permissions,
-					canPubliclyDisplayMessages: true,
-					messageIndexingDisabled: userServerSettings.messageIndexingDisabled,
-					apiKey: userServerSettings.apiKey,
-					apiCallsUsed: userServerSettings.apiCallsUsed,
-					botAddedTimestamp: userServerSettings.botAddedTimestamp,
-				}
-			: {
-					userId: BigInt(newMember.user.id),
-					serverId: server.discordId,
-					permissions: 0,
-					canPubliclyDisplayMessages: true,
-					messageIndexingDisabled: false,
-					apiCallsUsed: 0,
-				};
-
-		yield* database.private.user_server_settings.upsertUserServerSettings({
-			settings: existingSettings,
-		});
-
-		yield* Console.log(
-			`Granted read the rules consent for user ${newMember.user.id} in server ${server.discordId}`,
+		const granted = yield* grantPublicDisplayConsent(
+			BigInt(newMember.user.id),
+			server.discordId,
 		);
+
+		if (granted) {
+			yield* Console.log(
+				`Granted read the rules consent for user ${newMember.user.id} in server ${server.discordId}`,
+			);
+		}
 	}).pipe(
 		Effect.catchAll((error) =>
 			Console.error(
