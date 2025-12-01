@@ -25,7 +25,7 @@
 		"@mdx-js/react": "^2.3.0",
 		"@next/mdx": "15.0.0-rc.0",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.53.0",
-		"@opentelemetry/sdk-trace-node": "^1.26.0",
+		"@opentelemetry/sdk-trace-node": "^2.2.0",
 		"@tailwindcss/typography": "^0.5.10",
 		"@trpc/server": "^10.45.2",
 		"@vercel/otel": "^1.8.3",
