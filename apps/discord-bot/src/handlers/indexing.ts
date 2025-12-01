@@ -23,12 +23,9 @@ import {
 } from "effect";
 import { Discord } from "../core/discord-service";
 import { uploadAttachmentsInBatches } from "../utils/attachment-upload";
-import {
-	toAOChannel,
-	toAODiscordAccount,
-	toAOMessage,
-} from "../utils/conversions";
+import { toAODiscordAccount, toAOMessage } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
+import { syncChannel } from "./channel-parity";
 
 const INDEXING_CONFIG = {
 	scheduleInterval: Duration.hours(6),
@@ -328,14 +325,7 @@ function indexTextChannel(
 				threadsToIndex,
 				(thread) =>
 					Effect.gen(function* () {
-						yield* database.private.channels.upsertManyChannels({
-							channels: [
-								{
-									create: toAOChannel(thread),
-									update: toAOChannel(thread),
-								},
-							],
-						});
+						yield* syncChannel(thread);
 
 						const threadChannelLiveData =
 							yield* database.private.channels.findChannelByDiscordId({
@@ -403,14 +393,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			threadsToIndex,
 			(thread) =>
 				Effect.gen(function* () {
-					yield* database.private.channels.upsertManyChannels({
-						channels: [
-							{
-								create: toAOChannel(thread),
-								update: toAOChannel(thread),
-							},
-						],
-					});
+					yield* syncChannel(thread);
 
 					const threadChannelLiveData =
 						yield* database.private.channels.findChannelByDiscordId({

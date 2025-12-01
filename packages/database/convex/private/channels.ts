@@ -51,27 +51,6 @@ async function addSettingsToChannels(
 	}));
 }
 
-export const findChannelByInviteCode = privateQuery({
-	args: {
-		inviteCode: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const channel = await getOneFrom(
-			ctx.db,
-			"channels",
-			"by_inviteCode",
-			args.inviteCode,
-			"inviteCode",
-		);
-
-		if (!channel) {
-			return null;
-		}
-
-		return await getChannelWithSettings(ctx, channel.id);
-	},
-});
-
 export const findChannelByDiscordId = privateQuery({
 	args: {
 		discordId: v.int64(),
@@ -110,58 +89,24 @@ export const findManyChannelsByDiscordIds = privateQuery({
 	},
 });
 
-export const updateChannel = privateMutation({
+export const upsertChannel = privateMutation({
 	args: {
-		id: v.int64(),
-		channel: v.optional(channelSchema.partial()),
+		channel: channelSchema,
 	},
 	handler: async (ctx, args) => {
 		const existing = await getOneFrom(
 			ctx.db,
 			"channels",
 			"by_discordChannelId",
-			args.id,
+			args.channel.id,
 			"id",
 		);
 
-		if (!existing) {
-			throw new Error(`Channel with id ${args.id} not found`);
+		if (existing) {
+			return await ctx.db.patch(existing._id, args.channel);
+		} else {
+			return await ctx.db.insert("channels", args.channel);
 		}
-
-		await ctx.db.replace(existing._id, {
-			...existing,
-			...args.channel,
-			_id: existing._id,
-			_creationTime: existing._creationTime,
-		});
-
-		return args.id;
-	},
-});
-
-export const updateManyChannels = privateMutation({
-	args: {
-		channels: v.array(channelSchema),
-	},
-	handler: async (ctx, args) => {
-		const ids: bigint[] = [];
-		for (const channel of args.channels) {
-			const existing = await getOneFrom(
-				ctx.db,
-				"channels",
-				"by_discordChannelId",
-				channel.id,
-				"id",
-			);
-
-			if (existing) {
-				await ctx.db.patch(existing._id, channel);
-			} else {
-				await ctx.db.insert("channels", channel);
-			}
-			ids.push(channel.id);
-		}
-		return ids;
 	},
 });
 
@@ -172,119 +117,6 @@ export const deleteChannel = privateMutation({
 	handler: async (ctx, args) => {
 		await deleteChannelInternalLogic(ctx, args.id);
 		return null;
-	},
-});
-
-export const upsertManyChannels = privateMutation({
-	args: {
-		channels: v.array(
-			v.object({
-				create: channelSchema,
-				update: v.optional(channelSchema),
-				settings: v.optional(channelSettingsSchema),
-			}),
-		),
-	},
-	handler: async (ctx, args) => {
-		const ids: bigint[] = [];
-
-		const existingChannels = await Promise.all(
-			args.channels.map((item) =>
-				getOneFrom(
-					ctx.db,
-					"channels",
-					"by_discordChannelId",
-					item.create.id,
-					"id",
-				),
-			),
-		);
-
-		for (let i = 0; i < args.channels.length; i++) {
-			const item = args.channels[i];
-			if (!item) continue;
-
-			const existing = existingChannels[i];
-
-			if (existing) {
-				const updateData = item.update ?? item.create;
-				await ctx.db.patch(existing._id, updateData);
-
-				if (item.settings) {
-					const existingSettings = await getOneFrom(
-						ctx.db,
-						"channelSettings",
-						"by_channelId",
-						item.create.id,
-					);
-
-					if (existingSettings) {
-						await ctx.db.patch(existingSettings._id, item.settings);
-					} else {
-						await ctx.db.insert("channelSettings", item.settings);
-					}
-				}
-			} else {
-				await ctx.db.insert("channels", item.create);
-				if (item.settings) {
-					const existingSettings = await getOneFrom(
-						ctx.db,
-						"channelSettings",
-						"by_channelId",
-						item.create.id,
-					);
-
-					if (!existingSettings) {
-						await ctx.db.insert("channelSettings", item.settings);
-					} else {
-						await ctx.db.patch(existingSettings._id, item.settings);
-					}
-				}
-			}
-
-			ids.push(item.create.id);
-		}
-
-		return ids;
-	},
-});
-
-export const upsertChannelWithSettings = privateMutation({
-	args: {
-		channel: channelSchema,
-		settings: v.optional(channelSettingsSchema),
-	},
-	handler: async (ctx, args) => {
-		const existingChannel = await getOneFrom(
-			ctx.db,
-			"channels",
-			"by_discordChannelId",
-			args.channel.id,
-			"id",
-		);
-
-		if (existingChannel) {
-			await ctx.db.patch(existingChannel._id, args.channel);
-		} else {
-			await ctx.db.insert("channels", args.channel);
-		}
-
-		if (args.settings) {
-			const existingSettings = await getOneFrom(
-				ctx.db,
-				"channelSettings",
-				"by_channelId",
-				args.channel.id,
-			);
-
-			if (existingSettings) {
-				await ctx.db.patch(existingSettings._id, args.settings);
-			} else {
-				await ctx.db.insert("channelSettings", args.settings);
-			}
-		}
-
-		return args.channel.id;
 	},
 });
 

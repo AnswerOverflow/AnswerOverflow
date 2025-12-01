@@ -26,8 +26,7 @@ export function syncChannel(
 			channel.guild.id,
 		);
 
-		yield* database.private.channels.updateChannel({
-			id: BigInt(channel.id),
+		yield* database.private.channels.upsertChannel({
 			channel: {
 				...discordChannelData,
 				botPermissions: botPermissions ?? undefined,
@@ -50,36 +49,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(channel)) {
 					return;
 				}
-				const serverLiveData =
-					yield* database.private.servers.getServerByDiscordId({
-						discordId: BigInt(channel.guild.id),
-					});
-				const server = serverLiveData;
-				if (!server) {
-					yield* Console.warn(
-						`Server ${channel.guild.id} not found, skipping channel parity`,
-					);
-					return;
-				}
-				const aoChannel = toAOChannel(channel);
-				const botPermissions = yield* discord.getBotPermissionsForChannel(
-					channel.id,
-					channel.guild.id,
-				);
-				yield* database.private.channels.upsertChannelWithSettings({
-					channel: {
-						...aoChannel,
-						botPermissions: botPermissions ?? undefined,
-					},
-					settings: {
-						channelId: BigInt(channel.id),
-						indexingEnabled: false,
-						markSolutionEnabled: false,
-						sendMarkSolutionInstructionsInNewThreads: false,
-						autoThreadEnabled: false,
-						forumGuidelinesConsentEnabled: false,
-					},
-				});
+				yield* syncChannel(channel);
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(
@@ -120,15 +90,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					);
 					return;
 				}
-				const aoThread = toAOChannel(thread);
-				yield* database.private.channels.upsertManyChannels({
-					channels: [
-						{
-							create: aoThread,
-							update: aoThread,
-						},
-					],
-				});
+				yield* syncChannel(thread);
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error maintaining thread parity ${thread.id}:`, error),

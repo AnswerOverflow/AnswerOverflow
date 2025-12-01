@@ -12,6 +12,7 @@ import {
 	AutoThreadErrorCode,
 	handleAutoThread,
 } from "./auto-thread";
+import { syncChannel } from "./channel-parity";
 
 const setupTestChannel = (
 	autoThreadEnabled = true,
@@ -43,20 +44,11 @@ const setupTestChannel = (
 		if (!serverLiveData?._id) {
 			throw new Error("Server not found");
 		}
-		yield* database.private.channels.upsertChannelWithSettings({
-			channel: {
-				id: BigInt(channel.id),
-				serverId: serverLiveData.discordId,
-				name: channel.name,
-				type: channel.type,
-			},
+		yield* syncChannel(channel);
+		yield* database.private.channels.updateChannelSettings({
+			channelId: BigInt(channel.id),
 			settings: {
-				channelId: BigInt(channel.id),
 				autoThreadEnabled,
-				indexingEnabled: false,
-				markSolutionEnabled: false,
-				sendMarkSolutionInstructionsInNewThreads: false,
-				forumGuidelinesConsentEnabled: false,
 			},
 		});
 		return { guild, channel, discordMock };
