@@ -2,6 +2,7 @@ import type {
 	Channel as AOChannel,
 	DiscordAccount as AODiscordAccount,
 	Emoji as AOEmoji,
+	ForumTag as AOForumTag,
 } from "@packages/database/convex/schema";
 import type { DatabaseAttachment } from "@packages/database/convex/shared/shared";
 import type { BaseMessageWithRelations } from "@packages/database/database";
@@ -70,12 +71,7 @@ export function toAODiscordAccount(user: User): AODiscordAccount {
 
 export function toAOChannel(
 	channel: GuildChannel | GuildBasedChannel | AnyThreadChannel,
-	discordServerId: string,
 ): AOChannel {
-	if (!("guild" in channel) || !channel.guild) {
-		throw new Error("Channel is not in a guild");
-	}
-
 	const isThread = "isThread" in channel && channel.isThread();
 	const parentId = isThread && channel.parentId ? channel.parentId : undefined;
 	const archivedTimestamp =
@@ -83,9 +79,21 @@ export function toAOChannel(
 			? channel.archiveTimestamp
 			: undefined;
 
+	let availableTags: AOForumTag[] | undefined;
+	if (channel.type === ChannelType.GuildForum) {
+		const forumChannel = channel as ForumChannel;
+		availableTags = forumChannel.availableTags.map((tag) => ({
+			id: BigInt(tag.id),
+			name: tag.name,
+			moderated: tag.moderated,
+			emojiId: tag.emoji?.id ? BigInt(tag.emoji.id) : undefined,
+			emojiName: tag.emoji?.name ?? undefined,
+		}));
+	}
+
 	return {
 		id: BigInt(channel.id),
-		serverId: BigInt(discordServerId),
+		serverId: BigInt(channel.guild.id),
 		name: channel.name ?? "",
 		type: channel.type,
 		parentId: toBigIntId(parentId),
@@ -93,6 +101,7 @@ export function toAOChannel(
 		archivedTimestamp: archivedTimestamp,
 		solutionTagId: undefined,
 		lastIndexedSnowflake: undefined,
+		availableTags,
 	};
 }
 

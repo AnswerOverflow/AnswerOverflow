@@ -188,10 +188,6 @@ function storeMessages(
 			})),
 		);
 
-		if (allAttachments.length > 0) {
-			yield* uploadAttachmentsInBatches(allAttachments);
-		}
-
 		yield* Effect.forEach(
 			aoMessages,
 			(data) =>
@@ -222,6 +218,10 @@ function storeMessages(
 				}),
 			{ concurrency: 5 },
 		);
+
+		if (allAttachments.length > 0) {
+			yield* uploadAttachmentsInBatches(allAttachments);
+		}
 
 		if (humanMessages.length > 0) {
 			const lastMessage = humanMessages[humanMessages.length - 1];

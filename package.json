@@ -4,9 +4,8 @@
 	"scripts": {
 		"i": "bun install",
 		"ci": "bun run lint && bun run typecheck && bun run test",
-		"dev": "bun run dev:no-dbs",
-		"dev:dbs": "bun scripts/start-dbs.ts",
-		"dev:no-dbs": "turbo run dev",
+		"dev": "turbo run dev",
+		"dev:with:dbs": "bun scripts/start-dbs.ts && turbo run dev",
 		"build": "turbo run build",
 		"typecheck": "turbo run typecheck",
 		"test": "turbo run test",

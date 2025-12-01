@@ -2,6 +2,16 @@ import { defineSchema, defineTable } from "convex/server";
 import { type Infer, v } from "convex/values";
 import { literals } from "convex-helpers/validators";
 
+export const forumTagSchema = v.object({
+	id: v.int64(),
+	name: v.string(),
+	moderated: v.boolean(),
+	emojiId: v.optional(v.int64()),
+	emojiName: v.optional(v.string()),
+});
+
+export type ForumTag = Infer<typeof forumTagSchema>;
+
 const serverPreferencesSchema = v.object({
 	serverId: v.int64(),
 	readTheRulesConsentEnabled: v.optional(v.boolean()),
@@ -68,6 +78,7 @@ export const channelSchema = v.object({
 	archivedTimestamp: v.optional(v.number()),
 	solutionTagId: v.optional(v.int64()),
 	lastIndexedSnowflake: v.optional(v.int64()),
+	availableTags: v.optional(v.array(forumTagSchema)),
 });
 
 export const channelSettingsSchema = v.object({
