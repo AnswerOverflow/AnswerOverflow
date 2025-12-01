@@ -11,7 +11,7 @@ import {
 } from "../utils/analytics";
 import { isAllowedRootChannelType } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
-import { syncChannel } from "./channel-parity";
+import { syncChannel } from "./channel";
 
 function toAOServer(guild: Guild) {
 	return {

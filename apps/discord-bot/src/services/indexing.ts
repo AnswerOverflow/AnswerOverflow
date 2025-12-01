@@ -30,7 +30,7 @@ import {
 	toUpsertMessageArgs,
 } from "../utils/conversions";
 import { isHumanMessage } from "../utils/message-utils";
-import { syncChannel } from "./channel-parity";
+import { syncChannel } from "../sync/channel";
 
 const INDEXING_CONFIG = {
 	scheduleInterval: Duration.hours(6),

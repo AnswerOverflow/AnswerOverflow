@@ -1,6 +1,6 @@
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { syncChannel } from "./channel-parity";
+import { syncChannel } from "./channel";
 
 export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {

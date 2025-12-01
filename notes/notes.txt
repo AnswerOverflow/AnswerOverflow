@@ -8,6 +8,22 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 - https://www.convex.dev/components/aggregate use aggregate
 - https://docs.convex.dev/error#1 we're seeing write conflicts
 
+
+
+
+## Launch blockers:
+- load all messages for a message page
+- SEO friendly infinite scroll
+- Non jank page naivigation
+
+
+
+
+
+
+
+=======
+
 ## Sitemap
     /c/ sitemap
     /:domain sitemap
