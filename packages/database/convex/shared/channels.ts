@@ -40,10 +40,13 @@ export async function getChannelWithSettings(
 	ctx: QueryCtx | MutationCtx,
 	channelId: bigint,
 ) {
-	const channel = await ctx.db
-		.query("channels")
-		.withIndex("by_discordChannelId", (q) => q.eq("id", channelId))
-		.first();
+	const channel = await getOneFrom(
+		ctx.db,
+		"channels",
+		"by_discordChannelId",
+		channelId,
+		"id",
+	);
 
 	if (!channel) {
 		return null;

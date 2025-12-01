@@ -20,17 +20,13 @@ export const updateServerPreferencesFlags = guildManagerMutation({
 		let preferences: Awaited<
 			ReturnType<typeof ctx.db.get<"serverPreferences">>
 		> | null = null;
-		try {
-			preferences =
-				(await ctx.db
-					.query("serverPreferences")
-					.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-					.unique()) ?? null;
-		} catch {
-			throw new Error(
-				`Multiple server preferences found for server ${args.serverId}. This indicates a data integrity issue.`,
-			);
-		}
+		preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+			"serverId",
+		);
 
 		if (!preferences) {
 			const preferencesId = await ctx.db.insert("serverPreferences", {
@@ -39,17 +35,13 @@ export const updateServerPreferencesFlags = guildManagerMutation({
 				...args.flags,
 			});
 
-			try {
-				preferences =
-					(await ctx.db
-						.query("serverPreferences")
-						.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-						.unique()) ?? null;
-			} catch {
-				throw new Error(
-					`Multiple server preferences found for server ${args.serverId}. This indicates a data integrity issue.`,
-				);
-			}
+			preferences = await getOneFrom(
+				ctx.db,
+				"serverPreferences",
+				"by_serverId",
+				args.serverId,
+				"serverId",
+			);
 
 			if (!preferences) {
 				preferences = await ctx.db.get(preferencesId);
@@ -99,17 +91,13 @@ export const updateChannelSettingsFlags = guildManagerMutation({
 		let settings: Awaited<
 			ReturnType<typeof ctx.db.get<"channelSettings">>
 		> | null = null;
-		try {
-			settings =
-				(await ctx.db
-					.query("channelSettings")
-					.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
-					.unique()) ?? null;
-		} catch {
-			throw new Error(
-				`Multiple channel settings found for channel ${args.channelId}. This indicates a data integrity issue.`,
-			);
-		}
+		settings = await getOneFrom(
+			ctx.db,
+			"channelSettings",
+			"by_channelId",
+			args.channelId,
+			"channelId",
+		);
 
 		if (!settings) {
 			const settingsId = await ctx.db.insert("channelSettings", {
@@ -122,17 +110,13 @@ export const updateChannelSettingsFlags = guildManagerMutation({
 				...args.flags,
 			});
 
-			try {
-				settings =
-					(await ctx.db
-						.query("channelSettings")
-						.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
-						.unique()) ?? null;
-			} catch {
-				throw new Error(
-					`Multiple channel settings found for channel ${args.channelId}. This indicates a data integrity issue.`,
-				);
-			}
+			settings = await getOneFrom(
+				ctx.db,
+				"channelSettings",
+				"by_channelId",
+				args.channelId,
+				"channelId",
+			);
 
 			if (!settings) {
 				settings = await ctx.db.get(settingsId);
@@ -170,6 +154,7 @@ export const updateCustomDomain = guildManagerMutation({
 			"serverPreferences",
 			"by_serverId",
 			args.serverId,
+			"serverId",
 		);
 
 		if (!preferences) {
@@ -232,6 +217,7 @@ export const updateChannelSolutionTag = guildManagerMutation({
 			"channelSettings",
 			"by_channelId",
 			args.channelId,
+			"channelId",
 		);
 
 		if (!settings) {

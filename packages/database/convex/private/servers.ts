@@ -185,10 +185,7 @@ export const findManyServersByDiscordId = privateQuery({
 	handler: async (ctx, args) => {
 		if (args.discordIds.length === 0) return [];
 		const servers = await asyncMap(args.discordIds, (discordId) =>
-			ctx.db
-				.query("servers")
-				.withIndex("by_discordId", (q) => q.eq("discordId", discordId))
-				.first(),
+			getOneFrom(ctx.db, "servers", "by_discordId", discordId),
 		);
 		return Arr.filter(servers, Predicate.isNotNullable);
 	},
@@ -199,10 +196,12 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 		discordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		const server = await ctx.db
-			.query("servers")
-			.withIndex("by_discordId", (q) => q.eq("discordId", args.discordId))
-			.first();
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.discordId,
+		);
 		if (!server) {
 			return null;
 		}

@@ -43,10 +43,12 @@ export const upsertServerPreferences = privateMutation({
 	args: serverPreferencesSchema,
 	handler: async (ctx, args) => {
 		const { serverId, ...preferences } = args;
-		const existing = await ctx.db
-			.query("serverPreferences")
-			.withIndex("by_serverId", (q) => q.eq("serverId", serverId))
-			.first();
+		const existing = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			serverId,
+		);
 
 		if (existing) {
 			if (

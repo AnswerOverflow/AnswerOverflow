@@ -13,7 +13,6 @@ export const FUNCTION_TYPE_MAP = {
   "channels.upsertChannel": "mutation",
   "discord_accounts.deleteDiscordAccount": "mutation",
   "discord_accounts.findManyDiscordAccountsByIds": "query",
-  "discord_accounts.getDiscordAccountById": "query",
   "discord_accounts.getUserPageData": "query",
   "discord_accounts.upsertDiscordAccount": "mutation",
   "ignored_discord_accounts.deleteIgnoredDiscordAccount": "mutation",
@@ -58,7 +57,7 @@ export const NAMESPACES = ["attachments","channels","discord_accounts","ignored_
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl"],
   "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findManyChannelsByDiscordIds","getChannelPageData","updateChannelSettings","upsertChannel"],
-  "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getDiscordAccountById","getUserPageData","upsertDiscordAccount"],
+  "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageData","upsertDiscordAccount"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageData","getTopQuestionSolversByServerId","getTotalMessageCount","upsertManyMessages","upsertMessage"],
   "search": ["getRecentThreads","getServersUserHasPostedIn","getUserById","getUserComments","getUserPageData","getUserPosts","publicSearch"],
