@@ -14,8 +14,6 @@ import {
 	Context,
 	Duration,
 	Effect,
-	Equal,
-	Hash,
 	HashMap,
 	Layer,
 	Option,
@@ -155,33 +153,26 @@ export const service = Effect.gen(function* () {
 			),
 		}));
 
-	class QueryCacheKey {
-		constructor(
-			readonly cacheKey: string,
-			readonly funcRef: FunctionReference<any, any>,
-			readonly args: Record<string, unknown>,
-		) {}
-
-		[Equal.symbol](that: unknown): boolean {
-			return that instanceof QueryCacheKey && this.cacheKey === that.cacheKey;
-		}
-
-		[Hash.symbol](): number {
-			return Hash.string(this.cacheKey);
-		}
-	}
+	const lookupContexts = new Map<
+		string,
+		{ funcRef: FunctionReference<any, any>; args: Record<string, unknown> }
+	>();
 
 	const queryCache = yield* Cache.make({
 		capacity: 500,
 		timeToLive: Duration.minutes(5),
-		lookup: (key: QueryCacheKey) =>
+		lookup: (cacheKey: string) =>
 			Effect.gen(function* () {
-				yield* incrementCacheMiss(key.cacheKey);
+				const context = lookupContexts.get(cacheKey);
+				if (!context) {
+					throw new Error(`Lookup context not found for key: ${cacheKey}`);
+				}
+				yield* incrementCacheMiss(cacheKey);
 				return yield* callClientMethod(
 					"query",
-					key.funcRef,
+					context.funcRef,
 					convexClient.client,
-					key.args,
+					context.args,
 				);
 			}),
 	});
@@ -191,11 +182,11 @@ export const service = Effect.gen(function* () {
 		funcRef: FunctionReference<any, any>,
 		args: Record<string, unknown>,
 	): Effect.Effect<unknown, ConvexError> => {
-		const key = new QueryCacheKey(cacheKey, funcRef, args);
+		lookupContexts.set(cacheKey, { funcRef, args });
 
 		return Effect.gen(function* () {
-			const isCached = yield* queryCache.contains(key);
-			const result = yield* queryCache.get(key);
+			const isCached = yield* queryCache.contains(cacheKey);
+			const result = yield* queryCache.get(cacheKey);
 			if (isCached) {
 				yield* incrementCacheHit(cacheKey);
 			}
