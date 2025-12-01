@@ -2,11 +2,11 @@ import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { MessagePage } from "../../../components/message-page";
-import { runtime } from "../../../lib/runtime";
+import { runtime } from "../../../../lib/runtime";
+import { MessagePage } from "../../../../components/message-page";
 
 type Props = {
-	params: Promise<{ messageId: string }>;
+	params: Promise<{ domain: string; messageId: string }>;
 };
 
 function getThreadIdOfMessage(message: {
@@ -62,8 +62,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	};
 }
 
-export default async function Page(props: Props) {
+export default async function TenantMessagePage(props: Props) {
 	const params = await props.params;
+	const domain = decodeURIComponent(params.domain);
+
+	const tenantData = await Effect.gen(function* () {
+		const database = yield* Database;
+		const tenant = yield* database.private.servers.getServerByDomain({
+			domain,
+		});
+		return tenant;
+	}).pipe(runtime.runPromise);
+
+	if (!tenantData?.server) {
+		return notFound();
+	}
 
 	const message = await Effect.gen(function* () {
 		const database = yield* Database;
@@ -73,6 +86,10 @@ export default async function Page(props: Props) {
 	}).pipe(runtime.runPromise);
 
 	if (!message) {
+		return notFound();
+	}
+
+	if (message.serverId !== tenantData.server.discordId) {
 		return notFound();
 	}
 

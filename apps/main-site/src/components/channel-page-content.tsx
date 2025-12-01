@@ -11,6 +11,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@packages/ui/components/sheet";
+import { useTenant } from "@packages/ui/components/tenant-context";
 import type { FunctionReturnType } from "convex/server";
 import { ChevronDown, Hash, MessageSquare } from "lucide-react";
 import { useState } from "react";
@@ -48,12 +49,19 @@ function MobileChannelSelector({
 	channels,
 	selectedChannel,
 	serverDiscordId,
+	tenantMode,
 }: {
 	channels: ChannelPageData["channels"];
 	selectedChannel: ChannelPageData["selectedChannel"];
 	serverDiscordId: bigint;
+	tenantMode: boolean;
 }) {
 	const [open, setOpen] = useState(false);
+
+	const getChannelHref = (channelId: bigint) =>
+		tenantMode
+			? `/c/${channelId.toString()}`
+			: `/c/${serverDiscordId.toString()}/${channelId.toString()}`;
 
 	return (
 		<Sheet open={open} onOpenChange={setOpen}>
@@ -82,7 +90,7 @@ function MobileChannelSelector({
 							return (
 								<Link
 									key={channel.id.toString()}
-									href={`/c/${serverDiscordId.toString()}/${channel.id.toString()}`}
+									href={getChannelHref(channel.id)}
 									onClick={() => setOpen(false)}
 									className={`group flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
 										isSelected
@@ -108,7 +116,15 @@ export function ChannelPageContent({
 	selectedChannel,
 	threads,
 }: ChannelPageData) {
+	const tenant = useTenant();
+	const tenantMode = !!tenant;
 	const serverIcon = server.icon ?? null;
+
+	const getChannelHref = (channelId: bigint) =>
+		tenantMode
+			? `/c/${channelId.toString()}`
+			: `/c/${server.discordId.toString()}/${channelId.toString()}`;
+
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -144,6 +160,7 @@ export function ChannelPageContent({
 							channels={channels}
 							selectedChannel={selectedChannel}
 							serverDiscordId={server.discordId}
+							tenantMode={tenantMode}
 						/>
 					</div>
 				</div>
@@ -163,7 +180,7 @@ export function ChannelPageContent({
 									return (
 										<Link
 											key={channel.id.toString()}
-											href={`/c/${server.discordId.toString()}/${channel.id.toString()}`}
+											href={getChannelHref(channel.id)}
 											className={`group flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
 												isSelected
 													? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"

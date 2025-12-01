@@ -1,28 +1,15 @@
 import { Database } from "@packages/database/database";
-import type { Tenant } from "@packages/ui/components/tenant-context";
-import { normalizeSubpath } from "@packages/ui/utils/links";
 import { Effect } from "effect";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { ChannelPageContent } from "../../components/channel-page-content";
 import { runtime } from "../../lib/runtime";
 
-const subpathTenants = [
-	{
-		rewriteDomain: "migaku.com",
-		subpath: "community",
-	},
-	{
-		rewriteDomain: "rhys.ltd",
-		subpath: "idk",
-	},
-	{
-		rewriteDomain: "vapi.ai",
-		subpath: "community",
-	},
-];
-
-export default async function DomainPage(props: {
-	children: React.ReactNode;
+type Props = {
 	params: Promise<{ domain: string }>;
-}) {
+};
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const domain = decodeURIComponent(params.domain);
 
@@ -31,26 +18,133 @@ export default async function DomainPage(props: {
 		const tenant = yield* database.private.servers.getServerByDomain({
 			domain,
 		});
-		return {
-			...tenant?.server,
-			...tenant?.preferences,
-		};
+		return tenant;
 	}).pipe(runtime.runPromise);
 
-	const subpathTenant = subpathTenants.find(
-		(tenant) => tenant.rewriteDomain === domain,
-	);
+	if (!tenantData?.server) {
+		return {};
+	}
 
-	const tenant: Tenant = {
-		customDomain: tenantData.customDomain,
-		subpath: subpathTenant
-			? normalizeSubpath(subpathTenant.subpath)
-			: tenantData.subpath
-				? normalizeSubpath(tenantData.subpath)
-				: null,
-		name: tenantData.name,
-		icon: tenantData.icon,
-		discordId: tenantData.discordId,
+	const serverData = await Effect.gen(function* () {
+		const database = yield* Database;
+		const liveData =
+			yield* database.private.servers.getServerByDiscordIdWithChannels({
+				discordId: tenantData.server.discordId,
+			});
+		return liveData;
+	}).pipe(runtime.runPromise);
+
+	if (!serverData) {
+		return {};
+	}
+
+	const { server, channels } = serverData;
+	const description =
+		server.description ??
+		`Browse ${channels.length} indexed channels from the ${server.name} Discord community`;
+
+	return {
+		title: server.name,
+		description,
+		openGraph: {
+			images: [`/og/community?id=${server.discordId.toString()}`],
+			title: server.name,
+			description,
+		},
+		alternates: {
+			canonical: "/",
+		},
 	};
-	return <div>{tenant.name}</div>;
+}
+
+export default async function DomainPage(props: Props) {
+	const params = await props.params;
+	const domain = decodeURIComponent(params.domain);
+
+	const tenantData = await Effect.gen(function* () {
+		const database = yield* Database;
+		const tenant = yield* database.private.servers.getServerByDomain({
+			domain,
+		});
+		return tenant;
+	}).pipe(runtime.runPromise);
+
+	if (!tenantData?.server) {
+		return notFound();
+	}
+
+	const serverData = await Effect.gen(function* () {
+		const database = yield* Database;
+		const liveData =
+			yield* database.private.servers.getServerByDiscordIdWithChannels({
+				discordId: tenantData.server.discordId,
+			});
+		return liveData;
+	}).pipe(runtime.runPromise);
+
+	if (!serverData) {
+		return notFound();
+	}
+
+	const { server, channels } = serverData;
+
+	if (channels.length === 0) {
+		return (
+			<div className="min-h-screen bg-background">
+				<div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+					<div className="mb-8 pb-6 border-b border-border">
+						<div className="flex items-center gap-4">
+							{server.icon && (
+								<img
+									src={`https://cdn.discordapp.com/icons/${server.discordId}/${server.icon}.webp?size=64`}
+									alt={server.name}
+									className="w-16 h-16 rounded-full"
+								/>
+							)}
+							<div>
+								<h1 className="text-3xl font-bold text-foreground">
+									{server.name}
+								</h1>
+								{server.description && (
+									<p className="text-muted-foreground mt-1">
+										{server.description}
+									</p>
+								)}
+							</div>
+						</div>
+					</div>
+					<div className="text-center py-12 text-muted-foreground">
+						No channels available
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	const defaultChannel = channels[0];
+	if (!defaultChannel) {
+		return notFound();
+	}
+
+	const pageData = await Effect.gen(function* () {
+		const database = yield* Database;
+		const liveData = yield* database.private.channels.getChannelPageData({
+			serverDiscordId: tenantData.server.discordId,
+			channelDiscordId: defaultChannel.id,
+		});
+		return liveData;
+	}).pipe(runtime.runPromise);
+
+	if (!pageData) {
+		return notFound();
+	}
+
+	return (
+		<ChannelPageContent
+			server={pageData.server}
+			channels={pageData.channels}
+			selectedChannel={pageData.selectedChannel}
+			threads={pageData.threads}
+		/>
+	);
 }

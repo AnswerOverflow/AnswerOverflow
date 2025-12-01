@@ -11,6 +11,7 @@ import { MessageBody } from "@packages/ui/components/message-body";
 import { MessageResultPageProvider } from "@packages/ui/components/message-result-page-context";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
+import { useTenant } from "@packages/ui/components/tenant-context";
 import { ThinMessage } from "@packages/ui/components/thin-message";
 import { TimeAgo } from "@packages/ui/components/time-ago";
 import { TrackLoad } from "@packages/ui/components/track-load";
@@ -43,6 +44,7 @@ const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
 
 export function MessagePage(props: { data: MessagePageData }) {
 	const { data } = props;
+	const tenant = useTenant();
 
 	if (!data) {
 		return (
@@ -129,9 +131,8 @@ export function MessagePage(props: { data: MessagePageData }) {
 		messagesWithMergedContent,
 		Predicate.isNotNullable,
 	);
-	const messagesToDisplay = nonNull.filter((message, index) => {
+	const messagesToDisplay = nonNull.filter((message) => {
 		if (message.message.id === firstMessage.message.id) return false;
-		const _nextMessage = nonNull.at(index + 1);
 		if (data.thread || message.message.parentChannelId) {
 			if (message.message.channelId !== data.channel.id) return false;
 		} else {
@@ -183,6 +184,8 @@ export function MessagePage(props: { data: MessagePageData }) {
 		.filter((attachment) => isImageAttachment(attachment))
 		.at(0);
 
+	const serverHref = tenant ? "/" : `/c/${data.server.discordId.toString()}`;
+
 	const UserLink = () =>
 		firstMessage.author ? (
 			<Link
@@ -199,15 +202,12 @@ export function MessagePage(props: { data: MessagePageData }) {
 		<main className="flex w-full max-w-3xl grow flex-col gap-4">
 			<div className="flex flex-col gap-2 pl-2">
 				<div className="flex flex-row items-center gap-2">
-					<Link href={`/c/${data.server.discordId.toString()}`}>
+					<Link href={serverHref}>
 						<ServerIcon server={data.server} size={48} />
 					</Link>
 					<div className="flex flex-col">
 						<div className="flex flex-row items-center gap-2">
-							<Link
-								href={`/c/${data.server.discordId.toString()}`}
-								className="hover:underline"
-							>
+							<Link href={serverHref} className="hover:underline">
 								{data.server.name}
 							</Link>
 							<span className="text-sm text-muted-foreground">•</span>
@@ -269,7 +269,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 			<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block">
 				<div className="flex flex-col items-start gap-4 p-4">
 					<div className="flex w-full flex-row items-center justify-between truncate font-bold">
-						<Link href={getServerHomepageUrl(data.server)}>
+						<Link href={tenant ? "/" : getServerHomepageUrl(data.server)}>
 							{data.server.name}
 						</Link>
 						<ServerInviteJoinButton
