@@ -6,7 +6,7 @@ import type {
 	FunctionReturnType,
 } from "convex/server";
 
-import { Cache, Config, Context, Duration, Effect, Layer } from "effect";
+import { Config, Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Emoji, Message } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
@@ -71,11 +71,25 @@ function buildFunctionPath(
 	return `${namespacePath.join(".")}.${functionName}`;
 }
 
-function createQueryCacheKey(
+function sortObjectKeys(obj: unknown): unknown {
+	if (obj === null || typeof obj !== "object") {
+		return obj;
+	}
+	if (Array.isArray(obj)) {
+		return obj.map(sortObjectKeys);
+	}
+	const sorted: Record<string, unknown> = {};
+	for (const key of Object.keys(obj).sort()) {
+		sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);
+	}
+	return sorted;
+}
+
+export function createQueryCacheKey(
 	functionPath: string,
 	args: Record<string, unknown>,
 ): string {
-	return JSON.stringify({ functionPath, args });
+	return JSON.stringify({ args: sortObjectKeys(args), functionPath });
 }
 
 function callClientMethod(
@@ -108,35 +122,42 @@ export const service = Effect.gen(function* () {
 		internal,
 	});
 
-	const queryCacheLookupContexts = new Map<
+	const queryResultCache = new Map<
 		string,
-		{ funcRef: FunctionReference<any, any>; args: Record<string, unknown> }
+		{ value: unknown; expiresAt: number }
 	>();
+	const CACHE_TTL_MS = 5 * 60 * 1000;
+	const CACHE_MAX_SIZE = 500;
 
-	const queryCache = Effect.gen(function* () {
-		return yield* Cache.make({
-			capacity: 500,
-			timeToLive: Duration.minutes(5),
-			lookup: (cacheKey: string) =>
-				Effect.gen(function* () {
-					const context = queryCacheLookupContexts.get(cacheKey);
-					if (!context) {
-						return yield* Effect.fail(
-							new ConvexError({
-								cause: new Error(`Query context missing for key: ${cacheKey}`),
-							}),
-						);
+	const getCachedOrFetch = (
+		cacheKey: string,
+		funcRef: FunctionReference<any, any>,
+		args: Record<string, unknown>,
+	): Effect.Effect<unknown, ConvexError> => {
+		const now = Date.now();
+		const cached = queryResultCache.get(cacheKey);
+
+		if (cached && cached.expiresAt > now) {
+			return Effect.succeed(cached.value);
+		}
+
+		return callClientMethod("query", funcRef, convexClient.client, args).pipe(
+			Effect.tap((value) =>
+				Effect.sync(() => {
+					if (queryResultCache.size >= CACHE_MAX_SIZE) {
+						const oldestKey = queryResultCache.keys().next().value;
+						if (oldestKey) {
+							queryResultCache.delete(oldestKey);
+						}
 					}
-
-					return yield* callClientMethod(
-						"query",
-						context.funcRef,
-						convexClient.client,
-						context.args,
-					);
+					queryResultCache.set(cacheKey, {
+						value,
+						expiresAt: now + CACHE_TTL_MS,
+					});
 				}),
-		});
-	}).pipe(Effect.runSync);
+			),
+		);
+	};
 
 	const createProxy = <T extends Record<string, any>>(
 		target: T,
@@ -196,14 +217,7 @@ export const service = Effect.gen(function* () {
 							});
 						}
 
-						if (!queryCacheLookupContexts.has(cacheKey)) {
-							queryCacheLookupContexts.set(cacheKey, {
-								funcRef,
-								args: fullArgs,
-							});
-						}
-
-						return queryCache.get(cacheKey);
+						return getCachedOrFetch(cacheKey, funcRef, fullArgs);
 					}) as TransformToFunctions<T>[typeof prop];
 
 					return wrappedFunction;
