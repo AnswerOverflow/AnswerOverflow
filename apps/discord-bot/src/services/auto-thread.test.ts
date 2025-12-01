@@ -6,13 +6,13 @@ import { ChannelType, type Guild, MessageType } from "discord.js";
 import { Effect, type Either } from "effect";
 import { describe } from "vitest";
 import { DiscordClientMock } from "../core/discord-client-mock";
-import { TestLayer } from "../utils/layers";
+import { TestLayer } from "../core/layers";
+import { syncChannel } from "../sync/channel";
 import {
 	AutoThreadError,
 	AutoThreadErrorCode,
 	handleAutoThread,
 } from "./auto-thread";
-import { syncChannel } from "./channel-parity";
 
 const setupTestChannel = (
 	autoThreadEnabled = true,

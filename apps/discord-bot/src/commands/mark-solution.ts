@@ -4,7 +4,7 @@ import { ChannelType } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { toAOMessage, toUpsertMessageArgs } from "../utils/conversions";
-import { makeMarkSolutionResponse } from "./mark-solution";
+import { makeMarkSolutionResponse } from "../services/mark-solution";
 
 export function handleMarkSolutionCommand(
 	interaction: ContextMenuCommandInteraction,
