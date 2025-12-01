@@ -339,8 +339,8 @@ function indexTextChannel(
 						yield* database.private.channels.upsertManyChannels({
 							channels: [
 								{
-									create: toAOChannel(thread, discordServerId),
-									update: toAOChannel(thread, discordServerId),
+									create: toAOChannel(thread),
+									update: toAOChannel(thread),
 								},
 							],
 						});
@@ -413,8 +413,8 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 					yield* database.private.channels.upsertManyChannels({
 						channels: [
 							{
-								create: toAOChannel(thread, discordServerId),
-								update: toAOChannel(thread, discordServerId),
+								create: toAOChannel(thread),
+								update: toAOChannel(thread),
 							},
 						],
 					});
@@ -506,7 +506,6 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 
 function indexGuild(guild: Guild) {
 	return Effect.gen(function* () {
-		const discord = yield* Discord;
 		yield* Effect.logDebug(
 			`Starting indexing for guild: ${guild.name} (${guild.id})`,
 		);
@@ -526,7 +525,7 @@ function indexGuild(guild: Guild) {
 			return;
 		}
 
-		const channels = yield* discord.getChannels(guild.id);
+		const channels = Arr.fromIterable(guild.channels.cache.values());
 
 		const indexableChannels = Arr.filter(
 			channels,

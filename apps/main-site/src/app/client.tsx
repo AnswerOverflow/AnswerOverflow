@@ -1,5 +1,5 @@
-import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import type { Doc } from "@packages/database/convex/_generated/dataModel";
+import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { ThreadCard } from "@packages/ui/components/thread-card";
 
 type ThreadResult = SearchResult & {

@@ -1,7 +1,7 @@
 import { Database } from "@packages/database/database";
 import { Storage } from "@packages/database/storage";
-import type { Guild, GuildChannel } from "discord.js";
-import { Console, Effect, Layer } from "effect";
+import type { Guild } from "discord.js";
+import { Array as Arr, Console, Effect, Layer } from "effect";
 import { registerCommands } from "../commands/register";
 import { Discord } from "../core/discord-service";
 import {
@@ -29,7 +29,6 @@ function toAOServer(guild: Guild) {
 
 export function syncGuild(guild: Guild) {
 	return Effect.gen(function* () {
-		const discord = yield* Discord;
 		const database = yield* Database;
 
 		yield* Console.log(`Syncing server ${guild.id} ${guild.name}`);
@@ -104,13 +103,10 @@ export function syncGuild(guild: Guild) {
 			}
 		}
 
-		const channels = yield* discord.getChannels(guild.id);
+		const channels = Arr.fromIterable(guild.channels.cache.values());
 		const rootChannels = channels.filter((channel) => {
-			if (!("guild" in channel) || !channel.guild) return false;
-			if (!("type" in channel)) return false;
-			if (!("name" in channel)) return false;
 			return isAllowedRootChannelType(channel.type);
-		}) as GuildChannel[];
+		});
 
 		if (rootChannels.length > 0) {
 			const channelsToUpsert = rootChannels.map((channel) => {
