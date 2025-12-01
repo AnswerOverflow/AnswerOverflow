@@ -24,7 +24,7 @@ export const ROOT_CHANNEL_TYPES = [
 	CHANNEL_TYPE.GuildForum,
 ] as const;
 
-const DEFAULT_CHANNEL_SETTINGS = {
+export const DEFAULT_CHANNEL_SETTINGS = {
 	channelId: 0n,
 	indexingEnabled: false,
 	markSolutionEnabled: false,

@@ -4,16 +4,11 @@ import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { privateMutation, privateQuery } from "../client";
 import { serverSchema } from "../schema";
-import { CHANNEL_TYPE, isThreadType } from "../shared/shared";
-
-const DEFAULT_CHANNEL_SETTINGS = {
-	channelId: "",
-	indexingEnabled: false,
-	markSolutionEnabled: false,
-	sendMarkSolutionInstructionsInNewThreads: false,
-	autoThreadEnabled: false,
-	forumGuidelinesConsentEnabled: false,
-};
+import {
+	CHANNEL_TYPE,
+	DEFAULT_CHANNEL_SETTINGS,
+	isThreadType,
+} from "../shared/shared";
 
 export const upsertServer = privateMutation({
 	args: serverSchema,

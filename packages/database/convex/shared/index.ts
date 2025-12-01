@@ -5,6 +5,7 @@ export {
 
 export {
 	CHANNEL_TYPE,
+	DEFAULT_CHANNEL_SETTINGS,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
 	isThreadType,
