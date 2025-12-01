@@ -33,24 +33,13 @@ import { getDate } from "@packages/ui/utils/snowflake";
 import type { FunctionReturnType } from "convex/server";
 import { Array as Arr, Predicate } from "effect";
 import { ExternalLink, MessageSquare } from "lucide-react";
+import { JsonLdScript } from "@/components/json-ld-script";
 
 type MessagePageData = NonNullable<
 	FunctionReturnType<typeof api.private.messages.getMessagePageData>
 >;
 
 const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
-
-function _getDiscordAvatarUrl(
-	userId: string,
-	avatar?: string,
-	size = 40,
-): string {
-	if (avatar) {
-		return `https://cdn.discordapp.com/avatars/${userId}/${avatar}.webp?size=${size}`;
-	}
-	const defaultAvatar = (parseInt(userId) % 5).toString();
-	return `/discord/${defaultAvatar}.png`;
-}
 
 export function MessagePage(props: { data: MessagePageData }) {
 	const { data } = props;
@@ -347,11 +336,9 @@ export function MessagePage(props: { data: MessagePageData }) {
 			);
 			if (customUrl) return customUrl;
 		}
-		const hostname =
-			typeof window !== "undefined"
-				? window.location.hostname
-				: "www.answeroverflow.com";
-		return `https://${hostname}/m/${(data.thread?.id ?? firstMessage.message.id).toString()}`;
+		const baseUrl =
+			process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.answeroverflow.com";
+		return `${baseUrl}/m/${(data.thread?.id ?? firstMessage.message.id).toString()}`;
 	};
 
 	const jsonLdData = {
@@ -395,7 +382,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 	return (
 		<MessageResultPageProvider>
 			<div className="mx-auto pt-2">
-				<script type="application/ld+json">{JSON.stringify(jsonLdData)}</script>
+				<JsonLdScript data={jsonLdData} scriptKey="message-jsonld" />
 
 				<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
 					<Main />
