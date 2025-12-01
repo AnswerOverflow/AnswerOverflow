@@ -1,191 +1,226 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@effect/vitest";
+import { Effect } from "effect";
+import { Database } from "./database";
+import { DatabaseTestLayer } from "./database-test";
 
-function sortObjectKeys(obj: unknown): unknown {
-	if (obj === null || typeof obj !== "object") {
-		return obj;
-	}
-	if (Array.isArray(obj)) {
-		return obj.map(sortObjectKeys);
-	}
-	const sorted: Record<string, unknown> = {};
-	for (const key of Object.keys(obj).sort()) {
-		sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);
-	}
-	return sorted;
-}
+describe("Database query caching", () => {
+	it.scoped(
+		"should cache query results and only make one query to Convex",
+		() =>
+			Effect.gen(function* () {
+				const database = yield* Database;
 
-function createQueryCacheKey(
-	functionPath: string,
-	args: Record<string, unknown>,
-): string {
-	return JSON.stringify({ args: sortObjectKeys(args), functionPath });
-}
+				const testDiscordId = BigInt(Date.now());
 
-describe("createQueryCacheKey", () => {
-	it("should create consistent keys regardless of object key order", () => {
-		const key1 = createQueryCacheKey("test.query", { a: 1, b: 2, c: 3 });
-		const key2 = createQueryCacheKey("test.query", { c: 3, a: 1, b: 2 });
-		const key3 = createQueryCacheKey("test.query", { b: 2, c: 3, a: 1 });
+				yield* database.private.servers.upsertServer({
+					discordId: testDiscordId,
+					name: "Test Server",
+					approximateMemberCount: 100,
+					plan: "FREE",
+				});
 
-		expect(key1).toBe(key2);
-		expect(key2).toBe(key3);
-	});
+				database.metrics.resetQueryMetrics();
 
-	it("should create different keys for different function paths", () => {
-		const key1 = createQueryCacheKey("test.query1", { a: 1 });
-		const key2 = createQueryCacheKey("test.query2", { a: 1 });
+				const cacheKey = database.metrics.createCacheKey(
+					"servers.getServerByDiscordId",
+					{
+						discordId: testDiscordId,
+						backendAccessToken: "test-backend-access-token",
+					},
+				);
 
-		expect(key1).not.toBe(key2);
-	});
+				const result1 = yield* database.private.servers.getServerByDiscordId({
+					discordId: testDiscordId,
+				});
+				expect(result1).not.toBeNull();
+				expect(result1?.name).toBe("Test Server");
 
-	it("should create different keys for different args", () => {
-		const key1 = createQueryCacheKey("test.query", { a: 1 });
-		const key2 = createQueryCacheKey("test.query", { a: 2 });
+				const metricsAfterFirst = database.metrics.getQueryMetrics(cacheKey);
+				expect(metricsAfterFirst.misses).toBe(1);
+				expect(metricsAfterFirst.hits).toBe(0);
 
-		expect(key1).not.toBe(key2);
-	});
+				const result2 = yield* database.private.servers.getServerByDiscordId({
+					discordId: testDiscordId,
+				});
+				expect(result2).not.toBeNull();
+				expect(result2?.name).toBe("Test Server");
 
-	it("should handle nested objects with consistent key ordering", () => {
-		const key1 = createQueryCacheKey("test.query", {
-			outer: { b: 2, a: 1 },
-			z: "last",
-		});
-		const key2 = createQueryCacheKey("test.query", {
-			z: "last",
-			outer: { a: 1, b: 2 },
-		});
+				const metricsAfterSecond = database.metrics.getQueryMetrics(cacheKey);
+				expect(metricsAfterSecond.misses).toBe(1);
+				expect(metricsAfterSecond.hits).toBe(1);
 
-		expect(key1).toBe(key2);
-	});
+				expect(result1?.discordId).toBe(result2?.discordId);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+	);
 
-	it("should handle arrays correctly", () => {
-		const key1 = createQueryCacheKey("test.query", { items: [1, 2, 3] });
-		const key2 = createQueryCacheKey("test.query", { items: [1, 2, 3] });
-		const key3 = createQueryCacheKey("test.query", { items: [3, 2, 1] });
+	it.scoped("should return null for non-existent server", () =>
+		Effect.gen(function* () {
+			const database = yield* Database;
 
-		expect(key1).toBe(key2);
-		expect(key1).not.toBe(key3);
-	});
+			const nonExistentId = BigInt(999999999999);
 
-	it("should handle null and undefined values", () => {
-		const key1 = createQueryCacheKey("test.query", { a: null, b: 1 });
-		const key2 = createQueryCacheKey("test.query", { b: 1, a: null });
-
-		expect(key1).toBe(key2);
-	});
-
-	it("should handle empty args", () => {
-		const key1 = createQueryCacheKey("test.query", {});
-		const key2 = createQueryCacheKey("test.query", {});
-
-		expect(key1).toBe(key2);
-	});
-
-	it("should handle deeply nested structures", () => {
-		const key1 = createQueryCacheKey("test.query", {
-			level1: {
-				level2: {
-					level3: { c: 3, b: 2, a: 1 },
-				},
-			},
-		});
-		const key2 = createQueryCacheKey("test.query", {
-			level1: {
-				level2: {
-					level3: { a: 1, b: 2, c: 3 },
-				},
-			},
-		});
-
-		expect(key1).toBe(key2);
-	});
-
-	it("should handle arrays with objects inside", () => {
-		const key1 = createQueryCacheKey("test.query", {
-			items: [
-				{ b: 2, a: 1 },
-				{ d: 4, c: 3 },
-			],
-		});
-		const key2 = createQueryCacheKey("test.query", {
-			items: [
-				{ a: 1, b: 2 },
-				{ c: 3, d: 4 },
-			],
-		});
-
-		expect(key1).toBe(key2);
-	});
-});
-
-describe("QueryResultCache", () => {
-	const createCache = (ttlMs: number, maxSize: number) => {
-		const cache = new Map<string, { value: unknown; expiresAt: number }>();
-
-		const get = (key: string): { value: unknown; hit: boolean } | null => {
-			const cached = cache.get(key);
-			if (!cached) return null;
-			if (cached.expiresAt <= Date.now()) {
-				cache.delete(key);
-				return null;
-			}
-			return { value: cached.value, hit: true };
-		};
-
-		const set = (key: string, value: unknown) => {
-			if (cache.size >= maxSize) {
-				const oldestKey = cache.keys().next().value;
-				if (oldestKey) {
-					cache.delete(oldestKey);
-				}
-			}
-			cache.set(key, {
-				value,
-				expiresAt: Date.now() + ttlMs,
+			const result = yield* database.private.servers.getServerByDiscordId({
+				discordId: nonExistentId,
 			});
-		};
 
-		return { get, set, size: () => cache.size };
-	};
+			expect(result).toBeNull();
+		}).pipe(Effect.provide(DatabaseTestLayer)),
+	);
 
-	it("should return cached value on cache hit", () => {
-		const cache = createCache(60000, 100);
-		cache.set("key1", "value1");
+	it.scoped("should cache different queries separately", () =>
+		Effect.gen(function* () {
+			const database = yield* Database;
 
-		const result = cache.get("key1");
-		expect(result).toEqual({ value: "value1", hit: true });
-	});
+			const testDiscordId1 = BigInt(Date.now());
+			const testDiscordId2 = BigInt(Date.now() + 1);
 
-	it("should return null on cache miss", () => {
-		const cache = createCache(60000, 100);
+			yield* database.private.servers.upsertServer({
+				discordId: testDiscordId1,
+				name: "Server One",
+				approximateMemberCount: 50,
+				plan: "FREE",
+			});
 
-		const result = cache.get("nonexistent");
-		expect(result).toBeNull();
-	});
+			yield* database.private.servers.upsertServer({
+				discordId: testDiscordId2,
+				name: "Server Two",
+				approximateMemberCount: 75,
+				plan: "FREE",
+			});
 
-	it("should evict oldest entry when max size is reached", () => {
-		const cache = createCache(60000, 3);
-		cache.set("key1", "value1");
-		cache.set("key2", "value2");
-		cache.set("key3", "value3");
+			database.metrics.resetQueryMetrics();
 
-		expect(cache.size()).toBe(3);
+			const cacheKey1 = database.metrics.createCacheKey(
+				"servers.getServerByDiscordId",
+				{
+					discordId: testDiscordId1,
+					backendAccessToken: "test-backend-access-token",
+				},
+			);
+			const cacheKey2 = database.metrics.createCacheKey(
+				"servers.getServerByDiscordId",
+				{
+					discordId: testDiscordId2,
+					backendAccessToken: "test-backend-access-token",
+				},
+			);
 
-		cache.set("key4", "value4");
+			const result1 = yield* database.private.servers.getServerByDiscordId({
+				discordId: testDiscordId1,
+			});
+			const result2 = yield* database.private.servers.getServerByDiscordId({
+				discordId: testDiscordId2,
+			});
 
-		expect(cache.size()).toBe(3);
-		expect(cache.get("key1")).toBeNull();
-		expect(cache.get("key4")).toEqual({ value: "value4", hit: true });
-	});
+			expect(result1?.name).toBe("Server One");
+			expect(result2?.name).toBe("Server Two");
 
-	it("should expire entries after TTL", async () => {
-		const cache = createCache(50, 100);
-		cache.set("key1", "value1");
+			expect(database.metrics.getQueryMetrics(cacheKey1).misses).toBe(1);
+			expect(database.metrics.getQueryMetrics(cacheKey1).hits).toBe(0);
+			expect(database.metrics.getQueryMetrics(cacheKey2).misses).toBe(1);
+			expect(database.metrics.getQueryMetrics(cacheKey2).hits).toBe(0);
 
-		expect(cache.get("key1")).toEqual({ value: "value1", hit: true });
+			const result1Again = yield* database.private.servers.getServerByDiscordId(
+				{
+					discordId: testDiscordId1,
+				},
+			);
+			const result2Again = yield* database.private.servers.getServerByDiscordId(
+				{
+					discordId: testDiscordId2,
+				},
+			);
 
-		await new Promise((resolve) => setTimeout(resolve, 60));
+			expect(result1Again?.name).toBe("Server One");
+			expect(result2Again?.name).toBe("Server Two");
 
-		expect(cache.get("key1")).toBeNull();
-	});
+			expect(database.metrics.getQueryMetrics(cacheKey1).misses).toBe(1);
+			expect(database.metrics.getQueryMetrics(cacheKey1).hits).toBe(1);
+			expect(database.metrics.getQueryMetrics(cacheKey2).misses).toBe(1);
+			expect(database.metrics.getQueryMetrics(cacheKey2).hits).toBe(1);
+		}).pipe(Effect.provide(DatabaseTestLayer)),
+	);
+
+	it.scoped("should cache getAllServers query", () =>
+		Effect.gen(function* () {
+			const database = yield* Database;
+
+			const testDiscordId = BigInt(Date.now());
+
+			yield* database.private.servers.upsertServer({
+				discordId: testDiscordId,
+				name: "Cached Server",
+				approximateMemberCount: 200,
+				plan: "FREE",
+			});
+
+			database.metrics.resetQueryMetrics();
+
+			const cacheKey = database.metrics.createCacheKey(
+				"servers.getAllServers",
+				{
+					backendAccessToken: "test-backend-access-token",
+				},
+			);
+
+			const allServers1 = yield* database.private.servers.getAllServers();
+			expect(allServers1.length).toBeGreaterThan(0);
+
+			expect(database.metrics.getQueryMetrics(cacheKey).misses).toBe(1);
+			expect(database.metrics.getQueryMetrics(cacheKey).hits).toBe(0);
+
+			const allServers2 = yield* database.private.servers.getAllServers();
+			expect(allServers2.length).toBe(allServers1.length);
+
+			expect(database.metrics.getQueryMetrics(cacheKey).misses).toBe(1);
+			expect(database.metrics.getQueryMetrics(cacheKey).hits).toBe(1);
+		}).pipe(Effect.provide(DatabaseTestLayer)),
+	);
+
+	it.scoped("should handle concurrent queries for the same data", () =>
+		Effect.gen(function* () {
+			const database = yield* Database;
+
+			const testDiscordId = BigInt(Date.now());
+
+			yield* database.private.servers.upsertServer({
+				discordId: testDiscordId,
+				name: "Concurrent Server",
+				approximateMemberCount: 100,
+				plan: "FREE",
+			});
+
+			database.metrics.resetQueryMetrics();
+
+			const cacheKey = database.metrics.createCacheKey(
+				"servers.getServerByDiscordId",
+				{
+					discordId: testDiscordId,
+					backendAccessToken: "test-backend-access-token",
+				},
+			);
+
+			const [result1, result2] = yield* Effect.all(
+				[
+					database.private.servers.getServerByDiscordId({
+						discordId: testDiscordId,
+					}),
+					database.private.servers.getServerByDiscordId({
+						discordId: testDiscordId,
+					}),
+				],
+				{ concurrency: "unbounded" },
+			);
+
+			expect(result1).not.toBeNull();
+			expect(result2).not.toBeNull();
+			expect(result1?.name).toBe("Concurrent Server");
+			expect(result2?.name).toBe("Concurrent Server");
+			expect(result1?.discordId).toBe(result2?.discordId);
+
+			const metrics = database.metrics.getQueryMetrics(cacheKey);
+			expect(metrics.misses).toBe(1);
+			expect(metrics.hits).toBe(0);
+		}).pipe(Effect.provide(DatabaseTestLayer)),
+	);
 });

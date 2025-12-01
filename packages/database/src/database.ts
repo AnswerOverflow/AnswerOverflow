@@ -5,8 +5,10 @@ import type {
 	FunctionReference,
 	FunctionReturnType,
 } from "convex/server";
+import type { Value } from "convex/values";
+import { convexToJson } from "convex/values";
 
-import { Config, Context, Effect, Layer } from "effect";
+import { Config, Context, Effect, Equal, Hash, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import type { Emoji, Message } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
@@ -71,25 +73,14 @@ function buildFunctionPath(
 	return `${namespacePath.join(".")}.${functionName}`;
 }
 
-function sortObjectKeys(obj: unknown): unknown {
-	if (obj === null || typeof obj !== "object") {
-		return obj;
-	}
-	if (Array.isArray(obj)) {
-		return obj.map(sortObjectKeys);
-	}
-	const sorted: Record<string, unknown> = {};
-	for (const key of Object.keys(obj).sort()) {
-		sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);
-	}
-	return sorted;
-}
-
 export function createQueryCacheKey(
 	functionPath: string,
 	args: Record<string, unknown>,
 ): string {
-	return JSON.stringify({ args: sortObjectKeys(args), functionPath });
+	return JSON.stringify({
+		args: convexToJson(args as unknown as Value),
+		functionPath,
+	});
 }
 
 function callClientMethod(
@@ -122,41 +113,71 @@ export const service = Effect.gen(function* () {
 		internal,
 	});
 
-	const queryResultCache = new Map<
-		string,
-		{ value: unknown; expiresAt: number }
-	>();
-	const CACHE_TTL_MS = 5 * 60 * 1000;
-	const CACHE_MAX_SIZE = 500;
+	const queryMetrics = {
+		hits: new Map<string, number>(),
+		misses: new Map<string, number>(),
+	};
+
+	const incrementCacheHit = (cacheKey: string) => {
+		queryMetrics.hits.set(cacheKey, (queryMetrics.hits.get(cacheKey) ?? 0) + 1);
+	};
+
+	const incrementCacheMiss = (cacheKey: string) => {
+		queryMetrics.misses.set(
+			cacheKey,
+			(queryMetrics.misses.get(cacheKey) ?? 0) + 1,
+		);
+	};
+
+	class QueryCacheKey {
+		constructor(
+			readonly cacheKey: string,
+			readonly funcRef: FunctionReference<any, any>,
+			readonly args: Record<string, unknown>,
+		) {}
+
+		[Equal.symbol](that: unknown): boolean {
+			return that instanceof QueryCacheKey && this.cacheKey === that.cacheKey;
+		}
+
+		[Hash.symbol](): number {
+			return Hash.string(this.cacheKey);
+		}
+	}
+
+	const completedQueries = new Set<string>();
+
+	const cachedQuery = Effect.runSync(
+		Effect.cachedFunction((key: QueryCacheKey) =>
+			Effect.gen(function* () {
+				incrementCacheMiss(key.cacheKey);
+				const result = yield* callClientMethod(
+					"query",
+					key.funcRef,
+					convexClient.client,
+					key.args,
+				);
+				completedQueries.add(key.cacheKey);
+				return result;
+			}),
+		),
+	);
 
 	const getCachedOrFetch = (
 		cacheKey: string,
 		funcRef: FunctionReference<any, any>,
 		args: Record<string, unknown>,
 	): Effect.Effect<unknown, ConvexError> => {
-		const now = Date.now();
-		const cached = queryResultCache.get(cacheKey);
+		const key = new QueryCacheKey(cacheKey, funcRef, args);
+		const wasCompleted = completedQueries.has(cacheKey);
 
-		if (cached && cached.expiresAt > now) {
-			return Effect.succeed(cached.value);
-		}
-
-		return callClientMethod("query", funcRef, convexClient.client, args).pipe(
-			Effect.tap((value) =>
-				Effect.sync(() => {
-					if (queryResultCache.size >= CACHE_MAX_SIZE) {
-						const oldestKey = queryResultCache.keys().next().value;
-						if (oldestKey) {
-							queryResultCache.delete(oldestKey);
-						}
-					}
-					queryResultCache.set(cacheKey, {
-						value,
-						expiresAt: now + CACHE_TTL_MS,
-					});
-				}),
-			),
-		);
+		return Effect.gen(function* () {
+			const result = yield* cachedQuery(key);
+			if (wasCompleted) {
+				incrementCacheHit(cacheKey);
+			}
+			return result;
+		});
 	};
 
 	const createProxy = <T extends Record<string, any>>(
@@ -250,13 +271,32 @@ export const service = Effect.gen(function* () {
 	const publicProxy = createProxy(api.public, [], false);
 	const authenticatedProxy = createProxy(api.authenticated, [], false);
 
-	const result = {
+	const getQueryMetrics = (cacheKey: string) => ({
+		hits: queryMetrics.hits.get(cacheKey) ?? 0,
+		misses: queryMetrics.misses.get(cacheKey) ?? 0,
+	});
+
+	const getAllQueryMetrics = () => ({
+		hits: new Map(queryMetrics.hits),
+		misses: new Map(queryMetrics.misses),
+	});
+
+	const resetQueryMetrics = () => {
+		queryMetrics.hits.clear();
+		queryMetrics.misses.clear();
+	};
+
+	return {
 		public: publicProxy,
 		authenticated: authenticatedProxy,
 		private: privateProxy,
+		metrics: {
+			getQueryMetrics,
+			getAllQueryMetrics,
+			resetQueryMetrics,
+			createCacheKey: createQueryCacheKey,
+		},
 	};
-
-	return result;
 });
 export class Database extends Context.Tag("Database")<
 	Database,
