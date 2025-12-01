@@ -10,15 +10,6 @@ export const UserParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("userUpdate", (_oldUser, newUser) =>
 			Effect.gen(function* () {
-				const existing =
-					yield* database.private.discord_accounts.getDiscordAccountById({
-						id: BigInt(newUser.id),
-					});
-
-				if (!existing) {
-					return;
-				}
-
 				yield* database.private.discord_accounts.upsertDiscordAccount({
 					account: toAODiscordAccount(newUser),
 				});
