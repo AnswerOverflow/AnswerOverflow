@@ -26,15 +26,6 @@ function getDefaultDiscordAccount(data: {
 	};
 }
 
-export const getDiscordAccountById = privateQuery({
-	args: {
-		id: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		return await getDiscordAccountByIdShared(ctx, args.id);
-	},
-});
-
 export const upsertDiscordAccount = privateMutation({
 	args: {
 		account: discordAccountSchema,
