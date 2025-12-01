@@ -2,33 +2,6 @@
 
 Found during server/serverPreferences schema split refactoring.
 
-## High Priority (Similar to Server/ServerPreferences Split)
-
-### 1. `userServerSettings` Mixed Concerns
-
-**File**: `packages/database/convex/schema.ts` lines 54-63
-
-The `userServerSettings` table mixes:
-
-- **Discord data**: `permissions` (synced from Discord API)
-- **App settings**: `canPubliclyDisplayMessages`, `messageIndexingDisabled`, `apiKey`, `apiCallsUsed`, `botAddedTimestamp`
-
-**Recommendation**: Split into `userServerPermissions` (Discord data) and `userServerPreferences` (app settings), same pattern as server/serverPreferences.
-
-**Files affected**:
-
-- `packages/database/convex/schema.ts`
-- `packages/database/convex/private/user_server_settings.ts`
-- `packages/database/convex/shared/users.ts`
-
-### 2. `inviteCode` on `channelSchema`
-
-**File**: `packages/database/convex/schema.ts` line 75
-
-The `inviteCode` field is app-generated (AnswerOverflow creates invite codes), not Discord-synced data. It should be on `channelSettingsSchema`.
-
----
-
 ## Medium Priority (Function Consolidation)
 
 ### 3. Duplicate `DEFAULT_CHANNEL_SETTINGS` (3 files)
@@ -48,7 +21,7 @@ Same pattern in:
 - `apps/discord-bot/src/handlers/forum-guidelines-consent.ts` (lines 84-106)
 - `apps/discord-bot/src/handlers/read-the-rules-consent.ts` (lines 71-93)
 
-**Recommendation**: Extract `grantPublicDisplayConsent(database, userId, serverId)` helper.
+**Recommendation**: Extract `grantPublicDisplayConsent(userId, serverId)` helper.
 
 ### 7. Duplicate `makeDismissButton` (2 files, identical function)
 
@@ -93,7 +66,7 @@ Mix of `getOneFrom()` vs manual `.query().withIndex().unique()` patterns for the
 
 All manually destructure and rebuild message objects for upsert.
 
-**Recommendation**: Create `upsertMessageFromAO(database, aoMessage)` helper.
+**Recommendation**: Create `upsertMessageFromAO(aoMessage)` helper.
 
 ### 12. Server Lookup Pattern Duplication
 
@@ -112,7 +85,7 @@ if (!server) {
 
 **Files**: message-parity.ts, channel-parity.ts, forum-guidelines-consent.ts, read-the-rules-consent.ts, mark-solution-command.ts, channel-settings-command.ts, manage-account-command.ts
 
-**Recommendation**: Create `getServerOrFail(database, guildId)` helper that returns `Effect<Server, ServerNotFoundError>`.
+**Recommendation**: Create `getServerOrFail(guildId)` helper that returns `Effect<Server, ServerNotFoundError>`.
 
 ### 13. Duplicate Ignored Account Check
 
@@ -122,4 +95,4 @@ if (!server) {
 - `apps/discord-bot/src/handlers/read-the-rules-consent.ts` (lines 45-54)
 - `apps/discord-bot/src/handlers/manage-account-command.ts` (lines 194-200)
 
-**Recommendation**: Extract `isAccountIgnored(database, userId): Effect<boolean>` helper.
+**Recommendation**: Extract `isAccountIgnored(userId): Effect<boolean>` helper.
