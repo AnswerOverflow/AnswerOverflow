@@ -14,18 +14,6 @@ No efficient way to look up a specific reaction by `messageId + userId + emojiId
 
 **Recommendation**: Add composite index `by_messageId_userId_emojiId`.
 
-### 11. Duplicate Message Upsert Object Construction
-
-**Files**:
-
-- `apps/discord-bot/src/handlers/message-parity.ts` (lines 67-91 and 189-213)
-- `apps/discord-bot/src/handlers/indexing.ts` (lines 191-216)
-- `apps/discord-bot/src/handlers/mark-solution-command.ts` (lines 181-205)
-
-All manually destructure and rebuild message objects for upsert.
-
-**Recommendation**: Create `upsertMessageFromAO(aoMessage)` helper.
-
 ### 12. Server Lookup Pattern Duplication
 
 Nearly every handler has this pattern:

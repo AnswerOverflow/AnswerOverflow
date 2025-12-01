@@ -10,10 +10,9 @@
 
 ## Priority 2: High (User-Facing Features)
 
-| Feature                   | Description                                         | Status                             |
-| ------------------------- | --------------------------------------------------- | ---------------------------------- |
-| **Solved Tag Selection**  | Dashboard UI to select solved tag per forum channel | Missing from channel settings page |
-| **Client-side Analytics** | PostHog JS initialization and event capture         | TrackLoad only logs to console     |
+| Feature                   | Description                                 | Status                         |
+| ------------------------- | ------------------------------------------- | ------------------------------ |
+| **Client-side Analytics** | PostHog JS initialization and event capture | TrackLoad only logs to console |
 
 ## Priority 3: Medium (Bot Features)
 
@@ -26,10 +25,9 @@
 
 ## Priority 4: Lower Priority
 
-| Feature                         | Description                                      | Status          |
-| ------------------------------- | ------------------------------------------------ | --------------- |
-| **Vestaboard Stats Reporter**   | Daily stats to Vestaboard display                | Not implemented |
-| **Integrations Dashboard Page** | `/dashboard/[serverId]/integrations` with InKeep | Not implemented |
+| Feature                       | Description                       | Status          |
+| ----------------------------- | --------------------------------- | --------------- |
+| **Vestaboard Stats Reporter** | Daily stats to Vestaboard display | Not implemented |
 
 ## Schema/Database Gaps
 
@@ -42,7 +40,6 @@
 
 | Feature                           | Description                                         | Status                        |
 | --------------------------------- | --------------------------------------------------- | ----------------------------- |
-| **Bot-assisted Indexing**         | Enable indexing + fetch forum tags via bot          | Just toggles flags now        |
 | **Vercel Domain Hook**            | Actually call Vercel API when setting custom domain | Only saves to DB, no API call |
 | **Custom Domain Plan Gating**     | Require PRO+ plan for custom domains                | No plan check                 |
 | **Consolidated Dashboard+Stripe** | Single endpoint returning dashboard + billing state | Split into multiple calls     |
@@ -73,6 +70,7 @@
 | **Command Lifecycle Logging**        | Not needed                                                                   |
 | **Leave Server Button**              | Not needed                                                                   |
 | **API Key Refresh**                  | Not needed                                                                   |
+| **Integrations Dashboard Page**      | Unused                                                                       |
 
 ## Recently Implemented
 
