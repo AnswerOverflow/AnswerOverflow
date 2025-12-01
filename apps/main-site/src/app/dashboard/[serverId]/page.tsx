@@ -9,7 +9,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
-import { DateRangePicker } from "@packages/ui/components/date-range-picker";
 import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import { Link } from "@packages/ui/components/link";
 import { Spinner } from "@packages/ui/components/spinner";
@@ -25,7 +24,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { ExternalLink } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useAuthenticatedQuery } from "../../../lib/use-authenticated-query";
 
@@ -402,7 +400,6 @@ function TopPagesTable(props: { serverId: bigint }) {
 export default function DashboardOverviewPage() {
 	const params = useParams();
 	const serverId = params.serverId as string;
-	const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
@@ -428,11 +425,6 @@ export default function DashboardOverviewPage() {
 					</p>
 				</div>
 				<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-					<DateRangePicker
-						value={dateRange}
-						onChange={setDateRange}
-						placeholder="Select date range"
-					/>
 					<Button asChild variant="outline">
 						<Link
 							href={`/c/${server.discordId}`}
@@ -447,12 +439,9 @@ export default function DashboardOverviewPage() {
 			</div>
 
 			<div className="grid gap-6 lg:grid-cols-2">
-				<PageViewsChart serverId={serverIdBigInt} dateRange={dateRange} />
+				<PageViewsChart serverId={serverIdBigInt} />
 				<ServerInvitesChart serverId={serverIdBigInt} />
-				<QuestionsAndAnswersChart
-					serverId={serverIdBigInt}
-					dateRange={dateRange}
-				/>
+				<QuestionsAndAnswersChart serverId={serverIdBigInt} />
 				<TopQuestionSolversTable serverId={serverIdBigInt} />
 				<TopPagesTable serverId={serverIdBigInt} />
 			</div>
