@@ -1,25 +1,14 @@
 import type { GuildMember, Message, ThreadChannel } from "discord.js";
 import {
 	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Effect } from "effect";
-
-const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
-
-const DISMISS_ACTION_PREFIX = "dismiss";
-const DISMISS_BUTTON_LABEL = "Dismiss";
-
-function makeDismissButton(dismisserId: string): ButtonBuilder {
-	return new ButtonBuilder({
-		label: DISMISS_BUTTON_LABEL,
-		style: ButtonStyle.Secondary,
-		customId: `${DISMISS_ACTION_PREFIX}:${dismisserId}`,
-	});
-}
+import {
+	ANSWER_OVERFLOW_BLUE_HEX,
+	makeDismissButton,
+} from "../utils/discord-components";
 
 export class SendMarkSolutionInstructionsError extends Error {
 	constructor(
