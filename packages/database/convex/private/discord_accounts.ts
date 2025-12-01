@@ -35,41 +35,6 @@ export const getDiscordAccountById = privateQuery({
 	},
 });
 
-export const updateDiscordAccount = privateMutation({
-	args: {
-		account: discordAccountSchema,
-	},
-	handler: async (ctx, args) => {
-		const existing = await getOneFrom(
-			ctx.db,
-			"discordAccounts",
-			"by_discordAccountId",
-			args.account.id,
-			"id",
-		);
-
-		if (!existing) {
-			throw new Error("Account not found");
-		}
-
-		await ctx.db.patch(existing._id, args.account);
-
-		const updated = await getOneFrom(
-			ctx.db,
-			"discordAccounts",
-			"by_discordAccountId",
-			args.account.id,
-			"id",
-		);
-
-		if (!updated) {
-			throw new Error("Failed to update account");
-		}
-
-		return updated;
-	},
-});
-
 export const upsertDiscordAccount = privateMutation({
 	args: {
 		account: discordAccountSchema,

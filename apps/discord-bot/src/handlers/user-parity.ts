@@ -19,7 +19,7 @@ export const UserParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* database.private.discord_accounts.updateDiscordAccount({
+				yield* database.private.discord_accounts.upsertDiscordAccount({
 					account: toAODiscordAccount(newUser),
 				});
 			}).pipe(
