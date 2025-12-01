@@ -6,7 +6,7 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 - rate limiting
 - https://www.convex.dev/components/workpool may be relevant
 - https://www.convex.dev/components/aggregate use aggregate
-
+- https://docs.convex.dev/error#1 we're seeing write conflicts
 
 ## Sitemap
     /c/ sitemap

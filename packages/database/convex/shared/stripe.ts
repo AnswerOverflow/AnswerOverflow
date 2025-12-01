@@ -167,6 +167,68 @@ export async function createBillingPortalSession(input: {
 	return { url: session.url };
 }
 
+export type SyncedSubscriptionData =
+	| {
+			status: "active";
+			subscriptionId: string;
+			subscriptionStatus: Stripe.Subscription.Status;
+			priceId: string;
+			plan: Plan;
+			currentPeriodStart: number;
+			currentPeriodEnd: number;
+			cancelAtPeriodEnd: boolean;
+			cancelAt: number | null;
+			trialEnd: number | null;
+			isTrialActive: boolean;
+	  }
+	| {
+			status: "none";
+			plan: "FREE";
+	  };
+
+export async function syncStripeSubscription(
+	customerId: string,
+): Promise<SyncedSubscriptionData> {
+	const stripe = getStripeClient();
+
+	const subscriptions = await stripe.subscriptions.list({
+		customer: customerId,
+		limit: 1,
+		status: "all",
+	});
+
+	const subscription = subscriptions.data[0];
+	if (!subscription) {
+		return { status: "none", plan: "FREE" };
+	}
+
+	const priceId = subscription.items.data[0]?.price.id;
+	if (!priceId) {
+		return { status: "none", plan: "FREE" };
+	}
+
+	const plan = getPlanFromPriceId(priceId);
+	const isTrialActive = subscription.trial_end
+		? new Date() < new Date(subscription.trial_end * 1000)
+		: false;
+
+	const firstItem = subscription.items.data[0];
+
+	return {
+		status: "active",
+		subscriptionId: subscription.id,
+		subscriptionStatus: subscription.status,
+		priceId,
+		plan,
+		currentPeriodStart: firstItem?.current_period_start ?? 0,
+		currentPeriodEnd: firstItem?.current_period_end ?? 0,
+		cancelAtPeriodEnd: subscription.cancel_at_period_end,
+		cancelAt: subscription.cancel_at,
+		trialEnd: subscription.trial_end,
+		isTrialActive,
+	};
+}
+
 export function verifyWebhookSignature(
 	payload: string,
 	signature: string,
