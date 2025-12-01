@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect } from "effect";
+import { api } from "../convex/_generated/api";
 import { Database } from "./database";
 import { DatabaseTestLayer } from "./database-test";
 
@@ -21,21 +22,16 @@ describe("Database query caching", () => {
 
 				database.metrics.resetQueryMetrics();
 
-				const cacheKey = database.metrics.createCacheKey(
-					"servers.getServerByDiscordId",
-					{
-						discordId: testDiscordId,
-						backendAccessToken: "test-backend-access-token",
-					},
-				);
-
 				const result1 = yield* database.private.servers.getServerByDiscordId({
 					discordId: testDiscordId,
 				});
 				expect(result1).not.toBeNull();
 				expect(result1?.name).toBe("Test Server");
 
-				const metricsAfterFirst = database.metrics.getQueryMetrics(cacheKey);
+				const metricsAfterFirst = database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId },
+				);
 				expect(metricsAfterFirst.misses).toBe(1);
 				expect(metricsAfterFirst.hits).toBe(0);
 
@@ -45,7 +41,10 @@ describe("Database query caching", () => {
 				expect(result2).not.toBeNull();
 				expect(result2?.name).toBe("Test Server");
 
-				const metricsAfterSecond = database.metrics.getQueryMetrics(cacheKey);
+				const metricsAfterSecond = database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId },
+				);
 				expect(metricsAfterSecond.misses).toBe(1);
 				expect(metricsAfterSecond.hits).toBe(1);
 
@@ -90,21 +89,6 @@ describe("Database query caching", () => {
 
 			database.metrics.resetQueryMetrics();
 
-			const cacheKey1 = database.metrics.createCacheKey(
-				"servers.getServerByDiscordId",
-				{
-					discordId: testDiscordId1,
-					backendAccessToken: "test-backend-access-token",
-				},
-			);
-			const cacheKey2 = database.metrics.createCacheKey(
-				"servers.getServerByDiscordId",
-				{
-					discordId: testDiscordId2,
-					backendAccessToken: "test-backend-access-token",
-				},
-			);
-
 			const result1 = yield* database.private.servers.getServerByDiscordId({
 				discordId: testDiscordId1,
 			});
@@ -115,29 +99,65 @@ describe("Database query caching", () => {
 			expect(result1?.name).toBe("Server One");
 			expect(result2?.name).toBe("Server Two");
 
-			expect(database.metrics.getQueryMetrics(cacheKey1).misses).toBe(1);
-			expect(database.metrics.getQueryMetrics(cacheKey1).hits).toBe(0);
-			expect(database.metrics.getQueryMetrics(cacheKey2).misses).toBe(1);
-			expect(database.metrics.getQueryMetrics(cacheKey2).hits).toBe(0);
+			expect(
+				database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId1 },
+				).misses,
+			).toBe(1);
+			expect(
+				database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId1 },
+				).hits,
+			).toBe(0);
+			expect(
+				database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId2 },
+				).misses,
+			).toBe(1);
+			expect(
+				database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId2 },
+				).hits,
+			).toBe(0);
 
 			const result1Again = yield* database.private.servers.getServerByDiscordId(
-				{
-					discordId: testDiscordId1,
-				},
+				{ discordId: testDiscordId1 },
 			);
 			const result2Again = yield* database.private.servers.getServerByDiscordId(
-				{
-					discordId: testDiscordId2,
-				},
+				{ discordId: testDiscordId2 },
 			);
 
 			expect(result1Again?.name).toBe("Server One");
 			expect(result2Again?.name).toBe("Server Two");
 
-			expect(database.metrics.getQueryMetrics(cacheKey1).misses).toBe(1);
-			expect(database.metrics.getQueryMetrics(cacheKey1).hits).toBe(1);
-			expect(database.metrics.getQueryMetrics(cacheKey2).misses).toBe(1);
-			expect(database.metrics.getQueryMetrics(cacheKey2).hits).toBe(1);
+			expect(
+				database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId1 },
+				).misses,
+			).toBe(1);
+			expect(
+				database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId1 },
+				).hits,
+			).toBe(1);
+			expect(
+				database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId2 },
+				).misses,
+			).toBe(1);
+			expect(
+				database.metrics.getQueryMetrics(
+					api.private.servers.getServerByDiscordId,
+					{ discordId: testDiscordId2 },
+				).hits,
+			).toBe(1);
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 	);
 
@@ -156,24 +176,29 @@ describe("Database query caching", () => {
 
 			database.metrics.resetQueryMetrics();
 
-			const cacheKey = database.metrics.createCacheKey(
-				"servers.getAllServers",
-				{
-					backendAccessToken: "test-backend-access-token",
-				},
-			);
-
 			const allServers1 = yield* database.private.servers.getAllServers();
 			expect(allServers1.length).toBeGreaterThan(0);
 
-			expect(database.metrics.getQueryMetrics(cacheKey).misses).toBe(1);
-			expect(database.metrics.getQueryMetrics(cacheKey).hits).toBe(0);
+			expect(
+				database.metrics.getQueryMetrics(api.private.servers.getAllServers, {})
+					.misses,
+			).toBe(1);
+			expect(
+				database.metrics.getQueryMetrics(api.private.servers.getAllServers, {})
+					.hits,
+			).toBe(0);
 
 			const allServers2 = yield* database.private.servers.getAllServers();
 			expect(allServers2.length).toBe(allServers1.length);
 
-			expect(database.metrics.getQueryMetrics(cacheKey).misses).toBe(1);
-			expect(database.metrics.getQueryMetrics(cacheKey).hits).toBe(1);
+			expect(
+				database.metrics.getQueryMetrics(api.private.servers.getAllServers, {})
+					.misses,
+			).toBe(1);
+			expect(
+				database.metrics.getQueryMetrics(api.private.servers.getAllServers, {})
+					.hits,
+			).toBe(1);
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 	);
 
@@ -191,14 +216,6 @@ describe("Database query caching", () => {
 			});
 
 			database.metrics.resetQueryMetrics();
-
-			const cacheKey = database.metrics.createCacheKey(
-				"servers.getServerByDiscordId",
-				{
-					discordId: testDiscordId,
-					backendAccessToken: "test-backend-access-token",
-				},
-			);
 
 			const [result1, result2] = yield* Effect.all(
 				[
@@ -218,7 +235,10 @@ describe("Database query caching", () => {
 			expect(result2?.name).toBe("Concurrent Server");
 			expect(result1?.discordId).toBe(result2?.discordId);
 
-			const metrics = database.metrics.getQueryMetrics(cacheKey);
+			const metrics = database.metrics.getQueryMetrics(
+				api.private.servers.getServerByDiscordId,
+				{ discordId: testDiscordId },
+			);
 			expect(metrics.misses).toBe(1);
 			expect(metrics.hits).toBe(1);
 		}).pipe(Effect.provide(DatabaseTestLayer)),

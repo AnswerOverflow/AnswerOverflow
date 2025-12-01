@@ -5,6 +5,7 @@ import type {
 	FunctionReference,
 	FunctionReturnType,
 } from "convex/server";
+import { getFunctionName } from "convex/server";
 import type { Value } from "convex/values";
 import { convexToJson } from "convex/values";
 
@@ -239,7 +240,10 @@ export const service = Effect.gen(function* () {
 						const fullArgs: Record<string, unknown> = isPublic
 							? (args ?? {})
 							: { ...(args ?? {}), backendAccessToken };
-						const cacheKey = createQueryCacheKey(functionPath, fullArgs);
+						const cacheKey = createQueryCacheKey(
+							getFunctionName(funcRef),
+							fullArgs,
+						);
 
 						if (options.subscribe === true) {
 							return Effect.gen(function* () {
@@ -285,12 +289,22 @@ export const service = Effect.gen(function* () {
 	const publicProxy = createProxy(api.public, [], false);
 	const authenticatedProxy = createProxy(api.authenticated, [], false);
 
-	const getQueryMetrics = (cacheKey: string) => {
+	const getQueryMetricsByKey = (cacheKey: string) => {
 		const state = Ref.get(metricsRef).pipe(Effect.runSync);
 		return {
 			hits: Option.getOrElse(HashMap.get(state.hits, cacheKey), () => 0),
 			misses: Option.getOrElse(HashMap.get(state.misses, cacheKey), () => 0),
 		};
+	};
+
+	const getQueryMetrics = <Query extends FunctionReference<"query", any>>(
+		query: Query,
+		args: Omit<FunctionArgs<Query>, "backendAccessToken">,
+	) => {
+		const functionName = getFunctionName(query);
+		const fullArgs = { ...args, backendAccessToken };
+		const cacheKey = createQueryCacheKey(functionName, fullArgs);
+		return getQueryMetricsByKey(cacheKey);
 	};
 
 	const getAllQueryMetrics = () => {
@@ -316,7 +330,6 @@ export const service = Effect.gen(function* () {
 			getQueryMetrics,
 			getAllQueryMetrics,
 			resetQueryMetrics,
-			createCacheKey: createQueryCacheKey,
 		},
 	};
 });
