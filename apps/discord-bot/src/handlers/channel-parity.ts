@@ -16,21 +16,12 @@ export function syncChannel(
 	channel: GuildBasedChannel | GuildChannel | AnyThreadChannel,
 ) {
 	return Effect.gen(function* () {
-		const discord = yield* Discord;
 		const database = yield* Database;
 
-		const discordChannelData = toAOChannel(channel);
-
-		const botPermissions = yield* discord.getBotPermissionsForChannel(
-			channel.id,
-			channel.guild.id,
-		);
+		const discordChannelData = yield* toAOChannel(channel);
 
 		yield* database.private.channels.upsertChannel({
-			channel: {
-				...discordChannelData,
-				botPermissions: botPermissions ?? undefined,
-			},
+			channel: discordChannelData,
 		});
 	}).pipe(
 		Effect.catchAll((error) =>

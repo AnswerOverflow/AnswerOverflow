@@ -1,6 +1,7 @@
 import type { Infer } from "convex/values";
 import {
 	channelSchema,
+	channelSettingsSchema,
 	discordAccountSchema,
 	messageSchema,
 	serverSchema,
@@ -21,8 +22,12 @@ export const PublicChannel = channelSchema.pick(
 	"name",
 	"type",
 	"parentId",
-	"inviteCode",
 	"archivedTimestamp",
+);
+
+export const PublicChannelSettings = channelSettingsSchema.pick(
+	"channelId",
+	"inviteCode",
 );
 
 export const PublicDiscordAccount = discordAccountSchema;
@@ -50,5 +55,6 @@ export const PublicMessage = messageSchema.pick(
 
 export type PublicServer = Infer<typeof PublicServer>;
 export type PublicChannel = Infer<typeof PublicChannel>;
+export type PublicChannelSettings = Infer<typeof PublicChannelSettings>;
 export type PublicDiscordAccount = Infer<typeof PublicDiscordAccount>;
 export type PublicMessage = Infer<typeof PublicMessage>;

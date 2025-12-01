@@ -72,7 +72,6 @@ export const channelSchema = v.object({
 	name: v.string(),
 	type: v.number(),
 	parentId: v.optional(v.int64()),
-	inviteCode: v.optional(v.string()),
 	archivedTimestamp: v.optional(v.number()),
 	availableTags: v.optional(v.array(forumTagSchema)),
 	botPermissions: v.optional(v.union(v.string(), v.number())),
@@ -87,6 +86,7 @@ export const channelSettingsSchema = v.object({
 	forumGuidelinesConsentEnabled: v.boolean(),
 	solutionTagId: v.optional(v.int64()),
 	lastIndexedSnowflake: v.optional(v.int64()),
+	inviteCode: v.optional(v.string()),
 });
 
 const embedFooterSchema = v.object({
@@ -232,11 +232,10 @@ export default defineSchema({
 		.index("by_type", ["type"])
 		.index("by_type_and_id", ["type", "id"])
 		.index("by_discordChannelId", ["id"])
-		.index("by_parentId", ["parentId"])
+		.index("by_parentId", ["parentId"]),
+	channelSettings: defineTable(channelSettingsSchema)
+		.index("by_channelId", ["channelId"])
 		.index("by_inviteCode", ["inviteCode"]),
-	channelSettings: defineTable(channelSettingsSchema).index("by_channelId", [
-		"channelId",
-	]),
 	messages: defineTable(messageSchema)
 		.index("by_messageId", ["id"])
 		.index("by_authorId", ["authorId"])

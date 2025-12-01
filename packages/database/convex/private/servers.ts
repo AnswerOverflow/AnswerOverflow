@@ -250,12 +250,3 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 		};
 	},
 });
-
-export const findByDiscordId = privateQuery({
-	args: {
-		discordServerId: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		return getOneFrom(ctx.db, "servers", "by_discordId", args.discordServerId);
-	},
-});

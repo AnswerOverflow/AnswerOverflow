@@ -20,6 +20,8 @@ import {
 	type TextChannel,
 	type User,
 } from "discord.js";
+import { Effect } from "effect";
+import { Discord } from "../core/discord-service";
 
 // Helper functions to convert Discord string IDs to bigint
 export function toBigIntId(id: string | undefined | null): bigint | undefined {
@@ -72,38 +74,44 @@ export function toAODiscordAccount(user: User): AODiscordAccount {
 
 export function toAOChannel(
 	channel: GuildChannel | GuildBasedChannel | AnyThreadChannel,
-): AOChannel {
-	const isThread = "isThread" in channel && channel.isThread();
-	const parentId = isThread && channel.parentId ? channel.parentId : undefined;
-	const archivedTimestamp =
-		isThread && "archiveTimestamp" in channel && channel.archiveTimestamp
-			? channel.archiveTimestamp
-			: undefined;
-
-	let availableTags: AOForumTag[] | undefined;
-	if (isForumChannel(channel)) {
-		if (channel.availableTags) {
-			availableTags = channel.availableTags.map((tag) => ({
-				id: BigInt(tag.id),
-				name: tag.name,
-				moderated: tag.moderated,
-				emojiId: tag.emoji?.id ? BigInt(tag.emoji.id) : undefined,
-				emojiName: tag.emoji?.name ?? undefined,
-			}));
+) {
+	return Effect.gen(function* () {
+		const discord = yield* Discord;
+		const isThread = channel.isThread();
+		const parentId =
+			isThread && channel.parentId ? channel.parentId : undefined;
+		const archivedTimestamp =
+			isThread && channel.archiveTimestamp
+				? channel.archiveTimestamp
+				: undefined;
+		const botPermissions = yield* discord.getBotPermissionsForChannel(
+			channel.id,
+			channel.guild.id,
+		);
+		let availableTags: AOForumTag[] | undefined;
+		if (isForumChannel(channel)) {
+			if (channel.availableTags) {
+				availableTags = channel.availableTags.map((tag) => ({
+					id: BigInt(tag.id),
+					name: tag.name,
+					moderated: tag.moderated,
+					emojiId: tag.emoji?.id ? BigInt(tag.emoji.id) : undefined,
+					emojiName: tag.emoji?.name ?? undefined,
+				}));
+			}
 		}
-	}
 
-	return {
-		id: BigInt(channel.id),
-		serverId: BigInt(channel.guild.id),
-		name: channel.name ?? "",
-		type: channel.type,
-		parentId: toBigIntId(parentId),
-		inviteCode: undefined,
-		archivedTimestamp: archivedTimestamp,
-		botPermissions: undefined,
-		availableTags,
-	};
+		return {
+			id: BigInt(channel.id),
+			serverId: BigInt(channel.guild.id),
+			name: channel.name ?? "",
+			type: channel.type,
+			parentId: toBigIntId(parentId),
+			archivedTimestamp: archivedTimestamp,
+			botPermissions: botPermissions ?? undefined,
+			availableTags,
+		} satisfies AOChannel;
+	});
 }
 
 export async function toAOMessage(

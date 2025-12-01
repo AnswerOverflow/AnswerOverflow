@@ -20,7 +20,6 @@ type ChannelWithSettings = {
 	name: string;
 	type: number;
 	serverId: string;
-	inviteCode?: string;
 	flags: {
 		indexingEnabled: boolean;
 		markSolutionEnabled: boolean;
@@ -28,6 +27,7 @@ type ChannelWithSettings = {
 		autoThreadEnabled: boolean;
 		forumGuidelinesConsentEnabled: boolean;
 		solutionTagId?: string;
+		inviteCode?: string;
 	};
 };
 
