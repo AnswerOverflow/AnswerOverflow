@@ -55,10 +55,11 @@ export function isAllowedThreadChannel(
 ): channel is PublicThreadChannel {
 	return isAllowedThreadType(channel.type);
 }
-function _isAllowedChannelType(channelType: number): boolean {
-	return (
-		isAllowedRootChannelType(channelType) || isAllowedThreadType(channelType)
-	);
+
+function isForumChannel(
+	channel: GuildChannel | GuildBasedChannel | AnyThreadChannel,
+): channel is ForumChannel {
+	return channel.type === ChannelType.GuildForum;
 }
 
 export function toAODiscordAccount(user: User): AODiscordAccount {
@@ -80,15 +81,16 @@ export function toAOChannel(
 			: undefined;
 
 	let availableTags: AOForumTag[] | undefined;
-	if (channel.type === ChannelType.GuildForum) {
-		const forumChannel = channel as ForumChannel;
-		availableTags = forumChannel.availableTags.map((tag) => ({
-			id: BigInt(tag.id),
-			name: tag.name,
-			moderated: tag.moderated,
-			emojiId: tag.emoji?.id ? BigInt(tag.emoji.id) : undefined,
-			emojiName: tag.emoji?.name ?? undefined,
-		}));
+	if (isForumChannel(channel)) {
+		if (channel.availableTags) {
+			availableTags = channel.availableTags.map((tag) => ({
+				id: BigInt(tag.id),
+				name: tag.name,
+				moderated: tag.moderated,
+				emojiId: tag.emoji?.id ? BigInt(tag.emoji.id) : undefined,
+				emojiName: tag.emoji?.name ?? undefined,
+			}));
+		}
 	}
 
 	return {
