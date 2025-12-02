@@ -48,7 +48,7 @@ export async function buildConvexZip(
 			});
 
 			const schema = generatedSchemas[table.tableName];
-			if (schema && Object.keys(schema).length > 0) {
+			if (schema) {
 				archive.append(JSON.stringify(schema) + "\n", {
 					name: `${table.tableName}/generated_schema.jsonl`,
 				});
