@@ -40,20 +40,6 @@ async function hasMessageIndexingDisabled(
 	return settings?.messageIndexingDisabled === true;
 }
 
-function selectMessagesForDisplay(
-	messages: Array<Message>,
-	threadId: bigint | null,
-	targetMessageId: bigint,
-) {
-	if (threadId) {
-		return messages;
-	}
-
-	return messages.filter(
-		(message) => compareIds(message.id, targetMessageId) >= 0,
-	);
-}
-
 export const upsertMessage = privateMutation({
 	args: {
 		message: messageSchema,
@@ -513,11 +499,10 @@ export const getMessagePageData = privateQuery({
 				)
 			: null;
 
-		let allMessages = await findMessagesByChannelId(
-			ctx,
-			channelId,
-			threadId ? undefined : 50,
-		);
+		let allMessages = await findMessagesByChannelId(ctx, channelId, {
+			limit: threadId ? undefined : 50,
+			startingFrom: threadId ? undefined : targetMessage.id,
+		});
 
 		if (threadId) {
 			const threadStarterMessages = await ctx.db
@@ -534,14 +519,8 @@ export const getMessagePageData = privateQuery({
 			);
 		}
 
-		const messagesToShow = selectMessagesForDisplay(
-			allMessages,
-			threadId,
-			targetMessage.id,
-		);
-
 		const [enrichedMessages, server] = await Promise.all([
-			enrichMessages(ctx, messagesToShow),
+			enrichMessages(ctx, allMessages),
 			getOneFrom(
 				ctx.db,
 				"servers",
