@@ -28,6 +28,7 @@ export {
 	getMentionMetadata,
 	getMessageById,
 	getServerByDiscordId,
+	getThreadStartMessage,
 	hasPermission,
 	isThreadType,
 	ROOT_CHANNEL_TYPES,
