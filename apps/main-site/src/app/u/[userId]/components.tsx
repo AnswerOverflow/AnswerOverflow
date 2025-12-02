@@ -80,20 +80,22 @@ export function ServerFilter({
 	);
 }
 
-export function UserTabs({ userId }: { userId: string }) {
+export function UserTabs({
+	userId,
+	basePath,
+}: {
+	userId: string;
+	basePath: string;
+}) {
 	return (
 		<div className="flex flex-row gap-4">
-			<LinkButton
-				variant="outline"
-				selectedVariant="secondary"
-				href={`/u/${userId}`}
-			>
+			<LinkButton variant="outline" selectedVariant="secondary" href={basePath}>
 				Posts
 			</LinkButton>
 			<LinkButton
 				variant="outline"
 				selectedVariant="secondary"
-				href={`/u/${userId}/comments`}
+				href={`${basePath}/comments`}
 			>
 				Comments
 			</LinkButton>
@@ -127,6 +129,9 @@ export function UserPageLayout({
 	serverFilterLabel: string;
 	children: ReactNode;
 }) {
+	const userBasePath = basePath.includes("/comments")
+		? basePath.replace("/comments", "")
+		: basePath;
 	return (
 		<div className="flex flex-col gap-4">
 			<UserHeader user={user} />
@@ -136,7 +141,7 @@ export function UserPageLayout({
 				basePath={basePath}
 				label={serverFilterLabel}
 			/>
-			<UserTabs userId={userId} />
+			<UserTabs userId={userId} basePath={userBasePath} />
 			{children}
 		</div>
 	);

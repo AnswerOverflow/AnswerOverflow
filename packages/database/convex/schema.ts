@@ -249,6 +249,7 @@ export default defineSchema({
 		.index("by_questionId", ["questionId"])
 		.index("by_parentChannelId", ["parentChannelId"])
 		.index("by_childThreadId", ["childThreadId"])
+		.index("by_referenceId", ["referenceId"])
 		.index("by_channelId_and_id", ["channelId", "id"])
 		.searchIndex("search_content", {
 			searchField: "content",

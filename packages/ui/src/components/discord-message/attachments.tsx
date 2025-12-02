@@ -3,9 +3,8 @@
 import type { Attachment } from "@packages/database/convex/schema";
 import bytes from "bytes";
 import { ArrowUpRight, File } from "lucide-react";
-import { useState } from "react";
+
 import { Button } from "../../components/button";
-import { Skeleton } from "../../components/skeleton";
 import {
 	Tooltip,
 	TooltipContent,
@@ -109,7 +108,7 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 						)
 					: 16 / 9;
 				return (
-					<ImageWithSkeleton
+					<ImageWithAspectRatio
 						key={attachment.id}
 						imageUrl={attachment.url}
 						alt={attachment.filename}
@@ -123,7 +122,7 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 	);
 }
 
-function ImageWithSkeleton({
+function ImageWithAspectRatio({
 	imageUrl,
 	alt,
 	width,
@@ -136,9 +135,6 @@ function ImageWithSkeleton({
 	height?: number;
 	aspectRatio: number;
 }) {
-	const [isLoading, setIsLoading] = useState(true);
-	const [hasError, setHasError] = useState(false);
-
 	return (
 		<div
 			className="relative w-full overflow-hidden rounded"
@@ -146,37 +142,19 @@ function ImageWithSkeleton({
 				aspectRatio: `${aspectRatio}`,
 			}}
 		>
-			{isLoading && (
-				<Skeleton className="absolute inset-0 h-full w-full rounded" />
-			)}
 			<img
 				alt={alt}
-				className={cn(
-					"absolute inset-0 h-full w-full object-cover transition-opacity duration-200",
-					isLoading ? "opacity-0" : "opacity-100",
-				)}
+				className="absolute inset-0 h-full w-full object-cover"
 				src={imageUrl}
 				width={width}
 				height={height}
 				loading="lazy"
-				onLoad={() => setIsLoading(false)}
-				onError={() => {
-					setIsLoading(false);
-					setHasError(true);
-				}}
 			/>
-			{hasError && (
-				<div className="absolute inset-0 flex items-center justify-center bg-neutral-100 text-neutral-500 text-sm">
-					Failed to load image
-				</div>
-			)}
 		</div>
 	);
 }
 
 function VideoPlayer({ attachment }: { attachment: Attachment }) {
-	const [isLoading, setIsLoading] = useState(true);
-	const [hasError, setHasError] = useState(false);
 	const hasDimensions = attachment.width && attachment.height;
 	const aspectRatio = hasDimensions
 		? Number(((attachment.width ?? 0) / (attachment.height ?? 1)).toFixed(4))
@@ -189,33 +167,17 @@ function VideoPlayer({ attachment }: { attachment: Attachment }) {
 				aspectRatio: `${aspectRatio}`,
 			}}
 		>
-			{isLoading && (
-				<Skeleton className="absolute inset-0 h-full w-full rounded" />
-			)}
 			<video
-				className={cn(
-					"h-full w-full object-contain transition-opacity duration-200",
-					isLoading ? "opacity-0" : "opacity-100",
-				)}
+				className="h-full w-full object-contain"
 				controls
 				width={attachment.width ?? undefined}
 				height={attachment.height ?? undefined}
-				onLoadedData={() => setIsLoading(false)}
-				onError={() => {
-					setIsLoading(false);
-					setHasError(true);
-				}}
 			>
 				<source
 					src={attachment.url}
 					type={attachment.contentType ?? undefined}
 				/>
 			</video>
-			{hasError && (
-				<div className="absolute inset-0 flex items-center justify-center bg-neutral-100 text-neutral-500 text-sm">
-					Failed to load video
-				</div>
-			)}
 		</div>
 	);
 }
