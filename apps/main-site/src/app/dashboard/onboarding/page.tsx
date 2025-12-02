@@ -16,7 +16,8 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { CheckCircle2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { authClient } from "../../../lib/auth-client";
 
@@ -24,8 +25,7 @@ type OnboardingStep = "auth" | "install" | "complete";
 
 export default function OnboardingPage() {
 	const router = useRouter();
-	const searchParams = useSearchParams();
-	const serverId = searchParams.get("serverId");
+	const [serverId] = useQueryState("serverId");
 	const { data: session, isPending: isSessionPending } = useSession({
 		allowAnonymous: false,
 	});
