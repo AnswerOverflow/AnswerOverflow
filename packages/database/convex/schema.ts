@@ -93,6 +93,7 @@ const embedFooterSchema = v.object({
 	text: v.string(),
 	iconUrl: v.optional(v.string()),
 	proxyIconUrl: v.optional(v.string()),
+	iconStorageId: v.optional(v.id("_storage")),
 });
 
 const embedImageSchema = v.object({
@@ -100,6 +101,7 @@ const embedImageSchema = v.object({
 	proxyUrl: v.optional(v.string()),
 	height: v.optional(v.number()),
 	width: v.optional(v.number()),
+	storageId: v.optional(v.id("_storage")),
 });
 
 const embedThumbnailSchema = v.object({
@@ -107,6 +109,7 @@ const embedThumbnailSchema = v.object({
 	proxyUrl: v.optional(v.string()),
 	height: v.optional(v.number()),
 	width: v.optional(v.number()),
+	storageId: v.optional(v.id("_storage")),
 });
 
 const embedVideoSchema = v.object({
@@ -114,6 +117,7 @@ const embedVideoSchema = v.object({
 	proxyUrl: v.optional(v.string()),
 	height: v.optional(v.number()),
 	width: v.optional(v.number()),
+	storageId: v.optional(v.id("_storage")),
 });
 
 const embedProviderSchema = v.object({
@@ -126,6 +130,7 @@ const embedAuthorSchema = v.object({
 	url: v.optional(v.string()),
 	iconUrl: v.optional(v.string()),
 	proxyIconUrl: v.optional(v.string()),
+	iconStorageId: v.optional(v.id("_storage")),
 });
 
 const embedFieldSchema = v.object({

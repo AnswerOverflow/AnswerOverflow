@@ -289,3 +289,66 @@ export function toUpsertMessageArgs(data: BaseMessageWithRelations) {
 		reactions: data.reactions,
 	};
 }
+
+export interface EmbedImageToUpload {
+	url: string;
+	messageId: bigint;
+	embedIndex: number;
+	field: "image" | "thumbnail" | "video" | "footerIcon" | "authorIcon";
+}
+
+export function extractEmbedImagesToUpload(
+	message: Message,
+): EmbedImageToUpload[] {
+	const result: EmbedImageToUpload[] = [];
+	const messageId = BigInt(message.id);
+
+	message.embeds.forEach((embed, embedIndex) => {
+		if (embed.image?.proxyURL) {
+			result.push({
+				url: embed.image.proxyURL,
+				messageId,
+				embedIndex,
+				field: "image",
+			});
+		}
+
+		if (embed.thumbnail?.proxyURL) {
+			result.push({
+				url: embed.thumbnail.proxyURL,
+				messageId,
+				embedIndex,
+				field: "thumbnail",
+			});
+		}
+
+		if (embed.video?.proxyURL) {
+			result.push({
+				url: embed.video.proxyURL,
+				messageId,
+				embedIndex,
+				field: "video",
+			});
+		}
+
+		if (embed.footer?.proxyIconURL) {
+			result.push({
+				url: embed.footer.proxyIconURL,
+				messageId,
+				embedIndex,
+				field: "footerIcon",
+			});
+		}
+
+		if (embed.author?.proxyIconURL) {
+			result.push({
+				url: embed.author.proxyIconURL,
+				messageId,
+				embedIndex,
+				field: "authorIcon",
+			});
+		}
+	});
+
+	return result;
+}

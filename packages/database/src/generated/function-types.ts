@@ -4,6 +4,7 @@
 export const FUNCTION_TYPE_MAP = {
   "attachments.updateAttachmentStorageId": "mutation",
   "attachments.uploadAttachmentFromUrl": "action",
+  "attachments.uploadEmbedImageFromUrl": "action",
   "channels.deleteChannel": "mutation",
   "channels.findAllChannelsByServerId": "query",
   "channels.findChannelByDiscordId": "query",
@@ -23,6 +24,7 @@ export const FUNCTION_TYPE_MAP = {
   "messages.getMessagePageData": "query",
   "messages.getTopQuestionSolversByServerId": "query",
   "messages.getTotalMessageCount": "query",
+  "messages.updateEmbedStorageId": "mutation",
   "messages.upsertManyMessages": "mutation",
   "messages.upsertMessage": "mutation",
   "search.getRecentThreads": "query",
@@ -55,11 +57,11 @@ export const FUNCTION_TYPE_MAP = {
 export const NAMESPACES = ["attachments","channels","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","user_server_settings"] as const;
 
 export const NAMESPACE_STRUCTURE = {
-  "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl"],
+  "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
   "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findManyChannelsByDiscordIds","getChannelPageData","updateChannelSettings","upsertChannel"],
   "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageData","upsertDiscordAccount"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
-  "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageData","getTopQuestionSolversByServerId","getTotalMessageCount","upsertManyMessages","upsertMessage"],
+  "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageData","getTopQuestionSolversByServerId","getTotalMessageCount","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
   "search": ["getRecentThreads","getServersUserHasPostedIn","getUserById","getUserComments","getUserPageData","getUserPosts","publicSearch"],
   "server_preferences": ["findServerPreferencesByStripeCustomerId","getServerPreferencesByServerId","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],

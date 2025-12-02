@@ -33,6 +33,7 @@ export {
 	ROOT_CHANNEL_TYPES,
 	sortServersByBotAndRole,
 	uploadAttachmentFromUrlLogic,
+	uploadFromUrlLogic,
 	upsertIgnoredDiscordAccountInternalLogic,
 	upsertMessageInternalLogic,
 	validateCustomDomain,

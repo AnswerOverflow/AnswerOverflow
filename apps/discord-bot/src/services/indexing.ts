@@ -24,8 +24,12 @@ import {
 } from "effect";
 import { Discord } from "../core/discord-service";
 import { syncChannel } from "../sync/channel";
-import { uploadAttachmentsInBatches } from "../utils/attachment-upload";
 import {
+	uploadAttachmentsInBatches,
+	uploadEmbedImagesInBatches,
+} from "../utils/attachment-upload";
+import {
+	extractEmbedImagesToUpload,
 	toAODiscordAccount,
 	toAOMessage,
 	toUpsertMessageArgs,
@@ -202,6 +206,21 @@ function storeMessages(
 
 		if (allAttachments.length > 0) {
 			yield* uploadAttachmentsInBatches(allAttachments);
+		}
+
+		const allEmbedImages = Arr.flatMap(humanMessages, (msg) =>
+			extractEmbedImagesToUpload(msg),
+		);
+
+		if (allEmbedImages.length > 0) {
+			yield* uploadEmbedImagesInBatches(allEmbedImages).pipe(
+				Effect.catchAll((error) =>
+					Console.warn(
+						`Failed to upload embed images for channel ${channelId}:`,
+						error,
+					),
+				),
+			);
 		}
 
 		if (humanMessages.length > 0) {

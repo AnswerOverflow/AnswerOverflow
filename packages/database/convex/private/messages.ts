@@ -1,6 +1,7 @@
 import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import type { Id } from "../_generated/dataModel";
 import {
 	type MutationCtx,
 	privateMutation,
@@ -329,6 +330,82 @@ function getParentChannelOfMessage(
 ): bigint {
 	return message.parentChannelId ?? message.channelId;
 }
+
+export const updateEmbedStorageId = privateMutation({
+	args: {
+		messageId: v.int64(),
+		embedIndex: v.number(),
+		field: v.union(
+			v.literal("image"),
+			v.literal("thumbnail"),
+			v.literal("video"),
+			v.literal("footerIcon"),
+			v.literal("authorIcon"),
+		),
+		storageId: v.id("_storage"),
+	},
+	handler: async (ctx, args) => {
+		const message = await getOneFrom(
+			ctx.db,
+			"messages",
+			"by_messageId",
+			args.messageId,
+			"id",
+		);
+		if (!message) {
+			throw new Error("Message not found");
+		}
+
+		const embeds = message.embeds ?? [];
+		if (args.embedIndex < 0 || args.embedIndex >= embeds.length) {
+			throw new Error("Invalid embed index");
+		}
+
+		const embed = embeds[args.embedIndex];
+		if (!embed) {
+			throw new Error("Embed not found at index");
+		}
+
+		const updatedEmbed = { ...embed };
+
+		if (args.field === "image" && updatedEmbed.image) {
+			updatedEmbed.image = {
+				...updatedEmbed.image,
+				storageId: args.storageId,
+			};
+		} else if (args.field === "thumbnail" && updatedEmbed.thumbnail) {
+			updatedEmbed.thumbnail = {
+				...updatedEmbed.thumbnail,
+				storageId: args.storageId,
+			};
+		} else if (args.field === "video" && updatedEmbed.video) {
+			updatedEmbed.video = {
+				...updatedEmbed.video,
+				storageId: args.storageId,
+			};
+		} else if (args.field === "footerIcon" && updatedEmbed.footer) {
+			updatedEmbed.footer = {
+				...updatedEmbed.footer,
+				iconStorageId: args.storageId,
+			};
+		} else if (args.field === "authorIcon" && updatedEmbed.author) {
+			updatedEmbed.author = {
+				...updatedEmbed.author,
+				iconStorageId: args.storageId,
+			};
+		} else {
+			throw new Error(
+				`Invalid field ${args.field} or field not present in embed`,
+			);
+		}
+
+		const updatedEmbeds = [...embeds];
+		updatedEmbeds[args.embedIndex] = updatedEmbed;
+
+		await ctx.db.patch(message._id, { embeds: updatedEmbeds });
+		return null;
+	},
+});
 
 export const getMessagePageData = privateQuery({
 	args: {
