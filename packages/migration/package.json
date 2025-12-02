@@ -1,0 +1,19 @@
+{
+	"name": "@packages/migration",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"with-env": "bun run --env-file=../../.env --",
+		"migrate": "bun with-env bun run src/index.ts",
+		"validate": "bun with-env bun run src/index.ts --validate"
+	},
+	"dependencies": {
+		"@planetscale/database": "^1.19.0",
+		"drizzle-orm": "^0.36.4",
+		"archiver": "^7.0.1"
+	},
+	"devDependencies": {
+		"@types/archiver": "^6.0.3",
+		"typescript": "^5.7.2"
+	}
+}

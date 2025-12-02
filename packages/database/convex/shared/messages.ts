@@ -62,13 +62,7 @@ export async function getThreadStartMessage(
 	ctx: QueryCtx | MutationCtx,
 	threadId: bigint,
 ): Promise<Message | null> {
-	return getOneFrom(
-		ctx.db,
-		"messages",
-		"by_childThreadId",
-		threadId,
-		"childThreadId",
-	);
+	return getOneFrom(ctx.db, "messages", "by_messageId", threadId, "id");
 }
 
 export async function getFirstMessagesInChannels(
