@@ -94,6 +94,7 @@ const embedFooterSchema = v.object({
 	iconUrl: v.optional(v.string()),
 	proxyIconUrl: v.optional(v.string()),
 	iconStorageId: v.optional(v.id("_storage")),
+	iconS3Key: v.optional(v.string()),
 });
 
 const embedImageSchema = v.object({
@@ -102,6 +103,7 @@ const embedImageSchema = v.object({
 	height: v.optional(v.number()),
 	width: v.optional(v.number()),
 	storageId: v.optional(v.id("_storage")),
+	s3Key: v.optional(v.string()),
 });
 
 const embedThumbnailSchema = v.object({
@@ -110,6 +112,7 @@ const embedThumbnailSchema = v.object({
 	height: v.optional(v.number()),
 	width: v.optional(v.number()),
 	storageId: v.optional(v.id("_storage")),
+	s3Key: v.optional(v.string()),
 });
 
 const embedVideoSchema = v.object({
@@ -118,6 +121,7 @@ const embedVideoSchema = v.object({
 	height: v.optional(v.number()),
 	width: v.optional(v.number()),
 	storageId: v.optional(v.id("_storage")),
+	s3Key: v.optional(v.string()),
 });
 
 const embedProviderSchema = v.object({
@@ -131,6 +135,7 @@ const embedAuthorSchema = v.object({
 	iconUrl: v.optional(v.string()),
 	proxyIconUrl: v.optional(v.string()),
 	iconStorageId: v.optional(v.id("_storage")),
+	iconS3Key: v.optional(v.string()),
 });
 
 const embedFieldSchema = v.object({

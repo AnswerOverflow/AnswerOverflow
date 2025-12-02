@@ -655,14 +655,24 @@ export async function enrichMessageForDisplay(
 		embedsToResolve.map(async (embed) => {
 			const resolvedEmbed = { ...embed };
 
-			if (embed.image?.storageId) {
+			if (embed.image?.s3Key) {
+				const url = `https://${cdnDomain}/${embed.image.s3Key}`;
+				resolvedEmbed.image = { ...embed.image, url, proxyUrl: url };
+			} else if (embed.image?.storageId) {
 				const url = await ctx.storage.getUrl(embed.image.storageId);
 				if (url) {
 					resolvedEmbed.image = { ...embed.image, url, proxyUrl: url };
 				}
 			}
 
-			if (embed.thumbnail?.storageId) {
+			if (embed.thumbnail?.s3Key) {
+				const url = `https://${cdnDomain}/${embed.thumbnail.s3Key}`;
+				resolvedEmbed.thumbnail = {
+					...embed.thumbnail,
+					url,
+					proxyUrl: url,
+				};
+			} else if (embed.thumbnail?.storageId) {
 				const url = await ctx.storage.getUrl(embed.thumbnail.storageId);
 				if (url) {
 					resolvedEmbed.thumbnail = {
@@ -673,14 +683,24 @@ export async function enrichMessageForDisplay(
 				}
 			}
 
-			if (embed.video?.storageId) {
+			if (embed.video?.s3Key) {
+				const url = `https://${cdnDomain}/${embed.video.s3Key}`;
+				resolvedEmbed.video = { ...embed.video, url, proxyUrl: url };
+			} else if (embed.video?.storageId) {
 				const url = await ctx.storage.getUrl(embed.video.storageId);
 				if (url) {
 					resolvedEmbed.video = { ...embed.video, url, proxyUrl: url };
 				}
 			}
 
-			if (embed.footer?.iconStorageId) {
+			if (embed.footer?.iconS3Key) {
+				const url = `https://${cdnDomain}/${embed.footer.iconS3Key}`;
+				resolvedEmbed.footer = {
+					...embed.footer,
+					iconUrl: url,
+					proxyIconUrl: url,
+				};
+			} else if (embed.footer?.iconStorageId) {
 				const url = await ctx.storage.getUrl(embed.footer.iconStorageId);
 				if (url) {
 					resolvedEmbed.footer = {
@@ -691,7 +711,14 @@ export async function enrichMessageForDisplay(
 				}
 			}
 
-			if (embed.author?.iconStorageId) {
+			if (embed.author?.iconS3Key) {
+				const url = `https://${cdnDomain}/${embed.author.iconS3Key}`;
+				resolvedEmbed.author = {
+					...embed.author,
+					iconUrl: url,
+					proxyIconUrl: url,
+				};
+			} else if (embed.author?.iconStorageId) {
 				const url = await ctx.storage.getUrl(embed.author.iconStorageId);
 				if (url) {
 					resolvedEmbed.author = {

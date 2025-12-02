@@ -44,6 +44,7 @@ export class Storage extends Context.Tag("Storage")<
 >() {}
 
 const S3StorageServiceLive = Effect.gen(function* () {
+	const database = yield* Database;
 	const bucketName = process.env.BUCKET_NAME!;
 	const accessKeyId = process.env.IAM_USER_KEY!;
 	const secretAccessKey = process.env.IAM_USER_SECRET!;
@@ -87,10 +88,56 @@ const S3StorageServiceLive = Effect.gen(function* () {
 			});
 		});
 
-	const uploadEmbedImage = (_input: UploadEmbedImageInput) =>
+	const uploadEmbedImage = (input: UploadEmbedImageInput) =>
 		Effect.gen(function* () {
-			yield* Effect.logWarning(
-				"S3 storage does not support embed image uploads yet",
+			yield* Effect.logDebug(
+				`S3Storage: uploading embed ${input.field} for message ${input.messageId}`,
+			);
+
+			const res = yield* Effect.tryPromise({
+				try: () => fetch(input.url),
+				catch: (error) =>
+					new Error(`Failed to fetch embed image from URL: ${error}`),
+			});
+
+			if (!res.ok || !res.body) {
+				yield* Effect.logWarning(
+					`Failed to fetch embed image from URL: ${input.url}`,
+				);
+				return;
+			}
+
+			const contentType = res.headers.get("content-type") ?? "image/png";
+			const extension = contentType.split("/")[1] ?? "png";
+			const key = `embeds/${input.messageId}/${input.embedIndex}/${input.field}.${extension}`;
+
+			const bodyStream = res.body as unknown as Readable;
+
+			yield* Effect.tryPromise({
+				try: () =>
+					new Upload({
+						client: rawS3Client,
+						params: {
+							Bucket: bucketName,
+							Key: key,
+							Body: bodyStream,
+							ContentDisposition: "inline",
+							ContentType: contentType,
+						},
+					}).done(),
+				catch: (error) =>
+					new Error(`Failed to upload embed image to S3: ${error}`),
+			});
+
+			yield* database.private.messages.updateEmbedS3Key({
+				messageId: input.messageId,
+				embedIndex: input.embedIndex,
+				field: input.field,
+				s3Key: key,
+			});
+
+			yield* Effect.logDebug(
+				`S3Storage: successfully uploaded embed ${input.field} for message ${input.messageId} with key ${key}`,
 			);
 		});
 
