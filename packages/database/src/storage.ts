@@ -17,11 +17,28 @@ export interface UploadFileInput {
 	stream: Readable | ReadableStream | Blob;
 }
 
+export type EmbedImageField =
+	| "image"
+	| "thumbnail"
+	| "video"
+	| "footerIcon"
+	| "authorIcon";
+
+export interface UploadEmbedImageInput {
+	url: string;
+	messageId: bigint;
+	embedIndex: number;
+	field: EmbedImageField;
+}
+
 export class Storage extends Context.Tag("Storage")<
 	Storage,
 	{
 		uploadFileFromUrl: (
 			input: UploadFileFromUrlInput,
+		) => Effect.Effect<void, Error>;
+		uploadEmbedImage: (
+			input: UploadEmbedImageInput,
 		) => Effect.Effect<void, Error>;
 	}
 >() {}
@@ -70,8 +87,16 @@ const S3StorageServiceLive = Effect.gen(function* () {
 			});
 		});
 
+	const uploadEmbedImage = (_input: UploadEmbedImageInput) =>
+		Effect.gen(function* () {
+			yield* Effect.logWarning(
+				"S3 storage does not support embed image uploads yet",
+			);
+		});
+
 	return {
 		uploadFileFromUrl,
+		uploadEmbedImage,
 	};
 });
 
@@ -106,8 +131,25 @@ const ConvexStorageServiceLive = Effect.gen(function* () {
 			return storageId;
 		});
 
+	const uploadEmbedImage = (
+		input: UploadEmbedImageInput,
+	): Effect.Effect<void, Error> =>
+		Effect.gen(function* () {
+			yield* Effect.logDebug(
+				`ConvexStorage: uploading embed ${input.field} for message ${input.messageId}`,
+			);
+
+			yield* database.private.attachments.uploadEmbedImageFromUrl({
+				url: input.url,
+				messageId: input.messageId,
+				embedIndex: input.embedIndex,
+				field: input.field,
+			});
+		});
+
 	return {
 		uploadFileFromUrl,
+		uploadEmbedImage,
 	};
 });
 

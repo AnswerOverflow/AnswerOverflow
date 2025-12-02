@@ -15,12 +15,10 @@ export async function findAttachmentsByMessageId(
 	);
 }
 
-export async function uploadAttachmentFromUrlLogic(
+export async function uploadFromUrlLogic(
 	ctx: ActionCtx,
 	args: {
 		url: string;
-		filename: string;
-		contentType?: string;
 	},
 ): Promise<Id<"_storage"> | null> {
 	try {
@@ -28,7 +26,7 @@ export async function uploadAttachmentFromUrlLogic(
 
 		if (!response.ok) {
 			console.error(
-				`Failed to download attachment from ${args.url}: ${response.status} ${response.statusText}`,
+				`Failed to download file from ${args.url}: ${response.status} ${response.statusText}`,
 			);
 			return null;
 		}
@@ -39,7 +37,18 @@ export async function uploadAttachmentFromUrlLogic(
 
 		return storageId;
 	} catch (error) {
-		console.error(`Error uploading attachment from ${args.url}:`, error);
+		console.error(`Error uploading file from ${args.url}:`, error);
 		return null;
 	}
+}
+
+export async function uploadAttachmentFromUrlLogic(
+	ctx: ActionCtx,
+	args: {
+		url: string;
+		filename: string;
+		contentType?: string;
+	},
+): Promise<Id<"_storage"> | null> {
+	return uploadFromUrlLogic(ctx, { url: args.url });
 }

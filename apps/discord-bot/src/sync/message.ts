@@ -1,8 +1,12 @@
 import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { uploadAttachmentsInBatches } from "../utils/attachment-upload";
 import {
+	uploadAttachmentsInBatches,
+	uploadEmbedImagesInBatches,
+} from "../utils/attachment-upload";
+import {
+	extractEmbedImagesToUpload,
 	toAODiscordAccount,
 	toAOMessage,
 	toUpsertMessageArgs,
@@ -72,6 +76,20 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					...toUpsertMessageArgs(data),
 					ignoreChecks: false,
 				});
+
+				if (newMessage.embeds.length > 0) {
+					const embedImagesToUpload = extractEmbedImagesToUpload(newMessage);
+					if (embedImagesToUpload.length > 0) {
+						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
+							Effect.catchAll((error) =>
+								Console.warn(
+									`Failed to upload embed images for message ${newMessage.id}:`,
+									error,
+								),
+							),
+						);
+					}
+				}
 
 				yield* database.private.discord_accounts
 					.upsertDiscordAccount({
@@ -186,6 +204,21 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 					yield* uploadAttachmentsInBatches(attachmentsToUpload);
 				}
+
+				if (message.embeds.length > 0) {
+					const embedImagesToUpload = extractEmbedImagesToUpload(message);
+					if (embedImagesToUpload.length > 0) {
+						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
+							Effect.catchAll((error) =>
+								Console.warn(
+									`Failed to upload embed images for message ${message.id}:`,
+									error,
+								),
+							),
+						);
+					}
+				}
+
 				yield* database.private.discord_accounts
 					.upsertDiscordAccount({ account: toAODiscordAccount(message.author) })
 					.pipe(

@@ -3,7 +3,10 @@ import { getOneFrom } from "convex-helpers/server/relationships";
 import { api } from "../_generated/api";
 import { getBackendAccessToken } from "../authenticated/dashboard";
 import { privateAction, privateMutation } from "../client";
-import { uploadAttachmentFromUrlLogic } from "../shared/shared";
+import {
+	uploadAttachmentFromUrlLogic,
+	uploadFromUrlLogic,
+} from "../shared/shared";
 
 export const updateAttachmentStorageId = privateMutation({
 	args: {
@@ -44,6 +47,34 @@ export const uploadAttachmentFromUrl = privateAction({
 		await ctx.runMutation(api.private.attachments.updateAttachmentStorageId, {
 			id: args.id,
 			storageId: id,
+			backendAccessToken: getBackendAccessToken(),
+		});
+	},
+});
+
+export const uploadEmbedImageFromUrl = privateAction({
+	args: {
+		url: v.string(),
+		messageId: v.int64(),
+		embedIndex: v.number(),
+		field: v.union(
+			v.literal("image"),
+			v.literal("thumbnail"),
+			v.literal("video"),
+			v.literal("footerIcon"),
+			v.literal("authorIcon"),
+		),
+	},
+	handler: async (ctx, args) => {
+		const storageId = await uploadFromUrlLogic(ctx, { url: args.url });
+		if (!storageId) {
+			throw new Error("Failed to upload embed image");
+		}
+		await ctx.runMutation(api.private.messages.updateEmbedStorageId, {
+			messageId: args.messageId,
+			embedIndex: args.embedIndex,
+			field: args.field,
+			storageId,
 			backendAccessToken: getBackendAccessToken(),
 		});
 	},

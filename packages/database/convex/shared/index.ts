@@ -1,6 +1,7 @@
 export {
 	findAttachmentsByMessageId,
 	uploadAttachmentFromUrlLogic,
+	uploadFromUrlLogic,
 } from "./attachments";
 
 export {

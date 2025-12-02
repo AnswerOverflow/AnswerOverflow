@@ -641,6 +641,63 @@ export async function enrichMessageForDisplay(
 		}),
 	);
 
+	const embedsToResolve = message.embeds ?? [];
+
+	const embedsWithResolvedUrls = await Promise.all(
+		embedsToResolve.map(async (embed) => {
+			const resolvedEmbed = { ...embed };
+
+			if (embed.image?.storageId) {
+				const url = await ctx.storage.getUrl(embed.image.storageId);
+				if (url) {
+					resolvedEmbed.image = { ...embed.image, url, proxyUrl: url };
+				}
+			}
+
+			if (embed.thumbnail?.storageId) {
+				const url = await ctx.storage.getUrl(embed.thumbnail.storageId);
+				if (url) {
+					resolvedEmbed.thumbnail = {
+						...embed.thumbnail,
+						url,
+						proxyUrl: url,
+					};
+				}
+			}
+
+			if (embed.video?.storageId) {
+				const url = await ctx.storage.getUrl(embed.video.storageId);
+				if (url) {
+					resolvedEmbed.video = { ...embed.video, url, proxyUrl: url };
+				}
+			}
+
+			if (embed.footer?.iconStorageId) {
+				const url = await ctx.storage.getUrl(embed.footer.iconStorageId);
+				if (url) {
+					resolvedEmbed.footer = {
+						...embed.footer,
+						iconUrl: url,
+						proxyIconUrl: url,
+					};
+				}
+			}
+
+			if (embed.author?.iconStorageId) {
+				const url = await ctx.storage.getUrl(embed.author.iconStorageId);
+				if (url) {
+					resolvedEmbed.author = {
+						...embed.author,
+						iconUrl: url,
+						proxyIconUrl: url,
+					};
+				}
+			}
+
+			return resolvedEmbed;
+		}),
+	);
+
 	let authorData: { id: bigint; name: string; avatar?: string } | null = null;
 	if (author) {
 		if (options?.isAnonymous) {
@@ -659,8 +716,12 @@ export async function enrichMessageForDisplay(
 		}
 	}
 
+	const messageWithResolvedEmbeds = embedsWithResolvedUrls
+		? { ...message, embeds: embedsWithResolvedUrls }
+		: message;
+
 	const baseEnriched: EnrichedMessage = {
-		message,
+		message: messageWithResolvedEmbeds,
 		author: authorData,
 		attachments: attachmentsWithUrl.filter(Predicate.isNotNullable),
 		reactions: formattedReactions,
