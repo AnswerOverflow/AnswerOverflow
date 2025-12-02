@@ -12,7 +12,7 @@ const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
 const BaseLayer = Layer.mergeAll(
 	DiscordLayer,
 	DatabaseLayer,
-	S3StorageLayer,
+	S3StorageLayer.pipe(Layer.provide(DatabaseLayer)),
 	PostHogCaptureClientLayer,
 	OtelLayer,
 	LoggerLayer,
