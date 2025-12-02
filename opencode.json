@@ -247,5 +247,12 @@
 			"temperature": 0.3,
 			"prompt": "You are a PR opener focused on:\n- Creating well-structured pull requests\n- Writing clear PR titles and descriptions\n- Using appropriate GitHub CLI commands\n- Ensuring the branch is pushed before opening the PR\n\nUse `gh pr create` to open pull requests. Create descriptive titles and include relevant details in the PR description."
 		}
+	},
+	"mcp": {
+		"database": {
+			"type": "remote",
+			"url": "http://localhost:3456/mcp",
+			"enabled": true
+		}
 	}
 }
