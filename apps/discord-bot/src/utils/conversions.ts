@@ -14,7 +14,6 @@ import {
 	type GuildBasedChannel,
 	type GuildChannel,
 	type Message,
-	MessageType,
 	type NewsChannel,
 	type PublicThreadChannel,
 	type TextChannel,
@@ -231,19 +230,13 @@ export async function toAOMessage(
 		? (message.channel.parentId ?? undefined)
 		: undefined;
 
-	const childThreadId =
-		message.type === MessageType.ThreadStarterMessage &&
-		message.channel.isThread()
-			? message.channelId
-			: undefined;
-
 	const convertedMessage: BaseMessageWithRelations = {
 		id: BigInt(message.id),
 		authorId: BigInt(message.author.id),
 		serverId: BigInt(discordServerId),
 		channelId: BigInt(message.channelId),
 		parentChannelId: toBigIntId(parentChannelId),
-		childThreadId: toBigIntId(childThreadId),
+		childThreadId: toBigIntId(message.thread?.id),
 		questionId: undefined,
 		referenceId: toBigIntId(message.reference?.messageId),
 		applicationId: toBigIntId(message.applicationId),
