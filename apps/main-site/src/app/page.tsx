@@ -2,7 +2,7 @@ import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import { runtime } from "../lib/runtime";
 import { HomePageClient } from "./client";
-
+export const dynamic = "force-dynamic";
 export default async function HomePage() {
 	const initialData = await Effect.gen(function* () {
 		const database = yield* Database;

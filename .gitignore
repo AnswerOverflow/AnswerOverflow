@@ -16,6 +16,7 @@ build
 
 # expo
 .expo
+.git-ignored/
 
 # misc
 .DS_Store
