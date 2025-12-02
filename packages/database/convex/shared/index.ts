@@ -32,6 +32,7 @@ export {
 	getFirstMessageInChannel,
 	getFirstMessagesInChannels,
 	getMessageById,
+	getThreadStartMessage,
 	upsertMessageInternalLogic,
 } from "./messages";
 export {

@@ -10,6 +10,7 @@ import {
 	CHANNEL_TYPE,
 	getDiscordAccountById,
 	getFirstMessageInChannel,
+	getThreadStartMessage,
 	isThreadType,
 } from "../shared/shared";
 import { publicQuery } from "./custom_functions";
@@ -50,16 +51,17 @@ export const getRecentThreads = publicQuery({
 		const results = Arr.filter(
 			await Promise.all(
 				paginatedResult.page.map(async (threadChannel) => {
-					const firstMessage = await getFirstMessageInChannel(
+					const threadStartMessage = await getThreadStartMessage(
 						ctx,
 						threadChannel.id,
 					);
-					if (!firstMessage) {
+
+					if (!threadStartMessage) {
 						return null;
 					}
 					const enriched = await enrichedMessageWithServerAndChannels(
 						ctx,
-						firstMessage,
+						threadStartMessage,
 					);
 					if (!enriched) {
 						return null;
