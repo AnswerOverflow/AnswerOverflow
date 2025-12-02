@@ -181,23 +181,26 @@ export function handleMarkSolutionCommand(
 			ignoreChecks: false,
 		});
 
-		yield* Effect.promise(async () => {
+		yield* Effect.gen(function* () {
+			const solutionTagId = channelSettings?.flags?.solutionTagId;
 			if (
 				parentChannel.type === ChannelType.GuildForum &&
-				channelSettings?.flags?.solutionTagId &&
+				solutionTagId &&
 				thread.appliedTags.length < 5
 			) {
-				await thread.setAppliedTags([
-					...thread.appliedTags,
-					channelSettings.flags.solutionTagId.toString(),
-				]);
+				yield* discord.callClient(() =>
+					thread.setAppliedTags([
+						...thread.appliedTags,
+						solutionTagId.toString(),
+					]),
+				);
 			} else {
-				await questionMessage.react("✅");
+				yield* discord.callClient(() => questionMessage.react("✅"));
 			}
 
-			try {
-				await targetMessage.react("✅");
-			} catch {}
+			yield* discord
+				.callClient(() => targetMessage.react("✅"))
+				.pipe(Effect.catchAll(() => Effect.void));
 		}).pipe(
 			Effect.catchAll((error) =>
 				Effect.gen(function* () {

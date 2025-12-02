@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
-import { getOneFrom } from "convex-helpers/server/relationships";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { authenticatedQuery } from "../client";
 import { guildManagerQuery } from "../client/guildManager";
@@ -27,10 +27,12 @@ export const getDashboardData = guildManagerQuery({
 			args.serverId,
 		);
 
-		const allChannels = await ctx.db
-			.query("channels")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.collect();
+		const allChannels = await getManyFrom(
+			ctx.db,
+			"channels",
+			"by_serverId",
+			args.serverId,
+		);
 
 		const channels = allChannels.filter(
 			(channel) => !isThreadType(channel.type),
@@ -97,10 +99,12 @@ export const getUserServersForDropdown = authenticatedQuery({
 	handler: async (ctx, args) => {
 		const { discordAccountId } = args;
 
-		const userServerSettings = await ctx.db
-			.query("userServerSettings")
-			.withIndex("by_userId", (q) => q.eq("userId", discordAccountId))
-			.collect();
+		const userServerSettings = await getManyFrom(
+			ctx.db,
+			"userServerSettings",
+			"by_userId",
+			discordAccountId,
+		);
 
 		const manageableSettings = userServerSettings.filter((setting) => {
 			const permissions = setting.permissions;
