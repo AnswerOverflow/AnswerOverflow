@@ -127,14 +127,15 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
-				yield* database.private.servers.updateServer({
-					serverId: BigInt(guild.id),
-					server: {
-						kickedTime: Date.now(),
-					},
-				});
+				yield* Effect.void; // TODO: Re enable
+				// yield* database.private.servers.updateServer({
+				// 	serverId: BigInt(guild.id),
+				// 	server: {
+				// 		kickedTime: Date.now(),
+				// 	},
+				// });
 
-				yield* trackServerLeave(guild).pipe(Effect.catchAll(() => Effect.void));
+				// yield* trackServerLeave(guild).pipe(Effect.catchAll(() => Effect.void));
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error handling guild delete ${guild.id}:`, error),
@@ -194,13 +195,14 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					);
 					yield* Effect.forEach(serversToMarkAsKicked, (server) =>
 						Effect.gen(function* () {
-							yield* database.private.servers.updateServer({
-								serverId: server.discordId,
-								server: {
-									kickedTime: Date.now(),
-								},
-							});
-							yield* Console.log(`Marked server ${server.name} as kicked`);
+							yield* Effect.void; // TODO: Re enable
+							// yield* database.private.servers.updateServer({
+							// 	serverId: server.discordId,
+							// 	server: {
+							// 		kickedTime: Date.now(),
+							// 	},
+							// });
+							// yield* Console.log(`Marked server ${server.name} as kicked`);
 						}).pipe(
 							Effect.catchAll((error) =>
 								Console.error(
