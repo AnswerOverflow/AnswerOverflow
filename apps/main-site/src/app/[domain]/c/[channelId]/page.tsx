@@ -92,6 +92,7 @@ export default async function TenantChannelPage(props: Props) {
 			channels={pageData.channels}
 			selectedChannel={pageData.selectedChannel}
 			threads={pageData.threads}
+			messages={pageData.messages}
 		/>
 	);
 }
