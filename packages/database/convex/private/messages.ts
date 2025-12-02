@@ -1,7 +1,6 @@
 import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
-import type { Id } from "../_generated/dataModel";
 import {
 	type MutationCtx,
 	privateMutation,
