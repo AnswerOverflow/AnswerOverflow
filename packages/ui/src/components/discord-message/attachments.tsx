@@ -154,11 +154,23 @@ function ImageWithAspectRatio({
 	);
 }
 
+const BROWSER_SUPPORTED_VIDEO_TYPES = new Set([
+	"video/mp4",
+	"video/webm",
+	"video/ogg",
+]);
+
 function VideoPlayer({ attachment }: { attachment: Attachment }) {
 	const hasDimensions = attachment.width && attachment.height;
 	const aspectRatio = hasDimensions
 		? Number(((attachment.width ?? 0) / (attachment.height ?? 1)).toFixed(4))
 		: 16 / 9;
+
+	const contentType =
+		attachment.contentType &&
+		BROWSER_SUPPORTED_VIDEO_TYPES.has(attachment.contentType)
+			? attachment.contentType
+			: undefined;
 
 	return (
 		<div
@@ -173,10 +185,7 @@ function VideoPlayer({ attachment }: { attachment: Attachment }) {
 				width={attachment.width ?? undefined}
 				height={attachment.height ?? undefined}
 			>
-				<source
-					src={attachment.url}
-					type={attachment.contentType ?? undefined}
-				/>
+				<source src={attachment.url} type={contentType} />
 			</video>
 		</div>
 	);
