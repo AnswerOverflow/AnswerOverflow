@@ -35,7 +35,6 @@ export default async function ChannelPage(props: Props) {
 			channels={pageData.channels}
 			selectedChannel={pageData.selectedChannel}
 			threads={pageData.threads}
-			messages={pageData.messages}
 		/>
 	);
 }

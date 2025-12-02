@@ -119,7 +119,6 @@ export default async function ServerPage(props: Props) {
 			channels={pageData.channels}
 			selectedChannel={pageData.selectedChannel}
 			threads={pageData.threads}
-			messages={pageData.messages}
 		/>
 	);
 }
