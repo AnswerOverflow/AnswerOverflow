@@ -31,10 +31,9 @@
 
 ## Schema/Database Gaps
 
-| Issue                         | Description                                                     | Impact                 |
-| ----------------------------- | --------------------------------------------------------------- | ---------------------- |
-| **No Unique Constraints**     | vanityUrl, customDomain, inviteCode, apiKey not enforced unique | Potential duplicates   |
-| **Missing referenceId Index** | Messages table lacks index on referenceId                       | Slow reference lookups |
+| Issue                     | Description                                                     | Impact               |
+| ------------------------- | --------------------------------------------------------------- | -------------------- |
+| **No Unique Constraints** | vanityUrl, customDomain, inviteCode, apiKey not enforced unique | Potential duplicates |
 
 ## API/Backend Gaps
 
@@ -46,12 +45,11 @@
 
 ## Web App Gaps
 
-| Feature                               | Description                                    | Status                    |
-| ------------------------------------- | ---------------------------------------------- | ------------------------- |
-| **Tenant User Profiles**              | `/[domain]/u/[userId]` for custom domain sites | Missing                   |
-| **Custom Domain Canonical Redirects** | Redirect from main site to tenant domain       | Not implemented           |
-| **Posts Index Pages**                 | `/c/[serverId]/posts/[page]` bulk listings     | Removed                   |
-| **Server Filter in Root Search**      | `?s=serverId` parameter for search             | Only tenant search scoped |
+| Feature                               | Description                                | Status                    |
+| ------------------------------------- | ------------------------------------------ | ------------------------- |
+| **Custom Domain Canonical Redirects** | Redirect from main site to tenant domain   | Not implemented           |
+| **Posts Index Pages**                 | `/c/[serverId]/posts/[page]` bulk listings | Removed                   |
+| **Server Filter in Root Search**      | `?s=serverId` parameter for search         | Only tenant search scoped |
 
 ## Intentionally Omitted
 
