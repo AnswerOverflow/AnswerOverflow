@@ -235,7 +235,12 @@ export const service = Effect.gen(function* () {
 				const funcRef = value as FunctionReference<any, any>;
 
 				if (funcType === "query") {
-					const wrappedFunction = ((args?: any, options: QueryOptions = {}) => {
+					const wrappedFunction = ((
+						args?: any,
+						options: QueryOptions = {
+							subscribe: true,
+						},
+					) => {
 						const fullArgs: Record<string, unknown> = isPublic
 							? (args ?? {})
 							: { ...(args ?? {}), backendAccessToken };
