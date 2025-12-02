@@ -62,11 +62,11 @@ function FileShowcase({ attachment }: { attachment: Attachment }) {
 			<div className="group-hover:fade-in-0 group-hover:zoom-in-95 absolute top-0 right-0 translate-x-[50%] translate-y-[-50%] opacity-0 transition-opacity duration-300 group-hover:animate-in group-hover:opacity-100">
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<a href={attachmentUrl} target="_blank" rel="noreferrer">
-							<Button size="icon" variant="outline">
+						<Button size="icon" variant="outline" asChild>
+							<a href={attachmentUrl} target="_blank" rel="noreferrer">
 								<ArrowUpRight className="size-6" />
-							</Button>
-						</a>
+							</a>
+						</Button>
 					</TooltipTrigger>
 					<TooltipContent>
 						<p>Open attachment</p>

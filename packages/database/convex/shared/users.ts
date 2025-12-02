@@ -1,4 +1,4 @@
-import { getOneFrom } from "convex-helpers/server/relationships";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import type { MutationCtx, QueryCtx } from "../client";
 
 export async function getDiscordAccountById(
@@ -78,10 +78,12 @@ export async function deleteUserServerSettingsByUserIdLogic(
 	ctx: MutationCtx,
 	userId: bigint,
 ): Promise<void> {
-	const settings = await ctx.db
-		.query("userServerSettings")
-		.withIndex("by_userId", (q) => q.eq("userId", userId))
-		.collect();
+	const settings = await getManyFrom(
+		ctx.db,
+		"userServerSettings",
+		"by_userId",
+		userId,
+	);
 
 	for (const setting of settings) {
 		await ctx.db.delete(setting._id);

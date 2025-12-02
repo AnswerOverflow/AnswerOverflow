@@ -13,7 +13,7 @@ import {
 } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
 import { Effect, Exit } from "effect";
-import { useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 
 const ALLOWED_DEV_ORIGINS = [
@@ -35,17 +35,17 @@ function isValidState(state: string | null): state is string {
 }
 
 export default function DevAuthPage() {
-	const searchParams = useSearchParams();
+	const [redirect] = useQueryState("redirect");
+	const [state] = useQueryState("state");
 	const { data: session, isPending } = useSession({ allowAnonymous: false });
-	const redirect = searchParams.get("redirect") ?? "";
-	const state = searchParams.get("state");
+	const redirectUrl = redirect ?? "";
 	const [status, setStatus] = useState<
 		"idle" | "pending" | "success" | "error"
 	>("idle");
 	const [errorMessage, setErrorMessage] = useState<string>("");
 
 	const url = Effect.try({
-		try: () => new URL(redirect),
+		try: () => new URL(redirectUrl),
 		catch: () => {
 			return new Error("Invalid redirect URL");
 		},
@@ -83,7 +83,7 @@ export default function DevAuthPage() {
 
 				if (window.opener) {
 					window.opener.postMessage(
-						{ type: "dev-auth-token", token, redirect, state },
+						{ type: "dev-auth-token", token, redirect: redirectUrl, state },
 						url.value.origin,
 					);
 					setStatus("success");
@@ -106,7 +106,7 @@ export default function DevAuthPage() {
 		session,
 		isPending,
 		url,
-		redirect,
+		redirectUrl,
 		status,
 		isOriginAllowed,
 		isStateValid,
