@@ -24,19 +24,25 @@ export function compareIds(a: bigint, b: bigint): number {
 export async function findMessagesByChannelId(
 	ctx: QueryCtx | MutationCtx,
 	channelId: bigint,
-	limit?: number,
-	after?: bigint,
+	options?: {
+		limit?: number;
+		startingFrom?: bigint;
+	},
 ) {
 	const query = ctx.db
 		.query("messages")
 		.withIndex("by_channelId_and_id", (q) => {
 			const base = q.eq("channelId", channelId);
-			return after ? base.gt("id", after) : base;
+			return options?.startingFrom
+				? base.gte("id", options.startingFrom)
+				: base;
 		})
 		.order("asc");
 
-	const effectiveLimit = limit ?? 100;
-	return await query.take(effectiveLimit);
+	if (options?.limit) {
+		return await query.take(options.limit);
+	}
+	return await query.collect();
 }
 
 export async function getFirstMessageInChannel(
