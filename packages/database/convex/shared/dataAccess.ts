@@ -160,6 +160,7 @@ export async function searchMessages(
 	ctx: QueryCtx,
 	args: {
 		query: string;
+		serverId?: bigint;
 		paginationOpts: { numItems: number; cursor: string | null };
 	},
 ): Promise<{
@@ -169,11 +170,14 @@ export async function searchMessages(
 }> {
 	const paginatedResult = await ctx.db
 		.query("messages")
-		.withSearchIndex("search_content", (q) => q.search("content", args.query))
-		.paginate({
-			...args.paginationOpts,
-			numItems: Math.min(args.paginationOpts.numItems, 10),
-		});
+		.withSearchIndex("search_content", (q) => {
+			const searchQuery = q.search("content", args.query);
+			if (args.serverId) {
+				return searchQuery.eq("serverId", args.serverId);
+			}
+			return searchQuery;
+		})
+		.paginate(args.paginationOpts);
 
 	const results = Arr.filter(
 		await Promise.all(
