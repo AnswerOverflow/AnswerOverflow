@@ -9,7 +9,7 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { Link } from "@packages/ui/components/link";
-import { useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 
 const MAIN_SITE_ORIGIN = "https://new.answeroverflow.com";
@@ -24,8 +24,8 @@ function generateState(): string {
 }
 
 export default function DevAuthReceivePage() {
-	const searchParams = useSearchParams();
-	const redirect = searchParams.get("redirect") ?? "/";
+	const [redirectParam] = useQueryState("redirect");
+	const redirect = redirectParam ?? "/";
 	const [status, setStatus] = useState<
 		"idle" | "pending" | "success" | "error"
 	>("idle");

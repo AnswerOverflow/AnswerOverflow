@@ -1,4 +1,3 @@
-import type { BaseMessageWithRelations } from "@packages/database/database";
 import { Database } from "@packages/database/database";
 import type {
 	AnyThreadChannel,
@@ -20,6 +19,7 @@ import {
 	HashMap,
 	Layer,
 	Order,
+	Predicate,
 	Schedule,
 } from "effect";
 import { Discord } from "../core/discord-service";
@@ -153,17 +153,22 @@ function storeMessages(
 			`Storing ${humanMessages.length} human messages (filtered from ${messages.length} total)`,
 		);
 
-		const aoMessages: BaseMessageWithRelations[] = [];
-		for (const msg of humanMessages) {
-			try {
-				const aoMessage = yield* Effect.promise(() =>
-					toAOMessage(msg, discordServerId),
-				);
-				aoMessages.push(aoMessage);
-			} catch (error) {
-				yield* Console.warn(`Failed to convert message ${msg.id}:`, error);
-			}
-		}
+		const aoMessages = yield* Effect.forEach(
+			humanMessages,
+			(msg) =>
+				Effect.tryPromise(() => toAOMessage(msg, discordServerId)).pipe(
+					Effect.catchAll((error) =>
+						Effect.gen(function* () {
+							yield* Console.warn(
+								`Failed to convert message ${msg.id}:`,
+								error,
+							);
+							return null;
+						}),
+					),
+				),
+			{ concurrency: "unbounded" },
+		).pipe(Effect.map(Arr.filter(Predicate.isNotNull)));
 
 		const uniqueAuthors = HashMap.fromIterable(
 			Arr.map(

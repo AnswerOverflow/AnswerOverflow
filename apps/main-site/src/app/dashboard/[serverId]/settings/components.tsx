@@ -15,7 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import dayjs from "dayjs";
 import { CheckCircle, CreditCard } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
 type Plan =
@@ -143,14 +143,13 @@ function ManageBillingButton(props: { serverId: bigint }) {
 }
 
 function useSyncAfterCheckout(serverId: string) {
-	const searchParams = useSearchParams();
-	const router = useRouter();
+	const [success, setSuccess] = useQueryState("success");
 	const queryClient = useQueryClient();
 	const syncAfterCheckout = useAction(
 		api.authenticated.stripe.syncAfterCheckout,
 	);
 
-	const hasSuccess = searchParams.get("success") === "true";
+	const hasSuccess = success === "true";
 
 	const { isLoading: isSyncing, isSuccess: syncSuccess } = useQuery({
 		queryKey: ["sync-after-checkout", serverId],
@@ -159,9 +158,7 @@ function useSyncAfterCheckout(serverId: string) {
 			queryClient.invalidateQueries({
 				queryKey: ["subscription-info", serverId],
 			});
-			const url = new URL(window.location.href);
-			url.searchParams.delete("success");
-			router.replace(url.pathname + url.search);
+			await setSuccess(null);
 			return result;
 		},
 		enabled: hasSuccess,

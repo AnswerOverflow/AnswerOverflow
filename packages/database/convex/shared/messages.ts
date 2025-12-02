@@ -212,10 +212,13 @@ export async function upsertMessageInternalLogic(
 	}
 
 	if (attachments !== undefined) {
-		const existingAttachments = await ctx.db
-			.query("attachments")
-			.withIndex("by_messageId", (q) => q.eq("messageId", messageData.id))
-			.collect();
+		const existingAttachments = await getManyFrom(
+			ctx.db,
+			"attachments",
+			"by_messageId",
+			messageData.id,
+			"messageId",
+		);
 
 		for (const attachment of existingAttachments) {
 			await ctx.db.delete(attachment._id);
@@ -229,10 +232,13 @@ export async function upsertMessageInternalLogic(
 	}
 
 	if (reactions !== undefined) {
-		const existingReactions = await ctx.db
-			.query("reactions")
-			.withIndex("by_messageId", (q) => q.eq("messageId", messageData.id))
-			.collect();
+		const existingReactions = await getManyFrom(
+			ctx.db,
+			"reactions",
+			"by_messageId",
+			messageData.id,
+			"messageId",
+		);
 
 		for (const reaction of existingReactions) {
 			await ctx.db.delete(reaction._id);
