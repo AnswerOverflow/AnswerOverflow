@@ -14,8 +14,6 @@ coverage
 out/
 build
 
-git-ignored/
-
 # expo
 .expo
 

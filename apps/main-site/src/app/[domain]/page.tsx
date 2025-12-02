@@ -145,7 +145,6 @@ export default async function DomainPage(props: Props) {
 			channels={pageData.channels}
 			selectedChannel={pageData.selectedChannel}
 			threads={pageData.threads}
-			messages={pageData.messages}
 		/>
 	);
 }

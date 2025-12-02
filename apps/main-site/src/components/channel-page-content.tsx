@@ -110,106 +110,15 @@ function MobileChannelSelector({
 	);
 }
 
-function ThreadsList({ threads }: { threads: ChannelPageData["threads"] }) {
-	if (threads.length === 0) {
-		return (
-			<div className="text-center py-12 text-muted-foreground">
-				No threads found in this channel
-			</div>
-		);
-	}
-
-	return (
-		<div className="space-y-3">
-			{threads.map(({ thread, message }) => {
-				const messageDate = getSnowflakeDate(message.message.id);
-				const formattedDate = formatRelativeTime(messageDate);
-				return (
-					<Link
-						key={thread.id.toString()}
-						href={`/m/${message.message.id.toString()}`}
-						className="block rounded-lg border border-border bg-card p-4 md:p-5 transition-all hover:border-sidebar-border hover:bg-accent/50"
-					>
-						<div className="flex flex-col gap-2">
-							<div className="flex items-start justify-between gap-2">
-								<h3 className="font-semibold text-card-foreground line-clamp-2 text-sm md:text-base">
-									{thread.name}
-								</h3>
-								<div className="text-xs text-muted-foreground shrink-0">
-									{formattedDate}
-								</div>
-							</div>
-							<div className="text-sm">
-								<MessageBody message={message} collapseContent={true} />
-							</div>
-						</div>
-					</Link>
-				);
-			})}
-		</div>
-	);
-}
-
-function MessagesList({ messages }: { messages: ChannelPageData["messages"] }) {
-	if (messages.length === 0) {
-		return (
-			<div className="text-center py-12 text-muted-foreground">
-				No messages found in this channel
-			</div>
-		);
-	}
-
-	return (
-		<div className="space-y-3">
-			{messages.map((message) => {
-				const messageDate = getSnowflakeDate(message.message.id);
-				const formattedDate = formatRelativeTime(messageDate);
-				return (
-					<Link
-						key={message.message.id.toString()}
-						href={`/m/${message.message.id.toString()}`}
-						className="block rounded-lg border border-border bg-card p-4 md:p-5 transition-all hover:border-sidebar-border hover:bg-accent/50"
-					>
-						<div className="flex flex-col gap-2">
-							<div className="flex items-start justify-between gap-2">
-								<div className="flex items-center gap-2">
-									{message.author?.avatar && (
-										<img
-											src={`https://cdn.discordapp.com/avatars/${message.author.id}/${message.author.avatar}.webp?size=32`}
-											alt={message.author.name}
-											className="w-6 h-6 rounded-full"
-										/>
-									)}
-									<span className="font-semibold text-card-foreground text-sm md:text-base">
-										{message.author?.name ?? "Unknown User"}
-									</span>
-								</div>
-								<div className="text-xs text-muted-foreground shrink-0">
-									{formattedDate}
-								</div>
-							</div>
-							<div className="text-sm">
-								<MessageBody message={message} collapseContent={true} />
-							</div>
-						</div>
-					</Link>
-				);
-			})}
-		</div>
-	);
-}
-
 export function ChannelPageContent({
 	server,
 	channels,
 	selectedChannel,
 	threads,
-	messages,
 }: ChannelPageData) {
 	const tenant = useTenant();
 	const tenantMode = !!tenant;
 	const serverIcon = server.icon ?? null;
-	const isForumChannel = selectedChannel?.type === 15;
 
 	const getChannelHref = (channelId: bigint) =>
 		tenantMode
@@ -289,12 +198,43 @@ export function ChannelPageContent({
 
 					<div className="flex-1 min-w-0">
 						<h2 className="text-xl font-semibold text-foreground mb-4">
-							{isForumChannel ? "Threads" : "Messages"}
+							Threads
 						</h2>
-						{isForumChannel ? (
-							<ThreadsList threads={threads} />
+						{threads.length === 0 ? (
+							<div className="text-center py-12 text-muted-foreground">
+								No threads found in this channel
+							</div>
 						) : (
-							<MessagesList messages={messages} />
+							<div className="space-y-3">
+								{threads.map(({ thread, message }) => {
+									const messageDate = getSnowflakeDate(message.message.id);
+									const formattedDate = formatRelativeTime(messageDate);
+									return (
+										<Link
+											key={thread.id.toString()}
+											href={`/m/${message.message.id.toString()}`}
+											className="block rounded-lg border border-border bg-card p-4 md:p-5 transition-all hover:border-sidebar-border hover:bg-accent/50"
+										>
+											<div className="flex flex-col gap-2">
+												<div className="flex items-start justify-between gap-2">
+													<h3 className="font-semibold text-card-foreground line-clamp-2 text-sm md:text-base">
+														{thread.name}
+													</h3>
+													<div className="text-xs text-muted-foreground shrink-0">
+														{formattedDate}
+													</div>
+												</div>
+												<div className="text-sm">
+													<MessageBody
+														message={message}
+														collapseContent={true}
+													/>
+												</div>
+											</div>
+										</Link>
+									);
+								})}
+							</div>
 						)}
 					</div>
 				</div>
