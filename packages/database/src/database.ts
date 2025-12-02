@@ -256,7 +256,7 @@ export const service = Effect.gen(function* () {
 									getQuery,
 									fullArgs,
 								);
-								return liveData;
+								return liveData?.data;
 							});
 						}
 
