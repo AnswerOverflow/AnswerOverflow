@@ -271,6 +271,11 @@ export default function ChannelsPage() {
 			);
 		}
 
+		const typeOrder: Record<number, number> = { 15: 0, 5: 1, 0: 2 };
+		filtered = [...filtered].sort(
+			(a, b) => (typeOrder[a.type] ?? 99) - (typeOrder[b.type] ?? 99),
+		);
+
 		return filtered;
 	}, [dashboardData?.channels, channelSearchQuery, channelTypeFilter]);
 
@@ -432,13 +437,22 @@ export default function ChannelsPage() {
 		return false;
 	};
 
-	const toggleChannelSelection = (channelId: bigint) => {
+	const toggleChannelSelection = (channelId: bigint, shiftKey: boolean) => {
 		setSelectedChannelIds((prev) => {
 			const next = new Set(prev);
-			if (next.has(channelId)) {
-				next.delete(channelId);
+			const isCurrentlySelected = next.has(channelId);
+
+			if (shiftKey) {
+				if (isCurrentlySelected) {
+					next.delete(channelId);
+				} else {
+					next.add(channelId);
+				}
 			} else {
-				next.add(channelId);
+				next.clear();
+				if (!isCurrentlySelected) {
+					next.add(channelId);
+				}
 			}
 			return next;
 		});
@@ -547,31 +561,28 @@ export default function ChannelsPage() {
 										</div>
 									) : (
 										filteredChannels.map((channel) => {
-											const { Icon, typeName } = getChannelInfo(channel.type);
+											const { Icon } = getChannelInfo(channel.type);
 											const isSelected = selectedChannelIds.has(channel.id);
 											return (
-												<label
+												<div
 													key={channel.id.toString()}
-													className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors"
+													className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors select-none"
+													onClick={(e) =>
+														toggleChannelSelection(channel.id, e.shiftKey)
+													}
 												>
 													<Checkbox
 														checked={isSelected}
-														onCheckedChange={() =>
-															toggleChannelSelection(channel.id)
-														}
+														onClick={(e) => {
+															e.stopPropagation();
+															toggleChannelSelection(channel.id, e.shiftKey);
+														}}
 													/>
 													<Icon className="size-4 shrink-0 text-muted-foreground" />
-													<div className="flex-1 min-w-0">
-														<div className="flex items-center gap-2">
-															<span className="font-medium truncate text-sm">
-																{channel.name}
-															</span>
-															<span className="text-xs text-muted-foreground shrink-0">
-																{typeName}
-															</span>
-														</div>
-													</div>
-												</label>
+													<span className="font-medium truncate text-sm flex-1 min-w-0">
+														{channel.name}
+													</span>
+												</div>
 											);
 										})
 									)}
@@ -677,26 +688,23 @@ export default function ChannelsPage() {
 												</div>
 											) : (
 												filteredChannels.map((channel) => {
-													const { Icon, typeName } = getChannelInfo(
-														channel.type,
-													);
+													const { Icon } = getChannelInfo(channel.type);
 													const isSelected = selectedChannelIds.has(channel.id);
 													return (
 														<DropdownMenuCheckboxItem
 															key={channel.id.toString()}
 															checked={isSelected}
-															onCheckedChange={() =>
-																toggleChannelSelection(channel.id)
+															onCheckedChange={() => {}}
+															onClick={(e) =>
+																toggleChannelSelection(channel.id, e.shiftKey)
 															}
 															onSelect={(e) => e.preventDefault()}
+															className="select-none"
 														>
 															<div className="flex items-center gap-2 flex-1 min-w-0">
 																<Icon className="size-4 shrink-0 text-muted-foreground" />
 																<span className="truncate font-medium">
 																	{channel.name}
-																</span>
-																<span className="text-xs text-muted-foreground shrink-0 ml-auto">
-																	{typeName}
 																</span>
 															</div>
 														</DropdownMenuCheckboxItem>
@@ -736,7 +744,9 @@ export default function ChannelsPage() {
 											)}
 										</h2>
 										<p className="text-sm text-muted-foreground mt-1">
-											Settings will be applied to all selected channels
+											{selectedChannels.length > 1
+												? "Settings will be applied to all selected channels"
+												: "Hold Shift and click to select multiple channels"}
 										</p>
 									</div>
 
