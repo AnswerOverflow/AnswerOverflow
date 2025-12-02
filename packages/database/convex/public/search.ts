@@ -23,28 +23,14 @@ export const publicSearch = publicQuery({
 	handler: async (ctx, args) => {
 		const results = await searchMessages(ctx, {
 			query: args.query,
+			serverId: args.serverId ? BigInt(args.serverId) : undefined,
 			paginationOpts: {
 				numItems: Math.min(args.paginationOpts.numItems, 50),
 				cursor: args.paginationOpts.cursor,
 			},
 		});
 
-		if (!args.serverId) {
-			return {
-				...results,
-				page: results.page.slice(0, 10),
-			};
-		}
-
-		const serverIdFilter = BigInt(args.serverId);
-		const filteredPage = results.page.filter(
-			(result) => result.server.discordId === serverIdFilter,
-		);
-
-		return {
-			...results,
-			page: filteredPage.slice(0, 10),
-		};
+		return results;
 	},
 });
 

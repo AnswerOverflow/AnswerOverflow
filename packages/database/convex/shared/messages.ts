@@ -590,24 +590,26 @@ export async function enrichMessageForDisplay(
 		],
 	);
 
-	const emojiIds = new Set(
-		reactions.map((r) => r.emojiId).filter((id): id is bigint => !!id),
+	const emojiIds = Arr.dedupe(
+		Arr.filter(
+			reactions.map((r) => r.emojiId),
+			Predicate.isNotNullable,
+		),
+	);
+
+	const emojis = await Promise.all(
+		emojiIds.map((emojiId) =>
+			getOneFrom(ctx.db, "emojis", "by_emojiId", emojiId, "id"),
+		),
 	);
 
 	const emojiMap = new Map<
 		string,
 		{ id: bigint; name: string; animated?: boolean }
 	>();
-	for (const emojiId of emojiIds) {
-		const emoji = await getOneFrom(
-			ctx.db,
-			"emojis",
-			"by_emojiId",
-			emojiId,
-			"id",
-		);
+	for (const emoji of emojis) {
 		if (emoji) {
-			emojiMap.set(emojiId.toString(), {
+			emojiMap.set(emoji.id.toString(), {
 				id: emoji.id,
 				name: emoji.name,
 				animated: emoji.animated,

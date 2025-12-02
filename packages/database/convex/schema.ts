@@ -253,6 +253,7 @@ export default defineSchema({
 		.index("by_channelId_and_id", ["channelId", "id"])
 		.searchIndex("search_content", {
 			searchField: "content",
+			filterFields: ["serverId"],
 		}),
 	attachments: defineTable(attachmentSchema)
 		.index("by_messageId", ["messageId"])
