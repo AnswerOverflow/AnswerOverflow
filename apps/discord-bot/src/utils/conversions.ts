@@ -236,7 +236,9 @@ export async function toAOMessage(
 		serverId: BigInt(discordServerId),
 		channelId: BigInt(message.channelId),
 		parentChannelId: toBigIntId(parentChannelId),
-		childThreadId: toBigIntId(message.thread?.id),
+		childThreadId: toBigIntId(
+			message.thread?.id ?? (message?.hasThread ? message.id : undefined),
+		),
 		questionId: undefined,
 		referenceId: toBigIntId(message.reference?.messageId),
 		applicationId: toBigIntId(message.applicationId),
