@@ -1,14 +1,10 @@
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
-import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { privateMutation, privateQuery } from "../client";
 import { serverSchema } from "../schema";
-import {
-	CHANNEL_TYPE,
-	DEFAULT_CHANNEL_SETTINGS,
-	isThreadType,
-} from "../shared/shared";
+import { CHANNEL_TYPE } from "../shared/shared";
 
 export const upsertServer = privateMutation({
 	args: serverSchema,

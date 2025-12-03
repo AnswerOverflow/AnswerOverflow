@@ -1,32 +1,32 @@
+import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
 import { sql } from "drizzle-orm";
-import { join } from "path";
-import { mkdir } from "fs/promises";
 import { getDb } from "./db/client";
 import {
-	dbServers,
 	dbChannels,
 	dbDiscordAccounts,
-	dbMessages,
 	dbEmojis,
-	dbReactions,
-	dbUserServerSettings,
 	dbIgnoredDiscordAccounts,
+	dbMessages,
+	dbReactions,
+	dbServers,
+	dbUserServerSettings,
 } from "./db/schema";
+import { transformChannel } from "./transformers/channel";
+import { transformDiscordAccount } from "./transformers/discord-account";
+import { transformEmoji } from "./transformers/emoji";
+import { transformIgnoredDiscordAccount } from "./transformers/ignored-discord-account";
+import { transformMessage } from "./transformers/message";
+import { transformReaction } from "./transformers/reaction";
+import { transformServer } from "./transformers/server";
+import { transformUserServerSettings } from "./transformers/user-server-settings";
+import { ProgressLogger } from "./utils/progress";
 import { JsonlWriter } from "./writers/jsonl-writer";
 import {
 	buildConvexZip,
 	cleanupTempFiles,
 	type TableExport,
 } from "./writers/zip-builder";
-import { ProgressLogger } from "./utils/progress";
-import { transformServer } from "./transformers/server";
-import { transformChannel } from "./transformers/channel";
-import { transformDiscordAccount } from "./transformers/discord-account";
-import { transformMessage } from "./transformers/message";
-import { transformEmoji } from "./transformers/emoji";
-import { transformReaction } from "./transformers/reaction";
-import { transformUserServerSettings } from "./transformers/user-server-settings";
-import { transformIgnoredDiscordAccount } from "./transformers/ignored-discord-account";
 
 const TEMP_DIR = join(process.cwd(), ".migration-temp");
 const OUTPUT_FILE = join(process.cwd(), "migration-export.zip");
@@ -79,7 +79,7 @@ async function migrateServers(): Promise<TableExport[]> {
 			progress.increment();
 		}
 
-		lastId = rows[rows.length - 1]!.id;
+		lastId = rows[rows.length - 1]?.id;
 		if (shouldStop(progress.getProcessed())) break;
 	}
 
@@ -129,7 +129,7 @@ async function migrateChannels(): Promise<TableExport[]> {
 			progress.increment();
 		}
 
-		lastId = rows[rows.length - 1]!.id;
+		lastId = rows[rows.length - 1]?.id;
 		if (shouldStop(progress.getProcessed())) break;
 	}
 
@@ -176,7 +176,7 @@ async function migrateDiscordAccounts(): Promise<TableExport[]> {
 			progress.increment();
 		}
 
-		lastId = rows[rows.length - 1]!.id;
+		lastId = rows[rows.length - 1]?.id;
 		if (shouldStop(progress.getProcessed())) break;
 	}
 
@@ -215,7 +215,7 @@ async function migrateMessages(): Promise<TableExport[]> {
 			progress.increment();
 		}
 
-		lastId = rows[rows.length - 1]!.id;
+		lastId = rows[rows.length - 1]?.id;
 		if (shouldStop(progress.getProcessed())) break;
 	}
 
@@ -254,7 +254,7 @@ async function migrateEmojis(): Promise<TableExport[]> {
 			progress.increment();
 		}
 
-		lastId = rows[rows.length - 1]!.id;
+		lastId = rows[rows.length - 1]?.id;
 		if (shouldStop(progress.getProcessed())) break;
 	}
 
@@ -391,7 +391,7 @@ async function migrateIgnoredDiscordAccounts(): Promise<TableExport[]> {
 			progress.increment();
 		}
 
-		lastId = rows[rows.length - 1]!.id;
+		lastId = rows[rows.length - 1]?.id;
 		if (shouldStop(progress.getProcessed())) break;
 	}
 

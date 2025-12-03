@@ -3,9 +3,9 @@ import {
 	createWriteStream,
 	renameSync,
 	unlinkSync,
-} from "fs";
-import { createInterface } from "readline";
-import { join } from "path";
+} from "node:fs";
+import { join } from "node:path";
+import { createInterface } from "node:readline";
 
 const TEMP_DIR = join(process.cwd(), ".migration-temp");
 
@@ -61,7 +61,7 @@ const tables: TableConfig[] = [
 
 async function convertFile(config: TableConfig): Promise<void> {
 	const inputPath = join(TEMP_DIR, config.file);
-	const outputPath = join(TEMP_DIR, config.file + ".new");
+	const outputPath = join(TEMP_DIR, `${config.file}.new`);
 
 	console.log(`Converting ${config.file}...`);
 
@@ -83,7 +83,7 @@ async function convertFile(config: TableConfig): Promise<void> {
 			}
 		}
 
-		output.write(JSON.stringify(obj) + "\n");
+		output.write(`${JSON.stringify(obj)}\n`);
 		count++;
 
 		if (count % 1000000 === 0) {

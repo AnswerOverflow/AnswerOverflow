@@ -1,4 +1,4 @@
-import type { Message, Embed } from "../db/schema";
+import type { Embed, Message } from "../db/schema";
 
 export interface NewMessage {
 	id: string;

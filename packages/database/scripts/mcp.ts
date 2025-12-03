@@ -3,12 +3,12 @@ import { McpSchema, McpServer } from "@effect/ai";
 import { NodeRuntime, NodeSink, NodeStream } from "@effect/platform-node";
 import { Data, Effect, Layer, Logger } from "effect";
 import { api } from "../convex/_generated/api";
+import { ConvexClientLiveUnifiedLayer } from "../src/convex-client-live";
+import { ConvexClientUnified } from "../src/convex-unified-client";
 import {
 	FUNCTION_TYPE_MAP,
 	NAMESPACE_STRUCTURE,
 } from "../src/generated/function-types";
-import { ConvexClientLiveUnifiedLayer } from "../src/convex-client-live";
-import { ConvexClientUnified } from "../src/convex-unified-client";
 
 class McpConvexError extends Data.TaggedError("McpConvexError")<{
 	cause: unknown;

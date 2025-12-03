@@ -1,12 +1,12 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { TimeAgo } from "@packages/ui/components/time-ago";
 import { useStableQuery } from "@packages/ui/hooks/use-stable-query";
-import { useSession } from "@packages/ui/components/convex-client-provider";
 import { CheckCircle2 } from "lucide-react";
 
 type SimilarThreadsProps = {

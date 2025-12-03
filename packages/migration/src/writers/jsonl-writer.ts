@@ -1,4 +1,4 @@
-import { createWriteStream, type WriteStream } from "fs";
+import { createWriteStream, type WriteStream } from "node:fs";
 
 function stripUndefined(obj: object): Record<string, unknown> {
 	const result: Record<string, unknown> = {};
@@ -27,7 +27,7 @@ export class JsonlWriter {
 
 	write(record: object) {
 		const cleaned = stripUndefined(record);
-		this.stream.write(JSON.stringify(cleaned) + "\n");
+		this.stream.write(`${JSON.stringify(cleaned)}\n`);
 		this.count++;
 	}
 

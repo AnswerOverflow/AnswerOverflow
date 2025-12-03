@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, existsSync } from "fs";
-import { join } from "path";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const CHECKPOINT_FILE = join(process.cwd(), ".migration-checkpoint.json");
 
@@ -28,7 +28,7 @@ export function saveCheckpoint(checkpoint: Checkpoint): void {
 
 export function clearCheckpoint(): void {
 	if (existsSync(CHECKPOINT_FILE)) {
-		const fs = require("fs");
+		const fs = require("node:fs");
 		fs.unlinkSync(CHECKPOINT_FILE);
 	}
 }

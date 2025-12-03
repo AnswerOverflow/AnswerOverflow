@@ -1,4 +1,4 @@
-import { join } from "path";
+import { join } from "node:path";
 import { buildConvexZip, type TableExport } from "./writers/zip-builder";
 
 const TEMP_DIR = join(process.cwd(), ".migration-temp");

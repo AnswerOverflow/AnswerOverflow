@@ -1,18 +1,18 @@
+import { createWriteStream } from "node:fs";
+import { join } from "node:path";
 import { sql } from "drizzle-orm";
-import { createWriteStream } from "fs";
-import { join } from "path";
 import { getDb } from "./db/client";
 import {
 	dbEmojis,
+	dbIgnoredDiscordAccounts,
 	dbReactions,
 	dbUserServerSettings,
-	dbIgnoredDiscordAccounts,
 } from "./db/schema";
-import { ProgressLogger } from "./utils/progress";
 import { transformEmoji } from "./transformers/emoji";
+import { transformIgnoredDiscordAccount } from "./transformers/ignored-discord-account";
 import { transformReaction } from "./transformers/reaction";
 import { transformUserServerSettings } from "./transformers/user-server-settings";
-import { transformIgnoredDiscordAccount } from "./transformers/ignored-discord-account";
+import { ProgressLogger } from "./utils/progress";
 import { buildConvexZip, type TableExport } from "./writers/zip-builder";
 
 const TEMP_DIR = join(process.cwd(), ".migration-temp");
@@ -66,12 +66,12 @@ async function migrateEmojis(): Promise<TableExport> {
 
 		for (const row of rows) {
 			const transformed = transformEmoji(row);
-			stream.write(JSON.stringify(stripUndefined(transformed)) + "\n");
+			stream.write(`${JSON.stringify(stripUndefined(transformed))}\n`);
 			progress.increment();
 			count++;
 		}
 
-		lastId = rows[rows.length - 1]!.id;
+		lastId = rows[rows.length - 1]?.id;
 	}
 
 	await new Promise<void>((resolve, reject) => {
@@ -115,7 +115,7 @@ async function migrateReactions(): Promise<TableExport> {
 
 		for (const row of rows) {
 			const transformed = transformReaction(row);
-			stream.write(JSON.stringify(stripUndefined(transformed)) + "\n");
+			stream.write(`${JSON.stringify(stripUndefined(transformed))}\n`);
 			progress.increment();
 			count++;
 		}
@@ -168,7 +168,7 @@ async function migrateUserServerSettings(): Promise<TableExport> {
 
 		for (const row of rows) {
 			const transformed = transformUserServerSettings(row);
-			stream.write(JSON.stringify(stripUndefined(transformed)) + "\n");
+			stream.write(`${JSON.stringify(stripUndefined(transformed))}\n`);
 			progress.increment();
 			count++;
 		}
@@ -218,12 +218,12 @@ async function migrateIgnoredDiscordAccounts(): Promise<TableExport> {
 
 		for (const row of rows) {
 			const transformed = transformIgnoredDiscordAccount(row);
-			stream.write(JSON.stringify(stripUndefined(transformed)) + "\n");
+			stream.write(`${JSON.stringify(stripUndefined(transformed))}\n`);
 			progress.increment();
 			count++;
 		}
 
-		lastId = rows[rows.length - 1]!.id;
+		lastId = rows[rows.length - 1]?.id;
 	}
 
 	await new Promise<void>((resolve, reject) => {
