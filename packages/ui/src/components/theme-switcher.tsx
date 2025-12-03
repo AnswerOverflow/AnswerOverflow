@@ -1,21 +1,35 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "./button";
+import { cn } from "../lib/utils";
 
 export function ThemeSwitcher() {
 	const { theme, setTheme } = useTheme();
 
+	const options = [
+		{ value: "system", icon: Monitor, label: "System" },
+		{ value: "light", icon: Sun, label: "Light" },
+		{ value: "dark", icon: Moon, label: "Dark" },
+	];
+
 	return (
-		<Button
-			onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-			variant="ghost"
-			size="icon"
-		>
-			<Sun className="h-5 w-5 stroke-zinc-900 dark:hidden" />
-			<Moon className="hidden h-5 w-5 stroke-white dark:block" />
-			<span className="sr-only">Change Theme</span>
-		</Button>
+		<div className="flex items-center gap-1 rounded-full border bg-muted/50 p-1">
+			{options.map((option) => (
+				<button
+					key={option.value}
+					onClick={() => setTheme(option.value)}
+					className={cn(
+						"rounded-full p-2 transition-colors",
+						theme === option.value
+							? "bg-background shadow-sm"
+							: "text-muted-foreground hover:text-foreground",
+					)}
+				>
+					<option.icon className="h-4 w-4" />
+					<span className="sr-only">{option.label}</span>
+				</button>
+			))}
+		</div>
 	);
 }

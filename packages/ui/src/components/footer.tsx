@@ -5,6 +5,7 @@ import { getBaseUrl } from "../utils/links";
 import { AnswerOverflowLogo } from "./answer-overflow-logo";
 import { Link } from "./link";
 import type { Tenant } from "./tenant-context";
+import { ThemeSwitcher } from "./theme-switcher";
 
 type SocialItem = {
 	name: string;
@@ -122,7 +123,7 @@ const MainSiteFooter = () => {
 					})}
 				</div>
 			</nav>
-			<div className="mt-16 flex justify-center space-x-10">
+			<div className="mt-16 flex items-center justify-center space-x-10">
 				{navigation.social.map((item) => (
 					<Link
 						key={item.name}
@@ -136,6 +137,7 @@ const MainSiteFooter = () => {
 						<item.icon className="h-6 w-6" aria-hidden="true" />
 					</Link>
 				))}
+				<ThemeSwitcher />
 			</div>
 			<p className="mt-10 text-center font-body text-xs leading-5 text-gray-500 dark:text-neutral-400">
 				&copy; 2024 Hedgehog Software, LLC. All rights reserved.
@@ -147,11 +149,11 @@ const MainSiteFooter = () => {
 const PoweredByAnswerOverflowFooter = () => {
 	const baseUrl = getBaseUrl();
 	return (
-		<div className="flex flex-col items-center justify-center">
+		<div className="flex flex-col items-center justify-center gap-4 py-8">
 			<Link
 				href={baseUrl}
 				prefetch={false}
-				className="flex flex-col items-center justify-center gap-2 fill-black stroke-black py-8 font-bold hover:fill-blue-500 hover:stroke-blue-500 hover:text-blue-500 dark:fill-white dark:stroke-white hover:dark:fill-blue-500 hover:dark:stroke-blue-500"
+				className="flex flex-col items-center justify-center gap-2 fill-black stroke-black font-bold hover:fill-blue-500 hover:stroke-blue-500 hover:text-blue-500 dark:fill-white dark:stroke-white hover:dark:fill-blue-500 hover:dark:stroke-blue-500"
 			>
 				<span>Powered by</span>
 				<div className={"w-36"}>
@@ -161,6 +163,7 @@ const PoweredByAnswerOverflowFooter = () => {
 					/>
 				</div>
 			</Link>
+			<ThemeSwitcher />
 		</div>
 	);
 };

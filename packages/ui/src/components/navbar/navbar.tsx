@@ -7,7 +7,7 @@ import { cn } from "../../lib/utils";
 import { Link } from "../link";
 import { LinkButton } from "../link-button";
 import { ServerIcon } from "../server-icon";
-import { ThemeSwitcher } from "../theme-switcher";
+
 import { UserSection } from "./user-section";
 export interface NavbarProps {
 	logo?: React.ReactNode;
@@ -68,7 +68,6 @@ export function Navbar({
 					</div>
 				)}
 				<div className="flex items-center gap-2">
-					<ThemeSwitcher />
 					{showSearch && (
 						<LinkButton
 							variant="ghost"
