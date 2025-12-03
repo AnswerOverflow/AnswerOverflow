@@ -258,6 +258,7 @@ export default defineSchema({
 	messages: defineTable(messageSchema)
 		.index("by_messageId", ["id"])
 		.index("by_authorId", ["authorId"])
+		.index("by_authorId_and_childThreadId", ["authorId", "childThreadId"])
 		.index("by_serverId", ["serverId"])
 		.index("by_serverId_and_questionId", ["serverId", "questionId"])
 		.index("by_channelId", ["channelId"])

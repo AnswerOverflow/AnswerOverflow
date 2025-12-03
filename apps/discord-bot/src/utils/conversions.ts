@@ -237,7 +237,9 @@ export async function toAOMessage(
 		channelId: BigInt(message.channelId),
 		parentChannelId: toBigIntId(parentChannelId),
 		childThreadId: toBigIntId(
-			message.thread?.id ?? (message?.hasThread ? message.id : undefined),
+			message.thread?.id ??
+				(message?.hasThread ? message.id : undefined) ??
+				(message.channelId === message.id ? message.id : undefined),
 		),
 		questionId: undefined,
 		referenceId: toBigIntId(message.reference?.messageId),
