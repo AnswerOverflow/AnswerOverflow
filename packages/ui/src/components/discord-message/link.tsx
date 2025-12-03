@@ -22,12 +22,16 @@ export function Link({
 	if (isInternalLink) {
 		const { original, channel, message: messageId } = isInternalLink;
 
-		const answerOverflowUrl = messageId ? `/m/${messageId}` : undefined;
-
 		const isThread =
 			channel.type === ChannelType.PublicThread ||
 			channel.type === ChannelType.AnnouncementThread ||
 			channel.type === ChannelType.PrivateThread;
+
+		const answerOverflowUrl = messageId
+			? `/m/${messageId}`
+			: isThread
+				? `/m/${channel.id}`
+				: undefined;
 
 		const parentName = channel.parent?.name;
 		const channelName = channel.name;
