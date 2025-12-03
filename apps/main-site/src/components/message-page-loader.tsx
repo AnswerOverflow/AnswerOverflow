@@ -66,6 +66,18 @@ export function MessagePageLoader(props: {
 		return notFound();
 	}
 
+	const hasMessages = pageData.messages.length > 0;
+	const hasThread = pageData.thread !== null;
+	const rootMessageDeleted = pageData.rootMessageDeleted;
+
+	if (!hasMessages && !rootMessageDeleted) {
+		return notFound();
+	}
+
+	if (rootMessageDeleted && !hasThread) {
+		return notFound();
+	}
+
 	const canonicalId = pageData.canonicalId.toString();
 	if (canonicalId !== messageId) {
 		redirect(`/m/${canonicalId}?focus=${messageId}`);
