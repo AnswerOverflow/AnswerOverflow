@@ -102,6 +102,7 @@ export const updateChannelSettingsFlags = guildManagerMutation({
 		if (!settings) {
 			const settingsId = await ctx.db.insert("channelSettings", {
 				channelId: args.channelId,
+				serverId: channel.serverId,
 				indexingEnabled: false,
 				markSolutionEnabled: false,
 				sendMarkSolutionInstructionsInNewThreads: false,
@@ -122,7 +123,10 @@ export const updateChannelSettingsFlags = guildManagerMutation({
 				settings = await ctx.db.get(settingsId);
 			}
 		} else {
-			await ctx.db.patch(settings._id, args.flags);
+			await ctx.db.patch(settings._id, {
+				...args.flags,
+				serverId: channel.serverId,
+			});
 			settings = await ctx.db.get(settings._id);
 		}
 
@@ -223,6 +227,7 @@ export const updateChannelSolutionTag = guildManagerMutation({
 		if (!settings) {
 			const settingsId = await ctx.db.insert("channelSettings", {
 				channelId: args.channelId,
+				serverId: channel.serverId,
 				indexingEnabled: false,
 				markSolutionEnabled: false,
 				sendMarkSolutionInstructionsInNewThreads: false,
@@ -235,6 +240,7 @@ export const updateChannelSolutionTag = guildManagerMutation({
 
 		await ctx.db.patch(settings._id, {
 			solutionTagId: args.solutionTagId ?? undefined,
+			serverId: channel.serverId,
 		});
 
 		return settings._id;

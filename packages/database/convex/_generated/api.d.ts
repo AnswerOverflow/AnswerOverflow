@@ -19,6 +19,7 @@ import type * as client_guildManager from "../client/guildManager.js";
 import type * as client_index from "../client/index.js";
 import type * as client_private from "../client/private.js";
 import type * as http from "../http.js";
+import type * as migrations_index from "../migrations/index.js";
 import type * as private_attachments from "../private/attachments.js";
 import type * as private_channels from "../private/channels.js";
 import type * as private_discord_accounts from "../private/discord_accounts.js";
@@ -67,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   "client/index": typeof client_index;
   "client/private": typeof client_private;
   http: typeof http;
+  "migrations/index": typeof migrations_index;
   "private/attachments": typeof private_attachments;
   "private/channels": typeof private_channels;
   "private/discord_accounts": typeof private_discord_accounts;
@@ -2263,6 +2265,92 @@ export declare const components: {
         "internal",
         { batchSize?: number; before?: number; name?: string },
         null
+      >;
+    };
+  };
+  migrations: {
+    lib: {
+      cancel: FunctionReference<
+        "mutation",
+        "internal",
+        { name: string },
+        {
+          batchSize?: number;
+          cursor?: string | null;
+          error?: string;
+          isDone: boolean;
+          latestEnd?: number;
+          latestStart: number;
+          name: string;
+          next?: Array<string>;
+          processed: number;
+          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
+        }
+      >;
+      cancelAll: FunctionReference<
+        "mutation",
+        "internal",
+        { sinceTs?: number },
+        Array<{
+          batchSize?: number;
+          cursor?: string | null;
+          error?: string;
+          isDone: boolean;
+          latestEnd?: number;
+          latestStart: number;
+          name: string;
+          next?: Array<string>;
+          processed: number;
+          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
+        }>
+      >;
+      clearAll: FunctionReference<
+        "mutation",
+        "internal",
+        { before?: number },
+        null
+      >;
+      getStatus: FunctionReference<
+        "query",
+        "internal",
+        { limit?: number; names?: Array<string> },
+        Array<{
+          batchSize?: number;
+          cursor?: string | null;
+          error?: string;
+          isDone: boolean;
+          latestEnd?: number;
+          latestStart: number;
+          name: string;
+          next?: Array<string>;
+          processed: number;
+          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
+        }>
+      >;
+      migrate: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          batchSize?: number;
+          cursor?: string | null;
+          dryRun: boolean;
+          fnHandle: string;
+          name: string;
+          next?: Array<{ fnHandle: string; name: string }>;
+          oneBatchOnly?: boolean;
+        },
+        {
+          batchSize?: number;
+          cursor?: string | null;
+          error?: string;
+          isDone: boolean;
+          latestEnd?: number;
+          latestStart: number;
+          name: string;
+          next?: Array<string>;
+          processed: number;
+          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
+        }
       >;
     };
   };

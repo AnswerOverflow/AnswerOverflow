@@ -79,6 +79,7 @@ export const channelSchema = v.object({
 
 export const channelSettingsSchema = v.object({
 	channelId: v.int64(),
+	serverId: v.optional(v.int64()),
 	indexingEnabled: v.boolean(),
 	markSolutionEnabled: v.boolean(),
 	sendMarkSolutionInstructionsInNewThreads: v.boolean(),
@@ -245,6 +246,7 @@ export default defineSchema({
 		.index("by_parentId", ["parentId"]),
 	channelSettings: defineTable(channelSettingsSchema)
 		.index("by_channelId", ["channelId"])
+		.index("by_serverId", ["serverId"])
 		.index("by_inviteCode", ["inviteCode"]),
 	messages: defineTable(messageSchema)
 		.index("by_messageId", ["id"])
