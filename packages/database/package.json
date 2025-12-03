@@ -11,8 +11,7 @@
 	},
 	"scripts": {
 		"with-env": "bun run --env-file=../../.env",
-		"with-env:prod": "bun run --env-file=../../.env.production",
-		"deploy:prod": "bun run with-env:prod convex deploy",
+		"deploy:prod": "bun run convex deploy --prod",
 		"codegen": "bunx convex codegen && bun run scripts/generate-function-types.ts",
 		"generate-function-types": "bun run scripts/generate-function-types.ts",
 		"generate-function-types:watch": "chokidar \"convex/{public,authenticated,private}/**/*.ts\" -c \"bun run scripts/generate-function-types.ts\"",
