@@ -2,10 +2,16 @@
 
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 import { cn } from "../lib/utils";
 
 export function ThemeSwitcher() {
 	const { theme, setTheme } = useTheme();
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	const options = [
 		{ value: "system", icon: Monitor, label: "System" },
@@ -21,7 +27,7 @@ export function ThemeSwitcher() {
 					onClick={() => setTheme(option.value)}
 					className={cn(
 						"rounded-full p-2 transition-colors",
-						theme === option.value
+						mounted && theme === option.value
 							? "bg-background shadow-sm"
 							: "text-muted-foreground hover:text-foreground",
 					)}
