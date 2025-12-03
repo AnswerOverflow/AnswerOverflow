@@ -20,7 +20,7 @@ export function ThemeSwitcher() {
 	];
 
 	return (
-		<div className="flex items-center gap-1 rounded-full border bg-muted/50 p-1">
+		<div className="flex items-center gap-1 rounded-full p-1">
 			{options.map((option) => (
 				<button
 					key={option.value}
@@ -28,7 +28,7 @@ export function ThemeSwitcher() {
 					className={cn(
 						"rounded-full p-2 transition-colors",
 						mounted && theme === option.value
-							? "bg-background shadow-sm"
+							? "bg-muted/50"
 							: "text-muted-foreground hover:text-foreground",
 					)}
 				>

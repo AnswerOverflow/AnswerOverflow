@@ -2,11 +2,13 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
+import { internal } from "../_generated/api";
 import { isChannelIndexingEnabled } from "../shared/channels";
 import {
 	enrichedMessageWithServerAndChannels,
 	searchMessages,
 } from "../shared/dataAccess";
+import { findSolutionsByQuestionId } from "../shared/messages";
 import {
 	CHANNEL_TYPE,
 	getDiscordAccountById,
@@ -14,7 +16,7 @@ import {
 	getThreadStartMessage,
 	isThreadType,
 } from "../shared/shared";
-import { findSimilarThreads } from "../shared/similarThreads";
+import { findSimilarThreadCandidates } from "../shared/similarThreads";
 import { publicQuery } from "./custom_functions";
 
 export const publicSearch = publicQuery({
@@ -417,32 +419,68 @@ export const getSimilarThreads = publicQuery({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const results = await findSimilarThreads(ctx, {
+		const limit = Math.min(args.limit ?? 4, 10);
+		const candidates = await findSimilarThreadCandidates(ctx, {
 			searchQuery: args.searchQuery,
 			currentThreadId: BigInt(args.currentThreadId),
 			currentServerId: BigInt(args.currentServerId),
 			serverId: args.serverId ? BigInt(args.serverId) : undefined,
-			limit: Math.min(args.limit ?? 4, 10),
+			limit,
 		});
 
-		return results.map((result) => ({
-			thread: {
-				id: result.thread.id.toString(),
-				name: result.thread.name,
-				serverId: result.thread.serverId.toString(),
-			},
-			server: {
-				discordId: result.server.discordId.toString(),
-				name: result.server.name,
-				icon: result.server.icon,
-			},
-			channel: {
-				id: result.channel.id.toString(),
-				name: result.channel.name,
-			},
-			firstMessageId: result.firstMessageId.toString(),
-			firstMessageContent: result.firstMessageContent,
-			hasSolution: result.hasSolution,
-		}));
+		const results: Array<{
+			thread: { id: string; name: string; serverId: string };
+			server: { discordId: string; name: string; icon?: string };
+			channel: { id: string; name: string };
+			firstMessageId: string;
+			firstMessageContent: string;
+			hasSolution: boolean;
+		}> = [];
+
+		for (const candidate of candidates) {
+			if (results.length >= limit) break;
+
+			const messagePage = await ctx.runQuery(
+				internal.private.messages.getThreadMessagePageInternal,
+				{ threadId: candidate.threadId },
+			);
+
+			if (!messagePage || messagePage.messages.length === 0) continue;
+
+			const firstEnrichedMessage = messagePage.messages[0];
+			if (!firstEnrichedMessage) continue;
+
+			const firstMessage = firstEnrichedMessage.message;
+
+			const solutions = await findSolutionsByQuestionId(
+				ctx,
+				firstMessage.id,
+				1,
+			);
+			const hasSolution = solutions.length > 0;
+
+			results.push({
+				thread: {
+					id:
+						messagePage.thread?.id.toString() ?? candidate.threadId.toString(),
+					name: messagePage.thread?.name ?? "",
+					serverId: candidate.serverId.toString(),
+				},
+				server: {
+					discordId: messagePage.server.discordId.toString(),
+					name: messagePage.server.name,
+					icon: messagePage.server.icon,
+				},
+				channel: {
+					id: messagePage.channel.id.toString(),
+					name: messagePage.channel.name,
+				},
+				firstMessageId: firstMessage.id.toString(),
+				firstMessageContent: firstMessage.content.slice(0, 200),
+				hasSolution,
+			});
+		}
+
+		return results;
 	},
 });
