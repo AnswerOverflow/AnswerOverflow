@@ -2,7 +2,6 @@
 
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { Hash, MessageSquare } from "lucide-react";
-import { DiscordMessage } from "./discord-message";
 import { ThreadIcon } from "./discord-message/mention";
 import { Link } from "./link";
 import { MessagePreviewCardBody } from "./message-preview-card";

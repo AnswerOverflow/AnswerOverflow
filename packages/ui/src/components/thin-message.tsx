@@ -14,8 +14,9 @@ export function ThinMessage(props: {
 	message: EnrichedMessage;
 	op?: boolean;
 	isSolution?: boolean;
+	isLast?: boolean;
 }) {
-	const { message, op } = props;
+	const { message, op, isLast } = props;
 	const author = message.author;
 
 	return (
@@ -42,7 +43,9 @@ export function ThinMessage(props: {
 					) : (
 						<div className="h-10 w-10 rounded-full bg-muted" />
 					)}
-					<div className={cn("mx-auto h-full w-0 rounded-full border-1")} />
+					{!isLast && (
+						<div className={cn("mx-auto h-full w-0 rounded-full border-1")} />
+					)}
 				</div>
 				<div className="flex flex-col pl-2 pt-2 min-w-0 flex-1">
 					<div className="flex flex-row items-center gap-2 text-muted-foreground">

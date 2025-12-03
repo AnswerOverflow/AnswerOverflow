@@ -177,55 +177,36 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 			return null;
 		}
 
-		const rootChannelTypes = [
-			CHANNEL_TYPE.GuildText,
-			CHANNEL_TYPE.GuildAnnouncement,
-			CHANNEL_TYPE.GuildForum,
-		];
+		const indexedSettings = await ctx.db
+			.query("channelSettings")
+			.withIndex("by_serverId_and_indexingEnabled", (q) =>
+				q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+			)
+			.collect();
 
-		const channelsByType = await Promise.all(
-			rootChannelTypes.map((type) =>
-				ctx.db
-					.query("channels")
-					.withIndex("by_serverId_and_type", (q) =>
-						q.eq("serverId", server.discordId).eq("type", type),
-					)
-					.collect(),
-			),
+		const indexedChannelIds = new Set(indexedSettings.map((s) => s.channelId));
+
+		const indexedChannels = await asyncMap(
+			Array.from(indexedChannelIds),
+			(channelId) =>
+				getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
 		);
 
-		const allChannels = channelsByType.flat();
-
-		const allSettings = await Promise.all(
-			allChannels.map((c) =>
-				getOneFrom(ctx.db, "channelSettings", "by_channelId", c.id),
-			),
-		);
-
-		const settingsByChannelId = new Map(
-			Arr.filter(allSettings, Predicate.isNotNull).map((s) => [s.channelId, s]),
-		);
-
-		const channels = allChannels
-			.map((c) => ({
-				...c,
-				flags: settingsByChannelId.get(c.id) ?? {
-					...DEFAULT_CHANNEL_SETTINGS,
-					channelId: c.id,
-				},
-			}))
-			.filter((c) => c.flags.indexingEnabled)
+		const channels = Arr.filter(indexedChannels, Predicate.isNotNull)
+			.filter(
+				(c) =>
+					c.type === CHANNEL_TYPE.GuildText ||
+					c.type === CHANNEL_TYPE.GuildAnnouncement ||
+					c.type === CHANNEL_TYPE.GuildForum,
+			)
 			.sort((a, b) => {
 				if (a.type === CHANNEL_TYPE.GuildForum) return -1;
 				if (b.type === CHANNEL_TYPE.GuildForum) return 1;
 				if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
 				if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
 				return 0;
-			})
-			.map((c) => {
-				const { flags: _flags, ...channel } = c;
-				return channel;
 			});
+
 		return {
 			server,
 			channels,

@@ -160,7 +160,8 @@ export function MessagePage(props: { data: MessagePageData }) {
 	});
 
 	const messageStack = messagesToDisplay
-		.map((message) => {
+		.map((message, index) => {
+			const isLast = index === messagesToDisplay.length - 1;
 			if (message.message.id === solutionMessageId) {
 				return (
 					<div
@@ -173,7 +174,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 							className="rounded-lg border-2 border-green-500 p-2 dark:border-green-400"
 							key={message.message.id}
 						>
-							<ThinMessage message={message} />
+							<ThinMessage message={message} isLast={isLast} />
 						</div>
 					</div>
 				);
@@ -188,6 +189,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 					<ThinMessage
 						message={message}
 						op={message.author?.id === firstMessage.author?.id}
+						isLast={isLast}
 					/>
 				</div>
 			);
