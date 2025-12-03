@@ -2,7 +2,18 @@ import type { Server } from "@packages/database/convex/schema";
 import { Button } from "@packages/ui/components/button";
 import { Link } from "@packages/ui/components/link";
 import { ServerIcon } from "@packages/ui/components/server-icon";
+import { Users } from "lucide-react";
 import Image from "next/image";
+
+function formatMemberCount(count: number): string {
+	if (count >= 1000000) {
+		return `${(count / 1000000).toFixed(1)}M`;
+	}
+	if (count >= 1000) {
+		return `${(count / 1000).toFixed(1)}K`;
+	}
+	return count.toLocaleString();
+}
 
 const ServerCard = (props: { server: Server }) => {
 	const { server } = props;
@@ -30,6 +41,12 @@ const ServerCard = (props: { server: Server }) => {
 					<Button asChild>
 						<Link href={`/c/${server.discordId}`}>View</Link>
 					</Button>
+				</div>
+				<div className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400">
+					<Users className="h-4 w-4" />
+					<span>
+						{formatMemberCount(server.approximateMemberCount)} members
+					</span>
 				</div>
 				<span className="text-sm text-neutral-600 dark:text-neutral-400">
 					{server.description ??

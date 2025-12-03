@@ -69,55 +69,23 @@ export const getBrowseServers = privateQuery({
 			(server) => server.kickedTime === undefined || server.kickedTime === null,
 		);
 
-		const serverDiscordIds = nonKickedServers.map((server) => server.discordId);
+		const filteredServers: typeof nonKickedServers = [];
 
-		const consentingUserCounts: Array<{ serverId: bigint; count: number }> = [];
-		for (const serverId of serverDiscordIds) {
-			const settings = await getManyFrom(
-				ctx.db,
-				"userServerSettings",
-				"by_serverId",
-				serverId,
-			);
+		for (const server of nonKickedServers) {
+			const hasIndexingEnabled = await ctx.db
+				.query("channelSettings")
+				.withIndex("by_serverId", (q) => q.eq("serverId", server.discordId))
+				.filter((q) => q.eq(q.field("indexingEnabled"), true))
+				.first();
 
-			const count = settings.filter(
-				(setting) => setting.canPubliclyDisplayMessages === true,
-			).length;
-
-			consentingUserCounts.push({ serverId, count });
+			if (hasIndexingEnabled) {
+				filteredServers.push(server);
+			}
 		}
 
-		const consentingUserCountMap = new Map(
-			consentingUserCounts.map((result) => [result.serverId, result.count]),
+		return filteredServers.sort(
+			(a, b) => b.approximateMemberCount - a.approximateMemberCount,
 		);
-
-		const preferencesPromises = nonKickedServers.map(async (server) => {
-			const preferences = await getOneFrom(
-				ctx.db,
-				"serverPreferences",
-				"by_serverId",
-				server.discordId,
-			);
-			return { serverId: server.discordId, preferences };
-		});
-
-		const preferencesResults = await Promise.all(preferencesPromises);
-		const preferencesMap = new Map(
-			preferencesResults.map((result) => [result.serverId, result.preferences]),
-		);
-
-		const filteredServers = nonKickedServers.filter((server) => {
-			const consentingUserCount =
-				consentingUserCountMap.get(server.discordId) ?? 0;
-			if (consentingUserCount > 10) return true;
-
-			const preferences = preferencesMap.get(server.discordId);
-			if (preferences?.considerAllMessagesPublicEnabled === true) return true;
-
-			return false;
-		});
-
-		return filteredServers.sort((a, b) => a.name.localeCompare(b.name));
 	},
 });
 
