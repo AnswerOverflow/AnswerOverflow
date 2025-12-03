@@ -179,16 +179,9 @@ export function MessagePage(props: { data: MessagePageData }) {
 			const isLast = index === messagesToDisplay.length - 1;
 			if (message.message.id === solutionMessageId) {
 				return (
-					<div
-						className="text-green-700 dark:text-green-400"
-						key={message.message.id}
-						id={`solution-${message.message.id}`}
-					>
-						Solution
-						<div
-							className="rounded-lg border-2 border-green-500 p-2 dark:border-green-400"
-							key={message.message.id}
-						>
+					<div key={message.message.id} id={`solution-${message.message.id}`}>
+						<span className="text-green-700 dark:text-green-400">Solution</span>
+						<div className="rounded-lg border-2 border-green-500 p-2 dark:border-green-400">
 							<ThinMessage message={message} isLast={isLast} />
 						</div>
 					</div>

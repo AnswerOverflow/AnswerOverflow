@@ -514,7 +514,7 @@ async function getInternalLinksMetadataInternal(
 
 	const results = await Promise.all(
 		discordLinks.map(async (link) => {
-			const [server, channel] = await Promise.all([
+			const [server, channel, settings] = await Promise.all([
 				getOneFrom(ctx.db, "servers", "by_discordId", link.guildId),
 				getOneFrom(
 					ctx.db,
@@ -523,6 +523,7 @@ async function getInternalLinksMetadataInternal(
 					link.channelId,
 					"id",
 				),
+				getOneFrom(ctx.db, "channelSettings", "by_channelId", link.channelId),
 			]);
 
 			if (!server || !channel) {
@@ -553,6 +554,7 @@ async function getInternalLinksMetadataInternal(
 					id: channel.id,
 					type: channel.type,
 					name: channel.name,
+					indexingEnabled: settings?.indexingEnabled ?? false,
 					parent: parentChannel
 						? {
 								name: parentChannel.name,
@@ -597,9 +599,7 @@ export async function enrichMessageForDisplay(
 			getServerByDiscordIdInternal(ctx, message.serverId),
 			findAttachmentsByMessageIdInternal(ctx, message.id),
 			findReactionsByMessageId(ctx, message.id),
-			message.questionId
-				? findSolutionsByQuestionId(ctx, message.questionId)
-				: [],
+			findSolutionsByQuestionId(ctx, message.id),
 		],
 	);
 
