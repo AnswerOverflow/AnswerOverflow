@@ -6,21 +6,10 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@packages/ui/components/avatar";
+import { makeUserIconLink } from "@packages/ui/components/discord-avatar";
 import { Link } from "@packages/ui/components/link";
 import { DiscordUIMessage } from "./renderer";
 import type { MessageWithMetadata } from "./types";
-
-function getDiscordAvatarUrl(
-	userId: string,
-	avatar?: string,
-	size = 40,
-): string {
-	if (avatar) {
-		return `https://cdn.discordapp.com/avatars/${userId}/${avatar}.webp?size=${size}`;
-	}
-	const defaultAvatar = (parseInt(userId) % 5).toString();
-	return `/discord/${defaultAvatar}.png`;
-}
 
 function getSnowflakeDate(snowflake: string): Date {
 	const timestamp = BigInt(snowflake) >> 22n;
@@ -106,7 +95,14 @@ export function DiscordMessage({
 					<>
 						<Avatar className="w-10 h-10">
 							<AvatarImage
-								src={getDiscordAvatarUrl(author.id.toString(), author.avatar)}
+								src={makeUserIconLink(
+									{
+										id: author.id.toString(),
+										name: author.name,
+										avatar: author.avatar,
+									},
+									40,
+								)}
 								alt={author.name}
 							/>
 							<AvatarFallback>
