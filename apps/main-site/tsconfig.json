@@ -12,9 +12,8 @@
 		"jsx": "preserve",
 		"esModuleInterop": true,
 		"moduleResolution": "bundler",
-		"baseUrl": ".",
 		"paths": {
-			"@/.source/*": [".source/*"],
+			"@/.source/*": ["./.source/*"],
 			"@/*": ["./src/*"]
 		}
 	},

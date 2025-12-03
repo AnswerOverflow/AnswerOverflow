@@ -1,0 +1,14 @@
+{
+	"files": [],
+	"references": [
+		{ "path": "apps/discord-bot" },
+		{ "path": "apps/main-site" },
+		{ "path": "packages/database" },
+		{ "path": "packages/database-utils" },
+		{ "path": "packages/discord-api" },
+		{ "path": "packages/migration" },
+		{ "path": "packages/observability" },
+		{ "path": "packages/test-utils" },
+		{ "path": "packages/ui" }
+	]
+}
