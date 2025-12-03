@@ -1,8 +1,6 @@
 import type { Server } from "@packages/database/convex/schema";
-import { Button } from "@packages/ui/components/button";
 import { Link } from "@packages/ui/components/link";
 import { ServerIcon } from "@packages/ui/components/server-icon";
-import { Users } from "lucide-react";
 import Image from "next/image";
 
 function formatMemberCount(count: number): string {
@@ -18,58 +16,44 @@ function formatMemberCount(count: number): string {
 const ServerCard = (props: { server: Server }) => {
 	const { server } = props;
 	return (
-		<div className="flex max-w-md flex-col gap-3 rounded-lg">
-			<div className="relative mx-auto aspect-video w-full rounded-lg">
+		<Link
+			href={`/c/${server.discordId}`}
+			className="group flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white transition-shadow hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900"
+		>
+			<div className="relative h-32 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-800">
 				{server.icon && (
 					<Image
-						src={`https://cdn.discordapp.com/icons/${server.discordId}/${server.icon}.webp`}
-						alt={server.name}
+						src={`https://cdn.discordapp.com/icons/${server.discordId}/${server.icon}.webp?size=512`}
+						alt=""
 						fill
-						className="h-full w-full overflow-hidden rounded-lg object-cover opacity-25"
+						className="object-cover blur-xl scale-110 opacity-50"
 					/>
 				)}
-				<div className="relative z-10 h-full w-full rounded-lg bg-black/5 shadow-md backdrop-blur-md" />
-				<div className="absolute inset-0 z-20 flex items-center justify-center">
-					{server && <ServerIcon server={server} size={64} />}
+				<div className="absolute inset-0 flex items-center justify-center">
+					<ServerIcon server={server} size={56} />
 				</div>
 			</div>
-			<div className="flex w-full flex-col gap-4">
-				<div className="flex w-full flex-row items-center justify-between gap-2">
-					<span className="text-base font-bold text-black dark:text-neutral-300">
-						{server.name}
-					</span>
-					<Button asChild>
-						<Link href={`/c/${server.discordId}`}>View</Link>
-					</Button>
-				</div>
-				<div className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400">
-					<Users className="h-4 w-4" />
-					<span>
-						{formatMemberCount(server.approximateMemberCount)} members
-					</span>
-				</div>
-				<span className="text-sm text-neutral-600 dark:text-neutral-400">
-					{server.description ??
-						`Join the ${server.name} server to ask questions!`}
+			<div className="flex flex-1 flex-col p-4">
+				<h3 className="font-semibold text-neutral-900 dark:text-neutral-100">
+					{server.name}
+				</h3>
+				<span className="mt-1 text-sm text-neutral-500">
+					{formatMemberCount(server.approximateMemberCount)} members
 				</span>
+				<p className="mt-2 line-clamp-2 flex-1 text-sm text-neutral-600 dark:text-neutral-400">
+					{server.description ?? "Community discussions and Q&A"}
+				</p>
 			</div>
-		</div>
+		</Link>
 	);
 };
 
 export function ServerGrid(props: { servers: Server[] }) {
 	return (
-		<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{props.servers.map((server) => {
-				return (
-					<div
-						key={`server-${server.discordId}-area`}
-						className="w-full max-w-md rounded-md p-4 transition-all"
-					>
-						<ServerCard server={server} />
-					</div>
-				);
-			})}
+		<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			{props.servers.map((server) => (
+				<ServerCard key={server.discordId} server={server} />
+			))}
 		</div>
 	);
 }
