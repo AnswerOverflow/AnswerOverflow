@@ -31,12 +31,14 @@ export function generateMessagePageMetadata(
 	}
 
 	const firstMessage = pageData.messages.at(0);
+	const rootMessageDeleted = pageData.rootMessageDeleted && !firstMessage;
 	const title =
 		pageData.thread?.name ??
 		firstMessage?.message.content?.slice(0, 100) ??
 		pageData.channel.name;
-	const description =
-		firstMessage?.message.content && firstMessage.message.content.length > 0
+	const description = rootMessageDeleted
+		? `Discussion in ${pageData.thread?.name ?? pageData.channel.name} - ${pageData.server.name}`
+		: firstMessage?.message.content && firstMessage.message.content.length > 0
 			? firstMessage.message.content
 			: `Questions related to ${pageData.channel.name} in ${pageData.server.name}`;
 

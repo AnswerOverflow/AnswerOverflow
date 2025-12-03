@@ -69,8 +69,10 @@ export function MessagePage(props: { data: MessagePageData }) {
 		);
 	}
 
-	const firstMessage = data.messages.at(0);
-	if (!firstMessage) {
+	const rootMessageDeleted = data.rootMessageDeleted;
+	const firstMessage = rootMessageDeleted ? undefined : data.messages.at(0);
+
+	if (!firstMessage && !rootMessageDeleted) {
 		return (
 			<div className="max-w-4xl mx-auto p-8">
 				<div className="text-center text-muted-foreground">
@@ -80,7 +82,17 @@ export function MessagePage(props: { data: MessagePageData }) {
 		);
 	}
 
-	const solutionMessageId = firstMessage.solutions?.at(0)?.id;
+	if (!data.thread && rootMessageDeleted) {
+		return (
+			<div className="max-w-4xl mx-auto p-8">
+				<div className="text-center text-muted-foreground">
+					Message not found
+				</div>
+			</div>
+		);
+	}
+
+	const solutionMessageId = firstMessage?.solutions?.at(0)?.id;
 	const solution = data.messages.find(
 		(message) => message.message.id === solutionMessageId,
 	);
@@ -88,7 +100,8 @@ export function MessagePage(props: { data: MessagePageData }) {
 	let contents = "";
 	const messagesBeingMerged: EnrichedMessage[] = [];
 	const messagesWithMergedContent = data.messages.map((message, index) => {
-		if (message.message.id === firstMessage.message.id) return null;
+		if (firstMessage && message.message.id === firstMessage.message.id)
+			return null;
 		const nextMessage = data.messages.at(index + 1);
 		contents += message.message.content;
 		messagesBeingMerged.push(message);
@@ -145,7 +158,8 @@ export function MessagePage(props: { data: MessagePageData }) {
 		Predicate.isNotNullable,
 	);
 	const messagesToDisplay = nonNull.filter((message) => {
-		if (message.message.id === firstMessage.message.id) return false;
+		if (firstMessage && message.message.id === firstMessage.message.id)
+			return false;
 		if (data.thread || message.message.parentChannelId) {
 			if (message.message.channelId !== data.channel.id) return false;
 		} else {
@@ -189,7 +203,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 				>
 					<ThinMessage
 						message={message}
-						op={message.author?.id === firstMessage.author?.id}
+						op={message.author?.id === firstMessage?.author?.id}
 						isLast={isLast}
 					/>
 				</div>
@@ -198,24 +212,22 @@ export function MessagePage(props: { data: MessagePageData }) {
 		.filter(Boolean);
 
 	const title =
-		data.thread?.name ?? firstMessage.message.content?.slice(0, 100);
-	const firstMessageMedia = firstMessage.attachments
+		data.thread?.name ?? firstMessage?.message.content?.slice(0, 100);
+	const firstMessageMedia = firstMessage?.attachments
 		.filter((attachment) => isImageAttachment(attachment))
 		.at(0);
 
 	const serverHref = tenant ? "/" : `/c/${data.server.discordId.toString()}`;
 
 	const UserLink = () =>
-		firstMessage.author ? (
+		firstMessage?.author ? (
 			<Link
 				href={`/u/${firstMessage.author.id.toString()}`}
 				className="hover:underline"
 			>
 				{firstMessage.author.name}
 			</Link>
-		) : (
-			<span className="text-muted-foreground">Unknown</span>
-		);
+		) : null;
 
 	const Main = () => (
 		<main className="flex w-full max-w-3xl grow flex-col gap-4">
@@ -229,17 +241,29 @@ export function MessagePage(props: { data: MessagePageData }) {
 							<Link href={serverHref} className="hover:underline">
 								{data.server.name}
 							</Link>
-							<span className="text-sm text-muted-foreground">•</span>
-							<TimeAgo snowflake={firstMessage.message.id.toString()} />
+							{firstMessage && !rootMessageDeleted && (
+								<>
+									<span className="text-sm text-muted-foreground">•</span>
+									<TimeAgo snowflake={firstMessage.message.id.toString()} />
+								</>
+							)}
 						</div>
-						<UserLink />
+						{!rootMessageDeleted && <UserLink />}
 					</div>
 				</div>
 				{data.channel.type !== ChannelType.GuildAnnouncement && (
 					<h1 className="text-2xl font-semibold">{title}</h1>
 				)}
 				<div>
-					<MessageBody message={firstMessage} loadingStyle="eager" />
+					{rootMessageDeleted ? (
+						<div className="text-muted-foreground italic">
+							Original message was deleted
+						</div>
+					) : (
+						firstMessage && (
+							<MessageBody message={firstMessage} loadingStyle="eager" />
+						)
+					)}
 					{solution && (
 						<div className="mt-4 w-full rounded-lg border-2 border-green-500 p-2 dark:border-green-400">
 							<span className="text-green-800 dark:text-green-400">
@@ -283,6 +307,16 @@ export function MessagePage(props: { data: MessagePageData }) {
 		</main>
 	);
 
+	const discordUrl = firstMessage
+		? getDiscordURLForMessage({
+				serverId: firstMessage.message.serverId,
+				channelId: firstMessage.message.channelId,
+				id: firstMessage.message.id,
+			})
+		: data.thread
+			? `https://discord.com/channels/${data.server.discordId}/${data.thread.id}`
+			: undefined;
+
 	const Sidebar = () => (
 		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:sticky md:top-[calc(var(--navbar-height)+1rem)] md:self-start md:w-[400px]">
 			<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block">
@@ -312,26 +346,28 @@ export function MessagePage(props: { data: MessagePageData }) {
 								<span className="text-xs">Members</span>
 							</div>
 						)}
-						<Link
-							href={getDiscordURLForMessage({
-								serverId: firstMessage.message.serverId,
-								channelId: firstMessage.message.channelId,
-								id: firstMessage.message.id,
-							})}
-							className="flex flex-row-reverse items-center gap-1 text-sm font-semibold hover:underline"
-						>
-							<ExternalLink size={16} />
-							View on Discord
-						</Link>
+						{discordUrl && (
+							<Link
+								href={discordUrl}
+								className="flex flex-row-reverse items-center gap-1 text-sm font-semibold hover:underline"
+							>
+								<ExternalLink size={16} />
+								View on Discord
+							</Link>
+						)}
 					</div>
 				</div>
 			</div>
 			<SimilarThreads
 				searchQuery={
-					data.thread?.name ?? firstMessage.message.content?.slice(0, 100) ?? ""
+					data.thread?.name ??
+					firstMessage?.message.content?.slice(0, 100) ??
+					""
 				}
 				currentThreadId={(
-					data.thread?.id ?? firstMessage.message.id
+					data.thread?.id ??
+					firstMessage?.message.id ??
+					data.canonicalId
 				).toString()}
 				currentServerId={data.server.discordId.toString()}
 				serverId={tenant ? data.server.discordId.toString() : undefined}
@@ -345,12 +381,13 @@ export function MessagePage(props: { data: MessagePageData }) {
 							...threadToAnalyticsData(data.thread),
 							"Number of Messages": data.messages.length,
 						}),
-						...messageWithDiscordAccountToAnalyticsData({
-							id: firstMessage.message.id,
-							authorId: firstMessage.author?.id ?? "",
-							serverId: firstMessage.message.serverId,
-							channelId: firstMessage.message.channelId,
-						}),
+						...(firstMessage &&
+							messageWithDiscordAccountToAnalyticsData({
+								id: firstMessage.message.id,
+								authorId: firstMessage.author?.id ?? "",
+								serverId: firstMessage.message.serverId,
+								channelId: firstMessage.message.channelId,
+							})),
 					}}
 				/>
 			</div>
@@ -358,23 +395,25 @@ export function MessagePage(props: { data: MessagePageData }) {
 	);
 
 	const getSchemaUrl = () => {
+		const canonicalId = (
+			data.thread?.id ??
+			firstMessage?.message.id ??
+			data.canonicalId
+		).toString();
 		if (data.server.customDomain) {
-			const customUrl = getServerCustomUrl(
-				data.server,
-				`/m/${(data.thread?.id ?? firstMessage.message.id).toString()}`,
-			);
+			const customUrl = getServerCustomUrl(data.server, `/m/${canonicalId}`);
 			if (customUrl) return customUrl;
 		}
 		const baseUrl =
 			process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.answeroverflow.com";
-		return `${baseUrl}/m/${(data.thread?.id ?? firstMessage.message.id).toString()}`;
+		return `${baseUrl}/m/${canonicalId}`;
 	};
 
 	const jsonLdData = {
 		"@context": "https://schema.org",
 		"@type": "DiscussionForumPosting",
 		url: getSchemaUrl(),
-		author: firstMessage.author
+		author: firstMessage?.author
 			? {
 					"@type": "Person",
 					name: firstMessage.author.name,
@@ -384,12 +423,20 @@ export function MessagePage(props: { data: MessagePageData }) {
 			: undefined,
 		image: firstMessageMedia?.url ? firstMessageMedia.url : undefined,
 		headline: title,
-		articleBody: firstMessage.message.content,
-		datePublished: getDate(firstMessage.message.id).toISOString(),
+		articleBody: rootMessageDeleted
+			? "Original message was deleted"
+			: firstMessage?.message.content,
+		datePublished: firstMessage
+			? getDate(firstMessage.message.id).toISOString()
+			: undefined,
 		dateModified: data.thread?.archivedTimestamp
 			? new Date(Number(data.thread.archivedTimestamp)).toISOString()
 			: undefined,
-		identifier: (data.thread?.id ?? firstMessage.message.id).toString(),
+		identifier: (
+			data.thread?.id ??
+			firstMessage?.message.id ??
+			data.canonicalId
+		).toString(),
 		commentCount: messagesToDisplay.length,
 		comment: messagesToDisplay.map((message, index) => ({
 			"@type": message.message.id === solutionMessageId ? "Answer" : "Comment",
@@ -425,12 +472,13 @@ export function MessagePage(props: { data: MessagePageData }) {
 								...threadToAnalyticsData(data.thread),
 								"Number of Messages": data.messages.length,
 							}),
-							...messageWithDiscordAccountToAnalyticsData({
-								id: firstMessage.message.id,
-								authorId: firstMessage.author?.id ?? "",
-								serverId: firstMessage.message.serverId,
-								channelId: firstMessage.message.channelId,
-							}),
+							...(firstMessage &&
+								messageWithDiscordAccountToAnalyticsData({
+									id: firstMessage.message.id,
+									authorId: firstMessage.author?.id ?? "",
+									serverId: firstMessage.message.serverId,
+									channelId: firstMessage.message.channelId,
+								})),
 						}}
 					/>
 				</div>

@@ -75,44 +75,43 @@ export function SimilarThreads(props: SimilarThreadsProps) {
 	return (
 		<SimilarThreadsContainer>
 			<div className="flex flex-col divide-y divide-border">
-				{results.map((result) => (
-					<Link
-						key={result.thread.id}
-						href={`/m/${result.thread.id}`}
-						className="group block py-2.5 first:pt-0 last:pb-0"
-					>
-						<div className="flex items-start justify-between gap-2">
-							<span className="line-clamp-2 text-sm font-medium leading-snug text-foreground group-hover:underline">
-								{result.thread.name}
-							</span>
-							{result.hasSolution && (
-								<CheckCircle2
-									size={16}
-									className="mt-0.5 shrink-0 text-green-600 dark:text-green-500"
+				{results.map((result) => {
+					const server = {
+						discordId: BigInt(result.server.discordId),
+						name: result.server.name,
+						icon: result.server.icon,
+					};
+					return (
+						<Link
+							key={result.thread.id}
+							href={`/m/${result.thread.id}`}
+							className="group block py-2.5 first:pt-0 last:pb-0"
+						>
+							<div className="flex items-start justify-between gap-2">
+								<span className="line-clamp-2 text-sm font-medium leading-snug text-foreground group-hover:underline">
+									{result.thread.name}
+								</span>
+								{result.hasSolution && (
+									<CheckCircle2
+										size={16}
+										className="mt-0.5 shrink-0 text-green-600 dark:text-green-500"
+									/>
+								)}
+							</div>
+							<div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+								<ServerIcon server={server} size={16} className="shrink-0" />
+								<span className="truncate">
+									{result.server.name} / {result.channel.name}
+								</span>
+								<span className="shrink-0 text-muted-foreground/50">·</span>
+								<TimeAgo
+									snowflake={result.firstMessageId}
+									className="shrink-0 text-xs"
 								/>
-							)}
-						</div>
-						<div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-							<ServerIcon
-								server={{
-									discordId: BigInt(result.server.discordId),
-									name: result.server.name,
-									icon: result.server.icon,
-								}}
-								size={14}
-								className="shrink-0"
-							/>
-							<span className="truncate">
-								{result.server.name} / {result.channel.name}
-							</span>
-							<span className="shrink-0 text-muted-foreground/50">·</span>
-							<TimeAgo
-								snowflake={result.firstMessageId}
-								className="shrink-0 text-xs"
-							/>
-						</div>
-					</Link>
-				))}
+							</div>
+						</Link>
+					);
+				})}
 			</div>
 		</SimilarThreadsContainer>
 	);

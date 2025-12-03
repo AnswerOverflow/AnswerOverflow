@@ -494,13 +494,34 @@ export const getMessagePageData = privateQuery({
 	handler: async (ctx, args) => {
 		const targetMessage = await getMessageByIdShared(ctx, args.messageId);
 
-		if (!targetMessage) {
-			return null;
-		}
+		let threadId: bigint | null = null;
+		let parentId: bigint;
+		let channelId: bigint;
+		let serverId: bigint;
+		let rootMessageDeleted = false;
 
-		const threadId = getThreadIdOfMessage(targetMessage);
-		const parentId = getParentChannelOfMessage(targetMessage);
-		const channelId = threadId ?? parentId;
+		if (!targetMessage) {
+			const threadChannel = await getOneFrom(
+				ctx.db,
+				"channels",
+				"by_discordChannelId",
+				args.messageId,
+				"id",
+			);
+			if (!threadChannel || !threadChannel.parentId) {
+				return null;
+			}
+			threadId = threadChannel.id;
+			parentId = threadChannel.parentId;
+			channelId = threadId;
+			serverId = threadChannel.serverId;
+			rootMessageDeleted = true;
+		} else {
+			threadId = getThreadIdOfMessage(targetMessage);
+			parentId = getParentChannelOfMessage(targetMessage);
+			channelId = threadId ?? parentId;
+			serverId = targetMessage.serverId;
+		}
 
 		const indexingEnabled = await isChannelIndexingEnabled(
 			ctx,
@@ -529,7 +550,8 @@ export const getMessagePageData = privateQuery({
 
 		let allMessages = await findMessagesByChannelId(ctx, channelId, {
 			limit: threadId ? undefined : 50,
-			startingFrom: threadId ? undefined : targetMessage.id,
+			startingFrom:
+				threadId || rootMessageDeleted ? undefined : targetMessage?.id,
 		});
 
 		if (threadId) {
@@ -549,16 +571,10 @@ export const getMessagePageData = privateQuery({
 
 		const [enrichedMessages, server] = await Promise.all([
 			enrichMessages(ctx, allMessages),
-			getOneFrom(
-				ctx.db,
-				"servers",
-				"by_discordId",
-				targetMessage.serverId,
-				"discordId",
-			),
+			getOneFrom(ctx.db, "servers", "by_discordId", serverId, "discordId"),
 		]);
 
-		if (enrichedMessages.length === 0 || !server) {
+		if (!server) {
 			return null;
 		}
 
@@ -570,8 +586,9 @@ export const getMessagePageData = privateQuery({
 		);
 
 		return {
-			canonicalId: threadId ?? targetMessage.id,
+			canonicalId: threadId ?? targetMessage?.id ?? args.messageId,
 			messages: enrichedMessages,
+			rootMessageDeleted,
 			server: {
 				_id: server._id,
 				discordId: server.discordId,
