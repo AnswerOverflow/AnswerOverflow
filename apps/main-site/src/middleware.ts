@@ -46,8 +46,8 @@ export function middleware(req: NextRequest) {
 			}
 		}
 		if (path.startsWith('/m/')) {
-			// 10% chacne to make a request to new.answeroverflow.com
-			if (Math.random() < 0.1) {
+			// 15% chance to make a request to new.answeroverflow.com
+			if (Math.random() < 0.15) {
 				void fetch(`https://new.answeroverflow.com${path}`, {
 					headers: {
 						// it is fine to hard code this,
