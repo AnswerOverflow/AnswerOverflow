@@ -66,7 +66,7 @@ export function MessagePageLoader(props: {
 
 	const canonicalId = pageData.canonicalId.toString();
 	if (canonicalId !== messageId) {
-		redirect(`/m/${canonicalId}`);
+		redirect(`/m/${canonicalId}?focus=${messageId}`);
 	}
 
 	return <MessagePage data={pageData} />;

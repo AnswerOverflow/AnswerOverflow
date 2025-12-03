@@ -44,7 +44,7 @@ export default async function TenantMessagePage(props: Props) {
 
 	const canonicalId = pageData.canonicalId.toString();
 	if (canonicalId !== params.messageId) {
-		redirect(`/m/${canonicalId}`);
+		redirect(`/m/${canonicalId}?focus=${params.messageId}`);
 	}
 
 	return <MessagePage data={pageData} />;
