@@ -1,13 +1,7 @@
 "use client";
 
-import { api } from "@packages/database/convex/_generated/api";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
-import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import type { DiscordUser } from "@packages/ui/components/discord-avatar";
-import {
-	ThreadCard,
-	ThreadCardSkeletonList,
-} from "@packages/ui/components/thread-card";
 import {
 	EmptyState,
 	InitialResults,
@@ -15,36 +9,12 @@ import {
 	UserPageLayout,
 } from "./components";
 
-function UserPostsContent({
-	userId,
-	serverId,
-	initialPosts,
-}: {
-	userId: string;
-	serverId?: string;
-	initialPosts: SearchResult[];
-}) {
+function UserPostsContent({ initialPosts }: { initialPosts: SearchResult[] }) {
 	if (initialPosts.length === 0) {
 		return <EmptyState message="No posts found" />;
 	}
 
-	return (
-		<>
-			<InitialResults results={initialPosts} />
-			<ConvexInfiniteList
-				query={api.public.search.getUserPosts}
-				queryArgs={{ userId, serverId }}
-				pageSize={10}
-				loader={<ThreadCardSkeletonList />}
-				renderItem={(result) => (
-					<ThreadCard
-						key={result.message.message.id.toString()}
-						result={result}
-					/>
-				)}
-			/>
-		</>
-	);
+	return <InitialResults results={initialPosts} />;
 }
 
 export function UserPageClient({
@@ -69,11 +39,7 @@ export function UserPageClient({
 			basePath={`/u/${userId}`}
 			serverFilterLabel="Explore posts from servers"
 		>
-			<UserPostsContent
-				userId={userId}
-				serverId={serverId}
-				initialPosts={posts}
-			/>
+			<UserPostsContent initialPosts={posts} />
 		</UserPageLayout>
 	);
 }

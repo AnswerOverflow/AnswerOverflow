@@ -20,9 +20,9 @@ export default async function TenantUserPage(props: Props) {
 		if (!tenant?.server) {
 			return [null, null] as const;
 		}
-		const userData = yield* database.public.search.getUserPageData({
-			userId: params.userId,
-			serverId: tenant.server.discordId.toString(),
+		const userData = yield* database.private.discord_accounts.getUserPageData({
+			userId: BigInt(params.userId),
+			serverId: tenant.server.discordId,
 			limit: 10,
 		});
 		return [tenant, userData] as const;
