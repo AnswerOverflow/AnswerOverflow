@@ -29,4 +29,16 @@ export const backfillChannelSettingsServerId = migrations.define({
 	},
 });
 
+export const backfillChildThreadIdForThreadStarters = migrations.define({
+	table: "messages",
+	migrateOne: async (ctx, message) => {
+		if (
+			message.id === message.channelId &&
+			message.childThreadId === undefined
+		) {
+			await ctx.db.patch(message._id, { childThreadId: message.channelId });
+		}
+	},
+});
+
 export const run = migrations.runner();

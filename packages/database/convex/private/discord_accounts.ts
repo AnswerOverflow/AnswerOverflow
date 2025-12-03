@@ -144,16 +144,55 @@ export const getUserPageData = privateQuery({
 			return null;
 		}
 
-		const allMessages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_authorId",
-			args.userId,
-			"authorId",
+		const serverIdFilter = args.serverId ?? null;
+		const limit = args.limit ?? 10;
+		const scanLimit = limit * 5;
+
+		const postMessages = await ctx.db
+			.query("messages")
+			.withIndex("by_authorId_and_childThreadId", (q) =>
+				q.eq("authorId", args.userId).gte("childThreadId", 0n),
+			)
+			.order("desc")
+			.take(scanLimit);
+
+		const filteredPostMessages = serverIdFilter
+			? postMessages.filter((m) => m.serverId === serverIdFilter)
+			: postMessages;
+
+		const posts = Arr.filter(
+			await Promise.all(
+				filteredPostMessages
+					.slice(0, limit)
+					.map((message) => enrichedMessageWithServerAndChannels(ctx, message)),
+			),
+			Predicate.isNotNullable,
+		);
+
+		const commentMessages = await ctx.db
+			.query("messages")
+			.withIndex("by_authorId", (q) => q.eq("authorId", args.userId))
+			.order("desc")
+			.take(scanLimit);
+
+		const filteredCommentMessages = commentMessages.filter((m) => {
+			if (m.childThreadId !== undefined) return false;
+			if (m.parentChannelId === undefined) return false;
+			if (serverIdFilter && m.serverId !== serverIdFilter) return false;
+			return true;
+		});
+
+		const comments = Arr.filter(
+			await Promise.all(
+				filteredCommentMessages
+					.slice(0, limit)
+					.map((message) => enrichedMessageWithServerAndChannels(ctx, message)),
+			),
+			Predicate.isNotNullable,
 		);
 
 		const serverIds = new Set<bigint>();
-		for (const message of allMessages) {
+		for (const message of postMessages) {
 			serverIds.add(message.serverId);
 		}
 
@@ -179,54 +218,6 @@ export const getUserPageData = privateQuery({
 			),
 			Predicate.isNotNullable,
 		);
-
-		const serverIdFilter = args.serverId ?? null;
-		const limit = args.limit ?? 10;
-
-		const filteredMessages = serverIdFilter
-			? allMessages.filter((m) => m.serverId === serverIdFilter)
-			: allMessages;
-
-		const sortedMessages = filteredMessages.sort((a, b) =>
-			a.id > b.id ? -1 : a.id < b.id ? 1 : 0,
-		);
-
-		const posts = [];
-		const comments = [];
-
-		for (const message of sortedMessages) {
-			if (posts.length >= limit && comments.length >= limit) {
-				break;
-			}
-
-			const channel = await getOneFrom(
-				ctx.db,
-				"channels",
-				"by_discordChannelId",
-				message.channelId,
-				"id",
-			);
-
-			if (!channel || !isThreadType(channel.type)) {
-				continue;
-			}
-
-			const firstMessage = await getFirstMessageInChannel(ctx, channel.id);
-			if (!firstMessage) {
-				continue;
-			}
-
-			const enriched = await enrichedMessageWithServerAndChannels(ctx, message);
-			if (!enriched) {
-				continue;
-			}
-
-			if (firstMessage.id === message.id && posts.length < limit) {
-				posts.push(enriched);
-			} else if (firstMessage.id !== message.id && comments.length < limit) {
-				comments.push(enriched);
-			}
-		}
 
 		return {
 			user: {
