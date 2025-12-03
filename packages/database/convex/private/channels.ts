@@ -17,6 +17,7 @@ import {
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
 	getFirstMessagesInChannels,
+	getThreadStartMessage,
 } from "../shared/shared";
 
 type Channel = Infer<typeof channelSchema>;
@@ -226,10 +227,24 @@ export const getChannelPageData = privateQuery({
 			});
 
 		const threadIds = threads.map((t) => t.id);
-		const firstMessages = await getFirstMessagesInChannels(ctx, threadIds);
+		const [firstMessages, rootMessages] = await Promise.all([
+			getFirstMessagesInChannels(ctx, threadIds),
+			Promise.all(threadIds.map((id) => getThreadStartMessage(ctx, id))),
+		]);
+
+		const rootMessageIds = new Set(
+			Arr.filter(rootMessages, Predicate.isNotNull).map((m) => m.id),
+		);
+
+		const threadsWithRootMessage = Arr.filter(threads, (thread) =>
+			rootMessageIds.has(thread.id),
+		);
 
 		const messages = Arr.filter(
-			Arr.map(threads, (thread) => firstMessages[thread.id.toString()] ?? null),
+			Arr.map(
+				threadsWithRootMessage,
+				(thread) => firstMessages[thread.id.toString()] ?? null,
+			),
 			Predicate.isNotNull,
 		);
 
@@ -240,7 +255,7 @@ export const getChannelPageData = privateQuery({
 		);
 
 		const threadsWithMessages = Arr.filter(
-			Arr.map(threads, (thread) => {
+			Arr.map(threadsWithRootMessage, (thread) => {
 				const message = firstMessages[thread.id.toString()];
 				if (!message) return null;
 				const enrichedMessage = enrichedMessagesMap.get(message.id);
