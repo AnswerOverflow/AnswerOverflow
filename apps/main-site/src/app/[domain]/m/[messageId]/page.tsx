@@ -1,5 +1,5 @@
 import { Database } from "@packages/database/database";
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { MessagePage } from "../../../../components/message-page";
@@ -13,14 +13,26 @@ type Props = {
 	params: Promise<{ domain: string; messageId: string }>;
 };
 
+function parseBigInt(value: string) {
+	return Schema.decodeUnknownOption(Schema.BigInt)(value);
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
-	const pageData = await fetchMessagePageData(BigInt(params.messageId));
+	const parsed = parseBigInt(params.messageId);
+	if (parsed._tag === "None") {
+		return notFound();
+	}
+	const pageData = await fetchMessagePageData(parsed.value);
 	return generateMessagePageMetadata(pageData, params.messageId);
 }
 
 export default async function TenantMessagePage(props: Props) {
 	const params = await props.params;
+	const parsed = parseBigInt(params.messageId);
+	if (parsed._tag === "None") {
+		return notFound();
+	}
 	const domain = decodeURIComponent(params.domain);
 
 	const [tenantData, pageData] = await Effect.gen(function* () {
@@ -29,7 +41,7 @@ export default async function TenantMessagePage(props: Props) {
 			domain,
 		});
 		const page = yield* database.private.messages.getMessagePageData({
-			messageId: BigInt(params.messageId),
+			messageId: parsed.value,
 		});
 		return [tenant, page] as const;
 	}).pipe(runtime.runPromise);
