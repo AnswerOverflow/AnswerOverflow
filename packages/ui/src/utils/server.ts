@@ -8,11 +8,8 @@ type ServerWithCustomDomain = {
 
 export function getServerHomepageUrl(server: ServerWithCustomDomain) {
 	const subpath = normalizeSubpath(server.subpath);
-	if (process.env.NODE_ENV !== "production" && !server.customDomain) {
-		return `/c/${server.discordId}`;
-	}
 	if (!server.customDomain) {
-		return `https://www.answeroverflow.com/c/${server.discordId}`;
+		return `/c/${server.discordId}`;
 	}
 	const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
 	const subpathSuffix = subpath ? `/${subpath}` : "";
