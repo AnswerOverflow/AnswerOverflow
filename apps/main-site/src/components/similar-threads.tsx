@@ -88,7 +88,7 @@ export function SimilarThreads(props: SimilarThreadsProps) {
 							className="group block py-2.5 first:pt-0 last:pb-0"
 						>
 							<div className="flex items-start justify-between gap-2">
-								<span className="line-clamp-2 text-sm font-medium leading-snug text-foreground group-hover:underline">
+								<span className="truncate text-sm font-medium text-foreground group-hover:underline">
 									{result.thread.name}
 								</span>
 								{result.hasSolution && (
@@ -98,12 +98,13 @@ export function SimilarThreads(props: SimilarThreadsProps) {
 									/>
 								)}
 							</div>
-							<div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-								<ServerIcon server={server} size={16} className="shrink-0" />
-								<span className="truncate">
-									{result.server.name} / {result.channel.name}
-								</span>
-								<span className="shrink-0 text-muted-foreground/50">·</span>
+							<div className="mt-1 flex items-center justify-between gap-1.5 text-xs text-muted-foreground">
+								<div className="flex min-w-0 items-center gap-1.5">
+									<ServerIcon server={server} size={16} className="shrink-0" />
+									<span className="truncate">
+										{result.server.name} / {result.channel.name}
+									</span>
+								</div>
 								<TimeAgo
 									snowflake={result.firstMessageId}
 									className="shrink-0 text-xs"
