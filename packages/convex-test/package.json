@@ -13,7 +13,7 @@
     "test:once": "vitest run --no-watch --pool=forks",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:coverage": "vitest run --coverage --pool=forks",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsgo --noEmit"
   },
   "license": "Apache-2.0",
   "peerDependencies": {

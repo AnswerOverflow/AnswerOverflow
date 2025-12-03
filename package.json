@@ -30,6 +30,7 @@
 		"@typescript-eslint/eslint-plugin": "^8.47.0",
 		"@typescript-eslint/parser": "^8.47.0",
 		"@typescript-eslint/utils": "^8.47.0",
+		"@typescript/native-preview": "^7.0.0-dev.20251203.1",
 		"eslint": "^9.39.1",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.6",
