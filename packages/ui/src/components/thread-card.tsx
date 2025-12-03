@@ -44,9 +44,12 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 						<>
 							<div className="flex items-center gap-1.5">
 								<ChannelIcon className="size-4 text-muted-foreground shrink-0" />
-								<span className="text-muted-foreground">
+								<Link
+									href={`/c/${result.server?.discordId}/${result.channel.id}`}
+									className="text-muted-foreground hover:underline"
+								>
 									{result.channel.name}
-								</span>
+								</Link>
 							</div>
 							<span className="text-muted-foreground">•</span>
 						</>
@@ -54,11 +57,14 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 					{result.thread && (
 						<div className="flex items-center gap-1.5">
 							<ThreadIcon className="size-4 text-muted-foreground shrink-0" />
-							<span className="text-muted-foreground">
+							<Link
+								href={`/m/${result.message.message.id}`}
+								className="text-muted-foreground hover:underline"
+							>
 								{result.thread.name ||
 									result.message.message.content?.slice(0, 30).trim() ||
 									"Untitled thread"}
-							</span>
+							</Link>
 						</div>
 					)}
 				</div>
