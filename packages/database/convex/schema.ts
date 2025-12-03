@@ -245,7 +245,11 @@ export default defineSchema({
 		.index("by_type_and_id", ["type", "id"])
 		.index("by_discordChannelId", ["id"])
 		.index("by_parentId", ["parentId"])
-		.index("by_parentId_and_id", ["parentId", "id"]),
+		.index("by_parentId_and_id", ["parentId", "id"])
+		.searchIndex("search_name", {
+			searchField: "name",
+			filterFields: ["serverId", "type"],
+		}),
 	channelSettings: defineTable(channelSettingsSchema)
 		.index("by_channelId", ["channelId"])
 		.index("by_serverId", ["serverId"])
