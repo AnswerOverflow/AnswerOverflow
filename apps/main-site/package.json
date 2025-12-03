@@ -11,7 +11,7 @@
 		"dev": "bun run dev-next & bun run dev-proxy; wait",
 		"build": "bun with-env next build",
 		"start": "bun with-env next start",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "tsgo --noEmit",
 		"clean": "rm -rf node_modules .next"
 	},
 	"dependencies": {
