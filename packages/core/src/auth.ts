@@ -104,8 +104,8 @@ export async function createUser(input: { id?: string; email: string }) {
 
 import { sharedEnvs } from '@answeroverflow/env/shared';
 import type { Adapter } from '@auth/core/adapters';
-import { CookieSerializeOptions } from 'cookie';
-import { NextApiResponse } from 'next';
+import type { SerializeOptions } from 'cookie';
+import type { NextApiResponse } from 'next';
 import type { NextAuthOptions } from 'next-auth';
 import { getServerSession as getNextAuthSession } from 'next-auth';
 import DiscordProvider from 'next-auth/providers/discord';
@@ -120,7 +120,7 @@ const hostname =
 
 const useSecureCookies = sharedEnvs.NODE_ENV === 'production';
 
-export module Auth {
+export namespace Auth {
 	export type Session = Awaited<ReturnType<typeof getServerSession>>;
 
 	export async function findAccountByProviderAccountId(input: {
@@ -528,8 +528,8 @@ export module Auth {
 	}
 
 	export function getTenantCookieOptions(
-		override?: CookieSerializeOptions,
-	): CookieSerializeOptions {
+		override?: SerializeOptions,
+	): SerializeOptions {
 		return {
 			httpOnly: true,
 			sameSite: 'strict',
