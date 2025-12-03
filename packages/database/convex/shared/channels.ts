@@ -65,6 +65,21 @@ export async function getChannelWithSettings(
 	};
 }
 
+export async function isChannelIndexingEnabled(
+	ctx: QueryCtx | MutationCtx,
+	channelId: bigint,
+	parentChannelId?: bigint,
+): Promise<boolean> {
+	const targetChannelId = parentChannelId ?? channelId;
+	const settings = await getOneFrom(
+		ctx.db,
+		"channelSettings",
+		"by_channelId",
+		targetChannelId,
+	);
+	return settings?.indexingEnabled ?? false;
+}
+
 export async function deleteChannelInternalLogic(
 	ctx: MutationCtx,
 	id: bigint,

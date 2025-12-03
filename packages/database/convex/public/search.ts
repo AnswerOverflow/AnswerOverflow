@@ -2,6 +2,7 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
+import { isChannelIndexingEnabled } from "../shared/channels";
 import {
 	enrichedMessageWithServerAndChannels,
 	searchMessages,
@@ -51,6 +52,29 @@ export const getRecentThreads = publicQuery({
 		const results = Arr.filter(
 			await Promise.all(
 				paginatedResult.page.map(async (threadChannel) => {
+					if (!threadChannel.parentId) {
+						return null;
+					}
+
+					const server = await getOneFrom(
+						ctx.db,
+						"servers",
+						"by_discordId",
+						threadChannel.serverId,
+					);
+					if (!server || server.kickedTime) {
+						return null;
+					}
+
+					const indexingEnabled = await isChannelIndexingEnabled(
+						ctx,
+						threadChannel.id,
+						threadChannel.parentId,
+					);
+					if (!indexingEnabled) {
+						return null;
+					}
+
 					const threadStartMessage = await getThreadStartMessage(
 						ctx,
 						threadChannel.id,

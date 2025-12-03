@@ -6,6 +6,7 @@ import {
 	getDiscordAccountIdFromAuth,
 	getUserServerSettingsForServerByDiscordId,
 } from "./auth";
+import { isChannelIndexingEnabled } from "./channels";
 import {
 	isMessagePublic,
 	type MessageWithPrivacyFlags,
@@ -112,6 +113,14 @@ export async function enrichedMessageWithServerAndChannels(
 	message: Message,
 ) {
 	const { parentChannelId } = message;
+
+	const indexingEnabled = await isChannelIndexingEnabled(
+		ctx,
+		message.channelId,
+		parentChannelId ?? undefined,
+	);
+	if (!indexingEnabled) return null;
+
 	const [enrichedMessage, parentChannel, channel, server] = await Promise.all([
 		enrichMessage(ctx, message),
 		parentChannelId
