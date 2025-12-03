@@ -33,7 +33,7 @@ import {
 import { getDate } from "@packages/ui/utils/snowflake";
 import type { FunctionReturnType } from "convex/server";
 import { Array as Arr, Predicate } from "effect";
-import { ExternalLink, MessageSquare } from "lucide-react";
+import { CheckCircle2, ExternalLink, MessageSquare } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useEffect } from "react";
 import { JsonLdScript } from "@/components/json-ld-script";
@@ -180,8 +180,13 @@ export function MessagePage(props: { data: MessagePageData }) {
 			if (message.message.id === solutionMessageId) {
 				return (
 					<div key={message.message.id} id={`solution-${message.message.id}`}>
-						<span className="text-green-700 dark:text-green-400">Solution</span>
-						<div className="rounded-lg border-2 border-green-500 p-2 dark:border-green-400">
+						<div className="flex items-center gap-1.5 mb-2">
+							<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
+							<span className="text-sm font-medium text-green-600 dark:text-green-500">
+								Solution
+							</span>
+						</div>
+						<div className="rounded-xl border border-green-500/30 bg-green-500/5 dark:bg-green-500/10 p-3">
 							<ThinMessage message={message} isLast={isLast} />
 						</div>
 					</div>
@@ -258,16 +263,19 @@ export function MessagePage(props: { data: MessagePageData }) {
 						)
 					)}
 					{solution && (
-						<div className="mt-4 w-full rounded-lg border-2 border-green-500 p-2 dark:border-green-400">
-							<span className="text-green-800 dark:text-green-400">
-								Solution:
-							</span>
-
+						<div className="mt-6 w-full rounded-xl border border-green-500/30 bg-green-500/5 dark:bg-green-500/10 p-4">
+							<div className="flex items-center gap-1.5 mb-3">
+								<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
+								<span className="text-sm font-medium text-green-600 dark:text-green-500">
+									Solution
+								</span>
+							</div>
 							<MessageBlurrer message={solution}>
 								<MessageBody message={solution} collapseContent={true} />
 							</MessageBlurrer>
-
-							<JumpToSolution id={solution.message.id.toString()} />
+							<div className="mt-3">
+								<JumpToSolution id={solution.message.id.toString()} />
+							</div>
 						</div>
 					)}
 				</div>

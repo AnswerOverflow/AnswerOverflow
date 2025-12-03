@@ -33,6 +33,7 @@ export type MessageMetadata = {
 			id: bigint;
 			type: number;
 			name: string;
+			indexingEnabled?: boolean;
 		};
 		message?: bigint;
 	}>;
