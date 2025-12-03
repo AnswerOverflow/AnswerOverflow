@@ -46,6 +46,17 @@ export function middleware(req: NextRequest) {
 			}
 		}
 		if (path.startsWith('/m/')) {
+			// 10% chacne to make a request to new.answeroverflow.com
+			if (Math.random() < 0.1) {
+				void fetch(`https://new.answeroverflow.com${path}`, {
+					headers: {
+						// it is fine to hard code this,
+						// we only have the firewall to prevent
+						// googlebot and other crawlers accessing the new site
+						'Cookie': 'firewall-bypass=true'
+					}
+				});
+			}
 			if (authToken) {
 				return NextResponse.rewrite(makeMainSiteLink(`${path}/dynamic`));
 			}
