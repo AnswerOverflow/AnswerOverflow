@@ -14,6 +14,7 @@ import {
 	getThreadStartMessage,
 	isThreadType,
 } from "../shared/shared";
+import { findSimilarThreads } from "../shared/similarThreads";
 import { publicQuery } from "./custom_functions";
 
 export const publicSearch = publicQuery({
@@ -404,5 +405,44 @@ export const getUserPageData = publicQuery({
 			posts,
 			comments,
 		};
+	},
+});
+
+export const getSimilarThreads = publicQuery({
+	args: {
+		searchQuery: v.string(),
+		currentThreadId: v.string(),
+		currentServerId: v.string(),
+		serverId: v.optional(v.string()),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const results = await findSimilarThreads(ctx, {
+			searchQuery: args.searchQuery,
+			currentThreadId: BigInt(args.currentThreadId),
+			currentServerId: BigInt(args.currentServerId),
+			serverId: args.serverId ? BigInt(args.serverId) : undefined,
+			limit: Math.min(args.limit ?? 4, 10),
+		});
+
+		return results.map((result) => ({
+			thread: {
+				id: result.thread.id.toString(),
+				name: result.thread.name,
+				serverId: result.thread.serverId.toString(),
+			},
+			server: {
+				discordId: result.server.discordId.toString(),
+				name: result.server.name,
+				icon: result.server.icon,
+			},
+			channel: {
+				id: result.channel.id.toString(),
+				name: result.channel.name,
+			},
+			firstMessageId: result.firstMessageId.toString(),
+			firstMessageContent: result.firstMessageContent,
+			hasSolution: result.hasSolution,
+		}));
 	},
 });

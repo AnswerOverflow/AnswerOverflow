@@ -37,6 +37,7 @@ import { ExternalLink, MessageSquare } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useEffect } from "react";
 import { JsonLdScript } from "@/components/json-ld-script";
+import { SimilarThreads } from "@/components/similar-threads";
 
 type MessagePageData = NonNullable<
 	FunctionReturnType<typeof api.private.messages.getMessagePageData>
@@ -325,6 +326,16 @@ export function MessagePage(props: { data: MessagePageData }) {
 					</div>
 				</div>
 			</div>
+			<SimilarThreads
+				searchQuery={
+					data.thread?.name ?? firstMessage.message.content?.slice(0, 100) ?? ""
+				}
+				currentThreadId={(
+					data.thread?.id ?? firstMessage.message.id
+				).toString()}
+				currentServerId={data.server.discordId.toString()}
+				serverId={tenant ? data.server.discordId.toString() : undefined}
+			/>
 			<div className="flex w-full flex-col justify-center gap-2 text-center">
 				<HelpfulFeedback
 					page={{

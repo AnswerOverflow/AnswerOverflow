@@ -46,6 +46,7 @@ import type * as shared_permissionsShared from "../shared/permissionsShared.js";
 import type * as shared_publicSchemas from "../shared/publicSchemas.js";
 import type * as shared_servers from "../shared/servers.js";
 import type * as shared_shared from "../shared/shared.js";
+import type * as shared_similarThreads from "../shared/similarThreads.js";
 import type * as shared_stripe from "../shared/stripe.js";
 import type * as shared_users from "../shared/users.js";
 import type * as stripe_internal from "../stripe/internal.js";
@@ -95,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   "shared/publicSchemas": typeof shared_publicSchemas;
   "shared/servers": typeof shared_servers;
   "shared/shared": typeof shared_shared;
+  "shared/similarThreads": typeof shared_similarThreads;
   "shared/stripe": typeof shared_stripe;
   "shared/users": typeof shared_users;
   "stripe/internal": typeof stripe_internal;
