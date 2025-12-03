@@ -97,6 +97,7 @@ function renderASTNode(
 
 		case "link":
 		case "url":
+		case "autolink":
 			if (!message) {
 				return null;
 			}
@@ -196,11 +197,19 @@ function renderASTNode(
 					items={node.items as SingleASTNode[][]}
 					key={key}
 					ordered={node.ordered as boolean}
+					message={message}
 				/>
 			);
 		default:
 			return null;
 	}
+}
+
+function preprocessMarkdown(content: string): string {
+	return content
+		.replace(/^[ \t]+(```)/gm, "$1")
+		.replace(/(```)[ \t]*$/gm, "$1")
+		.replace(/^(\d+\..*)\n\n(?=\d+\.)/gm, "$1\n");
 }
 
 export const DiscordMarkdown = ({
@@ -215,7 +224,8 @@ export const DiscordMarkdown = ({
 	if (!children) {
 		return null;
 	}
-	const parsed = parse(children, "normal");
+	const preprocessed = preprocessMarkdown(children);
+	const parsed = parse(preprocessed, "extended");
 	return (
 		<div className="min-w-0 break-words">
 			{renderASTNode(
@@ -287,17 +297,21 @@ export function DiscordUIMessage({
 function List({
 	items,
 	ordered,
+	message,
 }: {
 	items: SingleASTNode[][];
 	ordered?: boolean;
+	message?: MessageWithMetadata;
 }) {
 	const Tag = ordered ? "ol" : "ul";
 	return (
-		<Tag className="my-0!">
+		<Tag
+			className={`my-2 pl-6 space-y-2 list-outside ${ordered ? "list-decimal" : "list-disc"}`}
+		>
 			{items.map((item, idx) => (
-				<li className="marker:text-black" key={idx}>
+				<li className="marker:text-foreground" key={idx}>
 					{item.map((i, childIdx) =>
-						renderASTNode(i, childIdx + idx + 1, item, true),
+						renderASTNode(i, childIdx + idx + 1, item, false, message),
 					)}
 				</li>
 			))}
