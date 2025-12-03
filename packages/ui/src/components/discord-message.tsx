@@ -11,17 +11,18 @@ export type { EnrichedMessage };
 export type DiscordMessageProps = {
 	enrichedMessage: EnrichedMessage;
 	showCard?: boolean;
+	hideSolutions?: boolean;
 };
 
 export function DiscordMessage(props: DiscordMessageProps) {
-	const { enrichedMessage, showCard = true } = props;
+	const { enrichedMessage, showCard = true, hideSolutions = false } = props;
 
 	const componentProps: DiscordMessageComponentProps = {
 		message: enrichedMessage.message,
 		author: enrichedMessage.author,
 		attachments: enrichedMessage.attachments,
 		reactions: enrichedMessage.reactions,
-		solutions: enrichedMessage.solutions,
+		solutions: hideSolutions ? [] : enrichedMessage.solutions,
 		metadata: enrichedMessage.metadata,
 		showCard,
 	};
