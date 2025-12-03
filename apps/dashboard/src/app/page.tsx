@@ -1,6 +1,6 @@
 import { callAPI } from '@answeroverflow/ui/utils/trpc';
 import { redirect } from 'next/navigation';
-
+//bump
 export default async function Onboarding() {
 	const servers = await callAPI({
 		apiCall: (api) => api.auth.getServersForOnboarding(),
