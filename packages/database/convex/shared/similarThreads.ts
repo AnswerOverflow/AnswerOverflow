@@ -3,8 +3,8 @@ import type { QueryCtx } from "../client";
 import { CHANNEL_TYPE, isChannelIndexingEnabled } from "./channels";
 import { isMessagePublic } from "./messagePrivacy";
 import {
-	getFirstMessageInChannel,
 	findSolutionsByQuestionId,
+	getFirstMessageInChannel,
 } from "./messages";
 
 export type SimilarThreadCandidate = {

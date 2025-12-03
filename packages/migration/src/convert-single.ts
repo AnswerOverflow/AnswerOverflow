@@ -1,5 +1,5 @@
-import { spawn } from "child_process";
-import { join } from "path";
+import { spawn } from "node:child_process";
+import { join } from "node:path";
 
 const TEMP_DIR = join(process.cwd(), ".migration-temp");
 
@@ -17,7 +17,7 @@ if (!file || fields.length === 0) {
 }
 
 const inputPath = join(TEMP_DIR, file);
-const outputPath = join(TEMP_DIR, file + ".new");
+const outputPath = join(TEMP_DIR, `${file}.new`);
 
 const sedExpr = fields
 	.map((f) => `s/"${f}":"([0-9]+)"/"${f}":{"\$integer":"\\1"}/g`)
@@ -29,14 +29,14 @@ console.log(`Fields: ${fields.join(", ")}`);
 const sed = spawn("sed", ["-E", sedExpr, inputPath], {
 	stdio: ["inherit", "pipe", "inherit"],
 });
-const output = require("fs").createWriteStream(outputPath);
+const output = require("node:fs").createWriteStream(outputPath);
 
 sed.stdout.pipe(output);
 
 sed.on("close", (code) => {
 	if (code === 0) {
-		require("fs").unlinkSync(inputPath);
-		require("fs").renameSync(outputPath, inputPath);
+		require("node:fs").unlinkSync(inputPath);
+		require("node:fs").renameSync(outputPath, inputPath);
 		console.log(`✓ ${file} converted`);
 	} else {
 		console.error(`Failed with code ${code}`);

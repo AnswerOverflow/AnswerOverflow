@@ -1,10 +1,10 @@
+import { createWriteStream } from "node:fs";
+import { join } from "node:path";
 import { sql } from "drizzle-orm";
-import { createWriteStream } from "fs";
 import { getDb } from "./db/client";
 import { dbMessages } from "./db/schema";
-import { ProgressLogger } from "./utils/progress";
 import { transformMessage } from "./transformers/message";
-import { join } from "path";
+import { ProgressLogger } from "./utils/progress";
 
 const TEMP_DIR = join(process.cwd(), ".migration-temp");
 const BATCH_SIZE = 5000;
@@ -67,12 +67,12 @@ async function resumeMessages() {
 		for (const row of rows) {
 			const transformed = transformMessage(row);
 			const cleaned = stripUndefined(transformed);
-			stream.write(JSON.stringify(cleaned) + "\n");
+			stream.write(`${JSON.stringify(cleaned)}\n`);
 			progress.increment();
 			count++;
 		}
 
-		lastId = rows[rows.length - 1]!.id;
+		lastId = rows[rows.length - 1]?.id;
 	}
 
 	await new Promise<void>((resolve, reject) => {

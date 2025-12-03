@@ -1,12 +1,12 @@
-import archiver from "archiver";
 import {
-	createWriteStream,
 	createReadStream,
+	createWriteStream,
 	existsSync,
 	unlinkSync,
-} from "fs";
-import { join, dirname } from "path";
-import { mkdir } from "fs/promises";
+} from "node:fs";
+import { mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
+import archiver from "archiver";
 import { generatedSchemas } from "../convex-schemas";
 
 export interface TableExport {
@@ -49,7 +49,7 @@ export async function buildConvexZip(
 
 			const schema = generatedSchemas[table.tableName];
 			if (schema) {
-				archive.append(JSON.stringify(schema) + "\n", {
+				archive.append(`${JSON.stringify(schema)}\n`, {
 					name: `${table.tableName}/generated_schema.jsonl`,
 				});
 			}

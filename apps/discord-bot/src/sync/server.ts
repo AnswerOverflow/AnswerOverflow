@@ -4,11 +4,7 @@ import type { Guild } from "discord.js";
 import { Array as Arr, Console, Effect, Layer } from "effect";
 import { registerCommands } from "../commands/register";
 import { Discord } from "../core/discord-service";
-import {
-	registerServerGroup,
-	trackServerJoin,
-	trackServerLeave,
-} from "../utils/analytics";
+import { registerServerGroup, trackServerJoin } from "../utils/analytics";
 import { isAllowedRootChannelType } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
 import { syncChannel } from "./channel";

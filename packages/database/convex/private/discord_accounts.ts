@@ -8,8 +8,6 @@ import {
 	deleteMessageInternalLogic,
 	deleteUserServerSettingsByUserIdLogic,
 	getDiscordAccountById as getDiscordAccountByIdShared,
-	getFirstMessageInChannel,
-	isThreadType,
 	upsertIgnoredDiscordAccountInternalLogic,
 } from "../shared/shared";
 

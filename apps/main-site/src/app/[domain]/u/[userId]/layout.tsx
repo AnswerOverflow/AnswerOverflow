@@ -6,7 +6,7 @@ type Props = {
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-	const params = await props.params;
+	const _params = await props.params;
 	return {
 		title: "User Posts",
 		description: "See posts from this user",

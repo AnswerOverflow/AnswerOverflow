@@ -2,11 +2,11 @@ import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { MessagePage } from "../../../../components/message-page";
 import {
 	fetchMessagePageData,
 	generateMessagePageMetadata,
 } from "../../../../components/message-page-loader";
-import { MessagePage } from "../../../../components/message-page";
 import { runtime } from "../../../../lib/runtime";
 
 type Props = {

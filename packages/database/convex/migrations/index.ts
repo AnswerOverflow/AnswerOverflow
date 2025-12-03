@@ -1,7 +1,7 @@
 import { Migrations } from "@convex-dev/migrations";
-import { components, internal } from "../_generated/api";
-import type { DataModel } from "../_generated/dataModel";
 import { getOneFrom } from "convex-helpers/server/relationships";
+import { components } from "../_generated/api";
+import type { DataModel } from "../_generated/dataModel";
 
 const migrations = new Migrations<DataModel>(components.migrations);
 
