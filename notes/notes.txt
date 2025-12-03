@@ -7,7 +7,7 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
 - https://www.convex.dev/components/workpool may be relevant
 - https://www.convex.dev/components/aggregate use aggregate
 - https://docs.convex.dev/error#1 we're seeing write conflicts
-
+- the compound index of server id + indexing is probably not needed since the amount of root channels is always going to be less than 100
 
 
 

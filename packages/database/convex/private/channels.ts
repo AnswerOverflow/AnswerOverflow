@@ -168,24 +168,14 @@ export const getChannelPageData = privateQuery({
 
 		if (!server) return null;
 
-		const rootChannelTypes = [
-			CHANNEL_TYPE.GuildText,
-			CHANNEL_TYPE.GuildAnnouncement,
-			CHANNEL_TYPE.GuildForum,
-		];
-
-		const [channel, channelsByType, threads] = await Promise.all([
+		const [channel, indexedSettings, threads] = await Promise.all([
 			getChannelWithSettings(ctx, args.channelDiscordId),
-			Promise.all(
-				rootChannelTypes.map((type) =>
-					ctx.db
-						.query("channels")
-						.withIndex("by_serverId_and_type", (q) =>
-							q.eq("serverId", server.discordId).eq("type", type),
-						)
-						.collect(),
-				),
-			),
+			ctx.db
+				.query("channelSettings")
+				.withIndex("by_serverId_and_indexingEnabled", (q) =>
+					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+				)
+				.collect(),
 			ctx.db
 				.query("channels")
 				.withIndex("by_parentId_and_id", (q) =>
@@ -197,33 +187,25 @@ export const getChannelPageData = privateQuery({
 
 		if (!channel || channel.serverId !== server.discordId) return null;
 
-		const rootChannels = channelsByType.flat();
+		const indexedChannelIds = indexedSettings.map((s) => s.channelId);
 
-		const allSettings = await Promise.all(
-			rootChannels.map((c) =>
-				getOneFrom(ctx.db, "channelSettings", "by_channelId", c.id),
-			),
+		const allIndexedChannels = await asyncMap(indexedChannelIds, (channelId) =>
+			getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
 		);
 
-		const indexedChannels = rootChannels
-			.map((c, idx) => ({
-				...c,
-				flags: allSettings[idx] ?? {
-					...DEFAULT_CHANNEL_SETTINGS,
-					channelId: c.id,
-				},
-			}))
-			.filter((c) => c.flags.indexingEnabled)
+		const indexedChannels = Arr.filter(allIndexedChannels, Predicate.isNotNull)
+			.filter(
+				(c) =>
+					c.type === CHANNEL_TYPE.GuildText ||
+					c.type === CHANNEL_TYPE.GuildAnnouncement ||
+					c.type === CHANNEL_TYPE.GuildForum,
+			)
 			.sort((a, b) => {
 				if (a.type === CHANNEL_TYPE.GuildForum) return -1;
 				if (b.type === CHANNEL_TYPE.GuildForum) return 1;
 				if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
 				if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
 				return 0;
-			})
-			.map((c) => {
-				const { flags: _flags, ...channel } = c;
-				return channel;
 			});
 
 		const threadIds = threads.map((t) => t.id);
