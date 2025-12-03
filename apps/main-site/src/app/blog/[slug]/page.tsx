@@ -204,7 +204,7 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
 						/>
 					</div>
 				</article>
-				<aside className="hidden xl:block w-64 shrink-0 sticky top-24 h-fit">
+				<aside className="hidden xl:block w-64 shrink-0 sticky top-[calc(var(--navbar-height)+1rem)] h-fit">
 					<BlogTOC headings={headings} />
 				</aside>
 			</div>

@@ -22,7 +22,7 @@ export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 	return (
 		<>
 			{showNavbar && <SiteNavbar />}
-			<div className={showNavbar ? "pt-16" : ""}>{children}</div>
+			<div className={showNavbar ? "pt-navbar" : ""}>{children}</div>
 			{showFooter && <Footer tenant={tenant} />}
 		</>
 	);

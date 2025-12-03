@@ -37,7 +37,7 @@ export function Navbar({
 	searchBar,
 }: NavbarProps) {
 	return (
-		<header className="fixed left-0 top-0 z-[1000] h-16 w-full bg-background px-4">
+		<header className="fixed left-0 top-0 z-[1000] h-navbar w-full bg-background px-4">
 			<nav className="relative z-10 flex size-full flex-1 items-center justify-between border-b-2 pb-2 md:py-2">
 				<div>
 					<Link

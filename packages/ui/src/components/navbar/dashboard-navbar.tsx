@@ -46,7 +46,7 @@ export function DashboardNavbar({
 		>
 			<div className="relative flex w-full flex-col">
 				{/* Header - Fixed at top */}
-				<header className="fixed top-0 left-0 right-0 z-50 flex h-[60px] items-center gap-4 border-b bg-background px-4">
+				<header className="fixed top-0 left-0 right-0 z-50 flex h-navbar items-center gap-4 border-b bg-background px-4">
 					{/* Mobile Menu Button */}
 					<Button
 						variant="ghost"
@@ -79,7 +79,7 @@ export function DashboardNavbar({
 				</header>
 
 				{/* Main Content - Offset for navbar */}
-				<div className="pt-[60px]">{children}</div>
+				<div className="pt-navbar">{children}</div>
 			</div>
 		</DashboardNavbarContext.Provider>
 	);
