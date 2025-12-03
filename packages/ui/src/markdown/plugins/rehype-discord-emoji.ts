@@ -1,4 +1,5 @@
 import type { Element, Root, Text } from "hast";
+import { emojify } from "node-emoji";
 import { visit } from "unist-util-visit";
 
 export function rehypeDiscordEmoji() {
@@ -15,11 +16,13 @@ export function rehypeDiscordEmoji() {
 					return;
 				}
 
-				const text = node.value;
+				let text = emojify(node.value);
+
 				const emojiRegex = /<(a?):([a-zA-Z0-9_-]+):(\d{17,19})>/g;
 				const matches = Array.from(text.matchAll(emojiRegex));
 
 				if (matches.length === 0) {
+					node.value = text;
 					return;
 				}
 

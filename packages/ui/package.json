@@ -56,6 +56,7 @@
 		"lucide-react": "catalog:",
 		"memoizee": "^0.4.17",
 		"next-themes": "^0.4.6",
+		"node-emoji": "^2.2.0",
 		"nuqs": "catalog:",
 		"ramda": "^0.32.0",
 		"react": "catalog:",
