@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { isChannelIndexingEnabled } from "../shared/channels";
 import {
@@ -10,9 +10,7 @@ import {
 import {
 	CHANNEL_TYPE,
 	getDiscordAccountById,
-	getFirstMessageInChannel,
 	getThreadStartMessage,
-	isThreadType,
 } from "../shared/shared";
 import { findSimilarThreadCandidates } from "../shared/similarThreads";
 import { publicQuery } from "./custom_functions";
@@ -269,107 +267,6 @@ export const getServersUserHasPostedIn = publicQuery({
 		);
 
 		return servers;
-	},
-});
-
-export const getUserPageData = publicQuery({
-	args: {
-		userId: v.string(),
-		serverId: v.optional(v.string()),
-		limit: v.optional(v.number()),
-	},
-	handler: async (ctx, args) => {
-		const userId = BigInt(args.userId);
-		const user = await getDiscordAccountById(ctx, userId);
-		if (!user) {
-			return null;
-		}
-
-		const serverIdFilter = args.serverId ? BigInt(args.serverId) : null;
-		const limit = args.limit ?? 10;
-		const scanLimit = limit * 5;
-
-		const postMessages = await ctx.db
-			.query("messages")
-			.withIndex("by_authorId_and_childThreadId", (q) =>
-				q.eq("authorId", userId).gte("childThreadId", 0n),
-			)
-			.order("desc")
-			.take(scanLimit);
-
-		const filteredPostMessages = serverIdFilter
-			? postMessages.filter((m) => m.serverId === serverIdFilter)
-			: postMessages;
-
-		const posts = Arr.filter(
-			await Promise.all(
-				filteredPostMessages
-					.slice(0, limit)
-					.map((message) => enrichedMessageWithServerAndChannels(ctx, message)),
-			),
-			Predicate.isNotNullable,
-		);
-
-		const commentMessages = await ctx.db
-			.query("messages")
-			.withIndex("by_authorId", (q) => q.eq("authorId", userId))
-			.order("desc")
-			.take(scanLimit);
-
-		const filteredCommentMessages = commentMessages.filter((m) => {
-			if (m.childThreadId !== undefined) return false;
-			if (m.parentChannelId === undefined) return false;
-			if (serverIdFilter && m.serverId !== serverIdFilter) return false;
-			return true;
-		});
-
-		const comments = Arr.filter(
-			await Promise.all(
-				filteredCommentMessages
-					.slice(0, limit)
-					.map((message) => enrichedMessageWithServerAndChannels(ctx, message)),
-			),
-			Predicate.isNotNullable,
-		);
-
-		const serverIds = new Set<bigint>();
-		for (const message of postMessages) {
-			serverIds.add(message.serverId);
-		}
-
-		const servers = Arr.filter(
-			await Promise.all(
-				Array.from(serverIds).map(async (serverId) => {
-					const server = await getOneFrom(
-						ctx.db,
-						"servers",
-						"by_discordId",
-						serverId,
-					);
-					if (!server || server.kickedTime) {
-						return null;
-					}
-					return {
-						id: server.discordId.toString(),
-						name: server.name,
-						icon: server.icon,
-						discordId: server.discordId,
-					};
-				}),
-			),
-			Predicate.isNotNullable,
-		);
-
-		return {
-			user: {
-				id: user.id.toString(),
-				name: user.name,
-				avatar: user.avatar,
-			},
-			servers,
-			posts,
-			comments,
-		};
 	},
 });
 

@@ -1,24 +1,14 @@
 "use client";
 
-import { api } from "@packages/database/convex/_generated/api";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
-import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import type { DiscordUser } from "@packages/ui/components/discord-avatar";
 import { EmptyStateCard } from "@packages/ui/components/empty";
-import {
-	ThreadCard,
-	ThreadCardSkeletonList,
-} from "@packages/ui/components/thread-card";
 import { MessageSquare } from "lucide-react";
 import { InitialResults, type ServerInfo, UserPageLayout } from "../components";
 
 function UserCommentsContent({
-	userId,
-	serverId,
 	initialComments,
 }: {
-	userId: string;
-	serverId?: string;
 	initialComments: SearchResult[];
 }) {
 	if (initialComments.length === 0) {
@@ -31,23 +21,7 @@ function UserCommentsContent({
 		);
 	}
 
-	return (
-		<>
-			<InitialResults results={initialComments} />
-			<ConvexInfiniteList
-				query={api.public.search.getUserComments}
-				queryArgs={{ userId, serverId }}
-				pageSize={10}
-				loader={<ThreadCardSkeletonList />}
-				renderItem={(result) => (
-					<ThreadCard
-						key={result.message.message.id.toString()}
-						result={result}
-					/>
-				)}
-			/>
-		</>
-	);
+	return <InitialResults results={initialComments} />;
 }
 
 export function UserCommentsPageClient({
@@ -72,11 +46,7 @@ export function UserCommentsPageClient({
 			basePath={`/u/${userId}/comments`}
 			serverFilterLabel="Explore comments from servers"
 		>
-			<UserCommentsContent
-				userId={userId}
-				serverId={serverId}
-				initialComments={comments}
-			/>
+			<UserCommentsContent initialComments={comments} />
 		</UserPageLayout>
 	);
 }
