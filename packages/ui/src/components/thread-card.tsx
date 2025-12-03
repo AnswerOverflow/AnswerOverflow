@@ -1,6 +1,7 @@
 "use client";
 
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
+import type { EnrichedMessage } from "@packages/database/convex/shared/shared";
 import { CheckCircle2, Hash, MessageSquare } from "lucide-react";
 import { ThreadIcon } from "./discord-message/mention";
 import { Link } from "./link";
@@ -11,6 +12,50 @@ import { Skeleton } from "./skeleton";
 function getChannelIcon(type: number) {
 	if (type === 15) return MessageSquare;
 	return Hash;
+}
+
+export type ChannelThreadCardProps = {
+	thread: {
+		name: string;
+	};
+	message: EnrichedMessage;
+};
+
+export function ChannelThreadCard({ thread, message }: ChannelThreadCardProps) {
+	const href = `/m/${message.message.id}`;
+	const threadTitle =
+		thread.name ||
+		message.message.content?.slice(0, 30).trim() ||
+		"Untitled thread";
+
+	return (
+		<div className="rounded-lg border border-border bg-card overflow-hidden">
+			<div className="px-4 py-3 border-b border-border bg-muted/30">
+				<div className="flex items-center gap-2 text-sm">
+					<div className="flex items-center gap-1.5 flex-1 min-w-0">
+						<ThreadIcon className="size-4 text-muted-foreground shrink-0" />
+						<Link
+							href={href}
+							className="font-medium text-foreground hover:underline truncate"
+						>
+							{threadTitle}
+						</Link>
+					</div>
+					{message.solutions.length > 0 && (
+						<div className="flex items-center gap-1 text-green-600 dark:text-green-500 shrink-0">
+							<CheckCircle2 className="size-4 shrink-0" />
+							<span className="font-medium">Solved</span>
+						</div>
+					)}
+				</div>
+			</div>
+			<MessagePreviewCardBody
+				enrichedMessage={message}
+				href={href}
+				ariaLabel={`Open thread: ${threadTitle}`}
+			/>
+		</div>
+	);
 }
 
 export function ThreadCard({ result }: { result: SearchResult }) {

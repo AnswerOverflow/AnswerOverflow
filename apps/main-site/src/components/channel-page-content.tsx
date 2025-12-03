@@ -3,7 +3,6 @@
 import type { api } from "@packages/database/convex/_generated/api";
 import { Button } from "@packages/ui/components/button";
 import { Link } from "@packages/ui/components/link";
-import { MessagePreviewCard } from "@packages/ui/components/message-preview-card";
 import {
 	Sheet,
 	SheetContent,
@@ -12,6 +11,7 @@ import {
 	SheetTrigger,
 } from "@packages/ui/components/sheet";
 import { useTenant } from "@packages/ui/components/tenant-context";
+import { ChannelThreadCard } from "@packages/ui/components/thread-card";
 import type { FunctionReturnType } from "convex/server";
 import { ChevronDown, Hash, MessageSquare } from "lucide-react";
 import { useState } from "react";
@@ -187,11 +187,10 @@ export function ChannelPageContent({
 						) : (
 							<div className="space-y-4">
 								{threads.map(({ thread, message }) => (
-									<MessagePreviewCard
+									<ChannelThreadCard
 										key={thread.id.toString()}
-										enrichedMessage={message}
-										href={`/m/${message.message.id.toString()}`}
-										ariaLabel={`Open thread: ${thread.name}`}
+										thread={thread}
+										message={message}
 									/>
 								))}
 							</div>
