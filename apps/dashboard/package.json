@@ -47,6 +47,7 @@
 	"devDependencies": {
 		"@answeroverflow/tsconfig": "workspace:*",
 		"@edge-runtime/vm": "^2.1.2",
+		"@types/node": "^20.14.0",
 		"@types/react": "^19.0.2",
 		"@types/react-dom": "^19.0.2",
 		"autoprefixer": "^10.4.15",
