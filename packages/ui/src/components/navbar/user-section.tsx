@@ -1,20 +1,14 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { authClient, useSession } from "../convex-client-provider";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "../dropdown-menu";
-import { Link } from "../link";
 import { LinkButton } from "../link-button";
 import { Skeleton } from "../skeleton";
 
@@ -37,22 +31,6 @@ export interface UserSectionProps {
 	showSignIn?: boolean;
 }
 
-function ChangeThemeItem() {
-	const { theme, setTheme } = useTheme();
-
-	return (
-		<DropdownMenuItem
-			onClick={() => {
-				setTheme(theme === "dark" ? "light" : "dark");
-			}}
-		>
-			<Sun className="mr-2 block h-4 w-4 dark:hidden" />
-			<Moon className="mr-2 hidden h-4 w-4 dark:block" />
-			<span className="w-full">Change Theme</span>
-		</DropdownMenuItem>
-	);
-}
-
 function UserAvatar({
 	user,
 	onSignOut,
@@ -71,18 +49,7 @@ function UserAvatar({
 					<AvatarFallback>{getInitials(user.name ?? "User")}</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className="mr-4 mt-2 max-h-96 w-52">
-				<DropdownMenuLabel>My Account</DropdownMenuLabel>
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem>
-						<Link href="/dashboard" className="w-full">
-							Dashboard
-						</Link>
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<ChangeThemeItem />
+			<DropdownMenuContent className="z-[100] mr-4 mt-4 w-32">
 				<DropdownMenuItem
 					onClick={() => {
 						if (onSignOut) {
@@ -173,7 +140,14 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 		return null;
 	}
 
-	return <UserAvatar user={user} onSignOut={handleSignOut} />;
+	return (
+		<>
+			<LinkButton variant="outline" href="/dashboard">
+				Dashboard
+			</LinkButton>
+			<UserAvatar user={user} onSignOut={handleSignOut} />
+		</>
+	);
 }
 
 export function UserSectionSkeleton() {
