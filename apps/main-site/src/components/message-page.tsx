@@ -34,6 +34,8 @@ import { getDate } from "@packages/ui/utils/snowflake";
 import type { FunctionReturnType } from "convex/server";
 import { Array as Arr, Predicate } from "effect";
 import { ExternalLink, MessageSquare } from "lucide-react";
+import { useQueryState } from "nuqs";
+import { useEffect } from "react";
 import { JsonLdScript } from "@/components/json-ld-script";
 
 type MessagePageData = NonNullable<
@@ -45,6 +47,16 @@ const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
 export function MessagePage(props: { data: MessagePageData }) {
 	const { data } = props;
 	const tenant = useTenant();
+	const [focusMessageId] = useQueryState("focus");
+
+	useEffect(() => {
+		if (focusMessageId) {
+			const element = document.getElementById(`message-${focusMessageId}`);
+			if (element) {
+				element.scrollIntoView({ behavior: "instant", block: "center" });
+			}
+		}
+	}, [focusMessageId]);
 
 	if (!data) {
 		return (
@@ -154,7 +166,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 					<div
 						className="text-green-700 dark:text-green-400"
 						key={message.message.id}
-						id={`solution-${message.message.id}`}
+						id={`message-${message.message.id}`}
 					>
 						Solution
 						<div
@@ -168,7 +180,11 @@ export function MessagePage(props: { data: MessagePageData }) {
 			}
 
 			return (
-				<div className="p-2" key={message.message.id}>
+				<div
+					className="p-2"
+					key={message.message.id}
+					id={`message-${message.message.id}`}
+				>
 					<ThinMessage
 						message={message}
 						op={message.author?.id === firstMessage.author?.id}
