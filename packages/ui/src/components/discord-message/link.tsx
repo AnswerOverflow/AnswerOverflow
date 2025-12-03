@@ -31,7 +31,9 @@ export function Link({
 			? `/m/${messageId}`
 			: isThread
 				? `/m/${channel.id}`
-				: undefined;
+				: channel.indexingEnabled
+					? `/c/${isInternalLink.guild.id}/${channel.id}`
+					: undefined;
 
 		const parentName = channel.parent?.name;
 		const channelName = channel.name;
