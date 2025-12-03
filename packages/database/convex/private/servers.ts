@@ -175,13 +175,34 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 		if (!server) {
 			return null;
 		}
-		const [allChannels, allSettings] = await Promise.all([
-			getManyFrom(ctx.db, "channels", "by_serverId", server.discordId),
-			getManyFrom(ctx.db, "channelSettings", "by_serverId", server.discordId),
-		]);
+
+		const rootChannelTypes = [
+			CHANNEL_TYPE.GuildText,
+			CHANNEL_TYPE.GuildAnnouncement,
+			CHANNEL_TYPE.GuildForum,
+		];
+
+		const channelsByType = await Promise.all(
+			rootChannelTypes.map((type) =>
+				ctx.db
+					.query("channels")
+					.withIndex("by_serverId_and_type", (q) =>
+						q.eq("serverId", server.discordId).eq("type", type),
+					)
+					.collect(),
+			),
+		);
+
+		const allChannels = channelsByType.flat();
+
+		const allSettings = await Promise.all(
+			allChannels.map((c) =>
+				getOneFrom(ctx.db, "channelSettings", "by_channelId", c.id),
+			),
+		);
 
 		const settingsByChannelId = new Map(
-			allSettings.map((s) => [s.channelId, s]),
+			Arr.filter(allSettings, Predicate.isNotNull).map((s) => [s.channelId, s]),
 		);
 
 		const channels = allChannels
@@ -193,7 +214,6 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 				},
 			}))
 			.filter((c) => c.flags.indexingEnabled)
-			.filter((c) => !isThreadType(c.type))
 			.sort((a, b) => {
 				if (a.type === CHANNEL_TYPE.GuildForum) return -1;
 				if (b.type === CHANNEL_TYPE.GuildForum) return 1;
