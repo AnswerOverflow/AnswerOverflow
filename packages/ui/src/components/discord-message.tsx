@@ -10,10 +10,11 @@ export type { EnrichedMessage };
 
 export type DiscordMessageProps = {
 	enrichedMessage: EnrichedMessage;
+	showCard?: boolean;
 };
 
 export function DiscordMessage(props: DiscordMessageProps) {
-	const { enrichedMessage } = props;
+	const { enrichedMessage, showCard = true } = props;
 
 	const componentProps: DiscordMessageComponentProps = {
 		message: enrichedMessage.message,
@@ -22,6 +23,7 @@ export function DiscordMessage(props: DiscordMessageProps) {
 		reactions: enrichedMessage.reactions,
 		solutions: enrichedMessage.solutions,
 		metadata: enrichedMessage.metadata,
+		showCard,
 	};
 
 	return <DiscordMessageComponent {...componentProps} />;

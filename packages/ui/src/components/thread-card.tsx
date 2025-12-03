@@ -76,7 +76,7 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 					aria-label={`Open message ${result.thread?.name || result.message.message.content?.slice(0, 30) || "Untitled thread"}`}
 				/>
 				<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto p-4">
-					<DiscordMessage enrichedMessage={result.message} />
+					<DiscordMessage enrichedMessage={result.message} showCard={false} />
 				</div>
 			</div>
 		</div>

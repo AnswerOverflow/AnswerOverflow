@@ -60,6 +60,7 @@ export type DiscordMessageProps = {
 	metadata?: MessageWithMetadata["metadata"];
 	poll?: MessageWithMetadata["poll"];
 	snapshot?: MessageWithMetadata["snapshot"];
+	showCard?: boolean;
 };
 
 export function DiscordMessage({
@@ -73,6 +74,7 @@ export function DiscordMessage({
 	metadata,
 	poll,
 	snapshot,
+	showCard = true,
 }: DiscordMessageProps) {
 	const messageDate = getSnowflakeDate(message.id.toString());
 
@@ -94,7 +96,11 @@ export function DiscordMessage({
 	};
 
 	return (
-		<div className="p-6 rounded-lg bg-card border border-border shadow-sm">
+		<div
+			className={
+				showCard ? "p-6 rounded-lg bg-card border border-border shadow-sm" : ""
+			}
+		>
 			<div className="flex items-center gap-3 mb-3">
 				{author ? (
 					<>
