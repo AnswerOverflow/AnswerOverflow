@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"paths": {
 			"@package/ui/*": ["./src/*"]
-		}
+		},
+		"outDir": "./dist"
 	},
 	"include": ["."],
 	"exclude": ["node_modules", "dist"]
