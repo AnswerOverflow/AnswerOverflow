@@ -2,7 +2,7 @@ import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 // biome-ignore lint/style/noRestrictedImports: Is fine since it's an internal mutation altho we should really make a better pattern i.e their own file
-import { internalMutation } from "../_generated/server";
+import { internalMutation, internalQuery } from "../_generated/server";
 import {
 	type MutationCtx,
 	privateMutation,
@@ -607,6 +607,104 @@ export const getMessagePageData = privateQuery({
 				inviteCode: channel.flags.inviteCode,
 			},
 			thread,
+		};
+	},
+});
+
+export const getThreadMessagePageInternal = internalQuery({
+	args: {
+		threadId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		const threadChannel = await getOneFrom(
+			ctx.db,
+			"channels",
+			"by_discordChannelId",
+			args.threadId,
+			"id",
+		);
+		if (!threadChannel || !threadChannel.parentId) {
+			return null;
+		}
+
+		const indexingEnabled = await isChannelIndexingEnabled(
+			ctx,
+			threadChannel.id,
+			threadChannel.parentId,
+		);
+		if (!indexingEnabled) {
+			return null;
+		}
+
+		const channel = await getChannelWithSettings(ctx, threadChannel.id);
+		if (!channel) {
+			return null;
+		}
+
+		let allMessages = await findMessagesByChannelId(ctx, threadChannel.id, {
+			limit: undefined,
+			startingFrom: undefined,
+		});
+
+		const threadStarterMessages = await ctx.db
+			.query("messages")
+			.withIndex("by_childThreadId", (q) =>
+				q.eq("childThreadId", threadChannel.id),
+			)
+			.collect();
+
+		const existingIds = new Set(allMessages.map((m) => m.id));
+		const newMessages = threadStarterMessages.filter(
+			(m) => !existingIds.has(m.id),
+		);
+		allMessages = [...allMessages, ...newMessages].sort((a, b) =>
+			compareIds(a.id, b.id),
+		);
+
+		const [enrichedMessages, server] = await Promise.all([
+			enrichMessages(ctx, allMessages),
+			getOneFrom(
+				ctx.db,
+				"servers",
+				"by_discordId",
+				threadChannel.serverId,
+				"discordId",
+			),
+		]);
+
+		if (!server) {
+			return null;
+		}
+
+		const serverPreferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			server.discordId,
+		);
+
+		return {
+			canonicalId: threadChannel.id,
+			messages: enrichedMessages,
+			rootMessageDeleted: false,
+			server: {
+				_id: server._id,
+				discordId: server.discordId,
+				name: server.name,
+				icon: server.icon,
+				description: server.description,
+				approximateMemberCount: server.approximateMemberCount,
+				customDomain: serverPreferences?.customDomain,
+				subpath: serverPreferences?.subpath,
+				vanityInviteCode: server.vanityInviteCode,
+			},
+			channel: {
+				id: channel.id,
+				name: channel.name,
+				type: channel.type,
+				inviteCode: channel.flags.inviteCode,
+			},
+			thread: threadChannel,
 		};
 	},
 });

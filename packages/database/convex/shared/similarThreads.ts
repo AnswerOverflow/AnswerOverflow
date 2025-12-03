@@ -1,32 +1,13 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import type { QueryCtx } from "../client";
 import { CHANNEL_TYPE, isChannelIndexingEnabled } from "./channels";
-import {
-	getFirstMessageInChannel,
-	findSolutionsByQuestionId,
-} from "./messages";
 
-export type SimilarThread = {
-	thread: {
-		id: bigint;
-		name: string;
-		serverId: bigint;
-	};
-	server: {
-		discordId: bigint;
-		name: string;
-		icon?: string;
-	};
-	channel: {
-		id: bigint;
-		name: string;
-	};
-	firstMessageId: bigint;
-	firstMessageContent: string;
-	hasSolution: boolean;
+export type SimilarThreadCandidate = {
+	threadId: bigint;
+	serverId: bigint;
 };
 
-export async function findSimilarThreads(
+export async function findSimilarThreadCandidates(
 	ctx: QueryCtx,
 	args: {
 		searchQuery: string;
@@ -35,7 +16,7 @@ export async function findSimilarThreads(
 		serverId?: bigint;
 		limit: number;
 	},
-): Promise<SimilarThread[]> {
+): Promise<SimilarThreadCandidate[]> {
 	const { searchQuery, currentThreadId, currentServerId, serverId, limit } =
 		args;
 
@@ -127,10 +108,10 @@ export async function findSimilarThreads(
 		return priorityA - priorityB;
 	});
 
-	const results: SimilarThread[] = [];
+	const candidates: SimilarThreadCandidate[] = [];
 
 	for (const threadIdStr of sortedThreadIds) {
-		if (results.length >= limit) break;
+		if (candidates.length >= limit * 2) break;
 
 		const threadId = BigInt(threadIdStr);
 
@@ -172,32 +153,11 @@ export async function findSimilarThreads(
 		);
 		if (!parentChannel) continue;
 
-		const firstMessage = await getFirstMessageInChannel(ctx, thread.id);
-		if (!firstMessage) continue;
-
-		const solutions = await findSolutionsByQuestionId(ctx, firstMessage.id, 1);
-		const hasSolution = solutions.length > 0;
-
-		results.push({
-			thread: {
-				id: thread.id,
-				name: thread.name,
-				serverId: thread.serverId,
-			},
-			server: {
-				discordId: server.discordId,
-				name: server.name,
-				icon: server.icon,
-			},
-			channel: {
-				id: parentChannel.id,
-				name: parentChannel.name,
-			},
-			firstMessageId: firstMessage.id,
-			firstMessageContent: firstMessage.content.slice(0, 200),
-			hasSolution,
+		candidates.push({
+			threadId: thread.id,
+			serverId: thread.serverId,
 		});
 	}
 
-	return results;
+	return candidates;
 }

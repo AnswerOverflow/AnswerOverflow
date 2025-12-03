@@ -182,7 +182,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 					<div
 						className="text-green-700 dark:text-green-400"
 						key={message.message.id}
-						id={`message-${message.message.id}`}
+						id={`solution-${message.message.id}`}
 					>
 						Solution
 						<div
