@@ -12,6 +12,7 @@
 		"build": "bun with-env next build",
 		"start": "bun with-env next start",
 		"typecheck": "tsgo --noEmit",
+		"typecheck:slow": "tsc --noEmit",
 		"clean": "rm -rf node_modules .next"
 	},
 	"dependencies": {

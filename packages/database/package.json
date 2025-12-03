@@ -18,6 +18,7 @@
 		"generate-function-types:watch": "chokidar \"convex/{public,authenticated,private}/**/*.ts\" -c \"bun run scripts/generate-function-types.ts\"",
 		"dev": "bun run scripts/dev.ts",
 		"typecheck": "tsgo -p convex/tsconfig.json --noEmit & tsgo -p tsconfig.json --noEmit & wait",
+		"typecheck:slow": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
 		"clean": "rm -rf node_modules .turbo",
 		"test": "vitest run --no-watch --pool=forks",
 		"test:watch": "vitest",
