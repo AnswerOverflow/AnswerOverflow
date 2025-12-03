@@ -2,13 +2,13 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCsrfToken, getSession } from 'next-auth/react';
 
 import { z } from 'zod';
-import { init } from '../../../../../../../node_modules/next-auth/core/init';
-import getAuthorizationUrl from '../../../../../../../node_modules/next-auth/core/lib/oauth/authorization-url';
-import { setCookie } from '../../../../../../../node_modules/next-auth/next/utils';
+import { init } from '../../../../../node_modules/next-auth/core/init';
+import getAuthorizationUrl from '../../../../../node_modules/next-auth/core/lib/oauth/authorization-url';
+import { setCookie } from '../../../../../node_modules/next-auth/next/utils';
 
-import { IncomingMessage } from 'http';
-import { NextAuthOptions } from 'next-auth';
-import { NextApiRequestCookies } from 'next/dist/server/api-utils';
+import type { IncomingMessage } from 'http';
+import type { NextAuthOptions } from 'next-auth';
+import type { NextApiRequestCookies } from 'next/dist/server/api-utils';
 
 import { randomUUID } from 'node:crypto';
 import { Auth } from '@answeroverflow/core/auth';
@@ -62,7 +62,7 @@ export default async function handler(
 		const redirect = await getServerSignInUrl(
 			req,
 			req.cookies,
-			Auth.authOptions, // your authOptions
+			Auth.authOptions as NextAuthOptions, // your authOptions
 		);
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		redirect.cookies?.forEach((cookie) => setCookie(res, cookie));

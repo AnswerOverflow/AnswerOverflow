@@ -1,13 +1,25 @@
+import { findDiscordAccountById } from '@answeroverflow/core/discord-account';
 import { DiscordAvatar } from '@answeroverflow/ui/discord-avatar';
 import { makeUserIconLink } from '@answeroverflow/ui/discord-avatar-utils';
 import { getDate } from '@answeroverflow/ui/utils/snowflake';
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { JsonLd } from 'react-schemaorg';
 import type { ProfilePage } from 'schema-dts';
-import { Props, getUserPageData } from './components';
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-	const { userInfo } = await getUserPageData(props);
+type LayoutProps = {
+	params: Promise<{ userId: string }>;
+};
+
+async function getUserInfoForLayout(params: Promise<{ userId: string }>) {
+	const { userId } = await params;
+	const userInfo = await findDiscordAccountById(userId);
+	if (!userInfo) return notFound();
+	return userInfo;
+}
+
+export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
+	const userInfo = await getUserInfoForLayout(props.params);
 	return {
 		title: `${userInfo.name} Posts - Answer Overflow`,
 		description: `See posts from ${userInfo.name} on Answer Overflow`,
@@ -26,13 +38,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function Layout(props: {
 	children: React.ReactNode;
-	params: { userId: string };
-	searchParams: { s?: string };
+	params: Promise<{ userId: string }>;
 }) {
-	const { userInfo } = await getUserPageData({
-		params: new Promise((resolve) => resolve({ userId: props.params.userId })),
-		searchParams: new Promise((resolve) => resolve(props.searchParams)),
-	});
+	const userInfo = await getUserInfoForLayout(props.params);
 	return (
 		<main className="flex w-full justify-center pt-4">
 			<JsonLd<ProfilePage>
