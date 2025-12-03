@@ -5,11 +5,12 @@ import {
 	DiscordAvatar,
 	type DiscordUser,
 } from "@packages/ui/components/discord-avatar";
+import { EmptyStateCard } from "@packages/ui/components/empty";
 import { LinkButton } from "@packages/ui/components/link-button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ThreadCard } from "@packages/ui/components/thread-card";
+import { Inbox } from "lucide-react";
 import type { ReactNode } from "react";
-import { GiSpiderWeb } from "react-icons/gi";
 
 export type ServerInfo = {
 	id: string;
@@ -105,10 +106,12 @@ export function UserTabs({
 
 export function EmptyState({ message }: { message: string }) {
 	return (
-		<div className="flex flex-row items-center justify-start gap-4 py-8">
-			<GiSpiderWeb size={64} className="text-muted-foreground" />
-			<span className="text-xl">{message}</span>
-		</div>
+		<EmptyStateCard
+			icon={Inbox}
+			title={message}
+			description=""
+			className="min-h-0 py-8"
+		/>
 	);
 }
 

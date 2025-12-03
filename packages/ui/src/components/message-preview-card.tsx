@@ -26,7 +26,11 @@ export function MessagePreviewCardBody({
 			/>
 			<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto p-4">
 				<div className="relative max-h-64 overflow-hidden [mask-image:linear-gradient(to_bottom,black_0,black_12rem,transparent_16rem)]">
-					<DiscordMessage enrichedMessage={enrichedMessage} showCard={false} />
+					<DiscordMessage
+						enrichedMessage={enrichedMessage}
+						showCard={false}
+						hideSolutions
+					/>
 				</div>
 			</div>
 		</div>
