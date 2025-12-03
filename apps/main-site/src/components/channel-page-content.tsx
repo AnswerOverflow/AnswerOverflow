@@ -147,7 +147,7 @@ export function ChannelPageContent({
 
 				<div className="flex gap-8">
 					<aside className="hidden md:block w-60 shrink-0">
-						<div className="sticky top-8">
+						<div className="sticky top-[calc(var(--navbar-height)+1rem)]">
 							<div className="mb-4">
 								<h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
 									Channels

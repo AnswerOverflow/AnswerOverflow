@@ -500,7 +500,7 @@ export default function ChannelsPage() {
 				<div className="mx-auto max-w-[1200px] w-full">
 					<div className="flex gap-6">
 						{/* Sidebar with channel selection */}
-						<div className="hidden lg:flex w-80 shrink-0 flex-col border rounded-lg sticky top-6 self-start max-h-[calc(100vh-8rem)]">
+						<div className="hidden lg:flex w-80 shrink-0 flex-col border rounded-lg sticky top-[calc(var(--navbar-height)+1.5rem)] self-start max-h-[calc(100vh-var(--navbar-height)-3rem)]">
 							<div className="flex-1 overflow-y-auto p-2 min-h-0">
 								<div className="space-y-1">
 									<div className="flex items-center gap-2 pl-2 mb-1">
