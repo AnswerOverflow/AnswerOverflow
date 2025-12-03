@@ -15,14 +15,15 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { DashboardProvider } from './components/dashboard-context';
 import { demoServerData } from './components/mock';
 import { ServerSelectDropdown } from './components/navbar';
 export default function Layout(props: {
 	children?: React.ReactNode;
-	params: { serverId: string };
+	params: Promise<{ serverId: string }>;
 }) {
+	const params = use(props.params);
 	const [toFrom, setToFrom] = useState<{
 		from: Date;
 		to: Date;
@@ -32,38 +33,34 @@ export default function Layout(props: {
 	});
 	const dashboardPaths = [
 		{
-			path: `/dashboard/${props.params.serverId}`,
+			path: `/dashboard/${params.serverId}`,
 			label: 'Home',
 			icon: <HomeIcon className="size-5" />,
 		},
 		{
-			path: `/dashboard/${props.params.serverId}/integrations`,
+			path: `/dashboard/${params.serverId}/integrations`,
 			label: 'Integrations',
 			icon: <PuzzleIcon className="size-5" />,
 		},
 		{
-			path: `/dashboard/${props.params.serverId}/settings`,
+			path: `/dashboard/${params.serverId}/settings`,
 			label: 'Settings',
 			icon: <CogIcon className="size-5" />,
 		},
 		{
-			path: `/dashboard/${props.params.serverId}/channels`,
+			path: `/dashboard/${params.serverId}/channels`,
 			label: 'Channels',
 			icon: <HashIcon className="size-5" />,
 		},
 	];
 	const router = useRouter();
-	const { data } = trpc.dashboard.fetchDashboardById.useQuery(
-		props.params.serverId,
-		{
-			initialData:
-				props.params.serverId === '1000' ? demoServerData : undefined,
-			onError: (err) => {
-				console.error(err);
-				router.push('/');
-			},
+	const { data } = trpc.dashboard.fetchDashboardById.useQuery(params.serverId, {
+		initialData: params.serverId === '1000' ? demoServerData : undefined,
+		onError: (err) => {
+			console.error(err);
+			router.push('/');
 		},
-	);
+	});
 	if (!data) {
 		return null;
 	}

@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth';
+import NextAuth, { type AuthOptions } from 'next-auth';
 
 import { isOnMainSite } from '@answeroverflow/constants/links';
 import { Auth } from '@answeroverflow/core/auth';
@@ -16,5 +16,6 @@ export default async function handler(
 	if (!isOnMainSite(req.headers.host!)) {
 		Auth.disableSettingCookies(res);
 	}
-	await NextAuth(req, res, Auth.authOptions);
+	// Type assertion needed due to multiple next-auth versions in node_modules
+	await NextAuth(req, res, Auth.authOptions as AuthOptions);
 }
