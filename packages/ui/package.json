@@ -67,14 +67,10 @@
 		"react-resizable-panels": "^3.0.6",
 		"react-virtuoso": "^4.14.1",
 		"recharts": "^3.5.1",
-		"remark-gfm": "^4.0.1",
 		"shiki": "^3.12.2",
-		"simple-markdown": "^0.7.3",
 		"sonner": "^2.0.7",
-		"streamdown": "^1.4.0",
 		"tailwind-merge": "^3.3.1",
 		"tw-animate-css": "^1.3.6",
-		"unist-util-visit": "^5.0.0",
 		"vaul": "^1.1.2"
 	},
 	"devDependencies": {
@@ -105,7 +101,6 @@
 		"./hooks/*": "./src/hooks/*.ts",
 		"./utils/*": "./src/utils/*.ts",
 		"./icons/index": "./src/icons/index.tsx",
-		"./markdown": "./src/markdown/index.tsx",
 		"./markdown/render/code-block": "./src/markdown/render/code-block.tsx",
 		"./analytics": "./src/analytics/index.ts"
 	}
