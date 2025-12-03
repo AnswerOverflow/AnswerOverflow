@@ -207,22 +207,19 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 		if (!server) {
 			return null;
 		}
-		const allChannels = await getManyFrom(
-			ctx.db,
-			"channels",
-			"by_serverId",
-			server.discordId,
-		);
+		const [allChannels, allSettings] = await Promise.all([
+			getManyFrom(ctx.db, "channels", "by_serverId", server.discordId),
+			getManyFrom(ctx.db, "channelSettings", "by_serverId", server.discordId),
+		]);
 
-		const channelIds = allChannels.map((c) => c.id);
-		const allSettings = await asyncMap(channelIds, (id) =>
-			getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
+		const settingsByChannelId = new Map(
+			allSettings.map((s) => [s.channelId, s]),
 		);
 
 		const channels = allChannels
-			.map((c, idx) => ({
+			.map((c) => ({
 				...c,
-				flags: allSettings[idx] ?? {
+				flags: settingsByChannelId.get(c.id) ?? {
 					...DEFAULT_CHANNEL_SETTINGS,
 					channelId: c.id,
 				},

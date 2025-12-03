@@ -31,6 +31,7 @@
 		"@better-auth/stripe": "^1.4.2",
 		"@convex-dev/action-cache": "^0.3.0",
 		"@convex-dev/better-auth": "catalog:",
+		"@convex-dev/migrations": "^0.3.1",
 		"@effect-aws/client-s3": "^1.10.6",
 		"@effect/ai": "^0.32.1",
 		"@effect/platform": "catalog:",
