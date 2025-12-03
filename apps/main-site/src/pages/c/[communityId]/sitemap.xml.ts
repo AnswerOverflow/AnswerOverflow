@@ -31,4 +31,6 @@ export async function getServerSideProps({
 	};
 }
 
-export default getServerSideProps;
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export default function SitemapPage() {}
+SitemapPage.getLayout = () => null;
