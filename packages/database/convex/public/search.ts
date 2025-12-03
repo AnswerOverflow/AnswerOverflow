@@ -2,13 +2,11 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
-import { internal } from "../_generated/api";
 import { isChannelIndexingEnabled } from "../shared/channels";
 import {
 	enrichedMessageWithServerAndChannels,
 	searchMessages,
 } from "../shared/dataAccess";
-import { findSolutionsByQuestionId } from "../shared/messages";
 import {
 	CHANNEL_TYPE,
 	getDiscordAccountById,
@@ -428,59 +426,24 @@ export const getSimilarThreads = publicQuery({
 			limit,
 		});
 
-		const results: Array<{
-			thread: { id: string; name: string; serverId: string };
-			server: { discordId: string; name: string; icon?: string };
-			channel: { id: string; name: string };
-			firstMessageId: string;
-			firstMessageContent: string;
-			hasSolution: boolean;
-		}> = [];
-
-		for (const candidate of candidates) {
-			if (results.length >= limit) break;
-
-			const messagePage = await ctx.runQuery(
-				internal.private.messages.getThreadMessagePageInternal,
-				{ threadId: candidate.threadId },
-			);
-
-			if (!messagePage || messagePage.messages.length === 0) continue;
-
-			const firstEnrichedMessage = messagePage.messages[0];
-			if (!firstEnrichedMessage) continue;
-
-			const firstMessage = firstEnrichedMessage.message;
-
-			const solutions = await findSolutionsByQuestionId(
-				ctx,
-				firstMessage.id,
-				1,
-			);
-			const hasSolution = solutions.length > 0;
-
-			results.push({
-				thread: {
-					id:
-						messagePage.thread?.id.toString() ?? candidate.threadId.toString(),
-					name: messagePage.thread?.name ?? "",
-					serverId: candidate.serverId.toString(),
-				},
-				server: {
-					discordId: messagePage.server.discordId.toString(),
-					name: messagePage.server.name,
-					icon: messagePage.server.icon,
-				},
-				channel: {
-					id: messagePage.channel.id.toString(),
-					name: messagePage.channel.name,
-				},
-				firstMessageId: firstMessage.id.toString(),
-				firstMessageContent: firstMessage.content.slice(0, 200),
-				hasSolution,
-			});
-		}
-
-		return results;
+		return candidates.map((candidate) => ({
+			thread: {
+				id: candidate.thread.id.toString(),
+				name: candidate.thread.name,
+				serverId: candidate.thread.serverId.toString(),
+			},
+			server: {
+				discordId: candidate.server.discordId.toString(),
+				name: candidate.server.name,
+				icon: candidate.server.icon,
+			},
+			channel: {
+				id: candidate.channel.id.toString(),
+				name: candidate.channel.name,
+			},
+			firstMessageId: candidate.firstMessageId.toString(),
+			firstMessageContent: candidate.firstMessageContent,
+			hasSolution: candidate.hasSolution,
+		}));
 	},
 });
