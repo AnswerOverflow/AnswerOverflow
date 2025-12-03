@@ -5,6 +5,7 @@ import { Hash, MessageSquare } from "lucide-react";
 import { DiscordMessage } from "./discord-message";
 import { ThreadIcon } from "./discord-message/mention";
 import { Link } from "./link";
+import { MessagePreviewCardBody } from "./message-preview-card";
 import { ServerIcon } from "./server-icon";
 import { Skeleton } from "./skeleton";
 
@@ -69,18 +70,11 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 					)}
 				</div>
 			</div>
-			<div className="group relative hover:bg-accent/50 transition-colors">
-				<Link
-					href={`/m/${result.message.message.id}`}
-					className="absolute inset-0 z-0"
-					aria-label={`Open message ${result.thread?.name || result.message.message.content?.slice(0, 30) || "Untitled thread"}`}
-				/>
-				<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto p-4">
-					<div className="relative max-h-64 overflow-hidden [mask-image:linear-gradient(to_bottom,black_0,black_12rem,transparent_16rem)]">
-						<DiscordMessage enrichedMessage={result.message} showCard={false} />
-					</div>
-				</div>
-			</div>
+			<MessagePreviewCardBody
+				enrichedMessage={result.message}
+				href={`/m/${result.message.message.id}`}
+				ariaLabel={`Open message ${result.thread?.name || result.message.message.content?.slice(0, 30) || "Untitled thread"}`}
+			/>
 		</div>
 	);
 }

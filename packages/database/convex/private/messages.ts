@@ -246,21 +246,18 @@ export const getTotalMessageCount = privateQuery({
 	},
 });
 
-// TODO: Probably use analytics from PostHog for this instead
 export const getTopQuestionSolversByServerId = privateQuery({
 	args: {
 		serverId: v.int64(),
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
-		const allMessages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_serverId",
-			args.serverId,
-		);
-
-		const solutions = allMessages.filter((msg) => msg.questionId !== undefined);
+		const solutions = await ctx.db
+			.query("messages")
+			.withIndex("by_serverId_and_questionId", (q) =>
+				q.eq("serverId", args.serverId).gt("questionId", 0n),
+			)
+			.collect();
 
 		const solutionCounts = new Map<bigint, number>();
 		for (const solution of solutions) {

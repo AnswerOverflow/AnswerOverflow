@@ -74,8 +74,9 @@ export const getBrowseServers = privateQuery({
 		for (const server of nonKickedServers) {
 			const hasIndexingEnabled = await ctx.db
 				.query("channelSettings")
-				.withIndex("by_serverId", (q) => q.eq("serverId", server.discordId))
-				.filter((q) => q.eq(q.field("indexingEnabled"), true))
+				.withIndex("by_serverId_and_indexingEnabled", (q) =>
+					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+				)
 				.first();
 
 			if (hasIndexingEnabled) {

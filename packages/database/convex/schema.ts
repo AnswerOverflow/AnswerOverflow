@@ -249,11 +249,13 @@ export default defineSchema({
 	channelSettings: defineTable(channelSettingsSchema)
 		.index("by_channelId", ["channelId"])
 		.index("by_serverId", ["serverId"])
+		.index("by_serverId_and_indexingEnabled", ["serverId", "indexingEnabled"])
 		.index("by_inviteCode", ["inviteCode"]),
 	messages: defineTable(messageSchema)
 		.index("by_messageId", ["id"])
 		.index("by_authorId", ["authorId"])
 		.index("by_serverId", ["serverId"])
+		.index("by_serverId_and_questionId", ["serverId", "questionId"])
 		.index("by_channelId", ["channelId"])
 		.index("by_questionId", ["questionId"])
 		.index("by_parentChannelId", ["parentChannelId"])
