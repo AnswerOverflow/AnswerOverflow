@@ -281,7 +281,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 	);
 
 	const Sidebar = () => (
-		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:w-[400px]">
+		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:sticky md:top-4 md:self-start md:w-[400px]">
 			<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block">
 				<div className="flex flex-col items-start gap-4 p-4">
 					<div className="flex w-full flex-row items-center justify-between truncate font-bold">

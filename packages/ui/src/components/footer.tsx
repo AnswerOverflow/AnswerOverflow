@@ -29,41 +29,34 @@ const getNavigation = (baseUrl: string): NavigationData => ({
 	main: [
 		{
 			category: {
+				name: "Product",
+				data: [
+					{ name: "Pricing", href: `${baseUrl}/pricing` },
+					{ name: "Docs", href: "https://docs.answeroverflow.com" },
+					{ name: "Communities", href: `${baseUrl}/browse` },
+					{ name: "All Posts", href: `${baseUrl}/posts` },
+				],
+			},
+		},
+		{
+			category: {
+				name: "Resources",
+				data: [
+					{ name: "About", href: `${baseUrl}/about` },
+					{ name: "Blog", href: `${baseUrl}/blog` },
+					{ name: "Changelog", href: `${baseUrl}/changelog` },
+					{ name: "Contributors", href: `${baseUrl}/contributors` },
+				],
+			},
+		},
+		{
+			category: {
 				name: "Legal",
 				data: [
 					{ name: "Terms", href: `${baseUrl}/tos` },
 					{ name: "Privacy", href: `${baseUrl}/privacy` },
 					{ name: "Cookies", href: `${baseUrl}/cookies` },
 					{ name: "EULA", href: `${baseUrl}/eula` },
-				],
-			},
-		},
-		{
-			category: {
-				name: "About",
-				data: [
-					{ name: "Docs", href: "https://docs.answeroverflow.com" },
-					{ name: "Pricing", href: `${baseUrl}/pricing` },
-					{
-						name: "About",
-						href: `${baseUrl}/about`,
-					},
-					{
-						name: "Contributors",
-						href: `${baseUrl}/contributors`,
-					},
-					{
-						name: "Communities",
-						href: `${baseUrl}/browse`,
-					},
-					{
-						name: "Changelog",
-						href: `${baseUrl}/changelog`,
-					},
-					{
-						name: "All Posts",
-						href: `${baseUrl}/posts`,
-					},
 				],
 			},
 		},
@@ -102,7 +95,7 @@ const MainSiteFooter = () => {
 				className="-mb-6 columns-1 text-center sm:flex sm:columns-2 sm:justify-center sm:space-x-12"
 				aria-label="Footer"
 			>
-				<div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-24">
+				<div className="grid grid-cols-1 gap-12 sm:grid-cols-3 sm:gap-16">
 					{navigation.main.map((category) => {
 						return (
 							<div

@@ -50,7 +50,7 @@ export default function DashboardLayout({
 			: undefined;
 
 	return (
-		<DashboardNavbar serverSelect={serverSelectProps} homeHref="/dashboard">
+		<DashboardNavbar serverSelect={serverSelectProps}>
 			{children}
 		</DashboardNavbar>
 	);
