@@ -549,24 +549,25 @@ export const getMessagePageData = privateQuery({
 			: null;
 
 		let allMessages = await findMessagesByChannelId(ctx, channelId, {
-			limit: threadId ? undefined : 50,
+			limit: threadId ? 1000 : 50,
 			startingFrom:
 				threadId || rootMessageDeleted ? undefined : targetMessage?.id,
 		});
 
 		if (threadId) {
+			// todo: this is maybe bad
 			const threadStarterMessages = await ctx.db
 				.query("messages")
 				.withIndex("by_childThreadId", (q) => q.eq("childThreadId", threadId))
-				.collect();
+				.take(1000);
 
 			const existingIds = new Set(allMessages.map((m) => m.id));
 			const newMessages = threadStarterMessages.filter(
 				(m) => !existingIds.has(m.id),
 			);
-			allMessages = [...allMessages, ...newMessages].sort((a, b) =>
-				compareIds(a.id, b.id),
-			);
+			allMessages = [...allMessages, ...newMessages]
+				.sort((a, b) => compareIds(a.id, b.id))
+				.slice(0, 1000);
 		}
 
 		const [enrichedMessages, server] = await Promise.all([
