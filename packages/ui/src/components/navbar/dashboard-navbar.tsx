@@ -3,7 +3,7 @@
 import { PanelLeftIcon } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
-import { AnswerOverflowIcon } from "../answer-overflow-icon";
+import { AnswerOverflowLogo } from "../answer-overflow-logo";
 import { Button } from "../button";
 import {
 	ServerSelectDropdown,
@@ -35,7 +35,7 @@ export interface DashboardNavbarProps {
 
 export function DashboardNavbar({
 	serverSelect,
-	homeHref = "/dashboard",
+	homeHref = "/",
 	children,
 }: DashboardNavbarProps) {
 	const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
@@ -58,9 +58,9 @@ export function DashboardNavbar({
 						<PanelLeftIcon className="h-5 w-5" />
 					</Button>
 
-					{/* Icon */}
+					{/* Logo */}
 					<Link href={homeHref} className="hidden lg:flex items-center">
-						<AnswerOverflowIcon size={32} />
+						<AnswerOverflowLogo width={160} />
 						<span className="sr-only">Answer Overflow</span>
 					</Link>
 
