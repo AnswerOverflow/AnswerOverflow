@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { authClient, useSession } from "../convex-client-provider";
 import {
@@ -90,7 +90,9 @@ function SignInButton({
 
 export function UserSection({ showSignIn = true }: UserSectionProps) {
 	const router = useRouter();
+	const pathname = usePathname();
 	const { data: session, refetch } = useSession({ allowAnonymous: false });
+	const isOnDashboard = pathname?.startsWith("/dashboard");
 
 	const handleSignIn = async () => {
 		if (
@@ -142,9 +144,11 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 
 	return (
 		<>
-			<LinkButton variant="outline" href="/dashboard">
-				Dashboard
-			</LinkButton>
+			{!isOnDashboard && (
+				<LinkButton variant="outline" href="/dashboard">
+					Dashboard
+				</LinkButton>
+			)}
 			<UserAvatar user={user} onSignOut={handleSignOut} />
 		</>
 	);
