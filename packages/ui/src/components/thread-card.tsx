@@ -2,7 +2,6 @@
 
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { Hash, MessageSquare } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { DiscordMessage } from "./discord-message";
 import { ThreadIcon } from "./discord-message/mention";
 import { Link } from "./link";
@@ -18,18 +17,6 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 	const ChannelIcon = result.channel
 		? getChannelIcon(result.channel.type)
 		: Hash;
-
-	const contentRef = useRef<HTMLDivElement>(null);
-	const [showFade, setShowFade] = useState(false);
-
-	useEffect(() => {
-		const el = contentRef.current;
-		if (el) {
-			const maxHeight = 256;
-			const threshold = maxHeight * 0.75;
-			setShowFade(el.scrollHeight > threshold);
-		}
-	}, []);
 
 	return (
 		<div className="rounded-lg border border-border bg-card overflow-hidden mb-4">
@@ -89,20 +76,7 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 					aria-label={`Open message ${result.thread?.name || result.message.message.content?.slice(0, 30) || "Untitled thread"}`}
 				/>
 				<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto p-4">
-					<div
-						ref={contentRef}
-						className="relative max-h-64 overflow-hidden"
-						style={
-							showFade
-								? {
-										maskImage:
-											"linear-gradient(to bottom, black calc(100% - 4rem), transparent 100%)",
-										WebkitMaskImage:
-											"linear-gradient(to bottom, black calc(100% - 4rem), transparent 100%)",
-									}
-								: undefined
-						}
-					>
+					<div className="relative max-h-64 overflow-hidden [mask-image:linear-gradient(to_bottom,black_0,black_12rem,transparent_16rem)]">
 						<DiscordMessage enrichedMessage={result.message} showCard={false} />
 					</div>
 				</div>
