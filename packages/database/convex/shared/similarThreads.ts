@@ -1,10 +1,30 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import type { QueryCtx } from "../client";
 import { CHANNEL_TYPE, isChannelIndexingEnabled } from "./channels";
+import { isMessagePublic } from "./messagePrivacy";
+import {
+	getFirstMessageInChannel,
+	findSolutionsByQuestionId,
+} from "./messages";
 
 export type SimilarThreadCandidate = {
-	threadId: bigint;
-	serverId: bigint;
+	thread: {
+		id: bigint;
+		name: string;
+		serverId: bigint;
+	};
+	server: {
+		discordId: bigint;
+		name: string;
+		icon?: string;
+	};
+	channel: {
+		id: bigint;
+		name: string;
+	};
+	firstMessageId: bigint;
+	firstMessageContent: string;
+	hasSolution: boolean;
 };
 
 export async function findSimilarThreadCandidates(
@@ -24,29 +44,30 @@ export async function findSimilarThreadCandidates(
 		return [];
 	}
 
-	const threadsByName = await ctx.db
-		.query("channels")
-		.withSearchIndex("search_name", (q) => {
-			const search = q
-				.search("name", searchQuery)
-				.eq("type", CHANNEL_TYPE.PublicThread);
-			if (serverId) {
-				return search.eq("serverId", serverId);
-			}
-			return search;
-		})
-		.take(limit * 3);
-
-	const messageResults = await ctx.db
-		.query("messages")
-		.withSearchIndex("search_content", (q) => {
-			const search = q.search("content", searchQuery);
-			if (serverId) {
-				return search.eq("serverId", serverId);
-			}
-			return search;
-		})
-		.take(limit * 3);
+	const [threadsByName, messageResults] = await Promise.all([
+		ctx.db
+			.query("channels")
+			.withSearchIndex("search_name", (q) => {
+				const search = q
+					.search("name", searchQuery)
+					.eq("type", CHANNEL_TYPE.PublicThread);
+				if (serverId) {
+					return search.eq("serverId", serverId);
+				}
+				return search;
+			})
+			.take(limit * 4),
+		ctx.db
+			.query("messages")
+			.withSearchIndex("search_content", (q) => {
+				const search = q.search("content", searchQuery);
+				if (serverId) {
+					return search.eq("serverId", serverId);
+				}
+				return search;
+			})
+			.take(limit * 4),
+	]);
 
 	const threadIdsFromMessages = new Set<string>();
 	const messageThreadMap = new Map<string, bigint>();
@@ -108,11 +129,9 @@ export async function findSimilarThreadCandidates(
 		return priorityA - priorityB;
 	});
 
-	const candidates: SimilarThreadCandidate[] = [];
-
-	for (const threadIdStr of sortedThreadIds) {
-		if (candidates.length >= limit * 2) break;
-
+	const processCandidate = async (
+		threadIdStr: string,
+	): Promise<SimilarThreadCandidate | null> => {
 		const threadId = BigInt(threadIdStr);
 
 		const cachedThread = threadsByName.find((t) => t.id === threadId);
@@ -126,37 +145,91 @@ export async function findSimilarThreadCandidates(
 				"id",
 			));
 
-		if (!thread || !thread.parentId) continue;
+		if (!thread || !thread.parentId) return null;
 
-		const indexingEnabled = await isChannelIndexingEnabled(
-			ctx,
-			thread.id,
-			thread.parentId,
-		);
-		if (!indexingEnabled) continue;
+		const [indexingEnabled, server, parentChannel, firstMessage] =
+			await Promise.all([
+				isChannelIndexingEnabled(ctx, thread.id, thread.parentId),
+				getOneFrom(
+					ctx.db,
+					"servers",
+					"by_discordId",
+					thread.serverId,
+					"discordId",
+				),
+				getOneFrom(
+					ctx.db,
+					"channels",
+					"by_discordChannelId",
+					thread.parentId,
+					"id",
+				),
+				getFirstMessageInChannel(ctx, thread.id),
+			]);
 
-		const server = await getOneFrom(
-			ctx.db,
-			"servers",
-			"by_discordId",
+		if (!indexingEnabled) return null;
+		if (!server || server.kickedTime) return null;
+		if (!parentChannel) return null;
+		if (!firstMessage) return null;
+
+		const [serverPreferences, userServerSettings, solutions] =
+			await Promise.all([
+				getOneFrom(ctx.db, "serverPreferences", "by_serverId", thread.serverId),
+				ctx.db
+					.query("userServerSettings")
+					.withIndex("by_userId_serverId", (q) =>
+						q
+							.eq("userId", firstMessage.authorId)
+							.eq("serverId", thread.serverId),
+					)
+					.first(),
+				findSolutionsByQuestionId(ctx, firstMessage.id, 1),
+			]);
+
+		const isPublic = isMessagePublic(
+			serverPreferences,
+			userServerSettings ?? null,
 			thread.serverId,
-			"discordId",
 		);
-		if (!server || server.kickedTime) continue;
+		if (!isPublic) return null;
 
-		const parentChannel = await getOneFrom(
-			ctx.db,
-			"channels",
-			"by_discordChannelId",
-			thread.parentId,
-			"id",
-		);
-		if (!parentChannel) continue;
+		return {
+			thread: {
+				id: thread.id,
+				name: thread.name,
+				serverId: thread.serverId,
+			},
+			server: {
+				discordId: server.discordId,
+				name: server.name,
+				icon: server.icon,
+			},
+			channel: {
+				id: parentChannel.id,
+				name: parentChannel.name,
+			},
+			firstMessageId: firstMessage.id,
+			firstMessageContent: firstMessage.content.slice(0, 200),
+			hasSolution: solutions.length > 0,
+		};
+	};
 
-		candidates.push({
-			threadId: thread.id,
-			serverId: thread.serverId,
-		});
+	const candidates: SimilarThreadCandidate[] = [];
+	const batchSize = limit;
+	let offset = 0;
+
+	while (candidates.length < limit && offset < sortedThreadIds.length) {
+		const batch = sortedThreadIds.slice(offset, offset + batchSize);
+		const results = await Promise.all(batch.map(processCandidate));
+
+		for (const result of results) {
+			if (result !== null) {
+				candidates.push(result);
+				if (candidates.length >= limit) break;
+			}
+		}
+
+		offset += batchSize;
 	}
 
 	return candidates;
