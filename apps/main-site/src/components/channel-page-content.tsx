@@ -3,7 +3,7 @@
 import type { api } from "@packages/database/convex/_generated/api";
 import { Button } from "@packages/ui/components/button";
 import { Link } from "@packages/ui/components/link";
-import { MessageBody } from "@packages/ui/components/message-body";
+import { MessagePreviewCard } from "@packages/ui/components/message-preview-card";
 import {
 	Sheet,
 	SheetContent,
@@ -23,26 +23,6 @@ type ChannelPageData = NonNullable<
 function getChannelIcon(type: number) {
 	if (type === 15) return MessageSquare;
 	return Hash;
-}
-
-function getSnowflakeDate(snowflake: bigint): Date {
-	const timestamp = snowflake >> 22n;
-	return new Date(Number(timestamp) + 1420070400000);
-}
-
-function formatRelativeTime(date: Date): string {
-	const now = new Date();
-	const diffMs = now.getTime() - date.getTime();
-	const diffSecs = Math.floor(diffMs / 1000);
-	const diffMins = Math.floor(diffSecs / 60);
-	const diffHours = Math.floor(diffMins / 60);
-	const diffDays = Math.floor(diffHours / 24);
-
-	if (diffSecs < 60) return "just now";
-	if (diffMins < 60) return `${diffMins}m ago`;
-	if (diffHours < 24) return `${diffHours}h ago`;
-	if (diffDays < 7) return `${diffDays}d ago`;
-	return date.toLocaleDateString();
 }
 
 function MobileChannelSelector({
@@ -205,35 +185,15 @@ export function ChannelPageContent({
 								No threads found in this channel
 							</div>
 						) : (
-							<div className="space-y-3">
-								{threads.map(({ thread, message }) => {
-									const messageDate = getSnowflakeDate(message.message.id);
-									const formattedDate = formatRelativeTime(messageDate);
-									return (
-										<Link
-											key={thread.id.toString()}
-											href={`/m/${message.message.id.toString()}`}
-											className="block rounded-lg border border-border bg-card p-4 md:p-5 transition-all hover:border-sidebar-border hover:bg-accent/50"
-										>
-											<div className="flex flex-col gap-2">
-												<div className="flex items-start justify-between gap-2">
-													<h3 className="font-semibold text-card-foreground line-clamp-2 text-sm md:text-base">
-														{thread.name}
-													</h3>
-													<div className="text-xs text-muted-foreground shrink-0">
-														{formattedDate}
-													</div>
-												</div>
-												<div className="text-sm">
-													<MessageBody
-														message={message}
-														collapseContent={true}
-													/>
-												</div>
-											</div>
-										</Link>
-									);
-								})}
+							<div className="space-y-4">
+								{threads.map(({ thread, message }) => (
+									<MessagePreviewCard
+										key={thread.id.toString()}
+										enrichedMessage={message}
+										href={`/m/${message.message.id.toString()}`}
+										ariaLabel={`Open thread: ${thread.name}`}
+									/>
+								))}
 							</div>
 						)}
 					</div>
