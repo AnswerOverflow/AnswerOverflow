@@ -2,6 +2,7 @@
 
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { Hash, MessageSquare } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { DiscordMessage } from "./discord-message";
 import { ThreadIcon } from "./discord-message/mention";
 import { Link } from "./link";
@@ -17,6 +18,18 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 	const ChannelIcon = result.channel
 		? getChannelIcon(result.channel.type)
 		: Hash;
+
+	const contentRef = useRef<HTMLDivElement>(null);
+	const [showFade, setShowFade] = useState(false);
+
+	useEffect(() => {
+		const el = contentRef.current;
+		if (el) {
+			const maxHeight = 256;
+			const threshold = maxHeight * 0.75;
+			setShowFade(el.scrollHeight > threshold);
+		}
+	}, []);
 
 	return (
 		<div className="rounded-lg border border-border bg-card overflow-hidden mb-4">
@@ -69,14 +82,29 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 					)}
 				</div>
 			</div>
-			<div className="relative hover:bg-accent/50 transition-colors">
+			<div className="group relative hover:bg-accent/50 transition-colors">
 				<Link
 					href={`/m/${result.message.message.id}`}
 					className="absolute inset-0 z-0"
 					aria-label={`Open message ${result.thread?.name || result.message.message.content?.slice(0, 30) || "Untitled thread"}`}
 				/>
 				<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto p-4">
-					<DiscordMessage enrichedMessage={result.message} showCard={false} />
+					<div
+						ref={contentRef}
+						className="relative max-h-64 overflow-hidden"
+						style={
+							showFade
+								? {
+										maskImage:
+											"linear-gradient(to bottom, black calc(100% - 4rem), transparent 100%)",
+										WebkitMaskImage:
+											"linear-gradient(to bottom, black calc(100% - 4rem), transparent 100%)",
+									}
+								: undefined
+						}
+					>
+						<DiscordMessage enrichedMessage={result.message} showCard={false} />
+					</div>
 				</div>
 			</div>
 		</div>
