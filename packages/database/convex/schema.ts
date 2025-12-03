@@ -240,10 +240,12 @@ export default defineSchema({
 	),
 	channels: defineTable(channelSchema)
 		.index("by_serverId", ["serverId"])
+		.index("by_serverId_and_type", ["serverId", "type"])
 		.index("by_type", ["type"])
 		.index("by_type_and_id", ["type", "id"])
 		.index("by_discordChannelId", ["id"])
-		.index("by_parentId", ["parentId"]),
+		.index("by_parentId", ["parentId"])
+		.index("by_parentId_and_id", ["parentId", "id"]),
 	channelSettings: defineTable(channelSettingsSchema)
 		.index("by_channelId", ["channelId"])
 		.index("by_serverId", ["serverId"])

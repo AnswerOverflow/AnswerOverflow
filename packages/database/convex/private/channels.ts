@@ -1,7 +1,7 @@
 import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
-import { ChannelType } from "discord-api-types/v10";
+
 import { Array as Arr, Predicate } from "effect";
 import {
 	type MutationCtx,
@@ -12,6 +12,7 @@ import {
 import { channelSchema, channelSettingsSchema } from "../schema";
 import { enrichMessages } from "../shared/dataAccess";
 import {
+	CHANNEL_TYPE,
 	DEFAULT_CHANNEL_SETTINGS,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
@@ -166,30 +167,41 @@ export const getChannelPageData = privateQuery({
 
 		if (!server) return null;
 
-		const [channel, allChannels, threads] = await Promise.all([
+		const rootChannelTypes = [
+			CHANNEL_TYPE.GuildText,
+			CHANNEL_TYPE.GuildAnnouncement,
+			CHANNEL_TYPE.GuildForum,
+		];
+
+		const [channel, channelsByType, threads] = await Promise.all([
 			getChannelWithSettings(ctx, args.channelDiscordId),
-			getManyFrom(ctx.db, "channels", "by_serverId", server.discordId),
-			getManyFrom(ctx.db, "channels", "by_parentId", args.channelDiscordId),
+			Promise.all(
+				rootChannelTypes.map((type) =>
+					ctx.db
+						.query("channels")
+						.withIndex("by_serverId_and_type", (q) =>
+							q.eq("serverId", server.discordId).eq("type", type),
+						)
+						.collect(),
+				),
+			),
+			ctx.db
+				.query("channels")
+				.withIndex("by_parentId_and_id", (q) =>
+					q.eq("parentId", args.channelDiscordId),
+				)
+				.order("desc")
+				.take(50),
 		]);
 
 		if (!channel || channel.serverId !== server.discordId) return null;
 
-		const ROOT_CHANNEL_TYPES = [
-			ChannelType.AnnouncementThread,
-			ChannelType.PublicThread,
-			ChannelType.PrivateThread,
-			ChannelType.GuildStageVoice,
-			ChannelType.GuildForum,
-		] as const;
-		const rootChannels = allChannels.filter((c) =>
-			ROOT_CHANNEL_TYPES.includes(
-				c.type as (typeof ROOT_CHANNEL_TYPES)[number],
-			),
-		);
+		const rootChannels = channelsByType.flat();
 
-		const channelIds = rootChannels.map((c) => c.id);
-		const allSettings = await asyncMap(channelIds, (id) =>
-			getOneFrom(ctx.db, "channelSettings", "by_channelId", id),
+		const allSettings = await Promise.all(
+			rootChannels.map((c) =>
+				getOneFrom(ctx.db, "channelSettings", "by_channelId", c.id),
+			),
 		);
 
 		const indexedChannels = rootChannels
@@ -202,10 +214,10 @@ export const getChannelPageData = privateQuery({
 			}))
 			.filter((c) => c.flags.indexingEnabled)
 			.sort((a, b) => {
-				if (a.type === ChannelType.GuildForum) return -1;
-				if (b.type === ChannelType.GuildForum) return 1;
-				if (a.type === ChannelType.GuildAnnouncement) return -1;
-				if (b.type === ChannelType.GuildAnnouncement) return 1;
+				if (a.type === CHANNEL_TYPE.GuildForum) return -1;
+				if (b.type === CHANNEL_TYPE.GuildForum) return 1;
+				if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
+				if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
 				return 0;
 			})
 			.map((c) => {
@@ -213,24 +225,11 @@ export const getChannelPageData = privateQuery({
 				return channel;
 			});
 
-		const sortedThreads = threads
-			.sort((a, b) => {
-				return BigInt(b.id) > BigInt(a.id)
-					? 1
-					: BigInt(b.id) < BigInt(a.id)
-						? -1
-						: 0;
-			})
-			.slice(0, 50);
-
-		const threadIds = sortedThreads.map((t) => t.id);
+		const threadIds = threads.map((t) => t.id);
 		const firstMessages = await getFirstMessagesInChannels(ctx, threadIds);
 
 		const messages = Arr.filter(
-			Arr.map(
-				sortedThreads,
-				(thread) => firstMessages[thread.id.toString()] ?? null,
-			),
+			Arr.map(threads, (thread) => firstMessages[thread.id.toString()] ?? null),
 			Predicate.isNotNull,
 		);
 
@@ -241,7 +240,7 @@ export const getChannelPageData = privateQuery({
 		);
 
 		const threadsWithMessages = Arr.filter(
-			Arr.map(sortedThreads, (thread) => {
+			Arr.map(threads, (thread) => {
 				const message = firstMessages[thread.id.toString()];
 				if (!message) return null;
 				const enrichedMessage = enrichedMessagesMap.get(message.id);
