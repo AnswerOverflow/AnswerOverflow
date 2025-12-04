@@ -4,73 +4,119 @@ import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
-import { MessagePage } from "./message-page";
+import { MessagePage, RepliesSection, RepliesSkeleton } from "./message-page";
 
-export type MessagePageData = NonNullable<
-	FunctionReturnType<typeof api.private.messages.getMessagePageData>
+export type MessagePageHeaderData = NonNullable<
+	FunctionReturnType<typeof api.private.messages.getMessagePageHeaderData>
 >;
 
-export async function fetchMessagePageData(
+export type MessagePageReplies = FunctionReturnType<
+	typeof api.private.messages.getMessagePageReplies
+>;
+
+export async function fetchMessagePageHeaderData(
 	messageId: bigint,
-): Promise<MessagePageData | null> {
+): Promise<MessagePageHeaderData | null> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.private.messages.getMessagePageData({
+		return yield* database.private.messages.getMessagePageHeaderData({
 			messageId,
 		});
 	}).pipe(runtime.runPromise);
 }
 
+export async function fetchMessagePageReplies(
+	channelId: bigint,
+	threadId: bigint | null,
+	startingFromMessageId: bigint | undefined,
+): Promise<MessagePageReplies> {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.private.messages.getMessagePageReplies({
+			channelId,
+			threadId: threadId ?? undefined,
+			startingFromMessageId,
+		});
+	}).pipe(runtime.runPromise);
+}
+
 export function generateMessagePageMetadata(
-	pageData: MessagePageData | null,
+	headerData: MessagePageHeaderData | null,
 	messageId: string,
 ): Metadata {
-	if (!pageData) {
+	if (!headerData) {
 		return {};
 	}
 
-	const firstMessage = pageData.messages.at(0);
-	const rootMessageDeleted = pageData.rootMessageDeleted && !firstMessage;
+	const { firstMessage } = headerData;
+	const rootMessageDeleted = headerData.rootMessageDeleted && !firstMessage;
 	const title =
-		pageData.thread?.name ??
+		headerData.thread?.name ??
 		firstMessage?.message.content?.slice(0, 100) ??
-		pageData.channel.name;
+		headerData.channel.name;
 	const description = rootMessageDeleted
-		? `Discussion in ${pageData.thread?.name ?? pageData.channel.name} - ${pageData.server.name}`
+		? `Discussion in ${headerData.thread?.name ?? headerData.channel.name} - ${headerData.server.name}`
 		: firstMessage?.message.content && firstMessage.message.content.length > 0
 			? firstMessage.message.content
-			: `Questions related to ${pageData.channel.name} in ${pageData.server.name}`;
+			: `Questions related to ${headerData.channel.name} in ${headerData.server.name}`;
 
 	return {
-		title: `${title} - ${pageData.server.name}`,
+		title: `${title} - ${headerData.server.name}`,
 		description,
 		openGraph: {
 			images: [`/og/post?id=${messageId}`],
-			title: `${title} - ${pageData.server.name}`,
+			title: `${title} - ${headerData.server.name}`,
 			description,
 		},
 		alternates: {
-			canonical: `/m/${pageData.canonicalId.toString()}`,
+			canonical: `/m/${headerData.canonicalId.toString()}`,
 		},
 	};
 }
 
+async function RepliesLoader(props: {
+	channelId: bigint;
+	threadId: bigint | null;
+	startingFromMessageId: bigint | undefined;
+	firstMessageId: bigint | undefined;
+	serverDiscordId: bigint;
+	channelDiscordId: bigint;
+	solutionMessageId: bigint | undefined;
+}) {
+	const replies = await fetchMessagePageReplies(
+		props.channelId,
+		props.threadId,
+		props.startingFromMessageId,
+	);
+
+	return (
+		<RepliesSection
+			replies={replies}
+			firstMessageId={props.firstMessageId}
+			channelId={props.channelDiscordId}
+			threadId={props.threadId}
+			solutionMessageId={props.solutionMessageId}
+		/>
+	);
+}
+
 export function MessagePageLoader(props: {
-	pageData: MessagePageData | null;
+	headerData: MessagePageHeaderData | null;
 	messageId: string;
 }) {
-	const { pageData, messageId } = props;
+	const { headerData, messageId } = props;
 
-	if (!pageData) {
+	if (!headerData) {
 		return notFound();
 	}
 
-	const hasMessages = pageData.messages.length > 0;
-	const hasThread = pageData.thread !== null;
-	const rootMessageDeleted = pageData.rootMessageDeleted;
+	const hasFirstMessage = headerData.firstMessage !== null;
+	const hasThread = headerData.thread !== null;
+	const rootMessageDeleted = headerData.rootMessageDeleted;
 
-	if (!hasMessages && !rootMessageDeleted) {
+	if (!hasFirstMessage && !rootMessageDeleted) {
 		return notFound();
 	}
 
@@ -78,10 +124,33 @@ export function MessagePageLoader(props: {
 		return notFound();
 	}
 
-	const canonicalId = pageData.canonicalId.toString();
+	const canonicalId = headerData.canonicalId.toString();
 	if (canonicalId !== messageId) {
 		redirect(`/m/${canonicalId}?focus=${messageId}`);
 	}
 
-	return <MessagePage data={pageData} />;
+	const solutionMessageId = headerData.solutionMessage?.message.id;
+	const startingFromMessageId =
+		headerData.threadId || rootMessageDeleted
+			? undefined
+			: headerData.firstMessage?.message.id;
+
+	return (
+		<MessagePage
+			headerData={headerData}
+			repliesSlot={
+				<Suspense fallback={<RepliesSkeleton />}>
+					<RepliesLoader
+						channelId={headerData.channelId}
+						threadId={headerData.threadId}
+						startingFromMessageId={startingFromMessageId}
+						firstMessageId={headerData.firstMessage?.message.id}
+						serverDiscordId={headerData.server.discordId}
+						channelDiscordId={headerData.channel.id}
+						solutionMessageId={solutionMessageId}
+					/>
+				</Suspense>
+			}
+		/>
+	);
 }

@@ -6,7 +6,7 @@ import { FormattedNumber } from "@packages/ui/components/formatted-number";
 import { HelpfulFeedback } from "@packages/ui/components/helpful-feedback";
 import { JumpToSolution } from "@packages/ui/components/jump-to-solution";
 import { Link } from "@packages/ui/components/link";
-import { MessageBlurrer } from "@packages/ui/components/message-blurrer";
+
 import { MessageBody } from "@packages/ui/components/message-body";
 import { MessageResultPageProvider } from "@packages/ui/components/message-result-page-context";
 import { ServerIcon } from "@packages/ui/components/server-icon";
@@ -35,74 +35,33 @@ import type { FunctionReturnType } from "convex/server";
 import { Array as Arr, Predicate } from "effect";
 import { CheckCircle2, ExternalLink, MessageSquare } from "lucide-react";
 import { useQueryState } from "nuqs";
+import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { SimilarThreads } from "@/components/similar-threads";
 
-type MessagePageData = NonNullable<
-	FunctionReturnType<typeof api.private.messages.getMessagePageData>
+export type MessagePageHeaderData = NonNullable<
+	FunctionReturnType<typeof api.private.messages.getMessagePageHeaderData>
+>;
+
+export type MessagePageReplies = FunctionReturnType<
+	typeof api.private.messages.getMessagePageReplies
 >;
 
 const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
 
-export function MessagePage(props: { data: MessagePageData }) {
-	const { data } = props;
-	const tenant = useTenant();
-	const [focusMessageId] = useQueryState("focus");
-
-	useEffect(() => {
-		if (focusMessageId) {
-			const element = document.getElementById(`message-${focusMessageId}`);
-			if (element) {
-				element.scrollIntoView({ behavior: "instant", block: "center" });
-			}
-		}
-	}, [focusMessageId]);
-
-	if (!data) {
-		return (
-			<div className="max-w-4xl mx-auto p-8">
-				<div className="text-center text-muted-foreground">
-					Message not found
-				</div>
-			</div>
-		);
-	}
-
-	const rootMessageDeleted = data.rootMessageDeleted;
-	const firstMessage = rootMessageDeleted ? undefined : data.messages.at(0);
-
-	if (!firstMessage && !rootMessageDeleted) {
-		return (
-			<div className="max-w-4xl mx-auto p-8">
-				<div className="text-center text-muted-foreground">
-					No messages found
-				</div>
-			</div>
-		);
-	}
-
-	if (!data.thread && rootMessageDeleted) {
-		return (
-			<div className="max-w-4xl mx-auto p-8">
-				<div className="text-center text-muted-foreground">
-					Message not found
-				</div>
-			</div>
-		);
-	}
-
-	const solutionMessageId = firstMessage?.solutions?.at(0)?.id;
-	const solution = data.messages.find(
-		(message) => message.message.id === solutionMessageId,
-	);
-
+function processRepliesForDisplay(
+	replies: EnrichedMessage[],
+	firstMessageId: bigint | undefined,
+	channelId: bigint,
+	threadId: bigint | null,
+	solutionMessageId: bigint | undefined,
+): EnrichedMessage[] {
 	let contents = "";
 	const messagesBeingMerged: EnrichedMessage[] = [];
-	const messagesWithMergedContent = data.messages.map((message, index) => {
-		if (firstMessage && message.message.id === firstMessage.message.id)
-			return null;
-		const nextMessage = data.messages.at(index + 1);
+	const messagesWithMergedContent = replies.map((message, index) => {
+		if (firstMessageId && message.message.id === firstMessageId) return null;
+		const nextMessage = replies.at(index + 1);
 		contents += message.message.content;
 		messagesBeingMerged.push(message);
 		const isSameAuthor = message.author?.id === nextMessage?.author?.id;
@@ -157,15 +116,15 @@ export function MessagePage(props: { data: MessagePageData }) {
 		messagesWithMergedContent,
 		Predicate.isNotNullable,
 	);
-	const messagesToDisplay = nonNull.filter((message) => {
-		if (firstMessage && message.message.id === firstMessage.message.id)
-			return false;
-		if (data.thread || message.message.parentChannelId) {
-			if (message.message.channelId !== data.channel.id) return false;
+
+	return nonNull.filter((message) => {
+		if (firstMessageId && message.message.id === firstMessageId) return false;
+		if (threadId || message.message.parentChannelId) {
+			if (message.message.channelId !== channelId) return false;
 		} else {
 			if (
 				message.message.parentChannelId &&
-				message.message.parentChannelId !== data.channel.id
+				message.message.parentChannelId !== channelId
 			)
 				return false;
 		}
@@ -173,6 +132,61 @@ export function MessagePage(props: { data: MessagePageData }) {
 			return false;
 		return true;
 	});
+}
+
+export function RepliesSkeleton() {
+	return (
+		<div className="animate-pulse space-y-4">
+			<div className="flex flex-row gap-4 border-b-2 border-muted py-4 pl-2">
+				<div className="flex items-center gap-2">
+					<MessageSquare className="size-4" />
+					<div className="h-4 w-16 bg-muted rounded" />
+				</div>
+			</div>
+			{[1, 2, 3].map((i) => (
+				<div key={i} className="p-2 space-y-2">
+					<div className="flex items-center gap-2">
+						<div className="size-8 bg-muted rounded-full" />
+						<div className="h-4 w-24 bg-muted rounded" />
+					</div>
+					<div className="ml-10 space-y-2">
+						<div className="h-4 w-full bg-muted rounded" />
+						<div className="h-4 w-3/4 bg-muted rounded" />
+					</div>
+				</div>
+			))}
+		</div>
+	);
+}
+
+export function RepliesSection(props: {
+	replies: EnrichedMessage[];
+	firstMessageId: bigint | undefined;
+	channelId: bigint;
+	threadId: bigint | null;
+	solutionMessageId: bigint | undefined;
+	firstMessageAuthorId?: bigint;
+	server?: MessagePageHeaderData["server"];
+	channel?: MessagePageHeaderData["channel"];
+}) {
+	const {
+		replies,
+		firstMessageId,
+		channelId,
+		threadId,
+		solutionMessageId,
+		firstMessageAuthorId,
+		server,
+		channel,
+	} = props;
+
+	const messagesToDisplay = processRepliesForDisplay(
+		replies,
+		firstMessageId,
+		channelId,
+		threadId,
+		solutionMessageId,
+	);
 
 	const messageStack = messagesToDisplay
 		.map((message, index) => {
@@ -201,7 +215,7 @@ export function MessagePage(props: { data: MessagePageData }) {
 				>
 					<ThinMessage
 						message={message}
-						op={message.author?.id === firstMessage?.author?.id}
+						op={message.author?.id === firstMessageAuthorId}
 						isLast={isLast}
 					/>
 				</div>
@@ -209,77 +223,8 @@ export function MessagePage(props: { data: MessagePageData }) {
 		})
 		.filter(Boolean);
 
-	const title =
-		data.thread?.name ?? firstMessage?.message.content?.slice(0, 100);
-	const firstMessageMedia = firstMessage?.attachments
-		.filter((attachment) => isImageAttachment(attachment))
-		.at(0);
-
-	const serverHref = tenant ? "/" : `/c/${data.server.discordId.toString()}`;
-
-	const UserLink = () =>
-		firstMessage?.author ? (
-			<Link
-				href={`/u/${firstMessage.author.id.toString()}`}
-				className="hover:underline"
-			>
-				{firstMessage.author.name}
-			</Link>
-		) : null;
-
-	const Main = () => (
-		<main className="flex w-full max-w-3xl grow flex-col gap-4">
-			<div className="flex flex-col gap-2 pl-2">
-				<div className="flex flex-row items-center gap-2">
-					<Link href={serverHref}>
-						<ServerIcon server={data.server} size={48} />
-					</Link>
-					<div className="flex flex-col">
-						<div className="flex flex-row items-center gap-2">
-							<Link href={serverHref} className="hover:underline">
-								{data.server.name}
-							</Link>
-							{firstMessage && !rootMessageDeleted && (
-								<>
-									<span className="text-sm text-muted-foreground">•</span>
-									<TimeAgo snowflake={firstMessage.message.id.toString()} />
-								</>
-							)}
-						</div>
-						{!rootMessageDeleted && <UserLink />}
-					</div>
-				</div>
-				{data.channel.type !== ChannelType.GuildAnnouncement && (
-					<h1 className="text-2xl font-semibold">{title}</h1>
-				)}
-				<div>
-					{rootMessageDeleted ? (
-						<div className="text-muted-foreground italic">
-							Original message was deleted
-						</div>
-					) : (
-						firstMessage && (
-							<MessageBody message={firstMessage} loadingStyle="eager" />
-						)
-					)}
-					{solution && (
-						<div className="mt-6 w-full rounded-xl border border-green-500/30 bg-green-500/5 dark:bg-green-500/10 p-4">
-							<div className="flex items-center gap-1.5 mb-3">
-								<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
-								<span className="text-sm font-medium text-green-600 dark:text-green-500">
-									Solution
-								</span>
-							</div>
-							<MessageBlurrer message={solution}>
-								<MessageBody message={solution} collapseContent={true} />
-							</MessageBlurrer>
-							<div className="mt-3">
-								<JumpToSolution id={solution.message.id.toString()} />
-							</div>
-						</div>
-					)}
-				</div>
-			</div>
+	return (
+		<>
 			<div className="flex flex-row gap-4 border-b-2 border-muted py-4 pl-2">
 				<div className="flex items-center gap-2">
 					<MessageSquare className="size-4" />
@@ -292,21 +237,64 @@ export function MessagePage(props: { data: MessagePageData }) {
 			<div className="rounded-md">
 				<div className="flex flex-col gap-4">{messageStack}</div>
 			</div>
-			{messagesToDisplay.length === 0 && (
+			{messagesToDisplay.length === 0 && server && channel && (
 				<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
 					<span className="text-lg font-semibold">No replies yet</span>
 					<span className="text-muted-foreground">
 						Be the first to reply to this message
 					</span>
 					<ServerInviteJoinButton
-						server={data.server}
-						channel={data.channel}
+						server={server}
+						channel={channel}
 						location="Message Result Page"
 					/>
 				</div>
 			)}
-		</main>
+		</>
 	);
+}
+
+export function MessagePage(props: {
+	headerData: MessagePageHeaderData;
+	repliesSlot: ReactNode;
+}) {
+	const { headerData, repliesSlot } = props;
+	const tenant = useTenant();
+	const [focusMessageId] = useQueryState("focus");
+
+	useEffect(() => {
+		if (focusMessageId) {
+			const element = document.getElementById(`message-${focusMessageId}`);
+			if (element) {
+				element.scrollIntoView({ behavior: "instant", block: "center" });
+			}
+		}
+	}, [focusMessageId]);
+
+	const rootMessageDeleted = headerData.rootMessageDeleted;
+	const firstMessage = headerData.firstMessage;
+	const solutionMessage = headerData.solutionMessage;
+	const solutionMessageId = solutionMessage?.message.id;
+
+	const title =
+		headerData.thread?.name ?? firstMessage?.message.content?.slice(0, 100);
+	const firstMessageMedia = firstMessage?.attachments
+		.filter((attachment) => isImageAttachment(attachment))
+		.at(0);
+
+	const serverHref = tenant
+		? "/"
+		: `/c/${headerData.server.discordId.toString()}`;
+
+	const UserLink = () =>
+		firstMessage?.author ? (
+			<Link
+				href={`/u/${firstMessage.author.id.toString()}`}
+				className="hover:underline"
+			>
+				{firstMessage.author.name}
+			</Link>
+		) : null;
 
 	const discordUrl = firstMessage
 		? getDiscordURLForMessage({
@@ -314,95 +302,21 @@ export function MessagePage(props: { data: MessagePageData }) {
 				channelId: firstMessage.message.channelId,
 				id: firstMessage.message.id,
 			})
-		: data.thread
-			? `https://discord.com/channels/${data.server.discordId}/${data.thread.id}`
+		: headerData.thread
+			? `https://discord.com/channels/${headerData.server.discordId}/${headerData.thread.id}`
 			: undefined;
-
-	const Sidebar = () => (
-		<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:sticky md:top-[calc(var(--navbar-height)+1rem)] md:self-start md:w-[400px]">
-			<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block">
-				<div className="flex flex-col items-start gap-4 p-4">
-					<div className="flex w-full flex-row items-center justify-between truncate font-bold">
-						<Link href={tenant ? "/" : getServerHomepageUrl(data.server)}>
-							{data.server.name}
-						</Link>
-						<ServerInviteJoinButton
-							server={data.server}
-							channel={data.channel}
-							location="Message Result Page"
-							size="sm"
-							variant="default"
-							className="rounded-3xl text-xs font-semibold"
-						/>
-					</div>
-					{data.server.description && (
-						<span className="text-left text-sm">{data.server.description}</span>
-					)}
-					<div className="flex w-full flex-row items-center justify-between">
-						{data.server.approximateMemberCount !== undefined && (
-							<div className="flex flex-col items-start">
-								<span className="text-sm font-semibold">
-									<FormattedNumber value={data.server.approximateMemberCount} />
-								</span>
-								<span className="text-xs">Members</span>
-							</div>
-						)}
-						{discordUrl && (
-							<Link
-								href={discordUrl}
-								className="flex flex-row-reverse items-center gap-1 text-sm font-semibold hover:underline"
-							>
-								<ExternalLink size={16} />
-								View on Discord
-							</Link>
-						)}
-					</div>
-				</div>
-			</div>
-			<SimilarThreads
-				searchQuery={
-					data.thread?.name ??
-					firstMessage?.message.content?.slice(0, 100) ??
-					""
-				}
-				currentThreadId={(
-					data.thread?.id ??
-					firstMessage?.message.id ??
-					data.canonicalId
-				).toString()}
-				currentServerId={data.server.discordId.toString()}
-				serverId={tenant ? data.server.discordId.toString() : undefined}
-			/>
-			<div className="flex w-full flex-col justify-center gap-2 text-center">
-				<HelpfulFeedback
-					page={{
-						...channelToAnalyticsData(data.channel),
-						...serverToAnalyticsData(data.server),
-						...(data.thread && {
-							...threadToAnalyticsData(data.thread),
-							"Number of Messages": data.messages.length,
-						}),
-						...(firstMessage &&
-							messageWithDiscordAccountToAnalyticsData({
-								id: firstMessage.message.id,
-								authorId: firstMessage.author?.id ?? "",
-								serverId: firstMessage.message.serverId,
-								channelId: firstMessage.message.channelId,
-							})),
-					}}
-				/>
-			</div>
-		</div>
-	);
 
 	const getSchemaUrl = () => {
 		const canonicalId = (
-			data.thread?.id ??
+			headerData.thread?.id ??
 			firstMessage?.message.id ??
-			data.canonicalId
+			headerData.canonicalId
 		).toString();
-		if (data.server.customDomain) {
-			const customUrl = getServerCustomUrl(data.server, `/m/${canonicalId}`);
+		if (headerData.server.customDomain) {
+			const customUrl = getServerCustomUrl(
+				headerData.server,
+				`/m/${canonicalId}`,
+			);
 			if (customUrl) return customUrl;
 		}
 		const baseUrl =
@@ -430,30 +344,14 @@ export function MessagePage(props: { data: MessagePageData }) {
 		datePublished: firstMessage
 			? getDate(firstMessage.message.id).toISOString()
 			: undefined,
-		dateModified: data.thread?.archivedTimestamp
-			? new Date(Number(data.thread.archivedTimestamp)).toISOString()
+		dateModified: headerData.thread?.archivedTimestamp
+			? new Date(Number(headerData.thread.archivedTimestamp)).toISOString()
 			: undefined,
 		identifier: (
-			data.thread?.id ??
+			headerData.thread?.id ??
 			firstMessage?.message.id ??
-			data.canonicalId
+			headerData.canonicalId
 		).toString(),
-		commentCount: messagesToDisplay.length,
-		comment: messagesToDisplay.map((message, index) => ({
-			"@type": message.message.id === solutionMessageId ? "Answer" : "Comment",
-			text: message.message.content,
-			identifier: message.message.id.toString(),
-			datePublished: getDate(message.message.id).toISOString(),
-			position: index + 1,
-			author: message.author
-				? {
-						"@type": "Person",
-						name: message.author.name,
-						identifier: message.author.id.toString(),
-						url: `/u/${message.author.id.toString()}`,
-					}
-				: undefined,
-		})),
 	};
 
 	return (
@@ -462,16 +360,157 @@ export function MessagePage(props: { data: MessagePageData }) {
 				<JsonLdScript data={jsonLdData} scriptKey="message-jsonld" />
 
 				<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
-					<Main />
-					<Sidebar />
+					<main className="flex w-full max-w-3xl grow flex-col gap-4">
+						<div className="flex flex-col gap-2 pl-2">
+							<div className="flex flex-row items-center gap-2">
+								<Link href={serverHref}>
+									<ServerIcon server={headerData.server} size={48} />
+								</Link>
+								<div className="flex flex-col">
+									<div className="flex flex-row items-center gap-2">
+										<Link href={serverHref} className="hover:underline">
+											{headerData.server.name}
+										</Link>
+										{firstMessage && !rootMessageDeleted && (
+											<>
+												<span className="text-sm text-muted-foreground">•</span>
+												<TimeAgo
+													snowflake={firstMessage.message.id.toString()}
+												/>
+											</>
+										)}
+									</div>
+									{!rootMessageDeleted && <UserLink />}
+								</div>
+							</div>
+							{headerData.channel.type !== ChannelType.GuildAnnouncement && (
+								<h1 className="text-2xl font-semibold">{title}</h1>
+							)}
+							<div>
+								{rootMessageDeleted ? (
+									<div className="text-muted-foreground italic">
+										Original message was deleted
+									</div>
+								) : (
+									firstMessage && (
+										<MessageBody message={firstMessage} loadingStyle="eager" />
+									)
+								)}
+								{solutionMessage && (
+									<div className="mt-6 w-full rounded-xl border border-green-500/30 bg-green-500/5 dark:bg-green-500/10 p-4">
+										<div className="flex items-center gap-1.5 mb-3">
+											<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
+											<span className="text-sm font-medium text-green-600 dark:text-green-500">
+												Solution
+											</span>
+										</div>
+										<MessageBody
+											message={solutionMessage}
+											collapseContent={true}
+										/>
+										<div className="mt-3">
+											<JumpToSolution
+												id={solutionMessageId?.toString() ?? ""}
+											/>
+										</div>
+									</div>
+								)}
+							</div>
+						</div>
+						{repliesSlot}
+					</main>
+
+					<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:sticky md:top-[calc(var(--navbar-height)+1rem)] md:self-start md:w-[400px]">
+						<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block">
+							<div className="flex flex-col items-start gap-4 p-4">
+								<div className="flex w-full flex-row items-center justify-between truncate font-bold">
+									<Link
+										href={
+											tenant ? "/" : getServerHomepageUrl(headerData.server)
+										}
+									>
+										{headerData.server.name}
+									</Link>
+									<ServerInviteJoinButton
+										server={headerData.server}
+										channel={headerData.channel}
+										location="Message Result Page"
+										size="sm"
+										variant="default"
+										className="rounded-3xl text-xs font-semibold"
+									/>
+								</div>
+								{headerData.server.description && (
+									<span className="text-left text-sm">
+										{headerData.server.description}
+									</span>
+								)}
+								<div className="flex w-full flex-row items-center justify-between">
+									{headerData.server.approximateMemberCount !== undefined && (
+										<div className="flex flex-col items-start">
+											<span className="text-sm font-semibold">
+												<FormattedNumber
+													value={headerData.server.approximateMemberCount}
+												/>
+											</span>
+											<span className="text-xs">Members</span>
+										</div>
+									)}
+									{discordUrl && (
+										<Link
+											href={discordUrl}
+											className="flex flex-row-reverse items-center gap-1 text-sm font-semibold hover:underline"
+										>
+											<ExternalLink size={16} />
+											View on Discord
+										</Link>
+									)}
+								</div>
+							</div>
+						</div>
+						<SimilarThreads
+							searchQuery={
+								headerData.thread?.name ??
+								firstMessage?.message.content?.slice(0, 100) ??
+								""
+							}
+							currentThreadId={(
+								headerData.thread?.id ??
+								firstMessage?.message.id ??
+								headerData.canonicalId
+							).toString()}
+							currentServerId={headerData.server.discordId.toString()}
+							serverId={
+								tenant ? headerData.server.discordId.toString() : undefined
+							}
+						/>
+						<div className="flex w-full flex-col justify-center gap-2 text-center">
+							<HelpfulFeedback
+								page={{
+									...channelToAnalyticsData(headerData.channel),
+									...serverToAnalyticsData(headerData.server),
+									...(headerData.thread && {
+										...threadToAnalyticsData(headerData.thread),
+									}),
+									...(firstMessage &&
+										messageWithDiscordAccountToAnalyticsData({
+											id: firstMessage.message.id,
+											authorId: firstMessage.author?.id ?? "",
+											serverId: firstMessage.message.serverId,
+											channelId: firstMessage.message.channelId,
+										})),
+								}}
+							/>
+						</div>
+					</div>
+
 					<TrackLoad
 						eventName="Message Page View"
 						eventData={{
-							...channelToAnalyticsData(data.channel),
-							...serverToAnalyticsData(data.server),
-							...(data.thread && {
-								...threadToAnalyticsData(data.thread),
-								"Number of Messages": data.messages.length,
+							...channelToAnalyticsData(headerData.channel),
+							...serverToAnalyticsData(headerData.server),
+							...(headerData.thread && {
+								...threadToAnalyticsData(headerData.thread),
 							}),
 							...(firstMessage &&
 								messageWithDiscordAccountToAnalyticsData({
