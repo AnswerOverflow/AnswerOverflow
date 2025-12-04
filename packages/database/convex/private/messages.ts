@@ -548,27 +548,11 @@ export const getMessagePageData = privateQuery({
 				)
 			: null;
 
-		let allMessages = await findMessagesByChannelId(ctx, channelId, {
-			limit: threadId ? 1000 : 50,
+		const allMessages = await findMessagesByChannelId(ctx, channelId, {
+			limit: threadId ? 100 : 50,
 			startingFrom:
 				threadId || rootMessageDeleted ? undefined : targetMessage?.id,
 		});
-
-		if (threadId) {
-			// todo: this is maybe bad
-			const threadStarterMessages = await ctx.db
-				.query("messages")
-				.withIndex("by_childThreadId", (q) => q.eq("childThreadId", threadId))
-				.take(1000);
-
-			const existingIds = new Set(allMessages.map((m) => m.id));
-			const newMessages = threadStarterMessages.filter(
-				(m) => !existingIds.has(m.id),
-			);
-			allMessages = [...allMessages, ...newMessages]
-				.sort((a, b) => compareIds(a.id, b.id))
-				.slice(0, 1000);
-		}
 
 		const [enrichedMessages, server] = await Promise.all([
 			enrichMessages(ctx, allMessages),
@@ -609,5 +593,141 @@ export const getMessagePageData = privateQuery({
 			},
 			thread,
 		};
+	},
+});
+
+export const getMessagePageHeaderData = privateQuery({
+	args: {
+		messageId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		const targetMessage = await getMessageByIdShared(ctx, args.messageId);
+
+		let threadId: bigint | null = null;
+		let parentId: bigint;
+		let channelId: bigint;
+		let serverId: bigint;
+		let rootMessageDeleted = false;
+
+		if (!targetMessage) {
+			const threadChannel = await getOneFrom(
+				ctx.db,
+				"channels",
+				"by_discordChannelId",
+				args.messageId,
+				"id",
+			);
+			if (!threadChannel || !threadChannel.parentId) {
+				return null;
+			}
+			threadId = threadChannel.id;
+			parentId = threadChannel.parentId;
+			channelId = threadId;
+			serverId = threadChannel.serverId;
+			rootMessageDeleted = true;
+		} else {
+			threadId = getThreadIdOfMessage(targetMessage);
+			parentId = getParentChannelOfMessage(targetMessage);
+			channelId = threadId ?? parentId;
+			serverId = targetMessage.serverId;
+		}
+
+		const indexingEnabled = await isChannelIndexingEnabled(
+			ctx,
+			channelId,
+			threadId ? parentId : undefined,
+		);
+		if (!indexingEnabled) {
+			return null;
+		}
+
+		const channel = await getChannelWithSettings(ctx, channelId);
+		if (!channel) {
+			return null;
+		}
+
+		const thread = threadId
+			? await getOneFrom(
+					ctx.db,
+					"channels",
+					"by_discordChannelId",
+					threadId,
+					"id",
+				)
+			: null;
+
+		const firstMessage = rootMessageDeleted
+			? null
+			: await ctx.db
+					.query("messages")
+					.withIndex("by_channelId_and_id", (q) => q.eq("channelId", channelId))
+					.order("asc")
+					.first();
+
+		const [enrichedFirstMessage, server] = await Promise.all([
+			firstMessage ? enrichMessages(ctx, [firstMessage]) : [],
+			getOneFrom(ctx.db, "servers", "by_discordId", serverId, "discordId"),
+		]);
+
+		if (!server) {
+			return null;
+		}
+
+		const enrichedFirst = enrichedFirstMessage[0] ?? null;
+		const solutionMessageId = enrichedFirst?.solutions?.at(0)?.id;
+
+		const [solutionMessage, serverPreferences] = await Promise.all([
+			solutionMessageId
+				? getMessageByIdShared(ctx, solutionMessageId).then((msg) =>
+						msg ? enrichMessages(ctx, [msg]) : [],
+					)
+				: Promise.resolve([]),
+			getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
+		]);
+
+		return {
+			canonicalId: threadId ?? targetMessage?.id ?? args.messageId,
+			firstMessage: enrichedFirst,
+			solutionMessage: solutionMessage[0] ?? null,
+			rootMessageDeleted,
+			channelId,
+			threadId,
+			server: {
+				_id: server._id,
+				discordId: server.discordId,
+				name: server.name,
+				icon: server.icon,
+				description: server.description,
+				approximateMemberCount: server.approximateMemberCount,
+				customDomain: serverPreferences?.customDomain,
+				subpath: serverPreferences?.subpath,
+				vanityInviteCode: server.vanityInviteCode,
+			},
+			channel: {
+				id: channel.id,
+				name: channel.name,
+				type: channel.type,
+				inviteCode: channel.flags.inviteCode,
+			},
+			thread,
+		};
+	},
+});
+
+export const getMessagePageReplies = privateQuery({
+	args: {
+		channelId: v.int64(),
+		threadId: v.optional(v.int64()),
+		startingFromMessageId: v.optional(v.int64()),
+	},
+	handler: async (ctx, args) => {
+		const { channelId, threadId, startingFromMessageId } = args;
+
+		const allMessages = await findMessagesByChannelId(ctx, channelId, {
+			limit: threadId ? 100 : 50,
+			startingFrom: startingFromMessageId,
+		});
+
+		return enrichMessages(ctx, allMessages);
 	},
 });

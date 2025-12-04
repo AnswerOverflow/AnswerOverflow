@@ -2,7 +2,7 @@ import { Schema } from "effect";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-	fetchMessagePageData,
+	fetchMessagePageHeaderData,
 	generateMessagePageMetadata,
 	MessagePageLoader,
 } from "../../../components/message-page-loader";
@@ -21,8 +21,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	if (parsed._tag === "None") {
 		return notFound();
 	}
-	const pageData = await fetchMessagePageData(parsed.value);
-	return generateMessagePageMetadata(pageData, params.messageId);
+	const headerData = await fetchMessagePageHeaderData(parsed.value);
+	return generateMessagePageMetadata(headerData, params.messageId);
 }
 
 export default async function Page(props: Props) {
@@ -31,6 +31,8 @@ export default async function Page(props: Props) {
 	if (parsed._tag === "None") {
 		return notFound();
 	}
-	const pageData = await fetchMessagePageData(parsed.value);
-	return <MessagePageLoader pageData={pageData} messageId={params.messageId} />;
+	const headerData = await fetchMessagePageHeaderData(parsed.value);
+	return (
+		<MessagePageLoader headerData={headerData} messageId={params.messageId} />
+	);
 }

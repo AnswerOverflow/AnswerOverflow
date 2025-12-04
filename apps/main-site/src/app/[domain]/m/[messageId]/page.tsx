@@ -2,9 +2,15 @@ import { Database } from "@packages/database/database";
 import { Effect, Schema } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { MessagePage } from "../../../../components/message-page";
+import { Suspense } from "react";
 import {
-	fetchMessagePageData,
+	MessagePage,
+	RepliesSection,
+	RepliesSkeleton,
+} from "../../../../components/message-page";
+import {
+	fetchMessagePageHeaderData,
+	fetchMessagePageReplies,
 	generateMessagePageMetadata,
 } from "../../../../components/message-page-loader";
 import { runtime } from "../../../../lib/runtime";
@@ -23,8 +29,32 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	if (parsed._tag === "None") {
 		return notFound();
 	}
-	const pageData = await fetchMessagePageData(parsed.value);
-	return generateMessagePageMetadata(pageData, params.messageId);
+	const headerData = await fetchMessagePageHeaderData(parsed.value);
+	return generateMessagePageMetadata(headerData, params.messageId);
+}
+
+async function RepliesLoader(props: {
+	channelId: bigint;
+	threadId: bigint | null;
+	startingFromMessageId: bigint | undefined;
+	firstMessageId: bigint | undefined;
+	solutionMessageId: bigint | undefined;
+}) {
+	const replies = await fetchMessagePageReplies(
+		props.channelId,
+		props.threadId,
+		props.startingFromMessageId,
+	);
+
+	return (
+		<RepliesSection
+			replies={replies}
+			firstMessageId={props.firstMessageId}
+			channelId={props.channelId}
+			threadId={props.threadId}
+			solutionMessageId={props.solutionMessageId}
+		/>
+	);
 }
 
 export default async function TenantMessagePage(props: Props) {
@@ -35,29 +65,50 @@ export default async function TenantMessagePage(props: Props) {
 	}
 	const domain = decodeURIComponent(params.domain);
 
-	const [tenantData, pageData] = await Effect.gen(function* () {
+	const [tenantData, headerData] = await Effect.gen(function* () {
 		const database = yield* Database;
 		const tenant = yield* database.private.servers.getServerByDomain({
 			domain,
 		});
-		const page = yield* database.private.messages.getMessagePageData({
+		const header = yield* database.private.messages.getMessagePageHeaderData({
 			messageId: parsed.value,
 		});
-		return [tenant, page] as const;
+		return [tenant, header] as const;
 	}).pipe(runtime.runPromise);
 
-	if (!tenantData?.server || !pageData) {
+	if (!tenantData?.server || !headerData) {
 		return notFound();
 	}
 
-	if (pageData.server.discordId !== tenantData.server.discordId) {
+	if (headerData.server.discordId !== tenantData.server.discordId) {
 		return notFound();
 	}
 
-	const canonicalId = pageData.canonicalId.toString();
+	const canonicalId = headerData.canonicalId.toString();
 	if (canonicalId !== params.messageId) {
 		redirect(`/m/${canonicalId}?focus=${params.messageId}`);
 	}
 
-	return <MessagePage data={pageData} />;
+	const solutionMessageId = headerData.solutionMessage?.message.id;
+	const startingFromMessageId =
+		headerData.threadId || headerData.rootMessageDeleted
+			? undefined
+			: headerData.firstMessage?.message.id;
+
+	return (
+		<MessagePage
+			headerData={headerData}
+			repliesSlot={
+				<Suspense fallback={<RepliesSkeleton />}>
+					<RepliesLoader
+						channelId={headerData.channelId}
+						threadId={headerData.threadId}
+						startingFromMessageId={startingFromMessageId}
+						firstMessageId={headerData.firstMessage?.message.id}
+						solutionMessageId={solutionMessageId}
+					/>
+				</Suspense>
+			}
+		/>
+	);
 }
