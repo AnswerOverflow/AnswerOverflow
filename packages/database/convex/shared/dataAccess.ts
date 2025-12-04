@@ -2,10 +2,7 @@ import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { QueryCtx } from "../client";
 import type { Message, ServerPreferences, UserServerSettings } from "../schema";
-import {
-	getDiscordAccountIdFromAuth,
-	getUserServerSettingsForServerByDiscordId,
-} from "./auth";
+import { getDiscordAccountIdFromAuth } from "./auth";
 import { isChannelIndexingEnabled } from "./channels";
 import {
 	isMessagePublic,
@@ -16,68 +13,8 @@ import type { PublicChannel, PublicServer } from "./publicSchemas";
 import {
 	enrichMessageForDisplay,
 	type EnrichedMessage as SharedEnrichedMessage,
+	findUserServerSettingsById,
 } from "./shared";
-
-async function fetchMessagePrivacyData(
-	ctx: QueryCtx,
-	message: Message,
-): Promise<{
-	serverPreferences: ServerPreferences | null;
-	authorServerSettings: UserServerSettings | null;
-}> {
-	const [serverPreferences, authorServerSettings] = await Promise.all([
-		getOneFrom(ctx.db, "serverPreferences", "by_serverId", message.serverId),
-		getUserServerSettingsForServerByDiscordId(
-			ctx,
-			message.authorId,
-			message.serverId,
-		),
-	]);
-
-	return {
-		serverPreferences: serverPreferences ?? null,
-		authorServerSettings,
-	};
-}
-
-async function enrichMessage(
-	ctx: QueryCtx,
-	message: Message,
-): Promise<SharedEnrichedMessage | null> {
-	const [privacyData, userServerSettings] = await Promise.all([
-		fetchMessagePrivacyData(ctx, message),
-		getDiscordAccountIdFromAuth(ctx).then((id) =>
-			id
-				? getUserServerSettingsForServerByDiscordId(ctx, id, message.serverId)
-				: null,
-		),
-	]);
-
-	const { serverPreferences, authorServerSettings } = privacyData;
-
-	const isPublic = isMessagePublic(
-		serverPreferences,
-		authorServerSettings,
-		message.serverId,
-	);
-	const isAnonymous = shouldAnonymizeMessage(
-		serverPreferences,
-		authorServerSettings,
-		message.serverId,
-	);
-
-	const messageWithPrivacy: MessageWithPrivacyFlags = {
-		...message,
-		public: isPublic,
-		isAnonymous,
-	};
-
-	if (!messageWithPrivacy.public && !userServerSettings) {
-		return null;
-	}
-
-	return await enrichMessageForDisplay(ctx, message, { isAnonymous });
-}
 
 export function hiddenMessageStub(): MessageWithPrivacyFlags {
 	return {
@@ -98,14 +35,129 @@ export function hiddenMessageStub(): MessageWithPrivacyFlags {
 	};
 }
 
+async function enrichSingleMessage(
+	ctx: QueryCtx,
+	message: Message,
+): Promise<SharedEnrichedMessage | null> {
+	const [viewerDiscordId, serverPreferences, authorServerSettings] =
+		await Promise.all([
+			getDiscordAccountIdFromAuth(ctx),
+			getOneFrom(
+				ctx.db,
+				"serverPreferences",
+				"by_serverId",
+				message.serverId,
+			).then((prefs) => prefs ?? null),
+			findUserServerSettingsById(ctx, message.authorId, message.serverId),
+		]);
+
+	const viewerServerSettings = viewerDiscordId
+		? await findUserServerSettingsById(ctx, viewerDiscordId, message.serverId)
+		: null;
+
+	const isPublic = isMessagePublic(
+		serverPreferences,
+		authorServerSettings,
+		message.serverId,
+	);
+	const isAnonymous = shouldAnonymizeMessage(
+		serverPreferences,
+		authorServerSettings,
+		message.serverId,
+	);
+
+	if (!isPublic && !viewerServerSettings) {
+		return null;
+	}
+
+	return await enrichMessageForDisplay(ctx, message, { isAnonymous });
+}
+
 export async function enrichMessages(
 	ctx: QueryCtx,
 	messages: Message[],
 ): Promise<SharedEnrichedMessage[]> {
-	const results = await Promise.all(
-		messages.map((message) => enrichMessage(ctx, message)),
+	if (messages.length === 0) {
+		return [];
+	}
+
+	const viewerDiscordId = await getDiscordAccountIdFromAuth(ctx);
+
+	const uniqueServerIds = Arr.dedupe(messages.map((m) => m.serverId));
+	const uniqueAuthorIds = Arr.dedupe(messages.map((m) => m.authorId));
+
+	const [serverPrefsResults, authorSettingsResults, viewerSettingsResults] =
+		await Promise.all([
+			Promise.all(
+				uniqueServerIds.map((serverId) =>
+					getOneFrom(ctx.db, "serverPreferences", "by_serverId", serverId).then(
+						(prefs) => [serverId.toString(), prefs ?? null] as const,
+					),
+				),
+			),
+			Promise.all(
+				uniqueAuthorIds.flatMap((authorId) =>
+					uniqueServerIds.map((serverId) =>
+						findUserServerSettingsById(ctx, authorId, serverId).then(
+							(settings) =>
+								[
+									`${authorId.toString()}_${serverId.toString()}`,
+									settings,
+								] as const,
+						),
+					),
+				),
+			),
+			viewerDiscordId
+				? Promise.all(
+						uniqueServerIds.map((serverId) =>
+							findUserServerSettingsById(ctx, viewerDiscordId, serverId).then(
+								(settings) => [serverId.toString(), settings] as const,
+							),
+						),
+					)
+				: Promise.resolve([]),
+		]);
+
+	const serverPrefsMap = new Map<string, ServerPreferences | null>(
+		serverPrefsResults,
 	);
-	return Arr.filter(results, Predicate.isNotNullable);
+	const authorSettingsMap = new Map<string, UserServerSettings | null>(
+		authorSettingsResults,
+	);
+	const viewerSettingsMap = new Map<string, UserServerSettings | null>(
+		viewerSettingsResults,
+	);
+
+	const enrichedResults = await Promise.all(
+		messages.map(async (message) => {
+			const serverIdStr = message.serverId.toString();
+			const authorKey = `${message.authorId.toString()}_${serverIdStr}`;
+
+			const serverPreferences = serverPrefsMap.get(serverIdStr) ?? null;
+			const authorServerSettings = authorSettingsMap.get(authorKey) ?? null;
+			const viewerServerSettings = viewerSettingsMap.get(serverIdStr) ?? null;
+
+			const isPublic = isMessagePublic(
+				serverPreferences,
+				authorServerSettings,
+				message.serverId,
+			);
+			const isAnonymous = shouldAnonymizeMessage(
+				serverPreferences,
+				authorServerSettings,
+				message.serverId,
+			);
+
+			if (!isPublic && !viewerServerSettings) {
+				return null;
+			}
+
+			return await enrichMessageForDisplay(ctx, message, { isAnonymous });
+		}),
+	);
+
+	return Arr.filter(enrichedResults, Predicate.isNotNullable);
 }
 
 export async function enrichedMessageWithServerAndChannels(
@@ -122,7 +174,7 @@ export async function enrichedMessageWithServerAndChannels(
 	if (!indexingEnabled) return null;
 
 	const [enrichedMessage, parentChannel, channel, server] = await Promise.all([
-		enrichMessage(ctx, message),
+		enrichSingleMessage(ctx, message),
 		parentChannelId
 			? getOneFrom(
 					ctx.db,

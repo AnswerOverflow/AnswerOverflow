@@ -9,7 +9,12 @@ import {
 	privateQuery,
 	type QueryCtx,
 } from "../client";
-import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
+import {
+	attachmentSchema,
+	type Channel,
+	emojiSchema,
+	messageSchema,
+} from "../schema";
 import { isChannelIndexingEnabled } from "../shared/channels";
 import { enrichMessages } from "../shared/dataAccess";
 import {
@@ -499,6 +504,7 @@ export const getMessagePageData = privateQuery({
 		let channelId: bigint;
 		let serverId: bigint;
 		let rootMessageDeleted = false;
+		let cachedThreadChannel: Channel | null = null;
 
 		if (!targetMessage) {
 			const threadChannel = await getOneFrom(
@@ -516,6 +522,7 @@ export const getMessagePageData = privateQuery({
 			channelId = threadId;
 			serverId = threadChannel.serverId;
 			rootMessageDeleted = true;
+			cachedThreadChannel = threadChannel;
 		} else {
 			threadId = getThreadIdOfMessage(targetMessage);
 			parentId = getParentChannelOfMessage(targetMessage);
@@ -523,30 +530,26 @@ export const getMessagePageData = privateQuery({
 			serverId = targetMessage.serverId;
 		}
 
-		const indexingEnabled = await isChannelIndexingEnabled(
-			ctx,
-			channelId,
-			threadId ? parentId : undefined,
-		);
-		if (!indexingEnabled) {
+		const [indexingEnabled, channel] = await Promise.all([
+			isChannelIndexingEnabled(ctx, channelId, threadId ? parentId : undefined),
+			getChannelWithSettings(ctx, channelId),
+		]);
+
+		if (!indexingEnabled || !channel) {
 			return null;
 		}
 
-		const channel = await getChannelWithSettings(ctx, channelId);
-
-		if (!channel) {
-			return null;
-		}
-
-		const thread = threadId
-			? await getOneFrom(
-					ctx.db,
-					"channels",
-					"by_discordChannelId",
-					threadId,
-					"id",
-				)
-			: null;
+		const thread =
+			cachedThreadChannel ??
+			(threadId
+				? await getOneFrom(
+						ctx.db,
+						"channels",
+						"by_discordChannelId",
+						threadId,
+						"id",
+					)
+				: null);
 
 		let allMessages = await findMessagesByChannelId(ctx, channelId, {
 			limit: threadId ? undefined : 50,
@@ -569,21 +572,15 @@ export const getMessagePageData = privateQuery({
 			);
 		}
 
-		const [enrichedMessages, server] = await Promise.all([
+		const [enrichedMessages, server, serverPreferences] = await Promise.all([
 			enrichMessages(ctx, allMessages),
 			getOneFrom(ctx.db, "servers", "by_discordId", serverId, "discordId"),
+			getOneFrom(ctx.db, "serverPreferences", "by_serverId", serverId),
 		]);
 
 		if (!server) {
 			return null;
 		}
-
-		const serverPreferences = await getOneFrom(
-			ctx.db,
-			"serverPreferences",
-			"by_serverId",
-			server.discordId,
-		);
 
 		return {
 			canonicalId: threadId ?? targetMessage?.id ?? args.messageId,

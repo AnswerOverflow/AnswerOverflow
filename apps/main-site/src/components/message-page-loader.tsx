@@ -4,6 +4,7 @@ import { Effect } from "effect";
 import type { FunctionReturnType } from "convex/server";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { cache } from "react";
 import { runtime } from "../lib/runtime";
 import { MessagePage } from "./message-page";
 
@@ -11,16 +12,16 @@ export type MessagePageData = NonNullable<
 	FunctionReturnType<typeof api.private.messages.getMessagePageData>
 >;
 
-export async function fetchMessagePageData(
-	messageId: bigint,
-): Promise<MessagePageData | null> {
-	return Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.private.messages.getMessagePageData({
-			messageId,
-		});
-	}).pipe(runtime.runPromise);
-}
+export const fetchMessagePageData = cache(
+	async (messageId: bigint): Promise<MessagePageData | null> => {
+		return Effect.gen(function* () {
+			const database = yield* Database;
+			return yield* database.private.messages.getMessagePageData({
+				messageId,
+			});
+		}).pipe(runtime.runPromise);
+	},
+);
 
 export function generateMessagePageMetadata(
 	pageData: MessagePageData | null,
