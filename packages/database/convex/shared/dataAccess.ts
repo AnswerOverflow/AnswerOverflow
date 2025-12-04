@@ -18,20 +18,67 @@ import {
 	type EnrichedMessage as SharedEnrichedMessage,
 } from "./shared";
 
+function createRequestCache() {
+	const cache = new Map<string, Promise<never>>();
+
+	return {
+		get<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+			const existing = cache.get(key);
+			if (existing) {
+				return existing;
+			}
+			const promise = fetcher();
+			cache.set(key, promise as Promise<never>);
+			return promise;
+		},
+	};
+}
+
+function createDataAccessCache(ctx: QueryCtx) {
+	const cache = createRequestCache();
+
+	return {
+		getServerPreferences: (serverId: bigint) =>
+			cache.get(`serverPreferences:${serverId}`, () =>
+				getOneFrom(ctx.db, "serverPreferences", "by_serverId", serverId),
+			),
+
+		getUserServerSettings: (userId: bigint, serverId: bigint) =>
+			cache.get(`userServerSettings:${userId}:${serverId}`, () =>
+				getUserServerSettingsForServerByDiscordId(ctx, userId, serverId),
+			),
+
+		getDiscordAccountIdFromAuth: () =>
+			cache.get("discordAccountId", () => getDiscordAccountIdFromAuth(ctx)),
+
+		getChannel: (channelId: bigint) =>
+			cache.get(`channel:${channelId}`, () =>
+				getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
+			),
+
+		getServer: (serverId: bigint) =>
+			cache.get(`server:${serverId}`, () =>
+				getOneFrom(ctx.db, "servers", "by_discordId", serverId, "discordId"),
+			),
+
+		isChannelIndexingEnabled: (channelId: bigint, parentChannelId?: bigint) =>
+			cache.get(
+				`channelIndexing:${channelId}:${parentChannelId ?? "none"}`,
+				() => isChannelIndexingEnabled(ctx, channelId, parentChannelId),
+			),
+	};
+}
+
 async function fetchMessagePrivacyData(
-	ctx: QueryCtx,
+	cache: DataAccessCache,
 	message: Message,
 ): Promise<{
 	serverPreferences: ServerPreferences | null;
 	authorServerSettings: UserServerSettings | null;
 }> {
 	const [serverPreferences, authorServerSettings] = await Promise.all([
-		getOneFrom(ctx.db, "serverPreferences", "by_serverId", message.serverId),
-		getUserServerSettingsForServerByDiscordId(
-			ctx,
-			message.authorId,
-			message.serverId,
-		),
+		cache.getServerPreferences(message.serverId),
+		cache.getUserServerSettings(message.authorId, message.serverId),
 	]);
 
 	return {
@@ -42,15 +89,16 @@ async function fetchMessagePrivacyData(
 
 async function enrichMessage(
 	ctx: QueryCtx,
+	cache: DataAccessCache,
 	message: Message,
 ): Promise<SharedEnrichedMessage | null> {
 	const [privacyData, userServerSettings] = await Promise.all([
-		fetchMessagePrivacyData(ctx, message),
-		getDiscordAccountIdFromAuth(ctx).then((id) =>
-			id
-				? getUserServerSettingsForServerByDiscordId(ctx, id, message.serverId)
-				: null,
-		),
+		fetchMessagePrivacyData(cache, message),
+		cache
+			.getDiscordAccountIdFromAuth()
+			.then((id) =>
+				id ? cache.getUserServerSettings(id, message.serverId) : null,
+			),
 	]);
 
 	const { serverPreferences, authorServerSettings } = privacyData;
@@ -79,6 +127,8 @@ async function enrichMessage(
 	return await enrichMessageForDisplay(ctx, message, { isAnonymous });
 }
 
+type DataAccessCache = ReturnType<typeof createDataAccessCache>;
+
 export function hiddenMessageStub(): MessageWithPrivacyFlags {
 	return {
 		authorId: 0n,
@@ -102,50 +152,31 @@ export async function enrichMessages(
 	ctx: QueryCtx,
 	messages: Message[],
 ): Promise<SharedEnrichedMessage[]> {
+	const cache = createDataAccessCache(ctx);
 	const results = await Promise.all(
-		messages.map((message) => enrichMessage(ctx, message)),
+		messages.map((message) => enrichMessage(ctx, cache, message)),
 	);
 	return Arr.filter(results, Predicate.isNotNullable);
 }
 
-export async function enrichedMessageWithServerAndChannels(
+async function enrichedMessageWithServerAndChannelsInternal(
 	ctx: QueryCtx,
+	cache: DataAccessCache,
 	message: Message,
 ) {
 	const { parentChannelId } = message;
 
-	const indexingEnabled = await isChannelIndexingEnabled(
-		ctx,
+	const indexingEnabled = await cache.isChannelIndexingEnabled(
 		message.channelId,
 		parentChannelId ?? undefined,
 	);
 	if (!indexingEnabled) return null;
 
 	const [enrichedMessage, parentChannel, channel, server] = await Promise.all([
-		enrichMessage(ctx, message),
-		parentChannelId
-			? getOneFrom(
-					ctx.db,
-					"channels",
-					"by_discordChannelId",
-					parentChannelId,
-					"id",
-				)
-			: undefined,
-		getOneFrom(
-			ctx.db,
-			"channels",
-			"by_discordChannelId",
-			message.channelId,
-			"id",
-		),
-		getOneFrom(
-			ctx.db,
-			"servers",
-			"by_discordId",
-			message.serverId,
-			"discordId",
-		),
+		enrichMessage(ctx, cache, message),
+		parentChannelId ? cache.getChannel(parentChannelId) : undefined,
+		cache.getChannel(message.channelId),
+		cache.getServer(message.serverId),
 	]);
 
 	if (!channel || !server || !enrichedMessage) return null;
@@ -156,6 +187,14 @@ export async function enrichedMessageWithServerAndChannels(
 		server: server,
 		thread: parentChannel ?? null,
 	} satisfies SearchResult;
+}
+
+export async function enrichedMessageWithServerAndChannels(
+	ctx: QueryCtx,
+	message: Message,
+) {
+	const cache = createDataAccessCache(ctx);
+	return enrichedMessageWithServerAndChannelsInternal(ctx, cache, message);
 }
 
 export type SearchResult = {
@@ -188,10 +227,11 @@ export async function searchMessages(
 		})
 		.paginate(args.paginationOpts);
 
+	const cache = createDataAccessCache(ctx);
 	const results = Arr.filter(
 		await Promise.all(
 			paginatedResult.page.map((m) =>
-				enrichedMessageWithServerAndChannels(ctx, m),
+				enrichedMessageWithServerAndChannelsInternal(ctx, cache, m),
 			),
 		),
 		Predicate.isNotNullable,
