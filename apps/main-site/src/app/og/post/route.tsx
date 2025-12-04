@@ -57,23 +57,24 @@ const SolvedIcon = () => (
 	</svg>
 );
 
-const MessagesIcon = () => (
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		width="48"
-		height="48"
-		viewBox="0 0 24 24"
-		fill="none"
-		opacity="0.8"
-		stroke="currentColor"
-		strokeWidth="2"
-		strokeLinecap="round"
-		strokeLinejoin="round"
-	>
-		<path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
-		<path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
-	</svg>
-);
+// TODO: Bring back reply count in a more efficient way
+// const MessagesIcon = () => (
+// 	<svg
+// 		xmlns="http://www.w3.org/2000/svg"
+// 		width="48"
+// 		height="48"
+// 		viewBox="0 0 24 24"
+// 		fill="none"
+// 		opacity="0.8"
+// 		stroke="currentColor"
+// 		strokeWidth="2"
+// 		strokeLinecap="round"
+// 		strokeLinejoin="round"
+// 	>
+// 		<path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" />
+// 		<path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
+// 	</svg>
+// );
 
 function truncate(str: string, n = 30) {
 	const truncated = str.length > n ? `${str.slice(0, n - 1)}...` : str;
@@ -104,7 +105,7 @@ export async function GET(req: Request) {
 
 	const data = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* database.private.messages.getMessagePageData({
+		const liveData = yield* database.private.messages.getMessagePageHeaderData({
 			messageId: BigInt(id),
 		});
 		return liveData;
@@ -116,19 +117,17 @@ export async function GET(req: Request) {
 		});
 	}
 
-	const { server, channel, thread, messages } = data;
+	const { server, channel, thread, firstMessage } = data;
 
-	const rootMessage = messages.at(0);
-	if (!rootMessage) {
+	if (!firstMessage) {
 		return new Response("Post not found", {
 			status: 404,
 		});
 	}
 
-	const title = thread?.name ?? rootMessage.message.content ?? "";
-	const isSolved = (rootMessage.solutions?.length ?? 0) > 0;
-	const numReplies = messages.length - 1;
-	const date = getSnowflakeUTCDate(rootMessage.message.id.toString());
+	const title = thread?.name ?? firstMessage.message.content ?? "";
+	const isSolved = (firstMessage.solutions?.length ?? 0) > 0;
+	const date = getSnowflakeUTCDate(firstMessage.message.id.toString());
 	const icon = makeServerIconLink(server, 96);
 
 	const ServerIcon = () => {
@@ -219,6 +218,7 @@ export async function GET(req: Request) {
 					{date}
 				</p>
 			</div>
+			{/* TODO: Bring back reply count in a more efficient way
 			<div
 				style={{
 					display: "flex",
@@ -241,6 +241,7 @@ export async function GET(req: Request) {
 					{numReplies} replies
 				</p>
 			</div>
+			*/}
 			{isSolved && (
 				<div
 					style={{

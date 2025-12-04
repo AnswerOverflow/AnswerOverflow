@@ -1,13 +1,14 @@
-"use client";
-
-import { api } from "@packages/database/convex/_generated/api";
-import { useSession } from "@packages/ui/components/convex-client-provider";
+import type { api } from "@packages/database/convex/_generated/api";
+import { Database } from "@packages/database/database";
 import { Link } from "@packages/ui/components/link";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { TimeAgo } from "@packages/ui/components/time-ago";
-import { useStableQuery } from "@packages/ui/hooks/use-stable-query";
+import type { FunctionReturnType } from "convex/server";
+import { Effect } from "effect";
 import { CheckCircle2 } from "lucide-react";
+import { Suspense } from "react";
+import { runtime } from "@/lib/runtime";
 
 type SimilarThreadsProps = {
 	searchQuery: string;
@@ -15,6 +16,10 @@ type SimilarThreadsProps = {
 	currentServerId: string;
 	serverId?: string;
 };
+
+type SimilarThreadsResult = FunctionReturnType<
+	typeof api.public.search.getSimilarThreads
+>;
 
 function SimilarThreadsContainer(props: { children: React.ReactNode }) {
 	return (
@@ -29,7 +34,7 @@ function SimilarThreadsContainer(props: { children: React.ReactNode }) {
 	);
 }
 
-function SimilarThreadsSkeleton() {
+export function SimilarThreadsSkeleton() {
 	return (
 		<SimilarThreadsContainer>
 			<div className="flex flex-col divide-y divide-border">
@@ -47,26 +52,23 @@ function SimilarThreadsSkeleton() {
 	);
 }
 
-export function SimilarThreads(props: SimilarThreadsProps) {
-	const { searchQuery, currentThreadId, currentServerId, serverId } = props;
-	const session = useSession({ allowAnonymous: true });
+async function fetchSimilarThreads(
+	args: SimilarThreadsProps & { limit: number },
+): Promise<SimilarThreadsResult> {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.public.search.getSimilarThreads({
+			searchQuery: args.searchQuery,
+			currentThreadId: args.currentThreadId,
+			currentServerId: args.currentServerId,
+			serverId: args.serverId,
+			limit: args.limit,
+		});
+	}).pipe(runtime.runPromise);
+}
 
-	const results = useStableQuery(
-		api.public.search.getSimilarThreads,
-		session?.data
-			? {
-					searchQuery,
-					currentThreadId,
-					currentServerId,
-					serverId,
-					limit: 4,
-				}
-			: "skip",
-	);
-
-	if (results === undefined) {
-		return <SimilarThreadsSkeleton />;
-	}
+function SimilarThreadsList(props: { results: SimilarThreadsResult }) {
+	const { results } = props;
 
 	if (results.length === 0) {
 		return null;
@@ -115,5 +117,22 @@ export function SimilarThreads(props: SimilarThreadsProps) {
 				})}
 			</div>
 		</SimilarThreadsContainer>
+	);
+}
+
+async function SimilarThreadsLoader(props: SimilarThreadsProps) {
+	const results = await fetchSimilarThreads({
+		...props,
+		limit: 4,
+	});
+
+	return <SimilarThreadsList results={results} />;
+}
+
+export function SimilarThreads(props: SimilarThreadsProps) {
+	return (
+		<Suspense fallback={<SimilarThreadsSkeleton />}>
+			<SimilarThreadsLoader {...props} />
+		</Suspense>
 	);
 }

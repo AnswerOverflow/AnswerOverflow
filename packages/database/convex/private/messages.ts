@@ -13,7 +13,6 @@ import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { isChannelIndexingEnabled } from "../shared/channels";
 import { enrichMessages } from "../shared/dataAccess";
 import {
-	compareIds,
 	deleteMessageInternalLogic,
 	findIgnoredDiscordAccountById,
 	findMessagesByChannelId,
