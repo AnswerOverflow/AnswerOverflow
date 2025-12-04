@@ -7,7 +7,6 @@ import { TimeAgo } from "@packages/ui/components/time-ago";
 import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
 import { CheckCircle2 } from "lucide-react";
-import { Suspense } from "react";
 import { runtime } from "@/lib/runtime";
 
 type SimilarThreadsProps = {
@@ -120,19 +119,11 @@ function SimilarThreadsList(props: { results: SimilarThreadsResult }) {
 	);
 }
 
-async function SimilarThreadsLoader(props: SimilarThreadsProps) {
+export async function SimilarThreads(props: SimilarThreadsProps) {
 	const results = await fetchSimilarThreads({
 		...props,
 		limit: 4,
 	});
 
 	return <SimilarThreadsList results={results} />;
-}
-
-export function SimilarThreads(props: SimilarThreadsProps) {
-	return (
-		<Suspense fallback={<SimilarThreadsSkeleton />}>
-			<SimilarThreadsLoader {...props} />
-		</Suspense>
-	);
 }
