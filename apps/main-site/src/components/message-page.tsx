@@ -38,7 +38,6 @@ import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { JsonLdScript } from "@/components/json-ld-script";
-import { SimilarThreads } from "@/components/similar-threads";
 
 export type MessagePageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.private.messages.getMessagePageHeaderData>
@@ -257,8 +256,9 @@ export function RepliesSection(props: {
 export function MessagePage(props: {
 	headerData: MessagePageHeaderData;
 	repliesSlot: ReactNode;
+	similarThreadsSlot: ReactNode;
 }) {
-	const { headerData, repliesSlot } = props;
+	const { headerData, repliesSlot, similarThreadsSlot } = props;
 	const tenant = useTenant();
 	const [focusMessageId] = useQueryState("focus");
 
@@ -468,22 +468,7 @@ export function MessagePage(props: {
 								</div>
 							</div>
 						</div>
-						<SimilarThreads
-							searchQuery={
-								headerData.thread?.name ??
-								firstMessage?.message.content?.slice(0, 100) ??
-								""
-							}
-							currentThreadId={(
-								headerData.thread?.id ??
-								firstMessage?.message.id ??
-								headerData.canonicalId
-							).toString()}
-							currentServerId={headerData.server.discordId.toString()}
-							serverId={
-								tenant ? headerData.server.discordId.toString() : undefined
-							}
-						/>
+						{similarThreadsSlot}
 						<div className="flex w-full flex-col justify-center gap-2 text-center">
 							<HelpfulFeedback
 								page={{
