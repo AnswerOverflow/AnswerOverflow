@@ -169,6 +169,7 @@
         "@answeroverflow/env": "workspace:*",
         "@answeroverflow/utils": "workspace:*",
         "@sapphire/bitfield": "^1.2.0",
+        "@sapphire/framework": "^5.4.0",
         "@trpc/client": "^10.45.2",
         "@trpc/server": "^10.45.2",
         "@types/qs": "^6.9.7",
@@ -210,6 +211,7 @@
         "@planetscale/database": "^1.11.0",
         "@sapphire/bitfield": "^1.2.0",
         "@typelytics/posthog": "^0.1.5",
+        "cookie": "^1.1.1",
         "dataloader": "^2.2.2",
         "discord-api-types": "^0.37.67",
         "dotenv": "^16.4.5",
@@ -1638,7 +1640,7 @@
 
     "convert-source-map": ["convert-source-map@2.0.0", "", {}, "sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg=="],
 
-    "cookie": ["cookie@0.6.0", "", {}, "sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw=="],
+    "cookie": ["cookie@1.1.1", "", {}, "sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ=="],
 
     "cookie-signature": ["cookie-signature@1.2.2", "", {}, "sha512-D76uU73ulSXrD1UXF4KE2TMxVVwhsnCgfAyTg9k8P6KGZjlXKrOLe4dJQKI3Bxi5wjesZoFXJWElNWBjPZMbhg=="],
 
@@ -3153,6 +3155,8 @@
     "@answeroverflow/main-site/@opentelemetry/exporter-trace-otlp-http": ["@opentelemetry/exporter-trace-otlp-http@0.53.0", "", { "dependencies": { "@opentelemetry/core": "1.26.0", "@opentelemetry/otlp-exporter-base": "0.53.0", "@opentelemetry/otlp-transformer": "0.53.0", "@opentelemetry/resources": "1.26.0", "@opentelemetry/sdk-trace-base": "1.26.0" }, "peerDependencies": { "@opentelemetry/api": "^1.0.0" } }, "sha512-m7F5ZTq+V9mKGWYpX8EnZ7NjoqAU7VemQ1E2HAG+W/u0wpY1x0OmbxAXfGKFHCspdJk8UKlwPGrpcB8nay3P8A=="],
 
     "@answeroverflow/ui/lucide-react": ["lucide-react@0.263.1", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0" } }, "sha512-keqxAx97PlaEN89PXZ6ki1N8nRjGWtDa4021GFYLNj0RgruM5odbpl8GHTExj0hhPq3sF6Up0gnxt6TSHu+ovw=="],
+
+    "@auth/core/cookie": ["cookie@0.6.0", "", {}, "sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw=="],
 
     "@auth/core/jose": ["jose@5.10.0", "", {}, "sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg=="],
 
