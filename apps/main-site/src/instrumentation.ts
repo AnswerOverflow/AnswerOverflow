@@ -8,7 +8,6 @@ export function register() {
 		registerOTel({
 			serviceName: 'main-site',
 			spanProcessors: [
-				// @ts-expect-error
 				new SimpleSpanProcessor(
 					new OTLPTraceExporter({
 						url: 'https://api.axiom.co/v1/traces',

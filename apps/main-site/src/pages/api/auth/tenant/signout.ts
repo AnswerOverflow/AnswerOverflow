@@ -1,7 +1,7 @@
 import { Auth } from '@answeroverflow/core/auth';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { z } from 'zod';
-import { setCookie } from '../../../../../../../node_modules/next-auth/next/utils';
+import { setCookie } from '../../../../../node_modules/next-auth/next/utils';
 
 export default async function handler(
 	req: NextApiRequest,
