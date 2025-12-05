@@ -73,11 +73,11 @@ const config = {
 	redirects: async () => {
 		return [
 			{
-				source: '/onboarding:slug*',
+				source: '/onboarding/:slug*',
 				destination:
 					process.env.NODE_ENV === 'development'
-						? 'http://localhost:3002/onboarding'
-						: 'https://app.answeroverflow.com/onboarding',
+						? 'http://localhost:3002/onboarding/:slug*'
+						: 'https://app.answeroverflow.com/onboarding/:slug*',
 				permanent: process.env.NODE_ENV === 'production',
 			},
 			{
@@ -89,11 +89,11 @@ const config = {
 				permanent: process.env.NODE_ENV === 'production',
 			},
 			{
-				source: '/dashboard:slug*',
+				source: '/dashboard/:slug*',
 				destination:
 					process.env.NODE_ENV === 'development'
-						? 'http://localhost:3002/dashboard'
-						: 'https://app.answeroverflow.com/dashboard',
+						? 'http://localhost:3002/dashboard/:slug*'
+						: 'https://app.answeroverflow.com/dashboard/:slug*',
 				permanent: process.env.NODE_ENV === 'production',
 			},
 			{
@@ -102,8 +102,8 @@ const config = {
 				permanent: false,
 			},
 			{
-				source: '/changelog:slug*',
-				destination: 'https://docs.answeroverflow.com/changelog:slug',
+				source: '/changelog/:slug*',
+				destination: 'https://docs.answeroverflow.com/changelog/:slug*',
 				permanent: false,
 			},
 		];
