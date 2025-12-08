@@ -72,7 +72,11 @@ export const upsertMessage = privateMutation({
 		}
 
 		const { attachments, reactions } = args;
-		const messageData = args.message;
+		const messageData = { ...args.message };
+
+		if (messageData.id === messageData.channelId) {
+			messageData.childThreadId = messageData.channelId;
+		}
 
 		const existing = await getOneFrom(
 			ctx.db,
