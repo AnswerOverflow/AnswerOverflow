@@ -24,7 +24,7 @@
 		"@sentry/tracing": "^7.64.0",
 		"@trpc/server": "^10.45.2",
 		"colorette": "^2.0.20",
-		"cron": "^3.1.7",
+		"cron": "^4.3.5",
 		"discord-api-types": "^0.37.67",
 		"discord.js": "^14.16.3",
 		"dotenv-cra": "^3.0.3",
