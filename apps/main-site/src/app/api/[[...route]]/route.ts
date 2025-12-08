@@ -23,11 +23,11 @@ function isAllowedDevOrigin(origin: string | undefined): boolean {
 	return ALLOWED_DEV_ORIGINS.some((pattern) => pattern.test(origin));
 }
 
-function isProductionReferer(referer: string | undefined): boolean {
+function isDevAuthPageReferer(referer: string | undefined): boolean {
 	if (!referer) return false;
 	try {
 		const url = new URL(referer);
-		return url.origin === PRODUCTION_ORIGIN;
+		return url.origin === PRODUCTION_ORIGIN && url.pathname === "/dev-auth";
 	} catch {
 		return false;
 	}
@@ -48,8 +48,13 @@ function isLocalhostRequest(requestUrl: string): boolean {
 
 app.get("/dev/auth/get-jwt", async (c) => {
 	const referer = c.req.header("Referer");
-	if (!isProductionReferer(referer)) {
-		return c.text("Forbidden: Invalid referer", 403);
+	if (!isDevAuthPageReferer(referer)) {
+		return c.text("Forbidden: Must be called from /dev-auth page", 403);
+	}
+
+	const state = c.req.query("state");
+	if (!state || !/^[0-9a-f]{64}$/.test(state)) {
+		return c.text("Bad Request: Invalid or missing state parameter", 400);
 	}
 
 	const cookies = getCookie(c);
@@ -64,10 +69,8 @@ app.get("/dev/auth/get-jwt", async (c) => {
 	const authCookieNames = [
 		"better-auth.session_token",
 		"better-auth.convex_jwt",
-		"better-auth.state",
 		"__Secure-better-auth.session_token",
 		"__Secure-better-auth.convex_jwt",
-		"__Secure-better-auth.state",
 	];
 
 	const authCookies: Record<string, string> = {};
@@ -91,54 +94,52 @@ app.post("/dev/auth/set-token", async (c) => {
 	}
 
 	const body = await c.req.json();
-	const token = body.token;
+	const { token } = body;
 
 	if (!token || typeof token !== "string") {
 		return c.json({ error: "Invalid or missing token" }, 400);
 	}
 
+	let cookies: Record<string, string>;
 	try {
 		const decoded = Buffer.from(token, "base64url").toString("utf-8");
-		const cookies = JSON.parse(decoded);
-
+		cookies = JSON.parse(decoded);
 		if (typeof cookies !== "object" || cookies === null) {
-			return c.json({ error: "Invalid token format: expected object" }, 400);
+			return c.json({ error: "Invalid token format" }, 400);
 		}
-
-		const isLocalhost = isLocalhostRequest(c.req.url);
-		const setCookieHeaders: string[] = [];
-
-		for (const [key, value] of Object.entries(cookies)) {
-			if (typeof value !== "string") continue;
-
-			const decodedValue = decodeURIComponent(value);
-
-			const cookieAttrs = [
-				"Path=/",
-				"HttpOnly",
-				"SameSite=Lax",
-				`Max-Age=${60 * 60 * 24 * 7}`,
-			];
-
-			// __Secure- prefix cookies require Secure attribute even on localhost
-			// This is a browser security requirement for cookies with the __Secure- prefix
-			const needsSecure = key.startsWith("__Secure-") || !isLocalhost;
-			if (needsSecure) {
-				cookieAttrs.push("Secure");
-			}
-
-			const cookieHeader = `${key}=${decodedValue}; ${cookieAttrs.join("; ")}`;
-			setCookieHeaders.push(cookieHeader);
-		}
-
-		const response = c.json({ success: true });
-		for (const header of setCookieHeaders) {
-			response.headers.append("Set-Cookie", header);
-		}
-		return response;
-	} catch (error) {
-		return c.json({ error: "Invalid token", details: String(error) }, 400);
+	} catch {
+		return c.json({ error: "Invalid token format" }, 400);
 	}
+
+	const isLocalhost = isLocalhostRequest(c.req.url);
+	const setCookieHeaders: string[] = [];
+
+	for (const [key, value] of Object.entries(cookies)) {
+		if (typeof value !== "string") continue;
+
+		const decodedValue = decodeURIComponent(value);
+
+		const cookieAttrs = [
+			"Path=/",
+			"HttpOnly",
+			"SameSite=Lax",
+			`Max-Age=${60 * 60 * 24 * 7}`,
+		];
+
+		const needsSecure = key.startsWith("__Secure-") || !isLocalhost;
+		if (needsSecure) {
+			cookieAttrs.push("Secure");
+		}
+
+		const cookieHeader = `${key}=${decodedValue}; ${cookieAttrs.join("; ")}`;
+		setCookieHeaders.push(cookieHeader);
+	}
+
+	const response = c.json({ success: true });
+	for (const header of setCookieHeaders) {
+		response.headers.append("Set-Cookie", header);
+	}
+	return response;
 });
 
 app.post("/dev/auth/clear-cookies", async (c) => {

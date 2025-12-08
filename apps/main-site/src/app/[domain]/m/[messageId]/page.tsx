@@ -95,7 +95,7 @@ export default async function TenantMessagePage(props: Props) {
 
 	const solutionMessageId = headerData.solutionMessage?.message.id;
 	const startingFromMessageId =
-		headerData.threadId || headerData.rootMessageDeleted
+		headerData.threadId || headerData.firstMessage === null
 			? undefined
 			: headerData.firstMessage?.message.id;
 

@@ -52,7 +52,7 @@ export function generateMessagePageMetadata(
 	}
 
 	const { firstMessage } = headerData;
-	const rootMessageDeleted = headerData.rootMessageDeleted && !firstMessage;
+	const rootMessageDeleted = !firstMessage;
 	const title =
 		headerData.thread?.name ??
 		firstMessage?.message.content?.slice(0, 100) ??
@@ -81,7 +81,6 @@ async function RepliesLoader(props: {
 	channelId: bigint;
 	threadId: bigint | null;
 	startingFromMessageId: bigint | undefined;
-	firstMessageId: bigint | undefined;
 	serverDiscordId: bigint;
 	channelDiscordId: bigint;
 	solutionMessageId: bigint | undefined;
@@ -92,10 +91,11 @@ async function RepliesLoader(props: {
 		props.startingFromMessageId,
 	);
 
+	console.log("replies", replies);
+
 	return (
 		<RepliesSection
 			replies={replies}
-			firstMessageId={props.firstMessageId}
 			channelId={props.channelDiscordId}
 			threadId={props.threadId}
 			solutionMessageId={props.solutionMessageId}
@@ -113,19 +113,15 @@ export function MessagePageLoader(props: {
 		return notFound();
 	}
 
-	const hasFirstMessage = headerData.firstMessage !== null;
 	const hasThread = headerData.thread !== null;
-	const rootMessageDeleted = headerData.rootMessageDeleted;
-
-	if (!hasFirstMessage && !rootMessageDeleted) {
-		return notFound();
-	}
+	const rootMessageDeleted = !headerData.firstMessage;
 
 	if (rootMessageDeleted && !hasThread) {
 		return notFound();
 	}
 
 	const canonicalId = headerData.canonicalId.toString();
+	console.log("canonicalId", canonicalId, messageId, headerData.thread);
 	if (canonicalId !== messageId) {
 		redirect(`/m/${canonicalId}?focus=${messageId}`);
 	}
@@ -145,7 +141,6 @@ export function MessagePageLoader(props: {
 						channelId={headerData.channelId}
 						threadId={headerData.threadId}
 						startingFromMessageId={startingFromMessageId}
-						firstMessageId={headerData.firstMessage?.message.id}
 						serverDiscordId={headerData.server.discordId}
 						channelDiscordId={headerData.channel.id}
 						solutionMessageId={solutionMessageId}

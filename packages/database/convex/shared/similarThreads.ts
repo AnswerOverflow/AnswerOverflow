@@ -149,7 +149,7 @@ export async function findSimilarThreadCandidates(
 
 		const [indexingEnabled, server, parentChannel, firstMessage] =
 			await Promise.all([
-				isChannelIndexingEnabled(ctx, thread.id, thread.parentId),
+				isChannelIndexingEnabled(ctx, thread),
 				getOneFrom(
 					ctx.db,
 					"servers",

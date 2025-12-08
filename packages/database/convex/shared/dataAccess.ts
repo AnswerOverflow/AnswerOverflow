@@ -64,7 +64,11 @@ function createDataAccessCache(ctx: QueryCtx) {
 		isChannelIndexingEnabled: (channelId: bigint, parentChannelId?: bigint) =>
 			cache.get(
 				`channelIndexing:${channelId}:${parentChannelId ?? "none"}`,
-				() => isChannelIndexingEnabled(ctx, channelId, parentChannelId),
+				() =>
+					isChannelIndexingEnabled(ctx, {
+						id: channelId,
+						parentId: parentChannelId,
+					}),
 			),
 	};
 }

@@ -66,13 +66,17 @@ export default function DevAuthPage() {
 
 		async function sendTokenToOpener() {
 			if (!Exit.isSuccess(url)) return;
+			if (!state) return;
 
 			setStatus("pending");
 			try {
-				const response = await fetch("/api/dev/auth/get-jwt", {
-					method: "GET",
-					credentials: "include",
-				});
+				const response = await fetch(
+					`/api/dev/auth/get-jwt?state=${encodeURIComponent(state)}`,
+					{
+						method: "GET",
+						credentials: "include",
+					},
+				);
 
 				if (!response.ok) {
 					const text = await response.text();
