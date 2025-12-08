@@ -2,7 +2,10 @@ import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ChannelPageContent } from "../../../components/channel-page-content";
+import {
+	ChannelPageLoader,
+	fetchChannelPageHeaderData,
+} from "../../../components/channel-page-loader";
 import { runtime } from "../../../lib/runtime";
 
 type Props = {
@@ -100,25 +103,10 @@ export default async function ServerPage(props: Props) {
 		return notFound();
 	}
 
-	const pageData = await Effect.gen(function* () {
-		const database = yield* Database;
-		const liveData = yield* database.private.channels.getChannelPageData({
-			serverDiscordId: BigInt(params.serverId),
-			channelDiscordId: defaultChannel.id,
-		});
-		return liveData;
-	}).pipe(runtime.runPromise);
-
-	if (!pageData) {
-		return notFound();
-	}
-
-	return (
-		<ChannelPageContent
-			server={pageData.server}
-			channels={pageData.channels}
-			selectedChannel={pageData.selectedChannel}
-			threads={pageData.threads}
-		/>
+	const headerData = await fetchChannelPageHeaderData(
+		BigInt(params.serverId),
+		defaultChannel.id,
 	);
+
+	return <ChannelPageLoader headerData={headerData} />;
 }

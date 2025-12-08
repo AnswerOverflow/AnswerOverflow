@@ -14,10 +14,15 @@ import { useTenant } from "@packages/ui/components/tenant-context";
 import { ChannelThreadCard } from "@packages/ui/components/thread-card";
 import type { FunctionReturnType } from "convex/server";
 import { ChevronDown, Hash, MessageSquare } from "lucide-react";
+import type { ReactNode } from "react";
 import { useState } from "react";
 
-type ChannelPageData = NonNullable<
-	FunctionReturnType<typeof api.private.channels.getChannelPageData>
+type ChannelPageHeaderData = NonNullable<
+	FunctionReturnType<typeof api.private.channels.getChannelPageHeaderData>
+>;
+
+export type ChannelPageThreads = FunctionReturnType<
+	typeof api.private.channels.getChannelPageThreads
 >;
 
 function getChannelIcon(type: number) {
@@ -31,8 +36,8 @@ function MobileChannelSelector({
 	serverDiscordId,
 	tenantMode,
 }: {
-	channels: ChannelPageData["channels"];
-	selectedChannel: ChannelPageData["selectedChannel"];
+	channels: ChannelPageHeaderData["channels"];
+	selectedChannel: ChannelPageHeaderData["selectedChannel"];
 	serverDiscordId: bigint;
 	tenantMode: boolean;
 }) {
@@ -90,12 +95,41 @@ function MobileChannelSelector({
 	);
 }
 
+export function ThreadsList({ threads }: { threads: ChannelPageThreads }) {
+	if (threads.length === 0) {
+		return (
+			<div className="text-center py-12 text-muted-foreground">
+				No threads found in this channel
+			</div>
+		);
+	}
+
+	return (
+		<div className="space-y-4">
+			{threads.map(({ thread, message }) => (
+				<ChannelThreadCard
+					key={thread.id.toString()}
+					thread={thread}
+					message={message}
+				/>
+			))}
+		</div>
+	);
+}
+
+type ChannelPageContentProps = {
+	server: ChannelPageHeaderData["server"];
+	channels: ChannelPageHeaderData["channels"];
+	selectedChannel: ChannelPageHeaderData["selectedChannel"];
+	threadsSlot: ReactNode;
+};
+
 export function ChannelPageContent({
 	server,
 	channels,
 	selectedChannel,
-	threads,
-}: ChannelPageData) {
+	threadsSlot,
+}: ChannelPageContentProps) {
 	const tenant = useTenant();
 	const tenantMode = !!tenant;
 	const serverIcon = server.icon ?? null;
@@ -180,21 +214,7 @@ export function ChannelPageContent({
 						<h2 className="text-xl font-semibold text-foreground mb-4">
 							Threads
 						</h2>
-						{threads.length === 0 ? (
-							<div className="text-center py-12 text-muted-foreground">
-								No threads found in this channel
-							</div>
-						) : (
-							<div className="space-y-4">
-								{threads.map(({ thread, message }) => (
-									<ChannelThreadCard
-										key={thread.id.toString()}
-										thread={thread}
-										message={message}
-									/>
-								))}
-							</div>
-						)}
+						{threadsSlot}
 					</div>
 				</div>
 			</div>

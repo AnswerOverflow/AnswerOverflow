@@ -8,27 +8,13 @@ import {
 } from "@packages/ui/components/avatar";
 import { makeUserIconLink } from "@packages/ui/components/discord-avatar";
 import { Link } from "@packages/ui/components/link";
+import { RelativeTime } from "@packages/ui/components/relative-time";
 import { DiscordUIMessage } from "./renderer";
 import type { MessageWithMetadata } from "./types";
 
 function getSnowflakeDate(snowflake: string): Date {
 	const timestamp = BigInt(snowflake) >> 22n;
 	return new Date(Number(timestamp) + 1420070400000);
-}
-
-function formatRelativeTime(date: Date): string {
-	const now = new Date();
-	const diffMs = now.getTime() - date.getTime();
-	const diffSecs = Math.floor(diffMs / 1000);
-	const diffMins = Math.floor(diffSecs / 60);
-	const diffHours = Math.floor(diffMins / 60);
-	const diffDays = Math.floor(diffHours / 24);
-
-	if (diffSecs < 60) return "just now";
-	if (diffMins < 60) return `${diffMins}m ago`;
-	if (diffHours < 24) return `${diffHours}h ago`;
-	if (diffDays < 7) return `${diffDays}d ago`;
-	return date.toLocaleDateString();
 }
 
 export type DiscordMessageProps = {
@@ -116,9 +102,10 @@ export function DiscordMessage({
 							>
 								{author.name}
 							</Link>
-							<div className="text-xs text-muted-foreground">
-								{formatRelativeTime(messageDate)}
-							</div>
+							<RelativeTime
+								date={messageDate}
+								className="text-xs text-muted-foreground"
+							/>
 						</div>
 					</>
 				) : (

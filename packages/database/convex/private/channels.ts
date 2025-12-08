@@ -261,3 +261,119 @@ export const getChannelPageData = privateQuery({
 		};
 	},
 });
+
+export const getChannelPageHeaderData = privateQuery({
+	args: {
+		serverDiscordId: v.int64(),
+		channelDiscordId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.serverDiscordId,
+		);
+
+		if (!server) return null;
+
+		const [channel, indexedSettings] = await Promise.all([
+			getChannelWithSettings(ctx, args.channelDiscordId),
+			ctx.db
+				.query("channelSettings")
+				.withIndex("by_serverId_and_indexingEnabled", (q) =>
+					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+				)
+				.collect(),
+		]);
+
+		if (!channel || channel.serverId !== server.discordId) return null;
+
+		const indexedChannelIds = indexedSettings.map((s) => s.channelId);
+
+		const allIndexedChannels = await asyncMap(indexedChannelIds, (channelId) =>
+			getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
+		);
+
+		const indexedChannels = Arr.filter(allIndexedChannels, Predicate.isNotNull)
+			.filter(
+				(c) =>
+					c.type === CHANNEL_TYPE.GuildText ||
+					c.type === CHANNEL_TYPE.GuildAnnouncement ||
+					c.type === CHANNEL_TYPE.GuildForum,
+			)
+			.sort((a, b) => {
+				if (a.type === CHANNEL_TYPE.GuildForum) return -1;
+				if (b.type === CHANNEL_TYPE.GuildForum) return 1;
+				if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
+				if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
+				return 0;
+			});
+
+		return {
+			server: {
+				...server,
+				channels: indexedChannels,
+			},
+			channels: indexedChannels,
+			selectedChannel: channel,
+		};
+	},
+});
+
+export const getChannelPageThreads = privateQuery({
+	args: {
+		channelDiscordId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		const threads = await ctx.db
+			.query("channels")
+			.withIndex("by_parentId_and_id", (q) =>
+				q.eq("parentId", args.channelDiscordId),
+			)
+			.order("desc")
+			.take(50);
+
+		const threadIds = threads.map((t) => t.id);
+		const [firstMessages, rootMessages] = await Promise.all([
+			getFirstMessagesInChannels(ctx, threadIds),
+			Promise.all(threadIds.map((id) => getThreadStartMessage(ctx, id))),
+		]);
+
+		const rootMessageIds = new Set(
+			Arr.filter(rootMessages, Predicate.isNotNull).map((m) => m.id),
+		);
+
+		const threadsWithRootMessage = Arr.filter(threads, (thread) =>
+			rootMessageIds.has(thread.id),
+		);
+
+		const messages = Arr.filter(
+			Arr.map(
+				threadsWithRootMessage,
+				(thread) => firstMessages[thread.id.toString()] ?? null,
+			),
+			Predicate.isNotNull,
+		);
+
+		const enrichedMessages = await enrichMessages(ctx, messages);
+
+		const enrichedMessagesMap = new Map(
+			enrichedMessages.map((em) => [em.message.id, em]),
+		);
+
+		return Arr.filter(
+			Arr.map(threadsWithRootMessage, (thread) => {
+				const message = firstMessages[thread.id.toString()];
+				if (!message) return null;
+				const enrichedMessage = enrichedMessagesMap.get(message.id);
+				if (!enrichedMessage) return null;
+				return {
+					thread,
+					message: enrichedMessage,
+				};
+			}),
+			Predicate.isNotNull,
+		);
+	},
+});
