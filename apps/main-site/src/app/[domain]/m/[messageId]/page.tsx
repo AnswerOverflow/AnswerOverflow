@@ -53,7 +53,6 @@ async function RepliesLoader(props: {
 	return (
 		<RepliesSection
 			replies={replies}
-			firstMessageId={props.firstMessageId}
 			channelId={props.channelId}
 			threadId={props.threadId}
 			solutionMessageId={props.solutionMessageId}
