@@ -104,7 +104,7 @@ export function DiscordMessage({
 							</Link>
 							<RelativeTime
 								date={messageDate}
-								className="text-xs text-muted-foreground"
+								className="text-xs text-muted-foreground ml-2"
 							/>
 						</div>
 					</>
