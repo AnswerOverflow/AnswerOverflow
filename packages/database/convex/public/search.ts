@@ -67,8 +67,7 @@ export const getRecentThreads = publicQuery({
 
 					const indexingEnabled = await isChannelIndexingEnabled(
 						ctx,
-						threadChannel.id,
-						threadChannel.parentId,
+						threadChannel,
 					);
 					if (!indexingEnabled) {
 						return null;
