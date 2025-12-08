@@ -1,5 +1,6 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import type { MutationCtx, QueryCtx } from "../client";
+import type { Channel } from "../schema";
 
 export const CHANNEL_TYPE = {
 	GuildText: 0,
@@ -67,10 +68,9 @@ export async function getChannelWithSettings(
 
 export async function isChannelIndexingEnabled(
 	ctx: QueryCtx | MutationCtx,
-	channelId: bigint,
-	parentChannelId?: bigint,
+	channel: Pick<Channel, "id" | "parentId">,
 ): Promise<boolean> {
-	const targetChannelId = parentChannelId ?? channelId;
+	const targetChannelId = channel.parentId ?? channel.id;
 	const settings = await getOneFrom(
 		ctx.db,
 		"channelSettings",

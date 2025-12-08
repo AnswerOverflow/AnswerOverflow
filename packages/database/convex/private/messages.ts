@@ -1,4 +1,4 @@
-import { type Infer, v } from "convex/values";
+import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 // biome-ignore lint/style/noRestrictedImports: Is fine since it's an internal mutation altho we should really make a better pattern i.e their own file
@@ -10,7 +10,6 @@ import {
 	type QueryCtx,
 } from "../client";
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
-import { isChannelIndexingEnabled } from "../shared/channels";
 import { enrichMessages } from "../shared/dataAccess";
 import {
 	deleteMessageInternalLogic,
@@ -21,8 +20,6 @@ import {
 	getMessageById as getMessageByIdShared,
 	upsertMessageInternalLogic,
 } from "../shared/shared";
-
-type Message = Infer<typeof messageSchema>;
 
 async function isIgnoredAccount(
 	ctx: QueryCtx | MutationCtx,
@@ -314,26 +311,6 @@ export const deleteMessagesByDiscordChannelId = internalMutation({
 	},
 });
 
-function getThreadIdOfMessage(
-	message: Pick<Message, "channelId"> &
-		Partial<Pick<Message, "childThreadId" | "parentChannelId">>,
-): bigint | null {
-	if (message.childThreadId) {
-		return message.childThreadId;
-	}
-	if (message.parentChannelId) {
-		return message.channelId;
-	}
-	return null;
-}
-
-function getParentChannelOfMessage(
-	message: Pick<Message, "channelId"> &
-		Partial<Pick<Message, "parentChannelId">>,
-): bigint {
-	return message.parentChannelId ?? message.channelId;
-}
-
 export const updateEmbedStorageId = privateMutation({
 	args: {
 		messageId: v.int64(),
@@ -493,73 +470,43 @@ export const getMessagePageHeaderData = privateQuery({
 	handler: async (ctx, args) => {
 		const targetMessage = await getMessageByIdShared(ctx, args.messageId);
 
-		let threadId: bigint | null = null;
-		let parentId: bigint;
-		let channelId: bigint;
-		let serverId: bigint;
-		let rootMessageDeleted = false;
-
-		if (!targetMessage) {
-			const threadChannel = await getOneFrom(
-				ctx.db,
-				"channels",
-				"by_discordChannelId",
-				args.messageId,
-				"id",
-			);
-			if (!threadChannel || !threadChannel.parentId) {
-				return null;
-			}
-			threadId = threadChannel.id;
-			parentId = threadChannel.parentId;
-			channelId = threadId;
-			serverId = threadChannel.serverId;
-			rootMessageDeleted = true;
-		} else {
-			threadId = getThreadIdOfMessage(targetMessage);
-			parentId = getParentChannelOfMessage(targetMessage);
-			channelId = threadId ?? parentId;
-			serverId = targetMessage.serverId;
-		}
-
-		const indexingEnabled = await isChannelIndexingEnabled(
-			ctx,
-			channelId,
-			threadId ? parentId : undefined,
+		const thread = await getOneFrom(
+			ctx.db,
+			"channels",
+			"by_discordChannelId",
+			targetMessage?.parentChannelId ? targetMessage.channelId : args.messageId,
+			"id",
 		);
-		if (!indexingEnabled) {
+
+		const channelId =
+			thread?.parentId ??
+			targetMessage?.parentChannelId ??
+			targetMessage?.channelId;
+		if (!channelId) {
 			return null;
 		}
 
 		const channel = await getChannelWithSettings(ctx, channelId);
-		if (!channel) {
+		if (!channel?.flags?.indexingEnabled) {
+			console.error("Channel indexing not enabled", channel?.id);
 			return null;
 		}
 
-		const thread = threadId
-			? await getOneFrom(
-					ctx.db,
-					"channels",
-					"by_discordChannelId",
-					threadId,
-					"id",
-				)
-			: null;
-
-		const firstMessage = rootMessageDeleted
-			? null
-			: await ctx.db
-					.query("messages")
-					.withIndex("by_channelId_and_id", (q) => q.eq("channelId", channelId))
-					.order("asc")
-					.first();
+		const firstMessage = targetMessage;
 
 		const [enrichedFirstMessage, server] = await Promise.all([
 			firstMessage ? enrichMessages(ctx, [firstMessage]) : [],
-			getOneFrom(ctx.db, "servers", "by_discordId", serverId, "discordId"),
+			getOneFrom(
+				ctx.db,
+				"servers",
+				"by_discordId",
+				channel.serverId,
+				"discordId",
+			),
 		]);
 
 		if (!server) {
+			console.error("Server not found", channel.serverId);
 			return null;
 		}
 
@@ -576,12 +523,11 @@ export const getMessagePageHeaderData = privateQuery({
 		]);
 
 		return {
-			canonicalId: threadId ?? targetMessage?.id ?? args.messageId,
+			canonicalId: thread?.id ?? targetMessage?.id ?? args.messageId,
 			firstMessage: enrichedFirst,
 			solutionMessage: solutionMessage[0] ?? null,
-			rootMessageDeleted,
 			channelId,
-			threadId,
+			threadId: thread?.id ?? null,
 			server: {
 				_id: server._id,
 				discordId: server.discordId,
@@ -613,11 +559,16 @@ export const getMessagePageReplies = privateQuery({
 	handler: async (ctx, args) => {
 		const { channelId, threadId, startingFromMessageId } = args;
 
-		const allMessages = await findMessagesByChannelId(ctx, channelId, {
-			limit: threadId ? 100 : 50,
-			startingFrom: startingFromMessageId,
-		});
+		const allMessages = await findMessagesByChannelId(
+			ctx,
+			threadId ?? channelId,
+			{
+				limit: threadId ? 100 : 50,
+				startingFrom: startingFromMessageId,
+			},
+		);
 
-		return enrichMessages(ctx, allMessages);
+		const enrichedMessages = await enrichMessages(ctx, allMessages);
+		return enrichedMessages;
 	},
 });

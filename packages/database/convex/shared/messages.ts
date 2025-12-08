@@ -34,8 +34,8 @@ export async function findMessagesByChannelId(
 		.withIndex("by_channelId_and_id", (q) => {
 			const base = q.eq("channelId", channelId);
 			return options?.startingFrom
-				? base.gte("id", options.startingFrom)
-				: base;
+				? base.gt("id", options.startingFrom)
+				: base.gt("id", channelId);
 		})
 		.order("asc");
 

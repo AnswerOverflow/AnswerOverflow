@@ -51,15 +51,11 @@ const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
 
 function processRepliesForDisplay(
 	replies: EnrichedMessage[],
-	firstMessageId: bigint | undefined,
-	channelId: bigint,
-	threadId: bigint | null,
 	solutionMessageId: bigint | undefined,
 ): EnrichedMessage[] {
 	let contents = "";
 	const messagesBeingMerged: EnrichedMessage[] = [];
 	const messagesWithMergedContent = replies.map((message, index) => {
-		if (firstMessageId && message.message.id === firstMessageId) return null;
 		const nextMessage = replies.at(index + 1);
 		contents += message.message.content;
 		messagesBeingMerged.push(message);
@@ -117,16 +113,6 @@ function processRepliesForDisplay(
 	);
 
 	return nonNull.filter((message) => {
-		if (firstMessageId && message.message.id === firstMessageId) return false;
-		if (threadId || message.message.parentChannelId) {
-			if (message.message.channelId !== channelId) return false;
-		} else {
-			if (
-				message.message.parentChannelId &&
-				message.message.parentChannelId !== channelId
-			)
-				return false;
-		}
 		if (DISCORD_CLIENT_ID && message.author?.id === BigInt(DISCORD_CLIENT_ID))
 			return false;
 		return true;
@@ -160,7 +146,6 @@ export function RepliesSkeleton() {
 
 export function RepliesSection(props: {
 	replies: EnrichedMessage[];
-	firstMessageId: bigint | undefined;
 	channelId: bigint;
 	threadId: bigint | null;
 	solutionMessageId: bigint | undefined;
@@ -168,59 +153,46 @@ export function RepliesSection(props: {
 	server?: MessagePageHeaderData["server"];
 	channel?: MessagePageHeaderData["channel"];
 }) {
-	const {
-		replies,
-		firstMessageId,
-		channelId,
-		threadId,
-		solutionMessageId,
-		firstMessageAuthorId,
-		server,
-		channel,
-	} = props;
+	const { replies, solutionMessageId, firstMessageAuthorId, server, channel } =
+		props;
 
 	const messagesToDisplay = processRepliesForDisplay(
 		replies,
-		firstMessageId,
-		channelId,
-		threadId,
 		solutionMessageId,
 	);
 
-	const messageStack = messagesToDisplay
-		.map((message, index) => {
-			const isLast = index === messagesToDisplay.length - 1;
-			if (message.message.id === solutionMessageId) {
-				return (
-					<div key={message.message.id} id={`solution-${message.message.id}`}>
-						<div className="flex items-center gap-1.5 mb-2">
-							<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
-							<span className="text-sm font-medium text-green-600 dark:text-green-500">
-								Solution
-							</span>
-						</div>
-						<div className="rounded-xl border border-green-500/30 bg-green-500/5 dark:bg-green-500/10 p-3">
-							<ThinMessage message={message} isLast={isLast} />
-						</div>
-					</div>
-				);
-			}
-
+	const messageStack = messagesToDisplay.map((message, index) => {
+		const isLast = index === messagesToDisplay.length - 1;
+		if (message.message.id === solutionMessageId) {
 			return (
-				<div
-					className="p-2"
-					key={message.message.id}
-					id={`message-${message.message.id}`}
-				>
-					<ThinMessage
-						message={message}
-						op={message.author?.id === firstMessageAuthorId}
-						isLast={isLast}
-					/>
+				<div key={message.message.id} id={`solution-${message.message.id}`}>
+					<div className="flex items-center gap-1.5 mb-2">
+						<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
+						<span className="text-sm font-medium text-green-600 dark:text-green-500">
+							Solution
+						</span>
+					</div>
+					<div className="rounded-xl border border-green-500/30 bg-green-500/5 dark:bg-green-500/10 p-3">
+						<ThinMessage message={message} isLast={isLast} />
+					</div>
 				</div>
 			);
-		})
-		.filter(Boolean);
+		}
+
+		return (
+			<div
+				className="p-2"
+				key={message.message.id}
+				id={`message-${message.message.id}`}
+			>
+				<ThinMessage
+					message={message}
+					op={message.author?.id === firstMessageAuthorId}
+					isLast={isLast}
+				/>
+			</div>
+		);
+	});
 
 	return (
 		<>
@@ -271,7 +243,7 @@ export function MessagePage(props: {
 		}
 	}, [focusMessageId]);
 
-	const rootMessageDeleted = headerData.rootMessageDeleted;
+	const rootMessageDeleted = headerData.firstMessage === null;
 	const firstMessage = headerData.firstMessage;
 	const solutionMessage = headerData.solutionMessage;
 	const solutionMessageId = solutionMessage?.message.id;
