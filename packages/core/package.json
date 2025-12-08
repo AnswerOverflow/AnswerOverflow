@@ -45,7 +45,7 @@
 		"redis": "^4.7.0",
 		"stripe": "^12.18.0",
 		"unique-names-generator": "^4.7.1",
-		"uploadthing": "^6.1.0",
+		"uploadthing": "^7.7.4",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
