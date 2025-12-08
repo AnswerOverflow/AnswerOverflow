@@ -65,7 +65,7 @@
 		"react-spring": "^9.7.2",
 		"react-toastify": "^10.0.5",
 		"react-use": "^17.4.0",
-		"react-wrap-balancer": "^0.4.1",
+		"react-wrap-balancer": "^1.1.1",
 		"schema-dts": "^1.1.2",
 		"simple-markdown": "^0.7.3",
 		"tailwind-merge": "^1.14.0",
