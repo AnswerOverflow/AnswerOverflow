@@ -229,3 +229,130 @@ export const getUserPageData = privateQuery({
 		};
 	},
 });
+
+export const getUserPageHeaderData = privateQuery({
+	args: {
+		userId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		const user = await getDiscordAccountByIdShared(ctx, args.userId);
+		if (!user) {
+			return null;
+		}
+
+		const postMessages = await ctx.db
+			.query("messages")
+			.withIndex("by_authorId_and_childThreadId", (q) =>
+				q.eq("authorId", args.userId).gte("childThreadId", 0n),
+			)
+			.order("desc")
+			.take(50);
+
+		const serverIds = new Set<bigint>();
+		for (const message of postMessages) {
+			serverIds.add(message.serverId);
+		}
+
+		const servers = Arr.filter(
+			await Promise.all(
+				Array.from(serverIds).map(async (serverId) => {
+					const server = await getOneFrom(
+						ctx.db,
+						"servers",
+						"by_discordId",
+						serverId,
+					);
+					if (!server || server.kickedTime) {
+						return null;
+					}
+					return {
+						id: server.discordId.toString(),
+						name: server.name,
+						icon: server.icon,
+						discordId: server.discordId,
+					};
+				}),
+			),
+			Predicate.isNotNullable,
+		);
+
+		return {
+			user: {
+				id: user.id.toString(),
+				name: user.name,
+				avatar: user.avatar,
+			},
+			servers,
+		};
+	},
+});
+
+export const getUserPosts = privateQuery({
+	args: {
+		userId: v.int64(),
+		serverId: v.optional(v.int64()),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const serverIdFilter = args.serverId ?? null;
+		const limit = args.limit ?? 10;
+		const scanLimit = limit * 5;
+
+		const postMessages = await ctx.db
+			.query("messages")
+			.withIndex("by_authorId_and_childThreadId", (q) =>
+				q.eq("authorId", args.userId).gte("childThreadId", 0n),
+			)
+			.order("desc")
+			.take(scanLimit);
+		console.log("filteredPostMessages", postMessages);
+
+		const filteredPostMessages = serverIdFilter
+			? postMessages.filter((m) => m.serverId === serverIdFilter)
+			: postMessages;
+
+		return Arr.filter(
+			await Promise.all(
+				filteredPostMessages
+					.slice(0, limit)
+					.map((message) => enrichedMessageWithServerAndChannels(ctx, message)),
+			),
+			Predicate.isNotNullable,
+		);
+	},
+});
+
+export const getUserComments = privateQuery({
+	args: {
+		userId: v.int64(),
+		serverId: v.optional(v.int64()),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const serverIdFilter = args.serverId ?? null;
+		const limit = args.limit ?? 10;
+		const scanLimit = limit * 5;
+
+		const commentMessages = await ctx.db
+			.query("messages")
+			.withIndex("by_authorId", (q) => q.eq("authorId", args.userId))
+			.order("desc")
+			.take(scanLimit);
+
+		const filteredCommentMessages = commentMessages.filter((m) => {
+			if (m.childThreadId !== undefined) return false;
+			if (m.parentChannelId === undefined) return false;
+			if (serverIdFilter && m.serverId !== serverIdFilter) return false;
+			return true;
+		});
+
+		return Arr.filter(
+			await Promise.all(
+				filteredCommentMessages
+					.slice(0, limit)
+					.map((message) => enrichedMessageWithServerAndChannels(ctx, message)),
+			),
+			Predicate.isNotNullable,
+		);
+	},
+});
