@@ -24,7 +24,7 @@
 		"@auth/core": "^0.35.0",
 		"@aws-sdk/client-s3": "^3.577.0",
 		"@aws-sdk/lib-storage": "^3.578.0",
-		"@elastic/elasticsearch": "8.15.0",
+		"@elastic/elasticsearch": "9.2.0",
 		"@planetscale/database": "^1.11.0",
 		"@sapphire/bitfield": "^1.2.0",
 		"@typelytics/posthog": "^0.1.5",
