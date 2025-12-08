@@ -121,7 +121,7 @@ export function MessagePageLoader(props: {
 	}
 
 	const canonicalId = headerData.canonicalId.toString();
-	console.log("canonicalId", canonicalId, messageId, headerData.thread);
+
 	if (canonicalId !== messageId) {
 		redirect(`/m/${canonicalId}?focus=${messageId}`);
 	}
