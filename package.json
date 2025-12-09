@@ -80,6 +80,9 @@
 	"patchedDependencies": {
 		"discord-markdown-parser@1.2.0": "patches/discord-markdown-parser@1.2.0.patch"
 	},
+	"overrides": {
+		"@modelcontextprotocol/sdk": "^1.24.0"
+	},
 	"dependencies": {
 		"@better-auth/stripe": "^1.4.2",
 		"better-auth": "1.3.27",

@@ -44,7 +44,6 @@ We can reduce a lot of complexity by using convex-helpers, things we should use 
     - [WIP] Update status
 
     Parity:
-    - [ ] Cache parity
     - [X] Channel parity
     - [X] Guild parity
     - [X] Message parity
@@ -88,19 +87,19 @@ Tenant Site:
 ## Dashboard Features:
 
 Analytics:
-    - [ ] Top Pages
-    - [ ] Top question solvers
-    - [ ] Page views over time
-    - [ ] Server invite clicks over time
-    - [ ] Q&As over time
+    - [X] Top Pages
+    - [X] Top question solvers
+    - [X] Page views over time
+    - [X] Server invite clicks over time
+    - [X] Q&As over time
 
 Server Settings:
-    - [ ] Set custom domain
+    - [X] Set custom domain
     - [ ] Set custom subpath
     - [X] Enable / disable consider all messages public
     - [X] Enable / disable aonymize messages
-    - [ ] Enable / disable read the rules consent
-    - [ ] Upgrade / downgrade plan
+    - [X] Enable / disable read the rules consent
+    - [X] Upgrade / downgrade plan
 
 Channel Settings:
     - [X] Enable / disable mark solution
