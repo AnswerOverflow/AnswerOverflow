@@ -16,13 +16,14 @@ function getChannelIcon(type: number) {
 
 export type ChannelThreadCardProps = {
 	thread: {
+		id: bigint;
 		name: string;
 	};
 	message: EnrichedMessage;
 };
 
 export function ChannelThreadCard({ thread, message }: ChannelThreadCardProps) {
-	const href = `/m/${message.message.id}`;
+	const href = `/m/${thread.id}`;
 	const threadTitle =
 		thread.name ||
 		message.message.content?.slice(0, 30).trim() ||
@@ -62,6 +63,10 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 	const ChannelIcon = result.channel
 		? getChannelIcon(result.channel.type)
 		: Hash;
+	const canonicalId = result.thread
+		? result.message.message.channelId
+		: result.message.message.id;
+	const canonicalHref = `/m/${canonicalId}`;
 
 	return (
 		<div className="rounded-lg border border-border bg-card overflow-hidden mb-4">
@@ -104,7 +109,7 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 							<div className="flex items-center gap-1.5">
 								<ThreadIcon className="size-4 text-muted-foreground shrink-0" />
 								<Link
-									href={`/m/${result.message.message.id}`}
+									href={canonicalHref}
 									className="text-muted-foreground hover:underline"
 								>
 									{result.thread.name ||
@@ -124,7 +129,7 @@ export function ThreadCard({ result }: { result: SearchResult }) {
 			</div>
 			<MessagePreviewCardBody
 				enrichedMessage={result.message}
-				href={`/m/${result.message.message.id}`}
+				href={canonicalHref}
 				ariaLabel={`Open message ${result.thread?.name || result.message.message.content?.slice(0, 30) || "Untitled thread"}`}
 			/>
 		</div>
