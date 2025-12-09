@@ -10,7 +10,7 @@ import {
 } from "@packages/database/analytics/server/index";
 import { make } from "@packages/discord-api/generated";
 import { v } from "convex/values";
-import { Effect } from "effect";
+import { Cause, Effect } from "effect";
 import { api, components, internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { authenticatedAction, internalAction } from "../client";
@@ -65,8 +65,23 @@ export const fetchDiscordGuilds = internalAction({
 		}
 
 		const token = discordAccount.accessToken;
-		const client = await Effect.runPromise(discordApi(token));
-		const guilds = await Effect.runPromise(client.listMyGuilds());
+
+		const program = Effect.gen(function* () {
+			const client = yield* discordApi(token);
+			return yield* client.listMyGuilds();
+		}).pipe(
+			Effect.catchAll((error) => {
+				console.error(
+					"Discord API error:",
+					JSON.stringify(Cause.pretty(Cause.fail(error))),
+				);
+				return Effect.fail(
+					new Error(`Discord API error: ${JSON.stringify(error)}`),
+				);
+			}),
+		);
+
+		const guilds = await Effect.runPromise(program);
 
 		return guilds.map((guild) => ({
 			id: guild.id,
