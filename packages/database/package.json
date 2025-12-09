@@ -58,7 +58,7 @@
 		"@packages/test-utils": "workspace:*",
 		"chokidar-cli": "^3.0.0",
 		"dotenv": "^17.2.3",
-		"glob": "^11.0.3",
+		"glob": "^11.1.0",
 		"vitest": "catalog:"
 	},
 	"peerDependencies": {

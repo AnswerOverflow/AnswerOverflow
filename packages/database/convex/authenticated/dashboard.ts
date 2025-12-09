@@ -15,7 +15,7 @@ import { api, components, internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { authenticatedAction, internalAction } from "../client";
 import { guildManagerAction } from "../client/guildManager";
-import { getDiscordAccountWithToken } from "../shared/auth";
+import { getDiscordAccountWithToken, getTokenStatus } from "../shared/auth";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
@@ -64,7 +64,24 @@ export const fetchDiscordGuilds = internalAction({
 			throw new Error("Discord account not linked or mismatch");
 		}
 
-		const token = discordAccount.accessToken;
+		const tokenStatus = getTokenStatus(discordAccount.accessTokenExpiresAt);
+
+		let token = discordAccount.accessToken;
+
+		if (tokenStatus === "expired") {
+			const refreshResult = await ctx.runAction(
+				internal.authenticated.discord_token.refreshAndGetValidToken,
+				{},
+			);
+
+			if (!refreshResult.success) {
+				throw new Error(
+					`Discord token refresh failed: ${refreshResult.error} (code: ${refreshResult.code})`,
+				);
+			}
+
+			token = refreshResult.accessToken;
+		}
 
 		const program = Effect.gen(function* () {
 			const client = yield* discordApi(token);

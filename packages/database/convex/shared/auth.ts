@@ -82,9 +82,31 @@ export async function getUserServerSettingsForServerByDiscordId(
 	return settings;
 }
 
+export type DiscordAccountToken = {
+	accountId: bigint;
+	accessToken: string;
+	refreshToken: string | null;
+	accessTokenExpiresAt: number | null;
+};
+
+export type TokenStatus = "valid" | "expired" | "no_expiry_info";
+
+const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
+
+export function getTokenStatus(expiresAt: number | null): TokenStatus {
+	if (expiresAt === null) {
+		return "no_expiry_info";
+	}
+	const now = Date.now();
+	if (expiresAt - TOKEN_EXPIRY_BUFFER_MS <= now) {
+		return "expired";
+	}
+	return "valid";
+}
+
 export async function getDiscordAccountWithToken(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
-): Promise<{ accountId: bigint; accessToken: string } | null> {
+): Promise<DiscordAccountToken | null> {
 	const user = await authComponent.getAuthUser(ctx);
 	if (!user) {
 		return null;
@@ -121,9 +143,23 @@ export async function getDiscordAccountWithToken(
 		return null;
 	}
 
+	const refreshToken =
+		"refreshToken" in accountResult &&
+		typeof accountResult.refreshToken === "string"
+			? accountResult.refreshToken
+			: null;
+
+	const accessTokenExpiresAt =
+		"accessTokenExpiresAt" in accountResult &&
+		typeof accountResult.accessTokenExpiresAt === "number"
+			? accountResult.accessTokenExpiresAt
+			: null;
+
 	return {
 		accountId: BigInt(accountResult.accountId),
 		accessToken: accountResult.accessToken,
+		refreshToken,
+		accessTokenExpiresAt,
 	};
 }
 
