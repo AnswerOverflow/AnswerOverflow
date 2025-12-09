@@ -9,12 +9,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { CustomDomain } from "@packages/ui/components/custom-domain";
 import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
 import { useMutation } from "convex/react";
 import { useParams } from "next/navigation";
 import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
-import { CustomDomainConfigurator } from "../components/custom-domain-configurator";
 import { TierAccessOnly } from "../components/tier-access-only";
 import { CurrentPlanCard } from "./components";
 
@@ -92,9 +92,7 @@ export default function SettingsPage() {
 	});
 
 	if (!dashboardData) {
-		return (
-			<div className="text-muted-foreground">Loading server settings...</div>
-		);
+		return null;
 	}
 
 	const { server } = dashboardData;
@@ -126,7 +124,10 @@ export default function SettingsPage() {
 				enabledFor={["PRO", "ENTERPRISE", "ADVANCED", "STARTER", "OPEN_SOURCE"]}
 				serverId={serverId}
 			>
-				<CustomDomainConfigurator serverId={serverId} />
+				<CustomDomain
+					defaultDomain={server.customDomain ?? undefined}
+					serverId={BigInt(serverId)}
+				/>
 			</TierAccessOnly>
 			<ToggleServerFlag
 				title="Consider All Messages Public"

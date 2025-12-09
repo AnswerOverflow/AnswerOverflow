@@ -14,7 +14,7 @@ import { Spinner } from "@packages/ui/components/spinner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import dayjs from "dayjs";
-import { CheckCircle, CreditCard } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
@@ -170,7 +170,7 @@ function useSyncAfterCheckout(serverId: string) {
 }
 
 export function CurrentPlanCard({ serverId }: { serverId: string }) {
-	const { isSyncing, syncSuccess } = useSyncAfterCheckout(serverId);
+	const _syncStatus = useSyncAfterCheckout(serverId);
 
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
@@ -219,18 +219,6 @@ export function CurrentPlanCard({ serverId }: { serverId: string }) {
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-2">
-				{isSyncing && (
-					<div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-						<Spinner className="h-4 w-4" />
-						Syncing subscription...
-					</div>
-				)}
-				{syncSuccess && (
-					<div className="flex items-center gap-2 text-green-600 text-sm mb-2">
-						<CheckCircle className="h-4 w-4" />
-						Subscription updated successfully!
-					</div>
-				)}
 				<span className="text-2xl font-semibold">{planToPrettyText(plan)}</span>
 				<SubscriptionStatus serverId={serverIdBigInt} />
 			</CardContent>

@@ -5,11 +5,11 @@ import { v } from "convex/values";
 import { authenticatedAction } from "../client";
 
 const vercel = new Vercel({
-	bearerToken: process.env.VERCEL_AUTH_TOKEN,
+	bearerToken: process.env.AUTH_BEARER_TOKEN_VERCEL,
 });
 
-const projectId = process.env.VERCEL_PROJECT_ID ?? "";
-const teamId = process.env.VERCEL_TEAM_ID;
+const projectId = process.env.PROJECT_ID_VERCEL ?? "";
+const teamId = process.env.TEAM_ID_VERCEL;
 
 const ErrorSchema = {
 	parse: (
@@ -165,6 +165,7 @@ export const addDomain = authenticatedAction({
 				},
 			})
 			.catch((error) => {
+				console.log("Error adding domain", error);
 				if ("body" in error) {
 					try {
 						const errorBody =
