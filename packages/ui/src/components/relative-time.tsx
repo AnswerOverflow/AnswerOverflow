@@ -27,6 +27,7 @@ export function RelativeTime({
 				{serverText}
 			</span>
 			<script
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: Needed for before hydration time setting
 				dangerouslySetInnerHTML={{
 					__html: `(function(){
 var el=document.currentScript.previousElementSibling;
