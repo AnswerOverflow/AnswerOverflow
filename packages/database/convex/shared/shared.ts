@@ -8,6 +8,7 @@ export {
 	deleteMessageInternalLogic,
 	deleteUserServerSettingsByUserIdLogic,
 	type EnrichedMessage,
+	type EnrichedMessageReference,
 	enrichMessageForDisplay,
 	enrichMessagesWithData,
 	extractDiscordLinks,

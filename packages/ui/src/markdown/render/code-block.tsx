@@ -2,7 +2,7 @@
 
 import { Button } from "@packages/ui/components/button";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "dompurify";
 import { Check, Copy, WrapText } from "lucide-react";
 import { useState } from "react";
 import type { BundledLanguage } from "shiki";

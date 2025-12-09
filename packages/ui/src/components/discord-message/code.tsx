@@ -1,7 +1,7 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "dompurify";
 import type { BundledLanguage } from "shiki";
 import { codeToHtml } from "shiki";
 import { cn } from "../../lib/utils";

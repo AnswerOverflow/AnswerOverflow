@@ -300,6 +300,11 @@ export async function upsertMessageInternalLogic(
 	}
 }
 
+export type EnrichedMessageReference = {
+	messageId: bigint;
+	message: EnrichedMessage | null;
+};
+
 export type EnrichedMessage = {
 	message: Message;
 	author: {
@@ -317,6 +322,7 @@ export type EnrichedMessage = {
 		};
 	}>;
 	solutions: Message[];
+	reference?: EnrichedMessageReference | null;
 	metadata?: {
 		users?: Record<
 			string,
@@ -597,15 +603,15 @@ export async function enrichMessageForDisplay(
 	message: Message,
 	options?: { isAnonymous?: boolean },
 ): Promise<EnrichedMessage> {
-	const [author, server, attachments, reactions, solutions] = await Promise.all(
-		[
+	const [author, server, attachments, reactions, solutions, referenceMessage] =
+		await Promise.all([
 			getDiscordAccountByIdInternal(ctx, message.authorId),
 			getServerByDiscordIdInternal(ctx, message.serverId),
 			findAttachmentsByMessageIdInternal(ctx, message.id),
 			findReactionsByMessageId(ctx, message.id),
 			findSolutionsByQuestionId(ctx, message.id),
-		],
-	);
+			message.referenceId ? getMessageById(ctx, message.referenceId) : null,
+		]);
 
 	const emojiIds = Arr.dedupe(
 		Arr.filter(
@@ -768,6 +774,26 @@ export async function enrichMessageForDisplay(
 		}
 	}
 
+	let referenceData: EnrichedMessage["reference"] = undefined;
+	if (message.referenceId) {
+		if (referenceMessage) {
+			const enrichedReference = await enrichMessageForDisplay(
+				ctx,
+				referenceMessage,
+				options,
+			);
+			referenceData = {
+				messageId: message.referenceId,
+				message: enrichedReference,
+			};
+		} else {
+			referenceData = {
+				messageId: message.referenceId,
+				message: null,
+			};
+		}
+	}
+
 	const messageWithResolvedEmbeds = embedsWithResolvedUrls
 		? { ...message, embeds: embedsWithResolvedUrls }
 		: message;
@@ -778,6 +804,7 @@ export async function enrichMessageForDisplay(
 		attachments: attachmentsWithUrl.filter(Predicate.isNotNullable),
 		reactions: formattedReactions,
 		solutions,
+		reference: referenceData,
 	};
 
 	if (!server) {
