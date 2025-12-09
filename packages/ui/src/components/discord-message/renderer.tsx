@@ -104,11 +104,7 @@ function renderASTNode(
 			}
 			return (
 				<Link
-					content={
-						renderNodes(
-							node.content as SingleASTNode | SingleASTNode[],
-						) as string
-					}
+					content={renderNodes(node.content as SingleASTNode | SingleASTNode[])}
 					key={key}
 					message={message}
 					target={node.target as string}
