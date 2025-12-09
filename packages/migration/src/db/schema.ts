@@ -292,3 +292,27 @@ export const dbReactions = mysqlTable(
 );
 
 export type Reaction = typeof dbReactions.$inferSelect;
+
+export const dbAttachments = mysqlTable(
+	"Attachment",
+	{
+		id: varchar("id", { length: 191 }).notNull(),
+		messageId: snowflake("messageId").notNull(),
+		contentType: varchar("contentType", { length: 191 }),
+		filename: varchar("filename", { length: 1024 }).notNull(),
+		proxyUrl: varchar("proxyUrl", { length: 1024 }).notNull(),
+		url: varchar("url", { length: 1024 }).notNull(),
+		width: int("width"),
+		height: int("height"),
+		size: int("size").notNull(),
+		description: varchar("description", { length: 1000 }),
+	},
+	(table) => {
+		return {
+			attachmentId: primaryKey({ columns: [table.id] }),
+			messageIdIdx: index("Attachment_messageId_idx").on(table.messageId),
+		};
+	},
+);
+
+export type Attachment = typeof dbAttachments.$inferSelect;

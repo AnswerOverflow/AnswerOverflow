@@ -5,7 +5,9 @@
 	"scripts": {
 		"with-env": "bun run --env-file=../../.env --",
 		"migrate": "bun with-env bun run src/index.ts",
-		"validate": "bun with-env bun run src/index.ts --validate"
+		"validate": "bun with-env bun run src/index.ts --validate",
+		"migrate:attachments": "bun with-env bun run src/migrate-attachments.ts",
+		"migrate:attachments:test": "bun with-env bun run src/migrate-attachments.ts --test"
 	},
 	"dependencies": {
 		"@planetscale/database": "^1.19.0",
