@@ -1,11 +1,12 @@
 "use client";
 
-import type { api } from "@packages/database/convex/_generated/api";
+import { api } from "@packages/database/convex/_generated/api";
 import { cn } from "@packages/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { useAction } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { AlertCircle, CheckCircle2, LoaderCircle, XCircle } from "lucide-react";
 import { type HTMLAttributes, useState } from "react";
+import { Badge } from "./badge";
 import { Button } from "./button";
 import {
 	Card,
@@ -30,11 +31,10 @@ export const InlineSnippet = ({ className, ...props }: InlineSnippetProps) => (
 	/>
 );
 
-export const useDomainStatus = (
-	domain: string,
-	getDomainStatusAction: (typeof api)["authenticated"]["vercel_domains"]["getDomainStatus"],
-) => {
-	const getDomainStatus = useAction(getDomainStatusAction);
+export const useDomainStatus = (domain: string) => {
+	const getDomainStatus = useAction(
+		api.authenticated.vercel_domains.getDomainStatus,
+	);
 
 	return useQuery({
 		queryKey: ["domain-status", domain],
@@ -50,40 +50,17 @@ export const preloadDomainStatus = (_domain: string) => {
 
 export type DomainConfigurationProps = HTMLAttributes<HTMLDivElement> & {
 	domain: string;
-	getDomainStatusAction: (typeof api)["authenticated"]["vercel_domains"]["getDomainStatus"];
 };
 
 export const DomainConfiguration = ({
 	domain,
 	className,
-	getDomainStatusAction,
 	...props
 }: DomainConfigurationProps) => {
-	const { data, isLoading, refetch, isFetching } = useDomainStatus(
-		domain,
-		getDomainStatusAction,
-	);
+	const { data, isLoading, refetch, isFetching } = useDomainStatus(domain);
 
 	if (isLoading || !data) {
 		return null;
-	}
-
-	if (data.status === "Valid Configuration") {
-		return (
-			<div
-				className={cn(
-					"flex w-full justify-start gap-2 text-muted-foreground",
-					className,
-				)}
-				{...props}
-			>
-				<DomainStatusIcon
-					domain={domain}
-					getDomainStatusAction={getDomainStatusAction}
-				/>
-				<p>Domain is configured correctly.</p>
-			</div>
-		);
 	}
 
 	if (data.status === "Domain is not added") {
@@ -100,7 +77,7 @@ export const DomainConfiguration = ({
 	}
 
 	return (
-		<div className={cn("w-full", className)} {...props}>
+		<div className={cn("w-full space-y-4", className)} {...props}>
 			{data.status === "Pending Verification" ? (
 				<div className="w-full text-left text-muted-foreground text-sm">
 					Please set the following TXT record on{" "}
@@ -125,6 +102,7 @@ export const DomainConfiguration = ({
 					disabled={isFetching}
 					onClick={() => refetch()}
 					size="sm"
+					type="button"
 					variant="outline"
 				>
 					{isFetching ? (
@@ -142,14 +120,10 @@ export const DomainConfiguration = ({
 
 export type DomainStatusIconProps = {
 	domain: string;
-	getDomainStatusAction: (typeof api)["authenticated"]["vercel_domains"]["getDomainStatus"];
 };
 
-export const DomainStatusIcon = ({
-	domain,
-	getDomainStatusAction,
-}: DomainStatusIconProps) => {
-	const { data, isLoading } = useDomainStatus(domain, getDomainStatusAction);
+export const DomainStatusIcon = ({ domain }: DomainStatusIconProps) => {
+	const { data, isLoading } = useDomainStatus(domain);
 
 	if (isLoading) {
 		return <LoaderCircle className="animate-spin text-black dark:text-white" />;
@@ -200,9 +174,7 @@ export const DomainStatusIcon = ({
 
 export type CustomDomainProps = {
 	defaultDomain?: string;
-	addDomainAction: (typeof api)["authenticated"]["vercel_domains"]["addDomain"];
-	getDomainStatusAction: (typeof api)["authenticated"]["vercel_domains"]["getDomainStatus"];
-	onDomainUpdate?: (domain: string | null) => Promise<void>;
+	serverId: bigint;
 };
 
 export const CustomDomain = (props: CustomDomainProps) => {
@@ -210,11 +182,18 @@ export const CustomDomain = (props: CustomDomainProps) => {
 		props.defaultDomain ?? null,
 	);
 	const [submitting, setSubmitting] = useState(false);
-	const addDomain = useAction(props.addDomainAction);
+	const addDomain = useAction(api.authenticated.vercel_domains.addDomain);
+	const updateCustomDomain = useMutation(
+		api.authenticated.dashboard_mutations.updateCustomDomain,
+	);
+	const domainStatus = useDomainStatus(domain ?? "");
+	const isValidConfiguration =
+		domainStatus.data?.status === "Valid Configuration";
+	const isRefreshing = domainStatus.isFetching;
 
 	return (
 		<form
-			className="@container w-full max-w-[620px]"
+			className="@container w-full"
 			onSubmit={async (event) => {
 				event.preventDefault();
 				setSubmitting(true);
@@ -224,19 +203,36 @@ export const CustomDomain = (props: CustomDomainProps) => {
 					.trim();
 
 				if (customDomain === "") {
-					await props.onDomainUpdate?.(null);
+					await updateCustomDomain({
+						serverId: props.serverId,
+						customDomain: null,
+					});
 					setDomain(null);
 				} else {
 					await addDomain({ domain: customDomain });
-					await props.onDomainUpdate?.(customDomain);
+					console.log("customDomain", customDomain);
+					await updateCustomDomain({
+						serverId: props.serverId,
+						customDomain: customDomain,
+					});
 					setDomain(customDomain);
 				}
 				setSubmitting(false);
 			}}
 		>
 			<Card className="flex flex-col">
-				<CardHeader className="flex flex-col text-left">
-					<CardTitle>Custom Domain</CardTitle>
+				<CardHeader className="relative flex flex-col text-left">
+					<div className="flex items-center gap-2 relative w-full">
+						<CardTitle>Custom Domain</CardTitle>
+						{isValidConfiguration && (
+							<Badge className="bg-blue-500 text-white border-blue-500">
+								Valid Configuration
+							</Badge>
+						)}
+						{isRefreshing && isValidConfiguration && (
+							<LoaderCircle className="hidden sm:block h-4 w-4 animate-spin text-muted-foreground" />
+						)}
+					</div>
 					<CardDescription>
 						The custom domain for your site. Leave empty to remove.
 					</CardDescription>
@@ -256,12 +252,9 @@ export const CustomDomain = (props: CustomDomainProps) => {
 						{submitting ? <LoaderCircle className="animate-spin" /> : "Save"}
 					</Button>
 				</CardContent>
-				{domain && (
+				{domain && !isValidConfiguration && (
 					<CardFooter className="flex flex-col gap-4 border-muted border-t-2 pt-4 text-sm">
-						<DomainConfiguration
-							domain={domain}
-							getDomainStatusAction={props.getDomainStatusAction}
-						/>
+						<DomainConfiguration domain={domain} />
 					</CardFooter>
 				)}
 			</Card>
