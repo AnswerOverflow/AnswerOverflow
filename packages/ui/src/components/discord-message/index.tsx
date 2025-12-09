@@ -8,6 +8,8 @@ export { Link } from "./link";
 export { ChannelIcon, Mention, ThreadIcon } from "./mention";
 export { Poll } from "./poll";
 export { DiscordMarkdown, DiscordUIMessage } from "./renderer";
+export type { ReplyBarProps } from "./reply-bar";
+export { ReplyBar } from "./reply-bar";
 export { Spoiler } from "./spoiler";
 export type {
 	MessageMetadata,

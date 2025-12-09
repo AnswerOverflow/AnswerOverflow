@@ -91,8 +91,6 @@ async function RepliesLoader(props: {
 		props.startingFromMessageId,
 	);
 
-	console.log("replies", replies);
-
 	return (
 		<RepliesSection
 			replies={replies}

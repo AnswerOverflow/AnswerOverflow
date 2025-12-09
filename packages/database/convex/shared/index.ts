@@ -23,6 +23,7 @@ export {
 	type DatabaseAttachment,
 	deleteMessageInternalLogic,
 	type EnrichedMessage,
+	type EnrichedMessageReference,
 	enrichMessageForDisplay,
 	enrichMessagesWithData,
 	findMessagesByAuthorId,
