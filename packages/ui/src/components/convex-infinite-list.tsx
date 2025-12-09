@@ -20,9 +20,27 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	virtualized?: boolean;
 	height?: number;
 	loader?: ReactNode;
+	initialLoaderCount?: number;
+	emptyState?: ReactNode;
 	scrollThreshold?: number;
 	authenticationType?: "all" | "non-anonymous";
 };
+
+function LoadingSkeletons({
+	count,
+	loader,
+}: {
+	count: number;
+	loader: ReactNode;
+}) {
+	return (
+		<div className="space-y-4">
+			{Array.from({ length: count }).map((_, i) => (
+				<div key={`loader-${i}`}>{loader}</div>
+			))}
+		</div>
+	);
+}
 
 export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	query,
@@ -31,14 +49,18 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	renderItem,
 	virtualized = false,
 	height = 600,
-	loader = <div className="py-2 text-sm text-gray-500">Loading…</div>,
+	loader,
+	initialLoaderCount = 5,
+	emptyState,
 	scrollThreshold = 0.8,
 	authenticationType = "all",
 }: ConvexInfiniteListProps<Query>) {
 	const session = useSession({ allowAnonymous: authenticationType === "all" });
+	const isSessionReady = !session?.isPending && session?.data !== undefined;
+
 	const { results, status, loadMore, isLoading } = useStablePaginatedQuery(
 		query,
-		session?.data ? queryArgs : "skip",
+		isSessionReady ? queryArgs : "skip",
 		{ initialNumItems: pageSize },
 	);
 
@@ -50,12 +72,32 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 		}
 	};
 
-	const isInitialLoading =
-		status === "LoadingFirstPage" && results.length === 0;
+	const defaultLoader = (
+		<div className="py-2 text-sm text-muted-foreground">Loading…</div>
+	);
+	const loaderElement = loader ?? defaultLoader;
+
+	const isWaitingForSession = !isSessionReady;
+	const isLoadingFirstPage = status === "LoadingFirstPage";
+	const hasResults = results && results.length > 0;
+	const isInitialLoading = isWaitingForSession || isLoadingFirstPage;
+	const isEmpty = status === "Exhausted" && !hasResults;
 
 	if (!virtualized) {
 		if (isInitialLoading) {
-			return <>{loader}</>;
+			return (
+				<LoadingSkeletons count={initialLoaderCount} loader={loaderElement} />
+			);
+		}
+
+		if (isEmpty && emptyState) {
+			return <>{emptyState}</>;
+		}
+
+		if (!hasResults) {
+			return (
+				<LoadingSkeletons count={initialLoaderCount} loader={loaderElement} />
+			);
 		}
 
 		return (
@@ -63,11 +105,27 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 				dataLength={results.length}
 				next={loadMorePage}
 				hasMore={hasMore}
-				loader={loader}
+				loader={loaderElement}
 				scrollThreshold={scrollThreshold}
 			>
 				{results.map((item, i) => renderItem(item, i))}
 			</InfiniteScroll>
+		);
+	}
+
+	if (isInitialLoading) {
+		return (
+			<LoadingSkeletons count={initialLoaderCount} loader={loaderElement} />
+		);
+	}
+
+	if (isEmpty && emptyState) {
+		return <>{emptyState}</>;
+	}
+
+	if (!hasResults) {
+		return (
+			<LoadingSkeletons count={initialLoaderCount} loader={loaderElement} />
 		);
 	}
 
