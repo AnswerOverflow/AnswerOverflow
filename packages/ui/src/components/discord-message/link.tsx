@@ -2,6 +2,7 @@
 
 import { ChannelType } from "discord-api-types/v10";
 import { ChevronRight, MessageSquare } from "lucide-react";
+import type React from "react";
 import { Link as NextLink } from "../link";
 import { ChannelIcon } from "./mention";
 import type { MessageWithMetadata } from "./types";
@@ -12,7 +13,7 @@ export function Link({
 	message,
 }: {
 	target: string;
-	content: string;
+	content: React.ReactNode;
 	message: MessageWithMetadata;
 }) {
 	const isInternalLink = message?.metadata?.internalLinks?.find(
