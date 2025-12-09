@@ -8,7 +8,7 @@ import { makeUserIconLink } from "./discord-avatar";
 import { Link } from "./link";
 import { MessageBlurrer } from "./message-blurrer";
 import { MessageBody } from "./message-body";
-import { TimeAgo } from "./time-ago";
+import { MessageTimestamp } from "./message-timestamp";
 
 export function ThinMessage(props: {
 	message: EnrichedMessage;
@@ -18,6 +18,7 @@ export function ThinMessage(props: {
 }) {
 	const { message, op, isLast } = props;
 	const author = message.author;
+	const isBot = message.message.applicationId !== undefined;
 
 	return (
 		<MessageBlurrer message={message}>
@@ -59,6 +60,14 @@ export function ThinMessage(props: {
 						) : (
 							<span>Unknown</span>
 						)}
+						{isBot && (
+							<Badge
+								variant="default"
+								className="rounded-sm px-1 py-0 text-[10px] font-medium h-4 bg-blurple text-white"
+							>
+								APP
+							</Badge>
+						)}
 						{op && (
 							<Badge
 								variant="secondary"
@@ -68,7 +77,7 @@ export function ThinMessage(props: {
 							</Badge>
 						)}
 						<span className="text-sm">•</span>
-						<TimeAgo snowflake={message.message.id.toString()} />
+						<MessageTimestamp snowflake={message.message.id.toString()} />
 					</div>
 					<div>
 						<MessageBody message={message} />

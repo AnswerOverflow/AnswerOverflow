@@ -6,16 +6,12 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@packages/ui/components/avatar";
+import { Badge } from "@packages/ui/components/badge";
 import { makeUserIconLink } from "@packages/ui/components/discord-avatar";
 import { Link } from "@packages/ui/components/link";
-import { RelativeTime } from "@packages/ui/components/relative-time";
+import { MessageTimestamp } from "@packages/ui/components/message-timestamp";
 import { DiscordUIMessage } from "./renderer";
 import type { MessageWithMetadata } from "./types";
-
-function getSnowflakeDate(snowflake: string): Date {
-	const timestamp = BigInt(snowflake) >> 22n;
-	return new Date(Number(timestamp) + 1420070400000);
-}
 
 export type DiscordMessageProps = {
 	message: Message;
@@ -51,13 +47,13 @@ export function DiscordMessage({
 	snapshot,
 	showCard = true,
 }: DiscordMessageProps) {
-	const messageDate = getSnowflakeDate(message.id.toString());
-
 	const defaultGetMessageUrl = (messageId: string) => `/m/${messageId}`;
 	const defaultGetUserUrl = (userId: string) => `/u/${userId}`;
 
 	const messageUrlGetter = getMessageUrl ?? defaultGetMessageUrl;
 	const userUrlGetter = getUserUrl ?? defaultGetUserUrl;
+
+	const isBot = message.applicationId !== undefined;
 
 	const messageWithMetadata: MessageWithMetadata = {
 		...message,
@@ -95,16 +91,24 @@ export function DiscordMessage({
 								{author.name.charAt(0).toUpperCase()}
 							</AvatarFallback>
 						</Avatar>
-						<div className="flex-1 min-w-0">
+						<div className="flex-1 min-w-0 flex items-center gap-2">
 							<Link
 								href={userUrlGetter(author.id.toString())}
 								className="font-semibold text-card-foreground hover:underline"
 							>
 								{author.name}
 							</Link>
-							<RelativeTime
-								date={messageDate}
-								className="text-xs text-muted-foreground ml-2"
+							{isBot && (
+								<Badge
+									variant="default"
+									className="rounded-sm px-1 py-0 text-[10px] font-medium h-4 bg-blurple text-white"
+								>
+									APP
+								</Badge>
+							)}
+							<MessageTimestamp
+								snowflake={message.id.toString()}
+								className="text-xs text-muted-foreground"
 							/>
 						</div>
 					</>

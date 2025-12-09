@@ -9,4 +9,5 @@ export const generatedSchemas: Record<string, string> = {
 	messages: `{"id": int64, "authorId": int64, "serverId": int64, "channelId": int64, "parentChannelId": int64, "childThreadId": int64, "questionId": int64, "referenceId": int64, "applicationId": int64, "interactionId": int64, "webhookId": int64, "content": string, "flags": normalfloat64, "type": normalfloat64, "pinned": boolean, "nonce": string, "tts": boolean}`,
 	emojis: `{"id": int64, "name": string}`,
 	reactions: `{"messageId": int64, "userId": int64, "emojiId": int64}`,
+	attachments: `{"id": int64, "messageId": int64, "contentType": string, "filename": string, "width": normalfloat64, "height": normalfloat64, "size": normalfloat64, "description": string}`,
 };

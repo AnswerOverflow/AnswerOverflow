@@ -1,5 +1,158 @@
 import type { Embed } from "@packages/database/convex/schema";
 import dayjs from "dayjs";
+import type React from "react";
+
+function EmbedMarkdown({ content }: { content: string }) {
+	const parts: React.ReactNode[] = [];
+	let remaining = content;
+	let keyIndex = 0;
+
+	const urlRegex = /(https?:\/\/[^\s<>\[\]]+)/g;
+	const boldRegex = /\*\*(.+?)\*\*/g;
+	const linkWithTextRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+
+	const processText = (text: string): React.ReactNode[] => {
+		const result: React.ReactNode[] = [];
+		let lastIndex = 0;
+		let match: RegExpExecArray | null;
+
+		linkWithTextRegex.lastIndex = 0;
+		while ((match = linkWithTextRegex.exec(text)) !== null) {
+			if (match.index > lastIndex) {
+				result.push(...processPlainText(text.slice(lastIndex, match.index)));
+			}
+			const linkText = match[1];
+			const linkUrl = match[2];
+			if (linkText && linkUrl) {
+				result.push(
+					<a
+						key={keyIndex++}
+						href={linkUrl}
+						target="_blank"
+						rel="noreferrer"
+						className="text-blue-500 hover:underline"
+					>
+						{linkText}
+					</a>,
+				);
+			}
+			lastIndex = match.index + match[0].length;
+		}
+
+		if (lastIndex < text.length) {
+			result.push(...processPlainText(text.slice(lastIndex)));
+		}
+
+		return result;
+	};
+
+	const processPlainText = (text: string): React.ReactNode[] => {
+		const result: React.ReactNode[] = [];
+		let lastIndex = 0;
+		let match: RegExpExecArray | null;
+
+		boldRegex.lastIndex = 0;
+		while ((match = boldRegex.exec(text)) !== null) {
+			if (match.index > lastIndex) {
+				result.push(...processUrls(text.slice(lastIndex, match.index)));
+			}
+			const boldContent = match[1];
+			if (boldContent) {
+				result.push(<strong key={keyIndex++}>{boldContent}</strong>);
+			}
+			lastIndex = match.index + match[0].length;
+		}
+
+		if (lastIndex < text.length) {
+			result.push(...processUrls(text.slice(lastIndex)));
+		}
+
+		return result;
+	};
+
+	const processUrls = (text: string): React.ReactNode[] => {
+		const result: React.ReactNode[] = [];
+		let lastIndex = 0;
+		let match: RegExpExecArray | null;
+
+		urlRegex.lastIndex = 0;
+		while ((match = urlRegex.exec(text)) !== null) {
+			if (match.index > lastIndex) {
+				result.push(
+					<span key={keyIndex++}>{text.slice(lastIndex, match.index)}</span>,
+				);
+			}
+			const url = match[1];
+			if (url) {
+				result.push(
+					<a
+						key={keyIndex++}
+						href={url}
+						target="_blank"
+						rel="noreferrer"
+						className="text-blue-500 hover:underline break-all"
+					>
+						{url}
+					</a>,
+				);
+			}
+			lastIndex = match.index + match[0].length;
+		}
+
+		if (lastIndex < text.length) {
+			result.push(<span key={keyIndex++}>{text.slice(lastIndex)}</span>);
+		}
+
+		return result;
+	};
+
+	const paragraphs = remaining.split(/\n\n+/);
+	for (let i = 0; i < paragraphs.length; i++) {
+		const paragraph = paragraphs[i];
+		if (!paragraph) continue;
+
+		const lines = paragraph.split(/\n/);
+		const lineElements: React.ReactNode[] = [];
+
+		for (let j = 0; j < lines.length; j++) {
+			const line = lines[j];
+			if (line === undefined) continue;
+			lineElements.push(...processText(line));
+			if (j < lines.length - 1) {
+				lineElements.push(<br key={`br-${keyIndex++}`} />);
+			}
+		}
+
+		parts.push(
+			<p key={`p-${i}`} className="mb-3 last:mb-0">
+				{lineElements}
+			</p>,
+		);
+	}
+
+	return <>{parts}</>;
+}
+
+function EmbedFields({
+	fields,
+}: {
+	fields: Array<{ name: string; value: string; inline?: boolean }>;
+}) {
+	return (
+		<div className="mt-3 grid gap-2">
+			{fields.map((field, idx) => (
+				<div key={idx} className={field.inline ? "inline-block mr-4" : ""}>
+					<div className="font-semibold text-[13px] text-foreground">
+						{field.name}
+					</div>
+					<div className="text-[13px] text-muted-foreground">
+						<EmbedMarkdown content={field.value} />
+					</div>
+				</div>
+			))}
+		</div>
+	);
+}
 
 export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 	if (!embeds?.length) {
@@ -10,7 +163,7 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 			{embeds.map((embed, idx) => {
 				const borderLeftColor = embed.color
 					? `#${embed.color.toString(16).padStart(6, "0")}`
-					: "dadadc";
+					: "#dadadc";
 				if (embed.type === "gifv") {
 					if (!embed.video?.width || !embed.video?.height) {
 						return null;
@@ -73,20 +226,21 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 				const previewUrl = embed.image ?? embed.thumbnail;
 				return (
 					<div
-						className="grid w-md rounded-md border border-l-4 px-4 pt-2 pb-3 shadow-xs"
+						className="mt-4 grid rounded border border-l-4 bg-secondary/30 pl-3 pr-4 pt-2 pb-3"
 						key={idx}
 						style={{
 							borderLeftColor,
+							maxWidth: "488px",
 						}}
 					>
 						{embed.provider && (
-							<span className="text-neutral-600 text-xs">
+							<span className="text-muted-foreground text-xs">
 								{embed.provider.name}
 							</span>
 						)}
 						{embed.author && (
 							<a
-								className="mt-2 font-semibold text-sm hover:underline"
+								className="mt-2 font-semibold text-[13px] text-foreground hover:underline"
 								href={embed.author.url}
 								target="_blank"
 								rel="noreferrer"
@@ -95,19 +249,28 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 							</a>
 						)}
 						{embed.title && (
-							<a
-								className="mt-2 font-semibold text-blue-500 hover:underline"
-								href={embed.url}
-								target="_blank"
-								rel="noreferrer"
-							>
-								{embed.title}
-							</a>
-						)}
-						{embed.type !== "video" && (
-							<div className="mt-1 text-neutral-500 text-sm">
-								{embed.description}
+							<div className="mt-2 font-semibold text-[14px] text-foreground">
+								{embed.url ? (
+									<a
+										className="hover:underline"
+										href={embed.url}
+										target="_blank"
+										rel="noreferrer"
+									>
+										{embed.title}
+									</a>
+								) : (
+									embed.title
+								)}
 							</div>
+						)}
+						{embed.type !== "video" && embed.description && (
+							<div className="mt-2 text-muted-foreground text-[13px] whitespace-pre-wrap">
+								<EmbedMarkdown content={embed.description} />
+							</div>
+						)}
+						{embed.fields && embed.fields.length > 0 && (
+							<EmbedFields fields={embed.fields} />
 						)}
 						{previewUrl?.width && previewUrl.height && (
 							<div className="mt-4 max-h-[300px] overflow-hidden rounded">
@@ -136,7 +299,7 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 											src={embed.footer.proxyIconUrl ?? embed.footer.iconUrl}
 										/>
 									)}
-									<div className="flex items-center gap-1 text-[13px]">
+									<div className="flex items-center gap-1 text-[13px] text-muted-foreground">
 										<p>{embed.footer.text}</p>
 										{embed.timestamp && (
 											<>
