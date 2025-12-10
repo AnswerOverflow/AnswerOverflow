@@ -1,4 +1,4 @@
-import { CodeBlock } from "@packages/ui/markdown/render/code-block";
+import { CodeBlock, InlineCode } from "@packages/ui/components/code";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -183,19 +183,15 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
 
 									return <pre {...props}>{children}</pre>;
 								},
-								code: ({ children, className, ...props }) => {
+								code: ({ children, className }) => {
 									if (className?.startsWith("language-")) {
-										return (
-											<code className={className} {...props}>
-												{children}
-											</code>
-										);
+										return <code className={className}>{children}</code>;
+									}
+									if (typeof children === "string") {
+										return <InlineCode code={children} />;
 									}
 									return (
-										<code
-											className="bg-muted px-1.5 py-0.5 rounded text-sm"
-											{...props}
-										>
+										<code className="bg-muted px-1.5 py-0.5 rounded text-sm">
 											{children}
 										</code>
 									);
