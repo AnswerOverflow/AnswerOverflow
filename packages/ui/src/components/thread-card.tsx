@@ -152,6 +152,29 @@ export function ThreadCardSkeleton() {
 	);
 }
 
+export function ChannelThreadCardSkeleton() {
+	return (
+		<div className="rounded-lg border border-border bg-card overflow-hidden">
+			<div className="px-4 py-3 border-b border-border bg-muted/30">
+				<div className="flex items-center gap-2">
+					<Skeleton className="size-4 shrink-0" />
+					<Skeleton className="h-5 w-48" />
+				</div>
+			</div>
+			<div className="p-4">
+				<div className="flex items-start gap-4">
+					<Skeleton className="size-10 rounded-full shrink-0" />
+					<div className="flex-1 space-y-2">
+						<Skeleton className="h-4 w-32" />
+						<Skeleton className="h-4 w-full" />
+						<Skeleton className="h-4 w-5/6" />
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export function ThreadCardSkeletonList({ count = 3 }: { count?: number }) {
 	return (
 		<div className="space-y-4">

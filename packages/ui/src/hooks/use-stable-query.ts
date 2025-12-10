@@ -1,18 +1,14 @@
-import { usePaginatedQuery, useQuery } from "convex/react";
-import { useRef } from "react";
+import type {
+	PaginatedQueryArgs,
+	PaginatedQueryItem,
+	PaginatedQueryReference,
+	UsePaginatedQueryReturnType,
+} from "convex/react";
+import { usePaginatedQuery, useQueries, useQuery } from "convex/react";
+import type { FunctionReference } from "convex/server";
+import type { Value } from "convex/values";
+import { useCallback, useMemo, useRef, useState } from "react";
 
-/**
- * Drop-in replacement for useQuery intended to be used with a parametrized query.
- * Unlike useQuery, useStableQuery does not return undefined while loading new
- * data when the query arguments change, but instead will continue to return
- * the previously loaded data until the new data has finished loading.
- *
- * See https://stack.convex.dev/help-my-app-is-overreacting for details.
- *
- * @param name - string naming the query function
- * @param ...args - arguments to be passed to the query function
- * @returns UseQueryResult
- */
 export const useStableQuery = ((name, ...args) => {
 	const result = useQuery(name, ...args);
 	const stored = useRef(result);
@@ -34,3 +30,177 @@ export const useStablePaginatedQuery = ((name, args, options) => {
 
 	return stored.current;
 }) as typeof usePaginatedQuery;
+
+type PaginatedQueryOptions = {
+	initialNumItems: number;
+	initialCursor?: string | null;
+};
+
+type PageResult<Query extends PaginatedQueryReference> = {
+	page: Array<PaginatedQueryItem<Query>>;
+	isDone: boolean;
+	continueCursor: string;
+};
+
+export function usePaginatedQueryWithCursor<
+	Query extends PaginatedQueryReference,
+>(
+	query: Query,
+	args: PaginatedQueryArgs<Query> | "skip",
+	options: PaginatedQueryOptions,
+): UsePaginatedQueryReturnType<Query> {
+	const { initialNumItems, initialCursor = null } = options;
+	const skip = args === "skip";
+
+	const [additionalPages, setAdditionalPages] = useState<
+		Array<{ cursor: string; numItems: number }>
+	>([]);
+
+	const queries = useMemo(() => {
+		if (skip) return {};
+
+		const queryMap: Record<
+			string,
+			{ query: FunctionReference<"query">; args: Record<string, Value> }
+		> = {
+			page0: {
+				query: query as FunctionReference<"query">,
+				args: {
+					...(args as Record<string, Value>),
+					paginationOpts: {
+						numItems: initialNumItems,
+						cursor: initialCursor,
+					},
+				},
+			},
+		};
+
+		additionalPages.forEach((page, index) => {
+			queryMap[`page${index + 1}`] = {
+				query: query as FunctionReference<"query">,
+				args: {
+					...(args as Record<string, Value>),
+					paginationOpts: {
+						numItems: page.numItems,
+						cursor: page.cursor,
+					},
+				},
+			};
+		});
+
+		return queryMap;
+	}, [skip, query, args, initialNumItems, initialCursor, additionalPages]);
+
+	const results = useQueries(queries);
+
+	const pageResults = useMemo(() => {
+		const pages: Array<PageResult<Query> | undefined> = [];
+		const totalPages = 1 + additionalPages.length;
+
+		for (let i = 0; i < totalPages; i++) {
+			const result = results[`page${i}`];
+			if (result instanceof Error) {
+				throw result;
+			}
+			pages.push(result as PageResult<Query> | undefined);
+		}
+
+		return pages;
+	}, [results, additionalPages.length]);
+
+	const allItems = useMemo(() => {
+		const items: Array<PaginatedQueryItem<Query>> = [];
+		for (const pageResult of pageResults) {
+			if (pageResult) {
+				items.push(...pageResult.page);
+			}
+		}
+		return items;
+	}, [pageResults]);
+
+	const lastLoadedResult = useMemo(() => {
+		for (let i = pageResults.length - 1; i >= 0; i--) {
+			if (pageResults[i]) return pageResults[i];
+		}
+		return undefined;
+	}, [pageResults]);
+
+	const firstPageResult = pageResults[0];
+	const isLoadingMore =
+		additionalPages.length > 0 &&
+		pageResults.some(
+			(r, i) => r === undefined && i > 0 && i <= additionalPages.length,
+		);
+
+	const loadMore = useCallback(
+		(numItems: number) => {
+			if (!lastLoadedResult || lastLoadedResult.isDone) return;
+
+			const alreadyLoading = additionalPages.some(
+				(p) => p.cursor === lastLoadedResult.continueCursor,
+			);
+			if (alreadyLoading) return;
+
+			setAdditionalPages((prev) => [
+				...prev,
+				{ cursor: lastLoadedResult.continueCursor, numItems },
+			]);
+		},
+		[lastLoadedResult, additionalPages],
+	);
+
+	const stored = useRef<UsePaginatedQueryReturnType<Query> | undefined>(
+		undefined,
+	);
+
+	const noopLoadMore = useCallback((_numItems: number) => {}, []);
+
+	const result = useMemo((): UsePaginatedQueryReturnType<Query> => {
+		if (!firstPageResult) {
+			return {
+				results: [],
+				status: "LoadingFirstPage",
+				isLoading: true,
+				loadMore: noopLoadMore,
+			};
+		}
+
+		if (isLoadingMore) {
+			return {
+				results: allItems,
+				status: "LoadingMore",
+				isLoading: true,
+				loadMore: noopLoadMore,
+			};
+		}
+
+		if (lastLoadedResult?.isDone) {
+			return {
+				results: allItems,
+				status: "Exhausted",
+				isLoading: false,
+				loadMore: noopLoadMore,
+			};
+		}
+
+		return {
+			results: allItems,
+			status: "CanLoadMore",
+			isLoading: false,
+			loadMore,
+		};
+	}, [
+		firstPageResult,
+		isLoadingMore,
+		lastLoadedResult,
+		allItems,
+		loadMore,
+		noopLoadMore,
+	]);
+
+	if (result.status !== "LoadingMore" && result.status !== "LoadingFirstPage") {
+		stored.current = result;
+	}
+
+	return stored.current ?? result;
+}
