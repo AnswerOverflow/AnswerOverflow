@@ -1,5 +1,5 @@
 import { useSession } from "@packages/ui/components/convex-client-provider";
-import { useQuery } from "convex/react";
+import { useStableQuery } from "@packages/ui/hooks/use-stable-query";
 import type { FunctionReference } from "convex/server";
 
 export function useAuthenticatedQuery<
@@ -8,5 +8,5 @@ export function useAuthenticatedQuery<
 >(query: Query, args: Args): Query["_returnType"] | undefined {
 	const session = useSession();
 
-	return useQuery(query, session?.data ? args : ("skip" as const));
+	return useStableQuery(query, session?.data ? args : ("skip" as const));
 }

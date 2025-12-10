@@ -1,7 +1,8 @@
 "use client";
 
-import type { api } from "@packages/database/convex/_generated/api";
+import { api } from "@packages/database/convex/_generated/api";
 import { Button } from "@packages/ui/components/button";
+import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import { Link } from "@packages/ui/components/link";
 import {
 	Sheet,
@@ -11,7 +12,11 @@ import {
 	SheetTrigger,
 } from "@packages/ui/components/sheet";
 import { useTenant } from "@packages/ui/components/tenant-context";
-import { ChannelThreadCard } from "@packages/ui/components/thread-card";
+import {
+	ChannelThreadCard,
+	ChannelThreadCardSkeleton,
+} from "@packages/ui/components/thread-card";
+import { encodeCursor } from "@packages/ui/utils/cursor";
 import type { FunctionReturnType } from "convex/server";
 import { ChevronDown, Hash, MessageSquare } from "lucide-react";
 import type { ReactNode } from "react";
@@ -19,10 +24,6 @@ import { useState } from "react";
 
 type ChannelPageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.private.channels.getChannelPageHeaderData>
->;
-
-export type ChannelPageThreads = FunctionReturnType<
-	typeof api.private.channels.getChannelPageThreads
 >;
 
 function getChannelIcon(type: number) {
@@ -95,25 +96,52 @@ function MobileChannelSelector({
 	);
 }
 
-export function ThreadsList({ threads }: { threads: ChannelPageThreads }) {
-	if (threads.length === 0) {
-		return (
-			<div className="text-center py-12 text-muted-foreground">
-				No threads found in this channel
-			</div>
-		);
-	}
+type ChannelPageThreads = FunctionReturnType<
+	typeof api.public.channels.getChannelPageThreads
+>;
 
+export function ThreadsList({
+	channelDiscordId,
+	initialData,
+	nextCursor,
+	currentCursor,
+}: {
+	channelDiscordId: bigint;
+	initialData?: ChannelPageThreads;
+	nextCursor?: string | null;
+	currentCursor?: string | null;
+}) {
 	return (
-		<div className="space-y-4">
-			{threads.map(({ thread, message }) => (
-				<ChannelThreadCard
-					key={thread.id.toString()}
-					thread={thread}
-					message={message}
-				/>
-			))}
-		</div>
+		<>
+			<ConvexInfiniteList
+				query={api.public.channels.getChannelPageThreads}
+				queryArgs={{ channelDiscordId }}
+				pageSize={20}
+				initialLoaderCount={5}
+				loader={<ChannelThreadCardSkeleton />}
+				initialData={initialData}
+				initialCursor={currentCursor}
+				emptyState={
+					<div className="text-center py-12 text-muted-foreground">
+						No threads found in this channel
+					</div>
+				}
+				renderItem={({ thread, message }) => (
+					<div key={thread.id.toString()} className="mb-4">
+						<ChannelThreadCard thread={thread} message={message} />
+					</div>
+				)}
+			/>
+			{nextCursor && (
+				<a
+					href={`?cursor=${encodeCursor(nextCursor)}`}
+					className="sr-only"
+					aria-hidden="true"
+				>
+					Next page
+				</a>
+			)}
+		</>
 	);
 }
 

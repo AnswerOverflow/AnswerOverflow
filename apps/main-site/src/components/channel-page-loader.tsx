@@ -1,8 +1,9 @@
 import type { api } from "@packages/database/convex/_generated/api";
 import { Database } from "@packages/database/database";
-import { ThreadCardSkeletonList } from "@packages/ui/components/thread-card";
+import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
@@ -13,7 +14,7 @@ export type ChannelPageHeaderData = NonNullable<
 >;
 
 export type ChannelPageThreads = FunctionReturnType<
-	typeof api.private.channels.getChannelPageThreads
+	typeof api.public.channels.getChannelPageThreads
 >;
 
 export async function fetchChannelPageHeaderData(
@@ -31,28 +32,77 @@ export async function fetchChannelPageHeaderData(
 
 export async function fetchChannelPageThreads(
 	channelDiscordId: bigint,
+	cursor: string | null = null,
 ): Promise<ChannelPageThreads> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.private.channels.getChannelPageThreads({
+		return yield* database.public.channels.getChannelPageThreads({
 			channelDiscordId,
+			paginationOpts: { numItems: 20, cursor },
 		});
 	}).pipe(runtime.runPromise);
 }
 
-async function ThreadsLoader(props: { channelDiscordId: bigint }) {
-	const threads = await fetchChannelPageThreads(props.channelDiscordId);
-	return <ThreadsList threads={threads} />;
+export function generateChannelPageMetadata(
+	headerData: ChannelPageHeaderData | null,
+	basePath: string,
+	cursor: string | null,
+): Metadata {
+	if (!headerData) {
+		return {};
+	}
+
+	const { server, selectedChannel } = headerData;
+	const description = `Browse threads from #${selectedChannel.name} in the ${server.name} Discord community`;
+
+	return {
+		title: `#${selectedChannel.name} - ${server.name}`,
+		description,
+		openGraph: {
+			images: [`/og/community?id=${server.discordId.toString()}`],
+			title: `#${selectedChannel.name} - ${server.name}`,
+			description,
+		},
+		alternates: {
+			canonical: basePath,
+		},
+		robots: cursor ? "noindex, follow" : "index, follow",
+	};
 }
 
-export function ThreadsSkeleton() {
-	return <ThreadCardSkeletonList count={5} />;
+function ThreadsSkeleton() {
+	return (
+		<div className="space-y-4">
+			{Array.from({ length: 5 }).map((_, i) => (
+				<ChannelThreadCardSkeleton key={`skeleton-${i}`} />
+			))}
+		</div>
+	);
+}
+
+async function ThreadsLoader(props: {
+	channelDiscordId: bigint;
+	cursor: string | null;
+}) {
+	const initialData = await fetchChannelPageThreads(
+		props.channelDiscordId,
+		props.cursor,
+	);
+	return (
+		<ThreadsList
+			channelDiscordId={props.channelDiscordId}
+			initialData={initialData}
+			nextCursor={initialData.isDone ? null : initialData.continueCursor}
+			currentCursor={props.cursor}
+		/>
+	);
 }
 
 export function ChannelPageLoader(props: {
 	headerData: ChannelPageHeaderData | null;
+	cursor?: string;
 }) {
-	const { headerData } = props;
+	const { headerData, cursor } = props;
 
 	if (!headerData) {
 		return notFound();
@@ -65,7 +115,10 @@ export function ChannelPageLoader(props: {
 			selectedChannel={headerData.selectedChannel}
 			threadsSlot={
 				<Suspense fallback={<ThreadsSkeleton />}>
-					<ThreadsLoader channelDiscordId={headerData.selectedChannel.id} />
+					<ThreadsLoader
+						channelDiscordId={headerData.selectedChannel.id}
+						cursor={cursor ?? null}
+					/>
 				</Suspense>
 			}
 		/>

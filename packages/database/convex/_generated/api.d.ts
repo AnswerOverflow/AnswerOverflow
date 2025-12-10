@@ -29,6 +29,7 @@ import type * as private_messages from "../private/messages.js";
 import type * as private_server_preferences from "../private/server_preferences.js";
 import type * as private_servers from "../private/servers.js";
 import type * as private_user_server_settings from "../private/user_server_settings.js";
+import type * as public_channels from "../public/channels.js";
 import type * as public_custom_functions from "../public/custom_functions.js";
 import type * as public_search from "../public/search.js";
 import type * as shared_anonymization from "../shared/anonymization.js";
@@ -80,6 +81,7 @@ declare const fullApi: ApiFromModules<{
   "private/server_preferences": typeof private_server_preferences;
   "private/servers": typeof private_servers;
   "private/user_server_settings": typeof private_user_server_settings;
+  "public/channels": typeof public_channels;
   "public/custom_functions": typeof public_custom_functions;
   "public/search": typeof public_search;
   "shared/anonymization": typeof shared_anonymization;

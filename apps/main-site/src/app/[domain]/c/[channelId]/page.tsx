@@ -1,4 +1,5 @@
 import { Database } from "@packages/database/database";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -10,19 +11,26 @@ import { runtime } from "../../../../lib/runtime";
 
 type Props = {
 	params: Promise<{ domain: string; channelId: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-	const params = await props.params;
-	const domain = decodeURIComponent(params.domain);
-
-	const tenantData = await Effect.gen(function* () {
+async function getTenantData(domain: string) {
+	return Effect.gen(function* () {
 		const database = yield* Database;
 		const tenant = yield* database.private.servers.getServerByDomain({
 			domain,
 		});
 		return tenant;
 	}).pipe(runtime.runPromise);
+}
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const params = await props.params;
+	const searchParams = await props.searchParams;
+	const domain = decodeURIComponent(params.domain);
+	const cursor = searchParams?.cursor ?? null;
+
+	const tenantData = await getTenantData(domain);
 
 	if (!tenantData?.server) {
 		return {};
@@ -57,20 +65,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		alternates: {
 			canonical: `/c/${params.channelId}`,
 		},
+		robots: cursor ? "noindex, follow" : "index, follow",
 	};
 }
 
 export default async function TenantChannelPage(props: Props) {
 	const params = await props.params;
+	const searchParams = await props.searchParams;
 	const domain = decodeURIComponent(params.domain);
+	const encodedCursor = searchParams?.cursor;
+	const cursor = encodedCursor ? decodeCursor(encodedCursor) : undefined;
 
-	const tenantData = await Effect.gen(function* () {
-		const database = yield* Database;
-		const tenant = yield* database.private.servers.getServerByDomain({
-			domain,
-		});
-		return tenant;
-	}).pipe(runtime.runPromise);
+	const tenantData = await getTenantData(domain);
 
 	if (!tenantData?.server) {
 		return notFound();
@@ -81,5 +87,5 @@ export default async function TenantChannelPage(props: Props) {
 		BigInt(params.channelId),
 	);
 
-	return <ChannelPageLoader headerData={headerData} />;
+	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
 }

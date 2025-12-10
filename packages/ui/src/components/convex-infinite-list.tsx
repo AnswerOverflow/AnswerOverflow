@@ -6,10 +6,9 @@ import type {
 	PaginatedQueryReference,
 } from "convex/react";
 
-import type { ReactNode } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { Virtuoso } from "react-virtuoso";
-import { useStablePaginatedQuery } from "../hooks/use-stable-query";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
+import { usePaginatedQueryWithCursor } from "../hooks/use-stable-query";
+import { Button } from "./button";
 import { useSession } from "./convex-client-provider";
 
 type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
@@ -17,13 +16,17 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	queryArgs: PaginatedQueryArgs<Query>;
 	pageSize?: number;
 	renderItem: (item: PaginatedQueryItem<Query>, index: number) => ReactNode;
-	virtualized?: boolean;
-	height?: number;
 	loader?: ReactNode;
 	initialLoaderCount?: number;
 	emptyState?: ReactNode;
-	scrollThreshold?: number;
 	authenticationType?: "all" | "non-anonymous";
+	initialData?: {
+		page: Array<PaginatedQueryItem<Query>>;
+		continueCursor: string;
+		isDone: boolean;
+	};
+	initialCursor?: string | null;
+	showLoadMoreButton?: boolean;
 };
 
 function LoadingSkeletons({
@@ -42,35 +45,68 @@ function LoadingSkeletons({
 	);
 }
 
+function useIntersectionObserver(onIntersect: () => void, enabled: boolean) {
+	const ref = useRef<HTMLDivElement>(null);
+	const onIntersectRef = useRef(onIntersect);
+	onIntersectRef.current = onIntersect;
+
+	useEffect(() => {
+		if (!enabled) return;
+
+		const element = ref.current;
+		if (!element) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0]?.isIntersecting) {
+					onIntersectRef.current();
+				}
+			},
+			{ rootMargin: "200px" },
+		);
+
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [enabled]);
+
+	return ref;
+}
+
 export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	query,
 	queryArgs,
 	pageSize = 30,
 	renderItem,
-	virtualized = false,
-	height = 600,
 	loader,
 	initialLoaderCount = 5,
 	emptyState,
-	scrollThreshold = 0.8,
 	authenticationType = "all",
+	initialData,
+	initialCursor = null,
+	showLoadMoreButton = false,
 }: ConvexInfiniteListProps<Query>) {
 	const session = useSession({ allowAnonymous: authenticationType === "all" });
 	const isSessionReady = !session?.isPending && session?.data !== undefined;
 
-	const { results, status, loadMore, isLoading } = useStablePaginatedQuery(
+	const { results, status, loadMore } = usePaginatedQueryWithCursor(
 		query,
 		isSessionReady ? queryArgs : "skip",
-		{ initialNumItems: pageSize },
+		{ initialNumItems: pageSize, initialCursor },
 	);
 
-	const hasMore = status === "CanLoadMore";
+	const canLoadMore = status === "CanLoadMore";
+	const isLoadingMore = status === "LoadingMore";
 
-	const loadMorePage = () => {
-		if (status === "CanLoadMore") {
+	const handleLoadMore = useCallback(() => {
+		if (canLoadMore) {
 			loadMore(pageSize);
 		}
-	};
+	}, [canLoadMore, loadMore, pageSize]);
+
+	const sentinelRef = useIntersectionObserver(
+		handleLoadMore,
+		canLoadMore && !showLoadMoreButton,
+	);
 
 	const defaultLoader = (
 		<div className="py-2 text-sm text-muted-foreground">Loading…</div>
@@ -79,39 +115,15 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 
 	const isWaitingForSession = !isSessionReady;
 	const isLoadingFirstPage = status === "LoadingFirstPage";
-	const hasResults = results && results.length > 0;
-	const isInitialLoading = isWaitingForSession || isLoadingFirstPage;
-	const isEmpty = status === "Exhausted" && !hasResults;
-
-	if (!virtualized) {
-		if (isInitialLoading) {
-			return (
-				<LoadingSkeletons count={initialLoaderCount} loader={loaderElement} />
-			);
-		}
-
-		if (isEmpty && emptyState) {
-			return <>{emptyState}</>;
-		}
-
-		if (!hasResults) {
-			return (
-				<LoadingSkeletons count={initialLoaderCount} loader={loaderElement} />
-			);
-		}
-
-		return (
-			<InfiniteScroll
-				dataLength={results.length}
-				next={loadMorePage}
-				hasMore={hasMore}
-				loader={loaderElement}
-				scrollThreshold={scrollThreshold}
-			>
-				{results.map((item, i) => renderItem(item, i))}
-			</InfiniteScroll>
-		);
-	}
+	const displayResults =
+		results && results.length > 0 ? results : initialData?.page;
+	const hasResults = displayResults && displayResults.length > 0;
+	const isInitialLoading =
+		(isWaitingForSession || isLoadingFirstPage) && !initialData;
+	const isEmpty =
+		(status === "Exhausted" ||
+			(initialData?.isDone && initialData.page.length === 0)) &&
+		!hasResults;
 
 	if (isInitialLoading) {
 		return (
@@ -130,15 +142,24 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	}
 
 	return (
-		<Virtuoso
-			style={{ height }}
-			data={results}
-			endReached={() => {
-				if (hasMore && !isLoading) {
-					loadMorePage();
-				}
-			}}
-			itemContent={(index, item) => renderItem(item, index)}
-		/>
+		<div>
+			{displayResults.map((item, i) => renderItem(item, i))}
+
+			{isLoadingMore && <div className="py-4">{loaderElement}</div>}
+
+			{canLoadMore && !isLoadingMore && (
+				<>
+					{showLoadMoreButton ? (
+						<div className="py-4 flex justify-center">
+							<Button variant="outline" onClick={handleLoadMore}>
+								Load More
+							</Button>
+						</div>
+					) : (
+						<div ref={sentinelRef} className="h-4" />
+					)}
+				</>
+			)}
+		</div>
 	);
 }
