@@ -20,7 +20,7 @@ Migrate data from old AnswerOverflow database (PlanetScale MySQL with Drizzle OR
 | Reaction | 236 | `reactions` |
 | UserServerSettings | 954,096 | `userServerSettings` |
 | IgnoredDiscordAccount | 186 | `ignoredDiscordAccounts` |
-| **Attachment** | 1,389,293 | **SKIPPED** |
+| Attachment | 1,389,293 | `attachments` |
 
 ## Bitfield Mappings
 
