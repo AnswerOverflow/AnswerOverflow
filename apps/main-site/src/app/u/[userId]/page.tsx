@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import {
 	fetchUserPageHeaderData,
 	UserPageLoader,
@@ -6,8 +8,23 @@ import {
 
 type Props = {
 	params: Promise<{ userId: string }>;
-	searchParams: Promise<{ s?: string }>;
+	searchParams: Promise<{ s?: string; cursor?: string }>;
 };
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const params = await props.params;
+	const searchParams = await props.searchParams;
+	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
+
+	return {
+		title: "User Posts - Answer Overflow",
+		description: "See posts from this user on Answer Overflow",
+		alternates: {
+			canonical: `/u/${params.userId}`,
+		},
+		robots: cursor ? "noindex, follow" : { index: false },
+	};
+}
 
 export default async function UserPage(props: Props) {
 	const params = await props.params;
@@ -19,6 +36,10 @@ export default async function UserPage(props: Props) {
 		return notFound();
 	}
 
+	const cursor = searchParams.cursor
+		? decodeCursor(searchParams.cursor)
+		: undefined;
+
 	return (
 		<UserPageLoader
 			headerData={headerData}
@@ -26,7 +47,7 @@ export default async function UserPage(props: Props) {
 			serverId={searchParams.s}
 			basePath={`/u/${params.userId}`}
 			serverFilterLabel="Explore posts from servers"
-			variant="posts"
+			cursor={cursor}
 		/>
 	);
 }

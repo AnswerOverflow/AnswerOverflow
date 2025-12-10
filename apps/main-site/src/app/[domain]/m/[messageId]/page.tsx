@@ -1,10 +1,12 @@
 import { Database } from "@packages/database/database";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Effect, Schema } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import {
 	MessagePage,
+	type MessagePageHeaderData,
 	RepliesSection,
 	RepliesSkeleton,
 } from "../../../../components/message-page";
@@ -21,6 +23,7 @@ import { runtime } from "../../../../lib/runtime";
 
 type Props = {
 	params: Promise<{ domain: string; messageId: string }>;
+	searchParams: Promise<{ cursor?: string; focus?: string }>;
 };
 
 function parseBigInt(value: string) {
@@ -28,45 +31,63 @@ function parseBigInt(value: string) {
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-	const params = await props.params;
+	const [params, searchParams] = await Promise.all([
+		props.params,
+		props.searchParams,
+	]);
 	const parsed = parseBigInt(params.messageId);
 	if (parsed._tag === "None") {
 		return notFound();
 	}
+	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value);
-	return generateMessagePageMetadata(headerData, params.messageId);
+	return generateMessagePageMetadata(headerData, params.messageId, cursor);
 }
 
 async function RepliesLoader(props: {
 	channelId: bigint;
 	threadId: bigint | null;
 	startingFromMessageId: bigint | undefined;
-	firstMessageId: bigint | undefined;
 	solutionMessageId: bigint | undefined;
+	firstMessageAuthorId?: bigint;
+	server?: MessagePageHeaderData["server"];
+	channel?: MessagePageHeaderData["channel"];
+	cursor: string | null;
 }) {
-	const replies = await fetchMessagePageReplies(
+	const initialData = await fetchMessagePageReplies(
 		props.channelId,
 		props.threadId,
 		props.startingFromMessageId,
+		props.cursor,
 	);
 
 	return (
 		<RepliesSection
-			replies={replies}
 			channelId={props.channelId}
 			threadId={props.threadId}
+			startingFromMessageId={props.startingFromMessageId}
 			solutionMessageId={props.solutionMessageId}
+			firstMessageAuthorId={props.firstMessageAuthorId}
+			server={props.server}
+			channel={props.channel}
+			initialData={initialData}
+			nextCursor={initialData.isDone ? null : initialData.continueCursor}
+			currentCursor={props.cursor}
 		/>
 	);
 }
 
 export default async function TenantMessagePage(props: Props) {
-	const params = await props.params;
+	const [params, searchParams] = await Promise.all([
+		props.params,
+		props.searchParams,
+	]);
 	const parsed = parseBigInt(params.messageId);
 	if (parsed._tag === "None") {
 		return notFound();
 	}
 	const domain = decodeURIComponent(params.domain);
+	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 
 	const [tenantData, headerData] = await Effect.gen(function* () {
 		const database = yield* Database;
@@ -107,8 +128,11 @@ export default async function TenantMessagePage(props: Props) {
 						channelId={headerData.channelId}
 						threadId={headerData.threadId}
 						startingFromMessageId={startingFromMessageId}
-						firstMessageId={headerData.firstMessage?.message.id}
 						solutionMessageId={solutionMessageId}
+						firstMessageAuthorId={headerData.firstMessage?.author?.id}
+						server={headerData.server}
+						channel={headerData.channel}
+						cursor={cursor}
 					/>
 				</Suspense>
 			}
