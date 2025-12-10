@@ -63,7 +63,7 @@ function useIntersectionObserver(onIntersect: () => void, enabled: boolean) {
 					onIntersectRef.current();
 				}
 			},
-			{ rootMargin: "200px" },
+			{ rootMargin: "100%" },
 		);
 
 		observer.observe(element);
@@ -97,6 +97,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	);
 
 	const canLoadMore = status === "CanLoadMore";
+	console.log("canLoadMore", canLoadMore);
 	const isLoadingMore = status === "LoadingMore";
 
 	const handleLoadMore = useCallback(() => {
@@ -155,11 +156,11 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 				</div>
 			)}
 
-			{canLoadMore && !isLoadingMore && !showLoadMoreButton && (
+			{canLoadMore && !showLoadMoreButton && (
 				<div ref={sentinelRef} className="h-4" />
 			)}
 
-			{isLoadingMore && (
+			{(isLoadingMore || canLoadMore) && !showLoadMoreButton && (
 				<LoadingSkeletons count={loadMoreLoaderCount} loader={loaderElement} />
 			)}
 		</div>

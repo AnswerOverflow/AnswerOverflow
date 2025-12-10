@@ -7,6 +7,7 @@ import { Suspense, useState } from "react";
 import type { BundledLanguage } from "shiki";
 import { codeToHtml } from "shiki";
 import { cn } from "../lib/utils";
+import { useIsHydrationRender } from "./hydration-context";
 
 function useHighlightedCode(
 	code: string,
@@ -31,8 +32,8 @@ function useHighlightedCode(
 }
 
 function SuspenseClientOnly({ children }: { children: React.ReactNode }) {
-	const isClient = typeof window !== "undefined";
-	if (!isClient) {
+	const isHydrationRender = useIsHydrationRender();
+	if (isHydrationRender) {
 		return children;
 	}
 
