@@ -1,5 +1,5 @@
 export { Attachments } from "./attachments";
-export { Code } from "./code";
+export { Code, CodeBlock, InlineCode } from "../code";
 export type { DiscordMessageProps } from "./discord-message";
 export { DiscordMessage } from "./discord-message";
 export { Embeds } from "./embed";

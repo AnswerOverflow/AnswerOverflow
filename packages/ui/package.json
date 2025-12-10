@@ -100,7 +100,7 @@
 		"./hooks/*": "./src/hooks/*.ts",
 		"./utils/*": "./src/utils/*.ts",
 		"./icons/index": "./src/icons/index.tsx",
-		"./markdown/render/code-block": "./src/markdown/render/code-block.tsx",
+		"./components/code": "./src/components/code.tsx",
 		"./analytics": "./src/analytics/index.ts"
 	}
 }

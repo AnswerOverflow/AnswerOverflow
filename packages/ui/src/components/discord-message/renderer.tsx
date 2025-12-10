@@ -6,7 +6,7 @@ import { CornerUpRight } from "lucide-react";
 import { emojify } from "node-emoji";
 import type React from "react";
 import { Attachments } from "./attachments";
-import { Code } from "./code";
+import { Code } from "../code";
 import { Embeds } from "./embed";
 import { CustomEmoji, getEmojiSize, Twemoji } from "./emoji";
 import { Link } from "./link";
