@@ -19,3 +19,6 @@
 [submodule ".context/typelytics"]
 	path = .context/typelytics
 	url = https://github.com/RhysSullivan/typelytics
+[submodule ".context/tweakcn"]
+	path = .context/tweakcn
+	url = https://github.com/jnsahaj/tweakcn.git
