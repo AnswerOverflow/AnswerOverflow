@@ -1,3 +1,4 @@
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Schema } from "effect";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -9,6 +10,7 @@ import {
 
 type Props = {
 	params: Promise<{ messageId: string }>;
+	searchParams: Promise<{ cursor?: string; focus?: string }>;
 };
 
 function parseBigInt(value: string) {
@@ -16,23 +18,35 @@ function parseBigInt(value: string) {
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-	const params = await props.params;
+	const [params, searchParams] = await Promise.all([
+		props.params,
+		props.searchParams,
+	]);
 	const parsed = parseBigInt(params.messageId);
 	if (parsed._tag === "None") {
 		return notFound();
 	}
+	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value);
-	return generateMessagePageMetadata(headerData, params.messageId);
+	return generateMessagePageMetadata(headerData, params.messageId, cursor);
 }
 
 export default async function Page(props: Props) {
-	const params = await props.params;
+	const [params, searchParams] = await Promise.all([
+		props.params,
+		props.searchParams,
+	]);
 	const parsed = parseBigInt(params.messageId);
 	if (parsed._tag === "None") {
 		return notFound();
 	}
+	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value);
 	return (
-		<MessagePageLoader headerData={headerData} messageId={params.messageId} />
+		<MessagePageLoader
+			headerData={headerData}
+			messageId={params.messageId}
+			cursor={cursor ?? undefined}
+		/>
 	);
 }

@@ -14,7 +14,7 @@ export type MessagePageHeaderData = NonNullable<
 >;
 
 export type MessagePageReplies = FunctionReturnType<
-	typeof api.private.messages.getMessagePageReplies
+	typeof api.public.messages.getMessagePageReplies
 >;
 
 export async function fetchMessagePageHeaderData(
@@ -32,13 +32,15 @@ export async function fetchMessagePageReplies(
 	channelId: bigint,
 	threadId: bigint | null,
 	startingFromMessageId: bigint | undefined,
+	cursor: string | null = null,
 ): Promise<MessagePageReplies> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.private.messages.getMessagePageReplies({
+		return yield* database.public.messages.getMessagePageReplies({
 			channelId,
 			threadId: threadId ?? undefined,
 			startingFromMessageId,
+			paginationOpts: { numItems: 50, cursor },
 		});
 	}).pipe(runtime.runPromise);
 }
@@ -46,6 +48,7 @@ export async function fetchMessagePageReplies(
 export function generateMessagePageMetadata(
 	headerData: MessagePageHeaderData | null,
 	messageId: string,
+	cursor: string | null = null,
 ): Metadata {
 	if (!headerData) {
 		return {};
@@ -74,6 +77,7 @@ export function generateMessagePageMetadata(
 		alternates: {
 			canonical: `/m/${headerData.canonicalId.toString()}`,
 		},
+		robots: cursor ? "noindex, follow" : "index, follow",
 	};
 }
 
@@ -84,19 +88,30 @@ async function RepliesLoader(props: {
 	serverDiscordId: bigint;
 	channelDiscordId: bigint;
 	solutionMessageId: bigint | undefined;
+	firstMessageAuthorId?: bigint;
+	server?: MessagePageHeaderData["server"];
+	channel?: MessagePageHeaderData["channel"];
+	cursor: string | null;
 }) {
-	const replies = await fetchMessagePageReplies(
+	const initialData = await fetchMessagePageReplies(
 		props.channelId,
 		props.threadId,
 		props.startingFromMessageId,
+		props.cursor,
 	);
 
 	return (
 		<RepliesSection
-			replies={replies}
 			channelId={props.channelDiscordId}
 			threadId={props.threadId}
+			startingFromMessageId={props.startingFromMessageId}
 			solutionMessageId={props.solutionMessageId}
+			firstMessageAuthorId={props.firstMessageAuthorId}
+			server={props.server}
+			channel={props.channel}
+			initialData={initialData}
+			nextCursor={initialData.isDone ? null : initialData.continueCursor}
+			currentCursor={props.cursor}
 		/>
 	);
 }
@@ -104,8 +119,9 @@ async function RepliesLoader(props: {
 export function MessagePageLoader(props: {
 	headerData: MessagePageHeaderData | null;
 	messageId: string;
+	cursor?: string;
 }) {
-	const { headerData, messageId } = props;
+	const { headerData, messageId, cursor } = props;
 
 	if (!headerData) {
 		return notFound();
@@ -142,6 +158,10 @@ export function MessagePageLoader(props: {
 						serverDiscordId={headerData.server.discordId}
 						channelDiscordId={headerData.channel.id}
 						solutionMessageId={solutionMessageId}
+						firstMessageAuthorId={headerData.firstMessage?.author?.id}
+						server={headerData.server}
+						channel={headerData.channel}
+						cursor={cursor ?? null}
 					/>
 				</Suspense>
 			}

@@ -138,7 +138,14 @@ async function generateFunctionTypes(): Promise<void> {
 
 	allFunctions.sort((a, b) => a.path.localeCompare(b.path));
 
-	const typeMapEntries = allFunctions
+	const uniqueFunctions = new Map<string, FunctionInfo>();
+	for (const func of allFunctions) {
+		if (!uniqueFunctions.has(func.path)) {
+			uniqueFunctions.set(func.path, func);
+		}
+	}
+
+	const typeMapEntries = Array.from(uniqueFunctions.values())
 		.map((f) => `  "${f.path}": "${f.type}"`)
 		.join(",\n");
 
@@ -147,7 +154,9 @@ async function generateFunctionTypes(): Promise<void> {
 	const namespaceStructureEntries = namespaceArray
 		.map((ns) => {
 			const functions = namespaceToFunctions.get(ns) || [];
-			const functionNames = functions.map((f) => f.path.split(".")[1]).sort();
+			const functionNames = [
+				...new Set(functions.map((f) => f.path.split(".")[1])),
+			].sort();
 			return `  "${ns}": ${JSON.stringify(functionNames)}`;
 		})
 		.join(",\n");

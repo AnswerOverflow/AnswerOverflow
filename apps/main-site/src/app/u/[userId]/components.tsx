@@ -1,14 +1,21 @@
 "use client";
 
+import { api } from "@packages/database/convex/_generated/api";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
+import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import {
 	DiscordAvatar,
 	type DiscordUser,
 } from "@packages/ui/components/discord-avatar";
 import { EmptyStateCard } from "@packages/ui/components/empty";
-import { LinkButton } from "@packages/ui/components/link-button";
+import { Link } from "@packages/ui/components/link";
 import { ServerIcon } from "@packages/ui/components/server-icon";
-import { ThreadCard } from "@packages/ui/components/thread-card";
+import {
+	ThreadCard,
+	ThreadCardSkeleton,
+} from "@packages/ui/components/thread-card";
+import { encodeCursor } from "@packages/ui/utils/cursor";
+import type { FunctionReturnType } from "convex/server";
 import { Inbox } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -38,14 +45,17 @@ export function ServerSelect({
 	basePath: string;
 }) {
 	return (
-		<LinkButton
+		<Link
 			href={selected ? basePath : `${basePath}?s=${server.id}`}
-			variant={selected ? "secondary" : "outline"}
-			className="gap-2"
+			className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border ${
+				selected
+					? "bg-secondary text-secondary-foreground border-transparent shadow-sm hover:bg-secondary/80"
+					: "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+			}`}
 		>
 			<ServerIcon server={server} size={24} />
 			<span>{server.name}</span>
-		</LinkButton>
+		</Link>
 	);
 }
 
@@ -81,29 +91,6 @@ export function ServerFilter({
 	);
 }
 
-export function UserTabs({
-	userId,
-	basePath,
-}: {
-	userId: string;
-	basePath: string;
-}) {
-	return (
-		<div className="flex flex-row gap-4">
-			<LinkButton variant="outline" selectedVariant="secondary" href={basePath}>
-				Posts
-			</LinkButton>
-			<LinkButton
-				variant="outline"
-				selectedVariant="secondary"
-				href={`${basePath}/comments`}
-			>
-				Comments
-			</LinkButton>
-		</div>
-	);
-}
-
 export function EmptyState({ message }: { message: string }) {
 	return (
 		<EmptyStateCard
@@ -118,7 +105,6 @@ export function EmptyState({ message }: { message: string }) {
 export function UserPageLayout({
 	user,
 	servers,
-	userId,
 	serverId,
 	basePath,
 	serverFilterLabel,
@@ -126,15 +112,11 @@ export function UserPageLayout({
 }: {
 	user: DiscordUser;
 	servers: ServerInfo[];
-	userId: string;
 	serverId?: string;
 	basePath: string;
 	serverFilterLabel: string;
 	children: ReactNode;
 }) {
-	const userBasePath = basePath.includes("/comments")
-		? basePath.replace("/comments", "")
-		: basePath;
 	return (
 		<div className="flex flex-col gap-4">
 			<UserHeader user={user} />
@@ -144,21 +126,59 @@ export function UserPageLayout({
 				basePath={basePath}
 				label={serverFilterLabel}
 			/>
-			<UserTabs userId={userId} basePath={userBasePath} />
 			{children}
 		</div>
 	);
 }
 
-export function InitialResults({ results }: { results: SearchResult[] }) {
+export type UserPosts = FunctionReturnType<
+	typeof api.public.discord_accounts.getUserPosts
+>;
+
+export function UserPostsList({
+	userId,
+	serverId,
+	initialData,
+	nextCursor,
+	currentCursor,
+	basePath,
+}: {
+	userId: bigint;
+	serverId?: string;
+	initialData?: UserPosts;
+	nextCursor?: string | null;
+	currentCursor?: string | null;
+	basePath: string;
+}) {
+	const serverIdBigInt = serverId ? BigInt(serverId) : undefined;
+
 	return (
 		<>
-			{results.map((result) => (
-				<ThreadCard
-					key={result.message.message.id.toString()}
-					result={result}
-				/>
-			))}
+			<ConvexInfiniteList
+				query={api.public.discord_accounts.getUserPosts}
+				queryArgs={{ userId, serverId: serverIdBigInt }}
+				pageSize={20}
+				initialLoaderCount={5}
+				loader={<ThreadCardSkeleton />}
+				initialData={initialData}
+				initialCursor={currentCursor}
+				emptyState={<EmptyState message="No posts found" />}
+				renderItem={(result: SearchResult) => (
+					<ThreadCard
+						key={result.message.message.id.toString()}
+						result={result}
+					/>
+				)}
+			/>
+			{nextCursor && (
+				<a
+					href={`${basePath}${serverId ? `?s=${serverId}&` : "?"}cursor=${encodeCursor(nextCursor)}`}
+					className="sr-only"
+					aria-hidden="true"
+				>
+					Next page
+				</a>
+			)}
 		</>
 	);
 }

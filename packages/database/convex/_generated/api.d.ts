@@ -31,6 +31,8 @@ import type * as private_servers from "../private/servers.js";
 import type * as private_user_server_settings from "../private/user_server_settings.js";
 import type * as public_channels from "../public/channels.js";
 import type * as public_custom_functions from "../public/custom_functions.js";
+import type * as public_discord_accounts from "../public/discord_accounts.js";
+import type * as public_messages from "../public/messages.js";
 import type * as public_search from "../public/search.js";
 import type * as shared_anonymization from "../shared/anonymization.js";
 import type * as shared_attachments from "../shared/attachments.js";
@@ -83,6 +85,8 @@ declare const fullApi: ApiFromModules<{
   "private/user_server_settings": typeof private_user_server_settings;
   "public/channels": typeof public_channels;
   "public/custom_functions": typeof public_custom_functions;
+  "public/discord_accounts": typeof public_discord_accounts;
+  "public/messages": typeof public_messages;
   "public/search": typeof public_search;
   "shared/anonymization": typeof shared_anonymization;
   "shared/attachments": typeof shared_attachments;

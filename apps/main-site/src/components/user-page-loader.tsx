@@ -1,16 +1,11 @@
 import type { api } from "@packages/database/convex/_generated/api";
-import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { Database } from "@packages/database/database";
-import { ThreadCardSkeletonList } from "@packages/ui/components/thread-card";
+import { ThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import {
-	EmptyState,
-	InitialResults,
-	UserPageLayout,
-} from "../app/u/[userId]/components";
+import { UserPageLayout, UserPostsList } from "../app/u/[userId]/components";
 import { runtime } from "../lib/runtime";
 
 export type UserPageHeaderData = NonNullable<
@@ -18,11 +13,7 @@ export type UserPageHeaderData = NonNullable<
 >;
 
 export type UserPosts = FunctionReturnType<
-	typeof api.private.discord_accounts.getUserPosts
->;
-
-export type UserComments = FunctionReturnType<
-	typeof api.private.discord_accounts.getUserComments
+	typeof api.public.discord_accounts.getUserPosts
 >;
 
 export async function fetchUserPageHeaderData(
@@ -39,57 +30,50 @@ export async function fetchUserPageHeaderData(
 export async function fetchUserPosts(
 	userId: bigint,
 	serverId?: bigint,
+	cursor: string | null = null,
 ): Promise<UserPosts> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.private.discord_accounts.getUserPosts({
+		return yield* database.public.discord_accounts.getUserPosts({
 			userId,
 			serverId,
-			limit: 10,
+			paginationOpts: { numItems: 20, cursor },
 		});
 	}).pipe(runtime.runPromise);
 }
 
-export async function fetchUserComments(
-	userId: bigint,
-	serverId?: bigint,
-): Promise<UserComments> {
-	return Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.private.discord_accounts.getUserComments({
-			userId,
-			serverId,
-			limit: 10,
-		});
-	}).pipe(runtime.runPromise);
+function UserContentSkeleton() {
+	return (
+		<div className="space-y-4">
+			{Array.from({ length: 5 }).map((_, i) => (
+				<ThreadCardSkeleton key={`skeleton-${i}`} />
+			))}
+		</div>
+	);
 }
 
-async function PostsLoader(props: { userId: bigint; serverId?: bigint }) {
-	const posts = await fetchUserPosts(props.userId, props.serverId);
-	return <PostsContent posts={posts} />;
-}
-
-async function CommentsLoader(props: { userId: bigint; serverId?: bigint }) {
-	const comments = await fetchUserComments(props.userId, props.serverId);
-	return <CommentsContent comments={comments} />;
-}
-
-function PostsContent(props: { posts: SearchResult[] }) {
-	if (props.posts.length === 0) {
-		return <EmptyState message="No posts found" />;
-	}
-	return <InitialResults results={props.posts} />;
-}
-
-function CommentsContent(props: { comments: SearchResult[] }) {
-	if (props.comments.length === 0) {
-		return <EmptyState message="No comments found" />;
-	}
-	return <InitialResults results={props.comments} />;
-}
-
-export function UserContentSkeleton() {
-	return <ThreadCardSkeletonList count={5} />;
+async function PostsLoader(props: {
+	userId: bigint;
+	serverId?: string;
+	cursor: string | null;
+	basePath: string;
+}) {
+	const serverIdBigInt = props.serverId ? BigInt(props.serverId) : undefined;
+	const posts = await fetchUserPosts(
+		props.userId,
+		serverIdBigInt,
+		props.cursor,
+	);
+	return (
+		<UserPostsList
+			userId={props.userId}
+			serverId={props.serverId}
+			initialData={posts}
+			nextCursor={posts.isDone ? null : posts.continueCursor}
+			currentCursor={props.cursor}
+			basePath={props.basePath}
+		/>
+	);
 }
 
 export function UserPageLoader(props: {
@@ -98,9 +82,9 @@ export function UserPageLoader(props: {
 	serverId?: string;
 	basePath: string;
 	serverFilterLabel: string;
-	variant: "posts" | "comments";
+	cursor?: string;
 }) {
-	const { headerData, userId, serverId, basePath, serverFilterLabel, variant } =
+	const { headerData, userId, serverId, basePath, serverFilterLabel, cursor } =
 		props;
 
 	if (!headerData) {
@@ -108,23 +92,22 @@ export function UserPageLoader(props: {
 	}
 
 	const userIdBigInt = BigInt(userId);
-	const serverIdBigInt = serverId ? BigInt(serverId) : undefined;
 
 	return (
 		<UserPageLayout
 			user={headerData.user}
 			servers={headerData.servers}
-			userId={userId}
 			serverId={serverId}
 			basePath={basePath}
 			serverFilterLabel={serverFilterLabel}
 		>
 			<Suspense fallback={<UserContentSkeleton />}>
-				{variant === "posts" ? (
-					<PostsLoader userId={userIdBigInt} serverId={serverIdBigInt} />
-				) : (
-					<CommentsLoader userId={userIdBigInt} serverId={serverIdBigInt} />
-				)}
+				<PostsLoader
+					userId={userIdBigInt}
+					serverId={serverId}
+					cursor={cursor ?? null}
+					basePath={basePath}
+				/>
 			</Suspense>
 		</UserPageLayout>
 	);

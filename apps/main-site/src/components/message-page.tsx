@@ -1,12 +1,13 @@
 "use client";
 
-import type { api } from "@packages/database/convex/_generated/api";
+import { api } from "@packages/database/convex/_generated/api";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import { FormattedNumber } from "@packages/ui/components/formatted-number";
 import { HelpfulFeedback } from "@packages/ui/components/helpful-feedback";
 import { JumpToSolution } from "@packages/ui/components/jump-to-solution";
 import { Link } from "@packages/ui/components/link";
 
+import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import { MessageBody } from "@packages/ui/components/message-body";
 import { MessageResultPageProvider } from "@packages/ui/components/message-result-page-context";
 import { ServerIcon } from "@packages/ui/components/server-icon";
@@ -22,6 +23,7 @@ import {
 	threadToAnalyticsData,
 } from "@packages/ui/utils/analytics";
 import { isImageAttachment } from "@packages/ui/utils/attachments";
+import { encodeCursor } from "@packages/ui/utils/cursor";
 import {
 	ChannelType,
 	getDiscordURLForMessage,
@@ -44,7 +46,7 @@ export type MessagePageHeaderData = NonNullable<
 >;
 
 export type MessagePageReplies = FunctionReturnType<
-	typeof api.private.messages.getMessagePageReplies
+	typeof api.public.messages.getMessagePageReplies
 >;
 
 const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
@@ -144,82 +146,147 @@ export function RepliesSkeleton() {
 	);
 }
 
+function ReplyMessageSkeleton() {
+	return (
+		<div className="p-2 space-y-2">
+			<div className="flex items-center gap-2">
+				<div className="size-10 bg-muted rounded-full animate-pulse" />
+				<div className="flex flex-col gap-1">
+					<div className="h-4 w-24 bg-muted rounded animate-pulse" />
+					<div className="h-3 w-16 bg-muted rounded animate-pulse" />
+				</div>
+			</div>
+			<div className="ml-12 space-y-2">
+				<div className="h-4 w-full bg-muted rounded animate-pulse" />
+				<div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+			</div>
+		</div>
+	);
+}
+
+function ReplyMessage(props: {
+	message: EnrichedMessage;
+	solutionMessageId: bigint | undefined;
+	firstMessageAuthorId?: bigint;
+	isLast: boolean;
+}) {
+	const { message, solutionMessageId, firstMessageAuthorId, isLast } = props;
+
+	if (message.message.id === solutionMessageId) {
+		return (
+			<div id={`solution-${message.message.id}`}>
+				<div className="flex items-center gap-1.5 mb-2">
+					<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
+					<span className="text-sm font-medium text-green-600 dark:text-green-500">
+						Solution
+					</span>
+				</div>
+				<div className="rounded-xl border border-green-500/30 bg-green-500/5 dark:bg-green-500/10 p-3">
+					<ThinMessage message={message} isLast={isLast} />
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="p-2" id={`message-${message.message.id}`}>
+			<ThinMessage
+				message={message}
+				op={message.author?.id === firstMessageAuthorId}
+				isLast={isLast}
+			/>
+		</div>
+	);
+}
+
 export function RepliesSection(props: {
-	replies: EnrichedMessage[];
 	channelId: bigint;
 	threadId: bigint | null;
+	startingFromMessageId: bigint | undefined;
 	solutionMessageId: bigint | undefined;
 	firstMessageAuthorId?: bigint;
 	server?: MessagePageHeaderData["server"];
 	channel?: MessagePageHeaderData["channel"];
+	initialData?: MessagePageReplies;
+	nextCursor?: string | null;
+	currentCursor?: string | null;
 }) {
-	const { replies, solutionMessageId, firstMessageAuthorId, server, channel } =
-		props;
-
-	const messagesToDisplay = processRepliesForDisplay(
-		replies,
+	const {
+		channelId,
+		threadId,
+		startingFromMessageId,
 		solutionMessageId,
-	);
+		firstMessageAuthorId,
+		server,
+		channel,
+		initialData,
+		nextCursor,
+		currentCursor,
+	} = props;
 
-	const messageStack = messagesToDisplay.map((message, index) => {
-		const isLast = index === messagesToDisplay.length - 1;
-		if (message.message.id === solutionMessageId) {
-			return (
-				<div key={message.message.id} id={`solution-${message.message.id}`}>
-					<div className="flex items-center gap-1.5 mb-2">
-						<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
-						<span className="text-sm font-medium text-green-600 dark:text-green-500">
-							Solution
-						</span>
-					</div>
-					<div className="rounded-xl border border-green-500/30 bg-green-500/5 dark:bg-green-500/10 p-3">
-						<ThinMessage message={message} isLast={isLast} />
-					</div>
-				</div>
-			);
-		}
-
-		return (
-			<div
-				className="p-2"
-				key={message.message.id}
-				id={`message-${message.message.id}`}
-			>
-				<ThinMessage
-					message={message}
-					op={message.author?.id === firstMessageAuthorId}
-					isLast={isLast}
-				/>
-			</div>
-		);
-	});
+	const targetChannelId = threadId ?? channelId;
 
 	return (
 		<>
 			<div className="flex flex-row gap-4 border-b-2 border-muted py-4 pl-2">
 				<div className="flex items-center gap-2">
 					<MessageSquare className="size-4" />
-					<span>
-						{messagesToDisplay.length}{" "}
-						{messagesToDisplay.length === 1 ? "Reply" : "Replies"}
-					</span>
+					<span>Replies</span>
 				</div>
 			</div>
 			<div className="rounded-md">
-				<div className="flex flex-col gap-4">{messageStack}</div>
-			</div>
-			{messagesToDisplay.length === 0 && server && channel && (
-				<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
-					<span className="text-lg font-semibold">No replies yet</span>
-					<span className="text-muted-foreground">
-						Be the first to reply to this message
-					</span>
-					<ServerInviteJoinButton
-						server={server}
-						channel={channel}
-						location="Message Result Page"
+				<div className="flex flex-col gap-4">
+					<ConvexInfiniteList
+						query={api.public.messages.getMessagePageReplies}
+						queryArgs={{
+							channelId: targetChannelId,
+							threadId: threadId ?? undefined,
+							startingFromMessageId,
+						}}
+						pageSize={50}
+						initialLoaderCount={3}
+						loader={<ReplyMessageSkeleton />}
+						initialData={initialData}
+						initialCursor={currentCursor}
+						emptyState={
+							server && channel ? (
+								<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
+									<span className="text-lg font-semibold">No replies yet</span>
+									<span className="text-muted-foreground">
+										Be the first to reply to this message
+									</span>
+									<ServerInviteJoinButton
+										server={server}
+										channel={channel}
+										location="Message Result Page"
+									/>
+								</div>
+							) : (
+								<div className="text-center py-12 text-muted-foreground">
+									No replies yet
+								</div>
+							)
+						}
+						renderItem={(message, index) => (
+							<ReplyMessage
+								key={message.message.id.toString()}
+								message={message}
+								solutionMessageId={solutionMessageId}
+								firstMessageAuthorId={firstMessageAuthorId}
+								isLast={false}
+							/>
+						)}
 					/>
 				</div>
+			</div>
+			{nextCursor && (
+				<a
+					href={`?cursor=${encodeCursor(nextCursor)}`}
+					className="sr-only"
+					aria-hidden="true"
+				>
+					Next page
+				</a>
 			)}
 		</>
 	);
