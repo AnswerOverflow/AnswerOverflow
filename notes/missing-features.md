@@ -37,11 +37,10 @@
 
 ## API/Backend Gaps
 
-| Feature                           | Description                                         | Status                        |
-| --------------------------------- | --------------------------------------------------- | ----------------------------- |
-| **Vercel Domain Hook**            | Actually call Vercel API when setting custom domain | Only saves to DB, no API call |
-| **Custom Domain Plan Gating**     | Require PRO+ plan for custom domains                | No plan check                 |
-| **Consolidated Dashboard+Stripe** | Single endpoint returning dashboard + billing state | Split into multiple calls     |
+| Feature                           | Description                                         | Status                    |
+| --------------------------------- | --------------------------------------------------- | ------------------------- |
+| **Custom Domain Plan Gating**     | Require PRO+ plan for custom domains                | No plan check             |
+| **Consolidated Dashboard+Stripe** | Single endpoint returning dashboard + billing state | Split into multiple calls |
 
 ## Web App Gaps
 
