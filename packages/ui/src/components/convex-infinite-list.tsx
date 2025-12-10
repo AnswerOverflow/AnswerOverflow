@@ -18,6 +18,7 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	renderItem: (item: PaginatedQueryItem<Query>, index: number) => ReactNode;
 	loader?: ReactNode;
 	initialLoaderCount?: number;
+	loadMoreLoaderCount?: number;
 	emptyState?: ReactNode;
 	authenticationType?: "all" | "non-anonymous";
 	initialData?: {
@@ -79,6 +80,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	renderItem,
 	loader,
 	initialLoaderCount = 5,
+	loadMoreLoaderCount = 3,
 	emptyState,
 	authenticationType = "all",
 	initialData,
@@ -145,21 +147,25 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 		<div>
 			{displayResults.map((item, i) => renderItem(item, i))}
 
-			{isLoadingMore && <div className="py-4">{loaderElement}</div>}
-
-			{canLoadMore && !isLoadingMore && (
+			{canLoadMore || isLoadingMore ? (
 				<>
-					{showLoadMoreButton ? (
+					{showLoadMoreButton && !isLoadingMore ? (
 						<div className="py-4 flex justify-center">
 							<Button variant="outline" onClick={handleLoadMore}>
 								Load More
 							</Button>
 						</div>
 					) : (
-						<div ref={sentinelRef} className="h-4" />
+						<>
+							<div ref={sentinelRef} className="h-4" />
+							<LoadingSkeletons
+								count={loadMoreLoaderCount}
+								loader={loaderElement}
+							/>
+						</>
 					)}
 				</>
-			)}
+			) : null}
 		</div>
 	);
 }
