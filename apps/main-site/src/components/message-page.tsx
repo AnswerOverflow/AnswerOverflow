@@ -1,13 +1,12 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import { FormattedNumber } from "@packages/ui/components/formatted-number";
 import { HelpfulFeedback } from "@packages/ui/components/helpful-feedback";
 import { JumpToSolution } from "@packages/ui/components/jump-to-solution";
 import { Link } from "@packages/ui/components/link";
-
-import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import { MessageBody } from "@packages/ui/components/message-body";
 import { MessageResultPageProvider } from "@packages/ui/components/message-result-page-context";
 import { ServerIcon } from "@packages/ui/components/server-icon";

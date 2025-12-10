@@ -4,7 +4,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import type { BundledLanguage } from "shiki";
 import { codeToHtml } from "shiki";
 import { cn } from "../../lib/utils";
-import { CodeBlock } from "../../markdown/render/code-block";
+import {
+	CodeBlock,
+	SuspenseClientOnly,
+} from "../../markdown/render/code-block";
 
 interface InlineCodeInternalProps {
 	code: string;
@@ -60,18 +63,22 @@ export function Code({
 	if (isInline) {
 		return (
 			<span className="relative inline-block">
-				<InlineCodeInternal
-					code={code}
-					language={language}
-					theme="light"
-					className="dark:hidden inline-block"
-				/>
-				<InlineCodeInternal
-					code={code}
-					language={language}
-					theme="dark"
-					className="hidden dark:inline-block"
-				/>
+				<SuspenseClientOnly>
+					<InlineCodeInternal
+						code={code}
+						language={language}
+						theme="light"
+						className="dark:hidden inline-block"
+					/>
+				</SuspenseClientOnly>
+				<SuspenseClientOnly>
+					<InlineCodeInternal
+						code={code}
+						language={language}
+						theme="dark"
+						className="hidden dark:inline-block"
+					/>
+				</SuspenseClientOnly>
 			</span>
 		);
 	}
