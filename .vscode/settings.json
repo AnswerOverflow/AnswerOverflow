@@ -1,6 +1,6 @@
 {
 	"files.exclude": {
-		"**/.context": true,
+		// "**/.context": true,
 		"**/_generated": true,
 		"**/.turbo": true,
 		"**/.next": true,
