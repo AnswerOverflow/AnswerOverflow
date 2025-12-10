@@ -147,25 +147,21 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 		<div>
 			{displayResults.map((item, i) => renderItem(item, i))}
 
-			{canLoadMore || isLoadingMore ? (
-				<>
-					{showLoadMoreButton && !isLoadingMore ? (
-						<div className="py-4 flex justify-center">
-							<Button variant="outline" onClick={handleLoadMore}>
-								Load More
-							</Button>
-						</div>
-					) : (
-						<>
-							<div ref={sentinelRef} className="h-4" />
-							<LoadingSkeletons
-								count={loadMoreLoaderCount}
-								loader={loaderElement}
-							/>
-						</>
-					)}
-				</>
-			) : null}
+			{canLoadMore && !isLoadingMore && showLoadMoreButton && (
+				<div className="py-4 flex justify-center">
+					<Button variant="outline" onClick={handleLoadMore}>
+						Load More
+					</Button>
+				</div>
+			)}
+
+			{canLoadMore && !isLoadingMore && !showLoadMoreButton && (
+				<div ref={sentinelRef} className="h-4" />
+			)}
+
+			{isLoadingMore && (
+				<LoadingSkeletons count={loadMoreLoaderCount} loader={loaderElement} />
+			)}
 		</div>
 	);
 }

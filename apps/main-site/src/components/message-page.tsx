@@ -123,24 +123,9 @@ function processRepliesForDisplay(
 
 export function RepliesSkeleton() {
 	return (
-		<div className="animate-pulse space-y-4">
-			<div className="flex flex-row gap-4 border-b-2 border-muted py-4 pl-2">
-				<div className="flex items-center gap-2">
-					<MessageSquare className="size-4" />
-					<div className="h-4 w-16 bg-muted rounded" />
-				</div>
-			</div>
+		<div className="space-y-4">
 			{[1, 2, 3].map((i) => (
-				<div key={i} className="p-2 space-y-2">
-					<div className="flex items-center gap-2">
-						<div className="size-8 bg-muted rounded-full" />
-						<div className="h-4 w-24 bg-muted rounded" />
-					</div>
-					<div className="ml-10 space-y-2">
-						<div className="h-4 w-full bg-muted rounded" />
-						<div className="h-4 w-3/4 bg-muted rounded" />
-					</div>
-				</div>
+				<ReplyMessageSkeleton key={i} />
 			))}
 		</div>
 	);
@@ -148,17 +133,22 @@ export function RepliesSkeleton() {
 
 function ReplyMessageSkeleton() {
 	return (
-		<div className="p-2 space-y-2">
-			<div className="flex items-center gap-2">
-				<div className="size-10 bg-muted rounded-full animate-pulse" />
-				<div className="flex flex-col gap-1">
-					<div className="h-4 w-24 bg-muted rounded animate-pulse" />
-					<div className="h-3 w-16 bg-muted rounded animate-pulse" />
+		<div className="p-2">
+			<div className="flex flex-row min-w-0">
+				<div className="w-[40px] flex-shrink-0">
+					<div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
 				</div>
-			</div>
-			<div className="ml-12 space-y-2">
-				<div className="h-4 w-full bg-muted rounded animate-pulse" />
-				<div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+				<div className="flex flex-col pl-2 pt-2 min-w-0 flex-1 gap-2">
+					<div className="flex flex-row items-center gap-2">
+						<div className="h-4 w-24 bg-muted rounded animate-pulse" />
+						<div className="h-3 w-3 bg-muted rounded-full animate-pulse" />
+						<div className="h-3 w-16 bg-muted rounded animate-pulse" />
+					</div>
+					<div className="space-y-2">
+						<div className="h-4 w-full bg-muted rounded animate-pulse" />
+						<div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+					</div>
+				</div>
 			</div>
 		</div>
 	);
@@ -228,12 +218,6 @@ export function RepliesSection(props: {
 
 	return (
 		<>
-			<div className="flex flex-row gap-4 border-b-2 border-muted py-4 pl-2">
-				<div className="flex items-center gap-2">
-					<MessageSquare className="size-4" />
-					<span>Replies</span>
-				</div>
-			</div>
 			<div className="rounded-md">
 				<div className="flex flex-col gap-4">
 					<ConvexInfiniteList
