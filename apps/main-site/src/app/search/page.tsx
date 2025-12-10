@@ -16,6 +16,7 @@ import {
 } from "@packages/ui/components/thread-card";
 import { FileQuestion, Search } from "lucide-react";
 import { useQueryState } from "nuqs";
+import { Suspense } from "react";
 import { useDebounce } from "use-debounce";
 
 type Props = {
@@ -105,5 +106,34 @@ function SearchPageContent() {
 }
 
 export default function SearchPage(_props: Props) {
-	return <SearchPageContent />;
+	return (
+		<Suspense
+			fallback={
+				<div className="min-h-screen bg-background">
+					<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+						<div className="mb-8">
+							<h1 className="text-3xl font-bold text-foreground mb-2">
+								Search
+							</h1>
+							<p className="text-muted-foreground">
+								Search through indexed Discord messages
+							</p>
+						</div>
+						<div className="mb-8">
+							<SearchInput
+								value=""
+								onChange={() => {}}
+								placeholder="Search for answers..."
+								isSearching={false}
+								autoFocus
+								className="max-w-2xl"
+							/>
+						</div>
+					</div>
+				</div>
+			}
+		>
+			<SearchPageContent />
+		</Suspense>
+	);
 }

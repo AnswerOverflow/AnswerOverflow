@@ -27,6 +27,7 @@ export function Link(
 	if (icon)
 		return (
 			<NextLink
+				scroll={true}
 				{...rest}
 				href={finalHref}
 				className={cn("flex flex-row items-center gap-2", className)}
@@ -35,5 +36,5 @@ export function Link(
 				{props.children}
 			</NextLink>
 		);
-	return <NextLink {...props} href={finalHref} />;
+	return <NextLink scroll={true} {...props} href={finalHref} />;
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import DOMPurify from "dompurify";
 import type { BundledLanguage } from "shiki";
 import { codeToHtml } from "shiki";
 import { cn } from "../../lib/utils";
@@ -25,15 +24,12 @@ function InlineCodeInternal({
 		queryFn: async () => {
 			try {
 				const lang = (language?.toLowerCase() || "text") as BundledLanguage;
-				const rawHtml = await codeToHtml(code, {
+				return await codeToHtml(code, {
 					lang,
 					theme: theme === "dark" ? "github-dark" : "github-light",
 				});
-				return DOMPurify.sanitize(rawHtml);
 			} catch {
-				return DOMPurify.sanitize(
-					`<pre class="shiki"><code>${code.replace(/</g, "&lt;")}</code></pre>`,
-				);
+				return `<pre class="shiki"><code>${code.replace(/</g, "&lt;")}</code></pre>`;
 			}
 		},
 		staleTime: Infinity,

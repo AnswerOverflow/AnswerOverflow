@@ -2,7 +2,6 @@
 
 import { Button } from "@packages/ui/components/button";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import DOMPurify from "dompurify";
 import { Check, Copy, WrapText } from "lucide-react";
 import { useState } from "react";
 import type { BundledLanguage } from "shiki";
@@ -74,15 +73,12 @@ function CodeBlockInternal({
 			try {
 				const language = (lang?.toLowerCase() || "text") as BundledLanguage;
 
-				const rawHtml = await codeToHtml(content, {
+				return await codeToHtml(content, {
 					lang: language,
 					theme: theme === "dark" ? "github-dark" : "github-light",
 				});
-				return DOMPurify.sanitize(rawHtml);
 			} catch {
-				return DOMPurify.sanitize(
-					`<pre class="shiki"><code>${content.replace(/</g, "&lt;")}</code></pre>`,
-				);
+				return `<pre class="shiki"><code>${content.replace(/</g, "&lt;")}</code></pre>`;
 			}
 		},
 		staleTime: Infinity,
