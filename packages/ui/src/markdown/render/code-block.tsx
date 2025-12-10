@@ -3,7 +3,7 @@
 import { Button } from "@packages/ui/components/button";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Check, Copy, WrapText } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import type { BundledLanguage } from "shiki";
 import { codeToHtml } from "shiki";
 
@@ -98,6 +98,26 @@ function CodeBlockInternal({
 	);
 }
 
+export function SuspenseClientOnly({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
+	const isClient = typeof window !== "undefined";
+	if (!isClient) {
+		return children;
+	}
+	return (
+		<Suspense
+			fallback={
+				<div className="h-full w-full bg-background/80 backdrop-blur-sm" />
+			}
+		>
+			{children}
+		</Suspense>
+	);
+}
+
 export function CodeBlock({ lang, content, key }: CodeBlockProps) {
 	const [wrap, setWrap] = useState(false);
 
@@ -109,20 +129,24 @@ export function CodeBlock({ lang, content, key }: CodeBlockProps) {
 				onToggleWrap={() => setWrap(!wrap)}
 			/>
 			<div className="overflow-x-auto">
-				<CodeBlockInternal
-					lang={lang}
-					content={content}
-					theme="light"
-					wrap={wrap}
-					className={"dark:hidden block w-full"}
-				/>
-				<CodeBlockInternal
-					lang={lang}
-					content={content}
-					theme="dark"
-					wrap={wrap}
-					className={"hidden dark:block w-full"}
-				/>
+				<SuspenseClientOnly>
+					<CodeBlockInternal
+						lang={lang}
+						content={content}
+						theme="light"
+						wrap={wrap}
+						className={"dark:hidden block w-full"}
+					/>
+				</SuspenseClientOnly>
+				<SuspenseClientOnly>
+					<CodeBlockInternal
+						lang={lang}
+						content={content}
+						theme="dark"
+						wrap={wrap}
+						className={"hidden dark:block w-full"}
+					/>
+				</SuspenseClientOnly>
 			</div>
 		</div>
 	);
