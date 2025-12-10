@@ -1,6 +1,5 @@
 import { ConvexClient } from "convex/browser";
 import type { FunctionReference } from "convex/server";
-import { parse } from "cookie";
 import { Context, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import {
@@ -9,64 +8,6 @@ import {
 	ConvexError,
 	type WrappedUnifiedClient,
 } from "./convex-unified-client";
-
-const JWT_COOKIE_NAMES = [
-	"better-auth.convex_jwt",
-	"__Secure-better-auth.convex_jwt",
-] as const;
-
-function extractJwtFromCookie(setCookieString: string) {
-	const nameValuePart = setCookieString.split(";")[0];
-	if (!nameValuePart) return null;
-	const parsed = parse(nameValuePart);
-	for (const name of JWT_COOKIE_NAMES) {
-		if (parsed[name])
-			return {
-				name: name,
-				value: parsed[name],
-			};
-	}
-	return null;
-}
-
-let cachedJwt: string | null = null;
-
-export function getConvexJwtFromHeaders(cookies: string[]) {
-	for (const cookie of cookies) {
-		const extracted = extractJwtFromCookie(cookie);
-		if (extracted) {
-			return extracted;
-		}
-	}
-
-	return null;
-}
-
-async function _getConvexJwt(): Promise<string | null> {
-	if (cachedJwt) return cachedJwt;
-
-	const response = await fetch(
-		`${process.env.SITE_URL}/api/auth/sign-in/anonymous`,
-		{
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Cookie: "auth-bypass=true",
-			},
-			body: JSON.stringify({ redirectTo: "/" }),
-		},
-	);
-
-	const headers = response.headers;
-	const jwt = getConvexJwtFromHeaders(
-		headers.getSetCookie?.() ?? headers.get("set-cookie")?.split(", ") ?? [],
-	);
-	if (jwt) {
-		cachedJwt = jwt.value;
-	}
-
-	return null;
-}
 
 const createLiveService = Effect.gen(function* () {
 	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL!;
