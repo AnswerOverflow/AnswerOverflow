@@ -8,21 +8,21 @@ import {
 	createTextChannelWithMessages,
 } from "../../src/test";
 
-describe("getMessagePageReplies", () => {
+describe("getMessages", () => {
 	describe("forum channel thread", () => {
-		it.scoped("should return thread replies excluding the root message", () =>
+		it.scoped("should return messages after the specified message id", () =>
 			Effect.gen(function* () {
 				const database = yield* Database;
 				const fixture = yield* createForumThreadWithReplies();
 
-				yield* fixture.addRootMessage();
+				const rootMessage = yield* fixture.addRootMessage();
 				const reply1 = yield* fixture.addMessage({ content: "First reply" });
 				const reply2 = yield* fixture.addMessage({ content: "Second reply" });
 
-				const result = yield* database.public.messages.getMessagePageReplies(
+				const result = yield* database.public.messages.getMessages(
 					{
-						channelId: fixture.forum.id,
-						threadId: fixture.thread.id,
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
 						paginationOpts: { numItems: 10, cursor: null },
 					},
 					{ subscribe: false },
@@ -32,31 +32,33 @@ describe("getMessagePageReplies", () => {
 				expect(result.isDone).toBe(true);
 
 				const messageIds = result.page.map((m) => m.message.id);
-				expect(messageIds).not.toContain(fixture.thread.id);
+				expect(messageIds).not.toContain(rootMessage.id);
 				expect(messageIds).toContain(reply1.id);
 				expect(messageIds).toContain(reply2.id);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 
-		it.scoped("should return empty page when only root message exists", () =>
-			Effect.gen(function* () {
-				const database = yield* Database;
-				const fixture = yield* createForumThreadWithReplies();
+		it.scoped(
+			"should return empty page when no messages after the specified id",
+			() =>
+				Effect.gen(function* () {
+					const database = yield* Database;
+					const fixture = yield* createForumThreadWithReplies();
 
-				yield* fixture.addRootMessage();
+					const rootMessage = yield* fixture.addRootMessage();
 
-				const result = yield* database.public.messages.getMessagePageReplies(
-					{
-						channelId: fixture.forum.id,
-						threadId: fixture.thread.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+					const result = yield* database.public.messages.getMessages(
+						{
+							channelId: fixture.thread.id,
+							after: rootMessage.id,
+							paginationOpts: { numItems: 10, cursor: null },
+						},
+						{ subscribe: false },
+					);
 
-				expect(result.page).toHaveLength(0);
-				expect(result.isDone).toBe(true);
-			}).pipe(Effect.provide(DatabaseTestLayer)),
+					expect(result.page).toHaveLength(0);
+					expect(result.isDone).toBe(true);
+				}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 
 		it.scoped("should paginate results correctly", () =>
@@ -64,15 +66,15 @@ describe("getMessagePageReplies", () => {
 				const database = yield* Database;
 				const fixture = yield* createForumThreadWithReplies();
 
-				yield* fixture.addRootMessage();
+				const rootMessage = yield* fixture.addRootMessage();
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 
-				const page1 = yield* database.public.messages.getMessagePageReplies(
+				const page1 = yield* database.public.messages.getMessages(
 					{
-						channelId: fixture.forum.id,
-						threadId: fixture.thread.id,
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
 						paginationOpts: { numItems: 2, cursor: null },
 					},
 					{ subscribe: false },
@@ -81,10 +83,10 @@ describe("getMessagePageReplies", () => {
 				expect(page1.page).toHaveLength(2);
 				expect(page1.isDone).toBe(false);
 
-				const page2 = yield* database.public.messages.getMessagePageReplies(
+				const page2 = yield* database.public.messages.getMessages(
 					{
-						channelId: fixture.forum.id,
-						threadId: fixture.thread.id,
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
 						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
 					},
 					{ subscribe: false },
@@ -100,13 +102,13 @@ describe("getMessagePageReplies", () => {
 				const database = yield* Database;
 				const fixture = yield* createForumThreadWithReplies();
 
-				yield* fixture.addRootMessage();
+				const rootMessage = yield* fixture.addRootMessage();
 				yield* fixture.addMessage({ content: "Test content" });
 
-				const result = yield* database.public.messages.getMessagePageReplies(
+				const result = yield* database.public.messages.getMessages(
 					{
-						channelId: fixture.forum.id,
-						threadId: fixture.thread.id,
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
 						paginationOpts: { numItems: 10, cursor: null },
 					},
 					{ subscribe: false },
@@ -119,19 +121,19 @@ describe("getMessagePageReplies", () => {
 	});
 
 	describe("text channel thread", () => {
-		it.scoped("should return thread replies excluding the root message", () =>
+		it.scoped("should return messages after the specified message id", () =>
 			Effect.gen(function* () {
 				const database = yield* Database;
 				const fixture = yield* createTextChannelThreadWithReplies();
 
-				yield* fixture.addRootMessage();
+				const rootMessage = yield* fixture.addRootMessage();
 				const reply1 = yield* fixture.addMessage({ content: "First reply" });
 				const reply2 = yield* fixture.addMessage({ content: "Second reply" });
 
-				const result = yield* database.public.messages.getMessagePageReplies(
+				const result = yield* database.public.messages.getMessages(
 					{
-						channelId: fixture.textChannel.id,
-						threadId: fixture.thread.id,
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
 						paginationOpts: { numItems: 10, cursor: null },
 					},
 					{ subscribe: false },
@@ -141,31 +143,33 @@ describe("getMessagePageReplies", () => {
 				expect(result.isDone).toBe(true);
 
 				const messageIds = result.page.map((m) => m.message.id);
-				expect(messageIds).not.toContain(fixture.thread.id);
+				expect(messageIds).not.toContain(rootMessage.id);
 				expect(messageIds).toContain(reply1.id);
 				expect(messageIds).toContain(reply2.id);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 
-		it.scoped("should return empty page when only root message exists", () =>
-			Effect.gen(function* () {
-				const database = yield* Database;
-				const fixture = yield* createTextChannelThreadWithReplies();
+		it.scoped(
+			"should return empty page when no messages after the specified id",
+			() =>
+				Effect.gen(function* () {
+					const database = yield* Database;
+					const fixture = yield* createTextChannelThreadWithReplies();
 
-				yield* fixture.addRootMessage();
+					const rootMessage = yield* fixture.addRootMessage();
 
-				const result = yield* database.public.messages.getMessagePageReplies(
-					{
-						channelId: fixture.textChannel.id,
-						threadId: fixture.thread.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+					const result = yield* database.public.messages.getMessages(
+						{
+							channelId: fixture.thread.id,
+							after: rootMessage.id,
+							paginationOpts: { numItems: 10, cursor: null },
+						},
+						{ subscribe: false },
+					);
 
-				expect(result.page).toHaveLength(0);
-				expect(result.isDone).toBe(true);
-			}).pipe(Effect.provide(DatabaseTestLayer)),
+					expect(result.page).toHaveLength(0);
+					expect(result.isDone).toBe(true);
+				}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 
 		it.scoped("should paginate results correctly", () =>
@@ -173,15 +177,15 @@ describe("getMessagePageReplies", () => {
 				const database = yield* Database;
 				const fixture = yield* createTextChannelThreadWithReplies();
 
-				yield* fixture.addRootMessage();
+				const rootMessage = yield* fixture.addRootMessage();
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 
-				const page1 = yield* database.public.messages.getMessagePageReplies(
+				const page1 = yield* database.public.messages.getMessages(
 					{
-						channelId: fixture.textChannel.id,
-						threadId: fixture.thread.id,
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
 						paginationOpts: { numItems: 2, cursor: null },
 					},
 					{ subscribe: false },
@@ -190,10 +194,10 @@ describe("getMessagePageReplies", () => {
 				expect(page1.page).toHaveLength(2);
 				expect(page1.isDone).toBe(false);
 
-				const page2 = yield* database.public.messages.getMessagePageReplies(
+				const page2 = yield* database.public.messages.getMessages(
 					{
-						channelId: fixture.textChannel.id,
-						threadId: fixture.thread.id,
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
 						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
 					},
 					{ subscribe: false },
@@ -209,13 +213,13 @@ describe("getMessagePageReplies", () => {
 				const database = yield* Database;
 				const fixture = yield* createTextChannelThreadWithReplies();
 
-				yield* fixture.addRootMessage();
+				const rootMessage = yield* fixture.addRootMessage();
 				yield* fixture.addMessage({ content: "Test content" });
 
-				const result = yield* database.public.messages.getMessagePageReplies(
+				const result = yield* database.public.messages.getMessages(
 					{
-						channelId: fixture.textChannel.id,
-						threadId: fixture.thread.id,
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
 						paginationOpts: { numItems: 10, cursor: null },
 					},
 					{ subscribe: false },
@@ -227,18 +231,20 @@ describe("getMessagePageReplies", () => {
 		);
 	});
 
-	describe("regular text channel (non-thread)", () => {
-		it.scoped("should return messages from the channel", () =>
+	describe("regular text channel", () => {
+		it.scoped("should return messages after the specified message id", () =>
 			Effect.gen(function* () {
 				const database = yield* Database;
 				const fixture = yield* createTextChannelWithMessages();
 
 				const msg1 = yield* fixture.addMessage({ content: "First message" });
 				const msg2 = yield* fixture.addMessage({ content: "Second message" });
+				const msg3 = yield* fixture.addMessage({ content: "Third message" });
 
-				const result = yield* database.public.messages.getMessagePageReplies(
+				const result = yield* database.public.messages.getMessages(
 					{
 						channelId: fixture.channel.id,
+						after: msg1.id,
 						paginationOpts: { numItems: 10, cursor: null },
 					},
 					{ subscribe: false },
@@ -248,27 +254,33 @@ describe("getMessagePageReplies", () => {
 				expect(result.isDone).toBe(true);
 
 				const messageIds = result.page.map((m) => m.message.id);
-				expect(messageIds).toContain(msg1.id);
+				expect(messageIds).not.toContain(msg1.id);
 				expect(messageIds).toContain(msg2.id);
+				expect(messageIds).toContain(msg3.id);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 
-		it.scoped("should return empty page when no messages exist", () =>
-			Effect.gen(function* () {
-				const database = yield* Database;
-				const fixture = yield* createTextChannelWithMessages();
+		it.scoped(
+			"should return empty page when no messages after the specified id",
+			() =>
+				Effect.gen(function* () {
+					const database = yield* Database;
+					const fixture = yield* createTextChannelWithMessages();
 
-				const result = yield* database.public.messages.getMessagePageReplies(
-					{
-						channelId: fixture.channel.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+					const msg1 = yield* fixture.addMessage({ content: "Only message" });
 
-				expect(result.page).toHaveLength(0);
-				expect(result.isDone).toBe(true);
-			}).pipe(Effect.provide(DatabaseTestLayer)),
+					const result = yield* database.public.messages.getMessages(
+						{
+							channelId: fixture.channel.id,
+							after: msg1.id,
+							paginationOpts: { numItems: 10, cursor: null },
+						},
+						{ subscribe: false },
+					);
+
+					expect(result.page).toHaveLength(0);
+					expect(result.isDone).toBe(true);
+				}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 
 		it.scoped("should paginate results correctly", () =>
@@ -276,13 +288,15 @@ describe("getMessagePageReplies", () => {
 				const database = yield* Database;
 				const fixture = yield* createTextChannelWithMessages();
 
+				const firstMsg = yield* fixture.addMessage();
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 
-				const page1 = yield* database.public.messages.getMessagePageReplies(
+				const page1 = yield* database.public.messages.getMessages(
 					{
 						channelId: fixture.channel.id,
+						after: firstMsg.id,
 						paginationOpts: { numItems: 2, cursor: null },
 					},
 					{ subscribe: false },
@@ -291,9 +305,10 @@ describe("getMessagePageReplies", () => {
 				expect(page1.page).toHaveLength(2);
 				expect(page1.isDone).toBe(false);
 
-				const page2 = yield* database.public.messages.getMessagePageReplies(
+				const page2 = yield* database.public.messages.getMessages(
 					{
 						channelId: fixture.channel.id,
+						after: firstMsg.id,
 						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
 					},
 					{ subscribe: false },
@@ -309,11 +324,13 @@ describe("getMessagePageReplies", () => {
 				const database = yield* Database;
 				const fixture = yield* createTextChannelWithMessages();
 
+				const firstMsg = yield* fixture.addMessage({ content: "First" });
 				yield* fixture.addMessage({ content: "Test content" });
 
-				const result = yield* database.public.messages.getMessagePageReplies(
+				const result = yield* database.public.messages.getMessages(
 					{
 						channelId: fixture.channel.id,
+						after: firstMsg.id,
 						paginationOpts: { numItems: 10, cursor: null },
 					},
 					{ subscribe: false },

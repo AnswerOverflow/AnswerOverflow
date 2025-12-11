@@ -45,7 +45,7 @@ export type MessagePageHeaderData = NonNullable<
 >;
 
 export type MessagePageReplies = FunctionReturnType<
-	typeof api.public.messages.getMessagePageReplies
+	typeof api.public.messages.getMessages
 >;
 
 export function RepliesSkeleton() {
@@ -118,7 +118,7 @@ function ReplyMessage(props: {
 
 export function RepliesSection(props: {
 	channelId: bigint;
-	threadId: bigint | null;
+	after: bigint;
 	solutionMessageId: bigint | undefined;
 	firstMessageAuthorId?: bigint;
 	server?: MessagePageHeaderData["server"];
@@ -129,7 +129,7 @@ export function RepliesSection(props: {
 }) {
 	const {
 		channelId,
-		threadId,
+		after,
 		solutionMessageId,
 		firstMessageAuthorId,
 		server,
@@ -139,17 +139,15 @@ export function RepliesSection(props: {
 		currentCursor,
 	} = props;
 
-	const targetChannelId = threadId ?? channelId;
-
 	return (
 		<>
 			<div className="rounded-md">
 				<div className="flex flex-col gap-4">
 					<ConvexInfiniteList
-						query={api.public.messages.getMessagePageReplies}
+						query={api.public.messages.getMessages}
 						queryArgs={{
-							channelId: targetChannelId,
-							threadId: threadId ?? undefined,
+							channelId,
+							after,
 						}}
 						pageSize={50}
 						initialLoaderCount={3}

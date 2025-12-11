@@ -14,7 +14,7 @@ export type MessagePageHeaderData = NonNullable<
 >;
 
 export type MessagePageReplies = FunctionReturnType<
-	typeof api.public.messages.getMessagePageReplies
+	typeof api.public.messages.getMessages
 >;
 
 export async function fetchMessagePageHeaderData(
@@ -30,14 +30,14 @@ export async function fetchMessagePageHeaderData(
 
 export async function fetchMessagePageReplies(args: {
 	channelId: bigint;
-	threadId: bigint | null;
+	after: bigint;
 	cursor: string | null;
 }): Promise<MessagePageReplies> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.public.messages.getMessagePageReplies({
+		return yield* database.public.messages.getMessages({
 			channelId: args.channelId,
-			threadId: args.threadId ?? undefined,
+			after: args.after,
 			paginationOpts: { numItems: 50, cursor: args.cursor },
 		});
 	}).pipe(runtime.runPromise);
@@ -81,9 +81,7 @@ export function generateMessagePageMetadata(
 
 async function RepliesLoader(props: {
 	channelId: bigint;
-	threadId: bigint | null;
-	serverDiscordId: bigint;
-	channelDiscordId: bigint;
+	after: bigint;
 	solutionMessageId: bigint | undefined;
 	firstMessageAuthorId?: bigint;
 	server?: MessagePageHeaderData["server"];
@@ -92,14 +90,14 @@ async function RepliesLoader(props: {
 }) {
 	const initialData = await fetchMessagePageReplies({
 		channelId: props.channelId,
-		threadId: props.threadId,
+		after: props.after,
 		cursor: props.cursor,
 	});
 
 	return (
 		<RepliesSection
-			channelId={props.channelDiscordId}
-			threadId={props.threadId}
+			channelId={props.channelId}
+			after={props.after}
 			solutionMessageId={props.solutionMessageId}
 			firstMessageAuthorId={props.firstMessageAuthorId}
 			server={props.server}
@@ -137,23 +135,29 @@ export function MessagePageLoader(props: {
 
 	const solutionMessageId = headerData.solutionMessage?.message.id;
 
+	const queryChannelId = headerData.threadId ?? headerData.channelId;
+	const afterMessageId =
+		headerData.threadId ?? headerData.firstMessage?.message.id;
+
 	return (
 		<MessagePage
 			headerData={headerData}
 			repliesSlot={
-				<Suspense fallback={<RepliesSkeleton />}>
-					<RepliesLoader
-						channelId={headerData.channelId}
-						threadId={headerData.threadId}
-						serverDiscordId={headerData.server.discordId}
-						channelDiscordId={headerData.channel.id}
-						solutionMessageId={solutionMessageId}
-						firstMessageAuthorId={headerData.firstMessage?.author?.id}
-						server={headerData.server}
-						channel={headerData.channel}
-						cursor={cursor ?? null}
-					/>
-				</Suspense>
+				afterMessageId ? (
+					<Suspense fallback={<RepliesSkeleton />}>
+						<RepliesLoader
+							channelId={queryChannelId}
+							after={afterMessageId}
+							solutionMessageId={solutionMessageId}
+							firstMessageAuthorId={headerData.firstMessage?.author?.id}
+							server={headerData.server}
+							channel={headerData.channel}
+							cursor={cursor ?? null}
+						/>
+					</Suspense>
+				) : (
+					<RepliesSkeleton />
+				)
 			}
 			similarThreadsSlot={
 				<Suspense fallback={<SimilarThreadsSkeleton />}>
