@@ -7,21 +7,18 @@ export const getMessagePageReplies = publicQuery({
 	args: {
 		channelId: v.int64(),
 		threadId: v.optional(v.int64()),
-		startingFromMessageId: v.optional(v.int64()),
 		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
-		const { channelId, threadId, startingFromMessageId, paginationOpts } = args;
+		const { channelId, threadId, paginationOpts } = args;
 
 		const targetChannelId = threadId ?? channelId;
 
-		let query = ctx.db
+		const query = ctx.db
 			.query("messages")
-			.withIndex("by_channelId", (q) => q.eq("channelId", targetChannelId));
-
-		if (startingFromMessageId) {
-			query = query.filter((q) => q.gt(q.field("id"), startingFromMessageId));
-		}
+			.withIndex("by_channelId_and_id", (q) =>
+				q.eq("channelId", channelId).gt("id", targetChannelId),
+			);
 
 		const paginatedResult = await query.order("asc").paginate(paginationOpts);
 

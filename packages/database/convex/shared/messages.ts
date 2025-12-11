@@ -21,30 +21,6 @@ export function compareIds(a: bigint, b: bigint): number {
 	return a > b ? 1 : a < b ? -1 : 0;
 }
 
-export async function findMessagesByChannelId(
-	ctx: QueryCtx | MutationCtx,
-	channelId: bigint,
-	options?: {
-		limit?: number;
-		startingFrom?: bigint;
-	},
-) {
-	const query = ctx.db
-		.query("messages")
-		.withIndex("by_channelId_and_id", (q) => {
-			const base = q.eq("channelId", channelId);
-			return options?.startingFrom
-				? base.gt("id", options.startingFrom)
-				: base.gt("id", channelId);
-		})
-		.order("asc");
-
-	if (options?.limit) {
-		return await query.take(options.limit);
-	}
-	return await query.collect();
-}
-
 export async function getFirstMessageInChannel(
 	ctx: QueryCtx | MutationCtx,
 	channelId: bigint,
@@ -774,7 +750,7 @@ export async function enrichMessageForDisplay(
 		}
 	}
 
-	let referenceData: EnrichedMessage["reference"] = undefined;
+	let referenceData: EnrichedMessage["reference"];
 	if (message.referenceId) {
 		if (referenceMessage) {
 			const enrichedReference = await enrichMessageForDisplay(

@@ -14,7 +14,6 @@ import { enrichMessages } from "../shared/dataAccess";
 import {
 	deleteMessageInternalLogic,
 	findIgnoredDiscordAccountById,
-	findMessagesByChannelId,
 	findUserServerSettingsById,
 	getChannelWithSettings,
 	getMessageById as getMessageByIdShared,
@@ -551,28 +550,5 @@ export const getMessagePageHeaderData = privateQuery({
 			},
 			thread,
 		};
-	},
-});
-
-export const getMessagePageReplies = privateQuery({
-	args: {
-		channelId: v.int64(),
-		threadId: v.optional(v.int64()),
-		startingFromMessageId: v.optional(v.int64()),
-	},
-	handler: async (ctx, args) => {
-		const { channelId, threadId, startingFromMessageId } = args;
-
-		const allMessages = await findMessagesByChannelId(
-			ctx,
-			threadId ?? channelId,
-			{
-				limit: threadId ? 100 : 50,
-				startingFrom: startingFromMessageId,
-			},
-		);
-
-		const enrichedMessages = await enrichMessages(ctx, allMessages);
-		return enrichedMessages;
 	},
 });

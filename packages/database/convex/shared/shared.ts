@@ -16,7 +16,6 @@ export {
 	findAttachmentsByMessageId,
 	findIgnoredDiscordAccountById,
 	findMessagesByAuthorId,
-	findMessagesByChannelId,
 	findReactionsByMessageId,
 	findSolutionsByQuestionId,
 	findUserServerSettingsById,
