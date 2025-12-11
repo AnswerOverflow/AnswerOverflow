@@ -11,6 +11,8 @@ import { Cache, Duration, Effect } from "effect";
 import type { WrappedUnifiedClient } from "./convex-unified-client";
 import { LiveData } from "./live-data";
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 const extractArgs = <Query extends FunctionReference<"query">>(
 	args: OptionalRestArgs<Query>,
 ): FunctionArgs<Query> => (args[0] ?? {}) as FunctionArgs<Query>;
@@ -47,8 +49,8 @@ export const createWatchQueryToLiveData = <
 
 	const cache = Effect.gen(function* () {
 		return yield* Cache.make({
-			capacity: 100,
-			timeToLive: Duration.minutes(5),
+			capacity: isDevelopment ? 0 : 100,
+			timeToLive: isDevelopment ? Duration.zero : Duration.minutes(5),
 			lookup: (cacheKey: string) =>
 				Effect.gen(function* () {
 					const context = lookupContexts.get(cacheKey);
