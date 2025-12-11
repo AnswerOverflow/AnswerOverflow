@@ -27,7 +27,6 @@ export {
 	enrichMessageForDisplay,
 	enrichMessagesWithData,
 	findMessagesByAuthorId,
-	findMessagesByChannelId,
 	findReactionsByMessageId,
 	findSolutionsByQuestionId,
 	getFirstMessageInChannel,

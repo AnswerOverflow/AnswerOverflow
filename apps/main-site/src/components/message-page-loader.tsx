@@ -31,7 +31,6 @@ export async function fetchMessagePageHeaderData(
 export async function fetchMessagePageReplies(
 	channelId: bigint,
 	threadId: bigint | null,
-	startingFromMessageId: bigint | undefined,
 	cursor: string | null = null,
 ): Promise<MessagePageReplies> {
 	return Effect.gen(function* () {
@@ -39,7 +38,6 @@ export async function fetchMessagePageReplies(
 		return yield* database.public.messages.getMessagePageReplies({
 			channelId,
 			threadId: threadId ?? undefined,
-			startingFromMessageId,
 			paginationOpts: { numItems: 50, cursor },
 		});
 	}).pipe(runtime.runPromise);
@@ -84,7 +82,6 @@ export function generateMessagePageMetadata(
 async function RepliesLoader(props: {
 	channelId: bigint;
 	threadId: bigint | null;
-	startingFromMessageId: bigint | undefined;
 	serverDiscordId: bigint;
 	channelDiscordId: bigint;
 	solutionMessageId: bigint | undefined;
@@ -96,15 +93,15 @@ async function RepliesLoader(props: {
 	const initialData = await fetchMessagePageReplies(
 		props.channelId,
 		props.threadId,
-		props.startingFromMessageId,
 		props.cursor,
 	);
+
+	console.log("initialData", initialData);
 
 	return (
 		<RepliesSection
 			channelId={props.channelDiscordId}
 			threadId={props.threadId}
-			startingFromMessageId={props.startingFromMessageId}
 			solutionMessageId={props.solutionMessageId}
 			firstMessageAuthorId={props.firstMessageAuthorId}
 			server={props.server}
@@ -141,10 +138,6 @@ export function MessagePageLoader(props: {
 	}
 
 	const solutionMessageId = headerData.solutionMessage?.message.id;
-	const startingFromMessageId =
-		headerData.threadId || rootMessageDeleted
-			? undefined
-			: headerData.firstMessage?.message.id;
 
 	return (
 		<MessagePage
@@ -154,7 +147,6 @@ export function MessagePageLoader(props: {
 					<RepliesLoader
 						channelId={headerData.channelId}
 						threadId={headerData.threadId}
-						startingFromMessageId={startingFromMessageId}
 						serverDiscordId={headerData.server.discordId}
 						channelDiscordId={headerData.channel.id}
 						solutionMessageId={solutionMessageId}

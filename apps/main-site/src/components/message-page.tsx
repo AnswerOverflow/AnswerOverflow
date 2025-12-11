@@ -191,7 +191,6 @@ function ReplyMessage(props: {
 export function RepliesSection(props: {
 	channelId: bigint;
 	threadId: bigint | null;
-	startingFromMessageId: bigint | undefined;
 	solutionMessageId: bigint | undefined;
 	firstMessageAuthorId?: bigint;
 	server?: MessagePageHeaderData["server"];
@@ -203,7 +202,6 @@ export function RepliesSection(props: {
 	const {
 		channelId,
 		threadId,
-		startingFromMessageId,
 		solutionMessageId,
 		firstMessageAuthorId,
 		server,
@@ -224,7 +222,6 @@ export function RepliesSection(props: {
 						queryArgs={{
 							channelId: targetChannelId,
 							threadId: threadId ?? undefined,
-							startingFromMessageId,
 						}}
 						pageSize={50}
 						initialLoaderCount={3}

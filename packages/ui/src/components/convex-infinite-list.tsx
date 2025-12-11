@@ -97,7 +97,6 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	);
 
 	const canLoadMore = status === "CanLoadMore";
-	console.log("canLoadMore", canLoadMore);
 	const isLoadingMore = status === "LoadingMore";
 
 	const handleLoadMore = useCallback(() => {

@@ -47,7 +47,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 async function RepliesLoader(props: {
 	channelId: bigint;
 	threadId: bigint | null;
-	startingFromMessageId: bigint | undefined;
 	solutionMessageId: bigint | undefined;
 	firstMessageAuthorId?: bigint;
 	server?: MessagePageHeaderData["server"];
@@ -57,7 +56,6 @@ async function RepliesLoader(props: {
 	const initialData = await fetchMessagePageReplies(
 		props.channelId,
 		props.threadId,
-		props.startingFromMessageId,
 		props.cursor,
 	);
 
@@ -65,7 +63,6 @@ async function RepliesLoader(props: {
 		<RepliesSection
 			channelId={props.channelId}
 			threadId={props.threadId}
-			startingFromMessageId={props.startingFromMessageId}
 			solutionMessageId={props.solutionMessageId}
 			firstMessageAuthorId={props.firstMessageAuthorId}
 			server={props.server}
@@ -114,10 +111,6 @@ export default async function TenantMessagePage(props: Props) {
 	}
 
 	const solutionMessageId = headerData.solutionMessage?.message.id;
-	const startingFromMessageId =
-		headerData.threadId || headerData.firstMessage === null
-			? undefined
-			: headerData.firstMessage?.message.id;
 
 	return (
 		<MessagePage
@@ -127,7 +120,6 @@ export default async function TenantMessagePage(props: Props) {
 					<RepliesLoader
 						channelId={headerData.channelId}
 						threadId={headerData.threadId}
-						startingFromMessageId={startingFromMessageId}
 						solutionMessageId={solutionMessageId}
 						firstMessageAuthorId={headerData.firstMessage?.author?.id}
 						server={headerData.server}
