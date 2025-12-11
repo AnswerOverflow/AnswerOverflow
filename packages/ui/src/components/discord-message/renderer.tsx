@@ -100,7 +100,17 @@ function renderASTNode(
 		case "url":
 		case "autolink":
 			if (!message) {
-				return null;
+				return (
+					<a
+						key={key}
+						href={node.target as string}
+						target="_blank"
+						rel="noreferrer"
+						className="text-blue-500 hover:underline"
+					>
+						{renderNodes(node.content as SingleASTNode | SingleASTNode[])}
+					</a>
+				);
 			}
 			return (
 				<Link
@@ -136,7 +146,11 @@ function renderASTNode(
 		case "channel":
 		case "role":
 			if (!message) {
-				return null;
+				return (
+					<span key={key} className="text-blue-500">
+						@{node.id as string}
+					</span>
+				);
 			}
 			return (
 				<Mention
@@ -218,7 +232,7 @@ export const DiscordMarkdown = ({
 }: {
 	children: string | null;
 	isReferenceReply?: boolean;
-	message: MessageWithMetadata | MessageSnapshot;
+	message?: MessageWithMetadata | MessageSnapshot;
 }) => {
 	if (!children) {
 		return null;
