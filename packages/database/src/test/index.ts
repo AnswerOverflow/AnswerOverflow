@@ -1,2 +1,2 @@
-export { Gen } from "./generators";
 export * from "./fixtures";
+export { Gen } from "./generators";
