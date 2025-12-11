@@ -33,8 +33,7 @@ import {
 } from "@packages/ui/utils/server";
 import { getDate } from "@packages/ui/utils/snowflake";
 import type { FunctionReturnType } from "convex/server";
-import { Array as Arr, Predicate } from "effect";
-import { CheckCircle2, ExternalLink, MessageSquare } from "lucide-react";
+import { CheckCircle2, ExternalLink } from "lucide-react";
 import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
@@ -47,78 +46,6 @@ export type MessagePageHeaderData = NonNullable<
 export type MessagePageReplies = FunctionReturnType<
 	typeof api.public.messages.getMessagePageReplies
 >;
-
-const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
-
-function processRepliesForDisplay(
-	replies: EnrichedMessage[],
-	solutionMessageId: bigint | undefined,
-): EnrichedMessage[] {
-	let contents = "";
-	const messagesBeingMerged: EnrichedMessage[] = [];
-	const messagesWithMergedContent = replies.map((message, index) => {
-		const nextMessage = replies.at(index + 1);
-		contents += message.message.content;
-		messagesBeingMerged.push(message);
-		const isSameAuthor = message.author?.id === nextMessage?.author?.id;
-		const isCollapsible =
-			message.attachments.length === 0 &&
-			(message.message.embeds?.length ?? 0) === 0 &&
-			message.message.id !== solutionMessageId;
-		const isNextMessageCollapsible =
-			nextMessage &&
-			nextMessage.attachments.length === 0 &&
-			(nextMessage.message.embeds?.length ?? 0) === 0 &&
-			nextMessage.message.id !== solutionMessageId;
-		if (isSameAuthor && isCollapsible && isNextMessageCollapsible) {
-			contents += "\n";
-			return null;
-		}
-		const mergedContent = contents;
-		const allEmbeds = messagesBeingMerged.flatMap(
-			(msg) => msg.message.embeds ?? [],
-		);
-		const discordLinkRegex =
-			/^https:\/\/discord\.com\/channels\/\d+\/\d+(?:\/\d+)?$/;
-		const filteredEmbeds = allEmbeds.filter(
-			(embed) => !embed.url || !discordLinkRegex.test(embed.url),
-		);
-		const allInternalLinks = messagesBeingMerged.flatMap(
-			(msg) => msg.metadata?.internalLinks ?? [],
-		);
-		const result = {
-			...message,
-			message: {
-				...message.message,
-				content: mergedContent,
-				embeds: filteredEmbeds.length > 0 ? filteredEmbeds : undefined,
-			},
-			metadata: message.metadata
-				? {
-						...message.metadata,
-						internalLinks:
-							allInternalLinks.length > 0
-								? allInternalLinks
-								: message.metadata.internalLinks,
-					}
-				: undefined,
-		};
-		contents = "";
-		messagesBeingMerged.length = 0;
-		return result;
-	});
-
-	const nonNull = Arr.filter(
-		messagesWithMergedContent,
-		Predicate.isNotNullable,
-	);
-
-	return nonNull.filter((message) => {
-		if (DISCORD_CLIENT_ID && message.author?.id === BigInt(DISCORD_CLIENT_ID))
-			return false;
-		return true;
-	});
-}
 
 export function RepliesSkeleton() {
 	return (
@@ -134,7 +61,7 @@ function ReplyMessageSkeleton() {
 	return (
 		<div className="p-2">
 			<div className="flex flex-row min-w-0">
-				<div className="w-[40px] flex-shrink-0">
+				<div className="w-[40px] shrink-0">
 					<div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
 				</div>
 				<div className="flex flex-col pl-2 pt-2 min-w-0 flex-1 gap-2">
@@ -247,7 +174,7 @@ export function RepliesSection(props: {
 								</div>
 							)
 						}
-						renderItem={(message, index) => (
+						renderItem={(message) => (
 							<ReplyMessage
 								key={message.message.id.toString()}
 								message={message}

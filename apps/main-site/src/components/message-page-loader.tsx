@@ -28,17 +28,17 @@ export async function fetchMessagePageHeaderData(
 	}).pipe(runtime.runPromise);
 }
 
-export async function fetchMessagePageReplies(
-	channelId: bigint,
-	threadId: bigint | null,
-	cursor: string | null = null,
-): Promise<MessagePageReplies> {
+export async function fetchMessagePageReplies(args: {
+	channelId: bigint;
+	threadId: bigint | null;
+	cursor: string | null;
+}): Promise<MessagePageReplies> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.messages.getMessagePageReplies({
-			channelId,
-			threadId: threadId ?? undefined,
-			paginationOpts: { numItems: 50, cursor },
+			channelId: args.channelId,
+			threadId: args.threadId ?? undefined,
+			paginationOpts: { numItems: 50, cursor: args.cursor },
 		});
 	}).pipe(runtime.runPromise);
 }
@@ -90,13 +90,11 @@ async function RepliesLoader(props: {
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
 }) {
-	const initialData = await fetchMessagePageReplies(
-		props.channelId,
-		props.threadId,
-		props.cursor,
-	);
-
-	console.log("initialData", initialData);
+	const initialData = await fetchMessagePageReplies({
+		channelId: props.channelId,
+		threadId: props.threadId,
+		cursor: props.cursor,
+	});
 
 	return (
 		<RepliesSection
