@@ -1882,7 +1882,7 @@ function withAuth(auth: AuthFake = new AuthFake()) {
 		query: Query,
 		args: FunctionArgs<Query>,
 	) => {
-		const argsKey = JSON.stringify(args);
+		const argsKey = JSON.stringify(convexToJson(args));
 		// Use getFunctionAddress to get a unique identifier for the function
 		// This ensures different functions (even with similar names) are tracked separately
 		const functionAddress = getFunctionAddress(query);
@@ -2151,7 +2151,7 @@ function withAuth(auth: AuthFake = new AuthFake()) {
 			callback: (result: FunctionReturnType<Query>) => void,
 		) => {
 			// Track query call - use string key matching getQueryCallCount
-			const argsKey = JSON.stringify(args);
+			const argsKey = JSON.stringify(convexToJson(args));
 			// Use getFunctionAddress to get a unique identifier for the function
 			// This ensures different functions (even with similar names) are tracked separately
 			const functionAddress = getFunctionAddress(query);
