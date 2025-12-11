@@ -4,11 +4,12 @@ import type {
 	Channel,
 	ForumChannel,
 	Guild,
+	GuildChannel,
 	Message,
 	NewsChannel,
 	TextChannel,
 } from "discord.js";
-import { ChannelType } from "discord.js";
+import { ChannelType, PermissionFlagsBits } from "discord.js";
 import {
 	Array as Arr,
 	BigInt as BigIntEffect,
@@ -34,7 +35,78 @@ import {
 	toAOMessage,
 	toUpsertMessageArgs,
 } from "../utils/conversions";
-import { isHumanMessage } from "../utils/message-utils";
+
+function canBotViewChannel(channel: GuildChannel): boolean {
+	const permissions = channel.permissionsFor(channel.client.user);
+	if (!permissions) return false;
+	return permissions.has([
+		PermissionFlagsBits.ViewChannel,
+		PermissionFlagsBits.ReadMessageHistory,
+	]);
+}
+
+function isIndexableMessage(message: Message): boolean {
+	if (message.system) return false;
+	return true;
+}
+
+function ensureInviteCode(
+	channel: TextChannel | NewsChannel | ForumChannel,
+	channelSettings: { flags: { inviteCode?: string } } | null,
+) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const discord = yield* Discord;
+
+		if (channelSettings?.flags.inviteCode) {
+			return;
+		}
+
+		const permissions = channel.permissionsFor(channel.client.user);
+		const canMakeInvites = permissions?.has(
+			PermissionFlagsBits.CreateInstantInvite,
+		);
+		const vanityURLCode = channel.guild.vanityURLCode;
+
+		if (!canMakeInvites && !vanityURLCode) {
+			return;
+		}
+
+		const inviteCode = canMakeInvites
+			? yield* discord
+					.callClient(() =>
+						channel.createInvite({
+							maxAge: 0,
+							maxUses: 0,
+							reason: "Channel indexing enabled invite",
+							unique: false,
+							temporary: false,
+						}),
+					)
+					.pipe(
+						Effect.map((invite) => invite.code),
+						Effect.catchAll((error) =>
+							Console.warn(
+								`Failed to create invite for channel ${channel.name} (${channel.id}):`,
+								error,
+							).pipe(Effect.map(() => null)),
+						),
+					)
+			: vanityURLCode;
+
+		if (inviteCode) {
+			yield* database.private.channels.updateChannelSettings({
+				channelId: BigInt(channel.id),
+				settings: {
+					inviteCode,
+				},
+			});
+			yield* Effect.logDebug(
+				`Created invite code ${inviteCode} for channel ${channel.name} (${channel.id})`,
+			);
+		}
+	});
+}
 
 const INDEXING_CONFIG = {
 	scheduleInterval: Duration.hours(6),
@@ -150,14 +222,16 @@ function storeMessages(
 			return;
 		}
 
-		const humanMessages = Arr.filter(messages, (msg) => isHumanMessage(msg));
+		const indexableMessages = Arr.filter(messages, (msg) =>
+			isIndexableMessage(msg),
+		);
 
 		yield* Effect.logDebug(
-			`Storing ${humanMessages.length} human messages (filtered from ${messages.length} total)`,
+			`Storing ${indexableMessages.length} indexable messages (filtered from ${messages.length} total)`,
 		);
 
 		const aoMessages = yield* Effect.forEach(
-			humanMessages,
+			indexableMessages,
 			(msg) =>
 				Effect.tryPromise(() => toAOMessage(msg, discordServerId)).pipe(
 					Effect.catchAll((error) =>
@@ -175,7 +249,7 @@ function storeMessages(
 
 		const uniqueAuthors = HashMap.fromIterable(
 			Arr.map(
-				humanMessages,
+				indexableMessages,
 				(msg) => [msg.author.id, toAODiscordAccount(msg.author)] as const,
 			),
 		);
@@ -189,7 +263,43 @@ function storeMessages(
 			{ concurrency: 10 },
 		);
 
-		const allAttachments = Arr.flatMap(humanMessages, (msg) =>
+		const botMessages = Arr.filter(indexableMessages, (msg) => msg.author.bot);
+		if (botMessages.length > 0) {
+			const uniqueBotIds = Arr.dedupe(
+				Arr.map(botMessages, (msg) => msg.author.id),
+			);
+			yield* Effect.forEach(
+				uniqueBotIds,
+				(botId) =>
+					Effect.gen(function* () {
+						const existingSettings =
+							yield* database.private.user_server_settings.findUserServerSettingsById(
+								{
+									userId: BigInt(botId),
+									serverId: BigInt(discordServerId),
+								},
+							);
+						yield* Effect.sleep(Duration.millis(10));
+
+						yield* database.private.user_server_settings.upsertUserServerSettings(
+							{
+								settings: {
+									serverId: BigInt(discordServerId),
+									userId: BigInt(botId),
+									permissions: existingSettings?.permissions ?? 0,
+									canPubliclyDisplayMessages: true,
+									messageIndexingDisabled:
+										existingSettings?.messageIndexingDisabled ?? false,
+									apiCallsUsed: existingSettings?.apiCallsUsed ?? 0,
+								},
+							},
+						);
+					}),
+				{ concurrency: 5 },
+			);
+		}
+
+		const allAttachments = Arr.flatMap(indexableMessages, (msg) =>
 			Arr.map(Arr.fromIterable(msg.attachments.values()), (att) => ({
 				id: att.id,
 				url: att.url,
@@ -212,7 +322,7 @@ function storeMessages(
 			yield* uploadAttachmentsInBatches(allAttachments);
 		}
 
-		const allEmbedImages = Arr.flatMap(humanMessages, (msg) =>
+		const allEmbedImages = Arr.flatMap(indexableMessages, (msg) =>
 			extractEmbedImagesToUpload(msg),
 		);
 
@@ -227,8 +337,14 @@ function storeMessages(
 			);
 		}
 
-		if (humanMessages.length > 0) {
-			const lastMessage = humanMessages[humanMessages.length - 1];
+		if (indexableMessages.length > 0) {
+			const sortedMessages = Arr.sort(
+				indexableMessages,
+				Order.reverse(
+					Order.mapInput(BigIntEffect.Order, (msg: Message) => BigInt(msg.id)),
+				),
+			);
+			const lastMessage = sortedMessages[0];
 			if (lastMessage) {
 				const channelLiveData =
 					yield* database.private.channels.findChannelByDiscordId({
@@ -277,6 +393,13 @@ function indexTextChannel(
 ) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
+
+		if (!canBotViewChannel(channel)) {
+			yield* Effect.logDebug(
+				`Bot cannot view channel ${channel.name} (${channel.id}), skipping`,
+			);
+			return;
+		}
 
 		const channelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
@@ -357,15 +480,24 @@ function indexTextChannel(
 							),
 						),
 					),
-				{ concurrency: 3 },
+				{ concurrency: 1 },
 			);
 		}
+
+		yield* ensureInviteCode(channel, channelSettings);
 	});
 }
 
 function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
+
+		if (!canBotViewChannel(channel)) {
+			yield* Effect.logDebug(
+				`Bot cannot view forum ${channel.name} (${channel.id}), skipping`,
+			);
+			return;
+		}
 
 		const channelLiveData =
 			yield* database.private.channels.findChannelByDiscordId({
@@ -385,7 +517,7 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 
 		const threads = yield* fetchForumThreads(channel.id, channel.name);
 
-		const threadsToIndex = lastIndexedSnowflake
+		const newThreads = lastIndexedSnowflake
 			? Arr.filter(
 					threads,
 					(thread) => BigInt(thread.id) > lastIndexedSnowflake,
@@ -393,15 +525,13 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			: threads;
 
 		yield* Effect.logDebug(
-			`Found ${threads.length} total threads, ${threadsToIndex.length} new threads to index (filtered by lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"})`,
+			`Found ${threads.length} total threads, ${newThreads.length} new threads (filtered by forum lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"})`,
 		);
 
-		yield* Effect.forEach(
-			threadsToIndex,
+		const outOfDateThreads = yield* Effect.filter(
+			threads,
 			(thread) =>
 				Effect.gen(function* () {
-					yield* syncChannel(thread);
-
 					const threadChannelLiveData =
 						yield* database.private.channels.findChannelByDiscordId({
 							discordId: BigInt(thread.id),
@@ -410,24 +540,51 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 					const threadChannel = threadChannelLiveData;
 					const threadLastIndexed = threadChannel?.flags?.lastIndexedSnowflake;
 
-					const threadMessages = yield* fetchChannelMessages(
-						thread.id,
-						thread.name,
-						threadLastIndexed?.toString() ?? undefined,
-					);
-					yield* storeMessages(threadMessages, discordServerId, thread.id);
+					if (!threadLastIndexed) {
+						return true;
+					}
 
-					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
-				}).pipe(
-					Effect.catchAll((error) =>
-						Console.error(
-							`Error indexing thread ${thread.name} (${thread.id}):`,
-							error,
-						),
+					const discordLastMessageId = thread.lastMessageId ?? thread.id;
+					return BigInt(discordLastMessageId) > threadLastIndexed;
+				}),
+			{ concurrency: 10 },
+		);
+
+		const threadsToIndex = Arr.dedupe([...newThreads, ...outOfDateThreads]);
+
+		yield* Effect.logDebug(
+			`${outOfDateThreads.length} threads have new messages, ${threadsToIndex.length} total threads to index`,
+		);
+
+		for (const thread of threadsToIndex) {
+			yield* Effect.gen(function* () {
+				yield* syncChannel(thread);
+
+				const threadChannelLiveData =
+					yield* database.private.channels.findChannelByDiscordId({
+						discordId: BigInt(thread.id),
+					});
+				yield* Effect.sleep(Duration.millis(10));
+				const threadChannel = threadChannelLiveData;
+				const threadLastIndexed = threadChannel?.flags?.lastIndexedSnowflake;
+
+				const threadMessages = yield* fetchChannelMessages(
+					thread.id,
+					thread.name,
+					threadLastIndexed?.toString() ?? undefined,
+				);
+				yield* storeMessages(threadMessages, discordServerId, thread.id);
+
+				yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
+			}).pipe(
+				Effect.catchAll((error) =>
+					Console.error(
+						`Error indexing thread ${thread.name} (${thread.id}):`,
+						error,
 					),
 				),
-			{ concurrency: 2 },
-		);
+			);
+		}
 
 		if (threads.length > 0) {
 			const sortedThreads = Arr.sort(
@@ -476,6 +633,8 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 				`No threads found, skipping lastIndexedSnowflake update for forum ${channel.name}`,
 			);
 		}
+
+		yield* ensureInviteCode(channel, channelSettings);
 	});
 }
 
@@ -540,7 +699,7 @@ function indexGuild(guild: Guild) {
 						return Console.error(`Error indexing channel ${channelId}:`, error);
 					}),
 				),
-			{ concurrency: 2 },
+			{ concurrency: 1 },
 		);
 
 		yield* Effect.logDebug(`Completed indexing for guild: ${guild.name}`);
