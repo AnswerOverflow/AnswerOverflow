@@ -94,7 +94,7 @@ async function migrateAttachments(): Promise<TableExport> {
 		}
 
 		log(`Writing ${lines.length} lines to file...`);
-		appendFileSync(outputPath, lines.join("\n") + "\n");
+		appendFileSync(outputPath, `${lines.join("\n")}\n`);
 		log(`Batch ${batchNum} written to disk`);
 
 		const lastRow = rows[rows.length - 1];

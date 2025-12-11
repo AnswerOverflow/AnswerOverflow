@@ -1,6 +1,6 @@
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { decodeCursor } from "@packages/ui/utils/cursor";
 import {
 	fetchUserPageHeaderData,
 	UserPageLoader,
