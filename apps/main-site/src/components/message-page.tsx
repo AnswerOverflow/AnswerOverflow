@@ -9,6 +9,7 @@ import { JumpToSolution } from "@packages/ui/components/jump-to-solution";
 import { Link } from "@packages/ui/components/link";
 import { MessageBody } from "@packages/ui/components/message-body";
 import { MessageResultPageProvider } from "@packages/ui/components/message-result-page-context";
+import { Separator } from "@packages/ui/components/separator";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
 import { useTenant } from "@packages/ui/components/tenant-context";
@@ -363,6 +364,7 @@ export function MessagePage(props: {
 								)}
 							</div>
 						</div>
+						<Separator className="my-4" />
 						{repliesSlot}
 					</main>
 
