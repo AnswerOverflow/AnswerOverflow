@@ -114,6 +114,8 @@ function callClientMethod(
 	});
 }
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 export const service = Effect.gen(function* () {
 	const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN!;
 	const convexClient = yield* ConvexClientUnified;
@@ -159,8 +161,8 @@ export const service = Effect.gen(function* () {
 	>();
 
 	const queryCache = yield* Cache.make({
-		capacity: 500,
-		timeToLive: Duration.minutes(5),
+		capacity: isDevelopment ? 0 : 500,
+		timeToLive: isDevelopment ? Duration.zero : Duration.minutes(5),
 		lookup: (cacheKey: string) =>
 			Effect.gen(function* () {
 				const context = lookupContexts.get(cacheKey);
