@@ -53,11 +53,11 @@ async function RepliesLoader(props: {
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
 }) {
-	const initialData = await fetchMessagePageReplies(
-		props.channelId,
-		props.threadId,
-		props.cursor,
-	);
+	const initialData = await fetchMessagePageReplies({
+		channelId: props.channelId,
+		threadId: props.threadId,
+		cursor: props.cursor,
+	});
 
 	return (
 		<RepliesSection
