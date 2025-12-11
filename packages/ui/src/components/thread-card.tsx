@@ -19,14 +19,14 @@ export type ChannelThreadCardProps = {
 		id: bigint;
 		name: string;
 	};
-	message: EnrichedMessage;
+	message: EnrichedMessage | null;
 };
 
 export function ChannelThreadCard({ thread, message }: ChannelThreadCardProps) {
 	const href = `/m/${thread.id}`;
 	const threadTitle =
 		thread.name ||
-		message.message.content?.slice(0, 30).trim() ||
+		message?.message.content?.slice(0, 30).trim() ||
 		"Untitled thread";
 
 	return (
@@ -42,7 +42,7 @@ export function ChannelThreadCard({ thread, message }: ChannelThreadCardProps) {
 							{threadTitle}
 						</Link>
 					</div>
-					{message.solutions.length > 0 && (
+					{(message?.solutions?.length ?? 0) > 0 && (
 						<div className="flex items-center gap-1 text-green-600 dark:text-green-500 shrink-0">
 							<CheckCircle2 className="size-4 shrink-0" />
 							<span className="font-medium">Solved</span>
@@ -50,11 +50,15 @@ export function ChannelThreadCard({ thread, message }: ChannelThreadCardProps) {
 					)}
 				</div>
 			</div>
-			<MessagePreviewCardBody
-				enrichedMessage={message}
-				href={href}
-				ariaLabel={`Open thread: ${threadTitle}`}
-			/>
+			{message ? (
+				<MessagePreviewCardBody
+					enrichedMessage={message}
+					href={href}
+					ariaLabel={`Open thread: ${threadTitle}`}
+				/>
+			) : (
+				<div className="p-4">Original message was deleted</div>
+			)}
 		</div>
 	);
 }
