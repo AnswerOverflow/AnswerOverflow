@@ -1,137 +1,6 @@
 import type { Embed } from "@packages/database/convex/schema";
 import dayjs from "dayjs";
-import type React from "react";
-
-function EmbedMarkdown({ content }: { content: string }) {
-	const parts: React.ReactNode[] = [];
-	const remaining = content;
-	let keyIndex = 0;
-
-	const urlRegex = /(https?:\/\/[^\s<>[\]]+)/g;
-	const boldRegex = /\*\*(.+?)\*\*/g;
-	const linkWithTextRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
-
-	const processText = (text: string): React.ReactNode[] => {
-		const result: React.ReactNode[] = [];
-		let lastIndex = 0;
-		let match: RegExpExecArray | null;
-
-		linkWithTextRegex.lastIndex = 0;
-		while ((match = linkWithTextRegex.exec(text)) !== null) {
-			if (match.index > lastIndex) {
-				result.push(...processPlainText(text.slice(lastIndex, match.index)));
-			}
-			const linkText = match[1];
-			const linkUrl = match[2];
-			if (linkText && linkUrl) {
-				result.push(
-					<a
-						key={keyIndex++}
-						href={linkUrl}
-						target="_blank"
-						rel="noreferrer"
-						className="text-blue-500 hover:underline"
-					>
-						{linkText}
-					</a>,
-				);
-			}
-			lastIndex = match.index + match[0].length;
-		}
-
-		if (lastIndex < text.length) {
-			result.push(...processPlainText(text.slice(lastIndex)));
-		}
-
-		return result;
-	};
-
-	const processPlainText = (text: string): React.ReactNode[] => {
-		const result: React.ReactNode[] = [];
-		let lastIndex = 0;
-		let match: RegExpExecArray | null;
-
-		boldRegex.lastIndex = 0;
-		while ((match = boldRegex.exec(text)) !== null) {
-			if (match.index > lastIndex) {
-				result.push(...processUrls(text.slice(lastIndex, match.index)));
-			}
-			const boldContent = match[1];
-			if (boldContent) {
-				result.push(<strong key={keyIndex++}>{boldContent}</strong>);
-			}
-			lastIndex = match.index + match[0].length;
-		}
-
-		if (lastIndex < text.length) {
-			result.push(...processUrls(text.slice(lastIndex)));
-		}
-
-		return result;
-	};
-
-	const processUrls = (text: string): React.ReactNode[] => {
-		const result: React.ReactNode[] = [];
-		let lastIndex = 0;
-		let match: RegExpExecArray | null;
-
-		urlRegex.lastIndex = 0;
-		while ((match = urlRegex.exec(text)) !== null) {
-			if (match.index > lastIndex) {
-				result.push(
-					<span key={keyIndex++}>{text.slice(lastIndex, match.index)}</span>,
-				);
-			}
-			const url = match[1];
-			if (url) {
-				result.push(
-					<a
-						key={keyIndex++}
-						href={url}
-						target="_blank"
-						rel="noreferrer"
-						className="text-blue-500 hover:underline break-all"
-					>
-						{url}
-					</a>,
-				);
-			}
-			lastIndex = match.index + match[0].length;
-		}
-
-		if (lastIndex < text.length) {
-			result.push(<span key={keyIndex++}>{text.slice(lastIndex)}</span>);
-		}
-
-		return result;
-	};
-
-	const paragraphs = remaining.split(/\n\n+/);
-	for (let i = 0; i < paragraphs.length; i++) {
-		const paragraph = paragraphs[i];
-		if (!paragraph) continue;
-
-		const lines = paragraph.split(/\n/);
-		const lineElements: React.ReactNode[] = [];
-
-		for (let j = 0; j < lines.length; j++) {
-			const line = lines[j];
-			if (line === undefined) continue;
-			lineElements.push(...processText(line));
-			if (j < lines.length - 1) {
-				lineElements.push(<br key={`br-${keyIndex++}`} />);
-			}
-		}
-
-		parts.push(
-			<p key={`p-${i}`} className="mb-3 last:mb-0">
-				{lineElements}
-			</p>,
-		);
-	}
-
-	return <>{parts}</>;
-}
+import { DiscordMarkdown } from "./renderer";
 
 function EmbedFields({
 	fields,
@@ -146,7 +15,7 @@ function EmbedFields({
 						{field.name}
 					</div>
 					<div className="text-[13px] text-muted-foreground">
-						<EmbedMarkdown content={field.value} />
+						<DiscordMarkdown>{field.value}</DiscordMarkdown>
 					</div>
 				</div>
 			))}
@@ -266,7 +135,7 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 						)}
 						{embed.type !== "video" && embed.description && (
 							<div className="mt-2 text-muted-foreground text-[13px] whitespace-pre-wrap">
-								<EmbedMarkdown content={embed.description} />
+								<DiscordMarkdown>{embed.description}</DiscordMarkdown>
 							</div>
 						)}
 						{embed.fields && embed.fields.length > 0 && (
