@@ -1,6 +1,6 @@
 # Expected functionality for functions in public/messages.ts
 
-## getRepliesAfterMessage
+## getMessages
 
 Takes in a message id, returns all messages after it in the channel.
 
