@@ -38,7 +38,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 	const pageData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* database.private.channels.getChannelPageData({
+		const liveData = yield* database.private.channels.getChannelPageHeaderData({
 			serverDiscordId: tenantData.server.discordId,
 			channelDiscordId: BigInt(params.channelId),
 		});

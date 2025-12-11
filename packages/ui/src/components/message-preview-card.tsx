@@ -25,7 +25,7 @@ export function MessagePreviewCardBody({
 				aria-label={ariaLabel ?? defaultAriaLabel}
 			/>
 			<div className="relative z-10 pointer-events-none [&_a]:pointer-events-auto p-4">
-				<div className="relative max-h-64 overflow-hidden [mask-image:linear-gradient(to_bottom,black_0,black_12rem,transparent_16rem)]">
+				<div className="relative max-h-64 overflow-hidden mask-[linear-gradient(to_bottom,black_0,black_12rem,transparent_16rem)]">
 					<DiscordMessage
 						enrichedMessage={enrichedMessage}
 						showCard={false}

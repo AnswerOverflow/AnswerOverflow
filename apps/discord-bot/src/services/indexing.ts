@@ -437,13 +437,18 @@ function indexTextChannel(
 
 		yield* storeMessages(messages, discordServerId, channel.id);
 
-		const threadsToIndex = Arr.filter(
-			Arr.map(messages, (msg) => msg.thread),
-			(thread): thread is AnyThreadChannel =>
-				thread !== null &&
-				thread !== undefined &&
-				(thread.type === ChannelType.PublicThread ||
-					thread.type === ChannelType.AnnouncementThread),
+		const threadsToIndex = Arr.sort(
+			Arr.filter(
+				Arr.map(messages, (msg) => msg.thread),
+				(thread): thread is AnyThreadChannel =>
+					thread !== null &&
+					thread !== undefined &&
+					(thread.type === ChannelType.PublicThread ||
+						thread.type === ChannelType.AnnouncementThread),
+			),
+			Order.mapInput(BigIntEffect.Order, (thread: AnyThreadChannel) =>
+				BigInt(thread.id),
+			),
 		);
 
 		if (threadsToIndex.length > 0) {
@@ -550,7 +555,12 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			{ concurrency: 10 },
 		);
 
-		const threadsToIndex = Arr.dedupe([...newThreads, ...outOfDateThreads]);
+		const threadsToIndex = Arr.sort(
+			Arr.dedupe([...newThreads, ...outOfDateThreads]),
+			Order.mapInput(BigIntEffect.Order, (thread: AnyThreadChannel) =>
+				BigInt(thread.id),
+			),
+		);
 
 		yield* Effect.logDebug(
 			`${outOfDateThreads.length} threads have new messages, ${threadsToIndex.length} total threads to index`,
