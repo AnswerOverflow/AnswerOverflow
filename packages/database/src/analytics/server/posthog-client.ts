@@ -46,10 +46,8 @@ export const makeServerAnalyticsClient = (opts: ServerAnalyticsOptions) =>
 			executionOptions: {
 				type: "line",
 				// @ts-expect-error
-				// biome-ignore lint/style/noNonNullAssertion: we know the date is not null
 				date_to: opts.to?.toISOString().split("T")[0]!,
 				// @ts-expect-error
-				// biome-ignore lint/style/noNonNullAssertion: we know the date is not null
 				date_from: opts.from?.toISOString().split("T")[0]!,
 			},
 		});

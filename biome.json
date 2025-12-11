@@ -35,6 +35,7 @@
 				"noArrayIndexKey": "off"
 			},
 			"style": {
+				"noNonNullAssertion": "off",
 				"noRestrictedImports": {
 					"level": "error",
 					"options": {
