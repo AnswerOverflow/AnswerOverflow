@@ -9,7 +9,6 @@ import { createAuthClient } from "better-auth/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import type { ReactNode } from "react";
 
-// biome-ignore lint/style/noNonNullAssertion: Setup
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
 	expectAuth: false,
 	unsavedChangesWarning: false,

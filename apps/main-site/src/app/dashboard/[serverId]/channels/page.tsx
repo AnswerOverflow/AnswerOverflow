@@ -102,7 +102,6 @@ function ToggleChannelFlag({
 }
 function ChooseSolvedTagCard({
 	channel,
-	serverId,
 	onUpdate,
 }: {
 	channel: {
@@ -112,7 +111,6 @@ function ChooseSolvedTagCard({
 		};
 		availableTags?: ForumTag[];
 	};
-	serverId: string;
 	onUpdate: (solutionTagId: bigint | null) => Promise<void>;
 }) {
 	const tags = channel.availableTags ?? [];
@@ -793,7 +791,6 @@ export default function ChannelsPage() {
 												selectedChannels[0].type === 15 && (
 													<ChooseSolvedTagCard
 														channel={selectedChannels[0]}
-														serverId={serverId}
 														onUpdate={async (solutionTagId) => {
 															const channel = selectedChannels[0];
 															if (!channel) return;
