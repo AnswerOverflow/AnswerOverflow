@@ -46,7 +46,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 async function RepliesLoader(props: {
 	channelId: bigint;
-	threadId: bigint | null;
+	after: bigint;
 	solutionMessageId: bigint | undefined;
 	firstMessageAuthorId?: bigint;
 	server?: MessagePageHeaderData["server"];
@@ -55,14 +55,14 @@ async function RepliesLoader(props: {
 }) {
 	const initialData = await fetchMessagePageReplies({
 		channelId: props.channelId,
-		threadId: props.threadId,
+		after: props.after,
 		cursor: props.cursor,
 	});
 
 	return (
 		<RepliesSection
 			channelId={props.channelId}
-			threadId={props.threadId}
+			after={props.after}
 			solutionMessageId={props.solutionMessageId}
 			firstMessageAuthorId={props.firstMessageAuthorId}
 			server={props.server}
@@ -111,22 +111,29 @@ export default async function TenantMessagePage(props: Props) {
 	}
 
 	const solutionMessageId = headerData.solutionMessage?.message.id;
+	const queryChannelId = headerData.threadId ?? headerData.channelId;
+	const afterMessageId =
+		headerData.threadId ?? headerData.firstMessage?.message.id;
 
 	return (
 		<MessagePage
 			headerData={headerData}
 			repliesSlot={
-				<Suspense fallback={<RepliesSkeleton />}>
-					<RepliesLoader
-						channelId={headerData.channelId}
-						threadId={headerData.threadId}
-						solutionMessageId={solutionMessageId}
-						firstMessageAuthorId={headerData.firstMessage?.author?.id}
-						server={headerData.server}
-						channel={headerData.channel}
-						cursor={cursor}
-					/>
-				</Suspense>
+				afterMessageId ? (
+					<Suspense fallback={<RepliesSkeleton />}>
+						<RepliesLoader
+							channelId={queryChannelId}
+							after={afterMessageId}
+							solutionMessageId={solutionMessageId}
+							firstMessageAuthorId={headerData.firstMessage?.author?.id}
+							server={headerData.server}
+							channel={headerData.channel}
+							cursor={cursor}
+						/>
+					</Suspense>
+				) : (
+					<RepliesSkeleton />
+				)
 			}
 			similarThreadsSlot={
 				<Suspense fallback={<SimilarThreadsSkeleton />}>

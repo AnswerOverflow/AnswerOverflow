@@ -3,21 +3,19 @@ import { v } from "convex/values";
 import { enrichMessages } from "../shared/dataAccess";
 import { publicQuery } from "./custom_functions";
 
-export const getMessagePageReplies = publicQuery({
+export const getMessages = publicQuery({
 	args: {
 		channelId: v.int64(),
-		threadId: v.optional(v.int64()),
+		after: v.int64(),
 		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
-		const { channelId, threadId, paginationOpts } = args;
-
-		const queryChannelId = threadId ?? channelId;
+		const { channelId, after, paginationOpts } = args;
 
 		const query = ctx.db
 			.query("messages")
 			.withIndex("by_channelId_and_id", (q) =>
-				q.eq("channelId", queryChannelId).gt("id", queryChannelId),
+				q.eq("channelId", channelId).gt("id", after),
 			);
 
 		const paginatedResult = await query.order("asc").paginate(paginationOpts);

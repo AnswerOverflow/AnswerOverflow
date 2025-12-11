@@ -66,10 +66,9 @@ function fetchChannelMessages(
 		}
 
 		while (hasMore && messages.length < INDEXING_CONFIG.maxMessagesPerChannel) {
-			const fetchAfter = lastMessageId === "0" ? undefined : lastMessageId;
 			const fetchedMessages = yield* discord.fetchChannelMessages(channelId, {
 				limit: INDEXING_CONFIG.messagesPerPage,
-				after: fetchAfter,
+				after: lastMessageId,
 			});
 
 			if (fetchedMessages.size === 0) {
