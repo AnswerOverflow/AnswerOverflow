@@ -4,10 +4,10 @@ import type React from "react";
 
 function EmbedMarkdown({ content }: { content: string }) {
 	const parts: React.ReactNode[] = [];
-	let remaining = content;
+	const remaining = content;
 	let keyIndex = 0;
 
-	const urlRegex = /(https?:\/\/[^\s<>\[\]]+)/g;
+	const urlRegex = /(https?:\/\/[^\s<>[\]]+)/g;
 	const boldRegex = /\*\*(.+?)\*\*/g;
 	const linkWithTextRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
 
