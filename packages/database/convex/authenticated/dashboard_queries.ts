@@ -86,16 +86,6 @@ export const getDashboardData = guildManagerQuery({
 
 export const getUserServersForDropdown = authenticatedQuery({
 	args: {},
-	returns: v.array(
-		v.object({
-			discordId: v.int64(),
-			name: v.string(),
-			icon: v.union(v.string(), v.null()),
-			highestRole: v.union(v.string(), v.null()),
-			hasBot: v.boolean(),
-			aoServerId: v.id("servers"),
-		}),
-	),
 	handler: async (ctx, args) => {
 		const { discordAccountId } = args;
 

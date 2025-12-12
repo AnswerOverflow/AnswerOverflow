@@ -751,7 +751,7 @@ export async function enrichMessageForDisplay(
 	}
 
 	let referenceData: EnrichedMessage["reference"];
-	if (message.referenceId) {
+	if (message.referenceId && !options?.skipReference) {
 		if (referenceMessage) {
 			const enrichedReference = await enrichMessageForDisplay(
 				ctx,
@@ -780,7 +780,7 @@ export async function enrichMessageForDisplay(
 		attachments: attachmentsWithUrl.filter(Predicate.isNotNullable),
 		reactions: formattedReactions,
 		solutions,
-		reference: referenceData,
+		...(referenceData !== undefined && { reference: referenceData }),
 	};
 
 	if (!server) {

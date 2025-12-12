@@ -81,7 +81,6 @@ export const updateAccountTokens = internalMutation({
 		refreshToken: v.string(),
 		accessTokenExpiresAt: v.number(),
 	},
-	returns: v.null(),
 	handler: async (ctx, args) => {
 		await ctx.runMutation(components.betterAuth.adapter.updateOne, {
 			input: {
@@ -108,24 +107,6 @@ export const updateAccountTokens = internalMutation({
 
 export const refreshAndGetValidToken = internalAction({
 	args: {},
-	returns: v.union(
-		v.object({
-			success: v.literal(true),
-			accountId: v.int64(),
-			accessToken: v.string(),
-		}),
-		v.object({
-			success: v.literal(false),
-			error: v.string(),
-			code: v.union(
-				v.literal("TOKEN_EXPIRED"),
-				v.literal("REFRESH_FAILED"),
-				v.literal("NO_REFRESH_TOKEN"),
-				v.literal("REAUTH_REQUIRED"),
-				v.literal("NOT_AUTHENTICATED"),
-			),
-		}),
-	),
 	handler: async (ctx) => {
 		const account = await getDiscordAccountWithToken(ctx);
 

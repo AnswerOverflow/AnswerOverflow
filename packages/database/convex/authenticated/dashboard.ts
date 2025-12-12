@@ -401,7 +401,6 @@ export const syncUserServerSettingsBackground = internalAction({
 		),
 		aoServerIds: v.array(v.id("servers")),
 	},
-	returns: v.null(),
 	handler: async (ctx, args): Promise<null> => {
 		const { discordAccountId, manageableServers, aoServerIds } = args;
 		const backendAccessToken = getBackendAccessToken();

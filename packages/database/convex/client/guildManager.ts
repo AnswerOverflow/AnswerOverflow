@@ -64,10 +64,6 @@ export const checkGuildManagerPermissions = internalQuery({
 		discordAccountId: v.int64(),
 		serverId: v.int64(),
 	},
-	returns: v.object({
-		hasPermission: v.boolean(),
-		errorMessage: v.optional(v.string()),
-	}),
 	handler: async (ctx, args) => {
 		const userServerSettings = await getUserServerSettingsForServerByDiscordId(
 			ctx,
