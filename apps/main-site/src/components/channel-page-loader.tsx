@@ -88,7 +88,6 @@ async function ThreadsLoader(props: {
 		props.channelDiscordId,
 		props.cursor,
 	);
-	console.log("initialData", initialData);
 	return (
 		<ThreadsList
 			channelDiscordId={props.channelDiscordId}

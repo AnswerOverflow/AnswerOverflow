@@ -111,5 +111,5 @@ export async function findSimilarThreads(
 		}),
 	);
 
-	return Arr.filter(firstMessages, Predicate.isNotNull);
+	return Arr.take(Arr.filter(firstMessages, Predicate.isNotNull), limit);
 }
