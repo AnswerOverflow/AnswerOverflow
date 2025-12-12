@@ -139,41 +139,41 @@ export const getUserPageHeaderData = privateQuery({
 			return null;
 		}
 
-		const postMessages = await ctx.db
-			.query("messages")
-			.withIndex("by_authorId_and_childThreadId", (q) =>
-				q.eq("authorId", args.userId).gte("childThreadId", 0n),
-			)
-			.order("desc")
-			.take(50);
+		// const postMessages = await ctx.db
+		// 	.query("messages")
+		// 	.withIndex("by_authorId_and_childThreadId", (q) =>
+		// 		q.eq("authorId", args.userId).gte("childThreadId", 0n),
+		// 	)
+		// 	.order("desc")
+		// 	.take(50);
 
-		const serverIds = new Set<bigint>();
-		for (const message of postMessages) {
-			serverIds.add(message.serverId);
-		}
+		// const serverIds = new Set<bigint>();
+		// for (const message of postMessages) {
+		// 	serverIds.add(message.serverId);
+		// }
 
-		const servers = Arr.filter(
-			await Promise.all(
-				Array.from(serverIds).map(async (serverId) => {
-					const server = await getOneFrom(
-						ctx.db,
-						"servers",
-						"by_discordId",
-						serverId,
-					);
-					if (!server || server.kickedTime) {
-						return null;
-					}
-					return {
-						id: server.discordId.toString(),
-						name: server.name,
-						icon: server.icon,
-						discordId: server.discordId,
-					};
-				}),
-			),
-			Predicate.isNotNullable,
-		);
+		// const servers = Arr.filter(
+		// 	await Promise.all(
+		// 		Array.from(serverIds).map(async (serverId) => {
+		// 			const server = await getOneFrom(
+		// 				ctx.db,
+		// 				"servers",
+		// 				"by_discordId",
+		// 				serverId,
+		// 			);
+		// 			if (!server || server.kickedTime) {
+		// 				return null;
+		// 			}
+		// 			return {
+		// 				id: server.discordId.toString(),
+		// 				name: server.name,
+		// 				icon: server.icon,
+		// 				discordId: server.discordId,
+		// 			};
+		// 		}),
+		// 	),
+		// 	Predicate.isNotNullable,
+		// );
 
 		return {
 			user: {
@@ -181,7 +181,7 @@ export const getUserPageHeaderData = privateQuery({
 				name: user.name,
 				avatar: user.avatar,
 			},
-			servers,
+			servers: [],
 		};
 	},
 });
