@@ -17,7 +17,7 @@ export const paginatedValidator = <T extends GenericValidator>(
 		continueCursor: v.string(),
 	});
 
-const channelWithSystemFieldsValidator = v.object({
+export const channelWithSystemFieldsValidator = v.object({
 	_id: v.id("channels"),
 	_creationTime: v.number(),
 	...channelSchema.fields,
