@@ -1,7 +1,10 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
+import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../client";
-import type { Message, ServerPreferences, UserServerSettings } from "../schema";
+import type { ServerPreferences, UserServerSettings } from "../schema";
+
+type Message = Doc<"messages">;
 import {
 	getDiscordAccountIdFromAuth,
 	getUserServerSettingsForServerByDiscordId,
@@ -12,7 +15,6 @@ import {
 	type MessageWithPrivacyFlags,
 	shouldAnonymizeMessage,
 } from "./messagePrivacy";
-import type { PublicChannel, PublicServer } from "./publicSchemas";
 import {
 	enrichMessageForDisplay,
 	type EnrichedMessage as SharedEnrichedMessage,
@@ -133,25 +135,6 @@ async function enrichMessage(
 
 type DataAccessCache = ReturnType<typeof createDataAccessCache>;
 
-export function hiddenMessageStub(): MessageWithPrivacyFlags {
-	return {
-		authorId: 0n,
-		type: 0,
-		parentChannelId: 0n,
-		childThreadId: 0n,
-		questionId: 0n,
-		referenceId: 0n,
-		applicationId: 0n,
-		webhookId: 0n,
-		channelId: 0n,
-		content: "",
-		id: 0n,
-		isAnonymous: true,
-		public: false,
-		serverId: 0n,
-	};
-}
-
 export async function enrichMessages(
 	ctx: QueryCtx,
 	messages: Message[],
@@ -183,29 +166,36 @@ async function enrichedMessageWithServerAndChannelsInternal(
 		cache.getServer(message.serverId),
 	]);
 
-	if (!channel || !server || !enrichedMessage) return null;
+	if (!channel || !server || server.kickedTime || !enrichedMessage) return null;
 
 	return {
-		channel: parentChannel || channel,
+		channel: parentChannel ?? channel,
 		message: enrichedMessage,
-		server: server,
-		thread: parentChannel ?? null,
+		server,
+		thread: parentChannel ? channel : null,
 	} satisfies SearchResult;
 }
 
-export async function enrichedMessageWithServerAndChannels(
+export async function enrichMessagesWithServerAndChannels(
 	ctx: QueryCtx,
-	message: Message,
-) {
+	messages: Message[],
+): Promise<SearchResult[]> {
 	const cache = createDataAccessCache(ctx);
-	return enrichedMessageWithServerAndChannelsInternal(ctx, cache, message);
+	return Arr.filter(
+		await Promise.all(
+			messages.map((m) =>
+				enrichedMessageWithServerAndChannelsInternal(ctx, cache, m),
+			),
+		),
+		Predicate.isNotNullable,
+	);
 }
 
 export type SearchResult = {
 	message: SharedEnrichedMessage;
-	channel: PublicChannel;
-	server: PublicServer;
-	thread?: PublicChannel | null;
+	channel: Doc<"channels">;
+	server: Doc<"servers">;
+	thread?: Doc<"channels"> | null;
 };
 
 export async function searchMessages(

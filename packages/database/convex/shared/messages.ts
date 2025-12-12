@@ -1,16 +1,14 @@
 import type { Infer } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
+import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../client";
-import type {
-	Attachment,
-	attachmentSchema,
-	emojiSchema,
-	messageSchema,
-} from "../schema";
+import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { anonymizeDiscordAccount } from "./anonymization.js";
 
 type Message = Infer<typeof messageSchema>;
+type MessageDoc = Doc<"messages">;
+type AttachmentDoc = Doc<"attachments"> & { url: string };
 export type DatabaseAttachment = Infer<typeof attachmentSchema>;
 
 export async function getMessageById(ctx: QueryCtx | MutationCtx, id: bigint) {
@@ -24,7 +22,7 @@ export function compareIds(a: bigint, b: bigint): number {
 export async function getFirstMessageInChannel(
 	ctx: QueryCtx | MutationCtx,
 	channelId: bigint,
-): Promise<Message | null> {
+): Promise<MessageDoc | null> {
 	const firstMessage = await ctx.db
 		.query("messages")
 		.withIndex("by_channelId_and_id", (q) => q.eq("channelId", channelId))
@@ -37,15 +35,15 @@ export async function getFirstMessageInChannel(
 export async function getThreadStartMessage(
 	ctx: QueryCtx | MutationCtx,
 	threadId: bigint,
-): Promise<Message | null> {
+): Promise<MessageDoc | null> {
 	return getOneFrom(ctx.db, "messages", "by_messageId", threadId, "id");
 }
 
 export async function getFirstMessagesInChannels(
 	ctx: QueryCtx | MutationCtx,
 	channelIds: bigint[],
-): Promise<Record<string, Message | null>> {
-	const results: Record<string, Message | null> = {};
+): Promise<Record<string, MessageDoc | null>> {
+	const results: Record<string, MessageDoc | null> = {};
 	for (const channelId of channelIds) {
 		results[channelId.toString()] = null;
 	}
@@ -282,13 +280,13 @@ export type EnrichedMessageReference = {
 };
 
 export type EnrichedMessage = {
-	message: Message;
+	message: MessageDoc;
 	author: {
 		id: bigint;
 		name: string;
 		avatar?: string;
 	} | null;
-	attachments: Attachment[];
+	attachments: AttachmentDoc[];
 	reactions: Array<{
 		userId: bigint;
 		emoji: {
@@ -297,7 +295,7 @@ export type EnrichedMessage = {
 			animated?: boolean;
 		};
 	}>;
-	solutions: Message[];
+	solutions: MessageDoc[];
 	reference?: EnrichedMessageReference | null;
 	metadata?: {
 		users?: Record<
@@ -559,7 +557,7 @@ async function getInternalLinksMetadataInternal(
 
 export async function enrichMessagesWithData(
 	ctx: QueryCtx | MutationCtx,
-	messages: Message[],
+	messages: MessageDoc[],
 ): Promise<EnrichedMessage[]> {
 	if (messages.length === 0) {
 		return [];
@@ -576,7 +574,7 @@ export async function enrichMessagesWithData(
 
 export async function enrichMessageForDisplay(
 	ctx: QueryCtx | MutationCtx,
-	message: Message,
+	message: MessageDoc,
 	options?: { isAnonymous?: boolean },
 ): Promise<EnrichedMessage> {
 	const [author, server, attachments, reactions, solutions, referenceMessage] =

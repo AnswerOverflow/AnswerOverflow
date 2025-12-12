@@ -73,26 +73,36 @@ function SimilarThreadsList(props: { results: SimilarThreadsResult }) {
 		return null;
 	}
 
+	const resultsWithThreads = results.filter((result) => result.thread != null);
+
+	if (resultsWithThreads.length === 0) {
+		return null;
+	}
+
 	return (
 		<SimilarThreadsContainer>
 			<div className="flex flex-col divide-y divide-border">
-				{results.map((result) => {
+				{resultsWithThreads.map((result) => {
+					const thread = result.thread;
+					if (!thread) return null;
+
 					const server = {
 						discordId: BigInt(result.server.discordId),
 						name: result.server.name,
 						icon: result.server.icon,
 					};
+					const hasSolution = result.message.solutions.length > 0;
 					return (
 						<Link
-							key={result.thread.id}
-							href={`/m/${result.thread.id}`}
+							key={thread.id}
+							href={`/m/${thread.id}`}
 							className="group block py-2.5 first:pt-0 last:pb-0"
 						>
 							<div className="flex items-start justify-between gap-2">
 								<span className="truncate text-sm font-medium text-foreground group-hover:underline">
-									{result.thread.name}
+									{thread.name}
 								</span>
-								{result.hasSolution && (
+								{hasSolution && (
 									<CheckCircle2
 										size={16}
 										className="mt-0.5 shrink-0 text-green-600 dark:text-green-500"
@@ -107,7 +117,7 @@ function SimilarThreadsList(props: { results: SimilarThreadsResult }) {
 									</span>
 								</div>
 								<TimeAgo
-									snowflake={result.firstMessageId}
+									snowflake={result.message.message.id.toString()}
 									className="shrink-0 text-xs"
 								/>
 							</div>

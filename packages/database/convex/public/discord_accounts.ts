@@ -1,7 +1,10 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { Array as Arr, Predicate } from "effect";
-import { enrichedMessageWithServerAndChannels } from "../shared/dataAccess";
+import { enrichMessagesWithServerAndChannels } from "../shared/dataAccess";
+import {
+	messageWithContextValidator,
+	paginatedValidator,
+} from "../shared/publicSchemas";
 import { publicQuery } from "./custom_functions";
 
 export const getUserPosts = publicQuery({
@@ -10,6 +13,7 @@ export const getUserPosts = publicQuery({
 		serverId: v.optional(v.int64()),
 		paginationOpts: paginationOptsValidator,
 	},
+	returns: paginatedValidator(messageWithContextValidator),
 	handler: async (ctx, args) => {
 		const serverIdFilter = args.serverId ?? null;
 
@@ -25,13 +29,9 @@ export const getUserPosts = publicQuery({
 			? paginatedResult.page.filter((m) => m.serverId === serverIdFilter)
 			: paginatedResult.page;
 
-		const enrichedPosts = Arr.filter(
-			await Promise.all(
-				filteredMessages.map((message) =>
-					enrichedMessageWithServerAndChannels(ctx, message),
-				),
-			),
-			Predicate.isNotNullable,
+		const enrichedPosts = await enrichMessagesWithServerAndChannels(
+			ctx,
+			filteredMessages,
 		);
 
 		return {

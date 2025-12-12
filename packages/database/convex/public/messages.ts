@@ -1,6 +1,10 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { enrichMessages } from "../shared/dataAccess";
+import {
+	enrichedMessageValidator,
+	paginatedValidator,
+} from "../shared/publicSchemas";
 import { publicQuery } from "./custom_functions";
 
 export const getMessages = publicQuery({
@@ -9,6 +13,7 @@ export const getMessages = publicQuery({
 		after: v.int64(),
 		paginationOpts: paginationOptsValidator,
 	},
+	returns: paginatedValidator(enrichedMessageValidator),
 	handler: async (ctx, args) => {
 		const { channelId, after, paginationOpts } = args;
 

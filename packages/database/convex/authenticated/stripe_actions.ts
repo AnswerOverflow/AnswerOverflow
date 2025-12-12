@@ -84,33 +84,3 @@ export const handleStripeWebhook = internalAction({
 		return { success: true };
 	},
 });
-
-export const syncStripeSubscriptionAction = internalAction({
-	args: {
-		stripeCustomerId: v.string(),
-	},
-	returns: v.object({
-		success: v.boolean(),
-	}),
-	handler: async (ctx, args) => {
-		const subscriptionData = await syncStripeSubscription(
-			args.stripeCustomerId,
-		);
-
-		if (subscriptionData.status === "active") {
-			await ctx.runMutation(internal.stripe.internal.updateServerSubscription, {
-				stripeCustomerId: args.stripeCustomerId,
-				stripeSubscriptionId: subscriptionData.subscriptionId,
-				plan: subscriptionData.plan,
-			});
-		} else {
-			await ctx.runMutation(internal.stripe.internal.updateServerSubscription, {
-				stripeCustomerId: args.stripeCustomerId,
-				stripeSubscriptionId: null,
-				plan: "FREE",
-			});
-		}
-
-		return { success: true };
-	},
-});

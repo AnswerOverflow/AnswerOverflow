@@ -201,33 +201,47 @@
 		"scroll_speed": 2
 	},
 	"agent": {
+		"explore": {
+			"description": "Fast agent specialized for exploring codebases locally. Use this when you need to quickly find files by patterns, search code for keywords, or answer questions about the codebase.",
+			"mode": "subagent",
+			"model": "anthropic/claude-sonnet-4-20250514",
+			"temperature": 0.1,
+			"prompt": "You are a fast codebase exploration agent.\n\nUse for:\n- Finding files by patterns (eg. 'src/components/**/*.tsx')\n- Searching code for keywords (eg. 'API endpoints')\n- Answering questions about the codebase structure\n- Quick local codebase exploration\n\nProvide concise findings with file paths and line numbers."
+		},
+		"general": {
+			"description": "General-purpose agent for researching complex questions and executing multi-step tasks. Use when searching for keywords or files and you're not confident you'll find the right match in the first few tries.",
+			"mode": "subagent",
+			"model": "anthropic/claude-sonnet-4-20250514",
+			"temperature": 0.1,
+			"prompt": "You are a general-purpose agent for researching complex questions and executing multi-step tasks.\n\nUse for:\n- Searching for keywords or files when unsure of exact location\n- Multi-step investigations\n- Complex questions requiring multiple searches\n\nProvide thorough findings with context."
+		},
 		"research": {
-			"description": "Deep research agent for complex questions, codebase analysis, and multi-step investigations. Uses maximum reasoning capability for thorough analysis.",
+			"description": "Deep research agent for web searching, external documentation lookup, and complex questions requiring internet access. Uses maximum reasoning capability.",
 			"mode": "subagent",
 			"model": "openai/gpt-5.1-codex-max-xhigh",
 			"temperature": 0.1,
-			"prompt": "You are a research agent focused on deep analysis and investigation.\n\nWhen researching:\n- Make prompts specific and detailed about what to research\n- Provide necessary context (file paths, concepts, goals)\n- Define clear boundaries for the research task\n- Use thorough analysis and multiple passes when needed\n- Document findings clearly\n\nFocus on:\n- Understanding complex codebase patterns\n- Investigating problems and root causes\n- Analyzing architecture and design decisions\n- Finding edge cases and potential issues\n- Providing comprehensive recommendations"
+			"prompt": "You are a research agent focused on deep analysis, web searching, and external documentation lookup.\n\nWhen researching:\n- Make prompts specific and detailed about what to research\n- Provide necessary context (file paths, concepts, goals)\n- Define clear boundaries for the research task\n- Use thorough analysis and multiple passes when needed\n- Document findings clearly\n\nFocus on:\n- Web searching for external documentation\n- Looking up API references and library docs\n- Investigating external tools and services\n- Finding best practices from the web\n- Providing comprehensive recommendations"
 		},
 		"research-fast": {
-			"description": "Fast exploratory research agent for quick scans and initial investigations",
+			"description": "Fast research agent for quick web searches and external documentation lookups",
 			"mode": "subagent",
 			"model": "openai/gpt-5.1-codex-max-low",
 			"temperature": 0.2,
-			"prompt": "You are a fast research agent for quick exploratory work.\n\nUse for:\n- Quick codebase scans\n- Initial investigations\n- Fast keyword searches\n- Getting a quick overview\n\nProvide concise findings and identify if deeper research is needed."
+			"prompt": "You are a fast research agent for quick web searches and documentation lookups.\n\nUse for:\n- Quick web searches\n- Fast documentation lookups\n- Getting a quick overview of external topics\n\nProvide concise findings and identify if deeper research is needed."
 		},
 		"research-balanced": {
-			"description": "Balanced research agent for standard investigations and codebase analysis",
+			"description": "Balanced research agent for standard web searches and external documentation analysis",
 			"mode": "subagent",
 			"model": "openai/gpt-5.1-codex-max-medium",
 			"temperature": 0.1,
-			"prompt": "You are a balanced research agent for standard investigations.\n\nUse for:\n- Standard codebase analysis\n- Pattern identification\n- Moderate complexity investigations\n- Balanced depth and speed\n\nProvide thorough but efficient analysis."
+			"prompt": "You are a balanced research agent for standard web research.\n\nUse for:\n- Standard external documentation analysis\n- Web searches for best practices\n- Moderate complexity external investigations\n\nProvide thorough but efficient analysis."
 		},
 		"research-deep": {
-			"description": "Deep analysis research agent for complex problems requiring high reasoning effort",
+			"description": "Deep analysis research agent for complex external research requiring high reasoning effort",
 			"mode": "subagent",
 			"model": "openai/gpt-5.1-codex-max-high",
 			"temperature": 0.1,
-			"prompt": "You are a deep analysis research agent for complex problems.\n\nUse for:\n- Complex problem investigation\n- Deep architectural analysis\n- Multi-step reasoning tasks\n- Finding subtle bugs or issues\n\nProvide comprehensive analysis with detailed reasoning."
+			"prompt": "You are a deep analysis research agent for complex external research.\n\nUse for:\n- Complex external documentation analysis\n- Deep investigation of external APIs and services\n- Multi-step web research tasks\n\nProvide comprehensive analysis with detailed reasoning."
 		},
 		"pr-review": {
 			"description": "Reviews code for quality, best practices, and potential issues",
