@@ -1,10 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { enrichMessagesWithServerAndChannels } from "../shared/dataAccess";
-import {
-	messageWithContextValidator,
-	paginatedValidator,
-} from "../shared/publicSchemas";
 import { publicQuery } from "./custom_functions";
 
 export const getUserPosts = publicQuery({
@@ -13,7 +9,6 @@ export const getUserPosts = publicQuery({
 		serverId: v.optional(v.int64()),
 		paginationOpts: paginationOptsValidator,
 	},
-	returns: paginatedValidator(messageWithContextValidator),
 	handler: async (ctx, args) => {
 		const serverIdFilter = args.serverId ?? null;
 

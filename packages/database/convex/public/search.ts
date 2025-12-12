@@ -4,10 +4,6 @@ import {
 	enrichMessagesWithServerAndChannels,
 	searchMessages,
 } from "../shared/dataAccess";
-import {
-	messageWithContextValidator,
-	paginatedValidator,
-} from "../shared/publicSchemas";
 import { findSimilarThreads } from "../shared/similarThreads";
 import { publicQuery } from "./custom_functions";
 
@@ -17,7 +13,6 @@ export const publicSearch = publicQuery({
 		serverId: v.optional(v.string()),
 		paginationOpts: paginationOptsValidator,
 	},
-	returns: paginatedValidator(messageWithContextValidator),
 	handler: async (ctx, args) => {
 		const results = await searchMessages(ctx, {
 			query: args.query,
@@ -36,7 +31,6 @@ export const getRecentThreads = publicQuery({
 	args: {
 		paginationOpts: paginationOptsValidator,
 	},
-	returns: paginatedValidator(messageWithContextValidator),
 	handler: async (ctx, args) => {
 		const paginatedResult = await ctx.db
 			.query("messages")
@@ -65,7 +59,6 @@ export const getSimilarThreads = publicQuery({
 		serverId: v.optional(v.string()),
 		limit: v.optional(v.number()),
 	},
-	returns: v.array(messageWithContextValidator),
 	handler: async (ctx, args) => {
 		const limit = Math.min(args.limit ?? 4, 10);
 		const similarThreads = await findSimilarThreads(ctx, {

@@ -1,12 +1,12 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
-import { enrichMessageForDisplay, getMessageById } from "../shared/shared";
 import {
 	channelWithSystemFieldsValidator,
 	enrichedMessageValidator,
 	paginatedValidator,
 } from "../shared/publicSchemas";
+import { enrichMessageForDisplay, getMessageById } from "../shared/shared";
 import { publicQuery } from "./custom_functions";
 
 export const getChannelPageThreads = publicQuery({

@@ -122,31 +122,8 @@ async function checkDomainStatus(domain: string): Promise<DomainStatus> {
 	};
 }
 
-const domainStatusReturnValidator = v.union(
-	v.object({
-		status: v.union(
-			v.literal("Pending Verification"),
-			v.literal("Invalid Configuration"),
-		),
-		dnsRecordsToSet: v.object({
-			type: v.union(v.literal("CNAME"), v.literal("TXT"), v.literal("A")),
-			name: v.string(),
-			value: v.string(),
-			ttl: v.optional(v.string()),
-		}),
-	}),
-	v.object({
-		status: v.union(
-			v.literal("Domain is not added"),
-			v.literal("Valid Configuration"),
-		),
-		dnsRecordsToSet: v.null(),
-	}),
-);
-
 export const getDomainStatus = authenticatedAction({
 	args: { domain: v.string() },
-	returns: domainStatusReturnValidator,
 	handler: async (_ctx, args) => {
 		return checkDomainStatus(args.domain);
 	},
@@ -154,7 +131,6 @@ export const getDomainStatus = authenticatedAction({
 
 export const addDomain = authenticatedAction({
 	args: { domain: v.string() },
-	returns: domainStatusReturnValidator,
 	handler: async (_ctx, args) => {
 		await vercel.projects
 			.addProjectDomain({
