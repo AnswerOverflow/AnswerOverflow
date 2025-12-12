@@ -3,10 +3,10 @@ import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { enrichMessageForDisplay, getMessageById } from "../shared/shared";
 import {
-	paginatedValidator,
+	channelWithSystemFieldsValidator,
 	enrichedMessageValidator,
+	paginatedValidator,
 } from "../shared/publicSchemas";
-import { channelSchema } from "../schema";
 import { publicQuery } from "./custom_functions";
 
 export const getChannelPageThreads = publicQuery({
@@ -16,7 +16,7 @@ export const getChannelPageThreads = publicQuery({
 	},
 	returns: paginatedValidator(
 		v.object({
-			thread: channelSchema,
+			thread: channelWithSystemFieldsValidator,
 			message: v.union(enrichedMessageValidator, v.null()),
 		}),
 	),
