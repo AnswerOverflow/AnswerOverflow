@@ -1,7 +1,7 @@
 import type { Infer } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../client";
 import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { anonymizeDiscordAccount } from "./anonymization.js";
@@ -575,7 +575,7 @@ export async function enrichMessagesWithData(
 export async function enrichMessageForDisplay(
 	ctx: QueryCtx | MutationCtx,
 	message: MessageDoc,
-	options?: { isAnonymous?: boolean },
+	options?: { isAnonymous?: boolean; skipReference?: boolean },
 ): Promise<EnrichedMessage> {
 	const [author, server, attachments, reactions, solutions, referenceMessage] =
 		await Promise.all([
@@ -584,7 +584,9 @@ export async function enrichMessageForDisplay(
 			findAttachmentsByMessageIdInternal(ctx, message.id),
 			findReactionsByMessageId(ctx, message.id),
 			findSolutionsByQuestionId(ctx, message.id),
-			message.referenceId ? getMessageById(ctx, message.referenceId) : null,
+			message.referenceId && !options?.skipReference
+				? getMessageById(ctx, message.referenceId)
+				: null,
 		]);
 
 	const emojiIds = Arr.dedupe(
@@ -754,7 +756,7 @@ export async function enrichMessageForDisplay(
 			const enrichedReference = await enrichMessageForDisplay(
 				ctx,
 				referenceMessage,
-				options,
+				{ ...options, skipReference: true },
 			);
 			referenceData = {
 				messageId: message.referenceId,
