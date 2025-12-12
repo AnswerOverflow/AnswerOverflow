@@ -1,60 +1,138 @@
-import type { Infer } from "convex/values";
+import type { GenericValidator } from "convex/values";
+import { v } from "convex/values";
 import {
+	attachmentSchema,
 	channelSchema,
-	channelSettingsSchema,
-	discordAccountSchema,
+	emojiSchema,
 	messageSchema,
 	serverSchema,
 } from "../schema";
 
-export const PublicServer = serverSchema.pick(
-	"discordId",
-	"name",
-	"icon",
-	"description",
-	"vanityInviteCode",
-	"approximateMemberCount",
+export const paginatedValidator = <T extends GenericValidator>(
+	itemValidator: T,
+) =>
+	v.object({
+		page: v.array(itemValidator),
+		isDone: v.boolean(),
+		continueCursor: v.string(),
+	});
+
+const channelWithSystemFieldsValidator = v.object({
+	_id: v.id("channels"),
+	_creationTime: v.number(),
+	...channelSchema.fields,
+});
+
+const serverWithSystemFieldsValidator = v.object({
+	_id: v.id("servers"),
+	_creationTime: v.number(),
+	...serverSchema.fields,
+});
+
+const messageWithSystemFieldsValidator = v.object({
+	_id: v.id("messages"),
+	_creationTime: v.number(),
+	...messageSchema.fields,
+});
+
+const attachmentWithSystemFieldsValidator = v.object({
+	_id: v.id("attachments"),
+	_creationTime: v.number(),
+	...attachmentSchema.fields,
+});
+
+const authorValidator = v.union(
+	v.object({
+		id: v.int64(),
+		name: v.string(),
+		avatar: v.optional(v.string()),
+	}),
+	v.null(),
 );
 
-export const PublicChannel = channelSchema.pick(
-	"id",
-	"serverId",
-	"name",
-	"type",
-	"parentId",
-	"archivedTimestamp",
+const attachmentWithUrlValidator = attachmentWithSystemFieldsValidator.extend({
+	url: v.string(),
+});
+
+const reactionWithEmojiValidator = v.object({
+	userId: v.int64(),
+	emoji: emojiSchema,
+});
+
+const metadataValidator = v.optional(
+	v.object({
+		users: v.optional(
+			v.record(
+				v.string(),
+				v.object({
+					username: v.string(),
+					globalName: v.union(v.string(), v.null()),
+					url: v.string(),
+					exists: v.optional(v.boolean()),
+				}),
+			),
+		),
+		channels: v.optional(
+			v.record(
+				v.string(),
+				v.object({
+					name: v.string(),
+					type: v.number(),
+					url: v.string(),
+					indexingEnabled: v.optional(v.boolean()),
+					exists: v.optional(v.boolean()),
+				}),
+			),
+		),
+		internalLinks: v.optional(
+			v.array(
+				v.object({
+					original: v.string(),
+					guild: v.object({ id: v.int64(), name: v.string() }),
+					channel: v.object({
+						parent: v.optional(
+							v.object({
+								name: v.optional(v.string()),
+								type: v.optional(v.number()),
+								parentId: v.optional(v.int64()),
+							}),
+						),
+						id: v.int64(),
+						type: v.number(),
+						name: v.string(),
+						indexingEnabled: v.optional(v.boolean()),
+					}),
+					message: v.optional(v.int64()),
+				}),
+			),
+		),
+	}),
 );
 
-export const PublicChannelSettings = channelSettingsSchema.pick(
-	"channelId",
-	"inviteCode",
-);
+const baseEnrichedMessageValidator = v.object({
+	message: messageWithSystemFieldsValidator,
+	author: authorValidator,
+	attachments: v.array(attachmentWithUrlValidator),
+	reactions: v.array(reactionWithEmojiValidator),
+	solutions: v.array(messageWithSystemFieldsValidator),
+	metadata: metadataValidator,
+});
 
-export const PublicDiscordAccount = discordAccountSchema;
+export const enrichedMessageValidator = baseEnrichedMessageValidator.extend({
+	reference: v.optional(
+		v.union(
+			v.object({
+				messageId: v.int64(),
+				message: v.union(baseEnrichedMessageValidator, v.null()),
+			}),
+			v.null(),
+		),
+	),
+});
 
-export const PublicMessage = messageSchema.pick(
-	"id",
-	"authorId",
-	"serverId",
-	"channelId",
-	"parentChannelId",
-	"childThreadId",
-	"questionId",
-	"referenceId",
-	"applicationId",
-	"interactionId",
-	"webhookId",
-	"content",
-	"flags",
-	"type",
-	"pinned",
-	"nonce",
-	"tts",
-	"embeds",
-);
-
-export type PublicServer = Infer<typeof PublicServer>;
-export type PublicChannel = Infer<typeof PublicChannel>;
-export type PublicChannelSettings = Infer<typeof PublicChannelSettings>;
-export type PublicDiscordAccount = Infer<typeof PublicDiscordAccount>;
-export type PublicMessage = Infer<typeof PublicMessage>;
+export const messageWithContextValidator = v.object({
+	message: enrichedMessageValidator,
+	channel: channelWithSystemFieldsValidator,
+	server: serverWithSystemFieldsValidator,
+	thread: v.optional(v.union(channelWithSystemFieldsValidator, v.null())),
+});

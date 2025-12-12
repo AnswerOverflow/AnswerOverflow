@@ -1,8 +1,6 @@
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
-// biome-ignore lint/style/noRestrictedImports: Is fine since it's an internal mutation altho we should really make a better pattern i.e their own file
-import { internalMutation } from "../_generated/server";
 import {
 	type MutationCtx,
 	privateMutation,
@@ -292,25 +290,6 @@ export const deleteManyMessages = privateMutation({
 			await deleteMessageInternalLogic(ctx, id);
 		}
 		return null;
-	},
-});
-
-export const deleteMessagesByDiscordChannelId = internalMutation({
-	args: {
-		channelId: v.int64(),
-	},
-	returns: v.number(),
-	handler: async (ctx, args) => {
-		const messages = await ctx.db
-			.query("messages")
-			.withIndex("by_channelId", (q) => q.eq("channelId", args.channelId))
-			.collect();
-
-		for (const message of messages) {
-			await deleteMessageInternalLogic(ctx, message.id);
-		}
-
-		return messages.length;
 	},
 });
 

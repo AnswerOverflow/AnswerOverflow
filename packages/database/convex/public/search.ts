@@ -1,14 +1,14 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { getOneFrom } from "convex-helpers/server/relationships";
-import { Array as Arr, Predicate } from "effect";
-import { isChannelIndexingEnabled } from "../shared/channels";
 import {
-	enrichedMessageWithServerAndChannels,
+	enrichMessagesWithServerAndChannels,
 	searchMessages,
 } from "../shared/dataAccess";
-import { CHANNEL_TYPE, getThreadStartMessage } from "../shared/shared";
-import { findSimilarThreadCandidates } from "../shared/similarThreads";
+import {
+	messageWithContextValidator,
+	paginatedValidator,
+} from "../shared/publicSchemas";
+import { findSimilarThreads } from "../shared/similarThreads";
 import { publicQuery } from "./custom_functions";
 
 export const publicSearch = publicQuery({
@@ -17,6 +17,7 @@ export const publicSearch = publicQuery({
 		serverId: v.optional(v.string()),
 		paginationOpts: paginationOptsValidator,
 	},
+	returns: paginatedValidator(messageWithContextValidator),
 	handler: async (ctx, args) => {
 		const results = await searchMessages(ctx, {
 			query: args.query,
@@ -35,63 +36,17 @@ export const getRecentThreads = publicQuery({
 	args: {
 		paginationOpts: paginationOptsValidator,
 	},
+	returns: paginatedValidator(messageWithContextValidator),
 	handler: async (ctx, args) => {
 		const paginatedResult = await ctx.db
-			.query("channels")
-			.withIndex("by_type_and_id", (q) =>
-				q.eq("type", CHANNEL_TYPE.PublicThread),
-			)
+			.query("messages")
+			.withIndex("by_childThreadId", (q) => q.gt("childThreadId", 0n))
 			.order("desc")
 			.paginate(args.paginationOpts);
 
-		const results = Arr.filter(
-			await Promise.all(
-				paginatedResult.page.map(async (threadChannel) => {
-					if (!threadChannel.parentId) {
-						return null;
-					}
-
-					const server = await getOneFrom(
-						ctx.db,
-						"servers",
-						"by_discordId",
-						threadChannel.serverId,
-					);
-					if (!server || server.kickedTime) {
-						return null;
-					}
-
-					const indexingEnabled = await isChannelIndexingEnabled(
-						ctx,
-						threadChannel,
-					);
-					if (!indexingEnabled) {
-						return null;
-					}
-
-					const threadStartMessage = await getThreadStartMessage(
-						ctx,
-						threadChannel.id,
-					);
-
-					if (!threadStartMessage) {
-						return null;
-					}
-					const enriched = await enrichedMessageWithServerAndChannels(
-						ctx,
-						threadStartMessage,
-					);
-					if (!enriched) {
-						return null;
-					}
-					return {
-						...enriched,
-						thread: threadChannel,
-						channel: enriched.channel,
-					};
-				}),
-			),
-			Predicate.isNotNullable,
+		const results = await enrichMessagesWithServerAndChannels(
+			ctx,
+			paginatedResult.page,
 		);
 
 		return {
@@ -110,9 +65,10 @@ export const getSimilarThreads = publicQuery({
 		serverId: v.optional(v.string()),
 		limit: v.optional(v.number()),
 	},
+	returns: v.array(messageWithContextValidator),
 	handler: async (ctx, args) => {
 		const limit = Math.min(args.limit ?? 4, 10);
-		const candidates = await findSimilarThreadCandidates(ctx, {
+		const similarThreads = await findSimilarThreads(ctx, {
 			searchQuery: args.searchQuery,
 			currentThreadId: BigInt(args.currentThreadId),
 			currentServerId: BigInt(args.currentServerId),
@@ -120,24 +76,6 @@ export const getSimilarThreads = publicQuery({
 			limit,
 		});
 
-		return candidates.map((candidate) => ({
-			thread: {
-				id: candidate.thread.id.toString(),
-				name: candidate.thread.name,
-				serverId: candidate.thread.serverId.toString(),
-			},
-			server: {
-				discordId: candidate.server.discordId.toString(),
-				name: candidate.server.name,
-				icon: candidate.server.icon,
-			},
-			channel: {
-				id: candidate.channel.id.toString(),
-				name: candidate.channel.name,
-			},
-			firstMessageId: candidate.firstMessageId.toString(),
-			firstMessageContent: candidate.firstMessageContent,
-			hasSolution: candidate.hasSolution,
-		}));
+		return await enrichMessagesWithServerAndChannels(ctx, similarThreads);
 	},
 });

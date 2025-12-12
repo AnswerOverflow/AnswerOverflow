@@ -1,15 +1,10 @@
-import type { Doc } from "@packages/database/convex/_generated/dataModel";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { ThreadCard } from "@packages/ui/components/thread-card";
-
-type ThreadResult = SearchResult & {
-	thread: Doc<"channels">;
-};
 
 export function HomePageClient({
 	initialThreads,
 }: {
-	initialThreads: ThreadResult[];
+	initialThreads: SearchResult[];
 }) {
 	return (
 		<div className="min-h-screen bg-background">
@@ -24,7 +19,10 @@ export function HomePageClient({
 				</div>
 
 				{initialThreads.map((result) => (
-					<ThreadCard key={result.thread.id.toString()} result={result} />
+					<ThreadCard
+						key={result.message.message.id.toString()}
+						result={result}
+					/>
 				))}
 			</div>
 		</div>

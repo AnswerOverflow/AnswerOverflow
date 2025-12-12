@@ -15,8 +15,6 @@ export const FUNCTION_TYPE_MAP = {
   "channels.upsertChannel": "mutation",
   "discord_accounts.deleteDiscordAccount": "mutation",
   "discord_accounts.findManyDiscordAccountsByIds": "query",
-  "discord_accounts.getUserComments": "query",
-  "discord_accounts.getUserPageData": "query",
   "discord_accounts.getUserPageHeaderData": "query",
   "discord_accounts.getUserPosts": "query",
   "discord_accounts.upsertDiscordAccount": "mutation",
@@ -36,7 +34,6 @@ export const FUNCTION_TYPE_MAP = {
   "search.getRecentThreads": "query",
   "search.getSimilarThreads": "query",
   "search.publicSearch": "query",
-  "server_preferences.findServerPreferencesByStripeCustomerId": "query",
   "server_preferences.getServerPreferencesByServerId": "query",
   "server_preferences.updateServerPreferences": "mutation",
   "server_preferences.updateStripeCustomer": "mutation",
@@ -61,11 +58,11 @@ export const NAMESPACES = ["attachments","channels","discord_accounts","ignored_
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
   "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findManyChannelsByDiscordIds","getChannelPageHeaderData","getChannelPageThreads","updateChannelSettings","upsertChannel"],
-  "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserComments","getUserPageData","getUserPageHeaderData","getUserPosts","upsertDiscordAccount"],
+  "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
   "search": ["getRecentThreads","getSimilarThreads","publicSearch"],
-  "server_preferences": ["findServerPreferencesByStripeCustomerId","getServerPreferencesByServerId","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
+  "server_preferences": ["getServerPreferencesByServerId","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertUserServerSettings"]
 } as const;

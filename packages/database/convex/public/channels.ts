@@ -2,6 +2,11 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { enrichMessageForDisplay, getMessageById } from "../shared/shared";
+import {
+	paginatedValidator,
+	enrichedMessageValidator,
+} from "../shared/publicSchemas";
+import { channelSchema } from "../schema";
 import { publicQuery } from "./custom_functions";
 
 export const getChannelPageThreads = publicQuery({
@@ -9,6 +14,12 @@ export const getChannelPageThreads = publicQuery({
 		channelDiscordId: v.int64(),
 		paginationOpts: paginationOptsValidator,
 	},
+	returns: paginatedValidator(
+		v.object({
+			thread: channelSchema,
+			message: v.union(enrichedMessageValidator, v.null()),
+		}),
+	),
 	handler: async (ctx, args) => {
 		const paginatedResult = await ctx.db
 			.query("channels")

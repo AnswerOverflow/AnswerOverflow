@@ -180,18 +180,3 @@ export const updateStripeSubscription = privateMutation({
 		}
 	},
 });
-
-export const findServerPreferencesByStripeCustomerId = privateQuery({
-	args: {
-		stripeCustomerId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		return getOneFrom(
-			ctx.db,
-			"serverPreferences",
-			"by_stripeCustomerId",
-			args.stripeCustomerId,
-			"stripeCustomerId",
-		);
-	},
-});
