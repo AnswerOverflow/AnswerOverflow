@@ -301,6 +301,7 @@ export function handleMarkSolutionCommand(
 		);
 		console.log("[mark-solution] Analytics tracked");
 
+		console.log("[mark-solution] Building response");
 		const { embed, components } = makeMarkSolutionResponse({
 			solution: targetMessage,
 			server: {
@@ -313,8 +314,9 @@ export function handleMarkSolutionCommand(
 				flags: channelSettings.flags,
 			},
 		});
+		console.log("[mark-solution] Response built");
 
-		console.log("[mark-solution] Sending response");
+		console.log("[mark-solution] Deleting deferred reply");
 		yield* discord.callClient(() => interaction.deleteReply());
 		yield* discord.callClient(() =>
 			interaction.followUp({
