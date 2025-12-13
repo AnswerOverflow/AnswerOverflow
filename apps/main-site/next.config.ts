@@ -70,7 +70,7 @@ const nextConfig: NextConfig = {
 	assetPrefix:
 		process.env.NODE_ENV === "development"
 			? undefined
-			: "https://www.answeroverflow.com/",
+			: "https://new.answeroverflow.com/",
 	skipTrailingSlashRedirect: true,
 	redirects: async () => {
 		return [
