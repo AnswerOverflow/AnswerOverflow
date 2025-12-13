@@ -129,6 +129,53 @@ export const findManyDiscordAccountsByIds = privateQuery({
 	},
 });
 
+export const upsertManyDiscordAccounts = privateMutation({
+	args: {
+		accounts: v.array(discordAccountSchema),
+	},
+	handler: async (ctx, args) => {
+		if (args.accounts.length === 0) return [];
+
+		const results: Infer<typeof discordAccountSchema>[] = [];
+
+		for (const account of args.accounts) {
+			const existing = await getOneFrom(
+				ctx.db,
+				"discordAccounts",
+				"by_discordAccountId",
+				account.id,
+				"id",
+			);
+
+			if (existing) {
+				await ctx.db.patch(existing._id, account);
+				results.push(account);
+			} else {
+				const ignored = await getOneFrom(
+					ctx.db,
+					"ignoredDiscordAccounts",
+					"by_discordAccountId",
+					account.id,
+					"id",
+				);
+
+				if (ignored) {
+					results.push({
+						id: account.id,
+						name: account.name,
+						avatar: undefined,
+					});
+				} else {
+					await ctx.db.insert("discordAccounts", account);
+					results.push(account);
+				}
+			}
+		}
+
+		return results;
+	},
+});
+
 export const getUserPageHeaderData = privateQuery({
 	args: {
 		userId: v.int64(),
