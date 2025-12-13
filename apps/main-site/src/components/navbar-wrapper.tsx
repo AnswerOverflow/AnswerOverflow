@@ -2,22 +2,27 @@
 
 import { Footer } from "@packages/ui/components/footer";
 import { useTenant } from "@packages/ui/components/tenant-context";
+import { isOnMainSite } from "@packages/ui/utils/links";
 import { usePathname } from "next/navigation";
+import { useSyncExternalStore } from "react";
 import { SiteNavbar } from "./site-navbar";
 
-function isDomainRoute(pathname: string | null): boolean {
-	if (!pathname) return false;
-	const firstSegment = pathname.split("/")[1];
-	return firstSegment?.includes(".") ?? false;
+function useHostname() {
+	return useSyncExternalStore(
+		() => () => {},
+		() => window.location.hostname,
+		() => null,
+	);
 }
 
 export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 	const tenant = useTenant();
+	const hostname = useHostname();
 	const isDashboard = pathname?.startsWith("/dashboard");
-	const isDomain = isDomainRoute(pathname);
-	const showNavbar = !isDashboard && !isDomain;
-	const showFooter = !isDashboard && !isDomain;
+	const isTenantSite = hostname !== null && !isOnMainSite(hostname);
+	const showNavbar = !isDashboard && !isTenantSite;
+	const showFooter = !isDashboard && !isTenantSite;
 
 	return (
 		<>
