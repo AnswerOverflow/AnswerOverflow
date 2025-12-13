@@ -7,7 +7,7 @@ import type {
 import { usePaginatedQuery, useQueries, useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
 import { convexToJson, type Value } from "convex/values";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export const useStableQuery = ((name, ...args) => {
 	const result = useQuery(name, ...args);
@@ -55,35 +55,18 @@ export function usePaginatedQueryWithCursor<
 	const argsKey = skip
 		? "skip"
 		: JSON.stringify(convexToJson(args as Record<string, Value>));
-	const argsKeyRef = useRef(argsKey);
-	argsKeyRef.current = argsKey;
 
-	const [paginationState, setPaginationState] = useState<{
-		argsKey: string;
-		additionalPages: Array<{ cursor: string; numItems: number }>;
-	}>({ argsKey, additionalPages: [] });
+	const [additionalPages, setAdditionalPages] = useState<
+		Array<{ cursor: string; numItems: number }>
+	>([]);
 
-	const additionalPages =
-		paginationState.argsKey === argsKey ? paginationState.additionalPages : [];
-
-	const setAdditionalPages = useCallback(
-		(
-			updater: (
-				prev: Array<{ cursor: string; numItems: number }>,
-			) => Array<{ cursor: string; numItems: number }>,
-		) => {
-			setPaginationState((prev) => {
-				const currentArgsKey = argsKeyRef.current;
-				return {
-					argsKey: currentArgsKey,
-					additionalPages: updater(
-						prev.argsKey === currentArgsKey ? prev.additionalPages : [],
-					),
-				};
-			});
-		},
-		[],
-	);
+	const prevArgsKeyRef = useRef(argsKey);
+	useEffect(() => {
+		if (prevArgsKeyRef.current !== argsKey) {
+			prevArgsKeyRef.current = argsKey;
+			setAdditionalPages([]);
+		}
+	}, [argsKey]);
 
 	const queries = useMemo(() => {
 		if (skip) return {};
