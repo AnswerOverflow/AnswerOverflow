@@ -6,6 +6,7 @@ import {
 	ButtonStyle,
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
+	MessageFlags,
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
@@ -38,7 +39,9 @@ export function handleLeaderboardCommand(
 		const isEphemeral = interaction.options.getBoolean("ephemeral") ?? false;
 
 		yield* discord.callClient(() =>
-			interaction.deferReply({ ephemeral: isEphemeral }),
+			interaction.deferReply(
+				isEphemeral ? { flags: MessageFlags.Ephemeral } : {},
+			),
 		);
 
 		if (!interaction.guildId) {
