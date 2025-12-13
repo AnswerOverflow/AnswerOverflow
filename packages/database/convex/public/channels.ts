@@ -1,12 +1,13 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
+import { createDataAccessCache, enrichMessage } from "../shared/dataAccess";
 import {
 	channelWithSystemFieldsValidator,
 	enrichedMessageValidator,
 	paginatedValidator,
 } from "../shared/publicSchemas";
-import { enrichMessageForDisplay, getMessageById } from "../shared/shared";
+import { getMessageById } from "../shared/shared";
 import { publicQuery } from "./custom_functions";
 
 export const getChannelPageThreads = publicQuery({
@@ -31,11 +32,16 @@ export const getChannelPageThreads = publicQuery({
 
 		const threads = paginatedResult.page;
 
+		const cache = createDataAccessCache(ctx);
 		const page = await asyncMap(threads, async (thread) => {
 			const message = await getMessageById(ctx, thread.id);
+			const enrichedMessage = message
+				? await enrichMessage(ctx, cache, message)
+				: null;
+
 			return {
 				thread,
-				message: message ? await enrichMessageForDisplay(ctx, message) : null,
+				message: enrichedMessage,
 			};
 		});
 

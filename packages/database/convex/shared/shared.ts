@@ -9,8 +9,6 @@ export {
 	deleteUserServerSettingsByUserIdLogic,
 	type EnrichedMessage,
 	type EnrichedMessageReference,
-	enrichMessageForDisplay,
-	enrichMessagesWithData,
 	extractDiscordLinks,
 	extractMentionIds,
 	findAttachmentsByMessageId,

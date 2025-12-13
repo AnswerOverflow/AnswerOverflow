@@ -555,23 +555,6 @@ async function getInternalLinksMetadataInternal(
 	return Arr.filter(results, Predicate.isNotNullable);
 }
 
-export async function enrichMessagesWithData(
-	ctx: QueryCtx | MutationCtx,
-	messages: MessageDoc[],
-): Promise<EnrichedMessage[]> {
-	if (messages.length === 0) {
-		return [];
-	}
-
-	const messagesWithData = await Promise.all(
-		messages.map(async (message) => {
-			return await enrichMessageForDisplay(ctx, message);
-		}),
-	);
-
-	return messagesWithData;
-}
-
 export async function enrichMessageForDisplay(
 	ctx: QueryCtx | MutationCtx,
 	message: MessageDoc,
