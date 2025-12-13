@@ -16,7 +16,7 @@ const ALLOWED_DEV_ORIGINS = [
 	/^http:\/\/\[::1\](:\d+)?$/,
 ];
 
-const PRODUCTION_ORIGIN = "https://new.answeroverflow.com";
+const PRODUCTION_ORIGIN = "https://www.answeroverflow.com";
 
 function isAllowedDevOrigin(origin: string | undefined): boolean {
 	if (!origin) return false;

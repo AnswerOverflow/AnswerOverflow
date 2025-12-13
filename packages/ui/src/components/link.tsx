@@ -17,7 +17,7 @@ function isExternalUrl(href: string): boolean {
 			const mainSiteHosts = [
 				"www.answeroverflow.com",
 				"answeroverflow.com",
-				"new.answeroverflow.com",
+				"www.answeroverflow.com",
 				"localhost",
 				"localhost:3000",
 			];
