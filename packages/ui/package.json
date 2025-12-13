@@ -97,6 +97,7 @@
 		"./lib/*": "./src/lib/*.ts",
 		"./components/*": "./src/components/*.tsx",
 		"./components/navbar": "./src/components/navbar/index.tsx",
+		"./components/footer": "./src/components/footer/index.tsx",
 		"./components/answer-overflow-logo": "./src/components/answer-overflow-logo.tsx",
 		"./hooks/*": "./src/hooks/*.ts",
 		"./utils/*": "./src/utils/*.ts",
