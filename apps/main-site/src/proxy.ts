@@ -1,5 +1,5 @@
 import { isIP } from "node:net";
-import { isOnMainSite, normalizeSubpath } from "@packages/ui/utils/links";
+import { isOnMainSite } from "@packages/ui/utils/links";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -23,45 +23,44 @@ const subpathTenants = [
 
 export function proxy(request: NextRequest) {
 	const url = request.nextUrl;
-	const { pathname } = url;
+	const path = url.pathname + url.search;
 	const host = request.headers.get("host") ?? "";
-	const normalizedHost = host.split(":")[0];
 
-	if (pathname.startsWith("/og") || pathname.startsWith("/ingest")) {
+	if (path.startsWith("/og") || path.startsWith("/ingest")) {
+		return NextResponse.next();
+	}
+
+	if (isOnMainSite(host)) {
 		return NextResponse.next();
 	}
 
 	const subpathTenant = subpathTenants.find((tenant) =>
-		normalizedHost?.includes(tenant.contentDomain),
+		host.includes(tenant.contentDomain),
 	);
 
 	if (subpathTenant) {
-		const redirect = new URL(
-			`https://${subpathTenant.rewriteDomain}/${subpathTenant.subpath}${pathname}${url.search}`,
-			request.url,
+		const bypass = request.headers.get(
+			"X-AnswerOverflow-Skip-Subpath-Redirect",
 		);
-		return NextResponse.redirect(redirect, 308);
-	}
-
-	const subpathRewriteTenant = subpathTenants.find(
-		(tenant) => normalizedHost === tenant.rewriteDomain,
-	);
-
-	if (subpathRewriteTenant) {
-		const tenantSubpath = normalizeSubpath(subpathRewriteTenant.subpath);
-		if (
-			tenantSubpath &&
-			(pathname === `/${tenantSubpath}` ||
-				pathname.startsWith(`/${tenantSubpath}/`))
-		) {
-			const rewrittenPath = pathname.replace(`/${tenantSubpath}`, "") || "/";
-			url.pathname = `/${subpathRewriteTenant.rewriteDomain}${rewrittenPath}`;
-			return NextResponse.rewrite(url);
+		if (!bypass && !subpathTenant.contentDomain.includes("vapi.ai")) {
+			return NextResponse.redirect(
+				new URL(
+					`https://${subpathTenant.rewriteDomain}/${subpathTenant.subpath}${path}`,
+					request.url,
+				),
+				308,
+			);
 		}
 	}
 
-	if (!isOnMainSite(normalizedHost) && isIP(normalizedHost ?? "") === 0) {
-		url.pathname = `/${normalizedHost}${pathname}`;
+	const actualHost = subpathTenant?.rewriteDomain ?? host;
+	const pathWithoutHost = path.startsWith(`/${actualHost}`)
+		? path.slice(actualHost.length + 1)
+		: path;
+
+	if (isIP(actualHost) === 0) {
+		url.pathname = `/${actualHost}${pathWithoutHost}`;
+		url.search = "";
 		return NextResponse.rewrite(url);
 	}
 
@@ -69,5 +68,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+	matcher: [
+		"/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)",
+		"/sitemap.xml",
+		"/robots.txt",
+	],
 };
