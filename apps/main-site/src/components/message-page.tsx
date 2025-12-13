@@ -420,6 +420,8 @@ export function MessagePage(props: {
 										id: headerData.channel.id,
 										name: headerData.channel.name,
 										type: headerData.channel.type,
+										serverId: headerData.server.discordId,
+										inviteCode: headerData.channel.inviteCode,
 									}}
 									thread={
 										headerData.thread
@@ -453,6 +455,8 @@ export function MessagePage(props: {
 									id: headerData.channel.id,
 									name: headerData.channel.name,
 									type: headerData.channel.type,
+									serverId: headerData.server.discordId,
+									inviteCode: headerData.channel.inviteCode,
 								},
 								thread: headerData.thread
 									? {

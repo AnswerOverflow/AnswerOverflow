@@ -2,6 +2,7 @@ import { Database } from "@packages/database/database";
 import type { GuildMember, PartialGuildMember } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
 
 export function handleReadTheRulesConsent(
@@ -54,6 +55,9 @@ export function handleReadTheRulesConsent(
 		);
 
 		if (granted) {
+			yield* trackUserGrantConsent(newMember, ConsentSource.ReadTheRules).pipe(
+				Effect.catchAll(() => Effect.void),
+			);
 			yield* Console.log(
 				`Granted read the rules consent for user ${newMember.user.id} in server ${server.discordId}`,
 			);

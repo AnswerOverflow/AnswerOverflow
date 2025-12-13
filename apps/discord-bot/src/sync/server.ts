@@ -4,7 +4,11 @@ import type { Guild } from "discord.js";
 import { Array as Arr, Console, Effect, Layer } from "effect";
 import { registerCommands } from "../commands/register";
 import { Discord } from "../core/discord-service";
-import { registerServerGroup, trackServerJoin } from "../utils/analytics";
+import {
+	registerServerGroup,
+	trackServerJoin,
+	trackServerLeave,
+} from "../utils/analytics";
 import { isAllowedRootChannelType } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
 import { syncChannel } from "./channel";
@@ -123,15 +127,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
-				yield* Effect.void; // TODO: Re enable
-				// yield* database.private.servers.updateServer({
-				// 	serverId: BigInt(guild.id),
-				// 	server: {
-				// 		kickedTime: Date.now(),
-				// 	},
-				// });
-
-				// yield* trackServerLeave(guild).pipe(Effect.catchAll(() => Effect.void));
+				yield* trackServerLeave(guild).pipe(Effect.catchAll(() => Effect.void));
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error handling guild delete ${guild.id}:`, error),

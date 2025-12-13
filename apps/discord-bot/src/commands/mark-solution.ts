@@ -4,6 +4,10 @@ import { ChannelType } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { makeMarkSolutionResponse } from "../services/mark-solution";
+import {
+	trackMarkSolutionCommandUsed,
+	trackSolvedQuestion,
+} from "../utils/analytics";
 import { toAOMessage, toUpsertMessageArgs } from "../utils/conversions";
 
 export function handleMarkSolutionCommand(
@@ -223,6 +227,40 @@ export function handleMarkSolutionCommand(
 			);
 			return;
 		}
+
+		const questionAsker = yield* discord
+			.callClient(() => guild.members.fetch(questionMessage.author.id))
+			.pipe(Effect.catchAll(() => Effect.succeed(null)));
+
+		const solutionAuthor = yield* discord
+			.callClient(() => guild.members.fetch(targetMessage.author.id))
+			.pipe(Effect.catchAll(() => Effect.succeed(null)));
+
+		if (questionAsker && solutionAuthor) {
+			yield* trackSolvedQuestion(
+				thread,
+				channelSettings,
+				questionAsker,
+				solutionAuthor,
+				guildMember,
+				questionMessage,
+				targetMessage,
+				{
+					discordId: server.discordId.toString(),
+					name: server.name,
+				},
+				serverPreferences
+					? {
+							readTheRulesConsentEnabled:
+								serverPreferences.readTheRulesConsentEnabled,
+						}
+					: undefined,
+			).pipe(Effect.catchAll(() => Effect.void));
+		}
+
+		yield* trackMarkSolutionCommandUsed(guildMember, "Success").pipe(
+			Effect.catchAll(() => Effect.void),
+		);
 
 		const { embed, components } = makeMarkSolutionResponse({
 			solution: targetMessage,

@@ -9,6 +9,7 @@ import {
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { trackLeaderboardViewed } from "../utils/analytics";
 
 const medalMap = new Map<number, string>([
 	[0, ":first_place:"],
@@ -102,6 +103,18 @@ export function handleLeaderboardCommand(
 						makeDismissButton(interaction.user.id),
 					),
 				];
+
+		const guild = interaction.guild;
+		if (guild) {
+			const member = yield* discord
+				.callClient(() => guild.members.fetch(interaction.user.id))
+				.pipe(Effect.catchAll(() => Effect.succeed(null)));
+			if (member) {
+				yield* trackLeaderboardViewed(member).pipe(
+					Effect.catchAll(() => Effect.void),
+				);
+			}
+		}
 
 		yield* discord.callClient(() =>
 			interaction.editReply({

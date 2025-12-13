@@ -3,6 +3,7 @@ import type {
 	Guild,
 	GuildMember,
 	Message,
+	PartialGuildMember,
 	ThreadChannel,
 } from "discord.js";
 import type {
@@ -22,19 +23,19 @@ type ServerWithSettings = {
 };
 
 type ChannelWithSettings = {
-	id: string;
+	id: string | bigint;
 	name: string;
 	type: number;
-	serverId: string;
+	serverId: string | bigint;
 	flags: {
 		indexingEnabled: boolean;
 		markSolutionEnabled: boolean;
 		sendMarkSolutionInstructionsInNewThreads: boolean;
 		autoThreadEnabled: boolean;
 		forumGuidelinesConsentEnabled: boolean;
-		solutionTagId?: string;
+		solutionTagId?: string | bigint;
 		inviteCode?: string;
-	};
+	} | null;
 };
 
 type ServerPreferences = {
@@ -43,7 +44,7 @@ type ServerPreferences = {
 
 export function memberToAnalyticsUser<T extends UserType>(
 	userType: T,
-	user: GuildMember,
+	user: GuildMember | PartialGuildMember,
 ): UserProps<T> {
 	return {
 		[`${userType} Id`]: user.id,
@@ -91,23 +92,23 @@ export function channelWithDiscordInfoToAnalyticsData(args: {
 	answerOverflowChannel: ChannelWithSettings;
 	discordChannel: Channel;
 }): ChannelPropsWithDiscordData {
+	const flags = args.answerOverflowChannel.flags;
 	return {
-		"Channel Id": args.answerOverflowChannel.id,
+		"Channel Id": String(args.answerOverflowChannel.id),
 		"Channel Name": args.answerOverflowChannel.name,
 		"Channel Type": args.answerOverflowChannel.type,
-		"Channel Server Id": args.answerOverflowChannel.serverId,
-		"Channel Invite Code":
-			args.answerOverflowChannel.flags.inviteCode ?? undefined,
-		"Channel Solution Tag Id":
-			args.answerOverflowChannel.flags.solutionTagId ?? undefined,
-		"Indexing Enabled": args.answerOverflowChannel.flags.indexingEnabled,
-		"Mark Solution Enabled":
-			args.answerOverflowChannel.flags.markSolutionEnabled,
+		"Channel Server Id": String(args.answerOverflowChannel.serverId),
+		"Channel Invite Code": flags?.inviteCode ?? undefined,
+		"Channel Solution Tag Id": flags?.solutionTagId
+			? String(flags.solutionTagId)
+			: undefined,
+		"Indexing Enabled": flags?.indexingEnabled ?? false,
+		"Mark Solution Enabled": flags?.markSolutionEnabled ?? false,
 		"Send Mark Solution Instructions In New Threads Enabled":
-			args.answerOverflowChannel.flags.sendMarkSolutionInstructionsInNewThreads,
-		"Auto Thread Enabled": args.answerOverflowChannel.flags.autoThreadEnabled,
+			flags?.sendMarkSolutionInstructionsInNewThreads ?? false,
+		"Auto Thread Enabled": flags?.autoThreadEnabled ?? false,
 		"Forum Guidelines Consent Enabled":
-			args.answerOverflowChannel.flags.forumGuidelinesConsentEnabled,
+			flags?.forumGuidelinesConsentEnabled ?? false,
 	};
 }
 
