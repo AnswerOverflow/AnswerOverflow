@@ -53,7 +53,12 @@ export const createAuth = (
 		logger: {
 			disabled: optionsOnly,
 		},
-		trustedOrigins: getTrustedOrigins(siteUrl),
+		trustedOrigins: async (request: Request) => {
+			const staticOrigins = getTrustedOrigins(siteUrl);
+			const origin = request.headers.get("origin");
+			if (!origin) return staticOrigins;
+			return [...staticOrigins, origin];
+		},
 		baseURL: siteUrl,
 		database: authComponent.adapter(ctx),
 		secret: (() => {
