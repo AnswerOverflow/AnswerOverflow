@@ -55,20 +55,14 @@ export function proxy(request: NextRequest) {
 				pathname.startsWith(`/${tenantSubpath}/`))
 		) {
 			const rewrittenPath = pathname.replace(`/${tenantSubpath}`, "") || "/";
-			const rewritten = new URL(
-				`/${subpathRewriteTenant.rewriteDomain}${rewrittenPath}${url.search}`,
-				request.url,
-			);
-			return NextResponse.rewrite(rewritten);
+			url.pathname = `/${subpathRewriteTenant.rewriteDomain}${rewrittenPath}`;
+			return NextResponse.rewrite(url);
 		}
 	}
 
 	if (!isOnMainSite(normalizedHost) && isIP(normalizedHost ?? "") === 0) {
-		const rewritten = new URL(
-			`/${normalizedHost}${pathname}${url.search}`,
-			request.url,
-		);
-		return NextResponse.rewrite(rewritten);
+		url.pathname = `/${normalizedHost}${pathname}`;
+		return NextResponse.rewrite(url);
 	}
 
 	return NextResponse.next();
