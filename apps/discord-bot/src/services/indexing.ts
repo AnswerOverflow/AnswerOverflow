@@ -116,6 +116,7 @@ const INDEXING_CONFIG = {
 	channelProcessDelay: Duration.millis(100),
 	guildProcessDelay: Duration.millis(500),
 	convexBatchSize: 500,
+	maxThreadsToCollect: 5000,
 } as const;
 
 function fetchChannelMessages(
@@ -176,13 +177,16 @@ function fetchChannelMessages(
 	});
 }
 
-function fetchForumThreads(forumChannelId: string, forumChannelName: string) {
+function fetchForumThreads(
+	forumChannelId: string,
+	forumChannelName: string,
+	threadCutoffId?: bigint,
+) {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 		const threads: AnyThreadChannel[] = [];
 
 		const activeThreads = yield* discord.fetchActiveThreads(forumChannelId);
-
 		threads.push(...Arr.fromIterable(activeThreads.threads.values()));
 
 		let hasMoreArchived = true;
@@ -194,20 +198,34 @@ function fetchForumThreads(forumChannelId: string, forumChannelName: string) {
 				{ before: beforeId },
 			);
 
-			threads.push(...Arr.fromIterable(archivedThreads.threads.values()));
+			const fetchedThreads = Arr.fromIterable(archivedThreads.threads.values());
+			threads.push(...fetchedThreads);
 
-			if (!archivedThreads.hasMore || archivedThreads.threads.size === 0) {
+			const lastThread = archivedThreads.threads.last();
+
+			const isLastThreadOlderThanCutoff =
+				lastThread && threadCutoffId && BigInt(lastThread.id) < threadCutoffId;
+
+			if (
+				!archivedThreads.hasMore ||
+				archivedThreads.threads.size === 0 ||
+				isLastThreadOlderThanCutoff
+			) {
 				hasMoreArchived = false;
 			} else {
-				const lastThread = archivedThreads.threads.last();
 				beforeId = lastThread?.id;
 			}
 		}
 
-		yield* Effect.logDebug(
-			`Found ${threads.length} threads in forum ${forumChannelName} (${forumChannelId})`,
+		const limitedThreads = threads.slice(
+			0,
+			INDEXING_CONFIG.maxThreadsToCollect,
 		);
-		return threads;
+
+		yield* Effect.logDebug(
+			`Found ${threads.length} threads in forum ${forumChannelName} (${forumChannelId}), limited to ${limitedThreads.length}`,
+		);
+		return limitedThreads;
 	});
 }
 
@@ -538,7 +556,11 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			`Indexing forum ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"}`,
 		);
 
-		const threads = yield* fetchForumThreads(channel.id, channel.name);
+		const threads = yield* fetchForumThreads(
+			channel.id,
+			channel.name,
+			lastIndexedSnowflake ?? undefined,
+		);
 
 		const newThreads = lastIndexedSnowflake
 			? Arr.filter(
@@ -557,34 +579,34 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			INDEXING_CONFIG.convexBatchSize,
 		);
 
-		const latestMessageResults = yield* Effect.forEach(
+		const threadChannels = yield* Effect.forEach(
 			threadIdChunks,
 			(chunk) =>
-				database.private.messages.findLatestMessageIdsByChannelIds({
-					channelIds: chunk,
+				database.private.channels.findChannelsByDiscordIds({
+					discordIds: chunk,
 				}),
 			{ concurrency: 1 },
 		).pipe(Effect.map(Arr.flatten));
 
-		const latestMessageMap = HashMap.fromIterable(
-			Arr.map(
-				latestMessageResults,
-				(r) => [r.channelId, r.latestMessageId] as const,
-			),
+		const threadChannelMap = HashMap.fromIterable(
+			Arr.map(threadChannels, (c) => [c.id, c] as const),
 		);
 
 		const outOfDateThreads = Arr.filter(threads, (thread) => {
-			const latestStoredMessageId = HashMap.get(
-				latestMessageMap,
+			const threadChannel = HashMap.get(
+				threadChannelMap,
 				BigInt(thread.id),
 			).pipe((opt) => (opt._tag === "Some" ? opt.value : null));
 
-			if (!latestStoredMessageId) {
+			const threadLastIndexedSnowflake =
+				threadChannel?.flags?.lastIndexedSnowflake;
+
+			if (!threadLastIndexedSnowflake) {
 				return true;
 			}
 
 			const discordLastMessageId = thread.lastMessageId ?? thread.id;
-			return BigInt(discordLastMessageId) > latestStoredMessageId;
+			return BigInt(discordLastMessageId) > threadLastIndexedSnowflake;
 		});
 
 		const threadsToIndex = Arr.sort(
@@ -612,15 +634,18 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 				Effect.gen(function* () {
 					yield* syncChannel(thread);
 
-					const latestStoredMessageId = HashMap.get(
-						latestMessageMap,
+					const threadChannel = HashMap.get(
+						threadChannelMap,
 						BigInt(thread.id),
 					).pipe((opt) => (opt._tag === "Some" ? opt.value : null));
+
+					const threadLastIndexedSnowflake =
+						threadChannel?.flags?.lastIndexedSnowflake;
 
 					const threadMessages = yield* fetchChannelMessages(
 						thread.id,
 						thread.name,
-						latestStoredMessageId?.toString() ?? undefined,
+						threadLastIndexedSnowflake?.toString() ?? undefined,
 					);
 					yield* storeMessages(threadMessages, discordServerId, thread.id);
 

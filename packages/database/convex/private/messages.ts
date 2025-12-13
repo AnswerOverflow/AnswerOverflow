@@ -293,26 +293,6 @@ export const deleteManyMessages = privateMutation({
 	},
 });
 
-export const findLatestMessageIdsByChannelIds = privateQuery({
-	args: {
-		channelIds: v.array(v.int64()),
-	},
-	handler: async (ctx, args) => {
-		const results = await asyncMap(args.channelIds, async (channelId) => {
-			const latestMessage = await ctx.db
-				.query("messages")
-				.withIndex("by_channelId_and_id", (q) => q.eq("channelId", channelId))
-				.order("desc")
-				.first();
-			return {
-				channelId,
-				latestMessageId: latestMessage?.id ?? null,
-			};
-		});
-		return results;
-	},
-});
-
 export const updateEmbedStorageId = privateMutation({
 	args: {
 		messageId: v.int64(),
