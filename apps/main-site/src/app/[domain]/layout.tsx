@@ -3,9 +3,50 @@ import { Providers } from "@packages/ui/components/providers";
 import type { Tenant } from "@packages/ui/components/tenant-context";
 import { normalizeSubpath } from "@packages/ui/utils/links";
 import { Effect } from "effect";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DomainNavbarFooterWrapper } from "../../components/domain-navbar-footer-wrapper";
 import { runtime } from "../../lib/runtime";
+
+type Props = {
+	children: React.ReactNode;
+	params: Promise<{ domain: string }>;
+};
+
+async function getTenantData(domain: string) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const tenant = yield* database.private.servers.getServerByDomain({
+			domain,
+		});
+		if (!tenant?.server || !tenant?.preferences) {
+			return null;
+		}
+		return {
+			...tenant.server,
+			...tenant.preferences,
+		};
+	}).pipe(runtime.runPromise);
+}
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+	const params = await props.params;
+	const domain = decodeURIComponent(params.domain);
+	const tenantData = await getTenantData(domain);
+
+	if (!tenantData?.icon) {
+		return {};
+	}
+
+	const iconUrl = `https://cdn.answeroverflow.com/${tenantData.icon}/icon.png`;
+
+	return {
+		icons: {
+			icon: iconUrl,
+			apple: iconUrl,
+		},
+	};
+}
 
 const subpathTenants = [
 	{
@@ -22,25 +63,10 @@ const subpathTenants = [
 	},
 ];
 
-export default async function DomainLayout(props: {
-	children: React.ReactNode;
-	params: Promise<{ domain: string }>;
-}) {
+export default async function DomainLayout(props: Props) {
 	const params = await props.params;
 	const domain = decodeURIComponent(params.domain);
-	const tenantData = await Effect.gen(function* () {
-		const database = yield* Database;
-		const tenant = yield* database.private.servers.getServerByDomain({
-			domain,
-		});
-		if (!tenant?.server || !tenant?.preferences) {
-			return null;
-		}
-		return {
-			...tenant?.server,
-			...tenant?.preferences,
-		};
-	}).pipe(runtime.runPromise);
+	const tenantData = await getTenantData(domain);
 
 	if (!tenantData) {
 		return notFound();

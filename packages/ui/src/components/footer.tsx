@@ -35,7 +35,6 @@ const getNavigation = (baseUrl: string): NavigationData => ({
 					{ name: "Pricing", href: `${baseUrl}/pricing` },
 					{ name: "Docs", href: "https://docs.answeroverflow.com" },
 					{ name: "Communities", href: `${baseUrl}/browse` },
-					{ name: "All Posts", href: `${baseUrl}/posts` },
 				],
 			},
 		},
