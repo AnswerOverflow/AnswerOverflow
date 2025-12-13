@@ -65,11 +65,10 @@ const nextConfig: NextConfig = {
 			},
 		];
 	},
-	// TODO: probably bring this back
-	// assetPrefix:
-	// 	process.env.NODE_ENV === "development"
-	// 		? undefined
-	// 		: "https://www.answeroverflow.com/",
+	assetPrefix:
+		process.env.NODE_ENV === "development"
+			? undefined
+			: "https://new.answeroverflow.com/",
 	skipTrailingSlashRedirect: true,
 	redirects: async () => {
 		return [
