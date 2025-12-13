@@ -154,3 +154,32 @@ export const upsertUserServerSettings = privateMutation({
 		}
 	},
 });
+
+export const upsertManyBotUserServerSettings = privateMutation({
+	args: {
+		settings: v.array(userServerSettingsSchema),
+	},
+	handler: async (ctx, args) => {
+		if (args.settings.length === 0) return [];
+
+		for (const setting of args.settings) {
+			const userSettings = await getManyFrom(
+				ctx.db,
+				"userServerSettings",
+				"by_userId",
+				setting.userId,
+			);
+			const existing = userSettings.find(
+				(s) => s.serverId === setting.serverId,
+			);
+
+			if (existing) {
+				await ctx.db.patch(existing._id, setting);
+			} else {
+				await ctx.db.insert("userServerSettings", setting);
+			}
+		}
+
+		return args.settings;
+	},
+});

@@ -115,6 +115,7 @@ const INDEXING_CONFIG = {
 	messagesPerPage: 100,
 	channelProcessDelay: Duration.millis(100),
 	guildProcessDelay: Duration.millis(500),
+	convexBatchSize: 500,
 } as const;
 
 function fetchChannelMessages(
@@ -248,55 +249,85 @@ function storeMessages(
 			{ concurrency: "unbounded" },
 		).pipe(Effect.map(Arr.filter(Predicate.isNotNull)));
 
-		const uniqueAuthors = HashMap.fromIterable(
-			Arr.map(
-				indexableMessages,
-				(msg) => [msg.author.id, toAODiscordAccount(msg.author)] as const,
+		const uniqueAuthors = Arr.fromIterable(
+			HashMap.values(
+				HashMap.fromIterable(
+					Arr.map(
+						indexableMessages,
+						(msg) => [msg.author.id, toAODiscordAccount(msg.author)] as const,
+					),
+				),
 			),
 		);
 
-		yield* Effect.forEach(
-			Arr.fromIterable(HashMap.values(uniqueAuthors)),
-			(author) =>
-				database.private.discord_accounts.upsertDiscordAccount({
-					account: author,
-				}),
-			{ concurrency: 10 },
-		);
+		if (uniqueAuthors.length > 0) {
+			const authorChunks = Arr.chunksOf(
+				uniqueAuthors,
+				INDEXING_CONFIG.convexBatchSize,
+			);
+			yield* Effect.forEach(
+				authorChunks,
+				(chunk) =>
+					database.private.discord_accounts.upsertManyDiscordAccounts({
+						accounts: chunk,
+					}),
+				{ concurrency: 3 },
+			);
+		}
 
 		const botMessages = Arr.filter(indexableMessages, (msg) => msg.author.bot);
 		if (botMessages.length > 0) {
 			const uniqueBotIds = Arr.dedupe(
 				Arr.map(botMessages, (msg) => msg.author.id),
 			);
-			yield* Effect.forEach(
-				uniqueBotIds,
-				(botId) =>
-					Effect.gen(function* () {
-						const existingSettings =
-							yield* database.private.user_server_settings.findUserServerSettingsById(
-								{
-									userId: BigInt(botId),
-									serverId: BigInt(discordServerId),
-								},
-							);
-						yield* Effect.sleep(Duration.millis(10));
 
-						yield* database.private.user_server_settings.upsertUserServerSettings(
-							{
-								settings: {
-									serverId: BigInt(discordServerId),
-									userId: BigInt(botId),
-									permissions: existingSettings?.permissions ?? 0,
-									canPubliclyDisplayMessages: true,
-									messageIndexingDisabled:
-										existingSettings?.messageIndexingDisabled ?? false,
-									apiCallsUsed: existingSettings?.apiCallsUsed ?? 0,
-								},
-							},
-						);
+			const botIdChunks = Arr.chunksOf(
+				uniqueBotIds,
+				INDEXING_CONFIG.convexBatchSize,
+			);
+			const existingSettings = yield* Effect.forEach(
+				botIdChunks,
+				(chunk) =>
+					database.private.user_server_settings.findManyUserServerSettings({
+						settings: Arr.map(chunk, (botId) => ({
+							userId: BigInt(botId),
+							serverId: BigInt(discordServerId),
+						})),
 					}),
-				{ concurrency: 5 },
+				{ concurrency: 1 },
+			).pipe(Effect.map(Arr.flatten));
+
+			const existingSettingsMap = HashMap.fromIterable(
+				Arr.map(existingSettings, (s) => [s.userId, s] as const),
+			);
+
+			const botSettings = Arr.map(uniqueBotIds, (botId) => {
+				const existing = HashMap.get(existingSettingsMap, BigInt(botId)).pipe(
+					(opt) => (opt._tag === "Some" ? opt.value : null),
+				);
+				return {
+					serverId: BigInt(discordServerId),
+					userId: BigInt(botId),
+					permissions: existing?.permissions ?? 0,
+					canPubliclyDisplayMessages: true,
+					messageIndexingDisabled: existing?.messageIndexingDisabled ?? false,
+					apiCallsUsed: existing?.apiCallsUsed ?? 0,
+				};
+			});
+
+			const botSettingsChunks = Arr.chunksOf(
+				botSettings,
+				INDEXING_CONFIG.convexBatchSize,
+			);
+			yield* Effect.forEach(
+				botSettingsChunks,
+				(chunk) =>
+					database.private.user_server_settings.upsertManyBotUserServerSettings(
+						{
+							settings: chunk,
+						},
+					),
+				{ concurrency: 1 },
 			);
 		}
 
@@ -309,14 +340,18 @@ function storeMessages(
 			})),
 		);
 
+		const messageChunks = Arr.chunksOf(
+			Arr.map(aoMessages, (data) => toUpsertMessageArgs(data)),
+			INDEXING_CONFIG.convexBatchSize,
+		);
 		yield* Effect.forEach(
-			aoMessages,
-			(data) =>
-				database.private.messages.upsertMessage({
-					...toUpsertMessageArgs(data),
+			messageChunks,
+			(chunk) =>
+				database.private.messages.upsertManyMessages({
+					messages: chunk,
 					ignoreChecks: false,
 				}),
-			{ concurrency: 5 },
+			{ concurrency: 1 },
 		);
 
 		if (allAttachments.length > 0) {
@@ -347,36 +382,22 @@ function storeMessages(
 			);
 			const lastMessage = sortedMessages[0];
 			if (lastMessage) {
-				const channelLiveData =
-					yield* database.private.channels.findChannelByDiscordId({
-						discordId: BigInt(channelId),
-					});
-				yield* Effect.sleep(Duration.millis(10));
-				const currentChannel = channelLiveData;
+				const newLastIndexedBigInt = BigInt(lastMessage.id);
 
-				if (currentChannel) {
-					const oldLastIndexed = currentChannel.flags?.lastIndexedSnowflake;
-					const newLastIndexedBigInt = BigInt(lastMessage.id);
+				yield* Effect.logDebug(
+					`Updating lastIndexedSnowflake for channel ${channelId} to ${newLastIndexedBigInt}`,
+				);
 
-					yield* Effect.logDebug(
-						`Updating lastIndexedSnowflake for channel ${channelId}: ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt}`,
-					);
+				yield* database.private.channels.updateChannelSettings({
+					channelId: BigInt(channelId),
+					settings: {
+						lastIndexedSnowflake: newLastIndexedBigInt,
+					},
+				});
 
-					yield* database.private.channels.updateChannelSettings({
-						channelId: BigInt(channelId),
-						settings: {
-							lastIndexedSnowflake: newLastIndexedBigInt,
-						},
-					});
-
-					yield* Effect.logDebug(
-						`Successfully updated lastIndexedSnowflake for channel ${channelId}`,
-					);
-				} else {
-					yield* Effect.logDebug(
-						`Warning: Could not update lastIndexedSnowflake for channel ${channelId} - channel not found in database`,
-					);
-				}
+				yield* Effect.logDebug(
+					`Successfully updated lastIndexedSnowflake for channel ${channelId}`,
+				);
 			}
 		} else {
 			yield* Effect.logDebug(
@@ -402,12 +423,10 @@ function indexTextChannel(
 			return;
 		}
 
-		const channelLiveData =
+		const channelSettings =
 			yield* database.private.channels.findChannelByDiscordId({
 				discordId: BigInt(channel.id),
 			});
-		yield* Effect.sleep(Duration.millis(10));
-		const channelSettings = channelLiveData;
 
 		if (!channelSettings?.flags.indexingEnabled) {
 			return;
@@ -505,12 +524,10 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			return;
 		}
 
-		const channelLiveData =
+		const channelSettings =
 			yield* database.private.channels.findChannelByDiscordId({
 				discordId: BigInt(channel.id),
 			});
-		yield* Effect.sleep(Duration.millis(10));
-		const channelSettings = channelLiveData;
 
 		if (!channelSettings?.flags.indexingEnabled) {
 			return;
@@ -534,27 +551,37 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			`Found ${threads.length} total threads, ${newThreads.length} new threads (filtered by forum lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"})`,
 		);
 
-		const outOfDateThreads = yield* Effect.filter(
-			threads,
-			(thread) =>
-				Effect.gen(function* () {
-					const threadChannelLiveData =
-						yield* database.private.channels.findChannelByDiscordId({
-							discordId: BigInt(thread.id),
-						});
-					yield* Effect.sleep(Duration.millis(10));
-					const threadChannel = threadChannelLiveData;
-					const threadLastIndexed = threadChannel?.flags?.lastIndexedSnowflake;
-
-					if (!threadLastIndexed) {
-						return true;
-					}
-
-					const discordLastMessageId = thread.lastMessageId ?? thread.id;
-					return BigInt(discordLastMessageId) > threadLastIndexed;
-				}),
-			{ concurrency: 10 },
+		const threadIds = Arr.map(threads, (t) => BigInt(t.id));
+		const threadIdChunks = Arr.chunksOf(
+			threadIds,
+			INDEXING_CONFIG.convexBatchSize,
 		);
+		const threadChannels = yield* Effect.forEach(
+			threadIdChunks,
+			(chunk) =>
+				database.private.channels.findChannelsByDiscordIds({
+					discordIds: chunk,
+				}),
+			{ concurrency: 1 },
+		).pipe(Effect.map(Arr.flatten));
+		const threadChannelMap = HashMap.fromIterable(
+			Arr.map(threadChannels, (c) => [c.id, c] as const),
+		);
+
+		const outOfDateThreads = Arr.filter(threads, (thread) => {
+			const threadChannel = HashMap.get(
+				threadChannelMap,
+				BigInt(thread.id),
+			).pipe((opt) => (opt._tag === "Some" ? opt.value : null));
+			const threadLastIndexed = threadChannel?.flags?.lastIndexedSnowflake;
+
+			if (!threadLastIndexed) {
+				return true;
+			}
+
+			const discordLastMessageId = thread.lastMessageId ?? thread.id;
+			return BigInt(discordLastMessageId) > threadLastIndexed;
+		});
 
 		const threadsToIndex = Arr.sort(
 			Arr.dedupe([...newThreads, ...outOfDateThreads]),
@@ -563,39 +590,59 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			),
 		);
 
-		yield* Effect.logDebug(
-			`${outOfDateThreads.length} threads have new messages, ${threadsToIndex.length} total threads to index`,
-		);
+		const totalThreadsToIndex = threadsToIndex.length;
 
-		for (const thread of threadsToIndex) {
-			yield* Effect.gen(function* () {
-				yield* syncChannel(thread);
-
-				const threadChannelLiveData =
-					yield* database.private.channels.findChannelByDiscordId({
-						discordId: BigInt(thread.id),
-					});
-				yield* Effect.sleep(Duration.millis(10));
-				const threadChannel = threadChannelLiveData;
-				const threadLastIndexed = threadChannel?.flags?.lastIndexedSnowflake;
-
-				const threadMessages = yield* fetchChannelMessages(
-					thread.id,
-					thread.name,
-					threadLastIndexed?.toString() ?? undefined,
-				);
-				yield* storeMessages(threadMessages, discordServerId, thread.id);
-
-				yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
-			}).pipe(
-				Effect.catchAll((error) =>
-					Console.error(
-						`Error indexing thread ${thread.name} (${thread.id}):`,
-						error,
-					),
-				),
+		if (totalThreadsToIndex > 0) {
+			yield* Console.log(
+				`Forum ${channel.name}: Indexing ${totalThreadsToIndex} threads (${outOfDateThreads.length} with new messages, ${newThreads.length} new)`,
 			);
+		} else {
+			yield* Effect.logDebug(`Forum ${channel.name}: No threads to index`);
 		}
+
+		let completedThreads = 0;
+
+		yield* Effect.forEach(
+			threadsToIndex,
+			(thread) =>
+				Effect.gen(function* () {
+					yield* syncChannel(thread);
+
+					const threadChannel = HashMap.get(
+						threadChannelMap,
+						BigInt(thread.id),
+					).pipe((opt) => (opt._tag === "Some" ? opt.value : null));
+					const threadLastIndexed = threadChannel?.flags?.lastIndexedSnowflake;
+
+					const threadMessages = yield* fetchChannelMessages(
+						thread.id,
+						thread.name,
+						threadLastIndexed?.toString() ?? undefined,
+					);
+					yield* storeMessages(threadMessages, discordServerId, thread.id);
+
+					completedThreads++;
+					if (
+						completedThreads % 10 === 0 ||
+						completedThreads === totalThreadsToIndex
+					) {
+						yield* Console.log(
+							`Forum ${channel.name}: ${completedThreads}/${totalThreadsToIndex} threads indexed`,
+						);
+					}
+
+					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
+				}).pipe(
+					Effect.catchAll((error) => {
+						completedThreads++;
+						return Console.error(
+							`Forum ${channel.name}: Error indexing thread ${thread.name} (${thread.id}):`,
+							error,
+						);
+					}),
+				),
+			{ concurrency: 3 },
+		);
 
 		if (threads.length > 0) {
 			const sortedThreads = Arr.sort(
@@ -608,36 +655,23 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			);
 			const latestThread = sortedThreads[0];
 			if (latestThread) {
-				const channelLiveData =
-					yield* database.private.channels.findChannelByDiscordId({
-						discordId: BigInt(channel.id),
-					});
-				yield* Effect.sleep(Duration.millis(10));
-				const currentChannel = channelLiveData;
+				const oldLastIndexed = channelSettings.flags?.lastIndexedSnowflake;
+				const newLastIndexedBigInt = BigInt(latestThread.id);
 
-				if (currentChannel) {
-					const oldLastIndexed = currentChannel.flags?.lastIndexedSnowflake;
-					const newLastIndexedBigInt = BigInt(latestThread.id);
+				yield* Effect.logDebug(
+					`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt} (latest thread: ${latestThread.name})`,
+				);
 
-					yield* Effect.logDebug(
-						`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt} (latest thread: ${latestThread.name})`,
-					);
+				yield* database.private.channels.updateChannelSettings({
+					channelId: BigInt(channel.id),
+					settings: {
+						lastIndexedSnowflake: newLastIndexedBigInt,
+					},
+				});
 
-					yield* database.private.channels.updateChannelSettings({
-						channelId: BigInt(channel.id),
-						settings: {
-							lastIndexedSnowflake: newLastIndexedBigInt,
-						},
-					});
-
-					yield* Effect.logDebug(
-						`Successfully updated forum lastIndexedSnowflake for ${channel.name}`,
-					);
-				} else {
-					yield* Effect.logDebug(
-						`Warning: Could not update lastIndexedSnowflake for forum ${channel.id} - channel not found in database`,
-					);
-				}
+				yield* Effect.logDebug(
+					`Successfully updated forum lastIndexedSnowflake for ${channel.name}`,
+				);
 			}
 		} else {
 			yield* Effect.logDebug(
@@ -649,10 +683,11 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 	});
 }
 
-function indexGuild(guild: Guild) {
+function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 	return Effect.gen(function* () {
-		yield* Effect.logDebug(
-			`Starting indexing for guild: ${guild.name} (${guild.id})`,
+		const guildStartTime = yield* Clock.currentTimeMillis;
+		yield* Console.log(
+			`[${guildIndex + 1}/${totalGuilds}] Starting indexing for guild: ${guild.name} (${guild.id})`,
 		);
 
 		yield* syncGuild(guild);
@@ -667,16 +702,20 @@ function indexGuild(guild: Guild) {
 				channel.type === ChannelType.GuildForum,
 		);
 
-		yield* Effect.logDebug(
-			`Found ${indexableChannels.length} indexable channels in ${guild.name}`,
+		yield* Console.log(
+			`[${guildIndex + 1}/${totalGuilds}] ${guild.name}: Found ${indexableChannels.length} indexable channels`,
 		);
 
 		const guildId = guild.id;
+		let completedChannels = 0;
+		const totalChannels = indexableChannels.length;
 
 		yield* Effect.forEach(
 			indexableChannels,
 			(channel: Channel) =>
 				Effect.gen(function* () {
+					const channelName = channel.isDMBased() ? channel.id : channel.name;
+
 					if (channel.type === ChannelType.GuildForum) {
 						yield* indexForumChannel(channel as ForumChannel, guildId);
 					} else if (
@@ -689,17 +728,34 @@ function indexGuild(guild: Guild) {
 						);
 					}
 
+					completedChannels++;
+					yield* Effect.logDebug(
+						`[${guildIndex + 1}/${totalGuilds}] ${guild.name}: Completed channel ${completedChannels}/${totalChannels} - ${channelName}`,
+					);
+
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
 					Effect.catchAll((error) => {
+						completedChannels++;
 						const channelId = channel.isDMBased() ? channel.id : channel.name;
-						return Console.error(`Error indexing channel ${channelId}:`, error);
+						return Console.error(
+							`[${guildIndex + 1}/${totalGuilds}] ${guild.name}: Error indexing channel ${channelId}:`,
+							error,
+						);
 					}),
 				),
-			{ concurrency: 1 },
+			{ concurrency: 3 },
 		);
 
-		yield* Effect.logDebug(`Completed indexing for guild: ${guild.name}`);
+		const guildEndTime = yield* Clock.currentTimeMillis;
+		const guildDuration = guildEndTime - guildStartTime;
+		const guildSeconds = Math.floor(guildDuration / 1000);
+		const guildMinutes = Math.floor(guildSeconds / 60);
+		const remainingSeconds = guildSeconds % 60;
+
+		yield* Console.log(
+			`[${guildIndex + 1}/${totalGuilds}] Completed indexing for guild: ${guild.name} (${totalChannels} channels in ${guildMinutes}m ${remainingSeconds}s)`,
+		);
 	});
 }
 
@@ -708,24 +764,25 @@ function runIndexing() {
 		const discord = yield* Discord;
 		const startTime = yield* Clock.currentTimeMillis;
 		yield* Console.log("=== Starting indexing run ===");
-		yield* Effect.logDebug("=== Starting indexing run ===");
 
 		const guilds = yield* discord.getGuilds();
-		yield* Console.log(`Found ${guilds.length} guilds to index`);
-		yield* Effect.logDebug(`Found ${guilds.length} guilds to index`);
+		const totalGuilds = guilds.length;
+		yield* Console.log(`Found ${totalGuilds} guilds to index`);
 
 		yield* Effect.forEach(
-			guilds,
-			(guild) =>
+			Arr.map(guilds, (guild, index) => ({ guild, index })),
+			({ guild, index }) =>
 				Effect.gen(function* () {
-					yield* indexGuild(guild);
-					yield* Effect.sleep(INDEXING_CONFIG.guildProcessDelay);
+					yield* indexGuild(guild, index, totalGuilds);
 				}).pipe(
 					Effect.catchAll((error) =>
-						Console.error(`Error indexing guild ${guild.name}:`, error),
+						Console.error(
+							`[${index + 1}/${totalGuilds}] Error indexing guild ${guild.name}:`,
+							error,
+						),
 					),
 				),
-			{ concurrency: 1 },
+			{ concurrency: 2 },
 		);
 
 		const endTime = yield* Clock.currentTimeMillis;
@@ -734,8 +791,8 @@ function runIndexing() {
 		const minutes = Math.floor((duration / 1000 / 60) % 60);
 		const seconds = Math.floor((duration / 1000) % 60);
 
-		yield* Effect.logDebug(
-			`=== Indexing complete - took ${hours}h ${minutes}m ${seconds}s ===`,
+		yield* Console.log(
+			`=== Indexing complete - ${totalGuilds} guilds indexed in ${hours}h ${minutes}m ${seconds}s ===`,
 		);
 	}).pipe(
 		Effect.catchAll((error) =>

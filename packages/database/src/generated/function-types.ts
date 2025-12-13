@@ -10,6 +10,7 @@ export const FUNCTION_TYPE_MAP = {
   "channels.deleteChannel": "mutation",
   "channels.findAllChannelsByServerId": "query",
   "channels.findChannelByDiscordId": "query",
+  "channels.findChannelsByDiscordIds": "query",
   "channels.findManyChannelsByDiscordIds": "query",
   "channels.getChannelPageHeaderData": "query",
   "channels.getChannelPageThreads": "query",
@@ -20,6 +21,7 @@ export const FUNCTION_TYPE_MAP = {
   "discord_accounts.getUserPageHeaderData": "query",
   "discord_accounts.getUserPosts": "query",
   "discord_accounts.upsertDiscordAccount": "mutation",
+  "discord_accounts.upsertManyDiscordAccounts": "mutation",
   "ignored_discord_accounts.deleteIgnoredDiscordAccount": "mutation",
   "ignored_discord_accounts.findIgnoredDiscordAccountById": "query",
   "messages.deleteManyMessages": "mutation",
@@ -52,6 +54,7 @@ export const FUNCTION_TYPE_MAP = {
   "servers.upsertServer": "mutation",
   "user_server_settings.findManyUserServerSettings": "query",
   "user_server_settings.findUserServerSettingsById": "query",
+  "user_server_settings.upsertManyBotUserServerSettings": "mutation",
   "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
@@ -60,14 +63,14 @@ export const NAMESPACES = ["attachments","cache","channels","discord_accounts","
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
   "cache": ["findDiscordOAuthAccountByDiscordId","invalidateUserGuildsCache"],
-  "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findManyChannelsByDiscordIds","getChannelPageHeaderData","getChannelPageThreads","updateChannelSettings","upsertChannel"],
-  "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount"],
+  "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelsByDiscordIds","findManyChannelsByDiscordIds","getChannelPageHeaderData","getChannelPageThreads","updateChannelSettings","upsertChannel"],
+  "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount","upsertManyDiscordAccounts"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
   "search": ["getRecentThreads","getSimilarThreads","publicSearch"],
   "server_preferences": ["getServerPreferencesByServerId","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
-  "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertUserServerSettings"]
+  "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertUserServerSettings"]
 } as const;
 
 export type FunctionPath = keyof typeof FUNCTION_TYPE_MAP;

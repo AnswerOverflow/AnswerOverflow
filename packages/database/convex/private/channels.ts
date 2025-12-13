@@ -78,6 +78,20 @@ export const findManyChannelsByDiscordIds = privateQuery({
 	},
 });
 
+export const findChannelsByDiscordIds = privateQuery({
+	args: {
+		discordIds: v.array(v.int64()),
+	},
+	handler: async (ctx, args) => {
+		const channels = await asyncMap(args.discordIds, (id) =>
+			getOneFrom(ctx.db, "channels", "by_discordChannelId", id, "id"),
+		);
+
+		const validChannels = Arr.filter(channels, Predicate.isNotNull);
+		return await addSettingsToChannels(ctx, validChannels);
+	},
+});
+
 export const upsertChannel = privateMutation({
 	args: {
 		channel: channelSchema,
