@@ -43,7 +43,8 @@ import {
 } from "../utils/conversions";
 
 const INDEXING_CONFIG = {
-	scheduleInterval: Duration.hours(6),
+	cronExpression: "0 */6 * * *",
+	cronTimezone: "America/Los_Angeles",
 	maxMessagesPerChannel: 10000,
 	messagesPerPage: 100,
 	channelProcessDelay: Duration.millis(100),
@@ -911,22 +912,16 @@ function runIndexing() {
 	);
 }
 
-export function startIndexingLoop(runImmediately = true) {
+export function startIndexingLoop() {
 	return Effect.gen(function* () {
-		yield* Effect.logDebug(
-			`Starting indexing loop - will run every ${INDEXING_CONFIG.scheduleInterval}`,
+		yield* Console.log(
+			`Indexing scheduled with cron: ${INDEXING_CONFIG.cronExpression} (${INDEXING_CONFIG.cronTimezone})`,
 		);
 
-		if (runImmediately) {
-			yield* Effect.logDebug("Running initial indexing...");
-			yield* runIndexing().pipe(
-				Effect.catchAllCause((cause) =>
-					Console.error("Error during initial indexing run:", cause),
-				),
-			);
-		}
-
-		const schedule = Schedule.fixed(INDEXING_CONFIG.scheduleInterval);
+		const schedule = Schedule.cron(
+			INDEXING_CONFIG.cronExpression,
+			INDEXING_CONFIG.cronTimezone,
+		);
 
 		yield* Effect.fork(
 			Effect.repeat(runIndexing(), schedule).pipe(
@@ -936,7 +931,7 @@ export function startIndexingLoop(runImmediately = true) {
 			),
 		);
 
-		yield* Effect.logDebug("Indexing loop started successfully");
+		yield* Console.log("Indexing loop started successfully");
 	});
 }
 
@@ -946,9 +941,7 @@ export const IndexingHandlerLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("clientReady", () =>
 			Effect.gen(function* () {
-				yield* Console.log("Starting indexing loop...");
-				yield* startIndexingLoop(true).pipe(
-					Effect.tap(() => Console.log("Indexing loop started")),
+				yield* startIndexingLoop().pipe(
 					Effect.catchAllCause((cause) =>
 						Console.error("Error starting indexing loop:", cause),
 					),

@@ -1,8 +1,8 @@
 import "@packages/ui/globals.css";
 import { Providers } from "@packages/ui/components/providers";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { NavbarWrapper } from "../components/navbar-wrapper";
 
 const isProduction = process.env.NEXT_PUBLIC_DEPLOYMENT_ENV === "production";
