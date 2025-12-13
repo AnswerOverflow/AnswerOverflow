@@ -1,3 +1,4 @@
+import { Database } from "@packages/database/database";
 import type { GuildMember, Message, ThreadChannel } from "discord.js";
 import {
 	ActionRowBuilder,
@@ -5,7 +6,6 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Effect } from "effect";
-import { Database } from "@packages/database/database";
 import {
 	trackAskedQuestion,
 	trackMarkSolutionInstructionsSent,

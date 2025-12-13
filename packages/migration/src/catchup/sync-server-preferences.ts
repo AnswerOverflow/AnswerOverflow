@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { Effect } from "effect";
 import { getDb } from "../db/client";
-import { type Plan, dbServers } from "../db/schema";
+import { dbServers, type Plan } from "../db/schema";
 import { transformServer } from "../transformers/server";
 import type { DatabaseService, SyncContext, SyncResult } from "./types";
 

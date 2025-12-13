@@ -4,7 +4,6 @@ import {
 } from "@packages/database/analytics/server/tracking";
 import {
 	ConsentSource,
-	type BaseProps,
 	type MarkSolutionCommandStatus,
 } from "@packages/database/analytics/server/types";
 import type {
@@ -14,7 +13,6 @@ import type {
 	PartialGuildMember,
 	ThreadChannel,
 } from "discord.js";
-import { Effect } from "effect";
 
 export { ConsentSource };
 
