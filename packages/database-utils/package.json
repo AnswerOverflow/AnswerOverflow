@@ -6,6 +6,9 @@
 		"./snowflakes": "./src/snowflakes.ts",
 		"./*": "./src/*.ts"
 	},
+	"dependencies": {
+		"effect": "catalog:"
+	},
 	"devDependencies": {
 		"typescript": "catalog:"
 	}
