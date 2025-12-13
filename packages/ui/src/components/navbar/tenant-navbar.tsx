@@ -17,7 +17,9 @@ export function TenantNavbar() {
 	const pathname = usePathname();
 	const [searchQuery, setSearchQuery] = useState("");
 
-	const isOnTenantHomepage = pathname === "/" || pathname.startsWith("/c/");
+	const basePath = tenant?.subpath ? `/${tenant.subpath}` : "";
+	const isOnTenantHomepage =
+		pathname === (basePath || "/") || pathname.startsWith(`${basePath}/c/`);
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();

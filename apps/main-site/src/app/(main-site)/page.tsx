@@ -1,19 +1,47 @@
 import { Database } from "@packages/database/database";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Effect } from "effect";
+import { Suspense } from "react";
 import { runtime } from "../../lib/runtime";
-import { HomePageClient } from "./client";
+import { HomePageClient, HomePageSkeleton } from "./client";
 
-export default async function HomePage() {
-	const initialData = await Effect.gen(function* () {
+type Props = {
+	searchParams: Promise<{ cursor?: string }>;
+};
+
+export const dynamic = "force-dynamic";
+
+async function fetchRecentThreads(cursor: string | null) {
+	return Effect.gen(function* () {
 		const database = yield* Database;
-		const result = yield* database.public.search.getRecentThreads({
+		return yield* database.public.search.getRecentThreads({
 			paginationOpts: {
 				numItems: 20,
-				cursor: null,
+				cursor,
 			},
 		});
-		return result;
 	}).pipe(runtime.runPromise);
+}
 
-	return <HomePageClient initialThreads={initialData.page} />;
+async function HomePageLoader({ cursor }: { cursor: string | null }) {
+	const initialData = await fetchRecentThreads(cursor);
+
+	return (
+		<HomePageClient
+			initialData={initialData}
+			nextCursor={initialData.isDone ? null : initialData.continueCursor}
+			currentCursor={cursor}
+		/>
+	);
+}
+
+export default async function HomePage(props: Props) {
+	const searchParams = await props.searchParams;
+	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
+
+	return (
+		<Suspense fallback={<HomePageSkeleton />}>
+			<HomePageLoader cursor={cursor} />
+		</Suspense>
+	);
 }
