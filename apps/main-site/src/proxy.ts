@@ -69,7 +69,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
 	matcher: [
-		"/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)",
+		"/((?!api/|_next/|_static/|_vercel|discord/|featured-communities/|uwu/|[\\w-]+\\.\\w+).*)",
 		"/sitemap.xml",
 		"/robots.txt",
 	],
