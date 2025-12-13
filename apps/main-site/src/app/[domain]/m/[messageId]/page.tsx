@@ -15,10 +15,10 @@ import {
 	fetchMessagePageReplies,
 	generateMessagePageMetadata,
 } from "../../../../components/message-page-loader";
-import {
-	SimilarThreads,
-	SimilarThreadsSkeleton,
-} from "../../../../components/similar-threads";
+// import {
+// 	SimilarThreads,
+// 	SimilarThreadsSkeleton,
+// } from "../../../../components/similar-threads";
 import { runtime } from "../../../../lib/runtime";
 
 type Props = {
@@ -141,22 +141,23 @@ export default async function TenantMessagePage(props: Props) {
 				)
 			}
 			similarThreadsSlot={
-				<Suspense fallback={<SimilarThreadsSkeleton />}>
-					<SimilarThreads
-						searchQuery={
-							headerData.thread?.name ??
-							headerData.firstMessage?.message.content?.slice(0, 100) ??
-							""
-						}
-						currentThreadId={(
-							headerData.thread?.id ??
-							headerData.firstMessage?.message.id ??
-							headerData.canonicalId
-						).toString()}
-						currentServerId={headerData.server.discordId.toString()}
-						serverId={headerData.server.discordId.toString()}
-					/>
-				</Suspense>
+				null
+				// <Suspense fallback={<SimilarThreadsSkeleton />}>
+				// 	<SimilarThreads
+				// 		searchQuery={
+				// 			headerData.thread?.name ??
+				// 			headerData.firstMessage?.message.content?.slice(0, 100) ??
+				// 			""
+				// 		}
+				// 		currentThreadId={(
+				// 			headerData.thread?.id ??
+				// 			headerData.firstMessage?.message.id ??
+				// 			headerData.canonicalId
+				// 		).toString()}
+				// 		currentServerId={headerData.server.discordId.toString()}
+				// 		serverId={headerData.server.discordId.toString()}
+				// 	/>
+				// </Suspense>
 			}
 		/>
 	);
