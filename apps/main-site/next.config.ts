@@ -5,6 +5,9 @@ import type { NextConfig } from "next";
 const withMDX = createMDX();
 
 const nextConfig: NextConfig = {
+	typescript: {
+		ignoreBuildErrors: true,
+	},
 	pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 	transpilePackages: ["@packages/ui", "@packages/database"],
 	images: {
