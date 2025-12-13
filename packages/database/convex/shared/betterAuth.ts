@@ -59,6 +59,9 @@ export const createAuth = (
 			if (!origin) return staticOrigins;
 			return [...staticOrigins, origin];
 		},
+		advanced: {
+			disableCSRFCheck: true,
+		},
 		baseURL: siteUrl,
 		database: authComponent.adapter(ctx),
 		secret: (() => {
