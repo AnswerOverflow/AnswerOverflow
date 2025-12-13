@@ -9,6 +9,8 @@ import { LinkButton } from "../link-button";
 import { ServerIcon } from "../server-icon";
 
 import { UserSection } from "./user-section";
+import { usePathname } from "next/navigation";
+import { useTenant } from "../tenant-context";
 export interface NavbarProps {
 	logo?: React.ReactNode;
 	server?: Pick<Server, "discordId" | "name" | "icon"> | null;
@@ -38,30 +40,36 @@ export function Navbar({
 	searchBar,
 	showSignIn = true,
 }: NavbarProps) {
+	const pathname = usePathname();
+	const tenant = useTenant();
+	const isOnTenantHomepage =
+		tenant && (pathname === "/" || pathname.startsWith("/c/"));
 	return (
 		<header className="fixed left-0 top-0 z-[1000] h-navbar w-full bg-background px-4">
 			<nav className="relative z-10 flex size-full flex-1 items-center justify-between border-b-2 pb-2 md:py-2">
 				<div>
-					<Link
-						href={homeHref}
-						className={cn(
-							hideIcon ? "hidden" : "",
-							"text-foreground hover:text-foreground no-underline hover:no-underline",
-						)}
-					>
-						{server ? (
-							<div className="flex items-center space-x-2">
-								<ServerIcon server={server} size={48} />
-								<span className="font-semibold">{server.name}</span>
-							</div>
-						) : (
-							logo || (
-								<div className="w-32 md:w-40">
-									<span className="text-xl font-bold">Logo</span>
+					{!isOnTenantHomepage && (
+						<Link
+							href={homeHref}
+							className={cn(
+								hideIcon ? "hidden" : "",
+								"text-foreground hover:text-foreground no-underline hover:no-underline",
+							)}
+						>
+							{server ? (
+								<div className="flex items-center space-x-2">
+									<ServerIcon server={server} size={48} />
+									<span className="font-semibold">{server.name}</span>
 								</div>
-							)
-						)}
-					</Link>
+							) : (
+								logo || (
+									<div className="w-32 md:w-40">
+										<span className="text-xl font-bold">Logo</span>
+									</div>
+								)
+							)}
+						</Link>
+					)}
 				</div>
 				{/* Align search bar to absolute middle horizontally, top vertically */}
 				{searchBar && (
