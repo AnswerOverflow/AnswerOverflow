@@ -77,11 +77,11 @@ import {
 	saveCheckpoint,
 } from "./checkpoint";
 import { getSnowflakeForDaysAgo, snowflakeToDate } from "./snowflake";
-import { countChannels, syncChannels } from "./sync-channels";
 import {
 	countChannelSettings,
 	syncChannelSettings,
 } from "./sync-channel-settings";
+import { countChannels, syncChannels } from "./sync-channels";
 import {
 	countDiscordAccounts,
 	syncDiscordAccounts,

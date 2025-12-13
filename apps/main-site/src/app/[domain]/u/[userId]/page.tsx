@@ -1,6 +1,6 @@
 import { Database } from "@packages/database/database";
-import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import { decodeCursor } from "@packages/ui/utils/cursor";
+import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";

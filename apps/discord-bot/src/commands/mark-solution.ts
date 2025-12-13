@@ -275,7 +275,7 @@ export function handleMarkSolutionCommand(
 			.pipe(Effect.catchAll(() => Effect.succeed(null)));
 
 		if (questionAsker && solutionAuthor) {
-			Effect.runFork(
+			yield* Effect.forkDaemon(
 				trackSolvedQuestion(
 					thread,
 					channelSettings,
@@ -298,7 +298,7 @@ export function handleMarkSolutionCommand(
 			);
 		}
 
-		Effect.runFork(
+		yield* Effect.forkDaemon(
 			trackMarkSolutionCommandUsed(guildMember, "Success").pipe(
 				Effect.catchAll(() => Effect.void),
 			),
