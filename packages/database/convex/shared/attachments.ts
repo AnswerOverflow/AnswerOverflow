@@ -2,6 +2,22 @@ import { getManyFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
 
+const ALLOWED_UPLOAD_DOMAINS = [
+	"cdn.discordapp.com",
+	"media.discordapp.net",
+	"images-ext-1.discordapp.net",
+	"images-ext-2.discordapp.net",
+];
+
+function isAllowedUploadUrl(url: string): boolean {
+	try {
+		const parsed = new URL(url);
+		return ALLOWED_UPLOAD_DOMAINS.includes(parsed.hostname);
+	} catch {
+		return false;
+	}
+}
+
 export async function findAttachmentsByMessageId(
 	ctx: QueryCtx | MutationCtx,
 	messageId: bigint,
@@ -21,6 +37,11 @@ export async function uploadFromUrlLogic(
 		url: string;
 	},
 ): Promise<Id<"_storage"> | null> {
+	if (!isAllowedUploadUrl(args.url)) {
+		console.error(`Rejected upload from untrusted domain: ${args.url}`);
+		return null;
+	}
+
 	try {
 		const response = await fetch(args.url);
 

@@ -18,15 +18,9 @@ function validateBackendAccessToken(token: string | undefined): boolean {
 	}
 
 	const expectedToken = process.env.BACKEND_ACCESS_TOKEN;
-	const isDev =
-		process.env.CONVEX_DEPLOYMENT === "dev" || !process.env.CONVEX_DEPLOYMENT;
 
 	if (!expectedToken) {
 		return false;
-	}
-
-	if (isDev && token === "TESTING") {
-		return true;
 	}
 
 	return token === expectedToken;
