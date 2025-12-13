@@ -314,11 +314,9 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 					);
 
 					if (result._tag === "Left") {
-						const error = result.left;
-						console.error("Mark solution command failed:", error);
+						console.error("Mark solution command failed:", result.left);
 
-						const errorMessage =
-							error instanceof Error ? error.message : "Unknown error";
+						const errorMessage = result.left.message;
 
 						if (interaction.deferred || interaction.replied) {
 							yield* discord
