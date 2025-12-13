@@ -25,6 +25,7 @@ import {
 } from "effect";
 import { Discord } from "../core/discord-service";
 import { syncChannel } from "../sync/channel";
+import { syncGuild } from "../sync/server";
 import {
 	uploadAttachmentsInBatches,
 	uploadEmbedImagesInBatches,
@@ -654,20 +655,7 @@ function indexGuild(guild: Guild) {
 			`Starting indexing for guild: ${guild.name} (${guild.id})`,
 		);
 
-		const database = yield* Database;
-
-		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
-			{
-				discordId: BigInt(guild.id),
-			},
-		);
-		yield* Effect.sleep(Duration.millis(10));
-		const server = serverLiveData;
-
-		if (!server) {
-			yield* Console.warn(`Server ${guild.id} not found in database, skipping`);
-			return;
-		}
+		yield* syncGuild(guild);
 
 		const channels = Arr.fromIterable(guild.channels.cache.values());
 
@@ -683,22 +671,21 @@ function indexGuild(guild: Guild) {
 			`Found ${indexableChannels.length} indexable channels in ${guild.name}`,
 		);
 
+		const guildId = guild.id;
+
 		yield* Effect.forEach(
 			indexableChannels,
 			(channel: Channel) =>
 				Effect.gen(function* () {
 					if (channel.type === ChannelType.GuildForum) {
-						yield* indexForumChannel(
-							channel as ForumChannel,
-							server.discordId.toString(),
-						);
+						yield* indexForumChannel(channel as ForumChannel, guildId);
 					} else if (
 						channel.type === ChannelType.GuildText ||
 						channel.type === ChannelType.GuildAnnouncement
 					) {
 						yield* indexTextChannel(
 							channel as TextChannel | NewsChannel,
-							server.discordId.toString(),
+							guildId,
 						);
 					}
 
