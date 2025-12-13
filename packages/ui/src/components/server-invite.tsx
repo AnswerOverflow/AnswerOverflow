@@ -1,15 +1,20 @@
+"use client";
+
 import type {
 	Channel,
 	ChannelSettings,
 	Server,
 } from "@packages/database/convex/schema";
+import type { ServerInviteClickProps } from "../analytics/client";
+import { trackEvent, usePostHog } from "../analytics/client";
 import { cn } from "../lib/utils";
 import { LinkButton } from "./link-button";
 
 export interface ServerInviteJoinButtonProps {
 	server: Pick<Server, "discordId" | "name" | "icon" | "vanityInviteCode">;
-	channel?: Pick<Channel, "id"> & Pick<ChannelSettings, "inviteCode">;
-	location: string;
+	channel?: Pick<Channel, "id" | "name" | "type"> &
+		Pick<ChannelSettings, "inviteCode">;
+	location: ServerInviteClickProps["Button Location"];
 	className?: string;
 	size?: "default" | "sm" | "lg" | "icon";
 }
@@ -21,12 +26,35 @@ export function ServerInviteJoinButton(
 			"href" | "children"
 		>,
 ) {
-	const { server, channel, className, ...rest } = props;
+	const { server, channel, location, className, ...rest } = props;
 	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
+	const posthog = usePostHog();
 
 	if (!inviteCode) {
 		return null;
 	}
+
+	const handleClick = () => {
+		trackEvent(
+			"Server Invite Click",
+			{
+				"Button Location": location,
+				server: {
+					discordId: server.discordId,
+					name: server.name,
+				},
+				channel: channel
+					? {
+							id: channel.id,
+							name: channel.name,
+							type: channel.type,
+							inviteCode: channel.inviteCode,
+						}
+					: null,
+			},
+			posthog,
+		);
+	};
 
 	return (
 		<LinkButton
@@ -34,6 +62,7 @@ export function ServerInviteJoinButton(
 			variant="default"
 			className={cn("text-center font-bold", className)}
 			size={props.size}
+			onClick={handleClick}
 			{...rest}
 		>
 			Join
