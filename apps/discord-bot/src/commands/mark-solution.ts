@@ -18,7 +18,7 @@ export function handleMarkSolutionCommand(
 		const discord = yield* Discord;
 
 		yield* discord.callClient(() =>
-			interaction.deferReply({ ephemeral: false }),
+			interaction.deferReply({ ephemeral: true }),
 		);
 
 		if (!interaction.channel) {
@@ -156,14 +156,19 @@ export function handleMarkSolutionCommand(
 		}
 
 		const isQuestionAuthor = questionMessage.author.id === interaction.user.id;
+		const memberPermissions = parentChannel.permissionsFor(guildMember);
 		const hasPermission =
-			parentChannel.permissionsFor(guildMember)?.has("ManageThreads") ?? false;
+			memberPermissions?.has("ManageThreads") ||
+			memberPermissions?.has("ManageChannels") ||
+			memberPermissions?.has("ManageGuild") ||
+			memberPermissions?.has("Administrator") ||
+			false;
 
 		if (!isQuestionAuthor && !hasPermission) {
 			yield* discord.callClient(() =>
 				interaction.editReply({
 					content:
-						"You must be the question author or have ManageThreads permission to mark a solution",
+						"You must be the question author or have ManageThreads, ManageChannels, ManageGuild, or Administrator permission to mark a solution",
 				}),
 			);
 			return;
@@ -275,8 +280,9 @@ export function handleMarkSolutionCommand(
 			},
 		});
 
+		yield* discord.callClient(() => interaction.deleteReply());
 		yield* discord.callClient(() =>
-			interaction.editReply({
+			interaction.followUp({
 				embeds: [embed],
 				components: components ? [components] : undefined,
 			}),
