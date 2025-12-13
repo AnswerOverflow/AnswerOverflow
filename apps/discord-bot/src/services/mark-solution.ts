@@ -74,16 +74,23 @@ export function makeMarkSolutionResponse({
 	console.log("[makeMarkSolutionResponse] Checking indexingEnabled");
 	if (channelSettings.flags.indexingEnabled) {
 		console.log("[makeMarkSolutionResponse] Adding View on AO button");
-		components.addComponents(
-			new ButtonBuilder()
-				.setLabel(
-					serverPreferences?.customDomain
-						? `View on ${server.name}`
-						: "View on Answer Overflow",
-				)
-				.setURL(makeMainSiteLink(`/m/${solution.id}`))
-				.setStyle(ButtonStyle.Link),
-		);
+		console.log("[makeMarkSolutionResponse] Creating ButtonBuilder");
+		const viewButton = new ButtonBuilder();
+		console.log("[makeMarkSolutionResponse] Setting label");
+		const label = serverPreferences?.customDomain
+			? `View on ${server.name}`
+			: "View on Answer Overflow";
+		console.log("[makeMarkSolutionResponse] Label:", label);
+		viewButton.setLabel(label);
+		console.log("[makeMarkSolutionResponse] Making URL");
+		const url = makeMainSiteLink(`/m/${solution.id}`);
+		console.log("[makeMarkSolutionResponse] URL:", url);
+		viewButton.setURL(url);
+		console.log("[makeMarkSolutionResponse] Setting style");
+		viewButton.setStyle(ButtonStyle.Link);
+		console.log("[makeMarkSolutionResponse] Adding to components");
+		components.addComponents(viewButton);
+		console.log("[makeMarkSolutionResponse] Added View on AO button");
 	}
 
 	console.log("[makeMarkSolutionResponse] Returning result");
