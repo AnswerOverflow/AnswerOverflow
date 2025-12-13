@@ -1,7 +1,7 @@
 import { Database } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType } from "discord.js";
-import { Effect, Layer } from "effect";
+import { Data, Duration, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { makeMarkSolutionResponse } from "../services/mark-solution";
 import {
@@ -10,6 +10,12 @@ import {
 } from "../utils/analytics";
 import { toAOMessage, toUpsertMessageArgs } from "../utils/conversions";
 
+class MarkSolutionTimeoutError extends Data.TaggedError(
+	"MarkSolutionTimeoutError",
+)<{
+	readonly message: string;
+}> {}
+
 export function handleMarkSolutionCommand(
 	interaction: ContextMenuCommandInteraction,
 ) {
@@ -17,9 +23,13 @@ export function handleMarkSolutionCommand(
 		const database = yield* Database;
 		const discord = yield* Discord;
 
+		console.log("[mark-solution] Starting command");
+
 		yield* discord.callClient(() =>
 			interaction.deferReply({ ephemeral: true }),
 		);
+
+		console.log("[mark-solution] Deferred reply");
 
 		if (!interaction.channel) {
 			yield* discord.callClient(() =>
@@ -40,6 +50,8 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
+		console.log("[mark-solution] Fetched target message");
+
 		if (!targetMessage.guildId) {
 			yield* discord.callClient(() =>
 				interaction.editReply({
@@ -49,9 +61,11 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
+		console.log("[mark-solution] Getting server from database");
 		const server = yield* database.private.servers.getServerByDiscordId({
 			discordId: BigInt(targetMessage.guildId),
 		});
+		console.log("[mark-solution] Got server from database");
 
 		if (!server) {
 			yield* discord.callClient(() =>
@@ -83,10 +97,12 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
+		console.log("[mark-solution] Getting channel settings from database");
 		const channelSettings =
 			yield* database.private.channels.findChannelByDiscordId({
 				discordId: BigInt(parentChannel.id),
 			});
+		console.log("[mark-solution] Got channel settings from database");
 
 		if (!channelSettings || !channelSettings.flags?.markSolutionEnabled) {
 			yield* discord.callClient(() =>
@@ -99,6 +115,7 @@ export function handleMarkSolutionCommand(
 
 		let questionMessage = null;
 
+		console.log("[mark-solution] Fetching question message");
 		if (parentChannel.type === ChannelType.GuildForum) {
 			const fetchedMessage = yield* discord
 				.callClient(() => thread.messages.fetch(thread.id))
@@ -113,6 +130,7 @@ export function handleMarkSolutionCommand(
 				.pipe(Effect.catchAll(() => Effect.succeed(null)));
 			questionMessage = fetchedMessage ?? null;
 		}
+		console.log("[mark-solution] Got question message");
 
 		if (!questionMessage) {
 			yield* discord.callClient(() =>
@@ -177,21 +195,26 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
+		console.log("[mark-solution] Getting server preferences from database");
 		const serverPreferencesLiveData =
 			yield* database.private.server_preferences.getServerPreferencesByServerId(
 				{
 					serverId: server.discordId,
 				},
 			);
+		console.log("[mark-solution] Got server preferences from database");
+
 		const serverPreferences = serverPreferencesLiveData ?? null;
 		const data = yield* discord.callClient(() =>
 			toAOMessage(targetMessage, server.discordId.toString()),
 		);
 
+		console.log("[mark-solution] Upserting message to database");
 		yield* database.private.messages.upsertMessage({
 			...toUpsertMessageArgs(data),
 			ignoreChecks: false,
 		});
+		console.log("[mark-solution] Upserted message to database");
 
 		yield* Effect.gen(function* () {
 			const solutionTagId = channelSettings?.flags?.solutionTagId;
@@ -250,6 +273,7 @@ export function handleMarkSolutionCommand(
 			.callClient(() => guild.members.fetch(targetMessage.author.id))
 			.pipe(Effect.catchAll(() => Effect.succeed(null)));
 
+		console.log("[mark-solution] Tracking analytics");
 		if (questionAsker && solutionAuthor) {
 			yield* trackSolvedQuestion(
 				thread,
@@ -275,6 +299,7 @@ export function handleMarkSolutionCommand(
 		yield* trackMarkSolutionCommandUsed(guildMember, "Success").pipe(
 			Effect.catchAll(() => Effect.void),
 		);
+		console.log("[mark-solution] Analytics tracked");
 
 		const { embed, components } = makeMarkSolutionResponse({
 			solution: targetMessage,
@@ -289,6 +314,7 @@ export function handleMarkSolutionCommand(
 			},
 		});
 
+		console.log("[mark-solution] Sending response");
 		yield* discord.callClient(() => interaction.deleteReply());
 		yield* discord.callClient(() =>
 			interaction.followUp({
@@ -296,6 +322,7 @@ export function handleMarkSolutionCommand(
 				components: components ? [components] : undefined,
 			}),
 		);
+		console.log("[mark-solution] Command completed successfully");
 	});
 }
 
@@ -309,14 +336,25 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 					interaction.isContextMenuCommand() &&
 					interaction.commandName === "✅ Mark Solution"
 				) {
-					const result = yield* handleMarkSolutionCommand(interaction).pipe(
-						Effect.either,
+					const commandWithTimeout = handleMarkSolutionCommand(
+						interaction,
+					).pipe(
+						Effect.timeoutFail({
+							duration: Duration.seconds(25),
+							onTimeout: () =>
+								new MarkSolutionTimeoutError({
+									message: "Mark solution command timed out after 25 seconds",
+								}),
+						}),
 					);
 
-					if (result._tag === "Left") {
-						console.error("Mark solution command failed:", result.left);
+					const result = yield* commandWithTimeout.pipe(Effect.either);
 
-						const errorMessage = result.left.message;
+					if (result._tag === "Left") {
+						const error = result.left;
+						console.error("Mark solution command failed:", error);
+
+						const errorMessage = error.message;
 
 						if (interaction.deferred || interaction.replied) {
 							yield* discord
