@@ -51,3 +51,15 @@ export function generateOrderedSnowflakes(count: number): string[] {
 	}
 	return snowflakes;
 }
+
+export function timestampToSnowflake(timestampMs: number): bigint {
+	const timestamp = BigInt(timestampMs) - DISCORD_EPOCH;
+	return timestamp << 22n;
+}
+
+export function getSnowflakeFromDurationAgo(
+	duration: Duration.Duration,
+): bigint {
+	const timestampMs = Date.now() - Duration.toMillis(duration);
+	return timestampToSnowflake(timestampMs);
+}

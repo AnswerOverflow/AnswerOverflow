@@ -1,5 +1,8 @@
 import { Database } from "@packages/database/database";
-import { wasRecentlyUpdated } from "@packages/database-utils/snowflakes";
+import {
+	getSnowflakeFromDurationAgo,
+	wasRecentlyUpdated,
+} from "@packages/database-utils/snowflakes";
 import type {
 	AnyThreadChannel,
 	Channel,
@@ -20,6 +23,7 @@ import {
 	Effect,
 	HashMap,
 	Layer,
+	Option,
 	Order,
 	Predicate,
 	Schedule,
@@ -38,6 +42,18 @@ import {
 	toUpsertMessageArgs,
 } from "../utils/conversions";
 
+const INDEXING_CONFIG = {
+	scheduleInterval: Duration.hours(6),
+	maxMessagesPerChannel: 10000,
+	messagesPerPage: 100,
+	channelProcessDelay: Duration.millis(100),
+	guildProcessDelay: Duration.millis(500),
+	convexBatchSize: 500,
+	maxThreadsToCollect: 5000,
+	recentUpdateThreshold: Duration.hours(6),
+	lookbackPeriod: Duration.weeks(2),
+} as const;
+
 function canBotViewChannel(channel: GuildChannel): boolean {
 	const permissions = channel.permissionsFor(channel.client.user);
 	if (!permissions) return false;
@@ -48,8 +64,88 @@ function canBotViewChannel(channel: GuildChannel): boolean {
 }
 
 function isIndexableMessage(message: Message): boolean {
-	if (message.system) return false;
-	return true;
+	return !message.system;
+}
+
+function getEffectiveStartSnowflake(
+	rawLastIndexedSnowflake: bigint | null | undefined,
+): bigint {
+	const lookbackSnowflake = getSnowflakeFromDurationAgo(
+		INDEXING_CONFIG.lookbackPeriod,
+	);
+	if (
+		rawLastIndexedSnowflake === null ||
+		rawLastIndexedSnowflake === undefined ||
+		rawLastIndexedSnowflake < lookbackSnowflake
+	) {
+		return lookbackSnowflake;
+	}
+	return rawLastIndexedSnowflake;
+}
+
+function shouldSkipIndexing(
+	rawLastIndexedSnowflake: bigint | null | undefined,
+): boolean {
+	return wasRecentlyUpdated(
+		rawLastIndexedSnowflake,
+		INDEXING_CONFIG.recentUpdateThreshold,
+	);
+}
+
+const sortMessagesByIdAsc = Order.mapInput(BigIntEffect.Order, (msg: Message) =>
+	BigInt(msg.id),
+);
+
+const sortMessagesByIdDesc = Order.reverse(sortMessagesByIdAsc);
+
+function formatDurationMs(ms: number): string {
+	const hours = Math.floor(ms / 1000 / 60 / 60);
+	const minutes = Math.floor((ms / 1000 / 60) % 60);
+	const seconds = Math.floor((ms / 1000) % 60);
+
+	if (hours > 0) {
+		return `${hours}h ${minutes}m ${seconds}s`;
+	}
+	return `${minutes}m ${seconds}s`;
+}
+
+const sortThreadsByIdAsc = Order.mapInput(
+	BigIntEffect.Order,
+	(thread: AnyThreadChannel) => BigInt(thread.id),
+);
+
+const sortThreadsByIdDesc = Order.reverse(sortThreadsByIdAsc);
+
+function updateLastIndexedSnowflake(
+	channelId: string,
+	newSnowflake: bigint,
+	currentSnowflake: bigint | null | undefined,
+) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+
+		if (currentSnowflake && newSnowflake <= currentSnowflake) {
+			yield* Console.error(
+				`Refusing to update lastIndexedSnowflake for channel ${channelId}: new value ${newSnowflake} is not greater than current value ${currentSnowflake}`,
+			);
+			return;
+		}
+
+		yield* Effect.logDebug(
+			`Updating lastIndexedSnowflake for channel ${channelId} to ${newSnowflake}`,
+		);
+
+		yield* database.private.channels.updateChannelSettings({
+			channelId: BigInt(channelId),
+			settings: {
+				lastIndexedSnowflake: newSnowflake,
+			},
+		});
+
+		yield* Effect.logDebug(
+			`Successfully updated lastIndexedSnowflake for channel ${channelId}`,
+		);
+	});
 }
 
 function ensureInviteCode(
@@ -110,16 +206,6 @@ function ensureInviteCode(
 	});
 }
 
-const INDEXING_CONFIG = {
-	scheduleInterval: Duration.hours(6),
-	maxMessagesPerChannel: 10000,
-	messagesPerPage: 100,
-	channelProcessDelay: Duration.millis(100),
-	guildProcessDelay: Duration.millis(500),
-	convexBatchSize: 500,
-	maxThreadsToCollect: 5000,
-} as const;
-
 function fetchChannelMessages(
 	channelId: string,
 	channelName: string,
@@ -154,7 +240,7 @@ function fetchChannelMessages(
 
 			const sortedMessages = Arr.sort(
 				Arr.fromIterable(fetchedMessages.values()),
-				Order.mapInput(BigIntEffect.Order, (msg: Message) => BigInt(msg.id)),
+				sortMessagesByIdAsc,
 			);
 
 			messages.push(...sortedMessages);
@@ -244,9 +330,7 @@ function storeMessages(
 			return;
 		}
 
-		const indexableMessages = Arr.filter(messages, (msg) =>
-			isIndexableMessage(msg),
-		);
+		const indexableMessages = Arr.filter(messages, isIndexableMessage);
 
 		yield* Effect.logDebug(
 			`Storing ${indexableMessages.length} indexable messages (filtered from ${messages.length} total)`,
@@ -257,115 +341,124 @@ function storeMessages(
 			(msg) =>
 				Effect.tryPromise(() => toAOMessage(msg, discordServerId)).pipe(
 					Effect.catchAll((error) =>
-						Effect.gen(function* () {
-							yield* Console.warn(
-								`Failed to convert message ${msg.id}:`,
-								error,
-							);
-							return null;
-						}),
+						Console.warn(`Failed to convert message ${msg.id}:`, error).pipe(
+							Effect.as(null),
+						),
 					),
 				),
 			{ concurrency: "unbounded" },
 		).pipe(Effect.map(Arr.filter(Predicate.isNotNull)));
 
+		yield* upsertAuthors(indexableMessages);
+		yield* upsertBotSettings(indexableMessages, discordServerId);
+		yield* upsertMessages(aoMessages, channelId);
+		yield* uploadMedia(indexableMessages, channelId);
+
+		const latestMessage = Arr.sort(indexableMessages, sortMessagesByIdDesc)[0];
+		if (latestMessage) {
+			yield* updateLastIndexedSnowflake(
+				channelId,
+				BigInt(latestMessage.id),
+				currentLastIndexedSnowflake,
+			);
+		}
+
+		yield* Effect.logDebug(`Successfully stored ${aoMessages.length} messages`);
+	});
+}
+
+function upsertAuthors(messages: Message[]) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+
 		const uniqueAuthors = Arr.fromIterable(
 			HashMap.values(
 				HashMap.fromIterable(
 					Arr.map(
-						indexableMessages,
+						messages,
 						(msg) => [msg.author.id, toAODiscordAccount(msg.author)] as const,
 					),
 				),
 			),
 		);
 
-		if (uniqueAuthors.length > 0) {
-			const authorChunks = Arr.chunksOf(
-				uniqueAuthors,
-				INDEXING_CONFIG.convexBatchSize,
-			);
-			yield* Effect.forEach(
-				authorChunks,
-				(chunk) =>
-					database.private.discord_accounts.upsertManyDiscordAccounts({
-						accounts: chunk,
-					}),
-				{ concurrency: 3 },
-			);
-		}
+		if (uniqueAuthors.length === 0) return;
 
-		const botMessages = Arr.filter(indexableMessages, (msg) => msg.author.bot);
-		if (botMessages.length > 0) {
-			const uniqueBotIds = Arr.dedupe(
-				Arr.map(botMessages, (msg) => msg.author.id),
-			);
-
-			const botIdChunks = Arr.chunksOf(
-				uniqueBotIds,
-				INDEXING_CONFIG.convexBatchSize,
-			);
-			const existingSettings = yield* Effect.forEach(
-				botIdChunks,
-				(chunk) =>
-					database.private.user_server_settings.findManyUserServerSettings({
-						settings: Arr.map(chunk, (botId) => ({
-							userId: BigInt(botId),
-							serverId: BigInt(discordServerId),
-						})),
-					}),
-				{ concurrency: 1 },
-			).pipe(Effect.map(Arr.flatten));
-
-			const existingSettingsMap = HashMap.fromIterable(
-				Arr.map(existingSettings, (s) => [s.userId, s] as const),
-			);
-
-			const botSettings = Arr.map(uniqueBotIds, (botId) => {
-				const existing = HashMap.get(existingSettingsMap, BigInt(botId)).pipe(
-					(opt) => (opt._tag === "Some" ? opt.value : null),
-				);
-				return {
-					serverId: BigInt(discordServerId),
-					userId: BigInt(botId),
-					permissions: existing?.permissions ?? 0,
-					canPubliclyDisplayMessages: true,
-					messageIndexingDisabled: existing?.messageIndexingDisabled ?? false,
-					apiCallsUsed: existing?.apiCallsUsed ?? 0,
-				};
-			});
-
-			const botSettingsChunks = Arr.chunksOf(
-				botSettings,
-				INDEXING_CONFIG.convexBatchSize,
-			);
-			yield* Effect.forEach(
-				botSettingsChunks,
-				(chunk) =>
-					database.private.user_server_settings.upsertManyBotUserServerSettings(
-						{
-							settings: chunk,
-						},
-					),
-				{ concurrency: 1 },
-			);
-		}
-
-		const allAttachments = Arr.flatMap(indexableMessages, (msg) =>
-			Arr.map(Arr.fromIterable(msg.attachments.values()), (att) => ({
-				id: att.id,
-				url: att.url,
-				filename: att.name ?? "",
-				contentType: att.contentType ?? undefined,
-			})),
-		);
-
-		const messageChunks = Arr.chunksOf(
-			Arr.map(aoMessages, (data) => toUpsertMessageArgs(data)),
-			INDEXING_CONFIG.convexBatchSize,
-		);
 		yield* Effect.forEach(
-			messageChunks,
+			Arr.chunksOf(uniqueAuthors, INDEXING_CONFIG.convexBatchSize),
+			(chunk) =>
+				database.private.discord_accounts.upsertManyDiscordAccounts({
+					accounts: chunk,
+				}),
+			{ concurrency: 3 },
+		);
+	});
+}
+
+function upsertBotSettings(messages: Message[], discordServerId: string) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+
+		const botMessages = Arr.filter(messages, (msg) => msg.author.bot);
+		if (botMessages.length === 0) return;
+
+		const uniqueBotIds = Arr.dedupe(
+			Arr.map(botMessages, (msg) => msg.author.id),
+		);
+
+		const existingSettings = yield* Effect.forEach(
+			Arr.chunksOf(uniqueBotIds, INDEXING_CONFIG.convexBatchSize),
+			(chunk) =>
+				database.private.user_server_settings.findManyUserServerSettings({
+					settings: Arr.map(chunk, (botId) => ({
+						userId: BigInt(botId),
+						serverId: BigInt(discordServerId),
+					})),
+				}),
+			{ concurrency: 1 },
+		).pipe(Effect.map(Arr.flatten));
+
+		const existingSettingsMap = HashMap.fromIterable(
+			Arr.map(existingSettings, (s) => [s.userId, s] as const),
+		);
+
+		const botSettings = Arr.map(uniqueBotIds, (botId) => {
+			const existing = Option.getOrNull(
+				HashMap.get(existingSettingsMap, BigInt(botId)),
+			);
+			return {
+				serverId: BigInt(discordServerId),
+				userId: BigInt(botId),
+				permissions: existing?.permissions ?? 0,
+				canPubliclyDisplayMessages: true,
+				messageIndexingDisabled: existing?.messageIndexingDisabled ?? false,
+				apiCallsUsed: existing?.apiCallsUsed ?? 0,
+			};
+		});
+
+		yield* Effect.forEach(
+			Arr.chunksOf(botSettings, INDEXING_CONFIG.convexBatchSize),
+			(chunk) =>
+				database.private.user_server_settings.upsertManyBotUserServerSettings({
+					settings: chunk,
+				}),
+			{ concurrency: 1 },
+		);
+	});
+}
+
+function upsertMessages(
+	aoMessages: Awaited<ReturnType<typeof toAOMessage>>[],
+	channelId: string,
+) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+
+		yield* Effect.forEach(
+			Arr.chunksOf(
+				Arr.map(aoMessages, toUpsertMessageArgs),
+				INDEXING_CONFIG.convexBatchSize,
+			),
 			(chunk) =>
 				database.private.messages.upsertManyMessages({
 					messages: chunk,
@@ -374,13 +467,28 @@ function storeMessages(
 			{ concurrency: 1 },
 		);
 
+		yield* Effect.logDebug(
+			`Upserted ${aoMessages.length} messages for channel ${channelId}`,
+		);
+	});
+}
+
+function uploadMedia(messages: Message[], channelId: string) {
+	return Effect.gen(function* () {
+		const allAttachments = Arr.flatMap(messages, (msg) =>
+			Arr.map(Arr.fromIterable(msg.attachments.values()), (att) => ({
+				id: att.id,
+				url: att.url,
+				filename: att.name ?? "",
+				contentType: att.contentType ?? undefined,
+			})),
+		);
+
 		if (allAttachments.length > 0) {
 			yield* uploadAttachmentsInBatches(allAttachments);
 		}
 
-		const allEmbedImages = Arr.flatMap(indexableMessages, (msg) =>
-			extractEmbedImagesToUpload(msg),
-		);
+		const allEmbedImages = Arr.flatMap(messages, extractEmbedImagesToUpload);
 
 		if (allEmbedImages.length > 0) {
 			yield* uploadEmbedImagesInBatches(allEmbedImages).pipe(
@@ -392,50 +500,84 @@ function storeMessages(
 				),
 			);
 		}
+	});
+}
 
-		if (indexableMessages.length > 0) {
-			const sortedMessages = Arr.sort(
-				indexableMessages,
-				Order.reverse(
-					Order.mapInput(BigIntEffect.Order, (msg: Message) => BigInt(msg.id)),
-				),
-			);
-			const lastMessage = sortedMessages[0];
-			if (lastMessage) {
-				const newLastIndexedBigInt = BigInt(lastMessage.id);
+type ChannelSettings = {
+	flags: {
+		indexingEnabled: boolean;
+		lastIndexedSnowflake?: bigint | null;
+		inviteCode?: string;
+	};
+};
 
-				if (
-					currentLastIndexedSnowflake &&
-					newLastIndexedBigInt <= currentLastIndexedSnowflake
-				) {
-					yield* Console.error(
-						`Refusing to update lastIndexedSnowflake for channel ${channelId}: new value ${newLastIndexedBigInt} is not greater than current value ${currentLastIndexedSnowflake}`,
-					);
-				} else {
-					yield* Effect.logDebug(
-						`Updating lastIndexedSnowflake for channel ${channelId} to ${newLastIndexedBigInt}`,
-					);
+function getChannelSettingsForIndexing(channel: GuildChannel) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
 
-					yield* database.private.channels.updateChannelSettings({
-						channelId: BigInt(channelId),
-						settings: {
-							lastIndexedSnowflake: newLastIndexedBigInt,
-						},
-					});
-
-					yield* Effect.logDebug(
-						`Successfully updated lastIndexedSnowflake for channel ${channelId}`,
-					);
-				}
-			}
-		} else {
+		if (!canBotViewChannel(channel)) {
 			yield* Effect.logDebug(
-				`No messages to store, skipping lastIndexedSnowflake update for channel ${channelId}`,
+				`Bot cannot view channel ${channel.name} (${channel.id}), skipping`,
 			);
+			return null;
 		}
 
-		yield* Effect.logDebug(`Successfully stored ${aoMessages.length} messages`);
+		const channelSettings =
+			yield* database.private.channels.findChannelByDiscordId({
+				discordId: BigInt(channel.id),
+			});
+
+		if (!channelSettings?.flags.indexingEnabled) {
+			return null;
+		}
+
+		const rawLastIndexedSnowflake = channelSettings.flags.lastIndexedSnowflake;
+		if (shouldSkipIndexing(rawLastIndexedSnowflake)) {
+			yield* Effect.logDebug(
+				`Last indexed snowflake is recent, skipping indexing for ${channel.name} (${channel.id})`,
+			);
+			return null;
+		}
+
+		return channelSettings;
 	});
+}
+
+function indexThread(
+	thread: AnyThreadChannel,
+	discordServerId: string,
+	lastIndexedSnowflake?: bigint | null,
+) {
+	return Effect.gen(function* () {
+		yield* syncChannel(thread);
+
+		const threadMessages = yield* fetchChannelMessages(
+			thread.id,
+			thread.name,
+			lastIndexedSnowflake?.toString() ?? undefined,
+		);
+		yield* storeMessages(
+			threadMessages,
+			discordServerId,
+			thread.id,
+			lastIndexedSnowflake,
+		);
+	});
+}
+
+function extractThreadsFromMessages(messages: Message[]) {
+	return Arr.sort(
+		Arr.filter(
+			Arr.filter(
+				Arr.map(messages, (msg) => msg.thread),
+				Predicate.isNotNull,
+			),
+			(thread): thread is AnyThreadChannel =>
+				thread.type === ChannelType.PublicThread ||
+				thread.type === ChannelType.AnnouncementThread,
+		),
+		sortThreadsByIdAsc,
+	);
 }
 
 function indexTextChannel(
@@ -445,50 +587,22 @@ function indexTextChannel(
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		if (!canBotViewChannel(channel)) {
-			yield* Effect.logDebug(
-				`Bot cannot view channel ${channel.name} (${channel.id}), skipping`,
-			);
-			return;
-		}
+		const channelSettings = yield* getChannelSettingsForIndexing(channel);
+		if (!channelSettings) return;
 
-		const channelSettings =
-			yield* database.private.channels.findChannelByDiscordId({
-				discordId: BigInt(channel.id),
-			});
+		const lastIndexedSnowflake = getEffectiveStartSnowflake(
+			channelSettings.flags.lastIndexedSnowflake,
+		);
 
-		if (!channelSettings?.flags.indexingEnabled) {
-			return;
-		}
-
-		const lastIndexedSnowflake = channelSettings.flags.lastIndexedSnowflake;
-		if (wasRecentlyUpdated(lastIndexedSnowflake, Duration.hours(6))) {
-			yield* Effect.logDebug(
-				`Last indexed snowflake is less than 6 hours old, skipping indexing for forum ${channel.name} (${channel.id})`,
-			);
-			return;
-		}
 		yield* Effect.logDebug(
-			`Indexing text channel ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null (starting from beginning)"}`,
+			`Indexing text channel ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake}`,
 		);
 
 		const messages = yield* fetchChannelMessages(
 			channel.id,
 			channel.name,
-			lastIndexedSnowflake?.toString() ?? undefined,
+			lastIndexedSnowflake.toString(),
 		);
-
-		if (messages.length > 0) {
-			const firstMessageId = messages[0]?.id;
-			const lastMessageId = messages[messages.length - 1]?.id;
-			yield* Effect.logDebug(
-				`Fetched messages range: ${firstMessageId} to ${lastMessageId} (${messages.length} total)`,
-			);
-		} else {
-			yield* Effect.logDebug(
-				`No new messages found after ${lastIndexedSnowflake ?? "beginning"}`,
-			);
-		}
 
 		yield* storeMessages(
 			messages,
@@ -497,19 +611,7 @@ function indexTextChannel(
 			lastIndexedSnowflake,
 		);
 
-		const threadsToIndex = Arr.sort(
-			Arr.filter(
-				Arr.map(messages, (msg) => msg.thread),
-				(thread): thread is AnyThreadChannel =>
-					thread !== null &&
-					thread !== undefined &&
-					(thread.type === ChannelType.PublicThread ||
-						thread.type === ChannelType.AnnouncementThread),
-			),
-			Order.mapInput(BigIntEffect.Order, (thread: AnyThreadChannel) =>
-				BigInt(thread.id),
-			),
-		);
+		const threadsToIndex = extractThreadsFromMessages(messages);
 
 		if (threadsToIndex.length > 0) {
 			yield* Effect.logDebug(
@@ -520,27 +622,14 @@ function indexTextChannel(
 				threadsToIndex,
 				(thread) =>
 					Effect.gen(function* () {
-						yield* syncChannel(thread);
-
-						const threadChannelLiveData =
+						const threadChannel =
 							yield* database.private.channels.findChannelByDiscordId({
 								discordId: BigInt(thread.id),
 							});
-						yield* Effect.sleep(Duration.millis(10));
-						const threadChannel = threadChannelLiveData;
-						const threadLastIndexed =
-							threadChannel?.flags?.lastIndexedSnowflake;
-
-						const threadMessages = yield* fetchChannelMessages(
-							thread.id,
-							thread.name,
-							threadLastIndexed?.toString() ?? undefined,
-						);
-						yield* storeMessages(
-							threadMessages,
+						yield* indexThread(
+							thread,
 							discordServerId,
-							thread.id,
-							threadLastIndexed,
+							threadChannel?.flags?.lastIndexedSnowflake,
 						);
 					}).pipe(
 						Effect.catchAll((error) =>
@@ -558,63 +647,13 @@ function indexTextChannel(
 	});
 }
 
-function indexForumChannel(channel: ForumChannel, discordServerId: string) {
+function fetchThreadChannelMap(threads: AnyThreadChannel[]) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		if (!canBotViewChannel(channel)) {
-			yield* Effect.logDebug(
-				`Bot cannot view forum ${channel.name} (${channel.id}), skipping`,
-			);
-			return;
-		}
-
-		const channelSettings =
-			yield* database.private.channels.findChannelByDiscordId({
-				discordId: BigInt(channel.id),
-			});
-
-		if (!channelSettings?.flags.indexingEnabled) {
-			return;
-		}
-
-		const lastIndexedSnowflake = channelSettings.flags.lastIndexedSnowflake;
-		if (wasRecentlyUpdated(lastIndexedSnowflake, Duration.hours(6))) {
-			yield* Effect.logDebug(
-				`Last indexed snowflake is less than 6 hours old, skipping indexing for forum ${channel.name} (${channel.id})`,
-			);
-			return;
-		}
-
-		yield* Effect.logDebug(
-			`Indexing forum ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"}`,
-		);
-
-		const threads = yield* fetchForumThreads(
-			channel.id,
-			channel.name,
-			lastIndexedSnowflake ?? undefined,
-		);
-
-		const newThreads = lastIndexedSnowflake
-			? Arr.filter(
-					threads,
-					(thread) => BigInt(thread.id) > lastIndexedSnowflake,
-				)
-			: threads;
-
-		yield* Effect.logDebug(
-			`Found ${threads.length} total threads, ${newThreads.length} new threads (filtered by forum lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"})`,
-		);
-
 		const threadIds = Arr.map(threads, (t) => BigInt(t.id));
-		const threadIdChunks = Arr.chunksOf(
-			threadIds,
-			INDEXING_CONFIG.convexBatchSize,
-		);
-
 		const threadChannels = yield* Effect.forEach(
-			threadIdChunks,
+			Arr.chunksOf(threadIds, INDEXING_CONFIG.convexBatchSize),
 			(chunk) =>
 				database.private.channels.findChannelsByDiscordIds({
 					discordIds: chunk,
@@ -622,70 +661,95 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			{ concurrency: 1 },
 		).pipe(Effect.map(Arr.flatten));
 
-		const threadChannelMap = HashMap.fromIterable(
+		return HashMap.fromIterable(
 			Arr.map(threadChannels, (c) => [c.id, c] as const),
 		);
+	});
+}
 
-		const outOfDateThreads = Arr.filter(threads, (thread) => {
-			const threadChannel = HashMap.get(
-				threadChannelMap,
-				BigInt(thread.id),
-			).pipe((opt) => (opt._tag === "Some" ? opt.value : null));
+function filterOutOfDateThreads(
+	threads: AnyThreadChannel[],
+	threadChannelMap: HashMap.HashMap<
+		bigint,
+		{ flags?: { lastIndexedSnowflake?: bigint | null } }
+	>,
+	lastIndexedSnowflake: bigint,
+) {
+	const newThreads = Arr.filter(
+		threads,
+		(thread) => BigInt(thread.id) > lastIndexedSnowflake,
+	);
 
-			const threadLastIndexedSnowflake =
-				threadChannel?.flags?.lastIndexedSnowflake;
+	const outOfDateThreads = Arr.filter(threads, (thread) => {
+		const threadChannel = Option.getOrNull(
+			HashMap.get(threadChannelMap, BigInt(thread.id)),
+		);
+		const threadLastIndexedSnowflake =
+			threadChannel?.flags?.lastIndexedSnowflake;
 
-			if (!threadLastIndexedSnowflake) {
-				return true;
-			}
+		if (!threadLastIndexedSnowflake) return true;
 
-			const discordLastMessageId = thread.lastMessageId ?? thread.id;
-			return BigInt(discordLastMessageId) > threadLastIndexedSnowflake;
-		});
+		const discordLastMessageId = thread.lastMessageId ?? thread.id;
+		return BigInt(discordLastMessageId) > threadLastIndexedSnowflake;
+	});
 
-		const threadsToIndex = Arr.sort(
+	return {
+		newThreads,
+		outOfDateThreads,
+		threadsToIndex: Arr.sort(
 			Arr.dedupe([...newThreads, ...outOfDateThreads]),
-			Order.mapInput(BigIntEffect.Order, (thread: AnyThreadChannel) =>
-				BigInt(thread.id),
-			),
+			sortThreadsByIdAsc,
+		),
+	};
+}
+
+function indexForumChannel(channel: ForumChannel, discordServerId: string) {
+	return Effect.gen(function* () {
+		const channelSettings = yield* getChannelSettingsForIndexing(channel);
+		if (!channelSettings) return;
+
+		const lastIndexedSnowflake = getEffectiveStartSnowflake(
+			channelSettings.flags.lastIndexedSnowflake,
 		);
 
-		const totalThreadsToIndex = threadsToIndex.length;
+		yield* Effect.logDebug(
+			`Indexing forum ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake}`,
+		);
 
-		if (totalThreadsToIndex > 0) {
+		const threads = yield* fetchForumThreads(
+			channel.id,
+			channel.name,
+			lastIndexedSnowflake,
+		);
+
+		const threadChannelMap = yield* fetchThreadChannelMap(threads);
+		const { newThreads, outOfDateThreads, threadsToIndex } =
+			filterOutOfDateThreads(threads, threadChannelMap, lastIndexedSnowflake);
+
+		yield* Effect.logDebug(
+			`Found ${threads.length} total threads, ${newThreads.length} new, ${outOfDateThreads.length} outdated`,
+		);
+
+		if (threadsToIndex.length > 0) {
 			yield* Console.log(
-				`Forum ${channel.name}: Indexing ${totalThreadsToIndex} threads (${outOfDateThreads.length} with new messages, ${newThreads.length} new)`,
+				`Forum ${channel.name}: Indexing ${threadsToIndex.length} threads`,
 			);
-		} else {
-			yield* Effect.logDebug(`Forum ${channel.name}: No threads to index`);
 		}
 
 		let completedThreads = 0;
+		const totalThreadsToIndex = threadsToIndex.length;
 
 		yield* Effect.forEach(
 			threadsToIndex,
 			(thread) =>
 				Effect.gen(function* () {
-					yield* syncChannel(thread);
-
-					const threadChannel = HashMap.get(
-						threadChannelMap,
-						BigInt(thread.id),
-					).pipe((opt) => (opt._tag === "Some" ? opt.value : null));
-
-					const threadLastIndexedSnowflake =
-						threadChannel?.flags?.lastIndexedSnowflake;
-
-					const threadMessages = yield* fetchChannelMessages(
-						thread.id,
-						thread.name,
-						threadLastIndexedSnowflake?.toString() ?? undefined,
+					const threadChannel = Option.getOrNull(
+						HashMap.get(threadChannelMap, BigInt(thread.id)),
 					);
-					yield* storeMessages(
-						threadMessages,
+					yield* indexThread(
+						thread,
 						discordServerId,
-						thread.id,
-						threadLastIndexedSnowflake,
+						threadChannel?.flags?.lastIndexedSnowflake,
 					);
 
 					completedThreads++;
@@ -711,44 +775,12 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			{ concurrency: 3 },
 		);
 
-		if (threads.length > 0) {
-			const sortedThreads = Arr.sort(
-				threads,
-				Order.reverse(
-					Order.mapInput(BigIntEffect.Order, (thread: AnyThreadChannel) =>
-						BigInt(thread.id),
-					),
-				),
-			);
-			const latestThread = sortedThreads[0];
-			if (latestThread) {
-				const oldLastIndexed = channelSettings.flags?.lastIndexedSnowflake;
-				const newLastIndexedBigInt = BigInt(latestThread.id);
-
-				if (oldLastIndexed && newLastIndexedBigInt <= oldLastIndexed) {
-					yield* Console.error(
-						`Refusing to update forum lastIndexedSnowflake for ${channel.name} (${channel.id}): new value ${newLastIndexedBigInt} is not greater than current value ${oldLastIndexed}`,
-					);
-				} else {
-					yield* Effect.logDebug(
-						`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt} (latest thread: ${latestThread.name})`,
-					);
-
-					yield* database.private.channels.updateChannelSettings({
-						channelId: BigInt(channel.id),
-						settings: {
-							lastIndexedSnowflake: newLastIndexedBigInt,
-						},
-					});
-
-					yield* Effect.logDebug(
-						`Successfully updated forum lastIndexedSnowflake for ${channel.name}`,
-					);
-				}
-			}
-		} else {
-			yield* Effect.logDebug(
-				`No threads found, skipping lastIndexedSnowflake update for forum ${channel.name}`,
+		const latestThread = Arr.sort(threads, sortThreadsByIdDesc)[0];
+		if (latestThread) {
+			yield* updateLastIndexedSnowflake(
+				channel.id,
+				BigInt(latestThread.id),
+				channelSettings.flags.lastIndexedSnowflake,
 			);
 		}
 
@@ -822,12 +854,9 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 
 		const guildEndTime = yield* Clock.currentTimeMillis;
 		const guildDuration = guildEndTime - guildStartTime;
-		const guildSeconds = Math.floor(guildDuration / 1000);
-		const guildMinutes = Math.floor(guildSeconds / 60);
-		const remainingSeconds = guildSeconds % 60;
 
 		yield* Console.log(
-			`[${guildIndex + 1}/${totalGuilds}] Completed indexing for guild: ${guild.name} (${totalChannels} channels in ${guildMinutes}m ${remainingSeconds}s)`,
+			`[${guildIndex + 1}/${totalGuilds}] Completed indexing for guild: ${guild.name} (${totalChannels} channels in ${formatDurationMs(guildDuration)})`,
 		);
 	});
 }
@@ -860,12 +889,9 @@ function runIndexing() {
 
 		const endTime = yield* Clock.currentTimeMillis;
 		const duration = endTime - startTime;
-		const hours = Math.floor(duration / 1000 / 60 / 60);
-		const minutes = Math.floor((duration / 1000 / 60) % 60);
-		const seconds = Math.floor((duration / 1000) % 60);
 
 		yield* Console.log(
-			`=== Indexing complete - ${totalGuilds} guilds indexed in ${hours}h ${minutes}m ${seconds}s ===`,
+			`=== Indexing complete - ${totalGuilds} guilds indexed in ${formatDurationMs(duration)} ===`,
 		);
 	}).pipe(
 		Effect.catchAll((error) =>
