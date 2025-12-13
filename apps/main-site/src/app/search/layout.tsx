@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
 type Props = {
-	searchParams: Promise<{ q?: string }>;
+	searchParams?: Promise<{ q?: string }>;
 	children: React.ReactNode;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const searchParams = await props.searchParams;
-	const query = searchParams.q;
+	const query = searchParams?.q;
 
 	const title = query
 		? `Search Results for "${query}" - Answer Overflow`
