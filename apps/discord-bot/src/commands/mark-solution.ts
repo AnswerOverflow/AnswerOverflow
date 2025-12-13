@@ -305,16 +305,26 @@ export function handleMarkSolutionCommand(
 		);
 
 		console.log("[mark-solution] Building response");
-		const { embed, components } = makeMarkSolutionResponse({
-			solution: targetMessage,
-			server: {
-				name: server.name,
-				_id: server._id,
-			},
-			serverPreferences,
-			channelSettings: {
-				...channelSettings,
-				flags: channelSettings.flags,
+		const { embed, components } = yield* Effect.try({
+			try: () =>
+				makeMarkSolutionResponse({
+					solution: targetMessage,
+					server: {
+						name: server.name,
+						_id: server._id,
+					},
+					serverPreferences,
+					channelSettings: {
+						...channelSettings,
+						flags: channelSettings.flags,
+					},
+				}),
+			catch: (error) => {
+				console.error(
+					"[mark-solution] Error in makeMarkSolutionResponse:",
+					error,
+				);
+				return new Error(`Failed to build response: ${error}`);
 			},
 		});
 		console.log("[mark-solution] Response built");
