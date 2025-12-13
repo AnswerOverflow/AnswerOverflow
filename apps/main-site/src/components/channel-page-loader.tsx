@@ -1,6 +1,10 @@
 import type { api } from "@packages/database/convex/_generated/api";
 import { Database } from "@packages/database/database";
 import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
+import {
+	getTenantCanonicalUrl,
+	type TenantInfo,
+} from "@packages/ui/utils/links";
 import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
 import type { Metadata } from "next";
@@ -47,18 +51,21 @@ export function generateChannelPageMetadata(
 	headerData: ChannelPageHeaderData | null,
 	basePath: string,
 	cursor: string | null,
-	isTenant = false,
+	tenant: TenantInfo | null = null,
 ): Metadata {
 	if (!headerData) {
 		return {};
 	}
 
+	const isTenant = tenant !== null;
 	const { server, selectedChannel } = headerData;
 	const description = `Browse threads from #${selectedChannel.name} in the ${server.name} Discord community`;
 	const title = `#${selectedChannel.name} - ${server.name}`;
 	const ogImage = isTenant
 		? `/og/community?id=${server.discordId.toString()}&tenant=true`
 		: `/og/community?id=${server.discordId.toString()}`;
+
+	const canonicalUrl = getTenantCanonicalUrl(tenant, basePath);
 
 	return {
 		title,
@@ -77,9 +84,9 @@ export function generateChannelPageMetadata(
 			images: [ogImage],
 		},
 		alternates: {
-			canonical: basePath,
+			canonical: canonicalUrl,
 		},
-		robots: cursor ? "noindex, follow" : "index, follow",
+		robots: "noindex, follow",
 	};
 }
 

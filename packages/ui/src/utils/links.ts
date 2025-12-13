@@ -47,3 +47,35 @@ export function normalizeSubpath(subpath?: string | null) {
 	const trimmed = subpath.trim().replace(/^\/+/, "").replace(/\/+$/, "");
 	return trimmed.length > 0 ? trimmed : null;
 }
+
+export type TenantInfo = {
+	customDomain?: string | null;
+	subpath?: string | null;
+};
+
+export function getTenantBaseUrl(tenant: TenantInfo | null): string {
+	if (!tenant) {
+		return getBaseUrl();
+	}
+
+	if (tenant.customDomain) {
+		const domain = tenant.customDomain.startsWith("http")
+			? tenant.customDomain
+			: `https://${tenant.customDomain}`;
+		const subpath = normalizeSubpath(tenant.subpath);
+		return subpath
+			? `${stripTrailingSlash(domain)}/${subpath}`
+			: stripTrailingSlash(domain);
+	}
+
+	return getBaseUrl();
+}
+
+export function getTenantCanonicalUrl(
+	tenant: TenantInfo | null,
+	path: string,
+): string {
+	const baseUrl = getTenantBaseUrl(tenant);
+	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+	return `${baseUrl}${normalizedPath}`;
+}

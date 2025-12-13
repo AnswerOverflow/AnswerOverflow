@@ -1,4 +1,5 @@
 import { Database } from "@packages/database/database";
+import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -48,6 +49,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 	const ogImage = `/og/community?id=${server.discordId.toString()}&tenant=true`;
 
+	const tenant = {
+		customDomain: tenantData.preferences?.customDomain,
+		subpath: tenantData.preferences?.subpath,
+	};
+	const canonicalUrl = getTenantCanonicalUrl(tenant, "/");
+
 	return {
 		title: server.name,
 		description,
@@ -65,8 +72,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 			images: [ogImage],
 		},
 		alternates: {
-			canonical: "/",
+			canonical: canonicalUrl,
 		},
+		robots: "index, follow",
 	};
 }
 

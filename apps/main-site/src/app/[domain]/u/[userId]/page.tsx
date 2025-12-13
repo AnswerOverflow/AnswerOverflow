@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
+import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -42,11 +43,17 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	const title = `${userName} Posts - ${serverName}`;
 	const description = `See posts from ${userName} in the ${serverName} Discord`;
 
+	const tenant = {
+		customDomain: tenantData?.preferences?.customDomain,
+		subpath: tenantData?.preferences?.subpath,
+	};
+	const canonicalUrl = getTenantCanonicalUrl(tenant, `/u/${params.userId}`);
+
 	return {
 		title,
 		description,
 		alternates: {
-			canonical: `/u/${params.userId}`,
+			canonical: canonicalUrl,
 		},
 		robots: cursor ? "noindex, follow" : { index: false },
 		openGraph: {

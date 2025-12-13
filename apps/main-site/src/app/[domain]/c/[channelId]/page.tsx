@@ -43,7 +43,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	);
 
 	const basePath = `/c/${params.channelId}`;
-	return generateChannelPageMetadata(headerData, basePath, cursor, true);
+	const tenant = {
+		customDomain: tenantData.preferences?.customDomain,
+		subpath: tenantData.preferences?.subpath,
+	};
+	return generateChannelPageMetadata(headerData, basePath, cursor, tenant);
 }
 
 export default async function TenantChannelPage(props: Props) {

@@ -1,5 +1,9 @@
 import type { api } from "@packages/database/convex/_generated/api";
 import { Database } from "@packages/database/database";
+import {
+	getTenantCanonicalUrl,
+	type TenantInfo,
+} from "@packages/ui/utils/links";
 import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
 import type { Metadata } from "next";
@@ -47,12 +51,13 @@ export function generateMessagePageMetadata(
 	headerData: MessagePageHeaderData | null,
 	messageId: string,
 	cursor: string | null = null,
-	isTenant = false,
+	tenant: TenantInfo | null = null,
 ): Metadata {
 	if (!headerData) {
 		return {};
 	}
 
+	const isTenant = tenant !== null;
 	const { firstMessage } = headerData;
 	const rootMessageDeleted = !firstMessage;
 	const title =
@@ -70,6 +75,8 @@ export function generateMessagePageMetadata(
 		: `/og/post?id=${messageId}`;
 
 	const fullTitle = `${title} - ${headerData.server.name}`;
+	const path = `/m/${headerData.canonicalId.toString()}`;
+	const canonicalUrl = getTenantCanonicalUrl(tenant, path);
 
 	return {
 		title: fullTitle,
@@ -88,7 +95,7 @@ export function generateMessagePageMetadata(
 			images: [ogImageUrl],
 		},
 		alternates: {
-			canonical: `/m/${headerData.canonicalId.toString()}`,
+			canonical: canonicalUrl,
 		},
 		robots: cursor ? "noindex, follow" : "index, follow",
 	};
