@@ -45,7 +45,7 @@ function SuspenseClientOnly({
 	}, []);
 
 	if (!shouldWrapInSuspense) {
-		return fallback;
+		return children;
 	}
 
 	return <Suspense fallback={fallback}>{children}</Suspense>;
