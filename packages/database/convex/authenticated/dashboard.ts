@@ -110,11 +110,14 @@ export const fetchDiscordGuilds = internalAction({
 	},
 });
 
-const discordGuildsCache = new ActionCache(components.actionCache, {
-	action: internal.authenticated.dashboard.fetchDiscordGuilds,
-	name: "discordGuilds",
-	ttl: 300 * 1000, // 5 minutes in milliseconds
-});
+const getDiscordGuildsCache = () =>
+	new ActionCache(components.actionCache, {
+		action: internal.authenticated.dashboard.fetchDiscordGuilds,
+		name: "discordGuilds",
+		ttl: 300 * 1000, // 5 minutes in milliseconds
+	});
+
+export const discordGuildsCacheName = "discordGuilds";
 
 type ServerWithMetadata = {
 	discordId: string;
@@ -138,7 +141,7 @@ export const getUserServers = authenticatedAction({
 			throw new Error("Discord account not linked or mismatch");
 		}
 
-		const discordGuilds = await discordGuildsCache.fetch(ctx, {
+		const discordGuilds = await getDiscordGuildsCache().fetch(ctx, {
 			discordAccountId,
 		});
 

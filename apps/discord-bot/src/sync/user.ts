@@ -4,25 +4,57 @@ import { Discord } from "../core/discord-service";
 import { trackUserJoinedServer, trackUserLeftServer } from "../utils/analytics";
 import { toAODiscordAccount } from "../utils/conversions";
 
+const invalidateUserGuildsCacheForMember = (
+	database: Effect.Effect.Success<typeof Database>,
+	discordUserId: string,
+) =>
+	Effect.gen(function* () {
+		const oauthAccount =
+			yield* database.private.cache.findDiscordOAuthAccountByDiscordId(
+				{ discordId: discordUserId },
+				{ subscribe: false },
+			);
+
+		if (!oauthAccount) {
+			return;
+		}
+
+		yield* database.private.cache.invalidateUserGuildsCache({
+			discordAccountId: BigInt(oauthAccount.accountId),
+		});
+	}).pipe(
+		Effect.catchAll((error) =>
+			Console.error(
+				`Error invalidating guilds cache for user ${discordUserId}:`,
+				error,
+			),
+		),
+	);
+
 export const UserParityLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 		const database = yield* Database;
 
 		yield* discord.client.on("userUpdate", (_oldUser, newUser) =>
-			Effect.gen(function* () {
-				yield* database.private.discord_accounts.upsertDiscordAccount({
+			database.private.discord_accounts
+				.upsertDiscordAccount({
 					account: toAODiscordAccount(newUser),
-				});
-			}).pipe(
-				Effect.catchAll((error) =>
-					Console.error(`Error updating Discord account ${newUser.id}:`, error),
+				})
+				.pipe(
+					Effect.catchAll((error) =>
+						Console.error(
+							`Error updating Discord account ${newUser.id}:`,
+							error,
+						),
+					),
 				),
-			),
 		);
 
 		yield* discord.client.on("guildMemberAdd", (member) =>
 			Effect.gen(function* () {
+				yield* invalidateUserGuildsCacheForMember(database, member.user.id);
+
 				const serverData = yield* database.private.servers.getServerByDiscordId(
 					{
 						discordId: BigInt(member.guild.id),
@@ -59,6 +91,8 @@ export const UserParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildMemberRemove", (member) =>
 			Effect.gen(function* () {
+				yield* invalidateUserGuildsCacheForMember(database, member.user.id);
+
 				const serverData = yield* database.private.servers.getServerByDiscordId(
 					{
 						discordId: BigInt(member.guild.id),
