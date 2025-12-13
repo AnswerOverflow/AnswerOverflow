@@ -2,14 +2,41 @@
 
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { useState } from "react";
+import {
+	type AnalyticsChannel,
+	type AnalyticsMessage,
+	type AnalyticsServer,
+	type AnalyticsThread,
+	trackEvent,
+	usePostHog,
+} from "../analytics/client";
 import { Button } from "./button";
 
-export function HelpfulFeedback(_props: { page: Record<string, unknown> }) {
+export type HelpfulFeedbackProps = {
+	server: AnalyticsServer;
+	channel: AnalyticsChannel;
+	thread?: AnalyticsThread | null;
+	message: AnalyticsMessage;
+};
+
+export function HelpfulFeedback(props: HelpfulFeedbackProps) {
 	const [voted, setVoted] = useState<"Yes" | "No" | null>(null);
+	const posthog = usePostHog();
 
 	const handleVote = (value: "Yes" | "No") => {
 		if (!voted) {
 			setVoted(value);
+			trackEvent(
+				"Helpful Feedback Click",
+				{
+					feedback: value,
+					server: props.server,
+					channel: props.channel,
+					thread: props.thread,
+					message: props.message,
+				},
+				posthog,
+			);
 		}
 	};
 

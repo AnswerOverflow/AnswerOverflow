@@ -16,12 +16,6 @@ import { useTenant } from "@packages/ui/components/tenant-context";
 import { ThinMessage } from "@packages/ui/components/thin-message";
 import { TimeAgo } from "@packages/ui/components/time-ago";
 import { TrackLoad } from "@packages/ui/components/track-load";
-import {
-	channelToAnalyticsData,
-	messageWithDiscordAccountToAnalyticsData,
-	serverToAnalyticsData,
-	threadToAnalyticsData,
-} from "@packages/ui/utils/analytics";
 import { isImageAttachment } from "@packages/ui/utils/attachments";
 import { encodeCursor } from "@packages/ui/utils/cursor";
 import {
@@ -415,43 +409,67 @@ export function MessagePage(props: {
 							</div>
 						</div>
 						{similarThreadsSlot}
-						<div className="flex w-full flex-col justify-center gap-2 text-center">
-							<HelpfulFeedback
-								page={{
-									...channelToAnalyticsData(headerData.channel),
-									...serverToAnalyticsData(headerData.server),
-									...(headerData.thread && {
-										...threadToAnalyticsData(headerData.thread),
-									}),
-									...(firstMessage &&
-										messageWithDiscordAccountToAnalyticsData({
-											id: firstMessage.message.id,
-											authorId: firstMessage.author?.id ?? "",
-											serverId: firstMessage.message.serverId,
-											channelId: firstMessage.message.channelId,
-										})),
-								}}
-							/>
-						</div>
+						{firstMessage && (
+							<div className="flex w-full flex-col justify-center gap-2 text-center">
+								<HelpfulFeedback
+									server={{
+										discordId: headerData.server.discordId,
+										name: headerData.server.name,
+									}}
+									channel={{
+										id: headerData.channel.id,
+										name: headerData.channel.name,
+										type: headerData.channel.type,
+									}}
+									thread={
+										headerData.thread
+											? {
+													id: headerData.thread.id,
+													name: headerData.thread.name,
+													type: headerData.thread.type,
+												}
+											: null
+									}
+									message={{
+										id: firstMessage.message.id,
+										authorId: firstMessage.author?.id ?? 0n,
+										serverId: firstMessage.message.serverId,
+										channelId: firstMessage.message.channelId,
+									}}
+								/>
+							</div>
+						)}
 					</div>
 
-					<TrackLoad
-						eventName="Message Page View"
-						eventData={{
-							...channelToAnalyticsData(headerData.channel),
-							...serverToAnalyticsData(headerData.server),
-							...(headerData.thread && {
-								...threadToAnalyticsData(headerData.thread),
-							}),
-							...(firstMessage &&
-								messageWithDiscordAccountToAnalyticsData({
+					{firstMessage && (
+						<TrackLoad
+							eventName="Message Page View"
+							eventData={{
+								server: {
+									discordId: headerData.server.discordId,
+									name: headerData.server.name,
+								},
+								channel: {
+									id: headerData.channel.id,
+									name: headerData.channel.name,
+									type: headerData.channel.type,
+								},
+								thread: headerData.thread
+									? {
+											id: headerData.thread.id,
+											name: headerData.thread.name,
+											type: headerData.thread.type,
+										}
+									: null,
+								message: {
 									id: firstMessage.message.id,
-									authorId: firstMessage.author?.id ?? "",
+									authorId: firstMessage.author?.id ?? 0n,
 									serverId: firstMessage.message.serverId,
 									channelId: firstMessage.message.channelId,
-								})),
-						}}
-					/>
+								},
+							}}
+						/>
+					)}
 				</div>
 			</div>
 		</MessageResultPageProvider>

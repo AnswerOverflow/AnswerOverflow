@@ -1,23 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import {
+	type EventMap,
+	type EventName,
+	useTrackEvent,
+} from "../analytics/client";
 
-export function TrackLoad(props: {
-	eventName: string;
-	eventData: Record<string, unknown>;
+export function TrackLoad<K extends EventName>(props: {
+	eventName: K;
+	eventData: EventMap[K];
 	runOnce?: boolean;
 }) {
-	const hasSentAnalyticsEvent = useRef(false);
-
-	useEffect(() => {
-		const runOnce = props.runOnce ?? true;
-		if (!hasSentAnalyticsEvent.current) {
-			console.log("TrackLoad:", props.eventName, props.eventData);
-			if (runOnce) {
-				hasSentAnalyticsEvent.current = true;
-			}
-		}
-	}, [props.eventName, props.eventData, props.runOnce]);
+	useTrackEvent(props.eventName, props.eventData, {
+		runOnce: props.runOnce ?? true,
+	});
 
 	return null;
 }
