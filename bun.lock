@@ -175,9 +175,11 @@
     "packages/migration": {
       "name": "@packages/migration",
       "dependencies": {
+        "@packages/database": "workspace:*",
         "@planetscale/database": "^1.19.0",
         "archiver": "^7.0.1",
         "drizzle-orm": "^0.36.4",
+        "effect": "catalog:",
       },
       "devDependencies": {
         "@types/archiver": "^6.0.3",
