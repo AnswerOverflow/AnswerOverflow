@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
 	experimental: {
 		turbopackFileSystemCacheForDev: true,
 	},
-	productionBrowserSourceMaps: true,
+	productionBrowserSourceMaps: false,
 	rewrites: async () => {
 		return [
 			{
