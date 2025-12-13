@@ -184,7 +184,7 @@ export async function toAOMessage(
 		image: embed.image
 			? {
 					url: embed.image.url,
-					proxyUrl: embed.image.proxyURL ?? undefined,
+					proxyUrl: embed.image.url ?? undefined,
 					height: embed.image.height ?? undefined,
 					width: embed.image.width ?? undefined,
 				}
@@ -192,7 +192,7 @@ export async function toAOMessage(
 		thumbnail: embed.thumbnail
 			? {
 					url: embed.thumbnail.url,
-					proxyUrl: embed.thumbnail.proxyURL ?? undefined,
+					proxyUrl: embed.thumbnail.url ?? undefined,
 					height: embed.thumbnail.height ?? undefined,
 					width: embed.thumbnail.width ?? undefined,
 				}
@@ -200,7 +200,7 @@ export async function toAOMessage(
 		video: embed.video
 			? {
 					url: embed.video.url,
-					proxyUrl: embed.video.proxyURL ?? undefined,
+					proxyUrl: embed.video.url ?? undefined,
 					height: embed.video.height ?? undefined,
 					width: embed.video.width ?? undefined,
 				}
@@ -301,27 +301,27 @@ export function extractEmbedImagesToUpload(
 	const messageId = BigInt(message.id);
 
 	message.embeds.forEach((embed, embedIndex) => {
-		if (embed.image?.proxyURL) {
+		if (embed.image?.url) {
 			result.push({
-				url: embed.image.proxyURL,
+				url: embed.image.url,
 				messageId,
 				embedIndex,
 				field: "image",
 			});
 		}
 
-		if (embed.thumbnail?.proxyURL) {
+		if (embed.thumbnail?.url) {
 			result.push({
-				url: embed.thumbnail.proxyURL,
+				url: embed.thumbnail.url,
 				messageId,
 				embedIndex,
 				field: "thumbnail",
 			});
 		}
 
-		if (embed.video?.proxyURL) {
+		if (embed.video?.url) {
 			result.push({
-				url: embed.video.proxyURL,
+				url: embed.video.url,
 				messageId,
 				embedIndex,
 				field: "video",
