@@ -556,31 +556,35 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 			threadIds,
 			INDEXING_CONFIG.convexBatchSize,
 		);
-		const threadChannels = yield* Effect.forEach(
+
+		const latestMessageResults = yield* Effect.forEach(
 			threadIdChunks,
 			(chunk) =>
-				database.private.channels.findChannelsByDiscordIds({
-					discordIds: chunk,
+				database.private.messages.findLatestMessageIdsByChannelIds({
+					channelIds: chunk,
 				}),
 			{ concurrency: 1 },
 		).pipe(Effect.map(Arr.flatten));
-		const threadChannelMap = HashMap.fromIterable(
-			Arr.map(threadChannels, (c) => [c.id, c] as const),
+
+		const latestMessageMap = HashMap.fromIterable(
+			Arr.map(
+				latestMessageResults,
+				(r) => [r.channelId, r.latestMessageId] as const,
+			),
 		);
 
 		const outOfDateThreads = Arr.filter(threads, (thread) => {
-			const threadChannel = HashMap.get(
-				threadChannelMap,
+			const latestStoredMessageId = HashMap.get(
+				latestMessageMap,
 				BigInt(thread.id),
 			).pipe((opt) => (opt._tag === "Some" ? opt.value : null));
-			const threadLastIndexed = threadChannel?.flags?.lastIndexedSnowflake;
 
-			if (!threadLastIndexed) {
+			if (!latestStoredMessageId) {
 				return true;
 			}
 
 			const discordLastMessageId = thread.lastMessageId ?? thread.id;
-			return BigInt(discordLastMessageId) > threadLastIndexed;
+			return BigInt(discordLastMessageId) > latestStoredMessageId;
 		});
 
 		const threadsToIndex = Arr.sort(
@@ -608,16 +612,15 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 				Effect.gen(function* () {
 					yield* syncChannel(thread);
 
-					const threadChannel = HashMap.get(
-						threadChannelMap,
+					const latestStoredMessageId = HashMap.get(
+						latestMessageMap,
 						BigInt(thread.id),
 					).pipe((opt) => (opt._tag === "Some" ? opt.value : null));
-					const threadLastIndexed = threadChannel?.flags?.lastIndexedSnowflake;
 
 					const threadMessages = yield* fetchChannelMessages(
 						thread.id,
 						thread.name,
-						threadLastIndexed?.toString() ?? undefined,
+						latestStoredMessageId?.toString() ?? undefined,
 					);
 					yield* storeMessages(threadMessages, discordServerId, thread.id);
 
