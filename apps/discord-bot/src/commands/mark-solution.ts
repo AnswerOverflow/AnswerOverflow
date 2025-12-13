@@ -195,7 +195,13 @@ export function handleMarkSolutionCommand(
 
 		yield* Effect.gen(function* () {
 			const solutionTagId = channelSettings?.flags?.solutionTagId;
-			if (
+			const PUBG_MOBILE_SERVER_ID = "393088095840370689";
+
+			if (thread.guildId === PUBG_MOBILE_SERVER_ID && solutionTagId) {
+				yield* discord.callClient(() =>
+					thread.setAppliedTags([solutionTagId.toString()]),
+				);
+			} else if (
 				parentChannel.type === ChannelType.GuildForum &&
 				solutionTagId &&
 				thread.appliedTags.length < 5
