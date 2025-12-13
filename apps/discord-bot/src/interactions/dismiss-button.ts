@@ -1,5 +1,5 @@
 import type { ButtonInteraction, GuildMember } from "discord.js";
-import { Message, PermissionFlagsBits } from "discord.js";
+import { Message, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord, UnknownDiscordError } from "../core/discord-service";
 import { trackDismissButtonClicked } from "../utils/analytics";
@@ -115,14 +115,14 @@ export function handleDismissButtonInteraction(interaction: ButtonInteraction) {
 						yield* discord.callClient(() =>
 							interaction.followUp({
 								content: error.message,
-								ephemeral: true,
+								flags: MessageFlags.Ephemeral,
 							}),
 						);
 					} else {
 						yield* discord.callClient(() =>
 							interaction.reply({
 								content: error.message,
-								ephemeral: true,
+								flags: MessageFlags.Ephemeral,
 							}),
 						);
 					}
@@ -135,14 +135,14 @@ export function handleDismissButtonInteraction(interaction: ButtonInteraction) {
 			yield* discord.callClient(() =>
 				interaction.followUp({
 					content: "Dismissed message!",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 			);
 		} else {
 			yield* discord.callClient(() =>
 				interaction.reply({
 					content: "Dismissed message!",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 			);
 		}

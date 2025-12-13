@@ -1,6 +1,6 @@
 import { Database } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
-import { ChannelType } from "discord.js";
+import { ChannelType, MessageFlags } from "discord.js";
 import { Data, Duration, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { makeMarkSolutionResponse } from "../services/mark-solution";
@@ -30,7 +30,7 @@ export function handleMarkSolutionCommand(
 		const discord = yield* Discord;
 
 		yield* discord.callClient(() =>
-			interaction.deferReply({ ephemeral: true }),
+			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 		);
 
 		if (!interaction.channel) {
@@ -363,7 +363,7 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 										.callClient(() =>
 											interaction.reply({
 												content: `An error occurred: ${errorMessage}`,
-												ephemeral: true,
+												flags: MessageFlags.Ephemeral,
 											}),
 										)
 										.pipe(Effect.catchAll(() => Effect.void));
@@ -389,7 +389,7 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 											interaction.reply({
 												content:
 													"An unexpected error occurred. Please try again.",
-												ephemeral: true,
+												flags: MessageFlags.Ephemeral,
 											}),
 										)
 										.pipe(Effect.catchAll(() => Effect.void));

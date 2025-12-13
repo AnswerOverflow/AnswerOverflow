@@ -8,6 +8,7 @@ import {
 	ComponentType,
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
+	MessageFlags,
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
@@ -140,7 +141,7 @@ export function handleManageAccountCommand(
 			yield* discord.callClient(() =>
 				interaction.reply({
 					content: "This command can only be used in a server",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 			);
 			return;
@@ -158,7 +159,7 @@ export function handleManageAccountCommand(
 			yield* discord.callClient(() =>
 				interaction.reply({
 					content: "Server not found in database",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 			);
 			return;
@@ -213,7 +214,7 @@ export function handleManageAccountCommand(
 			interaction.reply({
 				embeds: [embed],
 				components: [actionRow],
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			}),
 		);
 		const collector = reply.createMessageComponentCollector({

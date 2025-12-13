@@ -5,6 +5,7 @@ import {
 	ComponentType,
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
+	MessageFlags,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from "discord.js";
@@ -65,7 +66,7 @@ export function handleQuickActionCommand(
 
 		const interactionReply = yield* discord.callClient(() =>
 			interaction.reply({
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 				content: "Select an action to perform on this message.",
 				components: [actionRow],
 			}),

@@ -6,6 +6,7 @@ import {
 	ButtonStyle,
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
+	MessageFlags,
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
@@ -31,7 +32,7 @@ export function handleChannelSettingsCommand(
 			yield* discord.callClient(() =>
 				interaction.reply({
 					content: "This command can only be used in a server channel",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 			);
 			return;
@@ -45,7 +46,7 @@ export function handleChannelSettingsCommand(
 			yield* discord.callClient(() =>
 				interaction.reply({
 					content: "Could not determine parent channel",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 			);
 			return;
@@ -63,7 +64,7 @@ export function handleChannelSettingsCommand(
 			yield* discord.callClient(() =>
 				interaction.reply({
 					content: "Server not found in database",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 			);
 			return;
@@ -78,7 +79,7 @@ export function handleChannelSettingsCommand(
 			yield* discord.callClient(() =>
 				interaction.reply({
 					content: "Channel not found in database",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 			);
 			return;
@@ -105,7 +106,7 @@ export function handleChannelSettingsCommand(
 			interaction.reply({
 				embeds: [embed],
 				components: [actionRow],
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			}),
 		);
 	});
