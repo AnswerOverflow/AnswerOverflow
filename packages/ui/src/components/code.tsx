@@ -3,11 +3,10 @@
 import { Button } from "@packages/ui/components/button";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Check, Copy, WrapText } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import type { BundledLanguage } from "shiki";
 import { codeToHtml } from "shiki";
 import { cn } from "../lib/utils";
-import { useIsHydrationRender } from "./hydration-context";
 
 function useHighlightedCode(
 	code: string,
@@ -32,8 +31,13 @@ function useHighlightedCode(
 }
 
 function SuspenseClientOnly({ children }: { children: React.ReactNode }) {
-	const isHydrationRender = useIsHydrationRender();
-	if (isHydrationRender) {
+	const [shouldWrapInSuspense, setShouldWrapInSuspense] = useState(false);
+
+	useEffect(() => {
+		setShouldWrapInSuspense(true);
+	}, []);
+
+	if (!shouldWrapInSuspense) {
 		return children;
 	}
 
