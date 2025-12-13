@@ -1,6 +1,5 @@
 import type {
 	PaginatedQueryArgs,
-	PaginatedQueryItem,
 	PaginatedQueryReference,
 	UsePaginatedQueryReturnType,
 } from "convex/react";
@@ -24,8 +23,9 @@ export function usePaginatedQueryWithFilter<
 
 	const result = usePaginatedQueryWithCursor(query, args, { initialNumItems });
 
-	const roundsRef = useRef(0);
+	const totalRoundsRef = useRef(0);
 	const prevResultsLengthRef = useRef(0);
+	const consecutiveEmptyRoundsRef = useRef(0);
 
 	useEffect(() => {
 		if (
@@ -35,20 +35,34 @@ export function usePaginatedQueryWithFilter<
 			return;
 		}
 
-		if (result.results.length !== prevResultsLengthRef.current) {
-			prevResultsLengthRef.current = result.results.length;
-			roundsRef.current = 0;
+		const currentLength = result.results.length;
+		const prevLength = prevResultsLengthRef.current;
+		const gotNewResults = currentLength > prevLength;
+
+		if (gotNewResults) {
+			consecutiveEmptyRoundsRef.current = 0;
+		} else if (totalRoundsRef.current > 0) {
+			consecutiveEmptyRoundsRef.current += 1;
 		}
 
-		const needsMore =
-			result.results.length < targetNumItems &&
-			result.status === "CanLoadMore" &&
-			roundsRef.current < maxRounds;
+		prevResultsLengthRef.current = currentLength;
 
-		if (needsMore) {
-			roundsRef.current += 1;
-			result.loadMore(initialNumItems);
+		const hasEnoughResults = currentLength >= targetNumItems;
+		const exhaustedData = result.status !== "CanLoadMore";
+		const hitMaxRounds = totalRoundsRef.current >= maxRounds;
+		const tooManyEmptyRounds = consecutiveEmptyRoundsRef.current >= 3;
+
+		if (
+			hasEnoughResults ||
+			exhaustedData ||
+			hitMaxRounds ||
+			tooManyEmptyRounds
+		) {
+			return;
 		}
+
+		totalRoundsRef.current += 1;
+		result.loadMore(initialNumItems);
 	}, [
 		result.status,
 		result.results.length,
