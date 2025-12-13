@@ -52,9 +52,27 @@ export function usePaginatedQueryWithCursor<
 	const { initialNumItems, initialCursor = null } = options;
 	const skip = args === "skip";
 
-	const [additionalPages, setAdditionalPages] = useState<
-		Array<{ cursor: string; numItems: number }>
-	>([]);
+	const argsKey = skip ? "skip" : JSON.stringify(args);
+	const [paginationState, setPaginationState] = useState<{
+		argsKey: string;
+		additionalPages: Array<{ cursor: string; numItems: number }>;
+	}>({ argsKey, additionalPages: [] });
+
+	const additionalPages =
+		paginationState.argsKey === argsKey ? paginationState.additionalPages : [];
+
+	const setAdditionalPages = (
+		updater: (
+			prev: Array<{ cursor: string; numItems: number }>,
+		) => Array<{ cursor: string; numItems: number }>,
+	) => {
+		setPaginationState((prev) => ({
+			argsKey,
+			additionalPages: updater(
+				prev.argsKey === argsKey ? prev.additionalPages : [],
+			),
+		}));
+	};
 
 	const queries = useMemo(() => {
 		if (skip) return {};
