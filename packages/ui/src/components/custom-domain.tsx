@@ -210,7 +210,6 @@ export const CustomDomain = (props: CustomDomainProps) => {
 					setDomain(null);
 				} else {
 					await addDomain({ domain: customDomain });
-					console.log("customDomain", customDomain);
 					await updateCustomDomain({
 						serverId: props.serverId,
 						customDomain: customDomain,
