@@ -1,7 +1,10 @@
 import { Database } from "@packages/database/database";
 import { Providers } from "@packages/ui/components/providers";
 import type { Tenant } from "@packages/ui/components/tenant-context";
-import { normalizeSubpath } from "@packages/ui/utils/links";
+import {
+	getTenantCanonicalUrl,
+	normalizeSubpath,
+} from "@packages/ui/utils/links";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -39,11 +42,48 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	}
 
 	const iconUrl = `https://cdn.answeroverflow.com/${tenantData.discordId}/${tenantData.icon}/icon.png`;
-
+	const description =
+		tenantData.description ?? `Browse the ${tenantData.name} community`;
 	return {
-		icons: {
-			icon: iconUrl,
-			apple: iconUrl,
+		title: `${tenantData.name} Community`,
+		metadataBase: new URL("https://www.answeroverflow.com/"),
+		description,
+		robots: {
+			index: true,
+			follow: true,
+		},
+		openGraph: {
+			type: "website",
+			title: `${tenantData.name} Community`,
+			siteName: "Answer Overflow",
+			description,
+			images: [
+				{
+					url: getTenantCanonicalUrl(
+						{
+							customDomain: tenantData.customDomain,
+							subpath: tenantData.subpath,
+						},
+						`/og/community?id=${tenantData.discordId.toString()}&tenant=true`,
+					),
+					width: 1200,
+					height: 630,
+				},
+			],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: `${tenantData.name} Community`,
+			description,
+			images: [
+				getTenantCanonicalUrl(
+					{
+						customDomain: tenantData.customDomain,
+						subpath: tenantData.subpath,
+					},
+					`/og/community?id=${tenantData.discordId.toString()}&tenant=true`,
+				),
+			],
 		},
 	};
 }

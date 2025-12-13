@@ -71,10 +71,20 @@ export function getTenantBaseUrl(tenant: TenantInfo | null): string {
 	return getBaseUrl();
 }
 
+const subpathLookup: Record<string, string> = {
+	"community.migaku.com": "migaku.com/community",
+	"testing.rhys.ltd": "rhys.ltd/idk",
+	"discord.vapi.ai": "vapi.ai/community",
+};
+
 export function getTenantCanonicalUrl(
 	tenant: TenantInfo | null,
 	path: string,
 ): string {
+	if (subpathLookup[tenant?.customDomain ?? ""]) {
+		const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+		return `https://${subpathLookup[tenant?.customDomain ?? ""]}${normalizedPath}`;
+	}
 	const baseUrl = getTenantBaseUrl(tenant);
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 	return `${baseUrl}${normalizedPath}`;

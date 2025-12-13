@@ -5,7 +5,10 @@ import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { UserPageLayout, UserPostsList } from "../app/u/[userId]/components";
+import {
+	UserPageLayout,
+	UserPostsList,
+} from "../app/(main-site)/u/[userId]/components";
 import { runtime } from "../lib/runtime";
 
 export type UserPageHeaderData = NonNullable<
