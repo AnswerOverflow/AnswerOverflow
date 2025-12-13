@@ -3,7 +3,6 @@ import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../client";
 import type { ServerPreferences, UserServerSettings } from "../schema";
-import { paginateWithFilter } from "./pagination";
 
 type Message = Doc<"messages">;
 
@@ -38,7 +37,7 @@ function createRequestCache() {
 	};
 }
 
-export function createDataAccessCache(ctx: QueryCtx) {
+function createDataAccessCache(ctx: QueryCtx) {
 	const cache = createRequestCache();
 
 	return {
@@ -135,7 +134,7 @@ export async function enrichMessage(
 	return await enrichMessageForDisplay(ctx, message, { isAnonymous });
 }
 
-export type DataAccessCache = ReturnType<typeof createDataAccessCache>;
+type DataAccessCache = ReturnType<typeof createDataAccessCache>;
 
 export async function enrichMessages(
 	ctx: QueryCtx,
@@ -148,7 +147,7 @@ export async function enrichMessages(
 	return Arr.filter(results, Predicate.isNotNullable);
 }
 
-export async function enrichedMessageWithServerAndChannelsInternal(
+async function enrichedMessageWithServerAndChannelsInternal(
 	ctx: QueryCtx,
 	cache: DataAccessCache,
 	message: Message,
@@ -212,26 +211,30 @@ export async function searchMessages(
 	isDone: boolean;
 	continueCursor: string;
 }> {
-	const cache = createDataAccessCache(ctx);
+	const paginatedResult = await ctx.db
+		.query("messages")
+		.withSearchIndex("search_content", (q) => {
+			const searchQuery = q.search("content", args.query);
+			if (args.serverId) {
+				return searchQuery.eq("serverId", args.serverId);
+			}
+			return searchQuery;
+		})
+		.paginate(args.paginationOpts);
 
-	return paginateWithFilter(
-		args.paginationOpts,
-		(paginationOpts) =>
-			ctx.db
-				.query("messages")
-				.withSearchIndex("search_content", (q) => {
-					const searchQuery = q.search("content", args.query);
-					if (args.serverId) {
-						return searchQuery.eq("serverId", args.serverId);
-					}
-					return searchQuery;
-				})
-				.paginate(paginationOpts),
-		(messages) =>
-			Promise.all(
-				messages.map((m) =>
-					enrichedMessageWithServerAndChannelsInternal(ctx, cache, m),
-				),
+	const cache = createDataAccessCache(ctx);
+	const results = Arr.filter(
+		await Promise.all(
+			paginatedResult.page.map((m) =>
+				enrichedMessageWithServerAndChannelsInternal(ctx, cache, m),
 			),
+		),
+		Predicate.isNotNullable,
 	);
+
+	return {
+		page: results,
+		isDone: paginatedResult.isDone,
+		continueCursor: paginatedResult.continueCursor,
+	};
 }
