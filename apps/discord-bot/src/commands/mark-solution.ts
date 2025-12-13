@@ -274,33 +274,35 @@ export function handleMarkSolutionCommand(
 			.callClient(() => guild.members.fetch(targetMessage.author.id))
 			.pipe(Effect.catchAll(() => Effect.succeed(null)));
 
-		console.log("[mark-solution] Tracking analytics");
 		if (questionAsker && solutionAuthor) {
-			yield* trackSolvedQuestion(
-				thread,
-				channelSettings,
-				questionAsker,
-				solutionAuthor,
-				guildMember,
-				questionMessage,
-				targetMessage,
-				{
-					discordId: server.discordId.toString(),
-					name: server.name,
-				},
-				serverPreferences
-					? {
-							readTheRulesConsentEnabled:
-								serverPreferences.readTheRulesConsentEnabled,
-						}
-					: undefined,
-			).pipe(Effect.catchAll(() => Effect.void));
+			Effect.runFork(
+				trackSolvedQuestion(
+					thread,
+					channelSettings,
+					questionAsker,
+					solutionAuthor,
+					guildMember,
+					questionMessage,
+					targetMessage,
+					{
+						discordId: server.discordId.toString(),
+						name: server.name,
+					},
+					serverPreferences
+						? {
+								readTheRulesConsentEnabled:
+									serverPreferences.readTheRulesConsentEnabled,
+							}
+						: undefined,
+				).pipe(Effect.catchAll(() => Effect.void)),
+			);
 		}
 
-		yield* trackMarkSolutionCommandUsed(guildMember, "Success").pipe(
-			Effect.catchAll(() => Effect.void),
+		Effect.runFork(
+			trackMarkSolutionCommandUsed(guildMember, "Success").pipe(
+				Effect.catchAll(() => Effect.void),
+			),
 		);
-		console.log("[mark-solution] Analytics tracked");
 
 		console.log("[mark-solution] Building response");
 		const { embed, components } = makeMarkSolutionResponse({
