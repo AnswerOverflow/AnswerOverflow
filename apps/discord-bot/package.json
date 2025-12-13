@@ -4,7 +4,7 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"dev": "bun run --env-file=../../.env --watch index.dev.ts",
+		"dev": "NODE_ENV=development bun run --env-file=../../.env --watch index.dev.ts",
 		"start": "bun run --env-file=../../.env index.ts",
 		"typecheck": "tsgo -p tsconfig.json --noEmit",
 		"typecheck:slow": "tsc -p tsconfig.json --noEmit",

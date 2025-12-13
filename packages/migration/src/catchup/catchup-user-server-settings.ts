@@ -9,7 +9,7 @@ const BATCH_SIZE = 5000;
 
 export function syncUserServerSettings() {
 	return Effect.gen(function* () {
-		const cursor = "0";
+		let cursor = "0";
 		const convex = yield* Database;
 
 		while (true) {
@@ -23,10 +23,18 @@ export function syncUserServerSettings() {
 						.limit(BATCH_SIZE),
 				catch: (e) => new Error(`Failed to fetch user server settings: ${e}`),
 			});
+
+			const lastRow = rows[rows.length - 1];
+			if (lastRow) {
+				cursor = lastRow.userId;
+			}
+
 			if (rows.length === 0) break;
 
 			const settings = rows.map((row) => transformUserServerSettings(row));
-			console.log(`Upserting ${settings.length} user server settings`);
+			console.log(
+				`Upserting ${settings.length} user server settings (cursor: ${cursor})`,
+			);
 			yield* convex.private.user_server_settings.upsertManyUserServerSettings({
 				settings,
 			});
