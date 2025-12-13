@@ -47,6 +47,7 @@ export function generateMessagePageMetadata(
 	headerData: MessagePageHeaderData | null,
 	messageId: string,
 	cursor: string | null = null,
+	isTenant = false,
 ): Metadata {
 	if (!headerData) {
 		return {};
@@ -64,11 +65,15 @@ export function generateMessagePageMetadata(
 			? firstMessage.message.content
 			: `Questions related to ${headerData.channel.name} in ${headerData.server.name}`;
 
+	const ogImageUrl = isTenant
+		? `/og/post?id=${messageId}&tenant=true`
+		: `/og/post?id=${messageId}`;
+
 	return {
 		title: `${title} - ${headerData.server.name}`,
 		description,
 		openGraph: {
-			images: [`/og/post?id=${messageId}`],
+			images: [ogImageUrl],
 			title: `${title} - ${headerData.server.name}`,
 			description,
 		},

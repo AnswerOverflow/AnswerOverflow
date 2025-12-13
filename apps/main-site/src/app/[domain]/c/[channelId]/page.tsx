@@ -58,7 +58,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		title: `#${selectedChannel.name} - ${server.name}`,
 		description,
 		openGraph: {
-			images: [`/og/community?id=${server.discordId.toString()}`],
+			images: [`/og/community?id=${server.discordId.toString()}&tenant=true`],
 			title: `#${selectedChannel.name} - ${server.name}`,
 			description,
 		},

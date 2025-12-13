@@ -80,6 +80,7 @@ export async function GET(req: Request) {
 
 	const { searchParams } = new URL(req.url);
 	const id = searchParams.get("id");
+	const isTenant = searchParams.get("tenant") === "true";
 	if (!id) {
 		return new Response("Missing community ID", {
 			status: 400,
@@ -228,25 +229,27 @@ export async function GET(req: Request) {
 					</p>
 				</div>
 			</div>
-			<div
-				style={{
-					position: "absolute",
-					display: "flex",
-					right: "80px",
-					bottom: "40px",
-					gap: "20px",
-					alignItems: "center",
-				}}
-			>
-				<AnswerOverflowLogo
+			{!isTenant && (
+				<div
 					style={{
-						fill: "none",
-						stroke: "#000",
-						strokeWidth: 13,
-						strokeMiterlimit: 10,
+						position: "absolute",
+						display: "flex",
+						right: "80px",
+						bottom: "40px",
+						gap: "20px",
+						alignItems: "center",
 					}}
-				/>
-			</div>
+				>
+					<AnswerOverflowLogo
+						style={{
+							fill: "none",
+							stroke: "#000",
+							strokeWidth: 13,
+							strokeMiterlimit: 10,
+						}}
+					/>
+				</div>
+			)}
 		</div>,
 		{
 			width: 1200,
