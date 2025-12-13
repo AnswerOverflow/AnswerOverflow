@@ -10,7 +10,7 @@ import {
 } from "./avatar";
 
 export interface DiscordUser {
-	id: string;
+	id: string | bigint;
 	name: string;
 	avatar?: string;
 }

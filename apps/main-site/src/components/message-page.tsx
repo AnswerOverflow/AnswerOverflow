@@ -2,6 +2,7 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
+import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import { FormattedNumber } from "@packages/ui/components/formatted-number";
 import { HelpfulFeedback } from "@packages/ui/components/helpful-feedback";
@@ -308,9 +309,14 @@ export function MessagePage(props: {
 					<main className="flex w-full max-w-3xl grow flex-col gap-4">
 						<div className="flex flex-col gap-2 pl-2">
 							<div className="flex flex-row items-center gap-2">
-								<Link href={serverHref}>
-									<ServerIcon server={headerData.server} size={48} />
-								</Link>
+								{tenant && firstMessage?.author ? (
+									<DiscordAvatar user={firstMessage.author} size={48} />
+								) : (
+									<Link href={serverHref}>
+										<ServerIcon server={headerData.server} size={48} />
+									</Link>
+								)}
+
 								<div className="flex flex-col">
 									<div className="flex flex-row items-center gap-2">
 										<Link href={serverHref} className="hover:underline">

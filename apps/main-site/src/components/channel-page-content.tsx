@@ -3,7 +3,6 @@
 import { api } from "@packages/database/convex/_generated/api";
 import { Button } from "@packages/ui/components/button";
 import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
-import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import { Link } from "@packages/ui/components/link";
 import {
 	Sheet,
@@ -165,13 +164,10 @@ export function ChannelPageContent({
 	channels,
 	selectedChannel,
 	threadsSlot,
-	firstThreadAuthor,
 }: ChannelPageContentProps) {
 	const tenant = useTenant();
 	const tenantMode = !!tenant;
 	const serverIcon = server.icon ?? null;
-	const isForumChannel = selectedChannel?.type === 15;
-	const showAuthorIcon = tenantMode && isForumChannel && firstThreadAuthor;
 
 	const getChannelHref = (channelId: bigint) =>
 		tenantMode
@@ -183,17 +179,11 @@ export function ChannelPageContent({
 			<div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
 				<div className="mb-8 pb-6 border-b border-border">
 					<div className="flex items-center gap-4">
-						{showAuthorIcon ? (
-							<DiscordAvatar user={firstThreadAuthor} size={64} />
-						) : (
-							serverIcon && (
-								<img
-									src={`https://cdn.discordapp.com/icons/${server.discordId}/${serverIcon}.webp?size=64`}
-									alt={server.name}
-									className="w-16 h-16 rounded-full"
-								/>
-							)
-						)}
+						<img
+							src={`https://cdn.discordapp.com/icons/${server.discordId}/${serverIcon}.webp?size=64`}
+							alt={server.name}
+							className="w-16 h-16 rounded-full"
+						/>
 						<div className="flex-1 min-w-0">
 							<div className="flex items-center gap-2">
 								{selectedChannel &&

@@ -1,5 +1,5 @@
 import { type Infer, v } from "convex/values";
-import { getManyFrom } from "convex-helpers/server/relationships";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { privateMutation, privateQuery } from "../client";
 import { userServerSettingsSchema } from "../schema";
 import {
@@ -181,5 +181,28 @@ export const upsertManyBotUserServerSettings = privateMutation({
 		}
 
 		return args.settings;
+	},
+});
+
+export const upsertManyUserServerSettings = privateMutation({
+	args: {
+		settings: v.array(userServerSettingsSchema),
+	},
+	handler: async (ctx, args) => {
+		for (const setting of args.settings) {
+			try {
+				await ctx.db.insert("userServerSettings", setting);
+			} catch (e) {
+				const existing = await findUserServerSettingsByIdShared(
+					ctx,
+					setting.userId,
+					setting.serverId,
+				);
+				if (!existing) {
+					return null;
+				}
+				await ctx.db.replace(existing._id, setting);
+			}
+		}
 	},
 });
