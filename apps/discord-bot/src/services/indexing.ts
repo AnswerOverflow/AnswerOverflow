@@ -323,8 +323,6 @@ function storeMessages(
 	currentLastIndexedSnowflake?: bigint | null,
 ) {
 	return Effect.gen(function* () {
-		const database = yield* Database;
-
 		if (messages.length === 0) {
 			yield* Effect.logDebug(`No messages to store for channel ${channelId}`);
 			return;
@@ -502,14 +500,6 @@ function uploadMedia(messages: Message[], channelId: string) {
 		}
 	});
 }
-
-type ChannelSettings = {
-	flags: {
-		indexingEnabled: boolean;
-		lastIndexedSnowflake?: bigint | null;
-		inviteCode?: string;
-	};
-};
 
 function getChannelSettingsForIndexing(channel: GuildChannel) {
 	return Effect.gen(function* () {
@@ -872,7 +862,7 @@ function runIndexing() {
 		yield* Console.log(`Found ${totalGuilds} guilds to index`);
 
 		yield* Effect.forEach(
-			Arr.map(guilds, (guild, index) => ({ guild, index })).slice(226),
+			Arr.map(guilds, (guild, index) => ({ guild, index })).slice(245),
 			({ guild, index }) =>
 				Effect.gen(function* () {
 					yield* indexGuild(guild, index, totalGuilds);
