@@ -12,7 +12,7 @@ import { Link } from "@packages/ui/components/link";
 import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 
-const MAIN_SITE_ORIGIN = "https://new.answeroverflow.com";
+const MAIN_SITE_ORIGIN = "https://www.answeroverflow.com";
 const STATE_STORAGE_KEY = "dev-auth-state";
 
 function generateState(): string {

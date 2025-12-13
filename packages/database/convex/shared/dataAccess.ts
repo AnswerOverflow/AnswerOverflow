@@ -5,6 +5,7 @@ import type { QueryCtx } from "../client";
 import type { ServerPreferences, UserServerSettings } from "../schema";
 
 type Message = Doc<"messages">;
+
 import {
 	getDiscordAccountIdFromAuth,
 	getUserServerSettingsForServerByDiscordId,
@@ -93,7 +94,7 @@ async function fetchMessagePrivacyData(
 	};
 }
 
-async function enrichMessage(
+export async function enrichMessage(
 	ctx: QueryCtx,
 	cache: DataAccessCache,
 	message: Message,
