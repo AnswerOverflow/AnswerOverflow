@@ -6,7 +6,7 @@ import type {
 } from "convex/react";
 import { usePaginatedQuery, useQueries, useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
-import type { Value } from "convex/values";
+import { convexToJson, type Value } from "convex/values";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 export const useStableQuery = ((name, ...args) => {
@@ -52,7 +52,9 @@ export function usePaginatedQueryWithCursor<
 	const { initialNumItems, initialCursor = null } = options;
 	const skip = args === "skip";
 
-	const argsKey = skip ? "skip" : JSON.stringify(args);
+	const argsKey = skip
+		? "skip"
+		: JSON.stringify(convexToJson(args as Record<string, Value>));
 	const [paginationState, setPaginationState] = useState<{
 		argsKey: string;
 		additionalPages: Array<{ cursor: string; numItems: number }>;
