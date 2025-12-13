@@ -55,11 +55,11 @@ const nextConfig: NextConfig = {
 					"https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path",
 			},
 			{
-				source: "/ingest/static/:path*",
+				source: "/a/static/:path*",
 				destination: "https://us-assets.i.posthog.com/static/:path*",
 			},
 			{
-				source: "/ingest/:path*",
+				source: "/a/:path*",
 				destination: "https://us.i.posthog.com/:path*",
 			},
 		];
