@@ -91,8 +91,18 @@ function SignInButton({
 export function UserSection({ showSignIn = true }: UserSectionProps) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const { data: session, refetch } = useSession({ allowAnonymous: false });
+	const {
+		data: session,
+		isPending,
+		refetch,
+	} = useSession({
+		allowAnonymous: false,
+	});
 	const isOnDashboard = pathname?.startsWith("/dashboard");
+
+	if (isPending) {
+		return <UserSectionSkeleton />;
+	}
 
 	const handleSignIn = async () => {
 		if (
