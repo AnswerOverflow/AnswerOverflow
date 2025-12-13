@@ -35,6 +35,14 @@ const globalCommands = [
 		.setDescription("Configure channel settings in the dashboard")
 		.setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 		.setContexts(InteractionContextType.Guild),
+	new SlashCommandBuilder()
+		.setName("feedback")
+		.setDescription("Send feedback about Answer Overflow")
+		.setContexts(InteractionContextType.Guild, InteractionContextType.BotDM),
+	new SlashCommandBuilder()
+		.setName("bug-report")
+		.setDescription("Report a bug with Answer Overflow")
+		.setContexts(InteractionContextType.Guild, InteractionContextType.BotDM),
 ] as const;
 
 const guildCommands = [

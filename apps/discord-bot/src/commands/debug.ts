@@ -2,17 +2,15 @@ import { Database } from "@packages/database/database";
 import type { ChatInputCommandInteraction } from "discord.js";
 import { EmbedBuilder, MessageFlags } from "discord.js";
 import { Effect, Layer } from "effect";
+import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
-
-const RHYS_USER_ID = "523949187663134754";
 
 export function handleDebugCommand(interaction: ChatInputCommandInteraction) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		const discord = yield* Discord;
 
-		// Check if the user is Rhys
-		if (interaction.user.id !== RHYS_USER_ID) {
+		if (interaction.user.id !== SUPER_USER_ID) {
 			yield* discord.callClient(() =>
 				interaction.reply({
 					content: "This command is only available to Rhys.",
