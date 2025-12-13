@@ -164,7 +164,10 @@ export function handleMarkSolutionCommand(
 			memberPermissions?.has("Administrator") ||
 			false;
 
-		if (!isQuestionAuthor && !hasPermission) {
+		const VALORANT_ROLE_ID = "684140826762149923";
+		const hasSpecialRole = guildMember.roles.cache.has(VALORANT_ROLE_ID);
+
+		if (!isQuestionAuthor && !hasPermission && !hasSpecialRole) {
 			yield* discord.callClient(() =>
 				interaction.editReply({
 					content:
