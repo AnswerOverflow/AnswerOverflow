@@ -1,7 +1,8 @@
 import { decodeCursor } from "@packages/ui/utils/cursor";
+import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { Schema } from "effect";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
 	fetchMessagePageHeaderData,
 	generateMessagePageMetadata,
@@ -42,6 +43,17 @@ export default async function Page(props: Props) {
 	}
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value);
+
+	if (headerData?.server.customDomain) {
+		const customUrl = getServerCustomUrl(
+			headerData.server,
+			`/m/${params.messageId}`,
+		);
+		if (customUrl) {
+			return redirect(customUrl);
+		}
+	}
+
 	return (
 		<MessagePageLoader
 			headerData={headerData}

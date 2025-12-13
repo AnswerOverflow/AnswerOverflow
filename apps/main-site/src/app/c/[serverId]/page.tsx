@@ -1,7 +1,8 @@
 import { Database } from "@packages/database/database";
+import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { Effect } from "effect";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
 	ChannelPageLoader,
 	fetchChannelPageHeaderData,
@@ -75,6 +76,13 @@ export default async function ServerPage(props: Props) {
 	}
 
 	const { server, channels } = serverData;
+
+	if (server.customDomain) {
+		const customUrl = getServerCustomUrl(server, `/c/${params.serverId}`);
+		if (customUrl) {
+			return redirect(customUrl);
+		}
+	}
 
 	if (channels.length === 0) {
 		return (
