@@ -167,15 +167,21 @@ export function RepliesSection(props: {
 								</div>
 							)
 						}
-						renderItem={(message) => (
-							<ReplyMessage
-								key={message.message.id.toString()}
-								message={message}
-								solutionMessageId={solutionMessageId}
-								firstMessageAuthorId={firstMessageAuthorId}
-								isLast={false}
-							/>
-						)}
+						renderItem={(message) => {
+							const HIDDEN_AUTHOR_IDS = [958907348389339146n];
+							if (HIDDEN_AUTHOR_IDS.includes(message.message.authorId)) {
+								return null;
+							}
+							return (
+								<ReplyMessage
+									key={message.message.id.toString()}
+									message={message}
+									solutionMessageId={solutionMessageId}
+									firstMessageAuthorId={firstMessageAuthorId}
+									isLast={false}
+								/>
+							);
+						}}
 					/>
 				</div>
 			</div>
