@@ -1,12 +1,20 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { anonymous } from "better-auth/plugins";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import type { Plan } from "../schema";
 
 export type { Plan };
+
+const ALLOWED_TENANT_PATHS = [
+	"/sign-in/anonymous",
+	"/anonymous-session",
+	"/get-session",
+];
 
 const getTrustedOrigins = (siteUrl: string): string[] => {
 	const origins = [siteUrl];
@@ -45,6 +53,7 @@ export const createAuth = (
 		logger: {
 			disabled: optionsOnly,
 		},
+		trustedOrigins: getTrustedOrigins(siteUrl),
 		baseURL: siteUrl,
 		database: authComponent.adapter(ctx),
 		secret: (() => {
@@ -54,7 +63,55 @@ export const createAuth = (
 			}
 			return secret;
 		})(),
-		trustedOrigins: getTrustedOrigins(siteUrl),
+		hooks: {
+			before: createAuthMiddleware(async (authCtx) => {
+				const origin = authCtx.headers?.get("origin");
+				if (!origin) return;
+
+				try {
+					const url = new URL(origin);
+					const domain = url.hostname;
+					const mainSiteUrl = new URL(siteUrl);
+					const mainSiteDomain = mainSiteUrl.hostname;
+
+					if (domain === mainSiteDomain) {
+						return;
+					}
+
+					if (!("db" in ctx)) {
+						throw new APIError("FORBIDDEN", {
+							message: "Invalid origin",
+						});
+					}
+
+					const preferences = await getOneFrom(
+						ctx.db,
+						"serverPreferences",
+						"by_customDomain",
+						domain,
+						"customDomain",
+					);
+
+					if (preferences) {
+						const isAllowedPath = ALLOWED_TENANT_PATHS.some((p) =>
+							authCtx.path.startsWith(p),
+						);
+
+						if (!isAllowedPath) {
+							throw new APIError("FORBIDDEN", {
+								message: "Only anonymous auth is available on tenant sites",
+							});
+						}
+					} else {
+						throw new APIError("FORBIDDEN", {
+							message: "Invalid origin",
+						});
+					}
+				} catch (e) {
+					if (e instanceof APIError) throw e;
+				}
+			}),
+		},
 		socialProviders: {
 			discord: {
 				clientId: (() => {
