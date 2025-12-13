@@ -40,27 +40,27 @@ export function Providers({
 	tenant?: Tenant | null;
 }) {
 	return (
-		<HydrationProvider>
-			<AnalyticsProvider>
-				<Suspense fallback={null}>
-					<PostHogPageview />
-				</Suspense>
-				<NextThemesProvider
-					attribute="class"
-					defaultTheme="system"
-					enableSystem
-					disableTransitionOnChange
-					enableColorScheme
-				>
-					<TenantProvider tenant={tenant}>
+		<TenantProvider tenant={tenant}>
+			<HydrationProvider>
+				<AnalyticsProvider>
+					<Suspense fallback={null}>
+						<PostHogPageview />
+					</Suspense>
+					<NextThemesProvider
+						attribute="class"
+						defaultTheme="system"
+						enableSystem
+						disableTransitionOnChange
+						enableColorScheme
+					>
 						<ConvexClientProvider>
 							<SignInIfAnon />
 							<IdentifyUser />
 							{children}
 						</ConvexClientProvider>
-					</TenantProvider>
-				</NextThemesProvider>
-			</AnalyticsProvider>
-		</HydrationProvider>
+					</NextThemesProvider>
+				</AnalyticsProvider>
+			</HydrationProvider>
+		</TenantProvider>
 	);
 }
