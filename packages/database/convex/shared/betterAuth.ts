@@ -3,8 +3,7 @@ import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { anonymous } from "better-auth/plugins";
-import { getOneFrom } from "convex-helpers/server/relationships";
-import { components } from "../_generated/api";
+import { components, internal } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import type { Plan } from "../schema";
 
@@ -86,18 +85,10 @@ export const createAuth = (
 						return;
 					}
 
-					if (!("db" in ctx)) {
-						throw new APIError("FORBIDDEN", {
-							message: "Invalid origin",
-						});
-					}
-
-					const preferences = await getOneFrom(
-						ctx.db,
-						"serverPreferences",
-						"by_customDomain",
-						domain,
-						"customDomain",
+					const preferences = await ctx.runQuery(
+						internal.private.server_preferences
+							.getServerPreferencesByCustomDomain,
+						{ customDomain: domain },
 					);
 
 					if (preferences) {

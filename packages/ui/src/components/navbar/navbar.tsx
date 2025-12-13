@@ -21,6 +21,7 @@ export interface NavbarProps {
 	showGetStarted?: boolean;
 	getStartedProps?: React.ComponentProps<typeof LinkButton>;
 	searchBar?: React.ReactNode;
+	showSignIn?: boolean;
 }
 
 export function Navbar({
@@ -35,6 +36,7 @@ export function Navbar({
 	showGetStarted = false,
 	getStartedProps,
 	searchBar,
+	showSignIn = true,
 }: NavbarProps) {
 	return (
 		<header className="fixed left-0 top-0 z-[1000] h-navbar w-full bg-background px-4">
@@ -101,7 +103,7 @@ export function Navbar({
 							Get Started
 						</LinkButton>
 					)}
-					<UserSection />
+					<UserSection showSignIn={showSignIn} />
 				</div>
 			</nav>
 		</header>
