@@ -227,7 +227,8 @@ export function handleMarkSolutionCommand(
 			} else if (
 				parentChannel.type === ChannelType.GuildForum &&
 				solutionTagId &&
-				thread.appliedTags.length < 5
+				thread.appliedTags.length < 5 &&
+				!thread.appliedTags.includes(solutionTagId.toString())
 			) {
 				yield* discord.callClient(() =>
 					thread.setAppliedTags([
