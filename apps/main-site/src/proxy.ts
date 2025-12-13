@@ -23,10 +23,12 @@ const subpathTenants = [
 
 export function proxy(request: NextRequest) {
 	const url = request.nextUrl;
-	const path = url.pathname + url.search;
+	const pathname = url.pathname;
+	const search = url.search;
+	const path = pathname + search;
 	const host = request.headers.get("host") ?? "";
 
-	if (path.startsWith("/og") || path.startsWith("/ingest")) {
+	if (pathname.startsWith("/og") || pathname.startsWith("/ingest")) {
 		return NextResponse.next();
 	}
 
@@ -54,13 +56,12 @@ export function proxy(request: NextRequest) {
 	}
 
 	const actualHost = subpathTenant?.rewriteDomain ?? host;
-	const pathWithoutHost = path.startsWith(`/${actualHost}`)
-		? path.slice(actualHost.length + 1)
-		: path;
+	const pathnameWithoutHost = pathname.startsWith(`/${actualHost}`)
+		? pathname.slice(actualHost.length + 1)
+		: pathname;
 
 	if (isIP(actualHost) === 0) {
-		url.pathname = `/${actualHost}${pathWithoutHost}`;
-		url.search = "";
+		url.pathname = `/${actualHost}${pathnameWithoutHost}`;
 		return NextResponse.rewrite(url);
 	}
 
