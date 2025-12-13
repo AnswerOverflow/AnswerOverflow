@@ -6,8 +6,11 @@ import {
 } from "./posthog-client";
 
 export {
+	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
+	serverWithDiscordInfoToAnalyticsData,
+	threadWithDiscordInfoToAnalyticsData,
 } from "./discord-helpers";
 export type {
 	BaseProps,

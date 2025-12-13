@@ -76,3 +76,54 @@ export type ThreadProps = {
 	"Thread Parent Name"?: string;
 	"Thread Parent Type"?: number;
 };
+
+export const ConsentSource = {
+	ForumPostGuidelines: "forum-post-guidelines",
+	ReadTheRules: "read-the-rules",
+	ManageAccountMenu: "manage-account-menu",
+	MarkSolutionResponse: "mark-solution-response",
+	ManuallyPostedPrompt: "manually-posted-prompt",
+} as const;
+
+export type ConsentSource = (typeof ConsentSource)[keyof typeof ConsentSource];
+
+export type MarkSolutionCommandStatus = "Success" | "Error";
+
+export type ServerJoinProps = ServerPropsWithDiscordData;
+export type ServerLeaveProps = ServerPropsWithDiscordData;
+export type UserJoinedServerProps = ServerPropsWithDiscordData &
+	UserProps<"User">;
+export type UserLeftServerProps = ServerPropsWithDiscordData &
+	UserProps<"User">;
+
+export type QuestionAskedProps = ServerPropsWithDiscordData &
+	ChannelPropsWithDiscordData &
+	ThreadProps &
+	UserProps<"Question Asker"> &
+	Partial<MessageProps<"Question">>;
+
+export type QuestionSolvedProps = QuestionAskedProps &
+	UserProps<"Question Solver"> &
+	UserProps<"Mark As Solver"> &
+	MessageProps<"Solution"> & {
+		"Time To Solve In Ms": number;
+	};
+
+export type MarkSolutionUsedProps = UserProps<"User"> & {
+	Status: MarkSolutionCommandStatus;
+};
+
+export type LeaderboardViewedProps = UserProps<"User">;
+
+export type QuickActionCommandSentProps = UserProps<"User">;
+
+export type MarkSolutionInstructionsSentProps = QuestionAskedProps;
+
+export type DismissButtonClickedProps = UserProps<"User"> &
+	MessageProps<"Message"> & {
+		"Dismissed Message Type": "Mark Solution Instructions";
+	};
+
+export type UserGrantConsentProps = UserProps<"User"> & {
+	"Consent Source": ConsentSource;
+};

@@ -2,6 +2,7 @@ import type { ButtonInteraction, GuildMember } from "discord.js";
 import { Message, PermissionFlagsBits } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord, UnknownDiscordError } from "../core/discord-service";
+import { trackDismissButtonClicked } from "../utils/analytics";
 
 const DISMISS_ACTION_PREFIX = "dismiss";
 const DISMISS_OVERRIDE_PERMISSIONS = [
@@ -96,9 +97,13 @@ export function handleDismissButtonInteraction(interaction: ButtonInteraction) {
 			return yield* Effect.fail(new Error("Message not found"));
 		}
 
+		yield* trackDismissButtonClicked(dismisser, messageToDismiss).pipe(
+			Effect.catchAll(() => Effect.void),
+		);
+
 		yield* handleDismissMessage({
-			messageToDismiss: messageToDismiss as Message,
-			dismisser: dismisser as GuildMember,
+			messageToDismiss: messageToDismiss,
+			dismisser: dismisser,
 			allowedToDismissId,
 		}).pipe(
 			Effect.catchAll((error) =>

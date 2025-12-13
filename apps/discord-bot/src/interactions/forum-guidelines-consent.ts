@@ -3,6 +3,7 @@ import type { Message } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
 import { isHumanMessage } from "../utils/message-utils";
 
@@ -67,6 +68,13 @@ export function handleForumGuidelinesConsent(message: Message) {
 		);
 
 		if (granted) {
+			const member = message.member;
+			if (member) {
+				yield* trackUserGrantConsent(
+					member,
+					ConsentSource.ForumPostGuidelines,
+				).pipe(Effect.catchAll(() => Effect.void));
+			}
 			yield* Console.log(
 				`Granted forum guidelines consent for user ${message.author.id} in server ${server.discordId}`,
 			);

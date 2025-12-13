@@ -5,6 +5,11 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Effect } from "effect";
+import { Database } from "@packages/database/database";
+import {
+	trackAskedQuestion,
+	trackMarkSolutionInstructionsSent,
+} from "../utils/analytics";
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	makeDismissButton,
@@ -20,19 +25,82 @@ export class SendMarkSolutionInstructionsError extends Error {
 	}
 }
 
+type ChannelWithFlags = {
+	id: bigint;
+	name: string;
+	type: number;
+	serverId: bigint;
+	flags: {
+		indexingEnabled: boolean;
+		markSolutionEnabled: boolean;
+		sendMarkSolutionInstructionsInNewThreads: boolean;
+		autoThreadEnabled: boolean;
+		forumGuidelinesConsentEnabled: boolean;
+		solutionTagId?: bigint;
+		inviteCode?: string;
+	} | null;
+};
+
 export function handleSendMarkSolutionInstructions(
 	thread: ThreadChannel,
 	newlyCreated: boolean,
-	channelSettings: {
-		flags: {
-			sendMarkSolutionInstructionsInNewThreads: boolean;
-		};
-	} | null,
+	channelSettings: ChannelWithFlags | null,
 	threadOwner: GuildMember,
-	_question: Message | null,
+	question: Message | null,
 ) {
 	return Effect.gen(function* () {
-		if (!channelSettings?.flags.sendMarkSolutionInstructionsInNewThreads) {
+		if (!channelSettings) {
+			return;
+		}
+
+		const database = yield* Database;
+
+		const serverData = yield* database.private.servers.getServerByDiscordId({
+			discordId: BigInt(thread.guildId),
+		});
+
+		if (!serverData) {
+			return;
+		}
+
+		const preferencesData =
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId: BigInt(thread.guildId),
+				},
+			);
+
+		const server = {
+			discordId: serverData.discordId.toString(),
+			name: serverData.name,
+		};
+
+		const serverPreferences = preferencesData
+			? {
+					readTheRulesConsentEnabled:
+						preferencesData.readTheRulesConsentEnabled,
+				}
+			: undefined;
+
+		if (!channelSettings.flags) {
+			return;
+		}
+
+		if (
+			channelSettings.flags.indexingEnabled ||
+			channelSettings.flags.markSolutionEnabled
+		) {
+			yield* trackAskedQuestion(
+				thread,
+				channelSettings,
+				threadOwner,
+				server,
+				serverPreferences,
+				question,
+			).pipe(Effect.catchAll(() => Effect.void));
+		}
+
+		if (!channelSettings.flags.sendMarkSolutionInstructionsInNewThreads) {
 			return;
 		}
 
@@ -68,6 +136,15 @@ export function handleSendMarkSolutionInstructions(
 				);
 			},
 		});
+
+		yield* trackMarkSolutionInstructionsSent(
+			thread,
+			channelSettings,
+			threadOwner,
+			server,
+			serverPreferences,
+			question,
+		).pipe(Effect.catchAll(() => Effect.void));
 
 		console.log(
 			`Sent mark solution instructions to thread ${thread.id} (owner: ${threadOwner.id})`,

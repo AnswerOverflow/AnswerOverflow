@@ -30,6 +30,7 @@ export type MessageProps = {
 	"Server Id": Snowflake;
 	"Channel Id": Snowflake;
 	"Thread Id"?: Snowflake;
+	"Solution Id"?: Snowflake;
 	"Solution Author Id"?: Snowflake;
 };
 

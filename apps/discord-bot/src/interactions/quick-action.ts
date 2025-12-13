@@ -17,6 +17,7 @@ import {
 	Predicate,
 } from "effect";
 import { Discord } from "../core/discord-service";
+import { trackQuickActionCommandSent } from "../utils/analytics";
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	makeDismissButton,
@@ -178,6 +179,12 @@ export function handleQuickActionCommand(
 				components: [dismissRow],
 			}),
 		);
+
+		if (requestorAsMember) {
+			yield* trackQuickActionCommandSent(requestorAsMember).pipe(
+				Effect.catchAll(() => Effect.void),
+			);
+		}
 
 		yield* discord.callClient(() => interaction.deleteReply());
 	});

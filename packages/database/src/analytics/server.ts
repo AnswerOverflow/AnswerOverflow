@@ -3,8 +3,11 @@ export {
 	PostHogCaptureClientLayer,
 } from "./server/capture-client";
 export {
+	channelWithDiscordInfoToAnalyticsData,
 	memberToAnalyticsUser,
 	messageToAnalyticsMessage,
+	serverWithDiscordInfoToAnalyticsData,
+	threadWithDiscordInfoToAnalyticsData,
 } from "./server/discord-helpers";
 export type { ServerAnalyticsOptions } from "./server/index";
 export {

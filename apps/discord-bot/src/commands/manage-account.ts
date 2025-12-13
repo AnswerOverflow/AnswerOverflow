@@ -1,5 +1,6 @@
+import { PostHogCaptureClientLayer } from "@packages/database/analytics/server/capture-client";
 import { Database } from "@packages/database/database";
-import type { ChatInputCommandInteraction } from "discord.js";
+import type { ChatInputCommandInteraction, GuildMember } from "discord.js";
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -10,6 +11,7 @@ import {
 } from "discord.js";
 import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
+import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 
 export const menuButtonIds = {
 	consentButton: "consent-button",
@@ -225,6 +227,7 @@ export function handleManageAccountCommand(
 		});
 
 		collector.on("collect", async (buttonInteraction) => {
+			const member = buttonInteraction.member;
 			await Effect.runPromise(
 				handleManageAccountButtonPress(
 					buttonInteraction,
@@ -232,6 +235,9 @@ export function handleManageAccountCommand(
 					userIdBigInt,
 					serverIdBigInt,
 					state,
+					member instanceof Object && "id" in member
+						? (member as GuildMember)
+						: undefined,
 				),
 			);
 
@@ -255,6 +261,7 @@ function handleManageAccountButtonPress(
 	userId: bigint,
 	serverId: bigint,
 	state: ManageAccountState,
+	member?: GuildMember,
 ) {
 	return Effect.gen(function* () {
 		const customId =
@@ -299,6 +306,16 @@ function handleManageAccountButtonPress(
 				yield* database.private.user_server_settings.upsertUserServerSettings({
 					settings: updatedSettings,
 				});
+
+				if (canPubliclyDisplayMessages && member) {
+					yield* trackUserGrantConsent(
+						member,
+						ConsentSource.ManageAccountMenu,
+					).pipe(
+						Effect.provide(PostHogCaptureClientLayer),
+						Effect.catchAll(() => Effect.void),
+					);
+				}
 
 				state.userServerSettings.flags.canPubliclyDisplayMessages =
 					canPubliclyDisplayMessages;
