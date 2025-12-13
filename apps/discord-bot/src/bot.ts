@@ -1,6 +1,8 @@
 import { Console, Effect, Layer } from "effect";
+import { BugReportCommandHandlerLayer } from "./commands/bug-report";
 import { ChannelSettingsCommandHandlerLayer } from "./commands/channel-settings";
 import { DebugCommandHandlerLayer } from "./commands/debug";
+import { FeedbackCommandHandlerLayer } from "./commands/feedback";
 import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
 import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
@@ -10,6 +12,7 @@ import { ForumGuidelinesConsentHandlerLayer } from "./interactions/forum-guideli
 import { QuickActionCommandHandlerLayer } from "./interactions/quick-action";
 import { ReadTheRulesConsentHandlerLayer } from "./interactions/read-the-rules-consent";
 import { AutoThreadHandlerLayer } from "./services/auto-thread";
+import { DMForwardingHandlerLayer } from "./services/dm-forwarding";
 import { IndexingHandlerLayer } from "./services/indexing";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./services/send-mark-solution-instructions-handler";
 import { StatusUpdateHandlerLayer } from "./services/status-update";
@@ -38,6 +41,9 @@ export const BotLayers = Layer.mergeAll(
 	SendMarkSolutionInstructionsHandlerLayer,
 	StatusUpdateHandlerLayer,
 	IndexingHandlerLayer,
+	DMForwardingHandlerLayer,
+	FeedbackCommandHandlerLayer,
+	BugReportCommandHandlerLayer,
 );
 
 export const program = Effect.gen(function* () {
