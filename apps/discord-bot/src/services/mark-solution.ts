@@ -57,7 +57,7 @@ export function makeMarkSolutionResponse({
 		console.log("[makeMarkSolutionResponse] Adding learn more field");
 		embed.addFields({
 			name: "Learn more",
-			value: "https://answeroverflow.com",
+			value: "https://answeroverflow.com/about",
 		});
 	}
 	console.log("[makeMarkSolutionResponse] Setting description");
