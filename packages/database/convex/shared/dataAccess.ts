@@ -16,10 +16,8 @@ import {
 	type MessageWithPrivacyFlags,
 	shouldAnonymizeMessage,
 } from "./messagePrivacy";
-import {
-	enrichMessageForDisplay,
-	type EnrichedMessage as SharedEnrichedMessage,
-} from "./shared";
+import { enrichMessageForDisplay } from "./messages";
+import type { EnrichedMessage as SharedEnrichedMessage } from "./shared";
 
 function createRequestCache() {
 	const cache = new Map<string, Promise<never>>();
@@ -37,7 +35,7 @@ function createRequestCache() {
 	};
 }
 
-function createDataAccessCache(ctx: QueryCtx) {
+export function createDataAccessCache(ctx: QueryCtx) {
 	const cache = createRequestCache();
 
 	return {

@@ -24,8 +24,6 @@ export {
 	deleteMessageInternalLogic,
 	type EnrichedMessage,
 	type EnrichedMessageReference,
-	enrichMessageForDisplay,
-	enrichMessagesWithData,
 	findMessagesByAuthorId,
 	findReactionsByMessageId,
 	findSolutionsByQuestionId,
