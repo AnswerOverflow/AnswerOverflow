@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@packages/ui/components/button";
+import { isHydrated } from "@packages/ui/components/hydration-context";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Check, Copy, WrapText } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
@@ -30,26 +31,24 @@ function useHighlightedCode(
 	});
 }
 
-function SuspenseClientOnly({ children }: { children: React.ReactNode }) {
-	const [shouldWrapInSuspense, setShouldWrapInSuspense] = useState(false);
+function SuspenseClientOnly({
+	children,
+	fallback,
+}: {
+	children: React.ReactNode;
+	fallback: React.ReactNode;
+}) {
+	const [shouldWrapInSuspense, setShouldWrapInSuspense] = useState(isHydrated);
 
 	useEffect(() => {
 		setShouldWrapInSuspense(true);
 	}, []);
 
 	if (!shouldWrapInSuspense) {
-		return children;
+		return fallback;
 	}
 
-	return (
-		<Suspense
-			fallback={
-				<div className="h-full w-full bg-background/80 backdrop-blur-sm" />
-			}
-		>
-			{children}
-		</Suspense>
-	);
+	return <Suspense fallback={fallback}>{children}</Suspense>;
 }
 
 function CodeBlockButtons({
@@ -93,6 +92,26 @@ function CodeBlockButtons({
 	);
 }
 
+function CodeBlockFallback({
+	content,
+	className,
+	wrap,
+}: {
+	content: string;
+	className?: string;
+	wrap: boolean;
+}) {
+	const wrapClasses = wrap
+		? "whitespace-pre-wrap break-words"
+		: "w-fit min-w-full";
+
+	return (
+		<pre className={`p-4 pr-12 m-0 ${wrapClasses} ${className || ""}`}>
+			<code>{content}</code>
+		</pre>
+	);
+}
+
 function CodeBlockInternal({
 	lang,
 	content,
@@ -119,6 +138,25 @@ function CodeBlockInternal({
 			// biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Shiki syntax highlighting
 			dangerouslySetInnerHTML={{ __html: html }}
 		/>
+	);
+}
+
+function InlineCodeFallback({
+	code,
+	className,
+}: {
+	code: string;
+	className?: string;
+}) {
+	return (
+		<span
+			className={cn(
+				"inline-code not-prose inline-block rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-sm *:whitespace-normal",
+				className,
+			)}
+		>
+			<code>{code}</code>
+		</span>
 	);
 }
 
@@ -165,7 +203,15 @@ export function CodeBlock({
 				onToggleWrap={() => setWrap(!wrap)}
 			/>
 			<div className="overflow-x-auto">
-				<SuspenseClientOnly>
+				<SuspenseClientOnly
+					fallback={
+						<CodeBlockFallback
+							content={content}
+							wrap={wrap}
+							className="dark:hidden block w-full"
+						/>
+					}
+				>
 					<CodeBlockInternal
 						lang={lang}
 						content={content}
@@ -174,7 +220,15 @@ export function CodeBlock({
 						className="dark:hidden block w-full"
 					/>
 				</SuspenseClientOnly>
-				<SuspenseClientOnly>
+				<SuspenseClientOnly
+					fallback={
+						<CodeBlockFallback
+							content={content}
+							wrap={wrap}
+							className="hidden dark:block w-full"
+						/>
+					}
+				>
 					<CodeBlockInternal
 						lang={lang}
 						content={content}
@@ -197,7 +251,14 @@ export function InlineCode({
 }) {
 	return (
 		<span className="relative inline-block">
-			<SuspenseClientOnly>
+			<SuspenseClientOnly
+				fallback={
+					<InlineCodeFallback
+						code={code}
+						className="dark:hidden inline-block"
+					/>
+				}
+			>
 				<InlineCodeInternal
 					code={code}
 					language={language}
@@ -205,7 +266,14 @@ export function InlineCode({
 					className="dark:hidden inline-block"
 				/>
 			</SuspenseClientOnly>
-			<SuspenseClientOnly>
+			<SuspenseClientOnly
+				fallback={
+					<InlineCodeFallback
+						code={code}
+						className="hidden dark:inline-block"
+					/>
+				}
+			>
 				<InlineCodeInternal
 					code={code}
 					language={language}

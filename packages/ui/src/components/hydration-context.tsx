@@ -9,6 +9,17 @@ import {
 	useSyncExternalStore,
 } from "react";
 
+declare global {
+	interface Window {
+		__REACT_HYDRATED__?: boolean;
+	}
+}
+
+export function isHydrated(): boolean {
+	if (typeof window === "undefined") return false;
+	return window.__REACT_HYDRATED__ === true;
+}
+
 type HydrationContextValue = {
 	isHydrationRender: () => boolean;
 	subscribe: (callback: () => void) => () => void;
@@ -22,6 +33,7 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
 
 	useEffect(() => {
 		isHydrationRenderRef.current = false;
+		window.__REACT_HYDRATED__ = true;
 		for (const callback of subscribersRef.current) {
 			callback();
 		}
