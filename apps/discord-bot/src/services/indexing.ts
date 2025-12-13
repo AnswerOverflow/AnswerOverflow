@@ -233,6 +233,7 @@ function storeMessages(
 	messages: Message[],
 	discordServerId: string,
 	channelId: string,
+	currentLastIndexedSnowflake?: bigint | null,
 ) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
@@ -402,20 +403,29 @@ function storeMessages(
 			if (lastMessage) {
 				const newLastIndexedBigInt = BigInt(lastMessage.id);
 
-				yield* Effect.logDebug(
-					`Updating lastIndexedSnowflake for channel ${channelId} to ${newLastIndexedBigInt}`,
-				);
+				if (
+					currentLastIndexedSnowflake &&
+					newLastIndexedBigInt <= currentLastIndexedSnowflake
+				) {
+					yield* Console.error(
+						`Refusing to update lastIndexedSnowflake for channel ${channelId}: new value ${newLastIndexedBigInt} is not greater than current value ${currentLastIndexedSnowflake}`,
+					);
+				} else {
+					yield* Effect.logDebug(
+						`Updating lastIndexedSnowflake for channel ${channelId} to ${newLastIndexedBigInt}`,
+					);
 
-				yield* database.private.channels.updateChannelSettings({
-					channelId: BigInt(channelId),
-					settings: {
-						lastIndexedSnowflake: newLastIndexedBigInt,
-					},
-				});
+					yield* database.private.channels.updateChannelSettings({
+						channelId: BigInt(channelId),
+						settings: {
+							lastIndexedSnowflake: newLastIndexedBigInt,
+						},
+					});
 
-				yield* Effect.logDebug(
-					`Successfully updated lastIndexedSnowflake for channel ${channelId}`,
-				);
+					yield* Effect.logDebug(
+						`Successfully updated lastIndexedSnowflake for channel ${channelId}`,
+					);
+				}
 			}
 		} else {
 			yield* Effect.logDebug(
@@ -473,7 +483,12 @@ function indexTextChannel(
 			);
 		}
 
-		yield* storeMessages(messages, discordServerId, channel.id);
+		yield* storeMessages(
+			messages,
+			discordServerId,
+			channel.id,
+			lastIndexedSnowflake,
+		);
 
 		const threadsToIndex = Arr.sort(
 			Arr.filter(
@@ -514,7 +529,12 @@ function indexTextChannel(
 							thread.name,
 							threadLastIndexed?.toString() ?? undefined,
 						);
-						yield* storeMessages(threadMessages, discordServerId, thread.id);
+						yield* storeMessages(
+							threadMessages,
+							discordServerId,
+							thread.id,
+							threadLastIndexed,
+						);
 					}).pipe(
 						Effect.catchAll((error) =>
 							Console.error(
@@ -647,7 +667,12 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 						thread.name,
 						threadLastIndexedSnowflake?.toString() ?? undefined,
 					);
-					yield* storeMessages(threadMessages, discordServerId, thread.id);
+					yield* storeMessages(
+						threadMessages,
+						discordServerId,
+						thread.id,
+						threadLastIndexedSnowflake,
+					);
 
 					completedThreads++;
 					if (
@@ -686,20 +711,26 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 				const oldLastIndexed = channelSettings.flags?.lastIndexedSnowflake;
 				const newLastIndexedBigInt = BigInt(latestThread.id);
 
-				yield* Effect.logDebug(
-					`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt} (latest thread: ${latestThread.name})`,
-				);
+				if (oldLastIndexed && newLastIndexedBigInt <= oldLastIndexed) {
+					yield* Console.error(
+						`Refusing to update forum lastIndexedSnowflake for ${channel.name} (${channel.id}): new value ${newLastIndexedBigInt} is not greater than current value ${oldLastIndexed}`,
+					);
+				} else {
+					yield* Effect.logDebug(
+						`Updating forum lastIndexedSnowflake for ${channel.name} (${channel.id}): ${oldLastIndexed ?? "null"} -> ${newLastIndexedBigInt} (latest thread: ${latestThread.name})`,
+					);
 
-				yield* database.private.channels.updateChannelSettings({
-					channelId: BigInt(channel.id),
-					settings: {
-						lastIndexedSnowflake: newLastIndexedBigInt,
-					},
-				});
+					yield* database.private.channels.updateChannelSettings({
+						channelId: BigInt(channel.id),
+						settings: {
+							lastIndexedSnowflake: newLastIndexedBigInt,
+						},
+					});
 
-				yield* Effect.logDebug(
-					`Successfully updated forum lastIndexedSnowflake for ${channel.name}`,
-				);
+					yield* Effect.logDebug(
+						`Successfully updated forum lastIndexedSnowflake for ${channel.name}`,
+					);
+				}
 			}
 		} else {
 			yield* Effect.logDebug(
