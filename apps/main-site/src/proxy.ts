@@ -28,7 +28,7 @@ export function proxy(request: NextRequest) {
 	const path = pathname + search;
 	const host = request.headers.get("host") ?? "";
 
-	if (pathname.startsWith("/og") || pathname.startsWith("/a")) {
+	if (pathname.startsWith("/og")) {
 		return NextResponse.next();
 	}
 

@@ -76,7 +76,7 @@ Allow: /api/og/
 Disallow: /api/
 Disallow: /dashboard/
 Disallow: /oemf7z50uh7w/
-Disallow: /a/
+Disallow: /ingest/
 Disallow: /u/
 Disallow: /*/u/
 Sitemap: ${sitemapUrl}

@@ -41,7 +41,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	}
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value);
-	return generateMessagePageMetadata(headerData, params.messageId, cursor);
+	return generateMessagePageMetadata(
+		headerData,
+		params.messageId,
+		cursor,
+		true,
+	);
 }
 
 async function RepliesLoader(props: {
