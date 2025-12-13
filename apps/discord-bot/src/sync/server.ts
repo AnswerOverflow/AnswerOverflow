@@ -158,20 +158,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					},
 				]);
 
-				yield* Effect.forEach(guilds, (guild) =>
-					Effect.gen(function* () {
-						const leftServer = yield* leaveServerIfNecessary(guild);
-						if (leftServer) {
-							return;
-						}
-						yield* syncGuild(guild);
-					}).pipe(
-						Effect.catchAll((error) =>
-							Console.error(`Error syncing guild ${guild.id}:`, error),
-						),
-					),
-				);
-
 				const allServers = servers ?? [];
 
 				const serversToMarkAsKicked = allServers.filter(
