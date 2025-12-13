@@ -31,34 +31,35 @@ export function proxy(request: NextRequest) {
 		return NextResponse.next();
 	}
 
-	const subpathTenant = subpathTenants.find(
-		(tenant) =>
-			normalizedHost?.includes(tenant.contentDomain) ||
-			normalizedHost === tenant.rewriteDomain,
+	const subpathTenant = subpathTenants.find((tenant) =>
+		normalizedHost?.includes(tenant.contentDomain),
 	);
 
 	if (subpathTenant) {
-		const tenantSubpath = normalizeSubpath(subpathTenant.subpath);
-		if (tenantSubpath) {
-			if (normalizedHost?.includes(subpathTenant.contentDomain)) {
-				const redirect = new URL(
-					`https://${subpathTenant.rewriteDomain}/${tenantSubpath}${pathname}${url.search}`,
-					request.url,
-				);
-				return NextResponse.redirect(redirect, 308);
-			}
+		const redirect = new URL(
+			`https://${subpathTenant.rewriteDomain}/${subpathTenant.subpath}${pathname}${url.search}`,
+			request.url,
+		);
+		return NextResponse.redirect(redirect, 308);
+	}
 
-			if (
-				pathname === `/${tenantSubpath}` ||
-				pathname.startsWith(`/${tenantSubpath}/`)
-			) {
-				const rewrittenPath = pathname.replace(`/${tenantSubpath}`, "") || "/";
-				const rewritten = new URL(
-					`/${subpathTenant.rewriteDomain}${rewrittenPath}${url.search}`,
-					request.url,
-				);
-				return NextResponse.rewrite(rewritten);
-			}
+	const subpathRewriteTenant = subpathTenants.find(
+		(tenant) => normalizedHost === tenant.rewriteDomain,
+	);
+
+	if (subpathRewriteTenant) {
+		const tenantSubpath = normalizeSubpath(subpathRewriteTenant.subpath);
+		if (
+			tenantSubpath &&
+			(pathname === `/${tenantSubpath}` ||
+				pathname.startsWith(`/${tenantSubpath}/`))
+		) {
+			const rewrittenPath = pathname.replace(`/${tenantSubpath}`, "") || "/";
+			const rewritten = new URL(
+				`/${subpathRewriteTenant.rewriteDomain}${rewrittenPath}${url.search}`,
+				request.url,
+			);
+			return NextResponse.rewrite(rewritten);
 		}
 	}
 
