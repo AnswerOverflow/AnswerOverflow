@@ -55,6 +55,9 @@ export function usePaginatedQueryWithCursor<
 	const argsKey = skip
 		? "skip"
 		: JSON.stringify(convexToJson(args as Record<string, Value>));
+	const argsKeyRef = useRef(argsKey);
+	argsKeyRef.current = argsKey;
+
 	const [paginationState, setPaginationState] = useState<{
 		argsKey: string;
 		additionalPages: Array<{ cursor: string; numItems: number }>;
@@ -63,18 +66,24 @@ export function usePaginatedQueryWithCursor<
 	const additionalPages =
 		paginationState.argsKey === argsKey ? paginationState.additionalPages : [];
 
-	const setAdditionalPages = (
-		updater: (
-			prev: Array<{ cursor: string; numItems: number }>,
-		) => Array<{ cursor: string; numItems: number }>,
-	) => {
-		setPaginationState((prev) => ({
-			argsKey,
-			additionalPages: updater(
-				prev.argsKey === argsKey ? prev.additionalPages : [],
-			),
-		}));
-	};
+	const setAdditionalPages = useCallback(
+		(
+			updater: (
+				prev: Array<{ cursor: string; numItems: number }>,
+			) => Array<{ cursor: string; numItems: number }>,
+		) => {
+			setPaginationState((prev) => {
+				const currentArgsKey = argsKeyRef.current;
+				return {
+					argsKey: currentArgsKey,
+					additionalPages: updater(
+						prev.argsKey === currentArgsKey ? prev.additionalPages : [],
+					),
+				};
+			});
+		},
+		[],
+	);
 
 	const queries = useMemo(() => {
 		if (skip) return {};
