@@ -57,7 +57,7 @@ export function syncGuild(guild: Guild) {
 			const storage = yield* Storage;
 			yield* storage
 				.uploadFileFromUrl({
-					id: guild.icon,
+					id: `${guild.id}/${guild.icon}`,
 					filename: "icon.png",
 					contentType: "image/png",
 					url: `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=48`,
