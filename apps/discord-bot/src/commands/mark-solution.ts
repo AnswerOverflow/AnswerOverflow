@@ -16,6 +16,12 @@ class MarkSolutionTimeoutError extends Data.TaggedError(
 	readonly message: string;
 }> {}
 
+class MarkSolutionResponseBuildError extends Data.TaggedError(
+	"MarkSolutionResponseBuildError",
+)<{
+	readonly cause: unknown;
+}> {}
+
 export function handleMarkSolutionCommand(
 	interaction: ContextMenuCommandInteraction,
 ) {
@@ -23,13 +29,9 @@ export function handleMarkSolutionCommand(
 		const database = yield* Database;
 		const discord = yield* Discord;
 
-		console.log("[mark-solution] Starting command");
-
 		yield* discord.callClient(() =>
 			interaction.deferReply({ ephemeral: true }),
 		);
-
-		console.log("[mark-solution] Deferred reply");
 
 		if (!interaction.channel) {
 			yield* discord.callClient(() =>
@@ -50,8 +52,6 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		console.log("[mark-solution] Fetched target message");
-
 		if (!targetMessage.guildId) {
 			yield* discord.callClient(() =>
 				interaction.editReply({
@@ -61,11 +61,9 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		console.log("[mark-solution] Getting server from database");
 		const server = yield* database.private.servers.getServerByDiscordId({
 			discordId: BigInt(targetMessage.guildId),
 		});
-		console.log("[mark-solution] Got server from database");
 
 		if (!server) {
 			yield* discord.callClient(() =>
@@ -97,12 +95,10 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		console.log("[mark-solution] Getting channel settings from database");
 		const channelSettings =
 			yield* database.private.channels.findChannelByDiscordId({
 				discordId: BigInt(parentChannel.id),
 			});
-		console.log("[mark-solution] Got channel settings from database");
 
 		if (!channelSettings || !channelSettings.flags?.markSolutionEnabled) {
 			yield* discord.callClient(() =>
@@ -115,7 +111,6 @@ export function handleMarkSolutionCommand(
 
 		let questionMessage = null;
 
-		console.log("[mark-solution] Fetching question message");
 		if (parentChannel.type === ChannelType.GuildForum) {
 			const fetchedMessage = yield* discord
 				.callClient(() => thread.messages.fetch(thread.id))
@@ -130,7 +125,6 @@ export function handleMarkSolutionCommand(
 				.pipe(Effect.catchAll(() => Effect.succeed(null)));
 			questionMessage = fetchedMessage ?? null;
 		}
-		console.log("[mark-solution] Got question message");
 
 		if (!questionMessage) {
 			yield* discord.callClient(() =>
@@ -195,26 +189,22 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		console.log("[mark-solution] Getting server preferences from database");
 		const serverPreferencesLiveData =
 			yield* database.private.server_preferences.getServerPreferencesByServerId(
 				{
 					serverId: server.discordId,
 				},
 			);
-		console.log("[mark-solution] Got server preferences from database");
 
 		const serverPreferences = serverPreferencesLiveData ?? null;
 		const data = yield* discord.callClient(() =>
 			toAOMessage(targetMessage, server.discordId.toString()),
 		);
 
-		console.log("[mark-solution] Upserting message to database");
 		yield* database.private.messages.upsertMessage({
 			...toUpsertMessageArgs(data),
 			ignoreChecks: false,
 		});
-		console.log("[mark-solution] Upserted message to database");
 
 		yield* Effect.gen(function* () {
 			const solutionTagId = channelSettings?.flags?.solutionTagId;
@@ -304,7 +294,6 @@ export function handleMarkSolutionCommand(
 			),
 		);
 
-		console.log("[mark-solution] Building response");
 		const { embed, components } = yield* Effect.try({
 			try: () =>
 				makeMarkSolutionResponse({
@@ -319,17 +308,9 @@ export function handleMarkSolutionCommand(
 						flags: channelSettings.flags,
 					},
 				}),
-			catch: (error) => {
-				console.error(
-					"[mark-solution] Error in makeMarkSolutionResponse:",
-					error,
-				);
-				return new Error(`Failed to build response: ${error}`);
-			},
+			catch: (cause) => new MarkSolutionResponseBuildError({ cause }),
 		});
-		console.log("[mark-solution] Response built");
 
-		console.log("[mark-solution] Deleting deferred reply");
 		yield* discord.callClient(() => interaction.deleteReply());
 		yield* discord.callClient(() =>
 			interaction.followUp({
@@ -337,7 +318,6 @@ export function handleMarkSolutionCommand(
 				components: components ? [components] : undefined,
 			}),
 		);
-		console.log("[mark-solution] Command completed successfully");
 	});
 }
 
@@ -363,33 +343,60 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 						}),
 					);
 
-					const result = yield* commandWithTimeout.pipe(Effect.either);
+					yield* commandWithTimeout.pipe(
+						Effect.catchAll((error) =>
+							Effect.gen(function* () {
+								console.error("Mark solution command failed:", error);
 
-					if (result._tag === "Left") {
-						const error = result.left;
-						console.error("Mark solution command failed:", error);
+								const errorMessage = "An unexpected error occurred";
 
-						const errorMessage = error.message;
+								if (interaction.deferred || interaction.replied) {
+									yield* discord
+										.callClient(() =>
+											interaction.editReply({
+												content: `An error occurred: ${errorMessage}`,
+											}),
+										)
+										.pipe(Effect.catchAll(() => Effect.void));
+								} else {
+									yield* discord
+										.callClient(() =>
+											interaction.reply({
+												content: `An error occurred: ${errorMessage}`,
+												ephemeral: true,
+											}),
+										)
+										.pipe(Effect.catchAll(() => Effect.void));
+								}
+							}),
+						),
+						Effect.catchAllDefect((defect) =>
+							Effect.gen(function* () {
+								console.error("Mark solution command defect:", defect);
 
-						if (interaction.deferred || interaction.replied) {
-							yield* discord
-								.callClient(() =>
-									interaction.editReply({
-										content: `An error occurred: ${errorMessage}`,
-									}),
-								)
-								.pipe(Effect.catchAll(() => Effect.void));
-						} else {
-							yield* discord
-								.callClient(() =>
-									interaction.reply({
-										content: `An error occurred: ${errorMessage}`,
-										ephemeral: true,
-									}),
-								)
-								.pipe(Effect.catchAll(() => Effect.void));
-						}
-					}
+								if (interaction.deferred || interaction.replied) {
+									yield* discord
+										.callClient(() =>
+											interaction.editReply({
+												content:
+													"An unexpected error occurred. Please try again.",
+											}),
+										)
+										.pipe(Effect.catchAll(() => Effect.void));
+								} else {
+									yield* discord
+										.callClient(() =>
+											interaction.reply({
+												content:
+													"An unexpected error occurred. Please try again.",
+												ephemeral: true,
+											}),
+										)
+										.pipe(Effect.catchAll(() => Effect.void));
+								}
+							}),
+						),
+					);
 				}
 				return;
 			}),
