@@ -2,8 +2,8 @@ import type { UserServerSettings } from "../db/schema";
 import { decodeUserServerSettingsBitfield } from "../utils/bitfield";
 
 export interface NewUserServerSettings {
-	serverId: string;
-	userId: string;
+	serverId: bigint;
+	userId: bigint;
 	permissions: number;
 	canPubliclyDisplayMessages: boolean;
 	messageIndexingDisabled: boolean;
@@ -17,8 +17,8 @@ export function transformUserServerSettings(
 	const flags = decodeUserServerSettingsBitfield(row.bitfield);
 
 	return {
-		serverId: row.serverId,
-		userId: row.userId,
+		serverId: BigInt(row.serverId),
+		userId: BigInt(row.userId),
 		permissions: 0,
 		canPubliclyDisplayMessages: flags.canPubliclyDisplayMessages,
 		messageIndexingDisabled: flags.messageIndexingDisabled,

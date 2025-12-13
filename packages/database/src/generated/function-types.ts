@@ -56,6 +56,7 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.findManyUserServerSettings": "query",
   "user_server_settings.findUserServerSettingsById": "query",
   "user_server_settings.upsertManyBotUserServerSettings": "mutation",
+  "user_server_settings.upsertManyUserServerSettings": "mutation",
   "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
@@ -71,7 +72,7 @@ export const NAMESPACE_STRUCTURE = {
   "search": ["getRecentThreads","getSimilarThreads","publicSearch"],
   "server_preferences": ["getServerPreferencesByServerId","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
-  "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertUserServerSettings"]
+  "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
 } as const;
 
 export type FunctionPath = keyof typeof FUNCTION_TYPE_MAP;
