@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import {
 	ChannelPageLoader,
 	fetchChannelPageHeaderData,
+	generateChannelPageMetadata,
 } from "../../../../components/channel-page-loader";
 import { runtime } from "../../../../lib/runtime";
 
@@ -36,37 +37,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		return {};
 	}
 
-	const pageData = await Effect.gen(function* () {
-		const database = yield* Database;
-		const liveData = yield* database.private.channels.getChannelPageHeaderData({
-			serverDiscordId: tenantData.server.discordId,
-			channelDiscordId: BigInt(params.channelId),
-		});
-		return liveData;
-	}).pipe(runtime.runPromise);
+	const headerData = await fetchChannelPageHeaderData(
+		tenantData.server.discordId,
+		BigInt(params.channelId),
+	);
 
-	if (!pageData) {
-		return {};
-	}
-
-	const { server, selectedChannel } = pageData;
-	const description =
-		server.description ??
-		`Browse threads from #${selectedChannel.name} in the ${server.name} Discord community`;
-
-	return {
-		title: `#${selectedChannel.name} - ${server.name}`,
-		description,
-		openGraph: {
-			images: [`/og/community?id=${server.discordId.toString()}&tenant=true`],
-			title: `#${selectedChannel.name} - ${server.name}`,
-			description,
-		},
-		alternates: {
-			canonical: `/c/${params.channelId}`,
-		},
-		robots: cursor ? "noindex, follow" : "index, follow",
-	};
+	const basePath = `/c/${params.channelId}`;
+	return generateChannelPageMetadata(headerData, basePath, cursor, true);
 }
 
 export default async function TenantChannelPage(props: Props) {

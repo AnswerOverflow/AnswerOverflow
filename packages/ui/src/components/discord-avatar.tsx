@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "../lib/utils";
+import { makeUserIconLink } from "../utils/discord-avatar";
 import {
 	Avatar,
 	AvatarFallback,
@@ -19,13 +20,7 @@ export interface DiscordAvatarProps extends Omit<AvatarProps, "url" | "alt"> {
 	size?: number;
 }
 
-export function makeUserIconLink(user: DiscordUser, size: number = 64): string {
-	if (user.avatar) {
-		return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.webp?size=${size}`;
-	}
-	const defaultAvatar = Number(BigInt(user.id) % 5n).toString();
-	return `/discord/${defaultAvatar}.png`;
-}
+export { makeUserIconLink };
 
 export function DiscordAvatar(props: DiscordAvatarProps) {
 	const { className, size = 64, user, ...rest } = props;

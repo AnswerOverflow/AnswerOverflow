@@ -33,13 +33,24 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		server.description ??
 		`Browse ${channels.length} indexed channels from the ${server.name} Discord community`;
 
+	const title = `${server.name} - AnswerOverflow`;
+	const ogImage = `/og/community?id=${params.serverId}`;
+
 	return {
-		title: `${server.name} - AnswerOverflow`,
+		title,
 		description,
 		openGraph: {
-			images: [`/og/community?id=${params.serverId}`],
-			title: `${server.name} - AnswerOverflow`,
+			type: "website",
+			siteName: "Answer Overflow",
+			images: [ogImage],
+			title,
 			description,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title,
+			description,
+			images: [ogImage],
 		},
 		alternates: {
 			canonical: `/c/${params.serverId}`,
