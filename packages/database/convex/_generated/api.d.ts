@@ -22,6 +22,7 @@ import type * as client_private from "../client/private.js";
 import type * as http from "../http.js";
 import type * as migrations_index from "../migrations/index.js";
 import type * as private_attachments from "../private/attachments.js";
+import type * as private_cache from "../private/cache.js";
 import type * as private_channels from "../private/channels.js";
 import type * as private_discord_accounts from "../private/discord_accounts.js";
 import type * as private_ignored_discord_accounts from "../private/ignored_discord_accounts.js";
@@ -76,6 +77,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "migrations/index": typeof migrations_index;
   "private/attachments": typeof private_attachments;
+  "private/cache": typeof private_cache;
   "private/channels": typeof private_channels;
   "private/discord_accounts": typeof private_discord_accounts;
   "private/ignored_discord_accounts": typeof private_ignored_discord_accounts;

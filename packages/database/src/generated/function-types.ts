@@ -5,6 +5,8 @@ export const FUNCTION_TYPE_MAP = {
   "attachments.updateAttachmentStorageId": "mutation",
   "attachments.uploadAttachmentFromUrl": "action",
   "attachments.uploadEmbedImageFromUrl": "action",
+  "cache.findDiscordOAuthAccountByDiscordId": "query",
+  "cache.invalidateUserGuildsCache": "mutation",
   "channels.deleteChannel": "mutation",
   "channels.findAllChannelsByServerId": "query",
   "channels.findChannelByDiscordId": "query",
@@ -53,10 +55,11 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
-export const NAMESPACES = ["attachments","channels","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","user_server_settings"] as const;
+export const NAMESPACES = ["attachments","cache","channels","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","user_server_settings"] as const;
 
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
+  "cache": ["findDiscordOAuthAccountByDiscordId","invalidateUserGuildsCache"],
   "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findManyChannelsByDiscordIds","getChannelPageHeaderData","getChannelPageThreads","updateChannelSettings","upsertChannel"],
   "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
