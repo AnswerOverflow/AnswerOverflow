@@ -501,35 +501,35 @@ function uploadMedia(messages: Message[], channelId: string) {
 	});
 }
 
-function getChannelSettingsForIndexing(channel: GuildChannel) {
-	return Effect.gen(function* () {
-		const database = yield* Database;
+type ChannelSettings = {
+	flags: {
+		indexingEnabled: boolean;
+		lastIndexedSnowflake?: bigint | null;
+		inviteCode?: string;
+	};
+};
 
+function shouldIndexChannel(
+	channel: GuildChannel,
+	settings: ChannelSettings,
+): Effect.Effect<boolean, never, never> {
+	return Effect.gen(function* () {
 		if (!canBotViewChannel(channel)) {
 			yield* Effect.logDebug(
 				`Bot cannot view channel ${channel.name} (${channel.id}), skipping`,
 			);
-			return null;
+			return false;
 		}
 
-		const channelSettings =
-			yield* database.private.channels.findChannelByDiscordId({
-				discordId: BigInt(channel.id),
-			});
-
-		if (!channelSettings?.flags.indexingEnabled) {
-			return null;
-		}
-
-		const rawLastIndexedSnowflake = channelSettings.flags.lastIndexedSnowflake;
+		const rawLastIndexedSnowflake = settings.flags.lastIndexedSnowflake;
 		if (shouldSkipIndexing(rawLastIndexedSnowflake)) {
 			yield* Effect.logDebug(
 				`Last indexed snowflake is recent, skipping indexing for ${channel.name} (${channel.id})`,
 			);
-			return null;
+			return false;
 		}
 
-		return channelSettings;
+		return true;
 	});
 }
 
@@ -573,12 +573,13 @@ function extractThreadsFromMessages(messages: Message[]) {
 function indexTextChannel(
 	channel: TextChannel | NewsChannel,
 	discordServerId: string,
+	channelSettings: ChannelSettings,
 ) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		const channelSettings = yield* getChannelSettingsForIndexing(channel);
-		if (!channelSettings) return;
+		const shouldIndex = yield* shouldIndexChannel(channel, channelSettings);
+		if (!shouldIndex) return;
 
 		const lastIndexedSnowflake = getEffectiveStartSnowflake(
 			channelSettings.flags.lastIndexedSnowflake,
@@ -693,10 +694,14 @@ function filterOutOfDateThreads(
 	};
 }
 
-function indexForumChannel(channel: ForumChannel, discordServerId: string) {
+function indexForumChannel(
+	channel: ForumChannel,
+	discordServerId: string,
+	channelSettings: ChannelSettings,
+) {
 	return Effect.gen(function* () {
-		const channelSettings = yield* getChannelSettingsForIndexing(channel);
-		if (!channelSettings) return;
+		const shouldIndex = yield* shouldIndexChannel(channel, channelSettings);
+		if (!shouldIndex) return;
 
 		const lastIndexedSnowflake = getEffectiveStartSnowflake(
 			channelSettings.flags.lastIndexedSnowflake,
@@ -780,25 +785,36 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 
 function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 	return Effect.gen(function* () {
+		const database = yield* Database;
 		const guildStartTime = yield* Clock.currentTimeMillis;
 		yield* Console.log(
 			`[${guildIndex + 1}/${totalGuilds}] Starting indexing for guild: ${guild.name} (${guild.id})`,
 		);
 
-		yield* syncGuild(guild);
+		yield* syncGuild(guild).pipe(Effect.forkDaemon);
 
-		const channels = Arr.fromIterable(guild.channels.cache.values());
+		const channelSettingsWithIndexing =
+			yield* database.private.channels.findChannelSettingsWithIndexingEnabled({
+				serverId: BigInt(guild.id),
+			});
+
+		const settingsMap = new Map(
+			channelSettingsWithIndexing.map((s) => [s.channelId.toString(), s]),
+		);
+
+		const discordChannels = Arr.fromIterable(guild.channels.cache.values());
 
 		const indexableChannels = Arr.filter(
-			channels,
+			discordChannels,
 			(channel) =>
-				channel.type === ChannelType.GuildText ||
-				channel.type === ChannelType.GuildAnnouncement ||
-				channel.type === ChannelType.GuildForum,
+				(channel.type === ChannelType.GuildText ||
+					channel.type === ChannelType.GuildAnnouncement ||
+					channel.type === ChannelType.GuildForum) &&
+				settingsMap.has(channel.id),
 		);
 
 		yield* Console.log(
-			`[${guildIndex + 1}/${totalGuilds}] ${guild.name}: Found ${indexableChannels.length} indexable channels`,
+			`[${guildIndex + 1}/${totalGuilds}] ${guild.name}: Found ${indexableChannels.length} channels with indexing enabled`,
 		);
 
 		const guildId = guild.id;
@@ -810,9 +826,13 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 			(channel: Channel) =>
 				Effect.gen(function* () {
 					const channelName = channel.isDMBased() ? channel.id : channel.name;
+					const settings = settingsMap.get(channel.id);
+					if (!settings) return;
 
 					if (channel.type === ChannelType.GuildForum) {
-						yield* indexForumChannel(channel as ForumChannel, guildId);
+						yield* indexForumChannel(channel as ForumChannel, guildId, {
+							flags: settings,
+						});
 					} else if (
 						channel.type === ChannelType.GuildText ||
 						channel.type === ChannelType.GuildAnnouncement
@@ -820,6 +840,7 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 						yield* indexTextChannel(
 							channel as TextChannel | NewsChannel,
 							guildId,
+							{ flags: settings },
 						);
 					}
 

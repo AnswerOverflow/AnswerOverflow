@@ -164,6 +164,20 @@ export const updateChannelSettings = privateMutation({
 	},
 });
 
+export const findChannelSettingsWithIndexingEnabled = privateQuery({
+	args: {
+		serverId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db
+			.query("channelSettings")
+			.withIndex("by_serverId_and_indexingEnabled", (q) =>
+				q.eq("serverId", args.serverId).eq("indexingEnabled", true),
+			)
+			.collect();
+	},
+});
+
 export const getChannelPageHeaderData = privateQuery({
 	args: {
 		serverDiscordId: v.int64(),

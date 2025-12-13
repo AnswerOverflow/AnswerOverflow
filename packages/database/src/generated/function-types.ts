@@ -11,6 +11,7 @@ export const FUNCTION_TYPE_MAP = {
   "channels.findAllChannelsByServerId": "query",
   "channels.findChannelByDiscordId": "query",
   "channels.findChannelsByDiscordIds": "query",
+  "channels.findChannelSettingsWithIndexingEnabled": "query",
   "channels.findManyChannelsByDiscordIds": "query",
   "channels.getChannelPageHeaderData": "query",
   "channels.getChannelPageThreads": "query",
@@ -63,7 +64,7 @@ export const NAMESPACES = ["attachments","cache","channels","discord_accounts","
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
   "cache": ["findDiscordOAuthAccountByDiscordId","invalidateUserGuildsCache"],
-  "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelsByDiscordIds","findManyChannelsByDiscordIds","getChannelPageHeaderData","getChannelPageThreads","updateChannelSettings","upsertChannel"],
+  "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelSettingsWithIndexingEnabled","findChannelsByDiscordIds","findManyChannelsByDiscordIds","getChannelPageHeaderData","getChannelPageThreads","updateChannelSettings","upsertChannel"],
   "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount","upsertManyDiscordAccounts"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
