@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { privateMutation, privateQuery } from "../client";
+import { internalQuery, privateMutation, privateQuery } from "../client";
 import { planValidator } from "../schema";
 import { validateCustomDomainUniqueness } from "../shared/shared";
 
@@ -178,5 +178,22 @@ export const updateStripeSubscription = privateMutation({
 				plan: args.plan,
 			});
 		}
+	},
+});
+
+export const getServerPreferencesByCustomDomain = internalQuery({
+	args: {
+		customDomain: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_customDomain",
+			args.customDomain,
+			"customDomain",
+		);
+
+		return preferences ?? null;
 	},
 });

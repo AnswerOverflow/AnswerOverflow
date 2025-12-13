@@ -62,6 +62,7 @@ export function DomainNavbarFooterWrapper({
 				searchBar={searchBar}
 				showSearch={true}
 				searchHref={searchHref}
+				showSignIn={false}
 			/>
 			<div className="pt-16">{children}</div>
 			<Footer tenant={tenant} />
