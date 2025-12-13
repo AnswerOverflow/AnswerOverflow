@@ -7,6 +7,7 @@ const analyticsPath = process.env.NEXT_PUBLIC_ANALYTICS_PATH ?? "a";
 
 export function usePostHog() {
 	const tenant = useTenant();
+	console.log("tenant", tenant);
 	const posthog = usePostHogOriginal();
 
 	if (posthog && tenant?.subpath) {
