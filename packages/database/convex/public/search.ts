@@ -1,12 +1,9 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import {
-	createDataAccessCache,
-	enrichedMessageWithServerAndChannelsInternal,
 	enrichMessagesWithServerAndChannels,
 	searchMessages,
 } from "../shared/dataAccess";
-import { paginateWithFilter } from "../shared/pagination";
 import { findSimilarThreads } from "../shared/similarThreads";
 import { publicQuery } from "./custom_functions";
 
@@ -35,23 +32,22 @@ export const getRecentThreads = publicQuery({
 		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
-		const cache = createDataAccessCache(ctx);
+		const paginatedResult = await ctx.db
+			.query("messages")
+			.withIndex("by_childThreadId", (q) => q.gt("childThreadId", 0n))
+			.order("desc")
+			.paginate(args.paginationOpts);
 
-		return paginateWithFilter(
-			args.paginationOpts,
-			(paginationOpts) =>
-				ctx.db
-					.query("messages")
-					.withIndex("by_childThreadId", (q) => q.gt("childThreadId", 0n))
-					.order("desc")
-					.paginate(paginationOpts),
-			(messages) =>
-				Promise.all(
-					messages.map((m) =>
-						enrichedMessageWithServerAndChannelsInternal(ctx, cache, m),
-					),
-				),
+		const results = await enrichMessagesWithServerAndChannels(
+			ctx,
+			paginatedResult.page,
 		);
+
+		return {
+			page: results,
+			isDone: paginatedResult.isDone,
+			continueCursor: paginatedResult.continueCursor,
+		};
 	},
 });
 
