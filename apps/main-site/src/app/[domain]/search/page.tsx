@@ -17,6 +17,7 @@ import {
 } from "@packages/ui/components/thread-card";
 import { FileQuestion, Search } from "lucide-react";
 import { useQueryState } from "nuqs";
+import { Suspense } from "react";
 import { useDebounce } from "use-debounce";
 
 function TenantSearchResults({
@@ -113,5 +114,34 @@ function TenantSearchPageContent() {
 }
 
 export default function TenantSearchPage() {
-	return <TenantSearchPageContent />;
+	return (
+		<Suspense
+			fallback={
+				<div className="min-h-screen bg-background">
+					<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+						<div className="mb-8">
+							<h1 className="text-3xl font-bold text-foreground mb-2">
+								Search
+							</h1>
+							<p className="text-muted-foreground">
+								Search through messages in this community
+							</p>
+						</div>
+						<div className="mb-8">
+							<SearchInput
+								value=""
+								onChange={() => {}}
+								placeholder="Search..."
+								isSearching={false}
+								autoFocus
+								className="max-w-2xl"
+							/>
+						</div>
+					</div>
+				</div>
+			}
+		>
+			<TenantSearchPageContent />
+		</Suspense>
+	);
 }
