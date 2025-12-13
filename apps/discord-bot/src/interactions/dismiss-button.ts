@@ -8,6 +8,8 @@ const DISMISS_ACTION_PREFIX = "dismiss";
 const DISMISS_OVERRIDE_PERMISSIONS = [
 	PermissionFlagsBits.ManageMessages,
 	PermissionFlagsBits.Administrator,
+	PermissionFlagsBits.ManageChannels,
+	PermissionFlagsBits.ManageGuild,
 ];
 
 class DismissError extends Error {
