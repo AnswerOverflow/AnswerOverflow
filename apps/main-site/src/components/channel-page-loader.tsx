@@ -7,7 +7,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
-import { ChannelPageContent, ThreadsList } from "./channel-page-content";
+import {
+	ChannelPageContent,
+	type FirstThreadAuthor,
+	ThreadsList,
+} from "./channel-page-content";
 
 export type ChannelPageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.private.channels.getChannelPageHeaderData>
@@ -98,7 +102,22 @@ async function ThreadsLoader(props: {
 	);
 }
 
-export function ChannelPageLoader(props: {
+function extractFirstThreadAuthor(
+	threadsData: ChannelPageThreads,
+): FirstThreadAuthor {
+	const firstThread = threadsData.page[0];
+	if (!firstThread?.message?.author) {
+		return null;
+	}
+	const author = firstThread.message.author;
+	return {
+		id: author.id.toString(),
+		name: author.name,
+		avatar: author.avatar,
+	};
+}
+
+export async function ChannelPageLoader(props: {
 	headerData: ChannelPageHeaderData | null;
 	cursor?: string;
 }) {
@@ -108,11 +127,23 @@ export function ChannelPageLoader(props: {
 		return notFound();
 	}
 
+	const isForumChannel = headerData.selectedChannel.type === 15;
+	let firstThreadAuthor: FirstThreadAuthor = null;
+
+	if (isForumChannel) {
+		const threadsData = await fetchChannelPageThreads(
+			headerData.selectedChannel.id,
+			cursor ?? null,
+		);
+		firstThreadAuthor = extractFirstThreadAuthor(threadsData);
+	}
+
 	return (
 		<ChannelPageContent
 			server={headerData.server}
 			channels={headerData.channels}
 			selectedChannel={headerData.selectedChannel}
+			firstThreadAuthor={firstThreadAuthor}
 			threadsSlot={
 				<Suspense fallback={<ThreadsSkeleton />}>
 					<ThreadsLoader
