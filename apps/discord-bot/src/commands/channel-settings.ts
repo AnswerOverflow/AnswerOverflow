@@ -11,7 +11,6 @@ import { Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 
 function getDashboardUrl(serverId: string, channelId: string): string {
-	console.log("base", process.env.NEXT_PUBLIC_BASE_URL);
 	const baseUrl =
 		process.env.NEXT_PUBLIC_BASE_URL ?? "https://app.answeroverflow.com";
 	return `${baseUrl}/dashboard/${serverId}/channels?channels=${channelId}`;
