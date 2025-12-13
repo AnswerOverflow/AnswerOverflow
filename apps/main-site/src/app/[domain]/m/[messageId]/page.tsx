@@ -15,10 +15,6 @@ import {
 	fetchMessagePageReplies,
 	generateMessagePageMetadata,
 } from "../../../../components/message-page-loader";
-// import {
-// 	SimilarThreads,
-// 	SimilarThreadsSkeleton,
-// } from "../../../../components/similar-threads";
 import { runtime } from "../../../../lib/runtime";
 
 type Props = {
@@ -30,6 +26,16 @@ function parseBigInt(value: string) {
 	return Schema.decodeUnknownOption(Schema.BigInt)(value);
 }
 
+async function getTenantData(domain: string) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const tenant = yield* database.private.servers.getServerByDomain({
+			domain,
+		});
+		return tenant;
+	}).pipe(runtime.runPromise);
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const [params, searchParams] = await Promise.all([
 		props.params,
@@ -39,13 +45,19 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	if (parsed._tag === "None") {
 		return notFound();
 	}
+	const domain = decodeURIComponent(params.domain);
+	const tenantData = await getTenantData(domain);
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value);
+	const tenant = {
+		customDomain: tenantData?.preferences?.customDomain,
+		subpath: tenantData?.preferences?.subpath,
+	};
 	return generateMessagePageMetadata(
 		headerData,
 		params.messageId,
 		cursor,
-		true,
+		tenant,
 	);
 }
 

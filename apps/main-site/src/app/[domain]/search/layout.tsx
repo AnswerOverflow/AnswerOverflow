@@ -5,15 +5,12 @@ import { runtime } from "../../../lib/runtime";
 
 type Props = {
 	params: Promise<{ domain: string }>;
-	searchParams: Promise<{ q?: string }>;
 	children: React.ReactNode;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
-	const searchParams = await props.searchParams;
 	const domain = decodeURIComponent(params.domain);
-	const query = searchParams.q;
 
 	const tenantData = await Effect.gen(function* () {
 		const database = yield* Database;
@@ -22,9 +19,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 	const serverName = tenantData?.server?.name ?? "this community";
 
-	const title = query
-		? `Search Results for "${query}" - ${serverName}`
-		: `Search - ${serverName}`;
+	const title = `Search - ${serverName}`;
 	const description = `Search for answers to your questions in ${serverName}. Find indexed Discord messages and discussions.`;
 
 	return {
