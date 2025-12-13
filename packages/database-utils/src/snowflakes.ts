@@ -1,4 +1,33 @@
+import { Duration, Option, pipe } from "effect";
+
 const DISCORD_EPOCH = 1420070400000n;
+
+export const snowflakeToTimestamp = (snowflake: bigint): number =>
+	Number((snowflake >> 22n) + DISCORD_EPOCH);
+
+export const isSnowflakeWithin = (
+	snowflake: bigint,
+	duration: Duration.Duration,
+): boolean => {
+	const snowflakeTimestamp = snowflakeToTimestamp(snowflake);
+	const threshold = Date.now() - Duration.toMillis(duration);
+	return snowflakeTimestamp > threshold;
+};
+
+export const isSnowflakeOlderThan = (
+	snowflake: bigint,
+	duration: Duration.Duration,
+): boolean => !isSnowflakeWithin(snowflake, duration);
+
+export const wasRecentlyUpdated = (
+	snowflake: bigint | null | undefined,
+	duration: Duration.Duration,
+): boolean =>
+	pipe(
+		Option.fromNullable(snowflake),
+		Option.map((s) => isSnowflakeWithin(s, duration)),
+		Option.getOrElse(() => false),
+	);
 
 function generateSnowflake(
 	timestampMs: bigint,

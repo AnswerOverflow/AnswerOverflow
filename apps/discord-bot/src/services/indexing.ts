@@ -1,4 +1,5 @@
 import { Database } from "@packages/database/database";
+import { wasRecentlyUpdated } from "@packages/database-utils/snowflakes";
 import type {
 	AnyThreadChannel,
 	Channel,
@@ -461,6 +462,12 @@ function indexTextChannel(
 		}
 
 		const lastIndexedSnowflake = channelSettings.flags.lastIndexedSnowflake;
+		if (wasRecentlyUpdated(lastIndexedSnowflake, Duration.hours(6))) {
+			yield* Effect.logDebug(
+				`Last indexed snowflake is less than 6 hours old, skipping indexing for forum ${channel.name} (${channel.id})`,
+			);
+			return;
+		}
 		yield* Effect.logDebug(
 			`Indexing text channel ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null (starting from beginning)"}`,
 		);
@@ -572,6 +579,13 @@ function indexForumChannel(channel: ForumChannel, discordServerId: string) {
 		}
 
 		const lastIndexedSnowflake = channelSettings.flags.lastIndexedSnowflake;
+		if (wasRecentlyUpdated(lastIndexedSnowflake, Duration.hours(6))) {
+			yield* Effect.logDebug(
+				`Last indexed snowflake is less than 6 hours old, skipping indexing for forum ${channel.name} (${channel.id})`,
+			);
+			return;
+		}
+
 		yield* Effect.logDebug(
 			`Indexing forum ${channel.name} (${channel.id}) - lastIndexedSnowflake: ${lastIndexedSnowflake ?? "null"}`,
 		);
@@ -829,7 +843,7 @@ function runIndexing() {
 		yield* Console.log(`Found ${totalGuilds} guilds to index`);
 
 		yield* Effect.forEach(
-			Arr.map(guilds, (guild, index) => ({ guild, index })),
+			Arr.map(guilds, (guild, index) => ({ guild, index })).slice(226),
 			({ guild, index }) =>
 				Effect.gen(function* () {
 					yield* indexGuild(guild, index, totalGuilds);
