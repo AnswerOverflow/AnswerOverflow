@@ -193,7 +193,7 @@ export const getChannelPageHeaderData = privateQuery({
 
 		if (!server) return null;
 
-		const [channel, indexedSettings] = await Promise.all([
+		const [channel, indexedSettings, serverPreferences] = await Promise.all([
 			getChannelWithSettings(ctx, args.channelDiscordId),
 			ctx.db
 				.query("channelSettings")
@@ -201,6 +201,7 @@ export const getChannelPageHeaderData = privateQuery({
 					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
 				)
 				.collect(),
+			getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
 		]);
 
 		if (!channel || channel.serverId !== server.discordId) return null;
@@ -230,6 +231,8 @@ export const getChannelPageHeaderData = privateQuery({
 			server: {
 				...server,
 				channels: indexedChannels,
+				customDomain: serverPreferences?.customDomain,
+				subpath: serverPreferences?.subpath,
 			},
 			channels: indexedChannels,
 			selectedChannel: channel,

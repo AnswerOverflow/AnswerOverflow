@@ -173,12 +173,15 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 			return null;
 		}
 
-		const indexedSettings = await ctx.db
-			.query("channelSettings")
-			.withIndex("by_serverId_and_indexingEnabled", (q) =>
-				q.eq("serverId", server.discordId).eq("indexingEnabled", true),
-			)
-			.collect();
+		const [indexedSettings, serverPreferences] = await Promise.all([
+			ctx.db
+				.query("channelSettings")
+				.withIndex("by_serverId_and_indexingEnabled", (q) =>
+					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+				)
+				.collect(),
+			getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
+		]);
 
 		const indexedChannelIds = new Set(indexedSettings.map((s) => s.channelId));
 
@@ -204,7 +207,11 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 			});
 
 		return {
-			server,
+			server: {
+				...server,
+				customDomain: serverPreferences?.customDomain,
+				subpath: serverPreferences?.subpath,
+			},
 			channels,
 		};
 	},
