@@ -9,7 +9,7 @@
 		"dev-next": "bun with-env next dev --turbo",
 		"dev-proxy": "bun run scripts/proxy.ts",
 		"dev": "bun run dev-next & bun run dev-proxy; wait",
-		"build": "bun run typecheck & P1=$!; bun with-env next build & P2=$!; wait $P1 && wait $P2",
+		"build": "./scripts/build.sh",
 		"start": "bun with-env next start",
 		"typecheck": "tsgo --noEmit",
 		"typecheck:slow": "tsc --noEmit",
