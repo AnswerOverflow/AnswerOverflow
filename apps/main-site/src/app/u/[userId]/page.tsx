@@ -1,3 +1,4 @@
+import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -16,13 +17,39 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	const searchParams = await props.searchParams;
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 
+	const headerData = await fetchUserPageHeaderData(BigInt(params.userId));
+	const userName = headerData?.user.name ?? "User";
+	const userAvatar = headerData?.user
+		? makeUserIconLink(
+				{
+					id: headerData.user.id,
+					avatar: headerData.user.avatar,
+				},
+				256,
+			)
+		: null;
+
+	const title = `${userName} Posts - Answer Overflow`;
+	const description = `See posts from ${userName} on Answer Overflow`;
+
 	return {
-		title: "User Posts - Answer Overflow",
-		description: "See posts from this user on Answer Overflow",
+		title,
+		description,
 		alternates: {
 			canonical: `/u/${params.userId}`,
 		},
 		robots: cursor ? "noindex, follow" : { index: false },
+		openGraph: {
+			title,
+			description,
+			...(userAvatar && { images: [userAvatar] }),
+		},
+		twitter: {
+			card: "summary",
+			title,
+			description,
+			...(userAvatar && { images: [userAvatar] }),
+		},
 	};
 }
 

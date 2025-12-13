@@ -1,4 +1,5 @@
 import { Database } from "@packages/database/database";
+import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Effect } from "effect";
 import type { Metadata } from "next";
@@ -18,14 +19,47 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const searchParams = await props.searchParams;
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
+	const domain = decodeURIComponent(params.domain);
+
+	const tenantData = await Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.private.servers.getServerByDomain({ domain });
+	}).pipe(runtime.runPromise);
+
+	const headerData = await fetchUserPageHeaderData(BigInt(params.userId));
+	const userName = headerData?.user.name ?? "User";
+	const serverName = tenantData?.server?.name ?? "this community";
+	const userAvatar = headerData?.user
+		? makeUserIconLink(
+				{
+					id: headerData.user.id,
+					avatar: headerData.user.avatar,
+				},
+				256,
+			)
+		: null;
+
+	const title = `${userName} Posts - ${serverName}`;
+	const description = `See posts from ${userName} in the ${serverName} Discord`;
 
 	return {
-		title: "User Posts",
-		description: "See posts from this user",
+		title,
+		description,
 		alternates: {
 			canonical: `/u/${params.userId}`,
 		},
 		robots: cursor ? "noindex, follow" : { index: false },
+		openGraph: {
+			title,
+			description,
+			...(userAvatar && { images: [userAvatar] }),
+		},
+		twitter: {
+			card: "summary",
+			title,
+			description,
+			...(userAvatar && { images: [userAvatar] }),
+		},
 	};
 }
 

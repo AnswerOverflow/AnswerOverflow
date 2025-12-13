@@ -69,13 +69,23 @@ export function generateMessagePageMetadata(
 		? `/og/post?id=${messageId}&tenant=true`
 		: `/og/post?id=${messageId}`;
 
+	const fullTitle = `${title} - ${headerData.server.name}`;
+
 	return {
-		title: `${title} - ${headerData.server.name}`,
+		title: fullTitle,
 		description,
 		openGraph: {
+			type: "website",
+			siteName: isTenant ? headerData.server.name : "Answer Overflow",
 			images: [ogImageUrl],
-			title: `${title} - ${headerData.server.name}`,
+			title: fullTitle,
 			description,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: fullTitle,
+			description,
+			images: [ogImageUrl],
 		},
 		alternates: {
 			canonical: `/m/${headerData.canonicalId.toString()}`,

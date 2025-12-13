@@ -51,6 +51,7 @@ export function generateChannelPageMetadata(
 	headerData: ChannelPageHeaderData | null,
 	basePath: string,
 	cursor: string | null,
+	isTenant = false,
 ): Metadata {
 	if (!headerData) {
 		return {};
@@ -58,14 +59,26 @@ export function generateChannelPageMetadata(
 
 	const { server, selectedChannel } = headerData;
 	const description = `Browse threads from #${selectedChannel.name} in the ${server.name} Discord community`;
+	const title = `#${selectedChannel.name} - ${server.name}`;
+	const ogImage = isTenant
+		? `/og/community?id=${server.discordId.toString()}&tenant=true`
+		: `/og/community?id=${server.discordId.toString()}`;
 
 	return {
-		title: `#${selectedChannel.name} - ${server.name}`,
+		title,
 		description,
 		openGraph: {
-			images: [`/og/community?id=${server.discordId.toString()}`],
-			title: `#${selectedChannel.name} - ${server.name}`,
+			type: "website",
+			siteName: isTenant ? server.name : "Answer Overflow",
+			images: [ogImage],
+			title,
 			description,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title,
+			description,
+			images: [ogImage],
 		},
 		alternates: {
 			canonical: basePath,

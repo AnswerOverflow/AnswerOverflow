@@ -46,13 +46,23 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		server.description ??
 		`Browse ${channels.length} indexed channels from the ${server.name} Discord community`;
 
+	const ogImage = `/og/community?id=${server.discordId.toString()}&tenant=true`;
+
 	return {
 		title: server.name,
 		description,
 		openGraph: {
-			images: [`/og/community?id=${server.discordId.toString()}&tenant=true`],
+			type: "website",
+			siteName: server.name,
+			images: [ogImage],
 			title: server.name,
 			description,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: server.name,
+			description,
+			images: [ogImage],
 		},
 		alternates: {
 			canonical: "/",
