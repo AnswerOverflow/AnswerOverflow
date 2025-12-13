@@ -38,7 +38,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		return {};
 	}
 
-	const iconUrl = `https://cdn.answeroverflow.com/${tenantData.icon}/icon.png`;
+	const iconUrl = `https://cdn.answeroverflow.com/${tenantData.discordId}/${tenantData.icon}/icon.png`;
 
 	return {
 		icons: {
