@@ -309,7 +309,36 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 					interaction.isContextMenuCommand() &&
 					interaction.commandName === "✅ Mark Solution"
 				) {
-					yield* handleMarkSolutionCommand(interaction);
+					const result = yield* handleMarkSolutionCommand(interaction).pipe(
+						Effect.either,
+					);
+
+					if (result._tag === "Left") {
+						const error = result.left;
+						console.error("Mark solution command failed:", error);
+
+						const errorMessage =
+							error instanceof Error ? error.message : "Unknown error";
+
+						if (interaction.deferred || interaction.replied) {
+							yield* discord
+								.callClient(() =>
+									interaction.editReply({
+										content: `An error occurred: ${errorMessage}`,
+									}),
+								)
+								.pipe(Effect.catchAll(() => Effect.void));
+						} else {
+							yield* discord
+								.callClient(() =>
+									interaction.reply({
+										content: `An error occurred: ${errorMessage}`,
+										ephemeral: true,
+									}),
+								)
+								.pipe(Effect.catchAll(() => Effect.void));
+						}
+					}
 				}
 				return;
 			}),

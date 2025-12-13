@@ -862,7 +862,7 @@ function runIndexing() {
 		yield* Console.log(`Found ${totalGuilds} guilds to index`);
 
 		yield* Effect.forEach(
-			Arr.map(guilds, (guild, index) => ({ guild, index })).slice(302),
+			Arr.map(guilds, (guild, index) => ({ guild, index })).slice(360),
 			({ guild, index }) =>
 				Effect.gen(function* () {
 					yield* indexGuild(guild, index, totalGuilds);

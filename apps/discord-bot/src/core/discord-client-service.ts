@@ -6,6 +6,7 @@ const createDiscordClientService = Effect.succeed(
 		intents: [
 			GatewayIntentBits.Guilds,
 			GatewayIntentBits.GuildMessages,
+			GatewayIntentBits.DirectMessages,
 			GatewayIntentBits.MessageContent,
 			GatewayIntentBits.GuildMessageReactions,
 		],
