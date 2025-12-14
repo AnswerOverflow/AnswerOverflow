@@ -18,13 +18,17 @@ import {
 	ThreadsList,
 } from "./channel-page-content";
 
-export type ServerPageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.private.channels.getServerPageHeaderData>
+export type CommunityPageHeaderData = NonNullable<
+	FunctionReturnType<typeof api.private.channels.getCommunityPageHeaderData>
 >;
 
-export type ChannelPageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.private.channels.getChannelPageHeaderData>
->;
+export type ServerPageHeaderData = CommunityPageHeaderData & {
+	selectedChannel: null;
+};
+
+export type ChannelPageHeaderData = CommunityPageHeaderData & {
+	selectedChannel: NonNullable<CommunityPageHeaderData["selectedChannel"]>;
+};
 
 export type ChannelPageThreads = FunctionReturnType<
 	typeof api.public.channels.getChannelPageThreads
@@ -34,28 +38,37 @@ export type ServerPageThreads = FunctionReturnType<
 	typeof api.public.channels.getServerPageThreads
 >;
 
+export async function fetchCommunityPageHeaderData(
+	serverDiscordId: bigint,
+	channelDiscordId?: bigint,
+): Promise<CommunityPageHeaderData | null> {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.private.channels.getCommunityPageHeaderData({
+			serverDiscordId,
+			channelDiscordId,
+		});
+	}).pipe(runtime.runPromise);
+}
+
 export async function fetchServerPageHeaderData(
 	serverDiscordId: bigint,
 ): Promise<ServerPageHeaderData | null> {
-	return Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.private.channels.getServerPageHeaderData({
-			serverDiscordId,
-		});
-	}).pipe(runtime.runPromise);
+	const data = await fetchCommunityPageHeaderData(serverDiscordId);
+	if (!data) return null;
+	return data as ServerPageHeaderData;
 }
 
 export async function fetchChannelPageHeaderData(
 	serverDiscordId: bigint,
 	channelDiscordId: bigint,
 ): Promise<ChannelPageHeaderData | null> {
-	return Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.private.channels.getChannelPageHeaderData({
-			serverDiscordId,
-			channelDiscordId,
-		});
-	}).pipe(runtime.runPromise);
+	const data = await fetchCommunityPageHeaderData(
+		serverDiscordId,
+		channelDiscordId,
+	);
+	if (!data || !data.selectedChannel) return null;
+	return data as ChannelPageHeaderData;
 }
 
 export async function fetchChannelPageThreads(

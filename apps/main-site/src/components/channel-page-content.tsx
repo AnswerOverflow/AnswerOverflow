@@ -42,9 +42,29 @@ export type FirstThreadAuthor = {
 	avatar?: string;
 } | null;
 
-type ChannelPageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.private.channels.getChannelPageHeaderData>
+type CommunityPageHeaderData = NonNullable<
+	FunctionReturnType<typeof api.private.channels.getCommunityPageHeaderData>
 >;
+
+function getChannelHref({
+	channelId,
+	isSelected,
+	serverDiscordId,
+	tenantMode,
+}: {
+	channelId: bigint;
+	isSelected: boolean;
+	serverDiscordId: bigint;
+	tenantMode: boolean;
+}) {
+	const allChannelsHref = tenantMode ? "/" : `/c/${serverDiscordId.toString()}`;
+	if (isSelected) {
+		return allChannelsHref;
+	}
+	return tenantMode
+		? `/c/${channelId.toString()}`
+		: `/c/${serverDiscordId.toString()}/${channelId.toString()}`;
+}
 
 function ChannelLink({
 	channel,
@@ -52,7 +72,7 @@ function ChannelLink({
 	href,
 	onClick,
 }: {
-	channel: ChannelPageHeaderData["channels"][number];
+	channel: CommunityPageHeaderData["channels"][number];
 	isSelected: boolean;
 	href: string;
 	onClick?: () => void;
@@ -82,22 +102,11 @@ function ChannelsSidebar({
 	serverDiscordId,
 	tenantMode,
 }: {
-	channels: ChannelPageHeaderData["channels"];
+	channels: CommunityPageHeaderData["channels"];
 	selectedChannelId: bigint | null;
 	serverDiscordId: bigint;
 	tenantMode: boolean;
 }) {
-	const allChannelsHref = tenantMode ? "/" : `/c/${serverDiscordId.toString()}`;
-
-	const getChannelHref = (channelId: bigint, isSelected: boolean) => {
-		if (isSelected) {
-			return allChannelsHref;
-		}
-		return tenantMode
-			? `/c/${channelId.toString()}`
-			: `/c/${serverDiscordId.toString()}/${channelId.toString()}`;
-	};
-
 	return (
 		<aside className="w-52 shrink-0">
 			<div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
@@ -112,7 +121,12 @@ function ChannelsSidebar({
 								key={channel.id.toString()}
 								channel={channel}
 								isSelected={isSelected}
-								href={getChannelHref(channel.id, isSelected)}
+								href={getChannelHref({
+									channelId: channel.id,
+									isSelected,
+									serverDiscordId,
+									tenantMode,
+								})}
 							/>
 						);
 					})}
@@ -128,23 +142,12 @@ function MobileChannelSheet({
 	serverDiscordId,
 	tenantMode,
 }: {
-	channels: ChannelPageHeaderData["channels"];
+	channels: CommunityPageHeaderData["channels"];
 	selectedChannelId: bigint | null;
 	serverDiscordId: bigint;
 	tenantMode: boolean;
 }) {
 	const [open, setOpen] = useState(false);
-
-	const allChannelsHref = tenantMode ? "/" : `/c/${serverDiscordId.toString()}`;
-
-	const getChannelHref = (channelId: bigint, isSelected: boolean) => {
-		if (isSelected) {
-			return allChannelsHref;
-		}
-		return tenantMode
-			? `/c/${channelId.toString()}`
-			: `/c/${serverDiscordId.toString()}/${channelId.toString()}`;
-	};
 
 	const selectedChannel = selectedChannelId
 		? channels.find((c) => c.id === selectedChannelId)
@@ -172,7 +175,12 @@ function MobileChannelSheet({
 								key={channel.id.toString()}
 								channel={channel}
 								isSelected={isSelected}
-								href={getChannelHref(channel.id, isSelected)}
+								href={getChannelHref({
+									channelId: channel.id,
+									isSelected,
+									serverDiscordId,
+									tenantMode,
+								})}
 								onClick={() => setOpen(false)}
 							/>
 						);
@@ -183,7 +191,11 @@ function MobileChannelSheet({
 	);
 }
 
-function ServerHeader({ server }: { server: ChannelPageHeaderData["server"] }) {
+function ServerHeader({
+	server,
+}: {
+	server: CommunityPageHeaderData["server"];
+}) {
 	const inviteUrl = server.inviteCode
 		? `https://discord.gg/${server.inviteCode}`
 		: `https://discord.com/servers/${server.discordId}`;
@@ -330,9 +342,17 @@ export function ServerThreadsList({
 				initialCursor={currentCursor}
 				className="space-y-4"
 				emptyState={
-					<div className="text-center py-12 text-muted-foreground">
-						No threads found
-					</div>
+					<Empty className="py-16">
+						<EmptyHeader>
+							<EmptyMedia variant="icon">
+								<FileQuestion />
+							</EmptyMedia>
+							<EmptyTitle>No threads found</EmptyTitle>
+							<EmptyDescription>
+								This server doesn't have any indexed threads yet.
+							</EmptyDescription>
+						</EmptyHeader>
+					</Empty>
 				}
 				renderItem={({ thread, message, channel }) => (
 					<ChannelThreadCard
@@ -379,9 +399,17 @@ export function ThreadsList({
 				initialCursor={currentCursor}
 				className="space-y-4"
 				emptyState={
-					<div className="text-center py-12 text-muted-foreground">
-						No threads found in this channel
-					</div>
+					<Empty className="py-16">
+						<EmptyHeader>
+							<EmptyMedia variant="icon">
+								<FileQuestion />
+							</EmptyMedia>
+							<EmptyTitle>No threads found</EmptyTitle>
+							<EmptyDescription>
+								This channel doesn't have any indexed threads yet.
+							</EmptyDescription>
+						</EmptyHeader>
+					</Empty>
 				}
 				renderItem={({ thread, message }) => (
 					<ChannelThreadCard
@@ -405,9 +433,9 @@ export function ThreadsList({
 }
 
 type CommunityPageContentProps = {
-	server: ChannelPageHeaderData["server"];
-	channels: ChannelPageHeaderData["channels"];
-	selectedChannel?: ChannelPageHeaderData["selectedChannel"] | null;
+	server: CommunityPageHeaderData["server"];
+	channels: CommunityPageHeaderData["channels"];
+	selectedChannel?: CommunityPageHeaderData["selectedChannel"] | null;
 	children: React.ReactNode;
 };
 
@@ -432,11 +460,6 @@ export function CommunityPageContent({
 	const isSearching =
 		searchQuery !== debouncedSearchQuery && searchQuery.trim().length > 0;
 
-	const ChannelIcon = selectedChannel
-		? getChannelIcon(selectedChannel.type)
-		: Hash;
-	const channelLabel = selectedChannel ? selectedChannel.name : "All Channels";
-
 	return (
 		<div className="min-h-screen bg-background">
 			<ServerHeader server={server} />
@@ -460,11 +483,6 @@ export function CommunityPageContent({
 								serverDiscordId={server.discordId}
 								tenantMode={tenantMode}
 							/>
-						</div>
-
-						<div className="flex items-center gap-2 mb-4 text-muted-foreground">
-							<ChannelIcon className="size-4" />
-							<span className="text-sm font-medium">{channelLabel}</span>
 						</div>
 
 						<div className="mb-6">

@@ -238,23 +238,21 @@ async function getServerHeaderData(
 	};
 }
 
-export const getServerPageHeaderData = privateQuery({
+export const getCommunityPageHeaderData = privateQuery({
 	args: {
 		serverDiscordId: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		return getServerHeaderData(ctx, args.serverDiscordId);
-	},
-});
-
-export const getChannelPageHeaderData = privateQuery({
-	args: {
-		serverDiscordId: v.int64(),
-		channelDiscordId: v.int64(),
+		channelDiscordId: v.optional(v.int64()),
 	},
 	handler: async (ctx, args) => {
 		const headerData = await getServerHeaderData(ctx, args.serverDiscordId);
 		if (!headerData) return null;
+
+		if (!args.channelDiscordId) {
+			return {
+				...headerData,
+				selectedChannel: null,
+			};
+		}
 
 		const channel = await getChannelWithSettings(ctx, args.channelDiscordId);
 		if (!channel || channel.serverId !== headerData.server.discordId)
