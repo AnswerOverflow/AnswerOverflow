@@ -28,6 +28,7 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	};
 	initialCursor?: string | null;
 	showLoadMoreButton?: boolean;
+	className?: string;
 };
 
 function LoadingSkeletons({
@@ -86,6 +87,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	initialData,
 	initialCursor = null,
 	showLoadMoreButton = false,
+	className,
 }: ConvexInfiniteListProps<Query>) {
 	const session = useSession({ allowAnonymous: authenticationType === "all" });
 	const isSessionReady = !session?.isPending && session?.data !== undefined;
@@ -144,7 +146,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	}
 
 	return (
-		<div>
+		<div className={className}>
 			{displayResults.map((item, i) => renderItem(item, i))}
 
 			{canLoadMore && !isLoadingMore && showLoadMoreButton && (

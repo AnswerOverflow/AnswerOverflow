@@ -1,96 +1,48 @@
 "use client";
 
-import { Search } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { Input } from "../input";
+import { cn } from "../../lib/utils";
 import { Link } from "../link";
-import { LinkButton } from "../link-button";
 import { ServerIcon } from "../server-icon";
-import { useTenant } from "../tenant-context";
-import { NavbarBase } from "./navbar-base";
 import { UserSection } from "./user-section";
 
-export function TenantNavbar() {
-	const tenant = useTenant();
-	const router = useRouter();
-	const pathname = usePathname();
-	const [searchQuery, setSearchQuery] = useState("");
+export type TenantNavbarProps = {
+	showBorder?: boolean;
+	server?: {
+		discordId: bigint;
+		name: string;
+		icon: string | null;
+	} | null;
+};
 
-	const basePath = tenant?.subpath ? `/${tenant.subpath}` : "";
-	const isOnTenantHomepage =
-		pathname === (basePath || "/") || pathname.startsWith(`${basePath}/c/`);
-
-	const handleSearch = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (searchQuery.trim()) {
-			const searchPath = tenant?.subpath
-				? `/${tenant.subpath}/search`
-				: "/search";
-			router.push(`${searchPath}?q=${encodeURIComponent(searchQuery.trim())}`);
-		}
-	};
-
-	const homeHref = tenant?.subpath ? `/${tenant.subpath}` : "/";
-	const searchHref = tenant?.subpath ? `/${tenant.subpath}/search` : "/search";
-
-	const searchBar = (
-		<form onSubmit={handleSearch} className="w-full">
-			<Input
-				type="search"
-				value={searchQuery}
-				onChange={(e) => setSearchQuery(e.target.value)}
-				placeholder="Search Discord messages..."
-				className="w-full"
-			/>
-		</form>
-	);
-
-	const leftContent = !isOnTenantHomepage ? (
-		<Link
-			href={homeHref}
-			className="text-foreground hover:text-foreground no-underline hover:no-underline"
-		>
-			{tenant?.discordId ? (
-				<div className="flex items-center space-x-2">
-					<ServerIcon
-						server={{
-							discordId: tenant.discordId,
-							name: tenant.name ?? "",
-							icon: tenant.icon ?? "",
-						}}
-						size={48}
-					/>
-					<span className="font-semibold">{tenant.name}</span>
-				</div>
-			) : (
-				<div className="w-32 md:w-40">
-					<span className="text-xl font-bold">Community</span>
-				</div>
-			)}
-		</Link>
-	) : null;
-
-	const rightContent = (
-		<>
-			<LinkButton
-				variant="ghost"
-				size="icon"
-				href={searchHref}
-				className="flex items-center justify-center 2xl:hidden"
-			>
-				<Search className="h-5 w-5" />
-				<span className="sr-only">Search</span>
-			</LinkButton>
-			<UserSection showSignIn={false} />
-		</>
-	);
-
+export function TenantNavbar({ showBorder = true, server }: TenantNavbarProps) {
 	return (
-		<NavbarBase
-			leftContent={leftContent}
-			centerContent={searchBar}
-			rightContent={rightContent}
-		/>
+		<header
+			className={cn(
+				"fixed left-0 top-0 z-[1000] h-navbar w-full bg-background/95 backdrop-blur-sm px-4",
+				showBorder && "border-b border-border",
+			)}
+		>
+			<nav className="flex size-full items-center justify-between">
+				<div className="flex items-center gap-2">
+					{server && (
+						<Link
+							href="/"
+							className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+						>
+							<ServerIcon
+								server={{
+									discordId: server.discordId,
+									name: server.name,
+									icon: server.icon ?? undefined,
+								}}
+								size={28}
+							/>
+							<span className="font-medium text-foreground">{server.name}</span>
+						</Link>
+					)}
+				</div>
+				<UserSection showSignIn={false} />
+			</nav>
+		</header>
 	);
 }

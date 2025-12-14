@@ -1,3 +1,5 @@
+import { Hash, MessageSquare } from "lucide-react";
+
 export enum ChannelType {
 	GuildText = 0,
 	DM = 1,
@@ -15,6 +17,11 @@ export enum ChannelType {
 	GuildNewsThread = 10,
 	GuildPublicThread = 11,
 	GuildPrivateThread = 12,
+}
+
+export function getChannelIcon(type: number) {
+	if (type === ChannelType.GuildForum) return MessageSquare;
+	return Hash;
 }
 
 type MessageWithServerAndChannel = {

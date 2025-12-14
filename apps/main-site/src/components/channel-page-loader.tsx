@@ -11,27 +11,64 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
-import { ChannelPageContent, ThreadsList } from "./channel-page-content";
+import {
+	ChannelPageContent,
+	ServerPageContent,
+	ServerThreadsList,
+	ThreadsList,
+} from "./channel-page-content";
 
-export type ChannelPageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.private.channels.getChannelPageHeaderData>
+export type CommunityPageHeaderData = NonNullable<
+	FunctionReturnType<typeof api.private.channels.getCommunityPageHeaderData>
 >;
+
+export type ServerPageHeaderData = CommunityPageHeaderData & {
+	selectedChannel: null;
+};
+
+export type ChannelPageHeaderData = CommunityPageHeaderData & {
+	selectedChannel: NonNullable<CommunityPageHeaderData["selectedChannel"]>;
+};
 
 export type ChannelPageThreads = FunctionReturnType<
 	typeof api.public.channels.getChannelPageThreads
 >;
 
-export async function fetchChannelPageHeaderData(
+export type ServerPageThreads = FunctionReturnType<
+	typeof api.public.channels.getServerPageThreads
+>;
+
+export async function fetchCommunityPageHeaderData(
 	serverDiscordId: bigint,
-	channelDiscordId: bigint,
-): Promise<ChannelPageHeaderData | null> {
+	channelDiscordId?: bigint,
+): Promise<CommunityPageHeaderData | null> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.private.channels.getChannelPageHeaderData({
+		return yield* database.private.channels.getCommunityPageHeaderData({
 			serverDiscordId,
 			channelDiscordId,
 		});
 	}).pipe(runtime.runPromise);
+}
+
+export async function fetchServerPageHeaderData(
+	serverDiscordId: bigint,
+): Promise<ServerPageHeaderData | null> {
+	const data = await fetchCommunityPageHeaderData(serverDiscordId);
+	if (!data) return null;
+	return data as ServerPageHeaderData;
+}
+
+export async function fetchChannelPageHeaderData(
+	serverDiscordId: bigint,
+	channelDiscordId: bigint,
+): Promise<ChannelPageHeaderData | null> {
+	const data = await fetchCommunityPageHeaderData(
+		serverDiscordId,
+		channelDiscordId,
+	);
+	if (!data || !data.selectedChannel) return null;
+	return data as ChannelPageHeaderData;
 }
 
 export async function fetchChannelPageThreads(
@@ -47,10 +84,66 @@ export async function fetchChannelPageThreads(
 	}).pipe(runtime.runPromise);
 }
 
+export async function fetchServerPageThreads(
+	serverDiscordId: bigint,
+	cursor: string | null = null,
+): Promise<ServerPageThreads> {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.public.channels.getServerPageThreads({
+			serverDiscordId,
+			paginationOpts: { numItems: 20, cursor },
+		});
+	}).pipe(runtime.runPromise);
+}
+
+export function generateServerPageMetadata(
+	headerData: ServerPageHeaderData | null,
+	basePath: string,
+	tenant: TenantInfo | null = null,
+): Metadata {
+	if (!headerData) {
+		return {};
+	}
+
+	const isTenant = tenant !== null;
+	const { server } = headerData;
+	const description =
+		server.description ??
+		`Browse threads from the ${server.name} Discord community`;
+	const title = server.name;
+	const ogImage = isTenant
+		? `/og/community?id=${server.discordId.toString()}&tenant=true`
+		: `/og/community?id=${server.discordId.toString()}`;
+
+	const canonicalUrl = getTenantCanonicalUrl(tenant, basePath);
+
+	return {
+		title,
+		description,
+		openGraph: {
+			type: "website",
+			siteName: isTenant ? server.name : "Answer Overflow",
+			images: [ogImage],
+			title,
+			description,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title,
+			description,
+			images: [ogImage],
+		},
+		alternates: {
+			canonical: canonicalUrl,
+		},
+		robots: "index, follow",
+	};
+}
+
 export function generateChannelPageMetadata(
 	headerData: ChannelPageHeaderData | null,
 	basePath: string,
-	_cursor: string | null,
 	tenant: TenantInfo | null = null,
 ): Metadata {
 	if (!headerData) {
@@ -100,7 +193,26 @@ function ThreadsSkeleton() {
 	);
 }
 
-async function ThreadsLoader(props: {
+async function ServerThreadsLoader(props: {
+	serverDiscordId: bigint;
+	cursor: string | null;
+}) {
+	const initialData = await fetchServerPageThreads(
+		props.serverDiscordId,
+		props.cursor,
+	);
+
+	return (
+		<ServerThreadsList
+			serverDiscordId={props.serverDiscordId}
+			initialData={initialData}
+			nextCursor={initialData.isDone ? null : initialData.continueCursor}
+			currentCursor={props.cursor}
+		/>
+	);
+}
+
+async function ChannelThreadsLoader(props: {
 	channelDiscordId: bigint;
 	cursor: string | null;
 }) {
@@ -108,6 +220,7 @@ async function ThreadsLoader(props: {
 		props.channelDiscordId,
 		props.cursor,
 	);
+
 	return (
 		<ThreadsList
 			channelDiscordId={props.channelDiscordId}
@@ -115,6 +228,31 @@ async function ThreadsLoader(props: {
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
 			currentCursor={props.cursor}
 		/>
+	);
+}
+
+export async function ServerPageLoader(props: {
+	headerData: ServerPageHeaderData | null;
+	cursor?: string;
+}) {
+	const { headerData, cursor } = props;
+
+	if (!headerData) {
+		return notFound();
+	}
+
+	return (
+		<ServerPageContent
+			server={headerData.server}
+			channels={headerData.channels}
+		>
+			<Suspense fallback={<ThreadsSkeleton />}>
+				<ServerThreadsLoader
+					serverDiscordId={headerData.server.discordId}
+					cursor={cursor ?? null}
+				/>
+			</Suspense>
+		</ServerPageContent>
 	);
 }
 
@@ -133,14 +271,13 @@ export async function ChannelPageLoader(props: {
 			server={headerData.server}
 			channels={headerData.channels}
 			selectedChannel={headerData.selectedChannel}
-			threadsSlot={
-				<Suspense fallback={<ThreadsSkeleton />}>
-					<ThreadsLoader
-						channelDiscordId={headerData.selectedChannel.id}
-						cursor={cursor ?? null}
-					/>
-				</Suspense>
-			}
-		/>
+		>
+			<Suspense fallback={<ThreadsSkeleton />}>
+				<ChannelThreadsLoader
+					channelDiscordId={headerData.selectedChannel.id}
+					cursor={cursor ?? null}
+				/>
+			</Suspense>
+		</ChannelPageContent>
 	);
 }

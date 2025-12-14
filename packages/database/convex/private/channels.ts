@@ -1,8 +1,10 @@
+import type { GenericDatabaseReader } from "convex/server";
 import { type Infer, v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 
 import { Array as Arr, Predicate } from "effect";
+import type { DataModel } from "../_generated/dataModel";
 import {
 	type MutationCtx,
 	privateMutation,
@@ -178,63 +180,86 @@ export const findChannelSettingsWithIndexingEnabled = privateQuery({
 	},
 });
 
-export const getChannelPageHeaderData = privateQuery({
+async function getServerHeaderData(
+	ctx: { db: GenericDatabaseReader<DataModel> },
+	serverDiscordId: bigint,
+) {
+	const server = await getOneFrom(
+		ctx.db,
+		"servers",
+		"by_discordId",
+		serverDiscordId,
+	);
+
+	if (!server) return null;
+
+	const [indexedSettings, serverPreferences] = await Promise.all([
+		ctx.db
+			.query("channelSettings")
+			.withIndex("by_serverId_and_indexingEnabled", (q) =>
+				q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+			)
+			.collect(),
+		getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
+	]);
+
+	const indexedChannelIds = indexedSettings.map((s) => s.channelId);
+
+	const allIndexedChannels = await asyncMap(indexedChannelIds, (channelId) =>
+		getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
+	);
+
+	const indexedChannels = Arr.filter(allIndexedChannels, Predicate.isNotNull)
+		.filter(
+			(c) =>
+				c.type === CHANNEL_TYPE.GuildText ||
+				c.type === CHANNEL_TYPE.GuildAnnouncement ||
+				c.type === CHANNEL_TYPE.GuildForum,
+		)
+		.sort((a, b) => {
+			if (a.type === CHANNEL_TYPE.GuildForum) return -1;
+			if (b.type === CHANNEL_TYPE.GuildForum) return 1;
+			if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
+			if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
+			return 0;
+		});
+
+	const inviteCode = indexedSettings.find((s) => s.inviteCode)?.inviteCode;
+
+	return {
+		server: {
+			...server,
+			channels: indexedChannels,
+			customDomain: serverPreferences?.customDomain,
+			subpath: serverPreferences?.subpath,
+			inviteCode,
+		},
+		channels: indexedChannels,
+	};
+}
+
+export const getCommunityPageHeaderData = privateQuery({
 	args: {
 		serverDiscordId: v.int64(),
-		channelDiscordId: v.int64(),
+		channelDiscordId: v.optional(v.int64()),
 	},
 	handler: async (ctx, args) => {
-		const server = await getOneFrom(
-			ctx.db,
-			"servers",
-			"by_discordId",
-			args.serverDiscordId,
-		);
+		const headerData = await getServerHeaderData(ctx, args.serverDiscordId);
+		if (!headerData) return null;
 
-		if (!server) return null;
+		if (!args.channelDiscordId) {
+			return {
+				...headerData,
+				selectedChannel: null,
+			};
+		}
 
-		const [channel, indexedSettings, serverPreferences] = await Promise.all([
-			getChannelWithSettings(ctx, args.channelDiscordId),
-			ctx.db
-				.query("channelSettings")
-				.withIndex("by_serverId_and_indexingEnabled", (q) =>
-					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
-				)
-				.collect(),
-			getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
-		]);
-
-		if (!channel || channel.serverId !== server.discordId) return null;
-
-		const indexedChannelIds = indexedSettings.map((s) => s.channelId);
-
-		const allIndexedChannels = await asyncMap(indexedChannelIds, (channelId) =>
-			getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
-		);
-
-		const indexedChannels = Arr.filter(allIndexedChannels, Predicate.isNotNull)
-			.filter(
-				(c) =>
-					c.type === CHANNEL_TYPE.GuildText ||
-					c.type === CHANNEL_TYPE.GuildAnnouncement ||
-					c.type === CHANNEL_TYPE.GuildForum,
-			)
-			.sort((a, b) => {
-				if (a.type === CHANNEL_TYPE.GuildForum) return -1;
-				if (b.type === CHANNEL_TYPE.GuildForum) return 1;
-				if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
-				if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
-				return 0;
-			});
+		const channel = await getChannelWithSettings(ctx, args.channelDiscordId);
+		if (!channel || channel.serverId !== headerData.server.discordId)
+			return null;
 
 		return {
-			server: {
-				...server,
-				channels: indexedChannels,
-				customDomain: serverPreferences?.customDomain,
-				subpath: serverPreferences?.subpath,
-			},
-			channels: indexedChannels,
+			...headerData,
 			selectedChannel: channel,
 		};
 	},
