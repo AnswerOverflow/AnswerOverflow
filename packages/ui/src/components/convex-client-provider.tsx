@@ -44,7 +44,7 @@ function AuthClientProvider({ children }: { children: ReactNode }) {
 
 	const authClient = useMemo(
 		() => createAuthClientWithBaseURL(tenant),
-		[tenant?.subpath],
+		[tenant?.subpath, tenant?.customDomain],
 	);
 
 	return (
@@ -69,13 +69,18 @@ export const useSession = (
 ) => {
 	const authClient = useAuthClient();
 	const session = authClient.useSession();
-	if (!props.allowAnonymous && session?.data?.user?.isAnonymous) {
-		return {
-			...session,
-			data: null,
-		};
-	}
-	return session;
+	const isAnonymousUser = session?.data?.user?.isAnonymous ?? false;
+	const shouldHideData = !props.allowAnonymous && isAnonymousUser;
+
+	return useMemo(() => {
+		if (shouldHideData) {
+			return {
+				...session,
+				data: null,
+			};
+		}
+		return session;
+	}, [session, shouldHideData]);
 };
 
 export const useNonAnonymousSession = () => {

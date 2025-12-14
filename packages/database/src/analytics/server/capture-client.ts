@@ -3,7 +3,7 @@ import { PostHog } from "posthog-node";
 
 const createPostHogCaptureClient = Effect.gen(function* () {
 	yield* Effect.void;
-	const apiKey = process.env.POSTHOG_API_KEY;
+	const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
 	if (!apiKey) {
 		return undefined;
 	}
