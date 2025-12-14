@@ -46,8 +46,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		tenantData.description ?? `Browse the ${tenantData.name} community`;
 	return {
 		title: `${tenantData.name} Community`,
-		metadataBase: new URL("https://www.answeroverflow.com/"),
+		metadataBase: new URL(
+			getTenantCanonicalUrl(
+				{
+					customDomain: tenantData.customDomain,
+					subpath: tenantData.subpath,
+				},
+				"/",
+			),
+		),
 		description,
+		icons: {
+			icon: iconUrl,
+			shortcut: iconUrl,
+			apple: iconUrl,
+		},
 		robots: {
 			index: true,
 			follow: true,
