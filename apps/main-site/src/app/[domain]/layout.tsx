@@ -68,7 +68,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		openGraph: {
 			type: "website",
 			title: `${tenantData.name} Community`,
-			siteName: "Answer Overflow",
+			siteName: tenantData.name,
 			description,
 			images: [
 				{
