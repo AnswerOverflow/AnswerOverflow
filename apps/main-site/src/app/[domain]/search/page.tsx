@@ -49,7 +49,11 @@ function TenantSearchResults({
 				</Empty>
 			}
 			renderItem={(result) => (
-				<ThreadCard key={result.message.message.id} result={result} />
+				<ThreadCard
+					key={result.message.message.id}
+					result={result}
+					hideServer
+				/>
 			)}
 		/>
 	);
@@ -71,39 +75,42 @@ function TenantSearchPageContent() {
 
 	return (
 		<div className="min-h-screen bg-background">
-			<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-foreground mb-2">Search</h1>
-					<p className="text-muted-foreground">
-						Search through messages in {serverName}
+			<div className="border-b border-border bg-muted/30">
+				<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+					<h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+						Search {serverName}
+					</h1>
+					<p className="text-muted-foreground text-sm sm:text-base mb-6">
+						Find answers from community discussions
 					</p>
-				</div>
-
-				<div className="mb-8">
 					<SearchInput
 						value={searchQuery ?? ""}
 						onChange={(value) => setSearchQuery(value || null)}
 						placeholder={`Search ${serverName}...`}
 						isSearching={isSearching}
 						autoFocus
-						className="max-w-2xl"
+						className="max-w-xl"
 					/>
 				</div>
+			</div>
 
+			<div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
 				{hasQuery && tenant?.discordId ? (
-					<TenantSearchResults
-						query={debouncedSearchQuery}
-						serverId={tenant.discordId.toString()}
-					/>
+					<div className="space-y-4">
+						<TenantSearchResults
+							query={debouncedSearchQuery}
+							serverId={tenant.discordId.toString()}
+						/>
+					</div>
 				) : (
-					<Empty className="py-16 border rounded-lg">
+					<Empty className="py-16 border border-dashed rounded-xl bg-muted/10">
 						<EmptyHeader>
 							<EmptyMedia variant="icon">
 								<Search />
 							</EmptyMedia>
-							<EmptyTitle>Search {serverName}</EmptyTitle>
+							<EmptyTitle>Start searching</EmptyTitle>
 							<EmptyDescription>
-								Enter a search query above to find answers from this community.
+								Enter a search query above to find answers from {serverName}.
 							</EmptyDescription>
 						</EmptyHeader>
 					</Empty>
@@ -118,23 +125,21 @@ export default function TenantSearchPage() {
 		<Suspense
 			fallback={
 				<div className="min-h-screen bg-background">
-					<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-						<div className="mb-8">
-							<h1 className="text-3xl font-bold text-foreground mb-2">
+					<div className="border-b border-border bg-muted/30">
+						<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+							<h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
 								Search
 							</h1>
-							<p className="text-muted-foreground">
-								Search through messages in this community
+							<p className="text-muted-foreground text-sm sm:text-base mb-6">
+								Find answers from community discussions
 							</p>
-						</div>
-						<div className="mb-8">
 							<SearchInput
 								value=""
 								onChange={() => {}}
 								placeholder="Search..."
 								isSearching={false}
 								autoFocus
-								className="max-w-2xl"
+								className="max-w-xl"
 							/>
 						</div>
 					</div>
