@@ -7,7 +7,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { anonymousClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import {
+	createContext,
+	useContext,
+	useMemo,
+	useState,
+	type ReactNode,
+} from "react";
 import { useTenant } from "./tenant-context";
 import { getTenantCanonicalUrl, TenantInfo } from "../utils/links";
 
@@ -41,14 +47,14 @@ type AuthClient = ReturnType<typeof createAuthClientWithBaseURL>;
 
 const AuthClientContext = createContext<AuthClient | null>(null);
 
-function AuthClientProvider({ children }: { children: ReactNode }) {
-	const tenant = useTenant();
-
-	const authClient = useMemo(
-		() => createAuthClientWithBaseURL(tenant),
-		[tenant?.subpath, tenant?.customDomain],
-	);
-
+function AuthClientProvider({
+	children,
+	tenant,
+}: {
+	children: ReactNode;
+	tenant: TenantInfo | null | undefined;
+}) {
+	const [authClient] = useState(createAuthClientWithBaseURL(tenant));
 	return (
 		<AuthClientContext.Provider value={authClient}>
 			<ConvexBetterAuthProvider client={convex} authClient={authClient}>
@@ -89,11 +95,17 @@ export const useNonAnonymousSession = () => {
 	return useSession({ allowAnonymous: false });
 };
 
-export function ConvexClientProvider({ children }: { children: ReactNode }) {
+export function ConvexClientProvider({
+	children,
+	tenant,
+}: {
+	children: ReactNode;
+	tenant: TenantInfo | null | undefined;
+}) {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ConvexProvider client={convex}>
-				<AuthClientProvider>{children}</AuthClientProvider>
+				<AuthClientProvider tenant={tenant}>{children}</AuthClientProvider>
 			</ConvexProvider>
 		</QueryClientProvider>
 	);

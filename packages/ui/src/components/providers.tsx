@@ -53,7 +53,7 @@ export function Providers({
 						disableTransitionOnChange
 						enableColorScheme
 					>
-						<ConvexClientProvider>
+						<ConvexClientProvider tenant={tenant}>
 							<SignInIfAnon />
 							<IdentifyUser />
 							{children}
