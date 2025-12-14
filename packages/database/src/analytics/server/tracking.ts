@@ -152,6 +152,9 @@ export function trackEvent<K extends BaseProps>(
 	return Effect.gen(function* () {
 		const posthog = yield* PostHogCaptureClient;
 		if (!posthog) {
+			console.warn(
+				`[Analytics] PostHog client not initialized, skipping event: ${eventName}`,
+			);
 			return;
 		}
 
@@ -181,7 +184,16 @@ export function trackEvent<K extends BaseProps>(
 		yield* Effect.sync(() => {
 			posthog.capture(captureData);
 		});
-	}).pipe(Effect.catchAll(() => Effect.void));
+	}).pipe(
+		Effect.catchAll((error) =>
+			Effect.sync(() => {
+				console.error(
+					`[Analytics] Failed to track event "${eventName}":`,
+					error,
+				);
+			}),
+		),
+	);
 }
 
 export function registerServerGroup(props: {
@@ -191,6 +203,9 @@ export function registerServerGroup(props: {
 	return Effect.gen(function* () {
 		const posthog = yield* PostHogCaptureClient;
 		if (!posthog) {
+			console.warn(
+				`[Analytics] PostHog client not initialized, skipping server group registration`,
+			);
 			return;
 		}
 		yield* Effect.sync(() => {
@@ -200,5 +215,11 @@ export function registerServerGroup(props: {
 				properties: props,
 			});
 		});
-	}).pipe(Effect.catchAll(() => Effect.void));
+	}).pipe(
+		Effect.catchAll((error) =>
+			Effect.sync(() => {
+				console.error(`[Analytics] Failed to register server group:`, error);
+			}),
+		),
+	);
 }
