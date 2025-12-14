@@ -1,0 +1,40 @@
+diff --git a/node_modules/discord-markdown-parser/.bun-tag-7739271855565770 b/.bun-tag-7739271855565770
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/index.js b/dist/index.js
+index 8afffd8bdd0da9670a7438fd2a5ab5d06b9f4018..e72cf7084fd48ac82e6a57e6436ea77db9fa4846 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -32,7 +32,14 @@ exports.rules = {
+     blockQuote: blockQuote_1.blockQuote,
+     codeBlock: codeBlock_1.codeBlock,
+     newline: simple_markdown_1.default.defaultRules.newline,
++    list: Object.assign({}, simple_markdown_1.default.defaultRules.list, {
++        match: function (source, state, prevCapture) {
++            state._list = true;
++            return simple_markdown_1.default.defaultRules.list.match(source, state, prevCapture);
++        },
++    }),
+     escape: simple_markdown_1.default.defaultRules.escape,
++    link: simple_markdown_1.default.defaultRules.link,
+     autolink: autolink_1.autolink,
+     url: url_1.url,
+     em: em_1.em,
+diff --git a/dist/utils/regex.js b/dist/utils/regex.js
+index 2b460a365ce0b7f8d4e8bb2382c41c23c65135cb..b873ad0fd14e57b2bfc1a51907b8695b17b4de76 100644
+--- a/dist/utils/regex.js
++++ b/dist/utils/regex.js
+@@ -1,10 +1,10 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.SubtextRegex = exports.HeadingRegex = exports.TimestampRegex = exports.TextRegex = exports.StrikeThroughRegex = exports.SpoilerRegex = exports.EmoticonRegex = exports.CodeBlockRegex = exports.BlockQuoteRegex = exports.HereRegex = exports.EveryoneRegex = exports.UserMentionRegex = exports.RoleMentionRegex = exports.EmojiRegex = exports.ChannelMentionRegex = void 0;
+-exports.ChannelMentionRegex = /^<#(\d{17,20})>/;
++exports.ChannelMentionRegex = /^<#(\d+)>/;
+ exports.EmojiRegex = /^<(a)?:(\w{2,32}):(\d{17,21})>/;
+-exports.RoleMentionRegex = /^<@&(\d{17,20})>/;
+-exports.UserMentionRegex = /^<@!?(\d{17,20})>/;
++exports.RoleMentionRegex = /^<@&(\d+)>/;
++exports.UserMentionRegex = /^<@!?(\d+)>/;
+ exports.EveryoneRegex = /^@everyone/;
+ exports.HereRegex = /^@here/;
+ exports.BlockQuoteRegex = /^( *>>> ([\s\S]*))|^( *> [^\n]*(\n *> [^\n]*)*\n?)/;

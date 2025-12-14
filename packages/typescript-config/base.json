@@ -1,0 +1,25 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"display": "Default",
+	"compilerOptions": {
+		"declaration": false,
+		"declarationMap": false,
+		"esModuleInterop": true,
+		"incremental": true,
+		"isolatedModules": true,
+		"tsBuildInfoFile": ".tsbuildinfo",
+		"lib": ["es2022", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"noUncheckedIndexedAccess": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ES2022",
+		"plugins": [
+			{
+				"name": "@effect/language-service"
+			}
+		]
+	}
+}

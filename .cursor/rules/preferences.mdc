@@ -1,0 +1,73 @@
+---
+alwaysApply: true
+---
+
+# Code Style & Architecture Preferences
+
+## Type Safety
+
+- Never use `any`, `unknown`, or TypeScript type casting (`as` or angle bracket syntax)
+- Use proper types and type inference instead
+- **Prefer type inference over manual type annotations** - if TypeScript can infer the type, let it infer rather than adding explicit annotations
+- Access data through proper type-safe methods (e.g., `liveData?.property`)
+
+## Database Design
+
+- Use regular boolean fields instead of bitfield encoding/decoding
+- Store settings in separate tables rather than embedding flags in main entities
+- All database operations should flow through the database service layer
+- Avoid direct Convex client access in tests or application code
+
+## Testing
+
+- Tests should work without `TestClock.adjust()` - LiveData should be available immediately after mutations
+- **Never use `TestClock.adjust()` after writing data and then reading it** - data should be available instantly, no waiting needed
+- **Only use `TestClock.adjust()` when testing functionality specifically related to time** (e.g., timeouts, delays, scheduled tasks)
+- Use LiveData properly: access data via `liveData?.property` rather than casting or workarounds
+- Tests should use the same patterns as production code (database service layer)
+- Include tests in implementation plans and run them during development (`bun run test`)
+
+## Code Quality
+
+- Prefer type inference; only add explicit types when necessary for clarity or when inference isn't sufficient
+- Prefer clear separation of concerns
+- Avoid test-specific workarounds or shortcuts
+- Keep test code clean and straightforward
+
+## UI Components
+
+- **Always prefer components from `@packages/ui` over native HTML elements**
+- Use `<Button />` instead of `<button />`
+- Use `<Input />` instead of `<input />`
+- Use `<Textarea />` instead of `<textarea />`
+- Use `<Label />` instead of `<label />`
+- Use `<Select />` instead of `<select />`
+- Use `<Checkbox />` instead of `<input type="checkbox" />`
+- Use `<Link />` instead of `<a />` for navigation
+- Import components from `@packages/ui/components/*` (e.g., `import { Button } from "@packages/ui/components/button"`)
+- Only use native HTML elements when there is no equivalent component in `@packages/ui`
+
+Do not create summary documents or markdown documents unless instructed
+
+Run commands with a timeout of 60 seconds unless instructed otherwise
+
+### DISCORD IDS VS CONVEX IDS
+
+WHEN WE REFER TO AN ID, WE ARE REFERRING TO THE CONVEX ID
+
+WHEN REFERRING TO A DISCORD ID, WE ARE REFERRING TO THE DISCORD ID
+
+IF YOU HAVE A FUNCTION THAT IS GET BY ID, IT WILL LOOK UP ON THE CONVEX ID
+A FUNCTION THAT LOOKS UP BY DISCORD ID SHOULD HAVE THAT IN THE NAME
+
+## Lingo
+
+If I say "ITG", it means iterate to greatness, in which case I want you to iterate on your own by running commans and self evaluating until the task is complete.
+
+# Comments
+
+NEVER WRITE COMMENTS
+NEVER WRITE COMMENTS
+NEVER WRITE COMMENTS
+NEVER WRITE COMMENTS
+NEVER WRITE COMMENTS

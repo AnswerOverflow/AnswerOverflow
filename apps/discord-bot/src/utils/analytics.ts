@@ -1,182 +1,220 @@
-import { ConsentSource } from '@answeroverflow/api/router/user-server-settings-types';
 import {
-	ChannelPropsWithSettings,
-	ServerPropsWithSettings,
-	ThreadProps,
-	channelWithSettingsToAnalyticsData,
-	serverWithSettingsToAnalyticsData,
-} from '@answeroverflow/constants/analytics';
-import { Analytics, BaseProps } from '@answeroverflow/core/analytics';
-import { ChannelWithFlags, ServerWithFlags } from '@answeroverflow/core/zod';
+	registerServerGroup as registerServerGroupBase,
+	trackEvent,
+} from "@packages/database/analytics/server/tracking";
+import {
+	ConsentSource,
+	type MarkSolutionCommandStatus,
+} from "@packages/database/analytics/server/types";
 import type {
-	Channel,
 	Guild,
 	GuildMember,
 	Message,
+	PartialGuildMember,
 	ThreadChannel,
-} from 'discord.js';
-import { MarkSolutionErrorReason } from '../domains/mark-solution';
-import { sentryLogger } from './sentry';
+} from "discord.js";
 
-export type ServerPropsWithDiscordData = ServerPropsWithSettings & {
-	'Bot Time In Server In Ms': number;
+export { ConsentSource };
+
+type ChannelWithSettings = {
+	id: string | bigint;
+	name: string;
+	type: number;
+	serverId: string | bigint;
+	flags: {
+		indexingEnabled: boolean;
+		markSolutionEnabled: boolean;
+		sendMarkSolutionInstructionsInNewThreads: boolean;
+		autoThreadEnabled: boolean;
+		forumGuidelinesConsentEnabled: boolean;
+		solutionTagId?: string | bigint;
+		inviteCode?: string;
+	} | null;
 };
 
-export type ChannelPropsWithDiscordData = ChannelPropsWithSettings;
-
-export function serverWithDiscordInfoToAnalyticsData(args: {
-	serverWithSettings: ServerWithFlags;
-	guild: Guild;
-}): ServerPropsWithDiscordData {
-	return {
-		...serverWithSettingsToAnalyticsData(args.serverWithSettings),
-		'Bot Time In Server In Ms':
-			new Date().getTime() - args.guild.joinedAt.getTime(),
-	};
-}
-
-export function channelWithDiscordInfoToAnalyticsData(args: {
-	answerOverflowChannel: ChannelWithFlags;
-	discordChannel: Channel;
-}): ChannelPropsWithDiscordData {
-	return {
-		...channelWithSettingsToAnalyticsData(args.answerOverflowChannel),
-	};
-}
-
-export function threadWithDiscordInfoToAnalyticsData(args: {
-	thread: ThreadChannel;
-}): ThreadProps {
-	return {
-		'Thread Id': args.thread.id,
-		'Thread Name': args.thread.name,
-		'Thread Type': args.thread.type,
-		'Number of Messages': args.thread.messageCount ?? 0,
-		'Thread Archived Timestamp': args.thread.archivedAt?.getTime() ?? 0,
-		'Thread Parent Id': args.thread.parentId ?? undefined,
-		'Thread Parent Name': args.thread.parent?.name ?? undefined,
-		'Thread Parent Type': args.thread.parent?.type ?? undefined,
-	};
-}
-
-export const userTypes = [
-	'User',
-	'Question Asker',
-	'Question Solver',
-	'Mark As Solver',
-] as const;
-export type UserType = (typeof userTypes)[number];
-
-type UserProps<T extends UserType> = {
-	[K in
-		| `${T} Id`
-		| `${T} Joined At`
-		| `${T} Time In Server In Ms`]: K extends `${T} Id`
-		? string
-		: number | undefined;
+type ServerPreferences = {
+	readTheRulesConsentEnabled?: boolean;
 };
 
-export const messageTypes = ['Message', 'Question', 'Solution'] as const;
-
-export type MessageType = (typeof messageTypes)[number];
-
-type MessageProps<T extends MessageType> = {
-	[K in
-		| `${T} Id`
-		| `${T} Created At`
-		| `${T} Content Length`
-		| `${T} Server Id`
-		| `${T} Channel Id`
-		| `${T} Thread Id`]: K extends `${T} Id` ? string : number | undefined;
+type ServerWithSettings = {
+	discordId: string;
+	name: string;
 };
 
-type ServerJoinProps = ServerPropsWithDiscordData;
-type ServerLeaveProps = ServerPropsWithDiscordData;
-type UserJoinedServerProps = ServerPropsWithDiscordData & UserProps<'User'>;
-type UserLeftServerProps = ServerPropsWithDiscordData & UserProps<'User'>;
-
-type QuestionAskedProps = ServerPropsWithDiscordData &
-	ChannelPropsWithDiscordData &
-	ThreadProps &
-	UserProps<'Question Asker'> &
-	Partial<MessageProps<'Question'>>;
-
-export type QuestionSolvedProps = QuestionAskedProps &
-	UserProps<'Question Solver'> &
-	UserProps<'Mark As Solver'> & {
-		'Time To Solve In Ms': number;
-	} & MessageProps<'Solution'>;
-
-type MarkSolutionUsedProps = UserProps<'User'> & {
-	Status: MarkSolutionErrorReason | 'Success';
-};
-
-type EventMap = {
-	'Server Join': ServerJoinProps;
-	'Server Leave': ServerLeaveProps;
-	'User Joined Server': UserJoinedServerProps;
-	'User Left Server': UserLeftServerProps;
-	'Asked Question': QuestionAskedProps;
-	'Solved Question': QuestionSolvedProps;
-	'Leaderboard Viewed': UserProps<'User'>;
-	'Quick Action Command Sent': UserProps<'User'>;
-	'Mark Solution Instructions Sent': QuestionAskedProps; // TODO: Track if the user has ever had the instructions sent to them before
-	'Mark Solution Application Command Used': MarkSolutionUsedProps;
-	'Dismiss Button Clicked': UserProps<'User'> &
-		MessageProps<'Message'> & {
-			'Dismissed Message Type': 'Mark Solution Instructions';
-		};
-	'User Grant Consent': UserProps<'User'> & {
-		'Consent Source': ConsentSource;
-	};
-};
-
-export function memberToAnalyticsUser<T extends UserType>(
-	userType: T,
-	user: GuildMember,
-): UserProps<T> {
-	return {
-		[`${userType} Id`]: user.id,
-		[`${userType} Joined At`]: user.joinedAt?.getTime(),
-		[`${userType} Time In Server In Ms`]:
-			user.joinedAt?.getTime() &&
-			new Date().getTime() - user.joinedAt.getTime(),
-	} as UserProps<T>;
+export function trackServerJoin(guild: Guild) {
+	return trackEvent("Server Join", {
+		"Answer Overflow Account Id": guild.ownerId,
+		guild,
+	});
 }
 
-export function messageToAnalyticsMessage<T extends MessageType>(
-	messageType: T,
-	message: Message,
-): MessageProps<T> {
-	return {
-		[`${messageType} Id`]: message.id,
-		[`${messageType} Created At`]: message.createdTimestamp,
-		[`${messageType} Content Length`]: message.content.length,
-		[`${messageType} Server Id`]: message.guild?.id,
-		[`${messageType} Channel Id`]: message.channel.isThread()
-			? message.channel.parentId
-			: message.channel.id,
-		[`${messageType} Thread Id`]: message.channel.isThread()
-			? message.channel.id
-			: undefined,
-	} as MessageProps<T>;
+export function trackServerLeave(guild: Guild) {
+	return trackEvent("Server Leave", {
+		"Answer Overflow Account Id": guild.ownerId,
+		guild,
+	});
 }
 
-export function trackDiscordEvent<K extends keyof EventMap>(
-	event: K,
-	props: (EventMap[K] & BaseProps) | (() => Promise<EventMap[K] & BaseProps>),
+export function registerServerGroup(guild: Guild, serverId: string) {
+	return registerServerGroupBase({
+		"Server Id": serverId,
+		"Server Name": guild.name,
+	});
+}
+
+export function trackUserJoinedServer(
+	member: GuildMember,
+	server: ServerWithSettings,
+	serverPreferences?: ServerPreferences,
 ) {
-	if (props instanceof Function) {
-		void props()
-			.then((props) => Analytics.trackServerSideEvent(event, props))
-			.catch((error) => {
-				if (error instanceof Error) {
-					sentryLogger(error.message, {
-						event,
-					});
-				}
-			});
-		return;
-	}
-	Analytics.trackServerSideEvent(event, props);
+	return trackEvent("User Joined Server", {
+		"Answer Overflow Account Id": member.id,
+		guild: member.guild,
+		serverWithSettings: server,
+		serverPreferences,
+		members: [{ prefix: "User", member }],
+	});
+}
+
+export function trackUserLeftServer(
+	member: GuildMember | PartialGuildMember,
+	server: ServerWithSettings,
+	serverPreferences?: ServerPreferences,
+) {
+	return trackEvent("User Left Server", {
+		"Answer Overflow Account Id": member.id,
+		guild: member.guild,
+		serverWithSettings: server,
+		serverPreferences,
+		members: [{ prefix: "User", member }],
+	});
+}
+
+export function trackAskedQuestion(
+	thread: ThreadChannel,
+	channelSettings: ChannelWithSettings,
+	questionAsker: GuildMember,
+	server: ServerWithSettings,
+	serverPreferences?: ServerPreferences,
+	question?: Message | null,
+) {
+	console.log(
+		"trackAskedQuestion",
+		thread.parent?.id,
+		channelSettings.flags?.indexingEnabled,
+		channelSettings.flags?.markSolutionEnabled,
+	);
+	return trackEvent("Asked Question", {
+		"Answer Overflow Account Id": questionAsker.id,
+		guild: thread.guild,
+		serverWithSettings: server,
+		serverPreferences,
+		channel: thread.parent!,
+		channelWithSettings: channelSettings,
+		thread,
+		members: [{ prefix: "Question Asker", member: questionAsker }],
+		messages: question ? [{ prefix: "Question", message: question }] : [],
+	});
+}
+
+export function trackSolvedQuestion(
+	thread: ThreadChannel,
+	channelSettings: ChannelWithSettings,
+	questionAsker: GuildMember,
+	questionSolver: GuildMember,
+	markAsSolver: GuildMember,
+	question: Message,
+	solution: Message,
+	server: ServerWithSettings,
+	serverPreferences?: ServerPreferences,
+) {
+	return trackEvent("Solved Question", {
+		"Answer Overflow Account Id": questionSolver.id,
+		guild: thread.guild,
+		serverWithSettings: server,
+		serverPreferences,
+		channel: thread.parent!,
+		channelWithSettings: channelSettings,
+		thread,
+		members: [
+			{ prefix: "Question Asker", member: questionAsker },
+			{ prefix: "Question Solver", member: questionSolver },
+			{ prefix: "Mark As Solver", member: markAsSolver },
+		],
+		messages: [
+			{ prefix: "Question", message: question },
+			{ prefix: "Solution", message: solution },
+		],
+		"Time To Solve In Ms":
+			solution.createdTimestamp - question.createdTimestamp,
+	});
+}
+
+export function trackMarkSolutionInstructionsSent(
+	thread: ThreadChannel,
+	channelSettings: ChannelWithSettings,
+	questionAsker: GuildMember,
+	server: ServerWithSettings,
+	serverPreferences?: ServerPreferences,
+	question?: Message | null,
+) {
+	return trackEvent("Mark Solution Instructions Sent", {
+		"Answer Overflow Account Id": questionAsker.id,
+		guild: thread.guild,
+		serverWithSettings: server,
+		serverPreferences,
+		channel: thread.parent!,
+		channelWithSettings: channelSettings,
+		thread,
+		members: [{ prefix: "Question Asker", member: questionAsker }],
+		messages: question ? [{ prefix: "Question", message: question }] : [],
+	});
+}
+
+export function trackMarkSolutionCommandUsed(
+	member: GuildMember,
+	status: MarkSolutionCommandStatus,
+) {
+	return trackEvent("Mark Solution Application Command Used", {
+		"Answer Overflow Account Id": member.id,
+		members: [{ prefix: "User", member }],
+		Status: status,
+	});
+}
+
+export function trackDismissButtonClicked(
+	member: GuildMember,
+	message: Message,
+) {
+	return trackEvent("Dismiss Button Clicked", {
+		"Answer Overflow Account Id": member.id,
+		members: [{ prefix: "User", member }],
+		messages: [{ prefix: "Message", message }],
+		"Dismissed Message Type": "Mark Solution Instructions" as const,
+	});
+}
+
+export function trackUserGrantConsent(
+	member: GuildMember,
+	consentSource: ConsentSource,
+) {
+	return trackEvent("User Grant Consent", {
+		"Answer Overflow Account Id": member.id,
+		members: [{ prefix: "User", member }],
+		"Consent Source": consentSource,
+	});
+}
+
+export function trackLeaderboardViewed(member: GuildMember) {
+	return trackEvent("Leaderboard Viewed", {
+		"Answer Overflow Account Id": member.id,
+		members: [{ prefix: "User", member }],
+	});
+}
+
+export function trackQuickActionCommandSent(member: GuildMember) {
+	return trackEvent("Quick Action Command Sent", {
+		"Answer Overflow Account Id": member.id,
+		members: [{ prefix: "User", member }],
+	});
 }

@@ -1,0 +1,9 @@
+{
+	"name": "AnswerOverflow Bun Monorepo",
+	"snapshot": "POPULATED_FROM_SETTINGS",
+	"install": "if ! command -v bun >/dev/null 2>&1; then curl -fsSL https://bun.sh/install | bash; export BUN_INSTALL=\"$HOME/.bun\"; export PATH=\"$BUN_INSTALL/bin:$PATH\"; fi; bun install",
+	"terminals": [
+		{ "name": "Dev (turbo)", "command": "bun run dev:no-dbs" },
+		{ "name": "Tests", "command": "bun test" }
+	]
+}

@@ -1,72 +1,136 @@
-import { findServerByCustomDomain } from '@answeroverflow/core/server';
-import { zServerPublic } from '@answeroverflow/core/zod';
-import { Providers } from '@answeroverflow/ui/layouts/providers';
-import { makeServerIconLink } from '@answeroverflow/ui/server-icon';
-import { getServerCustomUrl } from '@answeroverflow/ui/utils/server';
-import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { Database } from "@packages/database/database";
+import { Providers } from "@packages/ui/components/providers";
+import type { Tenant } from "@packages/ui/components/tenant-context";
+import {
+	getTenantCanonicalUrl,
+	normalizeSubpath,
+} from "@packages/ui/utils/links";
+import { Effect } from "effect";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { DomainNavbarFooterWrapper } from "../../components/domain-navbar-footer-wrapper";
+import { runtime } from "../../lib/runtime";
 
-export async function generateMetadata(props: {
+type Props = {
+	children: React.ReactNode;
 	params: Promise<{ domain: string }>;
-}): Promise<Metadata> {
+};
+
+async function getTenantData(domain: string) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const tenant = yield* database.private.servers.getServerByDomain({
+			domain,
+		});
+		if (!tenant?.server || !tenant?.preferences) {
+			return null;
+		}
+		return {
+			...tenant.server,
+			...tenant.preferences,
+		};
+	}).pipe(runtime.runPromise);
+}
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
-	// read route params
-	const tenant = await findServerByCustomDomain(
-		decodeURIComponent(params.domain),
-	);
-	if (!tenant) {
-		return notFound();
+	const domain = decodeURIComponent(params.domain);
+	const tenantData = await getTenantData(domain);
+
+	if (!tenantData?.icon) {
+		return {};
 	}
 
-	const image =
-		makeServerIconLink(tenant, 256) ??
-		'https://www.answeroverflow.com/answer_overflow_icon_256.png';
-
+	const iconUrl = `https://cdn.answeroverflow.com/${tenantData.discordId}/${tenantData.icon}/icon.png`;
 	const description =
-		tenant.description ??
-		`View the ${tenant.name} Discord server on the web. Browse questions asked by the community and find answers.`;
-	const icon = tenant.icon
-		? `https://cdn.answeroverflow.com/${tenant.id}/${tenant.icon}/icon.png`
-		: makeServerIconLink(tenant, 48);
-
-	const customUrl = getServerCustomUrl(tenant);
-	const metadataBaseUrl = customUrl
-		? new URL(customUrl)
-		: new URL(`https://${tenant.customDomain!}`);
-
+		tenantData.description ?? `Browse the ${tenantData.name} community`;
 	return {
-		title: `${tenant.name} Community`,
+		title: `${tenantData.name} Community`,
+		metadataBase: new URL("https://www.answeroverflow.com/"),
 		description,
-		metadataBase: metadataBaseUrl,
-		other:
-			tenant.id == '864296203746803753'
-				? {
-						'google-site-verification':
-							'oljHAdgYTW0OIkYe1hFIrUFg1ZnhCeIh9fDnXwDDYMo',
-					}
-				: undefined,
-		icons: icon ? [icon] : undefined,
-		alternates: {
-			canonical: customUrl || `https://${tenant.customDomain!}`,
+		robots: {
+			index: true,
+			follow: true,
 		},
 		openGraph: {
-			images: [image],
-			siteName: tenant.name,
+			type: "website",
+			title: `${tenantData.name} Community`,
+			siteName: "Answer Overflow",
+			description,
+			images: [
+				{
+					url: getTenantCanonicalUrl(
+						{
+							customDomain: tenantData.customDomain,
+							subpath: tenantData.subpath,
+						},
+						`/og/community?id=${tenantData.discordId.toString()}&tenant=true`,
+					),
+					width: 1200,
+					height: 630,
+				},
+			],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: `${tenantData.name} Community`,
+			description,
+			images: [
+				getTenantCanonicalUrl(
+					{
+						customDomain: tenantData.customDomain,
+						subpath: tenantData.subpath,
+					},
+					`/og/community?id=${tenantData.discordId.toString()}&tenant=true`,
+				),
+			],
 		},
 	};
 }
 
-export default async function Layout(props: {
-	children: React.ReactNode;
-	params: Promise<{ domain: string }>;
-}) {
+const subpathTenants = [
+	{
+		rewriteDomain: "migaku.com",
+		subpath: "community",
+	},
+	{
+		rewriteDomain: "rhys.ltd",
+		subpath: "idk",
+	},
+	{
+		rewriteDomain: "vapi.ai",
+		subpath: "community",
+	},
+];
+
+export default async function DomainLayout(props: Props) {
 	const params = await props.params;
+	const domain = decodeURIComponent(params.domain);
+	const tenantData = await getTenantData(domain);
 
-	const { children } = props;
+	if (!tenantData) {
+		return notFound();
+	}
 
-	const server = await findServerByCustomDomain(
-		decodeURIComponent(params.domain),
+	const subpathTenant = subpathTenants.find(
+		(tenant) => tenant.rewriteDomain === domain,
 	);
-	const parsed = zServerPublic.parse(server);
-	return <Providers tenant={parsed}>{children}</Providers>;
+
+	const tenant: Tenant = {
+		customDomain: tenantData.customDomain,
+		subpath: subpathTenant
+			? normalizeSubpath(subpathTenant.subpath)
+			: tenantData.subpath
+				? normalizeSubpath(tenantData.subpath)
+				: null,
+		name: tenantData.name,
+		icon: tenantData.icon,
+		discordId: tenantData.discordId,
+	};
+
+	return (
+		<Providers tenant={tenant}>
+			<DomainNavbarFooterWrapper>{props.children}</DomainNavbarFooterWrapper>
+		</Providers>
+	);
 }

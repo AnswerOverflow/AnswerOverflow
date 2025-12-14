@@ -1,10 +1,12 @@
 {
-	"extends": "@answeroverflow/tsconfig/react.json",
-	"include": [
-		"../../reset.d.ts",
-		"postcss.config.cjs",
-		"tailwind.config.cjs",
-		"src"
-	],
-	"exclude": ["node_modules", "../../node_modules"]
+	"extends": "@packages/typescript-config/react-library.json",
+	"compilerOptions": {
+		"rootDir": ".",
+		"paths": {
+			"@package/ui/*": ["./src/*"]
+		},
+		"outDir": "./dist"
+	},
+	"include": ["."],
+	"exclude": ["node_modules", "dist"]
 }

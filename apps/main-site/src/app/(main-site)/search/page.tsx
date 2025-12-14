@@ -1,56 +1,139 @@
-import { Footer } from '@answeroverflow/ui/footer';
-import { Navbar } from '@answeroverflow/ui/navbar/index';
-import { SearchPage } from '@answeroverflow/ui/pages/SearchPage';
-import { callAPI } from '@answeroverflow/ui/utils/trpc';
-import { Metadata } from 'next';
-import { ZeroState } from './zero-state';
+"use client";
+
+import { api } from "@packages/database/convex/_generated/api";
+import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
+import {
+	Empty,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@packages/ui/components/empty";
+import { SearchInput } from "@packages/ui/components/search-input";
+import {
+	ThreadCard,
+	ThreadCardSkeleton,
+} from "@packages/ui/components/thread-card";
+import { FileQuestion, Search } from "lucide-react";
+import { useQueryState } from "nuqs";
+import { Suspense } from "react";
+import { useDebounce } from "use-debounce";
 
 type Props = {
-	searchParams: Promise<{
-		q?: string | string[];
-		s?: string | string[];
-	}>;
+	searchParams: Promise<{ q?: string; s?: string; c?: string }>;
 };
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-	const searchParams = await props.searchParams;
-	const query = searchParams.q ? (searchParams.q as string) : undefined;
-	return {
-		title: query
-			? `Search Results for "${query}" - Answer Overflow`
-			: 'Search - Answer Overflow',
-		description: 'Search for answers to your questions on Answer Overflow.',
-		openGraph: {
-			title: query
-				? `Search Results for "${query}" - Answer Overflow`
-				: 'Search - Answer Overflow',
-			description: 'Search for answers to your questions on Answer Overflow.',
-		},
-	};
+function SearchResults({ query }: { query: string }) {
+	return (
+		<ConvexInfiniteList
+			query={api.public.search.publicSearch}
+			queryArgs={{ query }}
+			pageSize={10}
+			initialLoaderCount={5}
+			loader={<ThreadCardSkeleton />}
+			emptyState={
+				<Empty className="py-16">
+					<EmptyHeader>
+						<EmptyMedia variant="icon">
+							<FileQuestion />
+						</EmptyMedia>
+						<EmptyTitle>No results found</EmptyTitle>
+						<EmptyDescription>
+							No messages match your search for "{query}". Try different
+							keywords or check your spelling.
+						</EmptyDescription>
+					</EmptyHeader>
+				</Empty>
+			}
+			renderItem={(result) => (
+				<ThreadCard key={result.message.message.id} result={result} />
+			)}
+		/>
+	);
 }
 
-export default async function Search(props: Props) {
-	const searchParams = await props.searchParams;
-	if (!searchParams.q || searchParams.q.length === 0) {
-		return <ZeroState />;
-	}
-
-	const results = await callAPI({
-		apiCall: (api) =>
-			api.messages.search({
-				query: searchParams.q ? (searchParams.q as string) : '',
-				serverId: searchParams.s ? (searchParams.s as string) : undefined,
-			}),
+function SearchPageContent() {
+	const [searchQuery, setSearchQuery] = useQueryState("q", {
+		defaultValue: "",
 	});
+	const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
+
+	const hasQuery =
+		debouncedSearchQuery && debouncedSearchQuery.trim().length > 0;
+	const isSearching =
+		searchQuery !== debouncedSearchQuery && searchQuery.trim().length > 0;
+
 	return (
-		<div className="mx-auto flex w-full flex-col items-center bg-background font-body">
-			<div className="w-full max-w-screen-2xl justify-center">
-				<Navbar tenant={undefined} />
-				<div className="mt-16 px-4 sm:px-[4rem] 2xl:px-[6rem]">
-					<SearchPage results={results} tenant={undefined} />
+		<div className="min-h-screen bg-background">
+			<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+				<div className="mb-8">
+					<h1 className="text-3xl font-bold text-foreground mb-2">Search</h1>
+					<p className="text-muted-foreground">
+						Search through indexed Discord messages
+					</p>
 				</div>
-				<Footer tenant={undefined} />
+
+				<div className="mb-8">
+					<SearchInput
+						value={searchQuery ?? ""}
+						onChange={(value) => setSearchQuery(value || null)}
+						placeholder="Search for answers..."
+						isSearching={isSearching}
+						autoFocus
+						className="max-w-2xl"
+					/>
+				</div>
+
+				{hasQuery ? (
+					<SearchResults query={debouncedSearchQuery} />
+				) : (
+					<Empty className="py-16 border rounded-lg">
+						<EmptyHeader>
+							<EmptyMedia variant="icon">
+								<Search />
+							</EmptyMedia>
+							<EmptyTitle>Search Discord messages</EmptyTitle>
+							<EmptyDescription>
+								Enter a search query above to find answers from indexed Discord
+								communities.
+							</EmptyDescription>
+						</EmptyHeader>
+					</Empty>
+				)}
 			</div>
 		</div>
+	);
+}
+
+export default function SearchPage(_props: Props) {
+	return (
+		<Suspense
+			fallback={
+				<div className="min-h-screen bg-background">
+					<div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+						<div className="mb-8">
+							<h1 className="text-3xl font-bold text-foreground mb-2">
+								Search
+							</h1>
+							<p className="text-muted-foreground">
+								Search through indexed Discord messages
+							</p>
+						</div>
+						<div className="mb-8">
+							<SearchInput
+								value=""
+								onChange={() => {}}
+								placeholder="Search for answers..."
+								isSearching={false}
+								autoFocus
+								className="max-w-2xl"
+							/>
+						</div>
+					</div>
+				</div>
+			}
+		>
+			<SearchPageContent />
+		</Suspense>
 	);
 }

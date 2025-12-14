@@ -1,0 +1,272 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"instructions": [".cursor/rules/*.mdc"],
+	"plugin": ["opencode-openai-codex-auth@4.0.2"],
+	"provider": {
+		"openai": {
+			"options": {
+				"reasoningEffort": "medium",
+				"reasoningSummary": "auto",
+				"textVerbosity": "medium",
+				"include": ["reasoning.encrypted_content"],
+				"store": false
+			},
+			"models": {
+				"gpt-5.1-codex-low": {
+					"name": "GPT 5.1 Codex Low (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "low",
+						"reasoningSummary": "auto",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-codex-medium": {
+					"name": "GPT 5.1 Codex Medium (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "medium",
+						"reasoningSummary": "auto",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-codex-high": {
+					"name": "GPT 5.1 Codex High (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "high",
+						"reasoningSummary": "detailed",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-codex-max": {
+					"name": "GPT 5.1 Codex Max (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "high",
+						"reasoningSummary": "detailed",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-codex-max-low": {
+					"name": "GPT 5.1 Codex Max Low (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "low",
+						"reasoningSummary": "detailed",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-codex-max-medium": {
+					"name": "GPT 5.1 Codex Max Medium (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "medium",
+						"reasoningSummary": "detailed",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-codex-max-high": {
+					"name": "GPT 5.1 Codex Max High (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "high",
+						"reasoningSummary": "detailed",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-codex-max-xhigh": {
+					"name": "GPT 5.1 Codex Max Extra High (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "xhigh",
+						"reasoningSummary": "detailed",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-codex-mini-medium": {
+					"name": "GPT 5.1 Codex Mini Medium (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "medium",
+						"reasoningSummary": "auto",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-codex-mini-high": {
+					"name": "GPT 5.1 Codex Mini High (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "high",
+						"reasoningSummary": "detailed",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-low": {
+					"name": "GPT 5.1 Low (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "low",
+						"reasoningSummary": "auto",
+						"textVerbosity": "low",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-medium": {
+					"name": "GPT 5.1 Medium (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "medium",
+						"reasoningSummary": "auto",
+						"textVerbosity": "medium",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				},
+				"gpt-5.1-high": {
+					"name": "GPT 5.1 High (OAuth)",
+					"limit": {
+						"context": 272000,
+						"output": 128000
+					},
+					"options": {
+						"reasoningEffort": "high",
+						"reasoningSummary": "detailed",
+						"textVerbosity": "high",
+						"include": ["reasoning.encrypted_content"],
+						"store": false
+					}
+				}
+			}
+		}
+	},
+	"tui": {
+		"scroll_speed": 2
+	},
+	"agent": {
+		"explore": {
+			"description": "Fast agent specialized for exploring codebases locally. Use this when you need to quickly find files by patterns, search code for keywords, or answer questions about the codebase.",
+			"mode": "subagent",
+			"model": "anthropic/claude-sonnet-4-20250514",
+			"temperature": 0.1,
+			"prompt": "You are a fast codebase exploration agent.\n\nUse for:\n- Finding files by patterns (eg. 'src/components/**/*.tsx')\n- Searching code for keywords (eg. 'API endpoints')\n- Answering questions about the codebase structure\n- Quick local codebase exploration\n\nProvide concise findings with file paths and line numbers."
+		},
+		"general": {
+			"description": "General-purpose agent for researching complex questions and executing multi-step tasks. Use when searching for keywords or files and you're not confident you'll find the right match in the first few tries.",
+			"mode": "subagent",
+			"model": "anthropic/claude-sonnet-4-20250514",
+			"temperature": 0.1,
+			"prompt": "You are a general-purpose agent for researching complex questions and executing multi-step tasks.\n\nUse for:\n- Searching for keywords or files when unsure of exact location\n- Multi-step investigations\n- Complex questions requiring multiple searches\n\nProvide thorough findings with context."
+		},
+		"research": {
+			"description": "Deep research agent for web searching, external documentation lookup, and complex questions requiring internet access. Uses maximum reasoning capability.",
+			"mode": "subagent",
+			"model": "openai/gpt-5.1-codex-max-xhigh",
+			"temperature": 0.1,
+			"prompt": "You are a research agent focused on deep analysis, web searching, and external documentation lookup.\n\nWhen researching:\n- Make prompts specific and detailed about what to research\n- Provide necessary context (file paths, concepts, goals)\n- Define clear boundaries for the research task\n- Use thorough analysis and multiple passes when needed\n- Document findings clearly\n\nFocus on:\n- Web searching for external documentation\n- Looking up API references and library docs\n- Investigating external tools and services\n- Finding best practices from the web\n- Providing comprehensive recommendations"
+		},
+		"research-fast": {
+			"description": "Fast research agent for quick web searches and external documentation lookups",
+			"mode": "subagent",
+			"model": "openai/gpt-5.1-codex-max-low",
+			"temperature": 0.2,
+			"prompt": "You are a fast research agent for quick web searches and documentation lookups.\n\nUse for:\n- Quick web searches\n- Fast documentation lookups\n- Getting a quick overview of external topics\n\nProvide concise findings and identify if deeper research is needed."
+		},
+		"research-balanced": {
+			"description": "Balanced research agent for standard web searches and external documentation analysis",
+			"mode": "subagent",
+			"model": "openai/gpt-5.1-codex-max-medium",
+			"temperature": 0.1,
+			"prompt": "You are a balanced research agent for standard web research.\n\nUse for:\n- Standard external documentation analysis\n- Web searches for best practices\n- Moderate complexity external investigations\n\nProvide thorough but efficient analysis."
+		},
+		"research-deep": {
+			"description": "Deep analysis research agent for complex external research requiring high reasoning effort",
+			"mode": "subagent",
+			"model": "openai/gpt-5.1-codex-max-high",
+			"temperature": 0.1,
+			"prompt": "You are a deep analysis research agent for complex external research.\n\nUse for:\n- Complex external documentation analysis\n- Deep investigation of external APIs and services\n- Multi-step web research tasks\n\nProvide comprehensive analysis with detailed reasoning."
+		},
+		"pr-review": {
+			"description": "Reviews code for quality, best practices, and potential issues",
+			"mode": "subagent",
+			"temperature": 0.1,
+			"prompt": "You are a code reviewer focused on:\n- Code quality and best practices\n- Potential bugs and edge cases\n- Performance implications\n- Security considerations\n- Type safety and correctness\n- Adherence to project conventions\n\nProvide constructive feedback without making direct changes. Review the code thoroughly and identify any issues or improvements."
+		},
+		"pr-fixes": {
+			"description": "Fixes failing CI checks and resolves PR review comments",
+			"mode": "subagent",
+			"temperature": 0.2,
+			"prompt": "You are a PR fixer focused on:\n- Fixing failing CI/CD checks\n- Resolving PR review comments\n- Addressing linting errors\n- Fixing type errors\n- Updating tests\n- Ensuring code quality\n\nMake targeted fixes based on CI failures and review feedback. Test your changes when possible."
+		},
+		"open-a-pr": {
+			"description": "Opens a pull request using the GitHub CLI",
+			"mode": "subagent",
+			"temperature": 0.3,
+			"prompt": "You are a PR opener focused on:\n- Creating well-structured pull requests\n- Writing clear PR titles and descriptions\n- Using appropriate GitHub CLI commands\n- Ensuring the branch is pushed before opening the PR\n\nUse `gh pr create` to open pull requests. Create descriptive titles and include relevant details in the PR description."
+		}
+	},
+	"mcp": {
+		"database": {
+			"type": "remote",
+			"url": "http://localhost:3456/mcp",
+			"enabled": true
+		}
+	}
+}

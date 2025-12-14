@@ -1,4 +1,8 @@
-export const runtime = 'edge';
+import { Database } from "@packages/database/database";
+import { normalizeSubpath } from "@packages/ui/utils/links";
+import { Effect } from "effect";
+import { runtime } from "../../../lib/runtime";
+
 export async function GET(
 	_req: Request,
 	props: {
@@ -8,7 +12,29 @@ export async function GET(
 	},
 ) {
 	const params = await props.params;
-	const domain = params.domain;
+	const domain = decodeURIComponent(params.domain);
+
+	const tenantData = await Effect.gen(function* () {
+		const database = yield* Database;
+		const tenant = yield* database.private.servers.getServerByDomain({
+			domain,
+		});
+		if (!tenant?.server || !tenant?.preferences) {
+			return null;
+		}
+		return {
+			...tenant.server,
+			...tenant.preferences,
+		};
+	}).pipe(runtime.runPromise);
+
+	if (!tenantData) {
+		return new Response("Not Found", { status: 404 });
+	}
+
+	const subpath = normalizeSubpath(tenantData.subpath);
+	const sitemapUrl = `https://${domain}${subpath ? `/${subpath}` : ""}/sitemap.xml`;
+
 	return new Response(
 		`User-agent: 008
 Disallow: /
@@ -53,17 +79,14 @@ Disallow: /oemf7z50uh7w/
 Disallow: /ingest/
 Disallow: /u/
 Disallow: /*/u/
-Sitemap: https://${domain}/sitemap.xml
+Sitemap: ${sitemapUrl}
 `,
 		{
 			headers: {
-				'content-type': 'text/plain',
-				// client cache for 12 hours
-				'Cache-Control': 'max-age=43200',
-				// downstream cache for 12 hours
-				'CDN-Cache-Control': 'max-age=43200',
-				// downstream cache for 24 hours
-				'Vercel-CDN-Cache-Control': 'max-age=86400',
+				"content-type": "text/plain",
+				"Cache-Control": "max-age=43200",
+				"CDN-Cache-Control": "max-age=43200",
+				"Vercel-CDN-Cache-Control": "max-age=86400",
 			},
 			status: 200,
 		},

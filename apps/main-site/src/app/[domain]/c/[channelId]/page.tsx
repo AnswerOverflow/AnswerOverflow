@@ -1,52 +1,72 @@
-import { findServerWithCommunityPageData } from '@answeroverflow/core/pages';
-import { findServerByCustomDomain } from '@answeroverflow/core/server';
-import { CommunityPage } from '@answeroverflow/ui/pages/CommunityPage';
-import { notFound, redirect } from 'next/navigation';
-import { z } from 'zod';
-export { generateMetadata } from '../../layout';
+import { Database } from "@packages/database/database";
+import { decodeCursor } from "@packages/ui/utils/cursor";
+import { Effect } from "effect";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import {
+	ChannelPageLoader,
+	fetchChannelPageHeaderData,
+	generateChannelPageMetadata,
+} from "../../../../components/channel-page-loader";
+import { runtime } from "../../../../lib/runtime";
 
 type Props = {
 	params: Promise<{ domain: string; channelId: string }>;
-	searchParams: Promise<{
-		page: string | undefined;
-	}>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
-export default async function TenantChannelPage(props: Props) {
-	const searchParams = await props.searchParams;
+async function getTenantData(domain: string) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const tenant = yield* database.private.servers.getServerByDomain({
+			domain,
+		});
+		return tenant;
+	}).pipe(runtime.runPromise);
+}
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
-	const page = z.coerce.number().parse(searchParams.page ?? '0');
-	if (searchParams.page && page === 0) {
-		return redirect(`/c/${params.channelId}`);
-	}
+	const searchParams = await props.searchParams;
 	const domain = decodeURIComponent(params.domain);
-	const server = await findServerByCustomDomain(domain);
-	if (!server) {
-		return notFound();
+	const cursor = searchParams?.cursor ?? null;
+
+	const tenantData = await getTenantData(domain);
+
+	if (!tenantData?.server) {
+		return {};
 	}
 
-	const communityPageData = await findServerWithCommunityPageData({
-		idOrVanityUrl: server.id,
-		selectedChannel: params.channelId,
-		page: page,
-	});
-	if (!communityPageData || communityPageData.server.kickedTime != null) {
-		return notFound();
-	}
-
-	const selectedChannel = communityPageData.channels.find(
-		(channel) => channel.id === params.channelId,
+	const headerData = await fetchChannelPageHeaderData(
+		tenantData.server.discordId,
+		BigInt(params.channelId),
 	);
-	if (!selectedChannel) {
+
+	const basePath = `/c/${params.channelId}`;
+	const tenant = {
+		customDomain: tenantData.preferences?.customDomain,
+		subpath: tenantData.preferences?.subpath,
+	};
+	return generateChannelPageMetadata(headerData, basePath, cursor, tenant);
+}
+
+export default async function TenantChannelPage(props: Props) {
+	const params = await props.params;
+	const searchParams = await props.searchParams;
+	const domain = decodeURIComponent(params.domain);
+	const encodedCursor = searchParams?.cursor;
+	const cursor = encodedCursor ? decodeCursor(encodedCursor) : undefined;
+
+	const tenantData = await getTenantData(domain);
+
+	if (!tenantData?.server) {
 		return notFound();
 	}
 
-	return (
-		<CommunityPage
-			{...communityPageData}
-			selectedChannel={selectedChannel}
-			tenant={server}
-			page={page}
-		/>
+	const headerData = await fetchChannelPageHeaderData(
+		tenantData.server.discordId,
+		BigInt(params.channelId),
 	);
+
+	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
 }
