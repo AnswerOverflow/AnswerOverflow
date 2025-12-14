@@ -1,5 +1,5 @@
+import type { Metadata } from "next";
 import { NavbarWrapper } from "@/components/navbar-wrapper";
-import { Metadata } from "next";
 
 export const metadata: Metadata = {
 	title: "Answer Overflow - Discord Content Discovery",

@@ -50,7 +50,7 @@ export async function fetchChannelPageThreads(
 export function generateChannelPageMetadata(
 	headerData: ChannelPageHeaderData | null,
 	basePath: string,
-	cursor: string | null,
+	_cursor: string | null,
 	tenant: TenantInfo | null = null,
 ): Metadata {
 	if (!headerData) {
