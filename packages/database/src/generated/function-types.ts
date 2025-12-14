@@ -13,8 +13,9 @@ export const FUNCTION_TYPE_MAP = {
   "channels.findChannelsByDiscordIds": "query",
   "channels.findChannelSettingsWithIndexingEnabled": "query",
   "channels.findManyChannelsByDiscordIds": "query",
-  "channels.getChannelPageHeaderData": "query",
   "channels.getChannelPageThreads": "query",
+  "channels.getCommunityPageHeaderData": "query",
+  "channels.getServerPageThreads": "query",
   "channels.updateChannelSettings": "mutation",
   "channels.upsertChannel": "mutation",
   "discord_accounts.deleteDiscordAccount": "mutation",
@@ -39,7 +40,6 @@ export const FUNCTION_TYPE_MAP = {
   "search.getRecentThreads": "query",
   "search.getSimilarThreads": "query",
   "search.publicSearch": "query",
-  "server_preferences.clearAddedByUser": "mutation",
   "server_preferences.getServerPreferencesByServerId": "query",
   "server_preferences.updateServerPreferences": "mutation",
   "server_preferences.updateStripeCustomer": "mutation",
@@ -66,12 +66,12 @@ export const NAMESPACES = ["attachments","cache","channels","discord_accounts","
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
   "cache": ["findDiscordOAuthAccountByDiscordId","invalidateUserGuildsCache"],
-  "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelSettingsWithIndexingEnabled","findChannelsByDiscordIds","findManyChannelsByDiscordIds","getChannelPageHeaderData","getChannelPageThreads","updateChannelSettings","upsertChannel"],
+  "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelSettingsWithIndexingEnabled","findChannelsByDiscordIds","findManyChannelsByDiscordIds","getChannelPageThreads","getCommunityPageHeaderData","getServerPageThreads","updateChannelSettings","upsertChannel"],
   "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount","upsertManyDiscordAccounts"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
   "search": ["getRecentThreads","getSimilarThreads","publicSearch"],
-  "server_preferences": ["clearAddedByUser","getServerPreferencesByServerId","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
+  "server_preferences": ["getServerPreferencesByServerId","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
 } as const;

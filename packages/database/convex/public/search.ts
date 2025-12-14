@@ -11,12 +11,14 @@ export const publicSearch = publicQuery({
 	args: {
 		query: v.string(),
 		serverId: v.optional(v.string()),
+		channelId: v.optional(v.string()),
 		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
 		const results = await searchMessages(ctx, {
 			query: args.query,
 			serverId: args.serverId ? BigInt(args.serverId) : undefined,
+			channelId: args.channelId ? BigInt(args.channelId) : undefined,
 			paginationOpts: {
 				numItems: Math.min(args.paginationOpts.numItems, 50),
 				cursor: args.paginationOpts.cursor,
