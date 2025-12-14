@@ -1,3 +1,4 @@
+import { NavbarWrapper } from "@/components/navbar-wrapper";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -37,5 +38,5 @@ export default function MainSiteLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	return children;
+	return <NavbarWrapper>{children}</NavbarWrapper>;
 }

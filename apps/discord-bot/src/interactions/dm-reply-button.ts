@@ -8,6 +8,7 @@ import {
 	TextInputStyle,
 } from "discord.js";
 import { Console, Effect, Layer } from "effect";
+import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import { DM_REPLY_ACTION_PREFIX } from "../utils/discord-components";
 
@@ -88,25 +89,58 @@ function handleDmReplyModalSubmit(interaction: ModalSubmitInteraction) {
 			.setDescription(replyContent)
 			.setTimestamp();
 
-		yield* Effect.tryPromise({
+		const sendResult = yield* Effect.tryPromise({
 			try: () => targetUser.send({ embeds: [embed] }),
 			catch: (error) => new Error(`Failed to send DM: ${error}`),
+		}).pipe(Effect.either);
+
+		if (sendResult._tag === "Left") {
+			yield* discord.callClient(() =>
+				interaction.reply({
+					content: `Could not send DM to ${targetUser.tag} - they may have DMs disabled or blocked the bot.`,
+					flags: MessageFlags.Ephemeral,
+				}),
+			);
+			return;
+		}
+
+		const sentEmbed = new EmbedBuilder()
+			.setTitle("Reply Sent")
+			.setColor("#00D26A")
+			.setTimestamp()
+			.addFields(
+				{
+					name: "To",
+					value: `${targetUser.tag} (${targetUser.id})`,
+					inline: false,
+				},
+				{
+					name: "Content",
+					value: replyContent,
+					inline: false,
+				},
+			);
+
+		if (targetUser.avatarURL()) {
+			sentEmbed.setThumbnail(targetUser.avatarURL());
+		}
+
+		yield* Effect.tryPromise({
+			try: async () => {
+				const superUser = await interaction.client.users.fetch(SUPER_USER_ID);
+				await superUser.send({ embeds: [sentEmbed] });
+			},
+			catch: (error) => new Error(`Failed to log reply: ${error}`),
 		}).pipe(
-			Effect.matchEffect({
-				onSuccess: () =>
-					discord.callClient(() =>
-						interaction.reply({
-							content: `Reply sent to ${targetUser.tag}!`,
-							flags: MessageFlags.Ephemeral,
-						}),
-					),
-				onFailure: () =>
-					discord.callClient(() =>
-						interaction.reply({
-							content: `Could not send DM to ${targetUser.tag} - they may have DMs disabled or blocked the bot.`,
-							flags: MessageFlags.Ephemeral,
-						}),
-					),
+			Effect.catchAll((error) =>
+				Console.error("Failed to send reply log to super user:", error),
+			),
+		);
+
+		yield* discord.callClient(() =>
+			interaction.reply({
+				content: `Reply sent to ${targetUser.tag}!`,
+				flags: MessageFlags.Ephemeral,
 			}),
 		);
 	});
