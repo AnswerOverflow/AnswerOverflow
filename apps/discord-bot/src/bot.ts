@@ -8,6 +8,7 @@ import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
 import { Discord } from "./core/discord-service";
 import { DismissButtonHandlerLayer } from "./interactions/dismiss-button";
+import { DMReplyHandlerLayer } from "./interactions/dm-reply-button";
 import { ForumGuidelinesConsentHandlerLayer } from "./interactions/forum-guidelines-consent";
 import { QuickActionCommandHandlerLayer } from "./interactions/quick-action";
 import { ReadTheRulesConsentHandlerLayer } from "./interactions/read-the-rules-consent";
@@ -30,6 +31,7 @@ export const BotLayers = Layer.mergeAll(
 	BotPermissionsSyncLayer,
 	AutoThreadHandlerLayer,
 	DismissButtonHandlerLayer,
+	DMReplyHandlerLayer,
 	ForumGuidelinesConsentHandlerLayer,
 	ReadTheRulesConsentHandlerLayer,
 	LeaderboardCommandHandlerLayer,
