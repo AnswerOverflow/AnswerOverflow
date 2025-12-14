@@ -14,6 +14,7 @@ const serverPreferencesSchema = v.object({
 	anonymizeMessagesEnabled: v.optional(v.boolean()),
 	customDomain: v.optional(v.string()),
 	subpath: v.optional(v.string()),
+	addedByUserId: v.optional(v.int64()),
 });
 
 const DEFAULT_SERVER_PREFERENCES = {
@@ -195,5 +196,26 @@ export const getServerPreferencesByCustomDomain = internalQuery({
 		);
 
 		return preferences ?? null;
+	},
+});
+
+export const clearAddedByUser = privateMutation({
+	args: {
+		serverId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		const existing = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+		);
+
+		if (existing) {
+			await ctx.db.patch(existing._id, {
+				addedByUserId: undefined,
+				addedByClickedAt: undefined,
+			});
+		}
 	},
 });

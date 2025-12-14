@@ -364,31 +364,16 @@ export const trackBotAddClick = guildManagerAction({
 		const { discordAccountId } = args;
 		const backendAccessToken = getBackendAccessToken();
 
-		const existingSettings = await ctx.runQuery(
-			api.private.user_server_settings.findUserServerSettingsById,
+		await ctx.runMutation(
+			api.private.server_preferences.updateServerPreferences,
 			{
 				backendAccessToken,
-				userId: discordAccountId,
 				serverId: args.serverId,
+				preferences: {
+					addedByUserId: discordAccountId,
+					addedByClickedAt: Date.now(),
+				},
 			},
-		);
-
-		const settings = {
-			serverId: args.serverId,
-			userId: discordAccountId,
-			permissions: existingSettings?.permissions ?? 0,
-			canPubliclyDisplayMessages:
-				existingSettings?.canPubliclyDisplayMessages ?? false,
-			messageIndexingDisabled:
-				existingSettings?.messageIndexingDisabled ?? false,
-			apiKey: existingSettings?.apiKey,
-			apiCallsUsed: existingSettings?.apiCallsUsed ?? 0,
-			botAddedTimestamp: existingSettings?.botAddedTimestamp ?? Date.now(), // Set timestamp when button was clicked (only if not already set)
-		};
-
-		await ctx.runMutation(
-			api.private.user_server_settings.upsertUserServerSettings,
-			{ backendAccessToken, settings },
 		);
 	},
 });

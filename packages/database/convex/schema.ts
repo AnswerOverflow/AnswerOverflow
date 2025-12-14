@@ -33,6 +33,7 @@ const serverPreferencesSchema = v.object({
 	anonymizeMessagesEnabled: v.optional(v.boolean()),
 	customDomain: v.optional(v.string()),
 	subpath: v.optional(v.string()),
+	addedByUserId: v.optional(v.int64()),
 });
 
 export const serverSchema = v.object({
