@@ -243,34 +243,63 @@ type ServerPageThreads = FunctionReturnType<
 function SearchResults({
 	query,
 	serverId,
+	channelId,
+	channelName,
 	hideServer = false,
+	onSearchWholeServer,
 }: {
 	query: string;
 	serverId: string;
+	channelId?: string;
+	channelName?: string;
 	hideServer?: boolean;
+	onSearchWholeServer?: () => void;
 }) {
+	const emptyState = channelId ? (
+		<Empty className="py-16">
+			<EmptyHeader>
+				<EmptyMedia variant="icon">
+					<FileQuestion />
+				</EmptyMedia>
+				<EmptyTitle>No results in #{channelName}</EmptyTitle>
+				<EmptyDescription>
+					No messages match your search for "{query}" in this channel.
+				</EmptyDescription>
+			</EmptyHeader>
+			{onSearchWholeServer && (
+				<Button
+					variant="outline"
+					onClick={onSearchWholeServer}
+					className="mt-4"
+				>
+					Search entire server instead
+				</Button>
+			)}
+		</Empty>
+	) : (
+		<Empty className="py-16">
+			<EmptyHeader>
+				<EmptyMedia variant="icon">
+					<FileQuestion />
+				</EmptyMedia>
+				<EmptyTitle>No results found</EmptyTitle>
+				<EmptyDescription>
+					No messages match your search for "{query}". Try different keywords or
+					check your spelling.
+				</EmptyDescription>
+			</EmptyHeader>
+		</Empty>
+	);
+
 	return (
 		<ConvexInfiniteList
 			query={api.public.search.publicSearch}
-			queryArgs={{ query, serverId }}
+			queryArgs={{ query, serverId, channelId }}
 			pageSize={20}
 			initialLoaderCount={5}
 			loader={<ThreadCardSkeleton />}
 			className="space-y-4"
-			emptyState={
-				<Empty className="py-16">
-					<EmptyHeader>
-						<EmptyMedia variant="icon">
-							<FileQuestion />
-						</EmptyMedia>
-						<EmptyTitle>No results found</EmptyTitle>
-						<EmptyDescription>
-							No messages match your search for "{query}". Try different
-							keywords or check your spelling.
-						</EmptyDescription>
-					</EmptyHeader>
-				</Empty>
-			}
+			emptyState={emptyState}
 			renderItem={(result) => (
 				<ThreadCard
 					key={result.message.message.id.toString()}
@@ -426,6 +455,11 @@ export function ServerPageContent({
 							/>
 						</div>
 
+						<div className="flex items-center gap-2 mb-4 text-muted-foreground">
+							<Hash className="size-4" />
+							<span className="text-sm font-medium">All Channels</span>
+						</div>
+
 						<div className="mb-6">
 							<SearchInput
 								value={searchQuery}
@@ -470,10 +504,13 @@ export function ChannelPageContent({
 	const [searchQuery, setSearchQuery] = useQueryState("q", {
 		defaultValue: "",
 	});
+	const [searchChannelScoped, setSearchChannelScoped] = useState(true);
 	const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 	const hasQuery = debouncedSearchQuery.trim().length > 0;
 	const isSearching =
 		searchQuery !== debouncedSearchQuery && searchQuery.trim().length > 0;
+
+	const ChannelIcon = getChannelIcon(selectedChannel.type);
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -500,32 +537,37 @@ export function ChannelPageContent({
 							/>
 						</div>
 
+						<div className="flex items-center gap-2 mb-4 text-muted-foreground">
+							<ChannelIcon className="size-4" />
+							<span className="text-sm font-medium">
+								{selectedChannel.name}
+							</span>
+						</div>
+
 						<div className="mb-6">
 							<SearchInput
 								value={searchQuery}
-								onChange={(value) => setSearchQuery(value || null)}
-								placeholder={`Search ${server.name}...`}
+								onChange={(value) => {
+									setSearchQuery(value || null);
+									setSearchChannelScoped(true);
+								}}
+								placeholder={`Search #${selectedChannel.name}...`}
 								isSearching={isSearching}
 							/>
 						</div>
-
-						{!hasQuery && (
-							<div className="flex items-center gap-2 mb-4 text-muted-foreground">
-								{(() => {
-									const Icon = getChannelIcon(selectedChannel.type);
-									return <Icon className="size-4" />;
-								})()}
-								<span className="text-sm font-medium">
-									{selectedChannel.name}
-								</span>
-							</div>
-						)}
 
 						{hasQuery ? (
 							<SearchResults
 								query={debouncedSearchQuery}
 								serverId={server.discordId.toString()}
+								channelId={
+									searchChannelScoped
+										? selectedChannel.id.toString()
+										: undefined
+								}
+								channelName={selectedChannel.name}
 								hideServer={tenantMode}
+								onSearchWholeServer={() => setSearchChannelScoped(false)}
 							/>
 						) : (
 							children

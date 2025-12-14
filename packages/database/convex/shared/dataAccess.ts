@@ -202,6 +202,7 @@ export async function searchMessages(
 	args: {
 		query: string;
 		serverId?: bigint;
+		channelId?: bigint;
 		paginationOpts: { numItems: number; cursor: string | null };
 	},
 ): Promise<{
@@ -221,7 +222,7 @@ export async function searchMessages(
 		.paginate(args.paginationOpts);
 
 	const cache = createDataAccessCache(ctx);
-	const results = Arr.filter(
+	const allResults = Arr.filter(
 		await Promise.all(
 			paginatedResult.page.map((m) =>
 				enrichedMessageWithServerAndChannelsInternal(ctx, cache, m),
@@ -229,6 +230,15 @@ export async function searchMessages(
 		),
 		Predicate.isNotNullable,
 	);
+
+	const results = args.channelId
+		? Arr.filter(
+				allResults,
+				(r) =>
+					r.channel.id === args.channelId ||
+					r.channel.parentId === args.channelId,
+			)
+		: allResults;
 
 	return {
 		page: results,
