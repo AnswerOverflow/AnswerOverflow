@@ -29,7 +29,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const searchParams = await props.searchParams;
 	const domain = decodeURIComponent(params.domain);
-	const cursor = searchParams?.cursor ?? null;
 
 	const tenantData = await getTenantData(domain);
 

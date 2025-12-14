@@ -1,8 +1,8 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { Array as Arr } from "effect";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
+import { Array as Arr } from "effect";
 import { createDataAccessCache, enrichMessage } from "../shared/dataAccess";
 import {
 	channelWithSystemFieldsValidator,

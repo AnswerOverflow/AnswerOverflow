@@ -16,7 +16,6 @@ type Props = {
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const searchParams = await props.searchParams;
-	const encodedCursor = searchParams?.cursor ?? null;
 
 	const headerData = await fetchChannelPageHeaderData(
 		BigInt(params.serverId),

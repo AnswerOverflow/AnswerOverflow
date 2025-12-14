@@ -31,7 +31,7 @@ import { cn } from "@packages/ui/lib/utils";
 import { encodeCursor } from "@packages/ui/utils/cursor";
 import { getChannelIcon } from "@packages/ui/utils/discord";
 import type { FunctionReturnType } from "convex/server";
-import { FileQuestion, Hash, Menu } from "lucide-react";
+import { FileQuestion, Menu } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";

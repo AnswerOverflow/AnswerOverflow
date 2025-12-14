@@ -6,9 +6,9 @@ import { Hash, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-	ServerPageLoader,
 	fetchServerPageHeaderData,
 	generateServerPageMetadata,
+	ServerPageLoader,
 } from "../../components/channel-page-loader";
 import { runtime } from "../../lib/runtime";
 
