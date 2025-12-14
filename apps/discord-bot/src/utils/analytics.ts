@@ -98,6 +98,12 @@ export function trackAskedQuestion(
 	serverPreferences?: ServerPreferences,
 	question?: Message | null,
 ) {
+	console.log(
+		"trackAskedQuestion",
+		thread.parent?.id,
+		channelSettings.flags?.indexingEnabled,
+		channelSettings.flags?.markSolutionEnabled,
+	);
 	return trackEvent("Asked Question", {
 		"Answer Overflow Account Id": questionAsker.id,
 		guild: thread.guild,

@@ -164,6 +164,13 @@ export function trackEvent<K extends BaseProps>(
 		const enrichedProps = enrichProps(resolvedProps as PropsWithDiscordObjects);
 
 		const { "Answer Overflow Account Id": aoId } = enrichedProps;
+		if (!aoId) {
+			console.error(
+				`[Analytics] Missing "Answer Overflow Account Id" for event "${eventName}". Props:`,
+				Object.keys(enrichedProps),
+			);
+			return;
+		}
 		const captureData: Parameters<typeof posthog.capture>[0] = {
 			event: eventName,
 			distinctId: aoId,
