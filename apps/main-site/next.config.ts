@@ -84,6 +84,11 @@ const nextConfig: NextConfig = {
 				destination: "https://docs.answeroverflow.com/changelog/:slug",
 				permanent: false,
 			},
+			{
+				source: "/onboarding",
+				destination: "https://www.answeroverflow.com/dashboard",
+				permanent: false,
+			},
 		];
 	},
 };
