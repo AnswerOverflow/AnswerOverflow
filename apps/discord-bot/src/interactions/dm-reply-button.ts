@@ -13,6 +13,8 @@ import { DM_REPLY_ACTION_PREFIX } from "../utils/discord-components";
 
 const DM_REPLY_MODAL_ID_PREFIX = "dm-reply-modal";
 const DM_REPLY_INPUT_ID = "dm-reply-input";
+const RHYS_AVATAR_URL =
+	"https://cdn.discordapp.com/avatars/523949187663134754/7716e305f7de26045526d9da6eef2dab.webp";
 
 function parseDmReplyButtonId(customId: string): string {
 	const parts = customId.split(":");
@@ -78,8 +80,11 @@ function handleDmReplyModalSubmit(interaction: ModalSubmitInteraction) {
 		});
 
 		const embed = new EmbedBuilder()
-			.setTitle("Message from Answer Overflow")
 			.setColor("#5865F2")
+			.setAuthor({
+				name: "Rhys",
+				iconURL: RHYS_AVATAR_URL,
+			})
 			.setDescription(replyContent)
 			.setTimestamp();
 
