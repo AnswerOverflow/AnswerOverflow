@@ -355,11 +355,17 @@ function storeMessages(
 
 		const latestMessage = Arr.sort(indexableMessages, sortMessagesByIdDesc)[0];
 		if (latestMessage) {
-			yield* updateLastIndexedSnowflake(
-				channelId,
-				BigInt(latestMessage.id),
-				currentLastIndexedSnowflake,
-			);
+			const newSnowflake = BigInt(latestMessage.id);
+			if (
+				!currentLastIndexedSnowflake ||
+				newSnowflake > currentLastIndexedSnowflake
+			) {
+				yield* updateLastIndexedSnowflake(
+					channelId,
+					newSnowflake,
+					currentLastIndexedSnowflake,
+				);
+			}
 		}
 
 		yield* Effect.logDebug(`Successfully stored ${aoMessages.length} messages`);
@@ -771,13 +777,22 @@ function indexForumChannel(
 			{ concurrency: 3 },
 		);
 
-		const latestThread = Arr.sort(threads, sortThreadsByIdDesc)[0];
-		if (latestThread) {
-			yield* updateLastIndexedSnowflake(
-				channel.id,
-				BigInt(latestThread.id),
-				channelSettings.flags.lastIndexedSnowflake,
-			);
+		if (threadsToIndex.length > 0) {
+			const latestIndexedThread = Arr.sort(
+				threadsToIndex,
+				sortThreadsByIdDesc,
+			)[0];
+			if (latestIndexedThread) {
+				const newSnowflake = BigInt(latestIndexedThread.id);
+				const currentSnowflake = channelSettings.flags.lastIndexedSnowflake;
+				if (!currentSnowflake || newSnowflake > currentSnowflake) {
+					yield* updateLastIndexedSnowflake(
+						channel.id,
+						newSnowflake,
+						currentSnowflake,
+					);
+				}
+			}
 		}
 
 		yield* ensureInviteCode(channel, channelSettings);
@@ -884,7 +899,7 @@ function runIndexing() {
 		yield* Console.log(`Found ${totalGuilds} guilds to index`);
 
 		yield* Effect.forEach(
-			Arr.map(guilds, (guild, index) => ({ guild, index })).slice(500),
+			Arr.map(guilds, (guild, index) => ({ guild, index })),
 			({ guild, index }) =>
 				Effect.gen(function* () {
 					yield* indexGuild(guild, index, totalGuilds);
@@ -930,6 +945,10 @@ export function startIndexingLoop() {
 				),
 			),
 		);
+
+		if (process.env.NODE_ENV === "development") {
+			yield* runIndexing();
+		}
 
 		yield* Console.log("Indexing loop started successfully");
 	});
