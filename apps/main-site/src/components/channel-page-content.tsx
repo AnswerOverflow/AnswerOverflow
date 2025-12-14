@@ -364,17 +364,13 @@ export function ThreadsList({
 type ServerPageContentProps = {
 	server: ChannelPageHeaderData["server"];
 	channels: ChannelPageHeaderData["channels"];
-	initialData?: ServerPageThreads;
-	nextCursor?: string | null;
-	currentCursor?: string | null;
+	children: React.ReactNode;
 };
 
 export function ServerPageContent({
 	server,
 	channels,
-	initialData,
-	nextCursor,
-	currentCursor,
+	children,
 }: ServerPageContentProps) {
 	const tenant = useTenant();
 	const tenantMode = !!tenant;
@@ -428,12 +424,7 @@ export function ServerPageContent({
 								hideServer={tenantMode}
 							/>
 						) : (
-							<ServerThreadsList
-								serverDiscordId={server.discordId}
-								initialData={initialData}
-								nextCursor={nextCursor}
-								currentCursor={currentCursor}
-							/>
+							children
 						)}
 					</main>
 				</div>
@@ -446,18 +437,14 @@ type ChannelPageContentProps = {
 	server: ChannelPageHeaderData["server"];
 	channels: ChannelPageHeaderData["channels"];
 	selectedChannel: ChannelPageHeaderData["selectedChannel"];
-	initialData?: ChannelPageThreads;
-	nextCursor?: string | null;
-	currentCursor?: string | null;
+	children: React.ReactNode;
 };
 
 export function ChannelPageContent({
 	server,
 	channels,
 	selectedChannel,
-	initialData,
-	nextCursor,
-	currentCursor,
+	children,
 }: ChannelPageContentProps) {
 	const tenant = useTenant();
 	const tenantMode = !!tenant;
@@ -523,12 +510,7 @@ export function ChannelPageContent({
 								hideServer={tenantMode}
 							/>
 						) : (
-							<ThreadsList
-								channelDiscordId={selectedChannel.id}
-								initialData={initialData}
-								nextCursor={nextCursor}
-								currentCursor={currentCursor}
-							/>
+							children
 						)}
 					</main>
 				</div>

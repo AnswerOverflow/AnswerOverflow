@@ -11,7 +11,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
-import { ChannelPageContent, ServerPageContent } from "./channel-page-content";
+import {
+	ChannelPageContent,
+	ServerPageContent,
+	ServerThreadsList,
+	ThreadsList,
+} from "./channel-page-content";
 
 export type ServerPageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.private.channels.getServerPageHeaderData>
@@ -176,99 +181,18 @@ function ThreadsSkeleton() {
 	);
 }
 
-function ServerPageSkeleton({
-	headerData,
-}: {
-	headerData: ServerPageHeaderData;
-}) {
-	return (
-		<div className="min-h-screen bg-background">
-			<div className="border-b">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex items-start gap-4">
-						<div className="size-16 shrink-0 rounded-full bg-muted animate-pulse" />
-						<div className="flex-1 min-w-0">
-							<div className="h-7 w-48 bg-muted animate-pulse rounded mb-2" />
-							<div className="h-4 w-full max-w-md bg-muted animate-pulse rounded" />
-						</div>
-					</div>
-				</div>
-			</div>
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-				<div className="flex gap-8">
-					<div className="hidden lg:block w-52 shrink-0">
-						<div className="space-y-2">
-							{Array.from({ length: 5 }).map((_, i) => (
-								<div
-									key={`channel-skeleton-${i}`}
-									className="h-8 bg-muted animate-pulse rounded"
-								/>
-							))}
-						</div>
-					</div>
-					<main className="flex-1 min-w-0">
-						<div className="h-10 bg-muted animate-pulse rounded mb-6" />
-						<ThreadsSkeleton />
-					</main>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-function ChannelPageSkeleton({
-	headerData,
-}: {
-	headerData: ChannelPageHeaderData;
-}) {
-	return (
-		<div className="min-h-screen bg-background">
-			<div className="border-b">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-					<div className="flex items-start gap-4">
-						<div className="size-16 shrink-0 rounded-full bg-muted animate-pulse" />
-						<div className="flex-1 min-w-0">
-							<div className="h-7 w-48 bg-muted animate-pulse rounded mb-2" />
-							<div className="h-4 w-full max-w-md bg-muted animate-pulse rounded" />
-						</div>
-					</div>
-				</div>
-			</div>
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-				<div className="flex gap-8">
-					<div className="hidden lg:block w-52 shrink-0">
-						<div className="space-y-2">
-							{Array.from({ length: 5 }).map((_, i) => (
-								<div
-									key={`channel-skeleton-${i}`}
-									className="h-8 bg-muted animate-pulse rounded"
-								/>
-							))}
-						</div>
-					</div>
-					<main className="flex-1 min-w-0">
-						<div className="h-10 bg-muted animate-pulse rounded mb-6" />
-						<ThreadsSkeleton />
-					</main>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-async function ServerPageLoaderInner(props: {
-	headerData: ServerPageHeaderData;
+async function ServerThreadsLoader(props: {
+	serverDiscordId: bigint;
 	cursor: string | null;
 }) {
 	const initialData = await fetchServerPageThreads(
-		props.headerData.server.discordId,
+		props.serverDiscordId,
 		props.cursor,
 	);
 
 	return (
-		<ServerPageContent
-			server={props.headerData.server}
-			channels={props.headerData.channels}
+		<ServerThreadsList
+			serverDiscordId={props.serverDiscordId}
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
 			currentCursor={props.cursor}
@@ -276,20 +200,18 @@ async function ServerPageLoaderInner(props: {
 	);
 }
 
-async function ChannelPageLoaderInner(props: {
-	headerData: ChannelPageHeaderData;
+async function ChannelThreadsLoader(props: {
+	channelDiscordId: bigint;
 	cursor: string | null;
 }) {
 	const initialData = await fetchChannelPageThreads(
-		props.headerData.selectedChannel.id,
+		props.channelDiscordId,
 		props.cursor,
 	);
 
 	return (
-		<ChannelPageContent
-			server={props.headerData.server}
-			channels={props.headerData.channels}
-			selectedChannel={props.headerData.selectedChannel}
+		<ThreadsList
+			channelDiscordId={props.channelDiscordId}
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
 			currentCursor={props.cursor}
@@ -308,9 +230,17 @@ export async function ServerPageLoader(props: {
 	}
 
 	return (
-		<Suspense fallback={<ServerPageSkeleton headerData={headerData} />}>
-			<ServerPageLoaderInner headerData={headerData} cursor={cursor ?? null} />
-		</Suspense>
+		<ServerPageContent
+			server={headerData.server}
+			channels={headerData.channels}
+		>
+			<Suspense fallback={<ThreadsSkeleton />}>
+				<ServerThreadsLoader
+					serverDiscordId={headerData.server.discordId}
+					cursor={cursor ?? null}
+				/>
+			</Suspense>
+		</ServerPageContent>
 	);
 }
 
@@ -325,8 +255,17 @@ export async function ChannelPageLoader(props: {
 	}
 
 	return (
-		<Suspense fallback={<ChannelPageSkeleton headerData={headerData} />}>
-			<ChannelPageLoaderInner headerData={headerData} cursor={cursor ?? null} />
-		</Suspense>
+		<ChannelPageContent
+			server={headerData.server}
+			channels={headerData.channels}
+			selectedChannel={headerData.selectedChannel}
+		>
+			<Suspense fallback={<ThreadsSkeleton />}>
+				<ChannelThreadsLoader
+					channelDiscordId={headerData.selectedChannel.id}
+					cursor={cursor ?? null}
+				/>
+			</Suspense>
+		</ChannelPageContent>
 	);
 }
