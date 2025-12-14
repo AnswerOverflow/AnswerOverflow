@@ -23,9 +23,7 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning>
 			<body>
 				<NuqsAdapter>
-					<Providers tenant={null}>
-						<NavbarWrapper>{children}</NavbarWrapper>
-					</Providers>
+					<Providers tenant={null}>{children}</Providers>
 				</NuqsAdapter>
 				<SpeedInsights sampleRate={0.1} />
 			</body>
