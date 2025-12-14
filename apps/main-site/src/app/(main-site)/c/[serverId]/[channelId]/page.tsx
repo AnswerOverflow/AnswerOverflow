@@ -24,7 +24,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	);
 
 	const basePath = `/c/${params.serverId}/${params.channelId}`;
-	return generateChannelPageMetadata(headerData, basePath, encodedCursor);
+	return generateChannelPageMetadata(headerData, basePath);
 }
 
 export default async function ChannelPage(props: Props) {

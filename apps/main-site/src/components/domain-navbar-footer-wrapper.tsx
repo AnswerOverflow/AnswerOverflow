@@ -32,7 +32,7 @@ export function DomainNavbarFooterWrapper({
 	return (
 		<>
 			<TenantNavbar showBorder={!isOverviewPage} server={server} />
-			<div className="pt-16">{children}</div>
+			<div className="pt-[var(--navbar-height)]">{children}</div>
 			<TenantFooter />
 		</>
 	);

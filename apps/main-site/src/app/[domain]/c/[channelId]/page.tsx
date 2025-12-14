@@ -47,7 +47,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		customDomain: tenantData.preferences?.customDomain,
 		subpath: tenantData.preferences?.subpath,
 	};
-	return generateChannelPageMetadata(headerData, basePath, cursor, tenant);
+	return generateChannelPageMetadata(headerData, basePath, tenant);
 }
 
 export default async function TenantChannelPage(props: Props) {

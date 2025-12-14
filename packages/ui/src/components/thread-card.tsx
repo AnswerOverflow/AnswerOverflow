@@ -2,17 +2,13 @@
 
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import type { EnrichedMessage } from "@packages/database/convex/shared/shared";
-import { CheckCircle2, Hash, MessageSquare } from "lucide-react";
+import { CheckCircle2, Hash } from "lucide-react";
+import { getChannelIcon } from "../utils/discord";
 import { ThreadIcon } from "./discord-message/mention";
 import { Link } from "./link";
 import { MessagePreviewCardBody } from "./message-preview-card";
 import { ServerIcon } from "./server-icon";
 import { Skeleton } from "./skeleton";
-
-function getChannelIcon(type: number) {
-	if (type === 15) return MessageSquare;
-	return Hash;
-}
 
 export type ChannelThreadCardProps = {
 	thread: {
@@ -198,28 +194,7 @@ export function ThreadCardSkeleton() {
 	);
 }
 
-export function ChannelThreadCardSkeleton() {
-	return (
-		<div className="rounded-xl border border-border bg-card overflow-hidden">
-			<div className="px-4 py-3 border-b border-border/50 bg-muted/20">
-				<div className="flex items-center gap-2">
-					<Skeleton className="size-4 rounded shrink-0" />
-					<Skeleton className="h-5 w-48" />
-				</div>
-			</div>
-			<div className="p-4">
-				<div className="flex items-start gap-3">
-					<Skeleton className="size-10 rounded-full shrink-0" />
-					<div className="flex-1 space-y-2">
-						<Skeleton className="h-4 w-32" />
-						<Skeleton className="h-4 w-full" />
-						<Skeleton className="h-4 w-5/6" />
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-}
+export const ChannelThreadCardSkeleton = ThreadCardSkeleton;
 
 export function ThreadCardSkeletonList({ count = 3 }: { count?: number }) {
 	return (

@@ -131,7 +131,6 @@ export function generateServerPageMetadata(
 export function generateChannelPageMetadata(
 	headerData: ChannelPageHeaderData | null,
 	basePath: string,
-	_cursor: string | null,
 	tenant: TenantInfo | null = null,
 ): Metadata {
 	if (!headerData) {

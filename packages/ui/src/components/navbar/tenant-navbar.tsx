@@ -33,7 +33,7 @@ export function TenantNavbar({ showBorder = true, server }: TenantNavbarProps) {
 								server={{
 									discordId: server.discordId,
 									name: server.name,
-									icon: server.icon ?? "",
+									icon: server.icon ?? undefined,
 								}}
 								size={28}
 							/>

@@ -29,8 +29,9 @@ import {
 } from "@packages/ui/components/thread-card";
 import { cn } from "@packages/ui/lib/utils";
 import { encodeCursor } from "@packages/ui/utils/cursor";
+import { getChannelIcon } from "@packages/ui/utils/discord";
 import type { FunctionReturnType } from "convex/server";
-import { FileQuestion, Hash, Menu, MessageSquare } from "lucide-react";
+import { FileQuestion, Hash, Menu } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
@@ -44,11 +45,6 @@ export type FirstThreadAuthor = {
 type ChannelPageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.private.channels.getChannelPageHeaderData>
 >;
-
-function getChannelIcon(type: number) {
-	if (type === 15) return MessageSquare;
-	return Hash;
-}
 
 function ChannelLink({
 	channel,
@@ -408,27 +404,38 @@ export function ThreadsList({
 	);
 }
 
-type ServerPageContentProps = {
+type CommunityPageContentProps = {
 	server: ChannelPageHeaderData["server"];
 	channels: ChannelPageHeaderData["channels"];
+	selectedChannel?: ChannelPageHeaderData["selectedChannel"] | null;
 	children: React.ReactNode;
 };
 
-export function ServerPageContent({
+export function CommunityPageContent({
 	server,
 	channels,
+	selectedChannel = null,
 	children,
-}: ServerPageContentProps) {
+}: CommunityPageContentProps) {
 	const tenant = useTenant();
 	const tenantMode = !!tenant;
 
 	const [searchQuery, setSearchQuery] = useQueryState("q", {
 		defaultValue: "",
 	});
+	const [searchScope, setSearchScope] = useQueryState("scope", {
+		defaultValue: "channel",
+	});
+	const searchChannelScoped = searchScope === "channel" && selectedChannel;
 	const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 	const hasQuery = debouncedSearchQuery.trim().length > 0;
 	const isSearching =
 		searchQuery !== debouncedSearchQuery && searchQuery.trim().length > 0;
+
+	const ChannelIcon = selectedChannel
+		? getChannelIcon(selectedChannel.type)
+		: Hash;
+	const channelLabel = selectedChannel ? selectedChannel.name : "All Channels";
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -439,7 +446,7 @@ export function ServerPageContent({
 					<div className="hidden lg:block">
 						<ChannelsSidebar
 							channels={channels}
-							selectedChannelId={null}
+							selectedChannelId={selectedChannel?.id ?? null}
 							serverDiscordId={server.discordId}
 							tenantMode={tenantMode}
 						/>
@@ -449,22 +456,31 @@ export function ServerPageContent({
 						<div className="flex items-center gap-4 mb-4 lg:hidden">
 							<MobileChannelSheet
 								channels={channels}
-								selectedChannelId={null}
+								selectedChannelId={selectedChannel?.id ?? null}
 								serverDiscordId={server.discordId}
 								tenantMode={tenantMode}
 							/>
 						</div>
 
 						<div className="flex items-center gap-2 mb-4 text-muted-foreground">
-							<Hash className="size-4" />
-							<span className="text-sm font-medium">All Channels</span>
+							<ChannelIcon className="size-4" />
+							<span className="text-sm font-medium">{channelLabel}</span>
 						</div>
 
 						<div className="mb-6">
 							<SearchInput
 								value={searchQuery}
-								onChange={(value) => setSearchQuery(value || null)}
-								placeholder={`Search ${server.name}...`}
+								onChange={(value) => {
+									setSearchQuery(value || null);
+									if (selectedChannel) {
+										setSearchScope("channel");
+									}
+								}}
+								placeholder={
+									selectedChannel
+										? `Search #${selectedChannel.name}...`
+										: `Search ${server.name}...`
+								}
 								isSearching={isSearching}
 							/>
 						</div>
@@ -473,7 +489,16 @@ export function ServerPageContent({
 							<SearchResults
 								query={debouncedSearchQuery}
 								serverId={server.discordId.toString()}
+								channelId={
+									searchChannelScoped
+										? selectedChannel?.id.toString()
+										: undefined
+								}
+								channelName={selectedChannel?.name}
 								hideServer={tenantMode}
+								onSearchWholeServer={
+									selectedChannel ? () => setSearchScope("server") : undefined
+								}
 							/>
 						) : (
 							children
@@ -485,96 +510,16 @@ export function ServerPageContent({
 	);
 }
 
-type ChannelPageContentProps = {
-	server: ChannelPageHeaderData["server"];
-	channels: ChannelPageHeaderData["channels"];
-	selectedChannel: ChannelPageHeaderData["selectedChannel"];
-	children: React.ReactNode;
-};
+export function ServerPageContent(
+	props: Omit<CommunityPageContentProps, "selectedChannel">,
+) {
+	return <CommunityPageContent {...props} selectedChannel={null} />;
+}
 
-export function ChannelPageContent({
-	server,
-	channels,
-	selectedChannel,
-	children,
-}: ChannelPageContentProps) {
-	const tenant = useTenant();
-	const tenantMode = !!tenant;
-
-	const [searchQuery, setSearchQuery] = useQueryState("q", {
-		defaultValue: "",
-	});
-	const [searchChannelScoped, setSearchChannelScoped] = useState(true);
-	const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
-	const hasQuery = debouncedSearchQuery.trim().length > 0;
-	const isSearching =
-		searchQuery !== debouncedSearchQuery && searchQuery.trim().length > 0;
-
-	const ChannelIcon = getChannelIcon(selectedChannel.type);
-
-	return (
-		<div className="min-h-screen bg-background">
-			<ServerHeader server={server} />
-
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-				<div className="flex gap-8">
-					<div className="hidden lg:block">
-						<ChannelsSidebar
-							channels={channels}
-							selectedChannelId={selectedChannel.id}
-							serverDiscordId={server.discordId}
-							tenantMode={tenantMode}
-						/>
-					</div>
-
-					<main className="flex-1 min-w-0">
-						<div className="flex items-center gap-4 mb-4 lg:hidden">
-							<MobileChannelSheet
-								channels={channels}
-								selectedChannelId={selectedChannel.id}
-								serverDiscordId={server.discordId}
-								tenantMode={tenantMode}
-							/>
-						</div>
-
-						<div className="flex items-center gap-2 mb-4 text-muted-foreground">
-							<ChannelIcon className="size-4" />
-							<span className="text-sm font-medium">
-								{selectedChannel.name}
-							</span>
-						</div>
-
-						<div className="mb-6">
-							<SearchInput
-								value={searchQuery}
-								onChange={(value) => {
-									setSearchQuery(value || null);
-									setSearchChannelScoped(true);
-								}}
-								placeholder={`Search #${selectedChannel.name}...`}
-								isSearching={isSearching}
-							/>
-						</div>
-
-						{hasQuery ? (
-							<SearchResults
-								query={debouncedSearchQuery}
-								serverId={server.discordId.toString()}
-								channelId={
-									searchChannelScoped
-										? selectedChannel.id.toString()
-										: undefined
-								}
-								channelName={selectedChannel.name}
-								hideServer={tenantMode}
-								onSearchWholeServer={() => setSearchChannelScoped(false)}
-							/>
-						) : (
-							children
-						)}
-					</main>
-				</div>
-			</div>
-		</div>
-	);
+export function ChannelPageContent(
+	props: CommunityPageContentProps & {
+		selectedChannel: NonNullable<CommunityPageContentProps["selectedChannel"]>;
+	},
+) {
+	return <CommunityPageContent {...props} />;
 }
