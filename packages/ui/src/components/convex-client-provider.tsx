@@ -7,7 +7,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { anonymousClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
-import type { ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { useTenant } from "./tenant-context";
+import { getTenantCanonicalUrl, TenantInfo } from "../utils/links";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
 	expectAuth: true,
@@ -25,13 +27,47 @@ const queryClient = new QueryClient({
 
 convexQueryClient.connect(queryClient);
 
-export const authClient = createAuthClient({
-	plugins: [anonymousClient(), convexClient()],
-});
+function createAuthClientWithBaseURL(tenant: TenantInfo | null | undefined) {
+	const baseURL = tenant ? getTenantCanonicalUrl(tenant, "/") : undefined;
+	return createAuthClient({
+		baseURL,
+		plugins: [anonymousClient(), convexClient()],
+	});
+}
+
+type AuthClient = ReturnType<typeof createAuthClientWithBaseURL>;
+
+const AuthClientContext = createContext<AuthClient | null>(null);
+
+function AuthClientProvider({ children }: { children: ReactNode }) {
+	const tenant = useTenant();
+
+	const authClient = useMemo(
+		() => createAuthClientWithBaseURL(tenant),
+		[tenant?.subpath],
+	);
+
+	return (
+		<AuthClientContext.Provider value={authClient}>
+			<ConvexBetterAuthProvider client={convex} authClient={authClient}>
+				{children}
+			</ConvexBetterAuthProvider>
+		</AuthClientContext.Provider>
+	);
+}
+
+export function useAuthClient() {
+	const authClient = useContext(AuthClientContext);
+	if (!authClient) {
+		throw new Error("useAuthClient must be used within an AuthClientProvider");
+	}
+	return authClient;
+}
 
 export const useSession = (
 	props: { allowAnonymous?: boolean } = { allowAnonymous: true },
 ) => {
+	const authClient = useAuthClient();
 	const session = authClient.useSession();
 	if (!props.allowAnonymous && session?.data?.user?.isAnonymous) {
 		return {
@@ -50,9 +86,7 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ConvexProvider client={convex}>
-				<ConvexBetterAuthProvider client={convex} authClient={authClient}>
-					{children}
-				</ConvexBetterAuthProvider>
+				<AuthClientProvider>{children}</AuthClientProvider>
 			</ConvexProvider>
 		</QueryClientProvider>
 	);
