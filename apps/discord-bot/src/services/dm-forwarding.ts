@@ -1,7 +1,8 @@
-import { EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, type ButtonBuilder, EmbedBuilder } from "discord.js";
 import { Console, Effect, Layer } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
+import { makeDmReplyButton } from "../utils/discord-components";
 
 export const DMForwardingHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
@@ -49,10 +50,15 @@ export const DMForwardingHandlerLayer = Layer.scopedDiscard(
 					embed.setThumbnail(message.author.avatarURL());
 				}
 
+				const replyButton = makeDmReplyButton(message.author.id);
+				const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+					replyButton,
+				);
+
 				yield* Effect.tryPromise({
 					try: async () => {
 						const superUser = await message.client.users.fetch(SUPER_USER_ID);
-						await superUser.send({ embeds: [embed] });
+						await superUser.send({ embeds: [embed], components: [actionRow] });
 					},
 					catch: (error) => error,
 				}).pipe(

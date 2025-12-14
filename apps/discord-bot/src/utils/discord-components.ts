@@ -12,3 +12,14 @@ export function makeDismissButton(dismisserId: string): ButtonBuilder {
 		customId: `${DISMISS_ACTION_PREFIX}:${dismisserId}`,
 	});
 }
+
+export const DM_REPLY_ACTION_PREFIX = "dm-reply";
+export const DM_REPLY_BUTTON_LABEL = "Reply";
+
+export function makeDmReplyButton(userId: string): ButtonBuilder {
+	return new ButtonBuilder({
+		label: DM_REPLY_BUTTON_LABEL,
+		style: ButtonStyle.Primary,
+		customId: `${DM_REPLY_ACTION_PREFIX}:${userId}`,
+	});
+}
