@@ -1,42 +1,128 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.3/schema.json",
-	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-	"files": { "ignoreUnknown": false, "ignore": [] },
+	"$schema": "https://biomejs.dev/schemas/2.1.4/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"includes": [
+			"**",
+			"!**/convex/_generated/**",
+			"!**/*.css",
+			"!.context/**",
+			"!**/.context/**",
+			"!packages/convex-test/**",
+			"!packages/discord-api/src/generated.ts",
+			"!packages/database/src/generated/function-types.ts"
+		]
+	},
 	"formatter": {
 		"enabled": true,
-		"useEditorconfig": true,
-		"formatWithErrors": false,
-		"indentStyle": "tab",
-		"indentWidth": 2,
-		"lineEnding": "lf",
-		"lineWidth": 80,
-		"attributePosition": "auto",
-		"bracketSpacing": true
+		"indentStyle": "tab"
 	},
-	"organizeImports": { "enabled": true },
-	"linter": { "enabled": false, "rules": { "recommended": true } },
-	"javascript": {
-		"formatter": {
-			"jsxQuoteStyle": "double",
-			"quoteProperties": "asNeeded",
-			"trailingCommas": "all",
-			"semicolons": "always",
-			"arrowParentheses": "always",
-			"bracketSameLine": false,
-			"quoteStyle": "single",
-			"attributePosition": "auto",
-			"bracketSpacing": true
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"performance": {
+				"noImgElement": "off"
+			},
+			"a11y": "off",
+			"suspicious": {
+				"noShadowRestrictedNames": "error",
+				"noExplicitAny": "error",
+				"noArrayIndexKey": "off"
+			},
+			"style": {
+				"noNonNullAssertion": "off",
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"paths": {
+							"../../../../packages/database/convex/_generated/api": "Do not use relative paths across packages. Use '@packages/database/convex/_generated/api' instead.",
+							"../../../../../packages/database/convex/_generated/api": "Do not use relative paths across packages. Use '@packages/database/convex/_generated/api' instead.",
+							"convex/react": {
+								"importNames": ["useConvexAuth"],
+								"message": "Do not use 'useConvexAuth'. Use the appropriate alternative authentication hook instead."
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"overrides": [
-		{ "include": [".all-contributorsrc"] },
 		{
-			"include": ["*.yml"],
-			"formatter": { "indentStyle": "space", "indentWidth": 2 }
+			"includes": ["packages/ui/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"paths": {
+									"@packages/ui": "Do not import from '@packages/ui' within the 'ui/' package. Use relative imports instead."
+								}
+							}
+						}
+					}
+				}
+			}
 		},
 		{
-			"include": ["*.json"],
-			"javascript": { "formatter": { "trailingCommas": "none" } }
+			"includes": ["packages/database/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"paths": {
+									"@packages/database": "Do not import from '@packages/database' within the 'database/' package. Use relative imports instead.",
+									"../_generated/server": "Do not import from '_generated/server' directly. Use '../client' instead for server types and functions (ActionCtx, MutationCtx, QueryCtx, internalQuery, internalMutation, internalAction, httpAction).",
+									"./_generated/server": "Do not import from '_generated/server' directly. Use './client' instead for server types and functions (ActionCtx, MutationCtx, QueryCtx, internalQuery, internalMutation, internalAction, httpAction)."
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["packages/database/convex/client/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "off"
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/*.test.ts", "**/*.test.tsx"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noNonNullAssertion": "off"
+					}
+				}
+			}
 		}
-	]
+	],
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	}
 }

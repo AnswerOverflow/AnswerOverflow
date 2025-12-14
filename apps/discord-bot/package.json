@@ -1,49 +1,30 @@
 {
-	"name": "@answeroverflow/discord-bot",
-	"version": "1.0.0",
-	"main": "src/index.ts",
+	"name": "@packages/discord-bot",
+	"module": "index.ts",
 	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "NODE_ENV=development bun run --env-file=../../.env --watch index.dev.ts",
+		"start": "bun run --env-file=../../.env index.ts",
+		"typecheck": "tsgo -p tsconfig.json --noEmit",
+		"typecheck:slow": "tsc -p tsconfig.json --noEmit",
+		"clean": "rm -rf node_modules .turbo",
+		"test": "vitest run --no-watch --pool=forks",
+		"test:watch": "vitest"
+	},
 	"dependencies": {
-		"@answeroverflow/api": "workspace:*",
-		"@answeroverflow/constants": "workspace:*",
-		"@answeroverflow/core": "workspace:*",
-		"@answeroverflow/env": "workspace:*",
-		"@answeroverflow/utils": "workspace:*",
-		"@sapphire/decorators": "^6.1.0",
-		"@sapphire/discord-utilities": "3.0.3",
-		"@sapphire/fetch": "^2.4.1",
-		"@sapphire/framework": "^5.2.1",
-		"@sapphire/pieces": "^3.7.0",
-		"@sapphire/plugin-editable-commands": "3.0.0",
-		"@sapphire/plugin-logger": "^4.0.2",
-		"@sapphire/plugin-subcommands": "^4.0.2",
-		"@sapphire/time-utilities": "^1.7.10",
-		"@sapphire/type": "^2.4.0",
-		"@sapphire/utilities": "^3.13.0",
-		"@sentry/node": "^8.32.0",
-		"@sentry/tracing": "^7.64.0",
-		"@trpc/server": "^10.45.2",
-		"colorette": "^2.0.20",
-		"cron": "^3.1.7",
-		"discord-api-types": "^0.37.67",
-		"discord.js": "^14.16.3",
-		"dotenv-cra": "^3.0.3",
-		"reflect-metadata": "^0.1.13",
-		"rxjs": "^7.8.1",
-		"zod": "^3.22.2"
+		"@packages/database": "workspace:*",
+		"@packages/database-utils": "workspace:*",
+		"@packages/observability": "workspace:*",
+		"discord.js": "^14.22.1",
+		"effect": "catalog:",
+		"posthog-node": "^4.2.0"
 	},
 	"devDependencies": {
-		"@answeroverflow/tsconfig": "workspace:*",
-		"@types/ws": "^8.5.5",
-		"dotenv-cli": "^7.4.1",
-		"npm-run-all": "^4.1.5",
-		"type-fest": "^4.12.0"
-	},
-	"scripts": {
-		"with-env": "bun run --env-file=../../.env --",
-		"start": "bun with-env bun run .",
-		"clean": "rm -rf node_modules",
-		"typecheck": "tsc --noEmit",
-		"dev": "bun with-env bun --hot . "
+		"@effect/language-service": "catalog:",
+		"@effect/vitest": "catalog:",
+		"@packages/typescript-config": "workspace:*",
+		"@types/bun": "latest",
+		"vitest": "catalog:"
 	}
 }

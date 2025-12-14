@@ -1,251 +1,351 @@
-import { Auth } from '@answeroverflow/core/auth';
-import { ReactionWithRelations } from '@answeroverflow/core/schema';
-import { BaseMessageWithRelations as AOMessage } from '@answeroverflow/core/schema';
-import {
+import type {
 	Channel as AOChannel,
 	DiscordAccount as AODiscordAccount,
-	Server as AOServer,
-} from '@answeroverflow/core/schema';
-import { getDefaultChannelWithFlags } from '@answeroverflow/core/utils/channelUtils';
-import { getDefaultServer } from '@answeroverflow/core/utils/serverUtils';
+	Emoji as AOEmoji,
+	ForumTag as AOForumTag,
+} from "@packages/database/convex/schema";
+import type { DatabaseAttachment } from "@packages/database/convex/shared/shared";
+import type { BaseMessageWithRelations } from "@packages/database/database";
 import {
 	type AnyThreadChannel,
-	Guild,
+	type Channel,
+	ChannelType,
+	type ForumChannel,
 	type GuildBasedChannel,
-	GuildChannel,
-	GuildMember,
-	Message,
-	User,
-} from 'discord.js';
+	type GuildChannel,
+	type Message,
+	type NewsChannel,
+	type PublicThreadChannel,
+	type TextChannel,
+	type User,
+} from "discord.js";
+import { Effect } from "effect";
+import { Discord } from "../core/discord-service";
 
-export function toDiscordAPIServer(
-	member: GuildMember,
-): Auth.DiscordAPIServerSchema {
-	const guild = member.guild;
-	return {
-		id: guild.id,
-		name: guild.name,
-		icon: guild.icon,
-		features: guild.features,
-		owner: guild.ownerId === member.user.id,
-		permissions: Number(member.permissions.bitfield),
-	};
+// Helper functions to convert Discord string IDs to bigint
+export function toBigIntId(id: string | undefined | null): bigint | undefined {
+	return id ? BigInt(id) : undefined;
 }
 
-// top 10 ugliest functions in this codebase
-export async function toAOMessage(message: Message): Promise<AOMessage> {
-	if (message.partial) {
-		message = await message.fetch();
-	}
-	if (!message.guildId) throw new Error('Message is not in a guild');
-	const reactions: ReactionWithRelations[] = [];
-	for (const reaction of message.reactions.cache.values()) {
-		const users = reaction.users.cache;
-		for (const user of users.values()) {
-			const emoji = reaction.emoji;
-			if (!emoji || !emoji.name || !emoji.id) continue;
-			reactions.push({
-				userId: user.id,
-				messageId: message.id,
-				emojiId: emoji.id,
-				emoji: {
-					id: emoji.id,
-					name: emoji.name,
-				},
-			});
-		}
-	}
+const ALLOWED_ROOT_CHANNEL_TYPES = new Set([
+	ChannelType.GuildText,
+	ChannelType.GuildAnnouncement,
+	ChannelType.GuildForum,
+]); // GuildText, GuildAnnouncement, GuildForum
+const ALLOWED_THREAD_TYPES = new Set([
+	ChannelType.PublicThread,
+	ChannelType.AnnouncementThread,
+]);
 
-	const convertedMessage: AOMessage = {
-		id: message.id,
-		content: message.cleanContent,
-		channelId: message.channelId,
-		parentChannelId: message.channel.isThread()
-			? message.channel.parentId
-			: null,
-		attachments: message.attachments.map((attachment) => {
-			return {
-				id: attachment.id,
-				url: attachment.url,
-				messageId: message.id,
-				proxyUrl: attachment.proxyURL,
-				filename: attachment.name ?? '',
-				size: attachment.size,
-				height: attachment.height,
-				width: attachment.width,
-				contentType: attachment.contentType,
-				description: attachment.description,
-				ephemeral: attachment.ephemeral ?? false,
-			};
-		}),
-		applicationId: message.applicationId,
-		flags: message.flags.bitfield,
-		nonce: message.nonce ? message.nonce.toString() : null,
-		tts: message.tts,
-		reactions,
-		embeds: message.embeds.map((embed) => ({
-			title: embed.title ?? undefined,
-			description: embed.description ?? undefined,
-			url: embed.url ?? undefined,
-			color: embed.color ?? undefined,
-			type: undefined,
-			timestamp: embed.timestamp ?? undefined,
-			footer: embed.footer
-				? {
-						text: embed.footer.text,
-						iconUrl: embed.footer.iconURL ?? undefined,
-						proxyIconUrl: embed.footer.proxyIconURL ?? undefined,
-					}
-				: undefined,
-			image: embed.image
-				? {
-						url: embed.image.url,
-						proxyUrl: embed.image.proxyURL ?? undefined,
-						height: embed.image.height ?? undefined,
-						width: embed.image.width ?? undefined,
-					}
-				: undefined,
-			video: embed.video
-				? {
-						height: embed.video.height ?? undefined,
-						width: embed.video.width ?? undefined,
-						url: embed.video.url,
-						proxyUrl: embed.video.proxyURL ?? undefined,
-					}
-				: undefined,
-			provider: embed.provider
-				? {
-						name: embed.provider.name ?? undefined,
-						url: embed.provider.url ?? undefined,
-					}
-				: undefined,
-			thumbnail: embed.thumbnail
-				? {
-						url: embed.thumbnail.url,
-						proxyUrl: embed.thumbnail.proxyURL ?? undefined,
-						height: embed.thumbnail.height ?? undefined,
-						width: embed.thumbnail.width ?? undefined,
-					}
-				: undefined,
-			author: embed.author
-				? {
-						name: embed.author.name ?? undefined,
-						url: embed.author.url ?? undefined,
-						iconUrl: embed.author.iconURL ?? undefined,
-						proxyIconUrl: embed.author.proxyIconURL ?? undefined,
-					}
-				: undefined,
-			fields: embed.fields.map((field) => ({
-				name: field.name,
-				value: field.value,
-				inline: field.inline ?? false,
-			})),
-		})),
-		interactionId: message.interaction?.id ?? null,
-		pinned: message.pinned,
-		type: message.type,
-		webhookId: message.webhookId,
-		referenceId: message.reference?.messageId ?? null,
-		authorId: message.author.id,
-		serverId: message.guildId,
-		questionId: null,
-		childThreadId: message.thread?.id ?? null,
-	};
-	return convertedMessage;
+export function isAllowedRootChannelType(channelType: number) {
+	return ALLOWED_ROOT_CHANNEL_TYPES.has(channelType);
+}
+
+export function isAllowedRootChannel(
+	channel: Channel,
+): channel is TextChannel | NewsChannel | ForumChannel {
+	return isAllowedRootChannelType(channel.type);
+}
+
+function isAllowedThreadType(channelType: number): boolean {
+	return ALLOWED_THREAD_TYPES.has(channelType);
+}
+
+export function isAllowedThreadChannel(
+	channel: Channel,
+): channel is PublicThreadChannel {
+	return isAllowedThreadType(channel.type);
+}
+
+function isForumChannel(
+	channel: GuildChannel | GuildBasedChannel | AnyThreadChannel,
+): channel is ForumChannel {
+	return channel.type === ChannelType.GuildForum;
 }
 
 export function toAODiscordAccount(user: User): AODiscordAccount {
-	const convertedUser: AODiscordAccount = {
-		id: user.id,
-		avatar: user.avatar,
-		name: user.displayName,
+	return {
+		id: BigInt(user.id),
+		name: user.displayName ?? user.username,
+		avatar: user.avatar ?? undefined,
 	};
-	return convertedUser;
-}
-
-export function getMemberCount(guild: Guild) {
-	const aprox = guild.approximateMemberCount;
-	const actual = guild.memberCount;
-	if (aprox && aprox > actual) return aprox;
-	return actual;
-}
-
-export function toAOServer(guild: Guild) {
-	return getDefaultServer({
-		id: guild.id,
-		name: guild.name,
-		icon: guild.icon,
-		description: guild.description,
-		vanityInviteCode: guild.vanityURLCode,
-		approximateMemberCount:
-			getMemberCount(guild) > 0 ? getMemberCount(guild) : undefined,
-	});
 }
 
 export function toAOChannel(
-	channel: GuildChannel | GuildBasedChannel,
-): AOChannel {
-	if (!channel.guild) throw new Error('Channel is not in a guild');
-	const convertedChannel: AOChannel = getDefaultChannelWithFlags({
-		id: channel.id,
-		name: channel.name,
-		type: channel.type,
-		parentId: channel.isThread() ? channel.parentId : null,
-		serverId: channel.guild.id,
-		archivedTimestamp:
-			channel.isThread() && channel.archiveTimestamp
-				? BigInt(channel.archiveTimestamp)
-				: null,
+	channel: GuildChannel | GuildBasedChannel | AnyThreadChannel,
+) {
+	return Effect.gen(function* () {
+		const discord = yield* Discord;
+		const isThread = channel.isThread();
+		const parentId =
+			isThread && channel.parentId ? channel.parentId : undefined;
+		const archivedTimestamp =
+			isThread && channel.archiveTimestamp
+				? channel.archiveTimestamp
+				: undefined;
+		const botPermissions = yield* discord.getBotPermissionsForChannel(
+			channel.id,
+			channel.guild.id,
+		);
+		let availableTags: AOForumTag[] | undefined;
+		if (isForumChannel(channel)) {
+			if (channel.availableTags) {
+				availableTags = channel.availableTags.map((tag) => ({
+					id: BigInt(tag.id),
+					name: tag.name,
+					moderated: tag.moderated,
+					emojiId: tag.emoji?.id ? BigInt(tag.emoji.id) : undefined,
+					emojiName: tag.emoji?.name ?? undefined,
+				}));
+			}
+		}
+
+		return {
+			id: BigInt(channel.id),
+			serverId: BigInt(channel.guild.id),
+			name: channel.name ?? "",
+			type: channel.type,
+			parentId: toBigIntId(parentId),
+			archivedTimestamp: archivedTimestamp,
+			botPermissions: botPermissions ?? undefined,
+			availableTags,
+		} satisfies AOChannel;
 	});
-	return convertedChannel;
 }
 
-export function toAOChannelWithServer(
-	channel: GuildChannel,
-): AOChannel & { server: AOServer } {
-	const converted = toAOChannel(channel);
+export async function toAOMessage(
+	message: Message,
+	discordServerId: string,
+): Promise<BaseMessageWithRelations> {
+	if (message.partial) {
+		message = await message.fetch();
+	}
+
+	if (!message.guildId) {
+		throw new Error("Message is not in a guild");
+	}
+
+	const reactions: Array<{
+		userId: bigint;
+		emoji: AOEmoji;
+	}> = [];
+
+	for (const reaction of message.reactions.cache.values()) {
+		const emoji = reaction.emoji;
+		if (!emoji.name || !emoji.id) continue;
+
+		try {
+			const users = await reaction.users.fetch({ limit: 100 });
+			for (const user of users.values()) {
+				reactions.push({
+					userId: BigInt(user.id),
+					emoji: {
+						id: BigInt(emoji.id),
+						name: emoji.name,
+						animated: emoji.animated ?? undefined,
+					},
+				});
+			}
+		} catch (error) {
+			console.warn(`Failed to fetch users for reaction ${emoji.name}:`, error);
+		}
+	}
+
+	const attachments: DatabaseAttachment[] = message.attachments.map(
+		(attachment) => ({
+			id: BigInt(attachment.id),
+			messageId: BigInt(message.id),
+			contentType: attachment.contentType ?? undefined,
+			filename: attachment.name ?? "",
+			width: attachment.width ?? undefined,
+			height: attachment.height ?? undefined,
+			size: attachment.size,
+			description: attachment.description ?? undefined,
+			storageId: undefined,
+		}),
+	);
+
+	const embeds = message.embeds.map((embed) => ({
+		title: embed.title ?? undefined,
+		type: undefined, // Discord embed type is deprecated, not storing
+		description: embed.description ?? undefined,
+		url: embed.url ?? undefined,
+		timestamp: embed.timestamp
+			? new Date(embed.timestamp).toISOString()
+			: undefined,
+		color: embed.color ?? undefined,
+		footer: embed.footer
+			? {
+					text: embed.footer.text,
+					iconUrl: embed.footer.iconURL ?? undefined,
+					proxyIconUrl: embed.footer.proxyIconURL ?? undefined,
+				}
+			: undefined,
+		image: embed.image
+			? {
+					url: embed.image.url,
+					proxyUrl: embed.image.url ?? undefined,
+					height: embed.image.height ?? undefined,
+					width: embed.image.width ?? undefined,
+				}
+			: undefined,
+		thumbnail: embed.thumbnail
+			? {
+					url: embed.thumbnail.url,
+					proxyUrl: embed.thumbnail.url ?? undefined,
+					height: embed.thumbnail.height ?? undefined,
+					width: embed.thumbnail.width ?? undefined,
+				}
+			: undefined,
+		video: embed.video
+			? {
+					url: embed.video.url,
+					proxyUrl: embed.video.url ?? undefined,
+					height: embed.video.height ?? undefined,
+					width: embed.video.width ?? undefined,
+				}
+			: undefined,
+		provider: embed.provider
+			? {
+					name: embed.provider.name ?? undefined,
+					url: embed.provider.url ?? undefined,
+				}
+			: undefined,
+		author: embed.author
+			? {
+					name: embed.author.name ?? undefined,
+					url: embed.author.url ?? undefined,
+					iconUrl: embed.author.iconURL ?? undefined,
+					proxyIconUrl: embed.author.proxyIconURL ?? undefined,
+				}
+			: undefined,
+		fields: embed.fields.map((field) => ({
+			name: field.name,
+			value: field.value,
+			inline: field.inline ?? false,
+		})),
+	}));
+
+	const parentChannelId = message.channel.isThread()
+		? (message.channel.parentId ?? undefined)
+		: undefined;
+
+	const convertedMessage: BaseMessageWithRelations = {
+		id: BigInt(message.id),
+		authorId: BigInt(message.author.id),
+		serverId: BigInt(discordServerId),
+		channelId: BigInt(message.channelId),
+		parentChannelId: toBigIntId(parentChannelId),
+		childThreadId: toBigIntId(
+			message.thread?.id ??
+				(message?.hasThread ? message.id : undefined) ??
+				(message.channelId === message.id ? message.id : undefined),
+		),
+		questionId: undefined,
+		referenceId: toBigIntId(message.reference?.messageId),
+		applicationId: toBigIntId(message.applicationId),
+		interactionId: toBigIntId(message.interaction?.id),
+		webhookId: toBigIntId(message.webhookId),
+		content: message.content,
+		flags: message.flags.bitfield,
+		type: message.type,
+		pinned: message.pinned ?? false,
+		nonce: message.nonce?.toString() ?? undefined,
+		tts: message.tts ?? false,
+		embeds: embeds.length > 0 ? embeds : undefined,
+		attachments: attachments.length > 0 ? attachments : undefined,
+		reactions: reactions.length > 0 ? reactions : undefined,
+	};
+
+	return convertedMessage;
+}
+
+export function toUpsertMessageArgs(data: BaseMessageWithRelations) {
 	return {
-		...converted,
-		server: toAOServer(channel.guild),
+		message: {
+			id: data.id,
+			authorId: data.authorId,
+			serverId: data.serverId,
+			channelId: data.channelId,
+			parentChannelId: data.parentChannelId,
+			childThreadId: data.childThreadId,
+			questionId: data.questionId,
+			referenceId: data.referenceId,
+			applicationId: data.applicationId,
+			interactionId: data.interactionId,
+			webhookId: data.webhookId,
+			content: data.content,
+			flags: data.flags,
+			type: data.type,
+			pinned: data.pinned,
+			nonce: data.nonce,
+			tts: data.tts,
+			embeds: data.embeds,
+		},
+		attachments: data.attachments,
+		reactions: data.reactions,
 	};
 }
 
-export function toAOThread(thread: AnyThreadChannel): AOChannel {
-	if (!thread?.parent?.id) throw new Error('Thread has no parent');
-
-	const convertedThread: AOChannel = getDefaultChannelWithFlags({
-		id: thread.id,
-		name: thread.name,
-		type: thread.type,
-		parentId: thread.parent.id,
-		serverId: thread.guild.id,
-	});
-	return convertedThread;
+export interface EmbedImageToUpload {
+	url: string;
+	messageId: bigint;
+	embedIndex: number;
+	field: "image" | "thumbnail" | "video" | "footerIcon" | "authorIcon";
 }
 
-export function extractUsersSetFromMessages(messages: Message[]) {
-	const users = new Map<string, AODiscordAccount>();
-	for (const msg of messages) {
-		users.set(msg.author.id, toAODiscordAccount(msg.author));
-	}
-	return Array.from(users.values());
-}
+export function extractEmbedImagesToUpload(
+	message: Message,
+): EmbedImageToUpload[] {
+	const result: EmbedImageToUpload[] = [];
+	const messageId = BigInt(message.id);
 
-export function extractThreadsSetFromMessages(messages: Message[]) {
-	const threads = new Map<string, AOChannel>();
-	for (const msg of messages) {
-		if (msg.thread) {
-			threads.set(msg.thread.id, toAOThread(msg.thread));
+	message.embeds.forEach((embed, embedIndex) => {
+		if (embed.image?.url) {
+			result.push({
+				url: embed.image.url,
+				messageId,
+				embedIndex,
+				field: "image",
+			});
 		}
-	}
-	return Array.from(threads.values());
-}
 
-export async function messagesToAOMessagesSet(messages: Message[]) {
-	const aoMessages = new Map<string, AOMessage>();
-	for await (const msg of messages) {
-		const converted = await toAOMessage(msg);
-		aoMessages.set(msg.id, converted);
-	}
-	return Array.from(aoMessages.values());
+		if (embed.thumbnail?.url) {
+			result.push({
+				url: embed.thumbnail.url,
+				messageId,
+				embedIndex,
+				field: "thumbnail",
+			});
+		}
+
+		if (embed.video?.url) {
+			result.push({
+				url: embed.video.url,
+				messageId,
+				embedIndex,
+				field: "video",
+			});
+		}
+
+		if (embed.footer?.proxyIconURL) {
+			result.push({
+				url: embed.footer.proxyIconURL,
+				messageId,
+				embedIndex,
+				field: "footerIcon",
+			});
+		}
+
+		if (embed.author?.proxyIconURL) {
+			result.push({
+				url: embed.author.proxyIconURL,
+				messageId,
+				embedIndex,
+				field: "authorIcon",
+			});
+		}
+	});
+
+	return result;
 }

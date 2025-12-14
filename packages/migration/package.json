@@ -1,0 +1,29 @@
+{
+	"name": "@packages/migration",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"with-env": "bun run --env-file=../../.env.production --",
+		"migrate": "bun with-env bun run src/index.ts",
+		"validate": "bun with-env bun run src/index.ts --validate",
+		"migrate:attachments": "bun with-env bun run src/migrate-attachments.ts",
+		"migrate:attachments:test": "bun with-env bun run src/migrate-attachments.ts --test",
+		"migrate:utfs-to-s3": "bun with-env bun run src/migrate-utfs-to-s3.ts",
+		"migrate:utfs-to-s3:test": "bun with-env bun run src/migrate-utfs-to-s3.ts --test",
+		"migrate:utfs-to-s3:dry-run": "bun with-env bun run src/migrate-utfs-to-s3.ts --dry-run",
+		"catchup": "bun with-env bun run src/catchup/index.ts",
+		"catchup:run": "bun with-env bun run src/catchup/index.ts --no-dry-run",
+		"catchup:fresh": "bun with-env bun run src/catchup/index.ts --fresh"
+	},
+	"dependencies": {
+		"@packages/database": "workspace:*",
+		"@planetscale/database": "^1.19.0",
+		"drizzle-orm": "^0.36.4",
+		"archiver": "^7.0.1",
+		"effect": "catalog:"
+	},
+	"devDependencies": {
+		"@types/archiver": "^6.0.3",
+		"typescript": "^5.7.2"
+	}
+}

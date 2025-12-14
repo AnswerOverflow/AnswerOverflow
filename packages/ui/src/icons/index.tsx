@@ -1,5 +1,5 @@
-/* eslint-disable tailwindcss/no-custom-classname */
-import { type VariantProps, cva } from 'cva';
+import { cva, type VariantProps } from "class-variance-authority";
+import type * as React from "react";
 
 const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	<svg fill="currentColor" viewBox="0 0 24 24" {...props}>
@@ -10,20 +10,22 @@ const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 		/>
 	</svg>
 );
-const discordIconStyles = cva('', {
+
+const discordIconStyles = cva("", {
 	variants: {
 		color: {
 			blurple:
-				'dark:text-blue-400 text-[#5865F2] hover:text-[#7289DA] dark:hover:text-blue-300 transition-all',
-			inherit: 'text-inherit',
+				"dark:text-blue-400 text-[#5865F2] hover:text-[#7289DA] dark:hover:text-blue-300 transition-all",
+			inherit: "text-inherit",
 			primary:
-				'dark:text-neutral-200 dark:hover:text-neutral-400 text-neutral-800 hover:text-neutral-700 transition-all',
-		},
-		defaultVariants: {
-			color: 'inherit',
+				"dark:text-neutral-200 dark:hover:text-neutral-400 text-neutral-800 hover:text-neutral-700 transition-all",
 		},
 	},
+	defaultVariants: {
+		color: "inherit",
+	},
 });
+
 function DiscordIcon(
 	props: React.SVGProps<SVGSVGElement> & VariantProps<typeof discordIconStyles>,
 ) {
@@ -32,8 +34,9 @@ function DiscordIcon(
 			fill="currentColor"
 			viewBox="0 0 127.14 96.36"
 			className={`${discordIconStyles({ color: props.color })} ${
-				props.className ?? ''
+				props.className ?? ""
 			}`}
+			{...props}
 		>
 			<path
 				fillRule="evenodd"
@@ -43,7 +46,6 @@ function DiscordIcon(
 		</svg>
 	);
 }
-import * as React from 'react';
 
 const ExternalLinkIcon = () => {
 	return (
@@ -63,6 +65,7 @@ const ExternalLinkIcon = () => {
 		</svg>
 	);
 };
+
 const CloseIcon = () => {
 	return (
 		<svg

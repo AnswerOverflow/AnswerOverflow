@@ -1,0 +1,28 @@
+{
+  "name": "@packages/convex-test",
+  "version": "0.0.38",
+  "description": "A JS mock of the Convex backend for testing your Convex functions.",
+  "type": "module",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test": "vitest run --no-watch --pool=forks",
+    "test:watch": "vitest",
+    "test:once": "vitest run --no-watch --pool=forks",
+    "test:debug": "vitest --inspect-brk --no-file-parallelism",
+    "test:coverage": "vitest run --coverage --pool=forks",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "convex": "^1.16.4"
+  },
+	"devDependencies": {
+		"@edge-runtime/vm": "catalog:",
+		"@types/node": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
+}

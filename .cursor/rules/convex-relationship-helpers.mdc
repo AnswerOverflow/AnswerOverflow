@@ -1,0 +1,18 @@
+---
+description: Use convex-helpers/server/relationships for Convex relationship queries instead of manual withIndex patterns
+globs: packages/database/convex/**/*.ts,packages/convex-test/convex/**/*.ts
+---
+
+# Convex Relationship Helpers
+
+Use `convex-helpers/server/relationships` instead of manual `.withIndex(...).eq(...)` patterns.
+
+**One-to-Many:** `getManyFrom(ctx.db, "table", "field", value)` (not `.withIndex().collect()`)
+**One-to-One:** `getOneFrom(ctx.db, "table", "field", value)` (not `.withIndex().first()`)
+**Async Arrays:** `asyncMap()` (not `Promise.all`)
+
+**Key Points:**
+- Use field names, not index names
+- Helpers auto-find correct indexes
+- Wrap in `Effect.tryPromise` for Effect code
+- Use custom logic for compound indexes

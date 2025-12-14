@@ -1,0 +1,67 @@
+{
+	"name": "@packages/database",
+	"version": "1.0.0",
+	"exports": {
+		"./*": "./src/*.ts",
+		"./convex/shared/*": "./convex/shared/*.ts",
+		"./convex/*": {
+			"types": "./convex/*.d.ts",
+			"default": "./convex/*.js"
+		}
+	},
+	"scripts": {
+		"with-env": "bun run --env-file=../../.env",
+		"with-env:prod": "bun run --env-file=../../.env.production",
+		"deploy:prod": "bun run with-env:prod convex deploy",
+		"codegen": "bunx convex codegen && bun run scripts/generate-function-types.ts",
+		"generate-function-types": "bun run scripts/generate-function-types.ts",
+		"generate-function-types:watch": "chokidar \"convex/{public,authenticated,private}/**/*.ts\" -c \"bun run scripts/generate-function-types.ts\"",
+		"dev": "bun run scripts/dev.ts",
+		"typecheck": "tsgo -p convex/tsconfig.json --noEmit & tsgo -p tsconfig.json --noEmit & wait",
+		"typecheck:slow": "tsc -p convex/tsconfig.json --noEmit & tsc -p tsconfig.json --noEmit & wait",
+		"clean": "rm -rf node_modules .turbo",
+		"test": "vitest run --no-watch --pool=forks",
+		"test:watch": "vitest",
+		"convex:knip": "bun scripts/find-unused-convex-functions.ts",
+		"env:sync:prod": "bun run scripts/sync-env-prod.ts",
+		"mcp": "bun run with-env bun run --hot scripts/mcp.ts"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.940.0",
+		"@aws-sdk/lib-storage": "^3.940.0",
+		"@better-auth/stripe": "^1.4.2",
+		"@convex-dev/action-cache": "^0.3.0",
+		"@convex-dev/better-auth": "catalog:",
+		"@convex-dev/migrations": "^0.3.1",
+		"@effect-aws/client-s3": "^1.10.6",
+		"@effect/ai": "^0.32.1",
+		"@effect/platform": "catalog:",
+		"@effect/platform-node": "^0.103.0",
+		"@packages/discord-api": "workspace:*",
+		"@typelytics/posthog": "^0.1.5",
+		"@vercel/sdk": "^1.17.7",
+		"convex": "catalog:",
+		"convex-helpers": "^0.1.104",
+		"cookie": "^1.1.1",
+		"discord-api-types": "^0.38.24",
+		"effect": "catalog:",
+		"posthog-node": "^4.2.0",
+		"stripe": "^20",
+		"unique-names-generator": "^4.7.1"
+	},
+	"devDependencies": {
+		"@edge-runtime/vm": "catalog:",
+		"@effect/vitest": "catalog:",
+		"@packages/convex-test": "workspace:*",
+		"@packages/database-utils": "workspace:*",
+		"@packages/observability": "workspace:*",
+		"@packages/test-utils": "workspace:*",
+		"chokidar-cli": "^3.0.0",
+		"dotenv": "^17.2.3",
+		"glob": "^11.1.0",
+		"vitest": "catalog:"
+	},
+	"peerDependencies": {
+		"discord.js": "^14.22.1"
+	}
+}

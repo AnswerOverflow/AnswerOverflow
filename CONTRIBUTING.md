@@ -81,7 +81,7 @@ bun dev
 
 ```bash
 # in project root directory
-bun test
+bun run test
 
 # to test an individual package:
 cd [apps|packages]/[package_name] bun test:watch
@@ -90,6 +90,5 @@ cd [apps|packages]/[package_name] bun test:watch
 ### Building
 
 ```bash
-bun build:prod
+bun run build
 ```
-

@@ -1,0 +1,48 @@
+---
+alwaysApply: false
+---
+
+We vendor the `Effect` repository as a git subtree under `.context/effect/`.
+
+- **Patterns and APIs**: Look in `.context/effect/` for canonical patterns, implementations, and best practices to follow when building agents and related workflows.
+- **Updating the subtree**:
+  - `git fetch effect-upstream`
+  - `git subtree pull --prefix=.context/effect effect-upstream main --squash`
+
+## AnswerOverflow Production Codebase
+
+We also include the AnswerOverflow production codebase as a git submodule under `.context/AnswerOverflow/`.
+
+- **Context**: This is the current production codebase that we're rewriting. Use it as a reference for understanding existing functionality, business logic, and patterns that need to be preserved or improved in the rewrite.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/AnswerOverflow`
+  - Or navigate to `.context/AnswerOverflow` and pull changes: `cd .context/AnswerOverflow && git pull`
+
+When I say 'the old answer overflow' i am referring to this codebase
+
+## Better Auth
+
+We include the Better Auth repository as a git submodule under `.context/better-auth/`.
+
+- **Context**: This is the Better Auth library for Convex. Use it as a reference for authentication patterns, implementations, and best practices when working with authentication in Convex.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/better-auth`
+  - Or navigate to `.context/better-auth` and pull changes: `cd .context/better-auth && git pull`
+
+## Convex Backend
+
+We include the Convex backend repository as a git submodule under `.context/convex-backend/`.
+
+- **Context**: This is the official Convex backend implementation. Use it as a reference for understanding Convex internals, backend patterns, and implementation details.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/convex-backend`
+  - Or navigate to `.context/convex-backend` and pull changes: `cd .context/convex-backend && git pull`
+
+## Convex JS
+
+We include the Convex JS client library repository as a git submodule under `.context/convex-js/`.
+
+- **Context**: This is the official Convex JavaScript/TypeScript client library. Use it as a reference for understanding client-side Convex patterns, API usage, and implementation details.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/convex-js`
+  - Or navigate to `.context/convex-js` and pull changes: `cd .context/convex-js && git pull`

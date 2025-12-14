@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		/* These settings are not required by Convex and can be modified. */
+		"allowJs": true,
+		"strict": true,
+
+		/* These compiler options are required by Convex */
+		"target": "ESNext",
+		"lib": ["ES2022", "dom"],
+		"forceConsistentCasingInFileNames": true,
+		"allowSyntheticDefaultImports": true,
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"isolatedModules": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"noUncheckedIndexedAccess": true
+	},
+	"include": ["./**/*"],
+	"exclude": [
+		"./_generated",
+		"**/node_modules",
+		"**/.turbo",
+		"**/dist",
+		"**/.next"
+	]
+}

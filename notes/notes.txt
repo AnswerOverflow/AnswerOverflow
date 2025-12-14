@@ -1,0 +1,190 @@
+- there's probably a bug in our onUpdate implementation where null should be part of live data, depends how convex handles onUpdate when the first value is null
+- lint should block deploy
+
+
+We can reduce a lot of complexity by using convex-helpers, things we should use from them:
+- rate limiting
+- https://www.convex.dev/components/workpool may be relevant
+- https://www.convex.dev/components/aggregate use aggregate
+- https://docs.convex.dev/error#1 we're seeing write conflicts
+- the compound index of server id + indexing is probably not needed since the amount of root channels is always going to be less than 100
+
+
+
+## Launch blockers:
+- load all messages for a message page
+- SEO friendly infinite scroll
+- Non jank page naivigation
+- Message pages can return the 'id' or whatever and check if it matches and if doesnt then rediret this saves us one nextwork hop
+- Embed images need to go to our storage
+
+
+
+
+
+
+=======
+
+## Sitemap
+    /c/ sitemap
+    /:domain sitemap
+    / sitemap
+
+## Discord Bot Features:
+    Commands:
+    - [X] Manage Account
+    - [X] Mark Solution
+    - [X] Leaderboard
+
+    Events:
+    - [X] Auto thread
+    - [X] Forum post guidelines consent
+    - [X] Read the rules consent
+    - [X] Send mark solutions in new threads
+    - [WIP] Update status
+
+    Parity:
+    - [X] Channel parity
+    - [X] Guild parity
+    - [X] Message parity
+    - [X] User parity
+
+    Misc:
+    - [X] Deny list
+
+
+
+## Website Features:
+
+Main Site:
+    - [X] /
+    - [X] /robots.txt
+    - [X] /about
+    - [X] /browse
+    - [X] /contributors
+    - [X] /cookies
+    - [X] /eula
+    - [X] /privacy
+    - [X] /tos
+    - [X] /c/:serverId
+    - [X] /c/:serverId/:channelId
+    - [X] /m/:messageId
+    - [X] /og/post?id
+    - [X] /u/:userId
+    - [X] /u/:userId/comments
+
+Tenant Site:
+    - [X] /:domain
+    - [X] /:domain/m/:messageId
+    - [X] /:domain/search
+    - [ ] /:domain/u/:userId
+    - [ ] /:domain/u/:userId/comments
+    - [X] /:domain/c/:channelId
+    - [X] /:domain/og/post?id
+    - [X] /:domain/robots.txt
+    
+
+## Dashboard Features:
+
+Analytics:
+    - [X] Top Pages
+    - [X] Top question solvers
+    - [X] Page views over time
+    - [X] Server invite clicks over time
+    - [X] Q&As over time
+
+Server Settings:
+    - [X] Set custom domain
+    - [ ] Set custom subpath
+    - [X] Enable / disable consider all messages public
+    - [X] Enable / disable aonymize messages
+    - [X] Enable / disable read the rules consent
+    - [X] Upgrade / downgrade plan
+
+Channel Settings:
+    - [X] Enable / disable mark solution
+    - [X] Enable / disable mark solution instructions
+    - [X] Enable / disable auto thread
+    - [X] Enable / disable indexing
+    - [X] Enable / disabe forum guidelines consent
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Extra work to be done after the migration is complete:
+
+## Onboarding
+
+Include a floating support widget / something similar w/ a quick add for Rhys on Discord
+
+If the server has 10k+ members, 'VIP' onboarding
+
+Flow is the following:
+1. Sign in, have all servers listed to setup
+2. On click setup open a page / modal with an add button for the bot
+    - display the permissions it asks for & why it needs them
+3. Put them on a pending screen while waiting for the bot to be added, pending screen should:
+    - Have a link to go back
+    - Have a button to readd the bot
+    - Let them know we'll automatically detect being added
+4. After being added, display a 'Thanks for adding, lets get it configured' screen
+5. One click config that detects & applies recommended settings
+    Recommended:
+        - All messages public
+        - All forum channels indexed
+        - Send mark solution instructions
+        - Apply solved tag
+    Optional:
+        - Anonymize messages
+6. Advanced config that lets them customize
+
+
+## Draft mode
+
+Communities should be able to turn on 'draft mode' that lets them see their server but not anyone else to make them more comfortable with getting context indexed
+
+## MCP
+
+- Global search
+- Search a community (needs to pass an id, get from search communities), searches name + description
+
+
+
+
+
+## Maybe:
+Lean on convex-helpers/server/validators: literals and nullable would shorten enums/nullables in packages/database/convex/schema.ts (e.g. plan union, customDomain args), and typedV(schema)/doc would let you reuse table validators in args instead of re-spelling shapes across mutations.
+
+Use getOneFromOrThrow/getManyVia from the relationship helpers to replace the repeated “withIndex().unique() + try/catch” patterns in packages/database/convex/authenticated/dashboard_mutations.ts and other helpers—reads clearer and centralizes the duplicate-detection error.
+
+Extend your existing customQuery/customMutation wrappers with customCtx to inject common auth/permission context (e.g. authorizedUser from assertCanEditServer in dashboard_mutations.ts) so handlers can stay focused on business logic instead of re-running the same guards.
+
+For the manual pagination/slicing helpers in packages/database/convex/shared/shared.ts (e.g. findMessagesByChannelId, findMessagesByAuthorId), swap the “collect then sort/slice” code for paginator/getPage on the relevant indexes; it trims boilerplate and reads closer to intent.
+
+Consider filter when you currently .collect() and then run JS filters (same shared helpers file); it keeps filtering colocated with the query chain and avoids extra local post-processing code.
+
+checkout ast grep
+
+
+## Emails
+
+- we should probably email people
