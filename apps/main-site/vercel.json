@@ -2,40 +2,12 @@
 	"buildCommand": "./scripts/build.sh",
 	"rewrites": [
 		{
-			"source": "/_mintlify/:path*",
-			"destination": "https://answeroverflow.mintlify.app/_mintlify/:path*"
-		},
-		{
-			"source": "/api/request",
-			"destination": "https://answeroverflow.mintlify.app/_mintlify/api/request"
-		},
-		{
 			"source": "/docs",
-			"destination": "https://answeroverflow.mintlify.app/docs"
+			"destination": "https://answeroverflow.mintlify.dev/docs"
 		},
 		{
-			"source": "/docs/llms.txt",
-			"destination": "https://answeroverflow.mintlify.app/llms.txt"
-		},
-		{
-			"source": "/docs/llms-full.txt",
-			"destination": "https://answeroverflow.mintlify.app/llms-full.txt"
-		},
-		{
-			"source": "/docs/sitemap.xml",
-			"destination": "https://answeroverflow.mintlify.app/sitemap.xml"
-		},
-		{
-			"source": "/docs/robots.txt",
-			"destination": "https://answeroverflow.mintlify.app/robots.txt"
-		},
-		{
-			"source": "/docs/:path*",
-			"destination": "https://answeroverflow.mintlify.app/docs/:path*"
-		},
-		{
-			"source": "/mintlify-assets/:path+",
-			"destination": "https://answeroverflow.mintlify.app/mintlify-assets/:path+"
+			"source": "/docs/:match*",
+			"destination": "https://answeroverflow.mintlify.dev/docs/:match*"
 		}
 	]
 }
