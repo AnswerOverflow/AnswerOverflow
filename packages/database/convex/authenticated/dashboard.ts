@@ -371,7 +371,6 @@ export const trackBotAddClick = guildManagerAction({
 				serverId: args.serverId,
 				preferences: {
 					addedByUserId: discordAccountId,
-					addedByClickedAt: Date.now(),
 				},
 			},
 		);
