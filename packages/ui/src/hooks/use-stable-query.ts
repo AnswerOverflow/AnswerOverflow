@@ -1,5 +1,4 @@
 import type {
-	OptionalRestArgsOrSkip,
 	PaginatedQueryArgs,
 	PaginatedQueryItem,
 	PaginatedQueryReference,
@@ -20,59 +19,6 @@ export const useStableQuery = ((name, ...args) => {
 
 	return stored.current;
 }) as typeof useQuery;
-
-type SafeQueryResult<T> =
-	| { data: T; error: null; isLoading: false }
-	| { data: undefined; error: Error; isLoading: false }
-	| { data: undefined; error: null; isLoading: true };
-
-export function useSafeStableQuery<Query extends FunctionReference<"query">>(
-	query: Query,
-	...args: OptionalRestArgsOrSkip<Query>
-): SafeQueryResult<Query["_returnType"]> {
-	const skip = args[0] === "skip";
-	const argsObject = args[0] === "skip" ? {} : (args[0] ?? {});
-
-	const argsKey = skip
-		? "skip"
-		: JSON.stringify(convexToJson(argsObject as Record<string, Value>));
-
-	const queries = useMemo(
-		(): Record<
-			string,
-			{ query: FunctionReference<"query">; args: Record<string, Value> }
-		> =>
-			skip
-				? {}
-				: {
-						query: {
-							query: query,
-							args: argsObject as Record<string, Value>,
-						},
-					},
-		[argsKey, query, skip],
-	);
-
-	const results = useQueries(queries);
-	const result = results["query"];
-
-	const currentResult = useMemo((): SafeQueryResult<Query["_returnType"]> => {
-		if (result instanceof Error) {
-			return { data: undefined, error: result, isLoading: false };
-		}
-		if (result !== undefined) {
-			return { data: result, error: null, isLoading: false };
-		}
-		return { data: undefined, error: null, isLoading: true };
-	}, [result]);
-
-	const stored = useRef(currentResult);
-	if (currentResult.isLoading === false || stored.current.isLoading === true) {
-		stored.current = currentResult;
-	}
-
-	return stored.current;
-}
 
 export const useStablePaginatedQuery = ((name, args, options) => {
 	const result = usePaginatedQuery(name, args, options);
