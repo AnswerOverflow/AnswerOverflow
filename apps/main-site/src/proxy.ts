@@ -28,6 +28,25 @@ export function proxy(request: NextRequest) {
 	const path = pathname + search;
 	const host = request.headers.get("host") ?? "";
 
+	const acceptHeader = request.headers.get("accept") ?? "";
+	const prefersMarkdown =
+		acceptHeader.includes("text/markdown") ||
+		acceptHeader.includes("text/plain");
+
+	const mdExtensionMatch = pathname.match(/^\/m\/(\d+)\.md$/);
+	if (mdExtensionMatch) {
+		url.pathname = `/m/${mdExtensionMatch[1]}/markdown`;
+		return NextResponse.rewrite(url);
+	}
+
+	if (prefersMarkdown) {
+		const messageMatch = pathname.match(/^\/m\/(\d+)$/);
+		if (messageMatch) {
+			url.pathname = `/m/${messageMatch[1]}/markdown`;
+			return NextResponse.rewrite(url);
+		}
+	}
+
 	if (pathname.startsWith("/og")) {
 		return NextResponse.next();
 	}
