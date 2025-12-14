@@ -83,7 +83,9 @@ export function getTenantCanonicalUrl(
 ): string {
 	if (subpathLookup[tenant?.customDomain ?? ""]) {
 		const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-		return `https://${subpathLookup[tenant?.customDomain ?? ""]}${normalizedPath}`;
+		// todo make this more general
+		const http = tenant?.customDomain === "tenant:3000" ? "http" : "https";
+		return `${http}://${subpathLookup[tenant?.customDomain ?? ""]}${normalizedPath}`;
 	}
 	const baseUrl = getTenantBaseUrl(tenant);
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;

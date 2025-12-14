@@ -54,7 +54,7 @@ function AuthClientProvider({
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
 }) {
-	const [authClient] = useState(createAuthClientWithBaseURL(tenant));
+	const [authClient] = useState(() => createAuthClientWithBaseURL(tenant));
 	return (
 		<AuthClientContext.Provider value={authClient}>
 			<ConvexBetterAuthProvider client={convex} authClient={authClient}>
