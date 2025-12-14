@@ -17,10 +17,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { useQueryState } from "nuqs";
 import { ServerCard } from "../../../components/server-card";
-import { useAuthClient } from "../../../lib/auth-client";
+import { authClient } from "../../../lib/auth-client";
 
 export default function DashboardHome() {
-	const authClient = useAuthClient();
 	const { data: session, isPending } = useSession({ allowAnonymous: false });
 	const getUserServers = useAction(api.authenticated.dashboard.getUserServers);
 	const [searchQuery, setSearchQuery] = useQueryState("search", {

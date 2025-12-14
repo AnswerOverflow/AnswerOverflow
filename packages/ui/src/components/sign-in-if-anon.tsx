@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuthClient } from "./convex-client-provider";
+import { authClient } from "./convex-client-provider";
 
 export function SignInIfAnon() {
-	const authClient = useAuthClient();
 	const auth = authClient.useSession();
 	const [isSigningIn, setIsSigningIn] = useState(false);
 	const hasAttemptedSignIn = useRef(false);
@@ -22,7 +21,7 @@ export function SignInIfAnon() {
 		authClient.signIn.anonymous().finally(() => {
 			setIsSigningIn(false);
 		});
-	}, [auth.isPending, auth.data, isSigningIn, authClient]);
+	}, [auth.isPending, auth.data, isSigningIn]);
 
 	return null;
 }

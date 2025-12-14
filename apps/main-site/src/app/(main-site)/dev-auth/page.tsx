@@ -8,7 +8,7 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import {
-	useAuthClient,
+	authClient,
 	useSession,
 } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
@@ -35,7 +35,6 @@ function isValidState(state: string | null): state is string {
 }
 
 export default function DevAuthPage() {
-	const authClient = useAuthClient();
 	const [redirect] = useQueryState("redirect");
 	const [state] = useQueryState("state");
 	const { data: session, isPending } = useSession({ allowAnonymous: false });

@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
-import { useAuthClient, useSession } from "../convex-client-provider";
+import { authClient, useSession } from "../convex-client-provider";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -91,7 +91,6 @@ function SignInButton({
 export function UserSection({ showSignIn = true }: UserSectionProps) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const authClient = useAuthClient();
 	const {
 		data: session,
 		isPending,
