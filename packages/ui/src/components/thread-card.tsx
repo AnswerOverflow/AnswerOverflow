@@ -149,7 +149,7 @@ export function ThreadCard({ result, hideServer = false }: ThreadCardProps) {
 								<ThreadIcon className="size-4 text-muted-foreground/70 shrink-0" />
 								<Link
 									href={canonicalHref}
-									className="text-muted-foreground hover:text-foreground hover:underline transition-colors truncate"
+									className="font-medium text-foreground hover:text-primary hover:underline transition-colors truncate"
 								>
 									{result.thread.name ||
 										result.message.message.content?.slice(0, 30).trim() ||

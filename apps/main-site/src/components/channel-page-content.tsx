@@ -91,10 +91,16 @@ function ChannelsSidebar({
 	serverDiscordId: bigint;
 	tenantMode: boolean;
 }) {
-	const getChannelHref = (channelId: bigint) =>
-		tenantMode
+	const allChannelsHref = tenantMode ? "/" : `/c/${serverDiscordId.toString()}`;
+
+	const getChannelHref = (channelId: bigint, isSelected: boolean) => {
+		if (isSelected) {
+			return allChannelsHref;
+		}
+		return tenantMode
 			? `/c/${channelId.toString()}`
 			: `/c/${serverDiscordId.toString()}/${channelId.toString()}`;
+	};
 
 	return (
 		<aside className="w-52 shrink-0">
@@ -103,14 +109,17 @@ function ChannelsSidebar({
 					Channels
 				</div>
 				<nav className="space-y-0.5">
-					{channels.map((channel) => (
-						<ChannelLink
-							key={channel.id.toString()}
-							channel={channel}
-							isSelected={channel.id === selectedChannelId}
-							href={getChannelHref(channel.id)}
-						/>
-					))}
+					{channels.map((channel) => {
+						const isSelected = channel.id === selectedChannelId;
+						return (
+							<ChannelLink
+								key={channel.id.toString()}
+								channel={channel}
+								isSelected={isSelected}
+								href={getChannelHref(channel.id, isSelected)}
+							/>
+						);
+					})}
 				</nav>
 			</div>
 		</aside>
@@ -130,10 +139,16 @@ function MobileChannelSheet({
 }) {
 	const [open, setOpen] = useState(false);
 
-	const getChannelHref = (channelId: bigint) =>
-		tenantMode
+	const allChannelsHref = tenantMode ? "/" : `/c/${serverDiscordId.toString()}`;
+
+	const getChannelHref = (channelId: bigint, isSelected: boolean) => {
+		if (isSelected) {
+			return allChannelsHref;
+		}
+		return tenantMode
 			? `/c/${channelId.toString()}`
 			: `/c/${serverDiscordId.toString()}/${channelId.toString()}`;
+	};
 
 	const selectedChannel = selectedChannelId
 		? channels.find((c) => c.id === selectedChannelId)
@@ -154,15 +169,18 @@ function MobileChannelSheet({
 					<SheetTitle className="text-left">Channels</SheetTitle>
 				</SheetHeader>
 				<nav className="p-2 space-y-0.5">
-					{channels.map((channel) => (
-						<ChannelLink
-							key={channel.id.toString()}
-							channel={channel}
-							isSelected={channel.id === selectedChannelId}
-							href={getChannelHref(channel.id)}
-							onClick={() => setOpen(false)}
-						/>
-					))}
+					{channels.map((channel) => {
+						const isSelected = channel.id === selectedChannelId;
+						return (
+							<ChannelLink
+								key={channel.id.toString()}
+								channel={channel}
+								isSelected={isSelected}
+								href={getChannelHref(channel.id, isSelected)}
+								onClick={() => setOpen(false)}
+							/>
+						);
+					})}
 				</nav>
 			</SheetContent>
 		</Sheet>
