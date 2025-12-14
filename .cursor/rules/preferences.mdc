@@ -51,6 +51,15 @@ Do not create summary documents or markdown documents unless instructed
 
 Run commands with a timeout of 60 seconds unless instructed otherwise
 
+## Typecheck
+
+- **Do NOT run `bun typecheck` after every change** - it's slow and wasteful
+- Only run typecheck when:
+  - Done making a set of changes
+  - Verifying work is complete
+  - Debugging type errors
+- During active development, rely on IDE type checking and only run the full typecheck at checkpoints
+
 ### DISCORD IDS VS CONVEX IDS
 
 WHEN WE REFER TO AN ID, WE ARE REFERRING TO THE CONVEX ID
