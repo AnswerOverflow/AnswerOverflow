@@ -76,12 +76,12 @@ const nextConfig: NextConfig = {
 		return [
 			{
 				source: "/changelog",
-				destination: "https://docs.answeroverflow.com/changelog",
+				destination: "/docs/changelog",
 				permanent: false,
 			},
 			{
 				source: "/changelog/:slug*",
-				destination: "https://docs.answeroverflow.com/changelog/:slug",
+				destination: "/docs/changelog/:slug",
 				permanent: false,
 			},
 		];

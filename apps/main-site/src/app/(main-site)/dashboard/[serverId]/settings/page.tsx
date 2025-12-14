@@ -136,7 +136,7 @@ export default function SettingsPage() {
 						All messages in the server will be considered public and displayed
 						on the web. Learn more about{" "}
 						<BlueLink
-							href="https://docs.answeroverflow.com/user-settings/displaying-messages"
+							href="/docs/user-settings/displaying-messages"
 							target="_blank"
 						>
 							displaying messages
