@@ -214,6 +214,9 @@ export async function searchMessages(
 		.query("messages")
 		.withSearchIndex("search_content", (q) => {
 			const searchQuery = q.search("content", args.query);
+			if (args.channelId) {
+				return searchQuery.eq("channelId", args.channelId);
+			}
 			if (args.serverId) {
 				return searchQuery.eq("serverId", args.serverId);
 			}
