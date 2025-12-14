@@ -28,7 +28,7 @@ const queryClient = new QueryClient({
 convexQueryClient.connect(queryClient);
 
 function createAuthClientWithBaseURL(tenant: TenantInfo | null | undefined) {
-	const baseURL = tenant ? getTenantCanonicalUrl(tenant, "/") : undefined;
+	const baseURL = tenant ? getTenantCanonicalUrl(tenant, "/api") : undefined;
 	return createAuthClient({
 		baseURL,
 		plugins: [anonymousClient(), convexClient()],
