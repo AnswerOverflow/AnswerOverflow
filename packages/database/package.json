@@ -34,7 +34,10 @@
 		"@convex-dev/better-auth": "catalog:",
 		"@convex-dev/migrations": "^0.3.1",
 		"@effect-aws/client-s3": "^1.10.6",
+
 		"@effect/ai": "^0.32.1",
+		"ai": "^5.0.36",
+		"zod": "^3.24.0",
 		"@effect/platform": "catalog:",
 		"@effect/platform-node": "^0.103.0",
 		"@packages/discord-api": "workspace:*",

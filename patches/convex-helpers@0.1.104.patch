@@ -1,0 +1,13 @@
+diff --git a/react.js b/react.js
+index 1234567..abcdefg 100644
+--- a/react.js
++++ b/react.js
+@@ -82,7 +82,7 @@ export function makeUseQueryWithStatus(useQueriesHook) {
+                     args,
+                 },
+             };
+-        }, [getFunctionName(query), JSON.stringify(args)]);
++        }, [getFunctionName(query), JSON.stringify(convexToJson(args))]);
+         const result = useQueriesHook(queries);
+         if (args === "skip") {
+             return {
