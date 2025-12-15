@@ -45,7 +45,7 @@ export function WizardNav({
 	};
 
 	return (
-		<div className="flex items-center justify-between pt-3 sm:pt-4">
+		<div className="flex items-center justify-between pt-3 sm:pt-4 mt-auto">
 			<div>
 				{backHref && (
 					<Button variant="ghost" onClick={() => router.push(backHref)}>

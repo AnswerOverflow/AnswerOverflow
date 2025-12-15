@@ -124,7 +124,7 @@ export default function CompletePage() {
 				</div>
 			</WizardCard>
 
-			<div className="flex items-center justify-between pt-4">
+			<div className="flex items-center justify-between pt-3 sm:pt-4 mt-auto">
 				<Button
 					variant="ghost"
 					onClick={() =>
