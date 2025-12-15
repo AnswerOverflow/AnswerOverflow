@@ -10,6 +10,7 @@ type StepLayoutProps = {
 	description: string;
 	children: React.ReactNode;
 	requiresChannels?: boolean;
+	video?: React.ReactNode;
 };
 
 export function StepLayout({
@@ -17,6 +18,7 @@ export function StepLayout({
 	description,
 	children,
 	requiresChannels = true,
+	video,
 }: StepLayoutProps) {
 	const { isLoading, error, reload } = useWizard();
 
@@ -75,6 +77,7 @@ export function StepLayout({
 					{description}
 				</p>
 			</div>
+			{video}
 			{children}
 		</div>
 	);

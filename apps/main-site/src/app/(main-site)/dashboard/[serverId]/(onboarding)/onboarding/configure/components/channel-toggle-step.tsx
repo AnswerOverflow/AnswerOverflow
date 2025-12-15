@@ -1,0 +1,83 @@
+"use client";
+
+import type { FeaturePreviewPlaceholderProps } from "./mock-message-preview";
+import { FeaturePreviewPlaceholder } from "./mock-message-preview";
+import { StepLayout } from "./step-layout";
+import { ChannelList } from "./toggle-channel-sections";
+import { WizardCard } from "./wizard-card";
+import type { ChannelRecommendation } from "./wizard-context";
+import { WizardNav } from "./wizard-nav";
+
+type ChannelToggleStepProps = {
+	title: string;
+	description: string;
+	feature: FeaturePreviewPlaceholderProps["feature"];
+	channels: Array<ChannelRecommendation>;
+	selectedIds: Set<string>;
+	onToggle: (channelId: string) => void;
+	onSelectAll: (channelIds: Array<string>, enabled: boolean) => void;
+	backHref: string;
+	nextHref: string;
+	showSkip?: boolean;
+	isNextDisabled?: boolean;
+	emptyState?: {
+		title: string;
+		description: string;
+	};
+};
+
+export function ChannelToggleStep({
+	title,
+	description,
+	feature,
+	channels,
+	selectedIds,
+	onToggle,
+	onSelectAll,
+	backHref,
+	nextHref,
+	showSkip,
+	isNextDisabled,
+	emptyState,
+}: ChannelToggleStepProps) {
+	const hasChannels = channels.length > 0;
+
+	return (
+		<StepLayout
+			title={title}
+			description={description}
+			video={
+				hasChannels ? (
+					<FeaturePreviewPlaceholder feature={feature} />
+				) : undefined
+			}
+		>
+			<WizardCard>
+				{hasChannels ? (
+					<ChannelList
+						channels={channels}
+						selectedIds={selectedIds}
+						onToggle={onToggle}
+						onSelectAll={onSelectAll}
+					/>
+				) : emptyState ? (
+					<div className="text-center py-8 text-muted-foreground">
+						<p>{emptyState.title}</p>
+						<p className="text-sm mt-2">{emptyState.description}</p>
+					</div>
+				) : (
+					<div className="text-center py-8 text-muted-foreground">
+						No channels available
+					</div>
+				)}
+			</WizardCard>
+
+			<WizardNav
+				backHref={backHref}
+				nextHref={nextHref}
+				showSkip={hasChannels && showSkip}
+				isNextDisabled={isNextDisabled}
+			/>
+		</StepLayout>
+	);
+}
