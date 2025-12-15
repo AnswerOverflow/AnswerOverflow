@@ -7,6 +7,6 @@
 		},
 		"outDir": "./dist"
 	},
-	"include": ["src/**/*"],
+	"include": ["."],
 	"exclude": ["node_modules", "dist"]
 }
