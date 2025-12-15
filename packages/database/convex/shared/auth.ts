@@ -165,16 +165,3 @@ export async function getDiscordAccountWithToken(
 		accessTokenExpiresAt,
 	};
 }
-
-export async function requireAuth(
-	ctx: QueryCtx | MutationCtx | ActionCtx,
-): Promise<{ accountId: bigint; accessToken: string }> {
-	const account = await getDiscordAccountWithToken(ctx);
-	if (!account || !account.accessToken) {
-		throw new Error("Not authenticated");
-	}
-	return {
-		accountId: account.accountId,
-		accessToken: account.accessToken,
-	};
-}
