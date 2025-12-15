@@ -1,35 +1,20 @@
 import { Database } from "@packages/database/database";
 import { normalizeSubpath } from "@packages/ui/utils/links";
+import { Sitemap } from "@packages/ui/utils/sitemap";
+import { getDate } from "@packages/ui/utils/snowflake";
 import { Array as Arr, Effect } from "effect";
 import { runtime } from "../../../lib/runtime";
 
-type SitemapEntry = {
-	loc: string;
-	lastmod?: Date;
-};
-
-type PaginationState = {
-	entries: SitemapEntry[];
-	cursor: string | null;
-	done: boolean;
-};
+export const maxDuration = 300;
 
 const MAX_SITEMAP_ENTRIES = 50000;
 const SITEMAP_BATCH_SIZE = 1000;
 
-function generateSitemapXml(entries: SitemapEntry[], baseUrl: string): string {
-	const urls = entries.map((entry) => {
-		let data = "<url>";
-		data += `<loc>${entry.loc.startsWith("http") ? entry.loc : baseUrl + entry.loc}</loc>`;
-		if (entry.lastmod) {
-			data += `<lastmod>${entry.lastmod.toISOString()}</lastmod>`;
-		}
-		data += "</url>";
-		return data;
-	});
-
-	return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join("")}</urlset>`;
-}
+type PaginationState = {
+	sitemap: Sitemap;
+	cursor: string | null;
+	done: boolean;
+};
 
 export async function GET(
 	_req: Request,
@@ -55,14 +40,14 @@ export async function GET(
 		const baseUrl = `https://${domain}${subpath ? `/${subpath}` : ""}`;
 
 		const initialState: PaginationState = {
-			entries: [],
+			sitemap: new Sitemap(baseUrl, "url"),
 			cursor: null,
 			done: false,
 		};
 
 		const finalState = yield* Effect.iterate(initialState, {
 			while: (state) =>
-				!state.done && state.entries.length < MAX_SITEMAP_ENTRIES,
+				!state.done && state.sitemap.entries.length < MAX_SITEMAP_ENTRIES,
 			body: (state) =>
 				Effect.gen(function* () {
 					const threads = yield* database.public.channels.getServerPageThreads(
@@ -76,44 +61,33 @@ export async function GET(
 						{ subscribe: false },
 					);
 
-					const remainingSlots = MAX_SITEMAP_ENTRIES - state.entries.length;
-					const newEntries = Arr.map(
-						Arr.take(threads.page, remainingSlots),
-						(thread) => ({
+					const remainingSlots =
+						MAX_SITEMAP_ENTRIES - state.sitemap.entries.length;
+
+					state.sitemap.addMany(
+						Arr.map(Arr.take(threads.page, remainingSlots), (thread) => ({
 							loc: `/m/${thread.thread.id}`,
-							lastmod: thread.thread._creationTime
-								? new Date(thread.thread._creationTime)
-								: undefined,
-						}),
+							lastmod: thread.thread.archivedTimestamp
+								? new Date(thread.thread.archivedTimestamp)
+								: getDate(thread.thread.id),
+							priority: 0.9,
+						})),
 					);
 
 					return {
-						entries: [...state.entries, ...newEntries],
+						sitemap: state.sitemap,
 						cursor: threads.continueCursor,
 						done: threads.isDone,
 					};
 				}),
 		});
 
-		return {
-			baseUrl,
-			entries: finalState.entries,
-		};
+		return finalState.sitemap;
 	}).pipe(runtime.runPromise);
 
 	if (!result) {
 		return new Response("Not Found", { status: 404 });
 	}
 
-	const xml = generateSitemapXml(result.entries, result.baseUrl);
-
-	return new Response(xml, {
-		headers: {
-			"Content-Type": "text/xml",
-			"Cache-Control": "public, s-maxage=21600, stale-while-revalidate=86400",
-			"CDN-Cache-Control": "max-age=43200",
-			"Vercel-CDN-Cache-Control": "max-age=86400",
-		},
-		status: 200,
-	});
+	return result.toResponse();
 }
