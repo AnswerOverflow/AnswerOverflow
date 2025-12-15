@@ -47,6 +47,7 @@
 		"@vercel/sdk": "^1.17.7",
 		"better-auth": "catalog:",
 		"@packages/confect": "workspace:*",
+		"ai": "^5.0.113",
 		"convex": "catalog:",
 		"convex-helpers": "^0.1.104",
 		"cookie": "^1.1.1",

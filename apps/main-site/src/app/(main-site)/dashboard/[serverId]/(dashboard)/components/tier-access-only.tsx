@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
+import { useAuthenticatedQuery } from "../../../../../../lib/use-authenticated-query";
 
 type Plan =
 	| "FREE"

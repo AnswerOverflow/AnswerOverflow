@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import type { DateRange } from "react-day-picker";
-import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
+import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
 
 function ChartWrapper(props: {
 	label: React.ReactNode;

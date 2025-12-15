@@ -1,0 +1,15 @@
+diff --git a/bin/cli.js b/bin/cli.js
+index 1234567..abcdefg 100644
+--- a/bin/cli.js
++++ b/bin/cli.js
+@@ -68,8 +68,8 @@ export const cli = ({ packageName = 'mint' }) => {
+             addLog(_jsx(ErrorLog, { message: "mint dev is not supported on node versions 25+. Please downgrade to an LTS node version." }));
+             yield terminate(1);
+         }
+-        if (majorVersion < 20 || (majorVersion === 20 && minorVersion < 17)) {
+-            addLog(_jsx(ErrorLog, { message: "mint dev is not supported on node versions below 20.17 Please upgrade to an LTS node version." }));
++        if (majorVersion < 18) {
++            addLog(_jsx(ErrorLog, { message: "mint dev is not supported on node versions below 18. Please upgrade to an LTS node version." }));
+             yield terminate(1);
+         }
+         const port = yield checkPort(argv);

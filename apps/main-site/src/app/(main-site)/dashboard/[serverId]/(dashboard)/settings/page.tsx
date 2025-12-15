@@ -15,7 +15,7 @@ import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
 import { useMutation } from "convex/react";
 import { useParams } from "next/navigation";
-import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
+import { useAuthenticatedQuery } from "../../../../../../lib/use-authenticated-query";
 import { TierAccessOnly } from "../components/tier-access-only";
 import { CurrentPlanCard } from "./components";
 

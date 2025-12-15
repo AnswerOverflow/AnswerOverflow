@@ -1,10 +1,11 @@
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
-import { getOneFrom } from "convex-helpers/server/relationships";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { internal } from "../_generated/api";
 import {
 	internalAction,
+	internalMutation,
 	internalQuery,
 	privateMutation,
 	privateQuery,
@@ -19,6 +20,98 @@ export type BrowsableServer = {
 	description: string | null;
 	approximateMemberCount: number;
 };
+
+export const hardDeleteServer = internalMutation({
+	args: {
+		discordId: v.int64(),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.discordId,
+		);
+		if (!server) {
+			return null;
+		}
+
+		const serverPreferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.discordId,
+		);
+		if (serverPreferences) {
+			await ctx.db.delete(serverPreferences._id);
+		}
+
+		const channels = await getManyFrom(
+			ctx.db,
+			"channels",
+			"by_serverId",
+			args.discordId,
+		);
+		for (const channel of channels) {
+			await ctx.db.delete(channel._id);
+		}
+
+		const channelSettings = await getManyFrom(
+			ctx.db,
+			"channelSettings",
+			"by_serverId",
+			args.discordId,
+		);
+		for (const settings of channelSettings) {
+			await ctx.db.delete(settings._id);
+		}
+
+		const userServerSettings = await getManyFrom(
+			ctx.db,
+			"userServerSettings",
+			"by_serverId",
+			args.discordId,
+		);
+		for (const uss of userServerSettings) {
+			await ctx.db.delete(uss._id);
+		}
+
+		const messages = await getManyFrom(
+			ctx.db,
+			"messages",
+			"by_serverId",
+			args.discordId,
+		);
+		for (const message of messages) {
+			const attachments = await getManyFrom(
+				ctx.db,
+				"attachments",
+				"by_messageId",
+				message.id,
+			);
+			for (const attachment of attachments) {
+				await ctx.db.delete(attachment._id);
+			}
+
+			const reactions = await getManyFrom(
+				ctx.db,
+				"reactions",
+				"by_messageId",
+				message.id,
+			);
+			for (const reaction of reactions) {
+				await ctx.db.delete(reaction._id);
+			}
+
+			await ctx.db.delete(message._id);
+		}
+
+		await ctx.db.delete(server._id);
+
+		return null;
+	},
+});
 
 export const upsertServer = privateMutation({
 	args: serverSchema,

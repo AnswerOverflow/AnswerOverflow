@@ -42,7 +42,7 @@ import {
 import { useParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import React from "react";
-import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
+import { useAuthenticatedQuery } from "../../../../../../lib/use-authenticated-query";
 
 function ToggleChannelFlag({
 	title,
