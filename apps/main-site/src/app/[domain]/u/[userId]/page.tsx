@@ -2,9 +2,10 @@ import { Database } from "@packages/database/database";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
-import { Effect } from "effect";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
+import { Effect, Option } from "effect";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
 	fetchUserPageHeaderData,
 	UserPageLoader,
@@ -22,12 +23,20 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const domain = decodeURIComponent(params.domain);
 
+	const parsed = parseSnowflakeId(params.userId);
+	if (Option.isNone(parsed)) {
+		return {};
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/u/${parsed.value.cleaned}`);
+	}
+
 	const tenantData = await Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.private.servers.getServerByDomain({ domain });
 	}).pipe(runtime.runPromise);
 
-	const headerData = await fetchUserPageHeaderData(BigInt(params.userId));
+	const headerData = await fetchUserPageHeaderData(parsed.value.id);
 	const userName = headerData?.user.name ?? "User";
 	const serverName = tenantData?.server?.name ?? "this community";
 	const userAvatar = headerData?.user
@@ -47,7 +56,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		customDomain: tenantData?.preferences?.customDomain,
 		subpath: tenantData?.preferences?.subpath,
 	};
-	const canonicalUrl = getTenantCanonicalUrl(tenant, `/u/${params.userId}`);
+	const canonicalUrl = getTenantCanonicalUrl(
+		tenant,
+		`/u/${parsed.value.cleaned}`,
+	);
 
 	return {
 		title,
@@ -75,6 +87,14 @@ export default async function TenantUserPage(props: Props) {
 	const searchParams = await props.searchParams;
 	const domain = decodeURIComponent(params.domain);
 
+	const parsed = parseSnowflakeId(params.userId);
+	if (Option.isNone(parsed)) {
+		return notFound();
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/u/${parsed.value.cleaned}`);
+	}
+
 	const tenantData = await Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.private.servers.getServerByDomain({ domain });
@@ -84,7 +104,7 @@ export default async function TenantUserPage(props: Props) {
 		return notFound();
 	}
 
-	const headerData = await fetchUserPageHeaderData(BigInt(params.userId));
+	const headerData = await fetchUserPageHeaderData(parsed.value.id);
 
 	if (!headerData) {
 		return notFound();
@@ -97,9 +117,9 @@ export default async function TenantUserPage(props: Props) {
 	return (
 		<UserPageLoader
 			headerData={headerData}
-			userId={params.userId}
+			userId={parsed.value.cleaned}
 			serverId={tenantData.server.discordId.toString()}
-			basePath={`/u/${params.userId}`}
+			basePath={`/u/${parsed.value.cleaned}`}
 			serverFilterLabel="Explore posts from servers"
 			cursor={cursor}
 		/>

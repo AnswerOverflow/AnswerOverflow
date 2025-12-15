@@ -2,8 +2,11 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Database } from "@packages/database/database";
 import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo";
-import { getSnowflakeUTCDate } from "@packages/ui/utils/snowflake";
-import { Effect } from "effect";
+import {
+	getSnowflakeUTCDate,
+	parseSnowflakeId,
+} from "@packages/ui/utils/snowflake";
+import { Effect, Option } from "effect";
 import { ImageResponse } from "next/og";
 import { runtime } from "../../../../lib/runtime";
 
@@ -104,10 +107,17 @@ export async function GET(req: Request) {
 		});
 	}
 
+	const parsed = parseSnowflakeId(id);
+	if (Option.isNone(parsed)) {
+		return new Response("Invalid ID", {
+			status: 400,
+		});
+	}
+
 	const data = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* database.private.messages.getMessagePageHeaderData({
-			messageId: BigInt(id),
+			messageId: parsed.value.id,
 		});
 		return liveData;
 	}).pipe(runtime.runPromise);

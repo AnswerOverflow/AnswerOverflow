@@ -1,7 +1,9 @@
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
+import { Option } from "effect";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
 	fetchUserPageHeaderData,
 	UserPageLoader,
@@ -17,7 +19,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	const searchParams = await props.searchParams;
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 
-	const headerData = await fetchUserPageHeaderData(BigInt(params.userId));
+	const parsed = parseSnowflakeId(params.userId);
+	if (Option.isNone(parsed)) {
+		return {};
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/u/${parsed.value.cleaned}`);
+	}
+
+	const headerData = await fetchUserPageHeaderData(parsed.value.id);
 	const userName = headerData?.user.name ?? "User";
 	const userAvatar = headerData?.user
 		? makeUserIconLink(
@@ -36,7 +46,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		title,
 		description,
 		alternates: {
-			canonical: `/u/${params.userId}`,
+			canonical: `/u/${parsed.value.cleaned}`,
 		},
 		robots: cursor ? "noindex, follow" : { index: false },
 		openGraph: {
@@ -57,7 +67,15 @@ export default async function UserPage(props: Props) {
 	const params = await props.params;
 	const searchParams = await props.searchParams;
 
-	const headerData = await fetchUserPageHeaderData(BigInt(params.userId));
+	const parsed = parseSnowflakeId(params.userId);
+	if (Option.isNone(parsed)) {
+		return notFound();
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/u/${parsed.value.cleaned}`);
+	}
+
+	const headerData = await fetchUserPageHeaderData(parsed.value.id);
 
 	if (!headerData) {
 		return notFound();
@@ -70,9 +88,9 @@ export default async function UserPage(props: Props) {
 	return (
 		<UserPageLoader
 			headerData={headerData}
-			userId={params.userId}
+			userId={parsed.value.cleaned}
 			serverId={searchParams.s}
-			basePath={`/u/${params.userId}`}
+			basePath={`/u/${parsed.value.cleaned}`}
 			serverFilterLabel="Explore posts from servers"
 			cursor={cursor}
 		/>

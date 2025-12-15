@@ -1,6 +1,7 @@
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
-import { Schema } from "effect";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
+import { Option } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import {
@@ -14,21 +15,20 @@ type Props = {
 	searchParams: Promise<{ cursor?: string; focus?: string }>;
 };
 
-function parseBigInt(value: string) {
-	return Schema.decodeUnknownOption(Schema.BigInt)(value);
-}
-
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const [params, searchParams] = await Promise.all([
 		props.params,
 		props.searchParams,
 	]);
-	const parsed = parseBigInt(params.messageId);
-	if (parsed._tag === "None") {
+	const parsed = parseSnowflakeId(params.messageId);
+	if (Option.isNone(parsed)) {
 		return notFound();
 	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/m/${parsed.value.cleaned}`);
+	}
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
-	const headerData = await fetchMessagePageHeaderData(parsed.value);
+	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
 	return generateMessagePageMetadata(headerData, params.messageId, cursor);
 }
 
@@ -37,12 +37,15 @@ export default async function Page(props: Props) {
 		props.params,
 		props.searchParams,
 	]);
-	const parsed = parseBigInt(params.messageId);
-	if (parsed._tag === "None") {
+	const parsed = parseSnowflakeId(params.messageId);
+	if (Option.isNone(parsed)) {
 		return notFound();
 	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/m/${parsed.value.cleaned}`);
+	}
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
-	const headerData = await fetchMessagePageHeaderData(parsed.value);
+	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
 
 	if (headerData?.server.customDomain) {
 		const customUrl = getServerCustomUrl(

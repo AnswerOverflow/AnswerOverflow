@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
 import { decodeCursor } from "@packages/ui/utils/cursor";
-import { Effect, Schema } from "effect";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
+import { Effect, Option } from "effect";
 import { notFound, redirect } from "next/navigation";
 import {
 	fetchMessagePageReplies,
@@ -16,10 +17,6 @@ type RouteParams = {
 	params: Promise<{ domain: string; messageId: string }>;
 };
 
-function parseBigInt(value: string) {
-	return Schema.decodeUnknownOption(Schema.BigInt)(value);
-}
-
 export async function GET(
 	request: Request,
 	{ params }: RouteParams,
@@ -27,9 +24,12 @@ export async function GET(
 	const { domain: encodedDomain, messageId } = await params;
 	const domain = decodeURIComponent(encodedDomain);
 
-	const parsed = parseBigInt(messageId);
-	if (parsed._tag === "None") {
+	const parsed = parseSnowflakeId(messageId);
+	if (Option.isNone(parsed)) {
 		notFound();
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/m/${parsed.value.cleaned}.md`);
 	}
 
 	const url = new URL(request.url);
@@ -42,7 +42,7 @@ export async function GET(
 			domain,
 		});
 		const header = yield* database.private.messages.getMessagePageHeaderData({
-			messageId: parsed.value,
+			messageId: parsed.value.id,
 		});
 		return [tenant, header] as const;
 	}).pipe(runtime.runPromise);
