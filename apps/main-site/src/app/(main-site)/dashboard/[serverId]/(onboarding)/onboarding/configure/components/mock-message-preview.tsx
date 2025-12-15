@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@packages/ui/components/button";
 import { Expand, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -63,6 +64,13 @@ export function FeaturePreviewPlaceholder({
 		[handleClose],
 	);
 
+	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
+			setIsOpen(true);
+		}
+	}, []);
+
 	if (videoUrl) {
 		return (
 			<>
@@ -77,6 +85,10 @@ export function FeaturePreviewPlaceholder({
 					<div
 						className="relative rounded-lg overflow-hidden border border-border cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98] group"
 						onClick={() => setIsOpen(true)}
+						onKeyDown={handleKeyDown}
+						role="button"
+						tabIndex={0}
+						aria-label="Expand video demo"
 					>
 						<video
 							src={videoUrl}
@@ -99,12 +111,15 @@ export function FeaturePreviewPlaceholder({
 						className={`fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 transition-opacity duration-150 ${isClosing ? "opacity-0" : "opacity-100"}`}
 						onClick={handleBackdropClick}
 					>
-						<button
+						<Button
 							onClick={handleClose}
 							className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10"
+							aria-label="Close video preview"
+							variant="ghost"
+							size="icon"
 						>
 							<X className="h-6 w-6" />
-						</button>
+						</Button>
 						<video
 							src={videoUrl}
 							width={1920}

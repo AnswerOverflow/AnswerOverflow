@@ -12,8 +12,13 @@ import { useWizard } from "../components/wizard-context";
 
 export default function CompletePage() {
 	const router = useRouter();
-	const { serverId, serverSettings, channelSettings, getIndexedChannels } =
-		useWizard();
+	const {
+		serverId,
+		serverSettings,
+		channelSettings,
+		getIndexedChannels,
+		getAllForumChannels,
+	} = useWizard();
 
 	const [isApplying, setIsApplying] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -23,6 +28,11 @@ export default function CompletePage() {
 	);
 
 	const indexedChannels = getIndexedChannels();
+	const forumChannels = getAllForumChannels();
+	const backHref =
+		forumChannels.length > 0
+			? `/dashboard/${serverId}/onboarding/configure/solved-tags`
+			: `/dashboard/${serverId}/onboarding/configure/solution-instructions`;
 
 	const handleApply = async () => {
 		setIsApplying(true);
@@ -39,9 +49,10 @@ export default function CompletePage() {
 						channelSettings.markSolutionEnabled.has(channelId),
 					sendMarkSolutionInstructionsInNewThreads:
 						channelSettings.solutionInstructionsEnabled.has(channelId),
-					solutionTagId: channelSettings.solvedTags.has(channelId)
-						? BigInt(channelSettings.solvedTags.get(channelId)!)
-						: undefined,
+					solutionTagId: (() => {
+						const tagIdStr = channelSettings.solvedTags.get(channelId);
+						return tagIdStr ? BigInt(tagIdStr) : undefined;
+					})(),
 				};
 			});
 
@@ -127,11 +138,7 @@ export default function CompletePage() {
 			<div className="flex items-center justify-between pt-3 sm:pt-4 mt-auto">
 				<Button
 					variant="ghost"
-					onClick={() =>
-						router.push(
-							`/dashboard/${serverId}/onboarding/configure/solved-tags`,
-						)
-					}
+					onClick={() => router.push(backHref)}
 					disabled={isApplying}
 				>
 					Back

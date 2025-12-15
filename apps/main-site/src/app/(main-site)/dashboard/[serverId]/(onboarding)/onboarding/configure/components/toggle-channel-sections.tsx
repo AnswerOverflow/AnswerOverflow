@@ -27,8 +27,16 @@ function ChannelItem({ channel, isSelected, onToggle }: ChannelItemProps) {
 
 	return (
 		<div
+			role="button"
+			tabIndex={0}
 			className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent/50 cursor-pointer transition-colors"
 			onClick={onToggle}
+			onKeyDown={(e) => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					onToggle();
+				}
+			}}
 		>
 			<Checkbox
 				checked={isSelected}
@@ -144,37 +152,5 @@ export function ChannelList({
 				)}
 			</div>
 		</div>
-	);
-}
-
-type ToggleChannelSectionsProps = {
-	enabledTitle: string;
-	availableTitle: string;
-	enabledChannels: Array<ChannelRecommendation>;
-	availableChannels: Array<ChannelRecommendation>;
-	selectedIds: Set<string>;
-	onToggle: (channelId: string) => void;
-	onSelectAll: (channelIds: Array<string>, enabled: boolean) => void;
-	showRecommendedBadge?: boolean;
-};
-
-export function ToggleChannelSections({
-	enabledChannels,
-	availableChannels,
-	selectedIds,
-	onToggle,
-	onSelectAll,
-}: ToggleChannelSectionsProps) {
-	const allChannels = useMemo(() => {
-		return [...enabledChannels, ...availableChannels];
-	}, [enabledChannels, availableChannels]);
-
-	return (
-		<ChannelList
-			channels={allChannels}
-			selectedIds={selectedIds}
-			onToggle={onToggle}
-			onSelectAll={onSelectAll}
-		/>
 	);
 }
