@@ -1,3 +1,4 @@
+import { makeUseQueryWithStatus } from "convex-helpers/react";
 import type {
 	PaginatedQueryArgs,
 	PaginatedQueryItem,
@@ -9,12 +10,14 @@ import type { FunctionReference } from "convex/server";
 import { convexToJson, type Value } from "convex/values";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+export const useQueryWithStatus = makeUseQueryWithStatus(useQueries);
+
 export const useStableQuery = ((name, ...args) => {
-	const result = useQuery(name, ...args);
-	const stored = useRef(result);
+	const result = useQueryWithStatus(name, ...args);
+	const stored = useRef(result?.data);
 
 	if (result !== undefined) {
-		stored.current = result;
+		stored.current = result?.data;
 	}
 
 	return stored.current;
