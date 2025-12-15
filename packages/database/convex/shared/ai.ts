@@ -12,7 +12,7 @@ export type TagInfo = {
 	name: string;
 };
 
-export async function detectHelpChannels(
+export async function detectPublicChannels(
 	channels: Array<ChannelInfo>,
 ): Promise<Array<string>> {
 	const channelList = channels
@@ -28,16 +28,27 @@ export async function detectHelpChannels(
 		schema: z.object({
 			channelIds: z.array(z.string()).describe("IDs of channels to index"),
 		}),
-		prompt: `You are analyzing Discord channel names for a developer community. Your task is to identify which channels are likely help/support channels that should be indexed for search engines.
+		prompt: `You are analyzing Discord channel names for a community server. Your task is to identify which channels would be good to make publicly indexable by search engines.
 
-Help channels typically have names containing words like: help, support, questions, faq, troubleshoot, assistance, ask, issues, bugs, debugging, general (when it's a forum), etc.
+Good candidates include:
+- Help/support channels (questions, faq, troubleshooting, etc.)
+- Discussion forums and general chat
+- Community content (fan art, creations, showcases)
+- Resource channels (guides, tutorials, tips)
 
-Forum channels (type 15) are particularly good candidates as they often contain Q&A style content.
+Forum channels (type 15) are particularly good candidates.
+
+Exclude channels that should stay private:
+- Admin/mod channels
+- Off-topic/random/memes (unless it's a main community channel)
+- Announcements-only channels
+- Voice channel text chats
+- Bot command channels
 
 Here are the channels:
 ${channelList}
 
-Return the IDs of channels that should be indexed. Be inclusive - if a channel might contain helpful content, include it. Exclude channels that are clearly not for help (like announcements-only, showcase, off-topic, memes, etc).`,
+Return the IDs of channels that would be good for public indexing.`,
 	});
 
 	return result.object.channelIds;
