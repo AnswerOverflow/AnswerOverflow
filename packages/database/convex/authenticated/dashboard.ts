@@ -10,7 +10,7 @@ import {
 } from "@packages/database/analytics/server/index";
 import { make } from "@packages/discord-api/generated";
 import { v } from "convex/values";
-import { Effect } from "effect";
+import { Cause, Effect, Runtime } from "effect";
 import { api, components, internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { authenticatedAction, internalAction } from "../client";
@@ -59,24 +59,97 @@ const discordApi = (token: string) =>
 		});
 	}).pipe(Effect.provide(FetchHttpClient.layer));
 
+function extractDiscordErrorInfo(error: unknown): {
+	status?: number;
+	message?: string;
+} {
+	if (Runtime.isFiberFailure(error)) {
+		const cause = error[Runtime.FiberFailureCauseId];
+		const failures = Cause.failures(cause);
+		for (const failure of failures) {
+			const info = extractDiscordErrorInfo(failure);
+			if (info.status || info.message) {
+				return info;
+			}
+		}
+	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"_tag" in error &&
+		"response" in error
+	) {
+		const clientError = error as {
+			_tag: string;
+			response: { status: number };
+			cause?: { message?: string };
+		};
+		return {
+			status: clientError.response?.status,
+			message: clientError.cause?.message ?? clientError._tag,
+		};
+	}
+	return {};
+}
+
 async function fetchGuildsWithToken(token: string) {
 	const program = Effect.gen(function* () {
 		const client = yield* discordApi(token);
 		return yield* client.listMyGuilds();
 	});
 
-	const guilds = await Effect.runPromise(program);
-
-	return guilds.map((guild) => ({
-		id: guild.id,
-		name: guild.name,
-		icon: guild.icon ?? null,
-		owner: guild.owner,
-		permissions: guild.permissions,
-	}));
+	try {
+		const guilds = await Effect.runPromise(program);
+		return guilds.map((guild) => ({
+			id: guild.id,
+			name: guild.name,
+			icon: guild.icon ?? null,
+			owner: guild.owner,
+			permissions: guild.permissions,
+		}));
+	} catch (error) {
+		const errorInfo = extractDiscordErrorInfo(error);
+		if (errorInfo.status) {
+			const newError = new Error(
+				`Discord API error (${errorInfo.status}): ${errorInfo.message ?? "Unknown error"}`,
+			);
+			(newError as Error & { discordStatus: number }).discordStatus =
+				errorInfo.status;
+			throw newError;
+		}
+		throw error;
+	}
 }
 
 function isDiscord401Error(error: unknown): boolean {
+	if (Runtime.isFiberFailure(error)) {
+		const cause = error[Runtime.FiberFailureCauseId];
+		const failures = Cause.failures(cause);
+		for (const failure of failures) {
+			if (isDiscord401Error(failure)) {
+				return true;
+			}
+		}
+	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"discordStatus" in error &&
+		(error as { discordStatus: number }).discordStatus === 401
+	) {
+		return true;
+	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"_tag" in error &&
+		"response" in error
+	) {
+		const clientError = error as { response: { status: number } };
+		if (clientError.response?.status === 401) {
+			return true;
+		}
+	}
 	if (error instanceof Error) {
 		const message = error.message;
 		return message.includes("401") || message.includes("Unauthorized");
