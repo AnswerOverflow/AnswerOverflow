@@ -185,7 +185,7 @@ export function ToggleChannelSections({
 	}
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+		<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 min-h-[400px]">
 			{hasEnabled && (
 				<ChannelSection
 					title={enabledTitle}

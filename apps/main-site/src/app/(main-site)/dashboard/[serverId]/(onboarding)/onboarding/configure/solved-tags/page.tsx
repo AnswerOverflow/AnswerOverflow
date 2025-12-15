@@ -40,7 +40,7 @@ export default function SolvedTagsPage() {
 				{hasEligibleForums ? (
 					<div className="space-y-6">
 						<FeaturePreviewPlaceholder feature="solved-tags" />
-						<div className="border-t pt-6 space-y-2">
+						<div className="border-t pt-6 space-y-2 min-h-[400px]">
 							{eligibleForums.map((channel) => {
 								const tags = channel.availableTags ?? [];
 								const currentTagId = channelSettings.solvedTags.get(

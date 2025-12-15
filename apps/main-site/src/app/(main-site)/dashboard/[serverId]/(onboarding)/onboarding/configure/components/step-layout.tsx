@@ -29,8 +29,8 @@ export function StepLayout({
 						{description}
 					</p>
 				</div>
-				<Card>
-					<CardContent className="py-8">
+				<Card className="p-0">
+					<CardContent className="px-3 py-4 sm:px-6 min-h-[400px] flex items-center justify-center">
 						<div className="flex flex-col items-center justify-center text-center">
 							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground mb-3" />
 							<p className="text-sm text-muted-foreground">
@@ -52,8 +52,8 @@ export function StepLayout({
 						{description}
 					</p>
 				</div>
-				<Card>
-					<CardContent className="py-8">
+				<Card className="p-0">
+					<CardContent className="px-3 py-4 sm:px-6 min-h-[400px] flex items-center justify-center">
 						<div className="flex flex-col items-center justify-center text-center">
 							<AlertCircle className="h-6 w-6 text-destructive mb-3" />
 							<p className="text-sm text-muted-foreground mb-4">{error}</p>
