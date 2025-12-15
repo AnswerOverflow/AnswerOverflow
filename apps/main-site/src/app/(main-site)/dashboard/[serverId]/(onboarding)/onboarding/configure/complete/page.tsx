@@ -2,12 +2,12 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { Button } from "@packages/ui/components/button";
-import { Card, CardContent } from "@packages/ui/components/card";
 import { useMutation } from "convex/react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { StepLayout } from "../components/step-layout";
+import { WizardCard } from "../components/wizard-card";
 import { useWizard } from "../components/wizard-context";
 
 export default function CompletePage() {
@@ -67,64 +67,62 @@ export default function CompletePage() {
 			title="Ready to Go!"
 			description="Review your configuration and apply it to start indexing your server."
 		>
-			<Card>
-				<CardContent className="pt-6">
-					<div className="space-y-4">
-						<div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
-							<CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-							<div>
-								<p className="font-medium">
-									{indexedChannels.length} channel
-									{indexedChannels.length !== 1 ? "s" : ""} will be indexed
-								</p>
-								<p className="text-sm text-muted-foreground mt-1">
-									{serverSettings.publicMessages
-										? "Messages will be publicly searchable"
-										: "Messages will be private"}
-									{serverSettings.anonymizeUsernames &&
-										" • Usernames will be anonymized"}
-								</p>
-							</div>
-						</div>
-
-						<div className="space-y-2">
-							<p className="text-sm font-medium text-muted-foreground">
-								Summary:
+			<WizardCard>
+				<div className="space-y-4">
+					<div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
+						<CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+						<div>
+							<p className="font-medium">
+								{indexedChannels.length} channel
+								{indexedChannels.length !== 1 ? "s" : ""} will be indexed
 							</p>
-							<ul className="text-sm space-y-1 text-muted-foreground">
-								<li>
-									• Auto-thread enabled on{" "}
-									{channelSettings.autoThreadEnabled.size} channel
-									{channelSettings.autoThreadEnabled.size !== 1 ? "s" : ""}
-								</li>
-								<li>
-									• Mark solution enabled on{" "}
-									{channelSettings.markSolutionEnabled.size} channel
-									{channelSettings.markSolutionEnabled.size !== 1 ? "s" : ""}
-								</li>
-								<li>
-									• Solution instructions on{" "}
-									{channelSettings.solutionInstructionsEnabled.size} channel
-									{channelSettings.solutionInstructionsEnabled.size !== 1
-										? "s"
-										: ""}
-								</li>
-								<li>
-									• Solved tags configured for {channelSettings.solvedTags.size}{" "}
-									forum
-									{channelSettings.solvedTags.size !== 1 ? "s" : ""}
-								</li>
-							</ul>
+							<p className="text-sm text-muted-foreground mt-1">
+								{serverSettings.publicMessages
+									? "Messages will be publicly searchable"
+									: "Messages will be private"}
+								{serverSettings.anonymizeUsernames &&
+									" • Usernames will be anonymized"}
+							</p>
 						</div>
-
-						{error && (
-							<div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
-								{error}
-							</div>
-						)}
 					</div>
-				</CardContent>
-			</Card>
+
+					<div className="space-y-2">
+						<p className="text-sm font-medium text-muted-foreground">
+							Summary:
+						</p>
+						<ul className="text-sm space-y-1 text-muted-foreground">
+							<li>
+								• Auto-thread enabled on{" "}
+								{channelSettings.autoThreadEnabled.size} channel
+								{channelSettings.autoThreadEnabled.size !== 1 ? "s" : ""}
+							</li>
+							<li>
+								• Mark solution enabled on{" "}
+								{channelSettings.markSolutionEnabled.size} channel
+								{channelSettings.markSolutionEnabled.size !== 1 ? "s" : ""}
+							</li>
+							<li>
+								• Solution instructions on{" "}
+								{channelSettings.solutionInstructionsEnabled.size} channel
+								{channelSettings.solutionInstructionsEnabled.size !== 1
+									? "s"
+									: ""}
+							</li>
+							<li>
+								• Solved tags configured for {channelSettings.solvedTags.size}{" "}
+								forum
+								{channelSettings.solvedTags.size !== 1 ? "s" : ""}
+							</li>
+						</ul>
+					</div>
+
+					{error && (
+						<div className="p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+							{error}
+						</div>
+					)}
+				</div>
+			</WizardCard>
 
 			<div className="flex items-center justify-between pt-4">
 				<Button

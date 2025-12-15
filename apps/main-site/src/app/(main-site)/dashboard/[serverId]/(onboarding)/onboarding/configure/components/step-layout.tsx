@@ -9,14 +9,20 @@ type StepLayoutProps = {
 	title: string;
 	description: string;
 	children: React.ReactNode;
+	requiresChannels?: boolean;
 };
 
-export function StepLayout({ title, description, children }: StepLayoutProps) {
+export function StepLayout({
+	title,
+	description,
+	children,
+	requiresChannels = true,
+}: StepLayoutProps) {
 	const { isLoading, error, reload } = useWizard();
 
-	if (isLoading) {
+	if (requiresChannels && isLoading) {
 		return (
-			<div className="w-full max-w-2xl mx-auto space-y-6">
+			<div className="w-full max-w-4xl mx-auto space-y-4">
 				<div>
 					<h1 className="text-2xl font-semibold">{title}</h1>
 					<p className="text-muted-foreground mt-1">{description}</p>
@@ -37,7 +43,7 @@ export function StepLayout({ title, description, children }: StepLayoutProps) {
 
 	if (error) {
 		return (
-			<div className="w-full max-w-2xl mx-auto space-y-6">
+			<div className="w-full max-w-4xl mx-auto space-y-4">
 				<div>
 					<h1 className="text-2xl font-semibold">{title}</h1>
 					<p className="text-muted-foreground mt-1">{description}</p>
@@ -58,7 +64,7 @@ export function StepLayout({ title, description, children }: StepLayoutProps) {
 	}
 
 	return (
-		<div className="w-full max-w-2xl mx-auto space-y-6">
+		<div className="w-full max-w-4xl mx-auto space-y-4">
 			<div>
 				<h1 className="text-2xl font-semibold">{title}</h1>
 				<p className="text-muted-foreground mt-1">{description}</p>
