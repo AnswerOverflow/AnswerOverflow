@@ -131,6 +131,7 @@ export const createAuth = (
 					}
 					return clientSecret;
 				})(),
+				scope: ["identify", "email", "guilds"],
 			},
 		},
 		plugins: [
