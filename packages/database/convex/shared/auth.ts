@@ -84,7 +84,7 @@ export async function getUserServerSettingsForServerByDiscordId(
 
 export type DiscordAccountToken = {
 	accountId: bigint;
-	accessToken: string;
+	accessToken: string | null;
 	refreshToken: string | null;
 	accessTokenExpiresAt: number | null;
 };
@@ -135,13 +135,16 @@ export async function getDiscordAccountWithToken(
 		!accountResult ||
 		typeof accountResult !== "object" ||
 		!("accountId" in accountResult) ||
-		typeof accountResult.accountId !== "string" ||
-		!("accessToken" in accountResult) ||
-		typeof accountResult.accessToken !== "string" ||
-		!accountResult.accessToken
+		typeof accountResult.accountId !== "string"
 	) {
 		return null;
 	}
+
+	const accessToken =
+		"accessToken" in accountResult &&
+		typeof accountResult.accessToken === "string"
+			? accountResult.accessToken
+			: null;
 
 	const refreshToken =
 		"refreshToken" in accountResult &&
@@ -157,18 +160,8 @@ export async function getDiscordAccountWithToken(
 
 	return {
 		accountId: BigInt(accountResult.accountId),
-		accessToken: accountResult.accessToken,
+		accessToken,
 		refreshToken,
 		accessTokenExpiresAt,
 	};
-}
-
-export async function requireAuth(
-	ctx: QueryCtx | MutationCtx | ActionCtx,
-): Promise<{ accountId: bigint; accessToken: string }> {
-	const account = await getDiscordAccountWithToken(ctx);
-	if (!account) {
-		throw new Error("Not authenticated");
-	}
-	return account;
 }
