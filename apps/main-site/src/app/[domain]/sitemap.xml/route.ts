@@ -8,7 +8,7 @@ import { runtime } from "../../../lib/runtime";
 export const maxDuration = 300;
 
 const MAX_SITEMAP_ENTRIES = 50000;
-const SITEMAP_BATCH_SIZE = 1000;
+const SITEMAP_BATCH_SIZE = 200;
 
 type PaginationState = {
 	sitemap: Sitemap;
