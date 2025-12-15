@@ -12,7 +12,7 @@ import {
 	type ReactNode,
 	useContext,
 	useMemo,
-	useState,
+	useRef,
 } from "react";
 import { getTenantCanonicalUrl, type TenantInfo } from "../utils/links";
 
@@ -53,10 +53,10 @@ function AuthClientProvider({
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
 }) {
-	const [authClient] = useState(() => createAuthClientWithBaseURL(tenant));
+	const authClient = useRef(createAuthClientWithBaseURL(tenant));
 	return (
-		<AuthClientContext.Provider value={authClient}>
-			<ConvexBetterAuthProvider client={convex} authClient={authClient}>
+		<AuthClientContext.Provider value={authClient.current}>
+			<ConvexBetterAuthProvider client={convex} authClient={authClient.current}>
 				{children}
 			</ConvexBetterAuthProvider>
 		</AuthClientContext.Provider>
