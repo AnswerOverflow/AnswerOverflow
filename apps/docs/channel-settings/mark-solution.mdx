@@ -1,3 +1,8 @@
+---
+title: Mark Solution
+description: Let users mark forum posts and threads as solved
+---
+
 ## Demo
 
 <iframe
@@ -8,29 +13,24 @@
   frameborder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
   allowfullscreen
->
-</iframe>
-
+/>
 
 ## What it does
 
-Allows users to mark their forum post or thread as solved. The following people are able to mark a post as solved:
+Lets users mark a message as the solution to their question. When someone marks a solution:
 
-- The original poster
-- Administrator
-- ManageChannels
-- ManageThreads
-- ManageGuild
-
-When a post is marked as solved:
-
-- A solved indicator is added to the post, either a specific tag if selected or a ✅ emoji
-- The Answer Overflow bot sends a message to the thread with a message containing a jump to the solution link
-- The message resolving the thread is reacted to with a ✅ emoji
+- The post gets a solved indicator (your configured tag or a ✅ emoji)
+- The bot sends a message with a link to jump to the solution
+- The solution message gets a ✅ reaction
 
 ![Automatic message sent by the Answer Overflow bot with a button to jump to the solution](/images/mark-solution-response-w-forum-post-guidelines.png)
 
-## Why you might want it
+## Who can mark solutions
 
-- Allows supporters to find questions that have not been answered yet
-- Solution message on Answer Overflow gets highlighted to make it easier to find
+- The original poster
+- Anyone with Administrator, Manage Channels, Manage Threads, or Manage Guild permissions
+
+## Why use it
+
+- Helpers can quickly find unanswered questions
+- Solutions get highlighted on Answer Overflow pages, making answers easy to find

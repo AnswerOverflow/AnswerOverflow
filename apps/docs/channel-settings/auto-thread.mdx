@@ -1,6 +1,9 @@
+---
+title: Auto Thread
+description: Automatically create threads for every message in a channel
+---
 
 ## Demo
-
 
 <iframe
   width="560"
@@ -10,30 +13,24 @@
   frameborder="0"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
   allowfullscreen
->
-</iframe>
+/>
 
 <TryLiveDemo />
 
-## Why auto thread is useful
+## What it does
 
-It's extremely hard to index content in a regular text channel with no threads as it lacks an indication of where the conversation starts and ends. Auto Thread creates a thread for every message in a channel, making it easier to keep discussions on track. You may want to use this in a channel where you want a lighter weight version of a forum channel.
+Auto Thread creates a thread for every message posted in a channel. Thread titles follow the format `[Nickname]-[Message Content...]` (up to 50 characters).
 
+This gives you a lightweight alternative to forum channels when you want threaded discussions without the full forum structure.
 
 <Note>
-	While Answer Overflow supports indexing threaded channels, we recommend using
-	[forum
-	channels](https://support.discord.com/hc/en-us/articles/6208479917079-Forum-Channels-FAQ)
-	instead as they are better suited for indexing.
+While Answer Overflow supports auto-threaded channels, [forum channels](https://support.discord.com/hc/en-us/articles/6208479917079-Forum-Channels-FAQ) are better suited for indexing and are the recommended choice.
 </Note>
 
-## How it works:
+## Why use it
 
-- When a user posts a message, the bot will automatically create a thread for that message
-- The thread name will be in the format of `[Nickname]-[Message Content...]` to a length of 50 characters for the title
+Regular text channels are hard to index because there's no clear boundary between conversations. Auto Thread solves this by giving each discussion its own thread.
 
-## Recommendations:
+## Tips
 
-To get the most out of this feature, we recommend:
-
-- Set [slow mode](https://support.discord.com/hc/en-us/articles/360016150952-Slowmode-Slllooowwwiiinng-down-your-channel) to at least 1 minute to prevent users from spamming threads
+Set [slow mode](https://support.discord.com/hc/en-us/articles/360016150952-Slowmode-Slllooowwwiiinng-down-your-channel) to at least 1 minute to prevent thread spam.
