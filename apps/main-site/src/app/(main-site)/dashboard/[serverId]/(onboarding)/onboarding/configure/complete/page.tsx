@@ -41,6 +41,7 @@ export default function CompletePage() {
 		try {
 			const channelConfigurations = indexedChannels.map((channel) => {
 				const channelId = channel.id.toString();
+				const tagIdStr = channelSettings.solvedTags.get(channelId);
 				return {
 					channelId: channel.id,
 					indexingEnabled: true,
@@ -49,10 +50,8 @@ export default function CompletePage() {
 						channelSettings.markSolutionEnabled.has(channelId),
 					sendMarkSolutionInstructionsInNewThreads:
 						channelSettings.solutionInstructionsEnabled.has(channelId),
-					solutionTagId: (() => {
-						const tagIdStr = channelSettings.solvedTags.get(channelId);
-						return tagIdStr ? BigInt(tagIdStr) : undefined;
-					})(),
+					forumGuidelinesConsentEnabled: false,
+					solutionTagId: tagIdStr ? BigInt(tagIdStr) : undefined,
 				};
 			});
 
