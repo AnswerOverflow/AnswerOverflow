@@ -128,7 +128,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
 				const db = yield* Database;
-				db.private.servers.updateServer({
+				yield* db.private.servers.updateServer({
 					serverId: BigInt(guild.id),
 					server: {
 						kickedTime: Date.now(),
