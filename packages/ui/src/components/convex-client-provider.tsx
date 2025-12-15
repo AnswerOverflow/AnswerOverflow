@@ -7,13 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { anonymousClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
-import {
-	createContext,
-	type ReactNode,
-	useContext,
-	useMemo,
-	useRef,
-} from "react";
+import { createContext, type ReactNode, useContext, useMemo } from "react";
 import { getTenantCanonicalUrl, type TenantInfo } from "../utils/links";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
@@ -45,7 +39,7 @@ function createAuthClientWithBaseURL(tenant: TenantInfo | null | undefined) {
 type AuthClient = ReturnType<typeof createAuthClientWithBaseURL>;
 
 const AuthClientContext = createContext<AuthClient | null>(null);
-
+const authClient = createAuthClientWithBaseURL(null);
 function AuthClientProvider({
 	children,
 	tenant,
@@ -53,10 +47,10 @@ function AuthClientProvider({
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
 }) {
-	const authClient = useRef(createAuthClientWithBaseURL(tenant));
+	// const [authClient] = useState(() => createAuthClientWithBaseURL(tenant));
 	return (
-		<AuthClientContext.Provider value={authClient.current}>
-			<ConvexBetterAuthProvider client={convex} authClient={authClient.current}>
+		<AuthClientContext.Provider value={authClient}>
+			<ConvexBetterAuthProvider client={convex} authClient={authClient}>
 				{children}
 			</ConvexBetterAuthProvider>
 		</AuthClientContext.Provider>

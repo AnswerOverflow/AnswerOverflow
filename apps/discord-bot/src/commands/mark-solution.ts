@@ -206,6 +206,11 @@ export function handleMarkSolutionCommand(
 			ignoreChecks: false,
 		});
 
+		yield* database.private.messages.markMessageAsSolution({
+			solutionMessageId: BigInt(targetMessage.id),
+			questionMessageId: BigInt(questionMessage.id),
+		});
+
 		yield* Effect.gen(function* () {
 			const solutionTagId = channelSettings?.flags?.solutionTagId;
 			const PUBG_MOBILE_SERVER_ID = "393088095840370689";
