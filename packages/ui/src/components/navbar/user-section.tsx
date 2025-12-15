@@ -7,8 +7,10 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "../dropdown-menu";
+import { Link } from "../link";
 import { LinkButton } from "../link-button";
 import { Skeleton } from "../skeleton";
 
@@ -34,9 +36,11 @@ export interface UserSectionProps {
 function UserAvatar({
 	user,
 	onSignOut,
+	showDashboardLink,
 }: {
 	user: User;
 	onSignOut?: () => void | Promise<void>;
+	showDashboardLink?: boolean;
 }) {
 	return (
 		<DropdownMenu modal={false}>
@@ -50,6 +54,14 @@ function UserAvatar({
 				</Avatar>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="z-[100] mr-4 mt-4 w-32">
+				{showDashboardLink && (
+					<>
+						<DropdownMenuItem asChild className="md:hidden">
+							<Link href="/dashboard">Dashboard</Link>
+						</DropdownMenuItem>
+						<DropdownMenuSeparator className="md:hidden" />
+					</>
+				)}
 				<DropdownMenuItem
 					onClick={() => {
 						if (onSignOut) {
@@ -156,11 +168,19 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 	return (
 		<>
 			{!isOnDashboard && (
-				<LinkButton variant="outline" href="/dashboard">
+				<LinkButton
+					variant="outline"
+					href="/dashboard"
+					className="hidden md:flex"
+				>
 					Dashboard
 				</LinkButton>
 			)}
-			<UserAvatar user={user} onSignOut={handleSignOut} />
+			<UserAvatar
+				user={user}
+				onSignOut={handleSignOut}
+				showDashboardLink={!isOnDashboard}
+			/>
 		</>
 	);
 }
