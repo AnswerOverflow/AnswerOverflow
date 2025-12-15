@@ -41,17 +41,8 @@ export const applyRecommendedConfiguration = guildManagerMutation({
 
 		for (const config of args.channelConfigurations) {
 			try {
-				await upsertChannelSettingsLogic(ctx, config.channelId, {
-					indexingEnabled: config.indexingEnabled,
-					markSolutionEnabled: config.markSolutionEnabled,
-					sendMarkSolutionInstructionsInNewThreads:
-						config.sendMarkSolutionInstructionsInNewThreads,
-					autoThreadEnabled: config.autoThreadEnabled ?? false,
-					solutionTagId: config.solutionTagId,
-				});
-			} catch {
-				continue;
-			}
+				await upsertChannelSettingsLogic(ctx, config.channelId, config);
+			} catch {}
 		}
 
 		return { success: true };

@@ -78,7 +78,12 @@ export async function getServerByDiscordId(
 	ctx: QueryCtx | MutationCtx,
 	discordId: bigint,
 ) {
-	return await getOneFrom(ctx.db, "servers", "by_discordId", discordId);
+	const server = await getOneFrom(ctx.db, "servers", "by_discordId", discordId);
+	if (!server || server.kickedTime) {
+		return null;
+	}
+
+	return server;
 }
 
 export async function upsertServerPreferencesLogic(

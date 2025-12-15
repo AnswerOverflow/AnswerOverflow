@@ -50,7 +50,6 @@ export default function CompletePage() {
 						channelSettings.markSolutionEnabled.has(channelId),
 					sendMarkSolutionInstructionsInNewThreads:
 						channelSettings.solutionInstructionsEnabled.has(channelId),
-					forumGuidelinesConsentEnabled: false,
 					solutionTagId: tagIdStr ? BigInt(tagIdStr) : undefined,
 				};
 			});
