@@ -57,6 +57,7 @@ import type * as shared_shared from "../shared/shared.js";
 import type * as shared_similarThreads from "../shared/similarThreads.js";
 import type * as shared_stripe from "../shared/stripe.js";
 import type * as shared_users from "../shared/users.js";
+import type * as shared_validators from "../shared/validators.js";
 import type * as stripe_internal from "../stripe/internal.js";
 
 import type {
@@ -115,6 +116,7 @@ declare const fullApi: ApiFromModules<{
   "shared/similarThreads": typeof shared_similarThreads;
   "shared/stripe": typeof shared_stripe;
   "shared/users": typeof shared_users;
+  "shared/validators": typeof shared_validators;
   "stripe/internal": typeof stripe_internal;
 }>;
 
