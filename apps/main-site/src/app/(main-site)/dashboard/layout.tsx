@@ -2,6 +2,7 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { SessionRecording } from "@packages/ui/analytics/client";
+import { useSession } from "@packages/ui/components/convex-client-provider";
 import {
 	DashboardNavbar,
 	type ServerSelectServer,
@@ -15,8 +16,10 @@ export default function DashboardLayout({
 	children: React.ReactNode;
 }) {
 	const pathname = usePathname();
+	const { data: session, isPending } = useSession({ allowAnonymous: false });
 
 	const isOnboardingPage = pathname === "/dashboard/onboarding";
+	const isDashboardRoot = pathname === "/dashboard";
 	const serverIdMatch = pathname?.match(/^\/dashboard\/([^/]+)/);
 	const serverId =
 		serverIdMatch && !isOnboardingPage
@@ -49,6 +52,18 @@ export default function DashboardLayout({
 					isLoading: servers === undefined,
 				}
 			: undefined;
+
+	const isSignedOut = !isPending && !session?.user;
+	const hideNavbar = isDashboardRoot && isSignedOut;
+
+	if (hideNavbar) {
+		return (
+			<>
+				<SessionRecording />
+				{children}
+			</>
+		);
+	}
 
 	return (
 		<DashboardNavbar serverSelect={serverSelectProps}>
