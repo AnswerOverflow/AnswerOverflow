@@ -8,7 +8,6 @@ export class DiscordTokenError extends Error {
 	constructor(
 		message: string,
 		public readonly code:
-			| "TOKEN_EXPIRED"
 			| "REFRESH_FAILED"
 			| "NO_REFRESH_TOKEN"
 			| "REAUTH_REQUIRED",
