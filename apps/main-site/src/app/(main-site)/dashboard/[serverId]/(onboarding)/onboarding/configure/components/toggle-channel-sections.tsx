@@ -3,7 +3,7 @@
 import { Checkbox } from "@packages/ui/components/checkbox";
 import { Input } from "@packages/ui/components/input";
 import { Hash, Megaphone, MessageSquare, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { ChannelRecommendation } from "./wizard-context";
 
 const CHANNEL_TYPE_FORUM = 15;
@@ -57,6 +57,8 @@ export function ChannelList({
 	const [searchQuery, setSearchQuery] = useState("");
 	const showSearch = channels.length >= SEARCH_THRESHOLD;
 
+	const initialSelectedIdsRef = useRef(selectedIds);
+
 	const sortedChannels = useMemo(() => {
 		const filtered = searchQuery
 			? channels.filter((c) =>
@@ -64,14 +66,15 @@ export function ChannelList({
 				)
 			: channels;
 
+		const initialSelected = initialSelectedIdsRef.current;
 		return [...filtered].sort((a, b) => {
-			const aSelected = selectedIds.has(a.id.toString());
-			const bSelected = selectedIds.has(b.id.toString());
+			const aSelected = initialSelected.has(a.id.toString());
+			const bSelected = initialSelected.has(b.id.toString());
 			if (aSelected && !bSelected) return -1;
 			if (!aSelected && bSelected) return 1;
 			return 0;
 		});
-	}, [channels, selectedIds, searchQuery]);
+	}, [channels, searchQuery]);
 
 	const allSelected =
 		sortedChannels.length > 0 &&
