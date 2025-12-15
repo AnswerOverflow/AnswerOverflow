@@ -270,40 +270,60 @@ export function MessagePage(props: {
 		return `${baseUrl}/m/${canonicalId}`;
 	};
 
-	const jsonLdData = {
-		"@context": "https://schema.org",
-		"@type": "DiscussionForumPosting",
-		url: getSchemaUrl(),
-		author: firstMessage?.author
-			? {
-					"@type": "Person",
-					name: firstMessage.author.name,
-					identifier: firstMessage.author.id.toString(),
-					url: `/u/${firstMessage.author.id.toString()}`,
-				}
-			: undefined,
-		image: firstMessageMedia?.url ? firstMessageMedia.url : undefined,
-		headline: title,
-		articleBody: rootMessageDeleted
-			? "Original message was deleted"
-			: firstMessage?.message.content,
-		datePublished: firstMessage
-			? getDate(firstMessage.message.id).toISOString()
-			: undefined,
-		dateModified: headerData.thread?.archivedTimestamp
-			? new Date(Number(headerData.thread.archivedTimestamp)).toISOString()
-			: undefined,
-		identifier: (
-			headerData.thread?.id ??
-			firstMessage?.message.id ??
-			headerData.canonicalId
-		).toString(),
+	const getTextContent = () => {
+		if (rootMessageDeleted) {
+			return undefined;
+		}
+		const content = firstMessage?.message.content;
+		if (content && content.trim().length > 0) {
+			return content;
+		}
+		return undefined;
 	};
+
+	const textContent = getTextContent();
+	const hasImage = Boolean(firstMessageMedia?.url);
+	const hasValidContent = Boolean(textContent) || hasImage;
+	const hasAuthor = Boolean(firstMessage?.author);
+	const canRenderJsonLd = hasValidContent && hasAuthor;
+
+	const jsonLdData =
+		canRenderJsonLd && firstMessage?.author
+			? {
+					"@context": "https://schema.org",
+					"@type": "DiscussionForumPosting",
+					url: getSchemaUrl(),
+					author: {
+						"@type": "Person",
+						name: firstMessage.author.name,
+						identifier: firstMessage.author.id.toString(),
+						url: `/u/${firstMessage.author.id.toString()}`,
+					},
+					image: firstMessageMedia?.url ? firstMessageMedia.url : undefined,
+					headline: title,
+					text: textContent,
+					datePublished: headerData.thread
+						? getDate(headerData.thread.id).toISOString()
+						: getDate(firstMessage.message.id).toISOString(),
+					dateModified: headerData.thread?.archivedTimestamp
+						? new Date(
+								Number(headerData.thread.archivedTimestamp),
+							).toISOString()
+						: undefined,
+					identifier: (
+						headerData.thread?.id ??
+						firstMessage?.message.id ??
+						headerData.canonicalId
+					).toString(),
+				}
+			: null;
 
 	return (
 		<MessageResultPageProvider>
 			<div className="mx-auto pt-2">
-				<JsonLdScript data={jsonLdData} scriptKey="message-jsonld" />
+				{jsonLdData && (
+					<JsonLdScript data={jsonLdData} scriptKey="message-jsonld" />
+				)}
 
 				<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
 					<main className="flex w-full max-w-3xl grow flex-col gap-4">
