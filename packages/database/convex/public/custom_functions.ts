@@ -80,7 +80,7 @@ export const publicQuery = customQuery(query, {
 			ctx,
 			args: {
 				...args,
-				rateLimitKey: "testing",
+				rateLimitKey,
 				discordAccountId,
 				anonymousSessionId,
 				type: identityType,
