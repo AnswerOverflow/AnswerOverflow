@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@packages/ui/components/card";
 import {
 	Select,
 	SelectContent,
@@ -9,7 +8,9 @@ import {
 	SelectValue,
 } from "@packages/ui/components/select";
 import { MessageSquare } from "lucide-react";
+import { FeaturePreviewPlaceholder } from "../components/mock-message-preview";
 import { StepLayout } from "../components/step-layout";
+import { WizardCard } from "../components/wizard-card";
 import { WizardNav } from "../components/wizard-nav";
 import { useWizard } from "../components/wizard-context";
 
@@ -35,10 +36,11 @@ export default function SolvedTagsPage() {
 			title="Solved Tags"
 			description="For forum channels, you can automatically apply a tag when a question is marked as solved. This makes it easy to see which posts have answers."
 		>
-			<Card>
-				<CardContent className="pt-6">
-					{hasEligibleForums ? (
-						<div className="space-y-4">
+			<WizardCard>
+				{hasEligibleForums ? (
+					<div className="space-y-6">
+						<FeaturePreviewPlaceholder feature="solved-tags" />
+						<div className="border-t pt-6 space-y-2">
 							{eligibleForums.map((channel) => {
 								const tags = channel.availableTags ?? [];
 								const currentTagId = channelSettings.solvedTags.get(
@@ -48,7 +50,7 @@ export default function SolvedTagsPage() {
 								return (
 									<div
 										key={channel.id.toString()}
-										className="flex items-center justify-between gap-4 p-4 border rounded-lg"
+										className="flex items-center justify-between gap-4 p-3 border rounded-lg"
 									>
 										<div className="flex items-center gap-3 min-w-0">
 											<MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -90,16 +92,16 @@ export default function SolvedTagsPage() {
 								);
 							})}
 						</div>
-					) : (
-						<div className="text-center py-8 text-muted-foreground">
-							<p>No forum channels with mark solution enabled.</p>
-							<p className="text-sm mt-2">
-								Solved tags are only available for forum channels.
-							</p>
-						</div>
-					)}
-				</CardContent>
-			</Card>
+					</div>
+				) : (
+					<div className="text-center py-8 text-muted-foreground">
+						<p>No forum channels with mark solution enabled.</p>
+						<p className="text-sm mt-2">
+							Solved tags are only available for forum channels.
+						</p>
+					</div>
+				)}
+			</WizardCard>
 
 			<WizardNav
 				backHref={`/dashboard/${serverId}/onboarding/configure/solution-instructions`}

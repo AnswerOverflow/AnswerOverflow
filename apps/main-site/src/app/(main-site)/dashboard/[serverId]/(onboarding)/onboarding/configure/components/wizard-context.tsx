@@ -59,6 +59,8 @@ type WizardContextValue = WizardState & {
 	getIndexedChannels: () => Array<ChannelRecommendation>;
 	getNonForumIndexedChannels: () => Array<ChannelRecommendation>;
 	getForumIndexedChannels: () => Array<ChannelRecommendation>;
+	getAllNonForumChannels: () => Array<ChannelRecommendation>;
+	getAllForumChannels: () => Array<ChannelRecommendation>;
 	getMarkSolutionChannels: () => Array<ChannelRecommendation>;
 	reload: () => Promise<void>;
 };
@@ -266,6 +268,14 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 		return getIndexedChannels().filter((c) => c.type === CHANNEL_TYPE_FORUM);
 	}, [getIndexedChannels]);
 
+	const getAllNonForumChannels = useCallback(() => {
+		return state.channels.filter((c) => c.type !== CHANNEL_TYPE_FORUM);
+	}, [state.channels]);
+
+	const getAllForumChannels = useCallback(() => {
+		return state.channels.filter((c) => c.type === CHANNEL_TYPE_FORUM);
+	}, [state.channels]);
+
 	const getMarkSolutionChannels = useCallback(() => {
 		return state.channels.filter((c) =>
 			state.channelSettings.markSolutionEnabled.has(c.id.toString()),
@@ -282,6 +292,8 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 		getIndexedChannels,
 		getNonForumIndexedChannels,
 		getForumIndexedChannels,
+		getAllNonForumChannels,
+		getAllForumChannels,
 		getMarkSolutionChannels,
 		reload: loadConfiguration,
 	};

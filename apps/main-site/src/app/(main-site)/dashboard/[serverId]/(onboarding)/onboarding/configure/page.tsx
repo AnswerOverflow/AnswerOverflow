@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardContent } from "@packages/ui/components/card";
 import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
 import { StepLayout } from "./components/step-layout";
+import { WizardCard } from "./components/wizard-card";
 import { WizardNav } from "./components/wizard-nav";
 import { useWizard } from "./components/wizard-context";
 
@@ -14,10 +14,11 @@ export default function ServerSettingsPage() {
 		<StepLayout
 			title="Server Settings"
 			description="Configure how your server's content appears on the web."
+			requiresChannels={false}
 		>
-			<Card>
-				<CardContent className="pt-6 space-y-6">
-					<div className="flex items-start justify-between gap-4">
+			<WizardCard>
+				<div className="space-y-4">
+					<div className="flex justify-between gap-4">
 						<div className="space-y-1">
 							<Label
 								htmlFor="public-messages"
@@ -37,9 +38,10 @@ export default function ServerSettingsPage() {
 							onCheckedChange={(checked) =>
 								setServerSettings({ publicMessages: checked })
 							}
+							className="mt-1"
 						/>
 					</div>
-					<div className="flex items-start justify-between gap-4">
+					<div className="flex justify-between gap-4">
 						<div className="space-y-1">
 							<Label
 								htmlFor="anonymize-usernames"
@@ -59,10 +61,11 @@ export default function ServerSettingsPage() {
 							onCheckedChange={(checked) =>
 								setServerSettings({ anonymizeUsernames: checked })
 							}
+							className="mt-1"
 						/>
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</WizardCard>
 
 			<WizardNav
 				backHref={`/dashboard/${serverId}/onboarding`}
