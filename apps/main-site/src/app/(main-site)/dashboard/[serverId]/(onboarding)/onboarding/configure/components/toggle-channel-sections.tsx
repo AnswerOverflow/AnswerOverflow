@@ -129,7 +129,7 @@ function ChannelSection({
 				</span>
 			</div>
 
-			<div className="max-h-[300px] overflow-y-auto space-y-1 pt-1">
+			<div className="max-h-[250px] sm:max-h-[300px] overflow-y-auto space-y-1 pt-1">
 				{filteredChannels.length === 0 ? (
 					<div className="text-center py-4 text-sm text-muted-foreground">
 						{searchQuery
@@ -185,7 +185,7 @@ export function ToggleChannelSections({
 	}
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+		<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
 			{hasEnabled && (
 				<ChannelSection
 					title={enabledTitle}
