@@ -445,6 +445,30 @@ export const updateEmbedS3Key = privateMutation({
 	},
 });
 
+export const markMessageAsSolution = privateMutation({
+	args: {
+		solutionMessageId: v.int64(),
+		questionMessageId: v.int64(),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const solutionMessage = await getOneFrom(
+			ctx.db,
+			"messages",
+			"by_messageId",
+			args.solutionMessageId,
+			"id",
+		);
+		if (!solutionMessage) {
+			throw new Error("Solution message not found");
+		}
+		await ctx.db.patch(solutionMessage._id, {
+			questionId: args.questionMessageId,
+		});
+		return null;
+	},
+});
+
 export const getMessagePageHeaderData = privateQuery({
 	args: {
 		messageId: v.int64(),
