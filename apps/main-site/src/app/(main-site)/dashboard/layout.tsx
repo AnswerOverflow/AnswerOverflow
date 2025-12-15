@@ -18,15 +18,11 @@ export default function DashboardLayout({
 	const pathname = usePathname();
 	const { data: session, isPending } = useSession({ allowAnonymous: false });
 
-	const isOnboardingPage = pathname?.includes("/onboarding");
 	const isDashboardRoot = pathname === "/dashboard";
 	const serverIdMatch = pathname?.match(/^\/dashboard\/([^/]+)/);
-	const serverId =
-		serverIdMatch && !isOnboardingPage
-			? (serverIdMatch[1] as string)
-			: undefined;
+	const serverId = serverIdMatch ? (serverIdMatch[1] as string) : undefined;
 
-	const shouldShowServerSelect = serverId !== undefined && !isOnboardingPage;
+	const shouldShowServerSelect = serverId !== undefined;
 
 	const servers = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getUserServersForDropdown,

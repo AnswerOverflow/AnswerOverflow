@@ -11,6 +11,7 @@ export const applyRecommendedConfiguration = guildManagerMutation({
 				indexingEnabled: v.boolean(),
 				markSolutionEnabled: v.boolean(),
 				sendMarkSolutionInstructionsInNewThreads: v.boolean(),
+				autoThreadEnabled: v.optional(v.boolean()),
 				solutionTagId: v.optional(v.int64()),
 			}),
 		),
@@ -78,7 +79,7 @@ export const applyRecommendedConfiguration = guildManagerMutation({
 					markSolutionEnabled: config.markSolutionEnabled,
 					sendMarkSolutionInstructionsInNewThreads:
 						config.sendMarkSolutionInstructionsInNewThreads,
-					autoThreadEnabled: false,
+					autoThreadEnabled: config.autoThreadEnabled ?? false,
 					forumGuidelinesConsentEnabled: false,
 					solutionTagId: config.solutionTagId,
 				});
@@ -88,6 +89,7 @@ export const applyRecommendedConfiguration = guildManagerMutation({
 					markSolutionEnabled: config.markSolutionEnabled,
 					sendMarkSolutionInstructionsInNewThreads:
 						config.sendMarkSolutionInstructionsInNewThreads,
+					autoThreadEnabled: config.autoThreadEnabled ?? false,
 					solutionTagId: config.solutionTagId,
 					serverId: channel.serverId,
 				});

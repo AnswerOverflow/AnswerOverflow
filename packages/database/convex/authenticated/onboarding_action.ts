@@ -5,7 +5,7 @@ import type { Doc } from "../_generated/dataModel";
 import { guildManagerAction } from "../client/guildManager";
 import {
 	type ChannelInfo,
-	detectHelpChannels,
+	detectPublicChannels,
 	detectSolvedTag,
 	type TagInfo,
 } from "../shared/ai";
@@ -22,11 +22,13 @@ type ChannelRecommendation = {
 	name: string;
 	type: number;
 	shouldIndex: boolean;
+	availableTags?: Array<{ id: bigint; name: string }>;
 	recommendedSettings: {
 		indexingEnabled: boolean;
 		markSolutionEnabled: boolean;
 		sendMarkSolutionInstructionsInNewThreads: boolean;
 		solutionTagId?: bigint;
+		solutionTagName?: string;
 	};
 };
 
@@ -102,12 +104,12 @@ export const getRecommendedConfiguration = guildManagerAction({
 		let errorMessage: string | undefined;
 
 		try {
-			recommendedChannelIds = await detectHelpChannels(channelsForAI);
+			recommendedChannelIds = await detectPublicChannels(channelsForAI);
 		} catch (error) {
-			console.error("Failed to detect help channels:", error);
+			console.error("Failed to detect public channels:", error);
 			detectionSuccessful = false;
 			errorMessage =
-				"Failed to auto-detect help channels. Please configure manually.";
+				"Failed to auto-detect channels. Please configure manually.";
 		}
 
 		const recommendedIdSet = new Set(recommendedChannelIds);
@@ -118,7 +120,10 @@ export const getRecommendedConfiguration = guildManagerAction({
 				recommendedIdSet.has(c.id.toString()),
 		);
 
-		const solutionTagMap = new Map<string, bigint | null>();
+		const solutionTagMap = new Map<
+			string,
+			{ id: bigint; name: string } | null
+		>();
 
 		if (detectionSuccessful) {
 			for (const channel of forumChannels) {
@@ -132,7 +137,14 @@ export const getRecommendedConfiguration = guildManagerAction({
 						);
 						const solvedTagId = await detectSolvedTag(channel.name, tags);
 						if (solvedTagId) {
-							solutionTagMap.set(channel.id.toString(), BigInt(solvedTagId));
+							const tagName =
+								channel.availableTags.find(
+									(t) => t.id.toString() === solvedTagId,
+								)?.name ?? "Solved";
+							solutionTagMap.set(channel.id.toString(), {
+								id: BigInt(solvedTagId),
+								name: tagName,
+							});
 						}
 					} catch (error) {
 						console.error(
@@ -147,18 +159,23 @@ export const getRecommendedConfiguration = guildManagerAction({
 		const channelRecommendations: Array<ChannelRecommendation> =
 			rootChannels.map((channel: ChannelWithFlags) => {
 				const shouldIndex = recommendedIdSet.has(channel.id.toString());
-				const solutionTagId = solutionTagMap.get(channel.id.toString());
+				const solutionTag = solutionTagMap.get(channel.id.toString());
 
 				return {
 					id: channel.id,
 					name: channel.name,
 					type: channel.type,
 					shouldIndex,
+					availableTags: channel.availableTags?.map((t) => ({
+						id: t.id,
+						name: t.name,
+					})),
 					recommendedSettings: {
 						indexingEnabled: shouldIndex,
 						markSolutionEnabled: shouldIndex,
 						sendMarkSolutionInstructionsInNewThreads: shouldIndex,
-						solutionTagId: solutionTagId ?? undefined,
+						solutionTagId: solutionTag?.id,
+						solutionTagName: solutionTag?.name,
 					},
 				};
 			});
