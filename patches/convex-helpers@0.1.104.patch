@@ -1,0 +1,26 @@
+diff --git a/react.js b/react.js
+index 9a4d734b50a6e46ac8018d9df893da7b1b93178d..7fc63bb43d45ebb3c718615d87231922608e6b2e 100644
+--- a/react.js
++++ b/react.js
+@@ -91,7 +91,7 @@ export function makeUseQueryWithStatus(useQueriesHook) {
+                     args,
+                 },
+             };
+-        }, [getFunctionName(query), JSON.stringify(args)]);
++        }, [getFunctionName(query), JSON.stringify(convexToJson(args))]);
+         const result = useQueriesHook(queries);
+         if (args === "skip") {
+             return {
+diff --git a/react.ts b/react.ts
+index 3789516389f3f3bde5ecc27e0f4d9ae75697dc09..7149cf6e60f7ac93fe10043e14cd9a952a34cd8d 100644
+--- a/react.ts
++++ b/react.ts
+@@ -139,7 +139,7 @@ export function makeUseQueryWithStatus(useQueriesHook: typeof useQueries) {
+           args,
+         },
+       };
+-    }, [getFunctionName(query), JSON.stringify(args)]);
++    }, [getFunctionName(query), JSON.stringify(convexToJson(args))]);
+     const result = useQueriesHook(queries);
+     if (args === "skip") {
+       return {
