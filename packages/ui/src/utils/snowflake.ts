@@ -1,4 +1,33 @@
+import { Option } from "effect";
+
 const DISCORD_EPOCH = BigInt(1420070400000);
+
+export type ParsedSnowflake = {
+	id: bigint;
+	cleaned: string;
+	wasCleaned: boolean;
+};
+
+export function parseSnowflakeId(
+	value: string,
+): Option.Option<ParsedSnowflake> {
+	const match = value.match(/^(\d+)/);
+	if (!match?.[1]) {
+		return Option.none();
+	}
+
+	const cleaned = match[1];
+	try {
+		const id = BigInt(cleaned);
+		return Option.some({
+			id,
+			cleaned,
+			wasCleaned: cleaned !== value,
+		});
+	} catch {
+		return Option.none();
+	}
+}
 
 export function getTimestamp(snowflake: bigint | string) {
 	const sf = typeof snowflake === "bigint" ? snowflake : BigInt(snowflake);
