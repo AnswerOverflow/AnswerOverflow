@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { Expand, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
-type FeaturePreviewPlaceholderProps = {
+export type FeaturePreviewPlaceholderProps = {
 	feature:
 		| "indexing"
 		| "mark-solution"

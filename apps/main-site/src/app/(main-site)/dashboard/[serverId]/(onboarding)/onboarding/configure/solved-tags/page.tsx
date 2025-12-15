@@ -11,8 +11,8 @@ import { MessageSquare } from "lucide-react";
 import { FeaturePreviewPlaceholder } from "../components/mock-message-preview";
 import { StepLayout } from "../components/step-layout";
 import { WizardCard } from "../components/wizard-card";
-import { WizardNav } from "../components/wizard-nav";
 import { useWizard } from "../components/wizard-context";
+import { WizardNav } from "../components/wizard-nav";
 
 export default function SolvedTagsPage() {
 	const {
@@ -35,63 +35,63 @@ export default function SolvedTagsPage() {
 		<StepLayout
 			title="Solved Tags"
 			description="For forum channels, you can automatically apply a tag when a question is marked as solved. This makes it easy to see which posts have answers."
+			video={
+				hasEligibleForums ? (
+					<FeaturePreviewPlaceholder feature="solved-tags" />
+				) : undefined
+			}
 		>
 			<WizardCard>
 				{hasEligibleForums ? (
-					<div className="space-y-6">
-						<FeaturePreviewPlaceholder feature="solved-tags" />
-						<div className="border-t pt-6 space-y-2 min-h-[400px]">
-							{eligibleForums.map((channel) => {
-								const tags = channel.availableTags ?? [];
-								const currentTagId = channelSettings.solvedTags.get(
-									channel.id.toString(),
-								);
+					<div className="space-y-2">
+						{eligibleForums.map((channel) => {
+							const tags = channel.availableTags ?? [];
+							const currentTagId = channelSettings.solvedTags.get(
+								channel.id.toString(),
+							);
 
-								return (
-									<div
-										key={channel.id.toString()}
-										className="flex items-center justify-between gap-4 p-3 border rounded-lg"
-									>
-										<div className="flex items-center gap-3 min-w-0">
-											<MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
-											<span className="font-medium truncate">
-												{channel.name}
-											</span>
-										</div>
-										{tags.length > 0 ? (
-											<Select
-												value={currentTagId ?? "none"}
-												onValueChange={(value) =>
-													setSolvedTag(
-														channel.id.toString(),
-														value === "none" ? undefined : value,
-													)
-												}
-											>
-												<SelectTrigger className="w-[180px]">
-													<SelectValue placeholder="Select a tag" />
-												</SelectTrigger>
-												<SelectContent>
-													<SelectItem value="none">No tag</SelectItem>
-													{tags.map((tag) => (
-														<SelectItem
-															key={tag.id.toString()}
-															value={tag.id.toString()}
-														>
-															{tag.name}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										) : (
-											<span className="text-sm text-muted-foreground">
-												No tags available
-											</span>
-										)}
+							return (
+								<div
+									key={channel.id.toString()}
+									className="flex items-center justify-between gap-4 p-3 border rounded-lg"
+								>
+									<div className="flex items-center gap-3 min-w-0">
+										<MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
+										<span className="font-medium truncate">{channel.name}</span>
 									</div>
-								);
-							})}
-						</div>
+									{tags.length > 0 ? (
+										<Select
+											value={currentTagId ?? "none"}
+											onValueChange={(value) =>
+												setSolvedTag(
+													channel.id.toString(),
+													value === "none" ? undefined : value,
+												)
+											}
+										>
+											<SelectTrigger className="w-[180px]">
+												<SelectValue placeholder="Select a tag" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="none">No tag</SelectItem>
+												{tags.map((tag) => (
+													<SelectItem
+														key={tag.id.toString()}
+														value={tag.id.toString()}
+													>
+														{tag.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									) : (
+										<span className="text-sm text-muted-foreground">
+											No tags available
+										</span>
+									)}
+								</div>
+							);
+						})}
 					</div>
 				) : (
 					<div className="text-center py-8 text-muted-foreground">

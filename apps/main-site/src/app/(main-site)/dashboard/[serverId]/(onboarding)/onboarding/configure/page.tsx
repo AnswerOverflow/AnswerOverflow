@@ -4,8 +4,8 @@ import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
 import { StepLayout } from "./components/step-layout";
 import { WizardCard } from "./components/wizard-card";
-import { WizardNav } from "./components/wizard-nav";
 import { useWizard } from "./components/wizard-context";
+import { WizardNav } from "./components/wizard-nav";
 
 export default function ServerSettingsPage() {
 	const { serverId, serverSettings, setServerSettings } = useWizard();
