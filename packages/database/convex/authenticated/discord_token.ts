@@ -119,16 +119,9 @@ export const refreshAndGetValidToken = internalAction({
 		}
 
 		const tokenStatus = getTokenStatus(account.accessTokenExpiresAt);
+		const needsRefresh = tokenStatus === "expired" || !account.accessToken;
 
-		if (tokenStatus === "valid") {
-			return {
-				success: true as const,
-				accountId: account.accountId,
-				accessToken: account.accessToken,
-			};
-		}
-
-		if (tokenStatus === "no_expiry_info") {
+		if (!needsRefresh && account.accessToken) {
 			return {
 				success: true as const,
 				accountId: account.accountId,
@@ -193,29 +186,3 @@ export const refreshAndGetValidToken = internalAction({
 		}
 	},
 });
-
-export async function getValidDiscordToken(
-	ctx: Parameters<typeof getDiscordAccountWithToken>[0],
-): Promise<{
-	accountId: bigint;
-	accessToken: string;
-	needsRefresh: boolean;
-	refreshToken: string | null;
-	accessTokenExpiresAt: number | null;
-} | null> {
-	const account = await getDiscordAccountWithToken(ctx);
-
-	if (!account) {
-		return null;
-	}
-
-	const tokenStatus = getTokenStatus(account.accessTokenExpiresAt);
-
-	return {
-		accountId: account.accountId,
-		accessToken: account.accessToken,
-		needsRefresh: tokenStatus === "expired",
-		refreshToken: account.refreshToken,
-		accessTokenExpiresAt: account.accessTokenExpiresAt,
-	};
-}

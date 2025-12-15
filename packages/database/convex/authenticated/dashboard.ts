@@ -23,6 +23,14 @@ import {
 	sortServersByBotAndRole,
 } from "../shared/shared";
 
+export class ReauthRequiredError extends Error {
+	public readonly code = "REAUTH_REQUIRED" as const;
+	constructor(message = "Please sign in again to continue") {
+		super(message);
+		this.name = "ReauthRequiredError";
+	}
+}
+
 export function getBackendAccessToken(): string {
 	const token = process.env.BACKEND_ACCESS_TOKEN;
 	return token ?? "";
@@ -51,30 +59,90 @@ const discordApi = (token: string) =>
 		});
 	}).pipe(Effect.provide(FetchHttpClient.layer));
 
+async function fetchGuildsWithToken(token: string) {
+	const program = Effect.gen(function* () {
+		const client = yield* discordApi(token);
+		return yield* client.listMyGuilds();
+	});
+
+	const guilds = await Effect.runPromise(program);
+
+	return guilds.map((guild) => ({
+		id: guild.id,
+		name: guild.name,
+		icon: guild.icon ?? null,
+		owner: guild.owner,
+		permissions: guild.permissions,
+	}));
+}
+
+function isDiscord401Error(error: unknown): boolean {
+	if (error instanceof Error) {
+		const message = error.message;
+		return message.includes("401") || message.includes("Unauthorized");
+	}
+	if (typeof error === "object" && error !== null) {
+		const errorStr = JSON.stringify(error);
+		return errorStr.includes("401") || errorStr.includes("Unauthorized");
+	}
+	return false;
+}
+
+type DiscordGuild = {
+	id: string;
+	name: string;
+	icon: string | null;
+	owner: boolean;
+	permissions: string;
+};
+
+type RefreshTokenResult =
+	| {
+			success: true;
+			accountId: bigint;
+			accessToken: string;
+	  }
+	| {
+			success: false;
+			error: string;
+			code:
+				| "NOT_AUTHENTICATED"
+				| "NO_REFRESH_TOKEN"
+				| "REAUTH_REQUIRED"
+				| "REFRESH_FAILED"
+				| "TOKEN_EXPIRED";
+	  };
+
 export const fetchDiscordGuilds = internalAction({
 	args: {
 		discordAccountId: v.int64(),
 	},
-	handler: async (ctx, args) => {
+	handler: async (ctx, args): Promise<DiscordGuild[]> => {
 		const { discordAccountId } = args;
 
 		const discordAccount = await getDiscordAccountWithToken(ctx);
 
 		if (!discordAccount || discordAccount.accountId !== discordAccountId) {
-			throw new Error("Discord account not linked or mismatch");
+			throw new ReauthRequiredError("Discord account not linked or mismatch");
 		}
 
 		const tokenStatus = getTokenStatus(discordAccount.accessTokenExpiresAt);
 
 		let token = discordAccount.accessToken;
 
-		if (tokenStatus === "expired") {
-			const refreshResult = await ctx.runAction(
+		if (tokenStatus === "expired" || !token) {
+			const refreshResult: RefreshTokenResult = await ctx.runAction(
 				internal.authenticated.discord_token.refreshAndGetValidToken,
 				{},
 			);
 
 			if (!refreshResult.success) {
+				if (
+					refreshResult.code === "REAUTH_REQUIRED" ||
+					refreshResult.code === "NO_REFRESH_TOKEN"
+				) {
+					throw new ReauthRequiredError(refreshResult.error);
+				}
 				throw new Error(
 					`Discord token refresh failed: ${refreshResult.error} (code: ${refreshResult.code})`,
 				);
@@ -83,30 +151,45 @@ export const fetchDiscordGuilds = internalAction({
 			token = refreshResult.accessToken;
 		}
 
-		const program = Effect.gen(function* () {
-			const client = yield* discordApi(token);
-			return yield* client.listMyGuilds();
-		}).pipe(
-			Effect.catchAll((error) => {
-				console.error(
-					"Discord API error:",
-					JSON.stringify(Cause.pretty(Cause.fail(error))),
+		try {
+			return await fetchGuildsWithToken(token);
+		} catch (error) {
+			if (isDiscord401Error(error)) {
+				console.log(
+					"Discord returned 401, attempting token refresh and retry...",
 				);
-				return Effect.fail(
-					new Error(`Discord API error: ${JSON.stringify(error)}`),
+
+				const refreshResult: RefreshTokenResult = await ctx.runAction(
+					internal.authenticated.discord_token.refreshAndGetValidToken,
+					{},
 				);
-			}),
-		);
 
-		const guilds = await Effect.runPromise(program);
+				if (!refreshResult.success) {
+					if (
+						refreshResult.code === "REAUTH_REQUIRED" ||
+						refreshResult.code === "NO_REFRESH_TOKEN"
+					) {
+						throw new ReauthRequiredError(refreshResult.error);
+					}
+					throw new ReauthRequiredError(
+						"Your Discord session has expired. Please sign in again.",
+					);
+				}
 
-		return guilds.map((guild) => ({
-			id: guild.id,
-			name: guild.name,
-			icon: guild.icon ?? null,
-			owner: guild.owner,
-			permissions: guild.permissions,
-		}));
+				try {
+					return await fetchGuildsWithToken(refreshResult.accessToken);
+				} catch (retryError) {
+					if (isDiscord401Error(retryError)) {
+						throw new ReauthRequiredError(
+							"Your Discord session has expired. Please sign in again.",
+						);
+					}
+					throw retryError;
+				}
+			}
+
+			throw error;
+		}
 	},
 });
 
