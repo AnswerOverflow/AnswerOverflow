@@ -27,19 +27,13 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.4",
-		"@eslint/js": "^9.39.1",
 		"@types/bytes": "^3.1.5",
-		"@typescript-eslint/eslint-plugin": "^8.47.0",
-		"@typescript-eslint/parser": "^8.47.0",
-		"@typescript-eslint/utils": "^8.47.0",
 		"@typescript/native-preview": "^7.0.0-dev.20251203.1",
-		"eslint": "^9.39.1",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.6",
 		"sharp": "^0.34.5",
 		"turbo": "^2.6.1",
-		"typescript": "catalog:",
-		"typescript-eslint": "^8.47.0"
+		"typescript": "catalog:"
 	},
 	"engines": {
 		"node": ">=18.8.0"
