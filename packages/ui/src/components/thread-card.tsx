@@ -111,7 +111,7 @@ export function ThreadCard({ result, hideServer = false }: ThreadCardProps) {
 								<div className="flex items-center gap-1.5">
 									<ServerIcon
 										server={result.server}
-										size={18}
+										size={16}
 										className="shrink-0"
 									/>
 									<Link
