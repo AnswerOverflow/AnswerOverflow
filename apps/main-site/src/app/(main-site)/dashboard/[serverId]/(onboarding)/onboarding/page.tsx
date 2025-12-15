@@ -16,17 +16,17 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { CheckCircle2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useQueryState } from "nuqs";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useAuthClient } from "../../../../lib/auth-client";
+import { useAuthClient } from "../../../../../../lib/auth-client";
 
 type OnboardingStep = "auth" | "install" | "complete";
 
 export default function OnboardingPage() {
 	const router = useRouter();
+	const params = useParams();
+	const serverId = params.serverId as string;
 	const authClient = useAuthClient();
-	const [serverId] = useQueryState("serverId");
 	const { data: session, isPending: isSessionPending } = useSession({
 		allowAnonymous: false,
 	});
@@ -72,15 +72,20 @@ export default function OnboardingPage() {
 			return;
 		}
 
+		if (selectedServer?.hasBot && selectedServer.aoServerId) {
+			router.push(`/dashboard/${serverId}/onboarding/configure`);
+			return;
+		}
+
 		if (step === "auth" && serverId) {
 			setStep("install");
 		}
-	}, [session, isSessionPending, serverId, step, router]);
+	}, [session, isSessionPending, serverId, step, router, selectedServer]);
 
 	useEffect(() => {
 		if (step === "install" && installingServerId && selectedServer) {
 			let attempts = 0;
-			const maxAttempts = 40; // 2 minutes max (40 * 3 seconds)
+			const maxAttempts = 40;
 
 			const interval = setInterval(async () => {
 				attempts++;
@@ -89,16 +94,16 @@ export default function OnboardingPage() {
 					(s) => s.discordId === installingServerId,
 				);
 				if (server?.hasBot && server.aoServerId) {
-					setStep("complete");
 					clearInterval(interval);
+					router.push(`/dashboard/${installingServerId}/onboarding/configure`);
 				} else if (attempts >= maxAttempts) {
 					clearInterval(interval);
 				}
-			}, 3000); // Check every 3 seconds
+			}, 3000);
 
 			return () => clearInterval(interval);
 		}
-	}, [step, installingServerId, selectedServer, refetchServers]);
+	}, [step, installingServerId, selectedServer, refetchServers, router]);
 
 	const handleInstallClick = async (discordId: string) => {
 		const discordClientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
@@ -149,9 +154,7 @@ export default function OnboardingPage() {
 							</p>
 							<Button
 								onClick={async () => {
-									const callbackUrl = serverId
-										? `/dashboard/onboarding?serverId=${serverId}`
-										: "/dashboard";
+									const callbackUrl = `/dashboard/${serverId}/onboarding`;
 									await authClient.signIn.social({
 										provider: "discord",
 										callbackURL: callbackUrl,

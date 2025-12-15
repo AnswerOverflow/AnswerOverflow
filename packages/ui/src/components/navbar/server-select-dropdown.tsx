@@ -59,7 +59,7 @@ export function ServerSelectDropdown({
 	currentServerId,
 	servers = [],
 	getServerHref = (serverId) => `/dashboard/${serverId}`,
-	addNewHref = "/dashboard/onboarding",
+	addNewHref = "/dashboard",
 	addNewLabel = "Add new",
 	emptyMessage = "No servers with bot found",
 	isLoading = false,

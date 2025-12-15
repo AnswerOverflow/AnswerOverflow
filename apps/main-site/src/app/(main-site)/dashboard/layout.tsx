@@ -18,7 +18,7 @@ export default function DashboardLayout({
 	const pathname = usePathname();
 	const { data: session, isPending } = useSession({ allowAnonymous: false });
 
-	const isOnboardingPage = pathname === "/dashboard/onboarding";
+	const isOnboardingPage = pathname?.includes("/onboarding");
 	const isDashboardRoot = pathname === "/dashboard";
 	const serverIdMatch = pathname?.match(/^\/dashboard\/([^/]+)/);
 	const serverId =
@@ -48,7 +48,7 @@ export default function DashboardLayout({
 					currentServerId: serverId,
 					servers: serversForDropdown,
 					getServerHref: (id: string) => `/dashboard/${id}`,
-					addNewHref: "/dashboard/onboarding",
+					addNewHref: "/dashboard",
 					isLoading: servers === undefined,
 				}
 			: undefined;

@@ -16,7 +16,7 @@ import { useAction } from "convex/react";
 import dayjs from "dayjs";
 import { CreditCard } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
+import { useAuthenticatedQuery } from "../../../../../../lib/use-authenticated-query";
 
 type Plan =
 	| "FREE"
