@@ -1,5 +1,8 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { Expand, X } from "lucide-react";
+
 type FeaturePreviewPlaceholderProps = {
 	feature:
 		| "indexing"
@@ -25,30 +28,91 @@ const videoUrls: Record<FeaturePreviewPlaceholderProps["feature"], string> = {
 export function FeaturePreviewPlaceholder({
 	feature,
 }: FeaturePreviewPlaceholderProps) {
-	const labels = {
-		indexing: "Enable Indexing",
-		"mark-solution": "Mark Solution",
-		"auto-thread": "Auto Thread",
-		"solution-instructions": "Solution Instructions",
-		"solved-tags": "Solved Tags",
-	};
+	const [isOpen, setIsOpen] = useState(false);
+	const [isClosing, setIsClosing] = useState(false);
 
 	const videoUrl = videoUrls[feature];
 
+	const handleClose = useCallback(() => {
+		setIsClosing(true);
+		setTimeout(() => {
+			setIsOpen(false);
+			setIsClosing(false);
+		}, 150);
+	}, []);
+
+	useEffect(() => {
+		if (!isOpen) return;
+
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				handleClose();
+			}
+		};
+
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
+	}, [isOpen, handleClose]);
+
+	const handleClick = useCallback(() => {
+		setIsOpen(true);
+	}, []);
+
+	const handleBackdropClick = useCallback(
+		(e: React.MouseEvent) => {
+			if (e.target === e.currentTarget) {
+				handleClose();
+			}
+		},
+		[handleClose],
+	);
+
 	if (videoUrl) {
 		return (
-			<div className="rounded-lg overflow-hidden border border-border">
-				<video
-					src={videoUrl}
-					width={1920}
-					height={1080}
-					autoPlay
-					loop
-					muted
-					playsInline
-					className="w-full h-auto"
-				/>
-			</div>
+			<>
+				<div
+					className="relative rounded-lg overflow-hidden border border-border max-w-md mx-auto cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98] group"
+					onClick={handleClick}
+				>
+					<video
+						src={videoUrl}
+						width={1920}
+						height={1080}
+						autoPlay
+						loop
+						muted
+						playsInline
+						className="w-full h-auto"
+					/>
+					<div className="absolute bottom-2 right-2 p-1.5 rounded-md bg-black/60 text-white/80 group-hover:text-white group-hover:bg-black/80 transition-colors">
+						<Expand className="h-4 w-4" />
+					</div>
+				</div>
+
+				{isOpen && (
+					<div
+						className={`fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 transition-opacity duration-150 ${isClosing ? "opacity-0" : "opacity-100"}`}
+						onClick={handleBackdropClick}
+					>
+						<button
+							onClick={handleClose}
+							className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10"
+						>
+							<X className="h-6 w-6" />
+						</button>
+						<video
+							src={videoUrl}
+							width={1920}
+							height={1080}
+							autoPlay
+							loop
+							muted
+							playsInline
+							className={`max-w-full max-h-full rounded-lg transition-transform duration-150 ${isClosing ? "scale-95" : "scale-100"}`}
+						/>
+					</div>
+				)}
+			</>
 		);
 	}
 
@@ -57,12 +121,7 @@ export function FeaturePreviewPlaceholder({
 			className="rounded-lg border border-dashed border-muted-foreground/25 bg-muted/30 flex flex-col items-center justify-center text-center"
 			style={{ aspectRatio: "16/9", maxWidth: "100%" }}
 		>
-			<div className="text-muted-foreground text-sm">
-				{labels[feature]} demo video placeholder
-			</div>
-			<div className="text-muted-foreground/50 text-xs mt-1">
-				16:9 aspect ratio
-			</div>
+			<div className="text-muted-foreground text-sm">Video placeholder</div>
 		</div>
 	);
 }

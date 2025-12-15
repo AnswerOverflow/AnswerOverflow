@@ -45,16 +45,16 @@ export function WizardNav({
 	};
 
 	return (
-		<div className="flex items-center justify-between pt-4">
+		<div className="flex items-center justify-between pt-3 sm:pt-4">
 			<div>
 				{backHref && (
 					<Button variant="ghost" onClick={() => router.push(backHref)}>
-						<ArrowLeft className="h-4 w-4 mr-2" />
-						Back
+						<ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" />
+						<span className="hidden sm:inline">Back</span>
 					</Button>
 				)}
 			</div>
-			<div className="flex items-center gap-2">
+			<div className="flex items-center gap-1 sm:gap-2">
 				{showSkip && (
 					<Button variant="ghost" onClick={handleSkip}>
 						Skip
@@ -63,13 +63,13 @@ export function WizardNav({
 				<Button onClick={handleNext} disabled={isNextDisabled || isLoading}>
 					{isLoading ? (
 						<>
-							<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-							Please wait...
+							<Loader2 className="h-4 w-4 mr-1 sm:mr-2 animate-spin" />
+							<span className="hidden sm:inline">Please wait...</span>
 						</>
 					) : (
 						<>
 							{nextLabel}
-							{nextHref && <ArrowRight className="h-4 w-4 ml-2" />}
+							{nextHref && <ArrowRight className="h-4 w-4 ml-1 sm:ml-2" />}
 						</>
 					)}
 				</Button>
