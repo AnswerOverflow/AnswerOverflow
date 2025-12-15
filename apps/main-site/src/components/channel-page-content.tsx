@@ -300,22 +300,25 @@ function SearchResults({
 	);
 
 	return (
-		<ConvexInfiniteList
-			query={api.public.search.publicSearch}
-			queryArgs={{ query, serverId, channelId }}
-			pageSize={20}
-			initialLoaderCount={5}
-			loader={<ThreadCardSkeleton />}
-			className="space-y-4"
-			emptyState={emptyState}
-			renderItem={(result) => (
-				<ThreadCard
-					key={result.message.message.id.toString()}
-					result={result}
-					hideServer={hideServer}
-				/>
-			)}
-		/>
+		<div className="relative">
+			<ConvexInfiniteList
+				query={api.public.search.publicSearch}
+				queryArgs={{ query, serverId, channelId }}
+				pageSize={20}
+				initialLoaderCount={5}
+				loader={<ThreadCardSkeleton />}
+				className="space-y-4 max-h-[calc(100vh-var(--navbar-height)-theme(spacing.6)-140px-theme(spacing.6)-theme(spacing.6))] overflow-y-auto"
+				emptyState={emptyState}
+				renderItem={(result) => (
+					<ThreadCard
+						key={result.message.message.id.toString()}
+						result={result}
+						hideServer={hideServer}
+					/>
+				)}
+			/>
+			<div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent" />
+		</div>
 	);
 }
 
@@ -332,37 +335,40 @@ export function ServerThreadsList({
 }) {
 	return (
 		<>
-			<ConvexInfiniteList
-				query={api.public.channels.getServerPageThreads}
-				queryArgs={{ serverDiscordId }}
-				pageSize={20}
-				initialLoaderCount={5}
-				loader={<ChannelThreadCardSkeleton />}
-				initialData={initialData}
-				initialCursor={currentCursor}
-				className="space-y-4"
-				emptyState={
-					<Empty className="py-16">
-						<EmptyHeader>
-							<EmptyMedia variant="icon">
-								<FileQuestion />
-							</EmptyMedia>
-							<EmptyTitle>No threads found</EmptyTitle>
-							<EmptyDescription>
-								This server doesn't have any indexed threads yet.
-							</EmptyDescription>
-						</EmptyHeader>
-					</Empty>
-				}
-				renderItem={({ thread, message, channel }) => (
-					<ChannelThreadCard
-						key={thread.id.toString()}
-						thread={thread}
-						message={message}
-						channel={channel}
-					/>
-				)}
-			/>
+			<div className="relative">
+				<ConvexInfiniteList
+					query={api.public.channels.getServerPageThreads}
+					queryArgs={{ serverDiscordId }}
+					pageSize={20}
+					initialLoaderCount={5}
+					loader={<ChannelThreadCardSkeleton />}
+					initialData={initialData}
+					initialCursor={currentCursor}
+					className="space-y-4 max-h-[calc(100vh-var(--navbar-height)-theme(spacing.6)-140px-theme(spacing.6)-theme(spacing.6))] overflow-y-auto"
+					emptyState={
+						<Empty className="py-16">
+							<EmptyHeader>
+								<EmptyMedia variant="icon">
+									<FileQuestion />
+								</EmptyMedia>
+								<EmptyTitle>No threads found</EmptyTitle>
+								<EmptyDescription>
+									This server doesn't have any indexed threads yet.
+								</EmptyDescription>
+							</EmptyHeader>
+						</Empty>
+					}
+					renderItem={({ thread, message, channel }) => (
+						<ChannelThreadCard
+							key={thread.id.toString()}
+							thread={thread}
+							message={message}
+							channel={channel}
+						/>
+					)}
+				/>
+				<div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent" />
+			</div>
 			{nextCursor && (
 				<a
 					href={`?cursor=${encodeCursor(nextCursor)}`}
@@ -389,36 +395,39 @@ export function ThreadsList({
 }) {
 	return (
 		<>
-			<ConvexInfiniteList
-				query={api.public.channels.getChannelPageThreads}
-				queryArgs={{ channelDiscordId }}
-				pageSize={20}
-				initialLoaderCount={5}
-				loader={<ChannelThreadCardSkeleton />}
-				initialData={initialData}
-				initialCursor={currentCursor}
-				className="space-y-4"
-				emptyState={
-					<Empty className="py-16">
-						<EmptyHeader>
-							<EmptyMedia variant="icon">
-								<FileQuestion />
-							</EmptyMedia>
-							<EmptyTitle>No threads found</EmptyTitle>
-							<EmptyDescription>
-								This channel doesn't have any indexed threads yet.
-							</EmptyDescription>
-						</EmptyHeader>
-					</Empty>
-				}
-				renderItem={({ thread, message }) => (
-					<ChannelThreadCard
-						key={thread.id.toString()}
-						thread={thread}
-						message={message}
-					/>
-				)}
-			/>
+			<div className="relative">
+				<ConvexInfiniteList
+					query={api.public.channels.getChannelPageThreads}
+					queryArgs={{ channelDiscordId }}
+					pageSize={20}
+					initialLoaderCount={5}
+					loader={<ChannelThreadCardSkeleton />}
+					initialData={initialData}
+					initialCursor={currentCursor}
+					className="space-y-4 max-h-[calc(100vh-var(--navbar-height)-theme(spacing.6)-140px-theme(spacing.6)-theme(spacing.6))] overflow-y-auto"
+					emptyState={
+						<Empty className="py-16">
+							<EmptyHeader>
+								<EmptyMedia variant="icon">
+									<FileQuestion />
+								</EmptyMedia>
+								<EmptyTitle>No threads found</EmptyTitle>
+								<EmptyDescription>
+									This channel doesn't have any indexed threads yet.
+								</EmptyDescription>
+							</EmptyHeader>
+						</Empty>
+					}
+					renderItem={({ thread, message }) => (
+						<ChannelThreadCard
+							key={thread.id.toString()}
+							thread={thread}
+							message={message}
+						/>
+					)}
+				/>
+				<div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent" />
+			</div>
 			{nextCursor && (
 				<a
 					href={`?cursor=${encodeCursor(nextCursor)}`}
