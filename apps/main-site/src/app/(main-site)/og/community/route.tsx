@@ -63,6 +63,16 @@ function makeServerIconLink(
 	return `https://cdn.discordapp.com/icons/${server.discordId}/${server.icon}.png?size=${size}`;
 }
 
+async function validateImageUrl(url: string | undefined): Promise<boolean> {
+	if (!url) return false;
+	try {
+		const response = await fetch(url, { method: "HEAD" });
+		return response.ok;
+	} catch {
+		return false;
+	}
+}
+
 function formatNumber(num: number): string {
 	if (num >= 1000000) {
 		return `${(num / 1000000).toFixed(1)}M`;
@@ -112,7 +122,9 @@ export async function GET(req: Request) {
 
 	const { server, channels } = data;
 
-	const icon = makeServerIconLink(server, 256);
+	const iconUrl = makeServerIconLink(server, 256);
+	const isIconValid = await validateImageUrl(iconUrl);
+	const icon = isIconValid ? iconUrl : undefined;
 	const channelCount = channels.length;
 	const memberCount = server.approximateMemberCount;
 
