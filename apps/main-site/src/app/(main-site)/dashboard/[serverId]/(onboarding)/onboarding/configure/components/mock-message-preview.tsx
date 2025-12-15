@@ -54,10 +54,6 @@ export function FeaturePreviewPlaceholder({
 		return () => document.removeEventListener("keydown", handleKeyDown);
 	}, [isOpen, handleClose]);
 
-	const handleClick = useCallback(() => {
-		setIsOpen(true);
-	}, []);
-
 	const handleBackdropClick = useCallback(
 		(e: React.MouseEvent) => {
 			if (e.target === e.currentTarget) {
@@ -70,22 +66,31 @@ export function FeaturePreviewPlaceholder({
 	if (videoUrl) {
 		return (
 			<>
-				<div
-					className="relative rounded-lg overflow-hidden border border-border max-w-md mx-auto cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98] group"
-					onClick={handleClick}
-				>
-					<video
-						src={videoUrl}
-						width={1920}
-						height={1080}
-						autoPlay
-						loop
-						muted
-						playsInline
-						className="w-full h-auto"
-					/>
-					<div className="absolute bottom-2 right-2 p-1.5 rounded-md bg-black/60 text-white/80 group-hover:text-white group-hover:bg-black/80 transition-colors">
-						<Expand className="h-4 w-4" />
+				<div className="max-w-md mx-auto">
+					<div className="flex items-center justify-center gap-2 mb-2">
+						<div className="h-px flex-1 bg-border" />
+						<span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+							Watch a demo
+						</span>
+						<div className="h-px flex-1 bg-border" />
+					</div>
+					<div
+						className="relative rounded-lg overflow-hidden border border-border cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98] group"
+						onClick={() => setIsOpen(true)}
+					>
+						<video
+							src={videoUrl}
+							width={1920}
+							height={1080}
+							autoPlay
+							loop
+							muted
+							playsInline
+							className="w-full h-auto"
+						/>
+						<div className="absolute bottom-2 right-2 p-1.5 rounded-md bg-black/60 text-white/80 group-hover:text-white group-hover:bg-black/80 transition-colors">
+							<Expand className="h-4 w-4" />
+						</div>
 					</div>
 				</div>
 
