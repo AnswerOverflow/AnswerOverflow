@@ -1,61 +1,52 @@
-## Recommended server configuration
+---
+title: Recommended Setup
+description: Best practices for Discord servers using Answer Overflow
+---
 
-### Community
+## Server setup
 
-Set your server type to [community](https://support.discord.com/hc/en-us/articles/360047132851-Enabling-Your-Community-Server) so you can have a server description, forum channels, and membership screening.
+### Enable Community
 
-### Description
+Turn on [Community](https://support.discord.com/hc/en-us/articles/360047132851-Enabling-Your-Community-Server) for your server. This unlocks forum channels, server descriptions, and membership screening—all of which improve indexing.
 
-Answer Overflow syncs your [server description](https://www.howtogeek.com/739355/how-to-set-up-a-community-server-on-discord/) with your community page on Answer Overflow so you don't have to worry about keeping them in sync. Make sure to set a good description for your server so people know what it's about.
-{/* TODO: In the future we can have a "live preview" of what their server card will look like here */}
+### Write a good description
 
-## Recommended help channel configuration
+Your [server description](https://www.howtogeek.com/739355/how-to-set-up-a-community-server-on-discord/) syncs automatically to your Answer Overflow community page. Make it count.
 
-Looking for some inspiration? Check out the following resources:
+## Help channel setup
 
-Discord Servers:
+### Use forum channels
 
-- `#questions` - [GitPod](https://discord.gg/gitpod)
-- `#questions` - [Apache TinkerPop](https://discord.gg/56PMgQB7X5)
-- `#questions` - [TypeScript](https://discord.gg/typescript)
+[Forum channels](https://support.discord.com/hc/en-us/articles/6208479917079-Forum-Channels-FAQ) are the best channel type for indexing. Each post is a self-contained thread, making it easy to identify where a question starts and ends.
 
-Blog Posts:
+### Set a default reaction
 
-- [What GitPod learned growing a community from 500 to 5000](https://www.gitpod.io/blog/what-we-learned-growing-a-community-from-500-5000#2-being-part-of-a-community-should-be-an-experience)
+Use `⬆️` or similar as the default reaction. This lets people upvote questions they also have, helping answerers prioritize.
 
-<Callout emoji="ℹ️" type="info">
-	Have a community you think would be a good example? Create a pull request to
-	add it!
-</Callout>
+### Use tags
 
-### Channel Type
+- **Create topic tags** — Organize questions by topic instead of spreading them across multiple text channels
+- **Use emojis** — Makes scanning the forum faster
+- **Require tags** — Keeps things organized and makes people think before posting
 
-The best discord channel type to use is a [forum channel](https://support.discord.com/hc/en-us/articles/6208479917079-Forum-Channels-FAQ) as it requires questions to be answered in a thread. This helps significantly with indexing content as it's easy to tell where the question related content starts and ends.
-
-### Default Reaction
-
-Set the default reaction as a `⬆️` emoji (or something similar) so people can upvote questions that they also have. This allows people answering questions in your community to know what to prioritize.
-
-### Tags
-
-#### Create tags for your topics
-
-Tags help to organize your forum channel, rather than having a bunch of text channels for different topics, you can create tags for each topic.
-
-#### Use emojis in your tags
-
-Using emojis helps people to quickly scan the contents of your forum channel. They also help with organizing and archiving your content
-
-#### Require tags when posting
-
-Requiring tags when posting helps to keep your forum channel organized and requires people to make sure they are posting in the right place.
-
-
-<Info emoji="ℹ️" type="info">
-	If you only have a few tags or one support channel, you can add a `misc` tag
-	for people to use as a fallback
+<Info>
+If you only have a few tags, add a `misc` fallback tag.
 </Info>
 
-#### Have a `✅ Solved` tag
+### Add a Solved tag
 
-It's useful to have a `✅ Solved` tag that people can add to their question when it's been answered. Answer Overflow will use your solved tag when a question is answered and highlight the answer on the message result page.
+Create a `✅ Solved` tag. Answer Overflow uses this to mark resolved questions and highlight solutions on indexed pages.
+
+## Examples worth checking out
+
+**Discord servers:**
+- `#questions` — [GitPod](https://discord.gg/gitpod)
+- `#questions` — [Apache TinkerPop](https://discord.gg/56PMgQB7X5)
+- `#questions` — [TypeScript](https://discord.gg/typescript)
+
+**Reading:**
+- [What GitPod learned growing a community from 500 to 5000](https://www.gitpod.io/blog/what-we-learned-growing-a-community-from-500-5000#2-being-part-of-a-community-should-be-an-experience)
+
+<Callout type="info">
+Know a community doing this well? [Open a PR](https://github.com/AnswerOverflow/AnswerOverflow) to add it.
+</Callout>
