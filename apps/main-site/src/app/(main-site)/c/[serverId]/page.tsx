@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
-import { Effect } from "effect";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
+import { Effect, Option } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import {
@@ -16,11 +17,19 @@ type Props = {
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 
+	const parsed = parseSnowflakeId(params.serverId);
+	if (Option.isNone(parsed)) {
+		return {};
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/c/${parsed.value.cleaned}`);
+	}
+
 	const serverData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData =
 			yield* database.private.servers.getServerByDiscordIdWithChannels({
-				discordId: BigInt(params.serverId),
+				discordId: parsed.value.id,
 			});
 		return liveData;
 	}).pipe(runtime.runPromise);
@@ -35,7 +44,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		`Browse ${channels.length} indexed channels from the ${server.name} Discord community`;
 
 	const title = `${server.name} - AnswerOverflow`;
-	const ogImage = `/og/community?id=${params.serverId}`;
+	const ogImage = `/og/community?id=${parsed.value.cleaned}`;
 
 	return {
 		title,
@@ -54,7 +63,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 			images: [ogImage],
 		},
 		alternates: {
-			canonical: `/c/${params.serverId}`,
+			canonical: `/c/${parsed.value.cleaned}`,
 		},
 	};
 }
@@ -62,11 +71,19 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function ServerPage(props: Props) {
 	const params = await props.params;
 
+	const parsed = parseSnowflakeId(params.serverId);
+	if (Option.isNone(parsed)) {
+		return notFound();
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/c/${parsed.value.cleaned}`);
+	}
+
 	const serverData = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData =
 			yield* database.private.servers.getServerByDiscordIdWithChannels({
-				discordId: BigInt(params.serverId),
+				discordId: parsed.value.id,
 			});
 		return liveData;
 	}).pipe(runtime.runPromise);
@@ -78,7 +95,7 @@ export default async function ServerPage(props: Props) {
 	const { server, channels } = serverData;
 
 	if (server.customDomain) {
-		const customUrl = getServerCustomUrl(server, `/c/${params.serverId}`);
+		const customUrl = getServerCustomUrl(server, `/c/${parsed.value.cleaned}`);
 		if (customUrl) {
 			return redirect(customUrl);
 		}
@@ -123,7 +140,7 @@ export default async function ServerPage(props: Props) {
 	}
 
 	const headerData = await fetchChannelPageHeaderData(
-		BigInt(params.serverId),
+		parsed.value.id,
 		defaultChannel.id,
 	);
 

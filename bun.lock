@@ -269,6 +269,7 @@
         "dayjs": "^1.11.18",
         "discord-api-types": "^0.38.24",
         "discord-markdown-parser": "^1.2.0",
+        "effect": "catalog:",
         "embla-carousel-react": "^8.6.0",
         "input-otp": "^1.4.2",
         "lucide-react": "catalog:",

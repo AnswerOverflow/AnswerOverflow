@@ -1,5 +1,6 @@
 import { decodeCursor } from "@packages/ui/utils/cursor";
-import { Schema } from "effect";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
+import { Option } from "effect";
 import { notFound, redirect } from "next/navigation";
 import {
 	fetchMessagePageHeaderData,
@@ -15,26 +16,25 @@ type RouteParams = {
 	params: Promise<{ messageId: string }>;
 };
 
-function parseBigInt(value: string) {
-	return Schema.decodeUnknownOption(Schema.BigInt)(value);
-}
-
 export async function GET(
 	request: Request,
 	{ params }: RouteParams,
 ): Promise<Response> {
 	const { messageId } = await params;
 
-	const parsed = parseBigInt(messageId);
-	if (parsed._tag === "None") {
+	const parsed = parseSnowflakeId(messageId);
+	if (Option.isNone(parsed)) {
 		notFound();
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/m/${parsed.value.cleaned}.md`);
 	}
 
 	const url = new URL(request.url);
 	const cursorParam = url.searchParams.get("cursor");
 	const cursor = cursorParam ? decodeCursor(cursorParam) : null;
 
-	const headerData = await fetchMessagePageHeaderData(parsed.value);
+	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
 
 	if (!headerData) {
 		notFound();

@@ -1,7 +1,9 @@
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
+import { Option } from "effect";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
 	ChannelPageLoader,
 	fetchChannelPageHeaderData,
@@ -15,14 +17,24 @@ type Props = {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
-	const searchParams = await props.searchParams;
+
+	const parsedServerId = parseSnowflakeId(params.serverId);
+	const parsedChannelId = parseSnowflakeId(params.channelId);
+	if (Option.isNone(parsedServerId) || Option.isNone(parsedChannelId)) {
+		return {};
+	}
+	if (parsedServerId.value.wasCleaned || parsedChannelId.value.wasCleaned) {
+		redirect(
+			`/c/${parsedServerId.value.cleaned}/${parsedChannelId.value.cleaned}`,
+		);
+	}
 
 	const headerData = await fetchChannelPageHeaderData(
-		BigInt(params.serverId),
-		BigInt(params.channelId),
+		parsedServerId.value.id,
+		parsedChannelId.value.id,
 	);
 
-	const basePath = `/c/${params.serverId}/${params.channelId}`;
+	const basePath = `/c/${parsedServerId.value.cleaned}/${parsedChannelId.value.cleaned}`;
 	return generateChannelPageMetadata(headerData, basePath);
 }
 
@@ -32,15 +44,26 @@ export default async function ChannelPage(props: Props) {
 	const encodedCursor = searchParams?.cursor;
 	const cursor = encodedCursor ? decodeCursor(encodedCursor) : undefined;
 
+	const parsedServerId = parseSnowflakeId(params.serverId);
+	const parsedChannelId = parseSnowflakeId(params.channelId);
+	if (Option.isNone(parsedServerId) || Option.isNone(parsedChannelId)) {
+		return notFound();
+	}
+	if (parsedServerId.value.wasCleaned || parsedChannelId.value.wasCleaned) {
+		redirect(
+			`/c/${parsedServerId.value.cleaned}/${parsedChannelId.value.cleaned}`,
+		);
+	}
+
 	const headerData = await fetchChannelPageHeaderData(
-		BigInt(params.serverId),
-		BigInt(params.channelId),
+		parsedServerId.value.id,
+		parsedChannelId.value.id,
 	);
 
 	if (headerData?.server.customDomain) {
 		const customUrl = getServerCustomUrl(
 			headerData.server,
-			`/c/${params.serverId}/${params.channelId}`,
+			`/c/${parsedServerId.value.cleaned}/${parsedChannelId.value.cleaned}`,
 		);
 		if (customUrl) {
 			return redirect(customUrl);

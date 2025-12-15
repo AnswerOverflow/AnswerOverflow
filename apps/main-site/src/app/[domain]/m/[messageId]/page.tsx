@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
 import { decodeCursor } from "@packages/ui/utils/cursor";
-import { Effect, Schema } from "effect";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
+import { Effect, Option } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -22,10 +23,6 @@ type Props = {
 	searchParams: Promise<{ cursor?: string; focus?: string }>;
 };
 
-function parseBigInt(value: string) {
-	return Schema.decodeUnknownOption(Schema.BigInt)(value);
-}
-
 async function getTenantData(domain: string) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
@@ -41,14 +38,17 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		props.params,
 		props.searchParams,
 	]);
-	const parsed = parseBigInt(params.messageId);
-	if (parsed._tag === "None") {
+	const parsed = parseSnowflakeId(params.messageId);
+	if (Option.isNone(parsed)) {
 		return notFound();
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/m/${parsed.value.cleaned}`);
 	}
 	const domain = decodeURIComponent(params.domain);
 	const tenantData = await getTenantData(domain);
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
-	const headerData = await fetchMessagePageHeaderData(parsed.value);
+	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
 	const tenant = {
 		customDomain: tenantData?.preferences?.customDomain,
 		subpath: tenantData?.preferences?.subpath,
@@ -96,9 +96,12 @@ export default async function TenantMessagePage(props: Props) {
 		props.params,
 		props.searchParams,
 	]);
-	const parsed = parseBigInt(params.messageId);
-	if (parsed._tag === "None") {
+	const parsed = parseSnowflakeId(params.messageId);
+	if (Option.isNone(parsed)) {
 		return notFound();
+	}
+	if (parsed.value.wasCleaned) {
+		redirect(`/m/${parsed.value.cleaned}`);
 	}
 	const domain = decodeURIComponent(params.domain);
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
@@ -109,7 +112,7 @@ export default async function TenantMessagePage(props: Props) {
 			domain,
 		});
 		const header = yield* database.private.messages.getMessagePageHeaderData({
-			messageId: parsed.value,
+			messageId: parsed.value.id,
 		});
 		return [tenant, header] as const;
 	}).pipe(runtime.runPromise);
