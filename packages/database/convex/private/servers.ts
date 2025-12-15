@@ -2,11 +2,84 @@ import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
-import { internalMutation, privateMutation, privateQuery } from "../client";
+import {
+	internalAction,
+	internalMutation,
+	privateMutation,
+	privateQuery,
+} from "../client";
+import { internal } from "../_generated/api";
 import { serverSchema } from "../schema";
 import { CHANNEL_TYPE } from "../shared/shared";
 
-export const hardDeleteServer = internalMutation({
+const DELETE_BATCH_SIZE = 500;
+
+export const hardDeleteServer = internalAction({
+	args: {
+		discordId: v.int64(),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		if (process.env.ALLOW_HARD_DELETE !== "true") {
+			throw new Error("Hard delete is not allowed");
+		}
+
+		let hasMoreMessages = true;
+		while (hasMoreMessages) {
+			hasMoreMessages = await ctx.runMutation(
+				internal.private.servers.deleteServerMessagesBatch,
+				{ discordId: args.discordId },
+			);
+		}
+
+		await ctx.runMutation(internal.private.servers.deleteServerMetadata, {
+			discordId: args.discordId,
+		});
+
+		return null;
+	},
+});
+
+export const deleteServerMessagesBatch = internalMutation({
+	args: {
+		discordId: v.int64(),
+	},
+	returns: v.boolean(),
+	handler: async (ctx, args) => {
+		const messages = await ctx.db
+			.query("messages")
+			.withIndex("by_serverId", (q) => q.eq("serverId", args.discordId))
+			.take(DELETE_BATCH_SIZE);
+
+		for (const message of messages) {
+			const attachments = await getManyFrom(
+				ctx.db,
+				"attachments",
+				"by_messageId",
+				message.id,
+			);
+			for (const attachment of attachments) {
+				await ctx.db.delete(attachment._id);
+			}
+
+			const reactions = await getManyFrom(
+				ctx.db,
+				"reactions",
+				"by_messageId",
+				message.id,
+			);
+			for (const reaction of reactions) {
+				await ctx.db.delete(reaction._id);
+			}
+
+			await ctx.db.delete(message._id);
+		}
+
+		return messages.length === DELETE_BATCH_SIZE;
+	},
+});
+
+export const deleteServerMetadata = internalMutation({
 	args: {
 		discordId: v.int64(),
 	},
@@ -60,36 +133,6 @@ export const hardDeleteServer = internalMutation({
 		);
 		for (const uss of userServerSettings) {
 			await ctx.db.delete(uss._id);
-		}
-
-		const messages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_serverId",
-			args.discordId,
-		);
-		for (const message of messages) {
-			const attachments = await getManyFrom(
-				ctx.db,
-				"attachments",
-				"by_messageId",
-				message.id,
-			);
-			for (const attachment of attachments) {
-				await ctx.db.delete(attachment._id);
-			}
-
-			const reactions = await getManyFrom(
-				ctx.db,
-				"reactions",
-				"by_messageId",
-				message.id,
-			);
-			for (const reaction of reactions) {
-				await ctx.db.delete(reaction._id);
-			}
-
-			await ctx.db.delete(message._id);
 		}
 
 		await ctx.db.delete(server._id);
