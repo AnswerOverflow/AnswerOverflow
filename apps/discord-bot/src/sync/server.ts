@@ -19,9 +19,10 @@ import {
 import { syncChannel } from "./channel";
 
 function makeGuildEmbed(guild: Guild, joined: boolean) {
-	const numberOfForumChannels = guild.channels.cache
-		.filter((c) => c.type === ChannelType.GuildForum)
-		.size.toString();
+	const numberOfForumChannels = (
+		guild.channels?.cache?.filter((c) => c.type === ChannelType.GuildForum)
+			?.size ?? 0
+	).toString();
 
 	return new EmbedBuilder()
 		.setTitle(joined ? "Joined Server" : "Left Server")
@@ -35,7 +36,7 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 		.setFields([
 			{
 				name: "Members",
-				value: guild.memberCount.toString(),
+				value: (guild.memberCount ?? 0).toString(),
 				inline: true,
 			},
 			{
@@ -45,7 +46,7 @@ function makeGuildEmbed(guild: Guild, joined: boolean) {
 			},
 			{
 				name: "Age",
-				value: guild.createdAt.toDateString(),
+				value: guild.createdAt?.toDateString() ?? "Unknown",
 				inline: false,
 			},
 			{
@@ -194,14 +195,14 @@ export const ServerParityLayer = Layer.scopedDiscard(
 						kickedTime: Date.now(),
 					},
 				});
-				yield* trackServerLeave(guild).pipe(Effect.catchAll(() => Effect.void));
+				yield* catchAllSilentWithReport(trackServerLeave(guild));
 				yield* discord
 					.callClient(async () => {
 						const superUser = await guild.client.users.fetch(SUPER_USER_ID);
 						await superUser.send({ embeds: [makeGuildEmbed(guild, false)] });
 					})
 					.pipe(
-						Effect.catchAll((error) =>
+						catchAllWithReport((error) =>
 							Console.error(
 								"Failed to notify super user of server leave:",
 								error,

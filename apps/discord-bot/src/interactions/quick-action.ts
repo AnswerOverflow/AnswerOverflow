@@ -17,6 +17,11 @@ import {
 	Option,
 	Predicate,
 } from "effect";
+import {
+	catchAllSucceedNullWithReport,
+	catchAllSilentWithReport,
+	catchAllWithReport,
+} from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { trackQuickActionCommandSent } from "../utils/analytics";
 import {
@@ -121,8 +126,8 @@ export function handleQuickActionCommand(
 		const member = authorMember.value;
 
 		const checkChannelAccess = (channel: (typeof indexedChannels)[number]) =>
-			discord
-				.callClient(async () => {
+			catchAllSucceedNullWithReport(
+				discord.callClient(async () => {
 					const discordChannel = await guild.channels.fetch(
 						channel.id.toString(),
 					);
@@ -137,8 +142,8 @@ export function handleQuickActionCommand(
 						return channel;
 					}
 					return null;
-				})
-				.pipe(Effect.catchAll(() => Effect.succeed(null)));
+				}),
+			);
 
 		const channelsTargetAuthorCanSee = yield* Effect.all(
 			Arr.map(indexedChannels, checkChannelAccess),
@@ -182,8 +187,8 @@ export function handleQuickActionCommand(
 		);
 
 		if (requestorAsMember) {
-			yield* trackQuickActionCommandSent(requestorAsMember).pipe(
-				Effect.catchAll(() => Effect.void),
+			yield* catchAllSilentWithReport(
+				trackQuickActionCommandSent(requestorAsMember),
 			);
 		}
 
@@ -202,7 +207,7 @@ export const QuickActionCommandHandlerLayer = Layer.scopedDiscard(
 					interaction.commandName === "Quick Action"
 				) {
 					yield* handleQuickActionCommand(interaction).pipe(
-						Effect.catchAll((error) =>
+						catchAllWithReport((error) =>
 							Console.error("Error in quick action handler:", error),
 						),
 					);

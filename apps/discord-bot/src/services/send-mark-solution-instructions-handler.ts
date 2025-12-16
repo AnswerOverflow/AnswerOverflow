@@ -1,5 +1,6 @@
 import { Database } from "@packages/database/database";
 import { Console, Effect, Layer } from "effect";
+import { catchAllWithReport } from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { isAllowedThreadChannel } from "../utils/conversions";
 import { handleSendMarkSolutionInstructions } from "./send-mark-solution-instructions";
@@ -65,7 +66,7 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 					firstMessage ?? null,
 				);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(
 						`Error processing thread create for mark solution instructions ${thread.id}:`,
 						error,

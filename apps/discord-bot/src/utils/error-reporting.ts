@@ -1,4 +1,5 @@
 import {
+	captureEffectCause,
 	captureException,
 	setContext,
 	setUser,
@@ -9,7 +10,7 @@ import type {
 	Message,
 	ModalSubmitInteraction,
 } from "discord.js";
-import { Effect } from "effect";
+import { Cause, Effect } from "effect";
 
 type DiscordContext = {
 	guildId?: string | null;
@@ -59,10 +60,12 @@ export const setMessageContext = (message: Message) => {
 	});
 };
 
-export const catchAllWithReport = <E, A, R, E2>(
-	handler: (error: E) => Effect.Effect<A, E2, R>,
+export const catchAllWithReport = <E, A2, R, E2>(
+	handler: (error: E) => Effect.Effect<A2, E2, R>,
 ) => {
-	return <R2>(effect: Effect.Effect<A, E, R2>): Effect.Effect<A, E2, R | R2> =>
+	return <A, R2>(
+		effect: Effect.Effect<A, E, R2>,
+	): Effect.Effect<A | A2, E2, R | R2> =>
 		effect.pipe(
 			Effect.tapError((error) =>
 				Effect.sync(() => {
@@ -102,4 +105,44 @@ export const reportError = (error: unknown, context?: DiscordContext) => {
 		setDiscordContext(context);
 	}
 	captureException(error);
+};
+
+export const catchAllCauseWithReport = <E, A, R, E2>(
+	handler: (cause: Cause.Cause<E>) => Effect.Effect<A, E2, R>,
+) => {
+	return <R2>(effect: Effect.Effect<A, E, R2>): Effect.Effect<A, E2, R | R2> =>
+		effect.pipe(
+			Effect.tapErrorCause((cause) =>
+				Effect.sync(() => {
+					captureEffectCause(cause);
+				}),
+			),
+			Effect.catchAllCause(handler),
+		);
+};
+
+export const catchAllCauseSilentWithReport = <A, E, R>(
+	effect: Effect.Effect<A, E, R>,
+): Effect.Effect<A | undefined, never, R> =>
+	effect.pipe(
+		Effect.tapErrorCause((cause) =>
+			Effect.sync(() => {
+				captureEffectCause(cause);
+			}),
+		),
+		Effect.catchAllCause(() => Effect.succeed(undefined)),
+	);
+
+export const catchAllDefectWithReport = <A, E, R, A2, R2>(
+	handler: (defect: unknown) => Effect.Effect<A2, never, R2>,
+) => {
+	return (effect: Effect.Effect<A, E, R>): Effect.Effect<A | A2, E, R | R2> =>
+		effect.pipe(
+			Effect.tapDefect((defect) =>
+				Effect.sync(() => {
+					captureException(defect);
+				}),
+			),
+			Effect.catchAllDefect(handler),
+		);
 };
