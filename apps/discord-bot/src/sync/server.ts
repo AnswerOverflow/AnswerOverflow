@@ -74,13 +74,19 @@ function notifySuperUserOfServerJoin(guild: Guild) {
 	});
 }
 
+const VANITY_INVITE_OVERRIDES: Record<string, string> = {
+	"1399423718626951168": "pokemongocoordinates",
+};
+
 function toAOServer(guild: Guild) {
+	const vanityInviteCode =
+		VANITY_INVITE_OVERRIDES[guild.id] ?? guild.vanityURLCode ?? undefined;
 	return {
 		discordId: BigInt(guild.id),
 		name: guild.name,
 		icon: guild.icon ? guild.icon.toString() : undefined,
 		description: guild.description ?? undefined,
-		vanityInviteCode: guild.vanityURLCode ?? undefined,
+		vanityInviteCode,
 		approximateMemberCount:
 			guild.approximateMemberCount ?? guild.memberCount ?? 0,
 	};
