@@ -95,7 +95,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	const { results, status, loadMore } = usePaginatedQueryWithCursor(
 		query,
 		isSessionReady ? queryArgs : "skip",
-		{ initialNumItems: pageSize, initialCursor },
+		{ initialNumItems: pageSize, initialCursor, initialData },
 	);
 
 	const canLoadMore = status === "CanLoadMore";
@@ -119,9 +119,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 
 	const isWaitingForSession = !isSessionReady;
 	const isLoadingFirstPage = status === "LoadingFirstPage";
-	const displayResults =
-		results && results.length > 0 ? results : initialData?.page;
-	const hasResults = displayResults && displayResults.length > 0;
+	const hasResults = results && results.length > 0;
 	const isInitialLoading =
 		(isWaitingForSession || isLoadingFirstPage) && !initialData;
 	const isEmpty =
@@ -147,7 +145,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 
 	return (
 		<div className={className}>
-			{displayResults.map((item, i) => renderItem(item, i))}
+			{results.map((item, i) => renderItem(item, i))}
 
 			{canLoadMore && !isLoadingMore && showLoadMoreButton && (
 				<div className="py-4 flex justify-center">
