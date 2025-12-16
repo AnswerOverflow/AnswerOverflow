@@ -135,7 +135,11 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				yield* accountQueue.offer(toAODiscordAccount(newMessage.author));
-			}),
+			}).pipe(
+				catchAllWithReport((error) =>
+					Console.error(`Error updating message ${newMessage.id}:`, error),
+				),
+			),
 		);
 
 		yield* discord.client.on("messageDelete", (message) =>
@@ -246,7 +250,11 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				}
 
 				yield* accountQueue.offer(toAODiscordAccount(message.author));
-			}),
+			}).pipe(
+				catchAllWithReport((error) =>
+					Console.error(`Error creating message ${message.id}:`, error),
+				),
+			),
 		);
 	}),
 );
