@@ -13,6 +13,8 @@
 		"test:watch": "vitest"
 	},
 	"dependencies": {
+		"@effect/cluster": "catalog:",
+		"@effect/platform-node": "catalog:",
 		"@packages/database": "workspace:*",
 		"@packages/database-utils": "workspace:*",
 		"@packages/observability": "workspace:*",

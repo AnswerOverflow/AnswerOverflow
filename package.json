@@ -44,8 +44,10 @@
 			"packages/*"
 		],
 		"catalog": {
-			"effect": "^3.19.3",
-			"@effect/platform": "^0.93.0",
+			"effect": "^3.19.8",
+			"@effect/platform": "^0.93.6",
+			"@effect/platform-node": "^0.103.0",
+			"@effect/cluster": "^0.55.0",
 			"@effect/vitest": "^0.25.0",
 			"@effect/language-service": "^0.56.0",
 			"convex": "^1.29.1",

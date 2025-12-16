@@ -1,3 +1,4 @@
+import { NodeRuntime } from "@effect/platform-node";
 import { PostHogCaptureClientLayer } from "@packages/database/analytics/server";
 import { DatabaseLayer } from "@packages/database/database";
 import { S3StorageLayer } from "@packages/database/storage";
@@ -23,7 +24,4 @@ export const AppLayer = Layer.mergeAll(
 	BotLayers.pipe(Layer.provide(BaseLayer)),
 );
 
-Effect.runPromise(program.pipe(Effect.provide(AppLayer))).catch((error) => {
-	console.error("Fatal error:", error);
-	process.exit(1);
-});
+NodeRuntime.runMain(program.pipe(Effect.provide(AppLayer)));
