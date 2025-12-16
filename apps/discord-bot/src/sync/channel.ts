@@ -11,7 +11,6 @@ import {
 	isAllowedThreadChannel,
 	toAOChannel,
 } from "../utils/conversions";
-import { catchAllWithReport } from "../utils/error-reporting";
 
 export function syncChannel(
 	channel: GuildBasedChannel | GuildChannel | AnyThreadChannel,
@@ -25,7 +24,7 @@ export function syncChannel(
 			channel: discordChannelData,
 		});
 	}).pipe(
-		catchAllWithReport((error) =>
+		Effect.catchAll((error) =>
 			Console.warn(`Failed to sync channel ${channel.id}:`, error),
 		),
 	);
@@ -43,7 +42,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				yield* syncChannel(channel);
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(
 						`Error maintaining channel parity ${channel.id}:`,
 						error,
@@ -84,7 +83,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				yield* syncChannel(thread);
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(`Error maintaining thread parity ${thread.id}:`, error),
 				),
 			),
@@ -97,7 +96,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				yield* syncChannel(newChannel);
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(`Error updating channel ${newChannel.id}:`, error),
 				),
 			),
@@ -112,7 +111,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					id: BigInt(channel.id),
 				});
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(`Error deleting channel ${channel.id}:`, error),
 				),
 			),
@@ -125,7 +124,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				yield* syncChannel(newThread);
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(`Error updating thread ${newThread.id}:`, error),
 				),
 			),
@@ -153,7 +152,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					id: BigInt(thread.id),
 				});
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(`Error deleting thread ${thread.id}:`, error),
 				),
 			),
@@ -166,7 +165,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				yield* syncChannel(invite.channel);
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(
 						`Error removing invite code from channel (invite: ${invite.code}):`,
 						error,

@@ -5,8 +5,7 @@
 	"exports": {
 		"./*": "./src/*.ts",
 		"./effect-otel": "./src/effect-otel.ts",
-		"./convex-effect-otel": "./src/convex-effect-otel.ts",
-		"./sentry": "./src/sentry.ts"
+		"./convex-effect-otel": "./src/convex-effect-otel.ts"
 	},
 	"scripts": {},
 	"dependencies": {
@@ -17,7 +16,6 @@
 		"@opentelemetry/sdk-trace-base": "^2.2.0",
 		"@opentelemetry/sdk-trace-node": "^2.2.0",
 		"@opentelemetry/sdk-trace-web": "^2.2.0",
-		"@sentry/node": "^10.30.0",
 		"effect": "catalog:"
 	},
 	"devDependencies": {
