@@ -1,6 +1,6 @@
-import { ConvexClient } from "convex/browser";
+import { ConvexClient, ConvexHttpClient } from "convex/browser";
 import type { FunctionReference } from "convex/server";
-import { Context, Duration, Effect, Layer, Ref, Schedule } from "effect";
+import { Context, Duration, Effect, Layer, Ref } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import {
 	type ConvexClientShared,
@@ -11,7 +11,7 @@ import {
 
 type ConvexClientWithClose = ConvexClientShared & { close: () => void };
 
-const createWrappedClient = (convexUrl: string): ConvexClientWithClose => {
+const createWebSocketClient = (convexUrl: string): ConvexClientWithClose => {
 	const client = new ConvexClient(convexUrl);
 	return {
 		query: client.query.bind(client),
@@ -26,23 +26,38 @@ const createWrappedClient = (convexUrl: string): ConvexClientWithClose => {
 	};
 };
 
+const createHttpClient = (convexUrl: string): ConvexClientShared => {
+	const client = new ConvexHttpClient(convexUrl);
+	const noopUnsubscribe = Object.assign(() => {}, {
+		unsubscribe: () => {},
+		getCurrentValue: () => undefined,
+	});
+	return {
+		query: client.query.bind(client),
+		mutation: <Mutation extends FunctionReference<"mutation">>(
+			mutation: Mutation,
+			args: Parameters<ConvexClient["mutation"]>[1],
+		) => client.mutation(mutation, args),
+		action: client.action.bind(client),
+		onUpdate: () => noopUnsubscribe,
+	};
+};
+
 const createLiveService = Effect.gen(function* () {
 	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL!;
-	const clientRef = yield* Ref.make(createWrappedClient(convexUrl));
-	const recreateMutex = yield* Effect.makeSemaphore(1);
+	const wsClientRef = yield* Ref.make(createWebSocketClient(convexUrl));
+	const httpClient = createHttpClient(convexUrl);
 
-	const recreateClient = recreateMutex.withPermits(1)(
-		Effect.gen(function* () {
-			const oldClient = yield* Ref.get(clientRef);
-			const newClient = createWrappedClient(convexUrl);
-			yield* Ref.set(clientRef, newClient);
-			try {
-				oldClient.close();
-			} catch {
-				// Ignore close errors
-			}
-		}),
-	);
+	const recreateWsClient = Effect.gen(function* () {
+		const oldClient = yield* Ref.get(wsClientRef);
+		const newClient = createWebSocketClient(convexUrl);
+		yield* Ref.set(wsClientRef, newClient);
+		try {
+			oldClient.close();
+		} catch {
+			// Ignore close errors
+		}
+	});
 
 	const use = <A>(
 		fn: (
@@ -53,20 +68,22 @@ const createLiveService = Effect.gen(function* () {
 			},
 		) => A | Promise<A>,
 	) => {
-		const attempt = Effect.gen(function* () {
-			const client = yield* Ref.get(clientRef);
+		const wsAttempt = Effect.gen(function* () {
+			const client = yield* Ref.get(wsClientRef);
 			return yield* Effect.tryPromise({
 				try: () => Promise.resolve(fn(client, { api, internal })),
 				catch: (cause) => new ConvexError({ cause }),
 			});
 		});
 
-		return attempt.pipe(
-			Effect.tapError(() => recreateClient),
-			Effect.retry({
-				schedule: Schedule.spaced(Duration.millis(200)),
-				times: 1,
-			}),
+		const httpFallback = Effect.tryPromise({
+			try: () => Promise.resolve(fn(httpClient, { api, internal })),
+			catch: (cause) => new ConvexError({ cause }),
+		}).pipe(Effect.withSpan("use_convex_http_fallback"));
+
+		return wsAttempt.pipe(
+			Effect.tapError(() => recreateWsClient),
+			Effect.orElse(() => httpFallback),
 			Effect.timeoutFail({
 				duration: Duration.seconds(20),
 				onTimeout: () =>
@@ -78,7 +95,7 @@ const createLiveService = Effect.gen(function* () {
 
 	return {
 		use,
-		clientRef,
+		wsClientRef,
 	};
 });
 
@@ -92,7 +109,7 @@ const ConvexClientLiveSharedLayer = Layer.effectContext(
 		const service = yield* createLiveService;
 		const clientProxy = new Proxy({} as ConvexClientShared, {
 			get(_, prop: keyof ConvexClientShared) {
-				const currentClient = Ref.get(service.clientRef).pipe(Effect.runSync);
+				const currentClient = Ref.get(service.wsClientRef).pipe(Effect.runSync);
 				return currentClient[prop];
 			},
 		});
