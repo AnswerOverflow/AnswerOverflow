@@ -3,6 +3,10 @@ import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import { trackUserJoinedServer, trackUserLeftServer } from "../utils/analytics";
 import { toAODiscordAccount } from "../utils/conversions";
+import {
+	catchAllSilentWithReport,
+	catchAllWithReport,
+} from "../utils/error-reporting";
 
 const invalidateUserGuildsCacheForMember = (
 	database: Effect.Effect.Success<typeof Database>,
@@ -23,7 +27,7 @@ const invalidateUserGuildsCacheForMember = (
 			discordAccountId: BigInt(oauthAccount.accountId),
 		});
 	}).pipe(
-		Effect.catchAll((error) =>
+		catchAllWithReport((error) =>
 			Console.error(
 				`Error invalidating guilds cache for user ${discordUserId}:`,
 				error,
@@ -42,7 +46,7 @@ export const UserParityLayer = Layer.scopedDiscard(
 					account: toAODiscordAccount(newUser),
 				})
 				.pipe(
-					Effect.catchAll((error) =>
+					catchAllWithReport((error) =>
 						Console.error(
 							`Error updating Discord account ${newUser.id}:`,
 							error,
@@ -69,21 +73,23 @@ export const UserParityLayer = Layer.scopedDiscard(
 						},
 					);
 
-				yield* trackUserJoinedServer(
-					member,
-					{
-						discordId: serverData.discordId.toString(),
-						name: serverData.name,
-					},
-					preferencesData
-						? {
-								readTheRulesConsentEnabled:
-									preferencesData.readTheRulesConsentEnabled,
-							}
-						: undefined,
-				).pipe(Effect.catchAll(() => Effect.void));
+				yield* catchAllSilentWithReport(
+					trackUserJoinedServer(
+						member,
+						{
+							discordId: serverData.discordId.toString(),
+							name: serverData.name,
+						},
+						preferencesData
+							? {
+									readTheRulesConsentEnabled:
+										preferencesData.readTheRulesConsentEnabled,
+								}
+							: undefined,
+					),
+				);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(`Error handling guild member add ${member.id}:`, error),
 				),
 			),
@@ -107,21 +113,23 @@ export const UserParityLayer = Layer.scopedDiscard(
 						},
 					);
 
-				yield* trackUserLeftServer(
-					member,
-					{
-						discordId: serverData.discordId.toString(),
-						name: serverData.name,
-					},
-					preferencesData
-						? {
-								readTheRulesConsentEnabled:
-									preferencesData.readTheRulesConsentEnabled,
-							}
-						: undefined,
-				).pipe(Effect.catchAll(() => Effect.void));
+				yield* catchAllSilentWithReport(
+					trackUserLeftServer(
+						member,
+						{
+							discordId: serverData.discordId.toString(),
+							name: serverData.name,
+						},
+						preferencesData
+							? {
+									readTheRulesConsentEnabled:
+										preferencesData.readTheRulesConsentEnabled,
+								}
+							: undefined,
+					),
+				);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(
 						`Error handling guild member remove ${member.id}:`,
 						error,
