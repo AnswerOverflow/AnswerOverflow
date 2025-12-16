@@ -1,8 +1,11 @@
+import "./src/instrument";
+
 import { PostHogCaptureClientLayer } from "@packages/database/analytics/server";
 import { DatabaseLayer } from "@packages/database/database";
 import { ConvexStorageLayer } from "@packages/database/storage";
 import { createOtelLayer } from "@packages/observability/effect-otel";
-import { Effect, Layer, Logger, LogLevel } from "effect";
+import { captureEffectCause, flush } from "@packages/observability/sentry";
+import { Cause, Effect, Layer, Logger, LogLevel } from "effect";
 import { BotLayers, program } from "./src/bot";
 import { DiscordLayer } from "./src/core/discord-service";
 
@@ -23,7 +26,25 @@ export const AppLayer = Layer.mergeAll(
 	BotLayers.pipe(Layer.provide(BaseLayer)),
 );
 
-Effect.runPromise(program.pipe(Effect.provide(AppLayer))).catch((error) => {
-	console.error("Fatal error:", error);
-	process.exit(1);
+const runProgram = program.pipe(
+	Effect.provide(AppLayer),
+	Effect.tapErrorCause((cause) =>
+		Effect.sync(() => {
+			captureEffectCause(cause, { tags: { fatal: "true" } });
+			console.error("Fatal error:", Cause.squash(cause));
+		}),
+	),
+	Effect.ensuring(Effect.promise(() => flush(2000))),
+);
+
+Effect.runFork(runProgram);
+
+process.on("SIGTERM", async () => {
+	await flush(2000);
+	process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+	await flush(2000);
+	process.exit(0);
 });

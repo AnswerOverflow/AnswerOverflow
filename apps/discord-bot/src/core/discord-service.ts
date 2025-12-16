@@ -1,4 +1,10 @@
 import {
+	captureEffectCause,
+	captureException,
+	captureMessage,
+	setTag,
+} from "@packages/observability/sentry";
+import {
 	type ActivityType,
 	ChannelType,
 	type Client,
@@ -7,6 +13,7 @@ import {
 } from "discord.js";
 import {
 	Array as Arr,
+	Cause,
 	Context,
 	Data,
 	Effect,
@@ -51,8 +58,27 @@ export const createDiscordService = Effect.gen(function* () {
 			},
 		});
 
+	const setupErrorListeners = () => {
+		client.on("error", (error) => {
+			captureException(error, { tags: { discord_event: "error" } });
+		});
+
+		client.on("shardError", (error, shardId) => {
+			captureException(error, {
+				tags: { discord_event: "shardError", shard_id: String(shardId) },
+			});
+		});
+
+		client.on("warn", (message) => {
+			captureMessage(message, "warning");
+			setTag("discord_event", "warn");
+		});
+	};
+
 	const login = () =>
 		Effect.gen(function* () {
+			setupErrorListeners();
+
 			yield* use((c) => c.login(token));
 
 			yield* Effect.async<void, UnknownDiscordError>((resume) => {
@@ -74,7 +100,15 @@ export const createDiscordService = Effect.gen(function* () {
 			const eventKey = String(event);
 
 			const listener = (...args: ClientEvents[E]) => {
-				const handlerEffect = Effect.scoped(handler(...args));
+				const handlerEffect = Effect.scoped(handler(...args)).pipe(
+					Effect.tapErrorCause((cause) =>
+						Effect.sync(() => {
+							captureEffectCause(cause, {
+								tags: { discord_event: eventKey },
+							});
+						}),
+					),
+				);
 
 				const fiber = Runtime.runFork(runtime)(handlerEffect);
 
