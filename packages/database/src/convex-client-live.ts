@@ -1,6 +1,6 @@
 import { ConvexClient } from "convex/browser";
 import type { FunctionReference } from "convex/server";
-import { Context, Effect, Layer } from "effect";
+import { Context, Duration, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import {
 	type ConvexClientShared,
@@ -43,10 +43,10 @@ const createLiveService = Effect.gen(function* () {
 			catch(cause) {
 				return new ConvexError({ cause });
 			},
-		}).pipe(Effect.withSpan("use_convex_live_client")) as Effect.Effect<
-			Awaited<A>,
-			ConvexError
-		>;
+		}).pipe(
+			Effect.timeout(Duration.seconds(15)),
+			Effect.withSpan("use_convex_live_client"),
+		) as Effect.Effect<Awaited<A>, ConvexError>;
 	};
 
 	return { use, client: wrappedClient };
