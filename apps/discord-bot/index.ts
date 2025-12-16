@@ -2,12 +2,19 @@ import { NodeRuntime } from "@effect/platform-node";
 import { PostHogCaptureClientLayer } from "@packages/database/analytics/server";
 import { DatabaseLayer } from "@packages/database/database";
 import { S3StorageLayer } from "@packages/database/storage";
-import { createOtelLayer } from "@packages/observability/effect-otel";
+import { createSentryEffectLayer } from "@packages/observability/sentry-effect";
 import { Effect, Layer, Logger, LogLevel } from "effect";
 import { BotLayers, program } from "./src/bot";
 import { DiscordLayer } from "./src/core/discord-service";
 
-const OtelLayer = createOtelLayer("discord-bot");
+const SentryLayer = createSentryEffectLayer({
+	dsn: process.env.SENTRY_DSN,
+	serviceName: "discord-bot",
+	environment: process.env.NODE_ENV ?? "development",
+	release: process.env.SENTRY_RELEASE,
+	tracesSampleRate: 1.0,
+});
+
 const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
 
 const BaseLayer = Layer.mergeAll(
@@ -15,7 +22,7 @@ const BaseLayer = Layer.mergeAll(
 	DatabaseLayer,
 	S3StorageLayer.pipe(Layer.provide(DatabaseLayer)),
 	PostHogCaptureClientLayer,
-	OtelLayer,
+	SentryLayer,
 	LoggerLayer,
 );
 

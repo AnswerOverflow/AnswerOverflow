@@ -53,7 +53,8 @@
 		"shiki": "^3.12.2",
 		"sonner": "^2.0.7",
 		"use-debounce": "^10.0.6",
-		"zod": "^4.1.13"
+		"zod": "^4.1.13",
+		"@sentry/nextjs": "^9"
 	},
 	"devDependencies": {
 		"@packages/typescript-config": "workspace:*",
