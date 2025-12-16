@@ -7,7 +7,7 @@ import type {
 	FunctionReference,
 	FunctionReturnType,
 } from "convex/server";
-import { Context, Effect, Layer } from "effect";
+import { Context, Duration, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
 import schema from "../convex/schema";
 import {
@@ -132,10 +132,10 @@ const createTestService = Effect.gen(function* () {
 				}
 				return new ConvexError({ cause });
 			},
-		}).pipe(Effect.withSpan("use_convex_test_client")) as Effect.Effect<
-			Awaited<A>,
-			ConvexError
-		>;
+		}).pipe(
+			Effect.timeout(Duration.seconds(15)),
+			Effect.withSpan("use_convex_test_client"),
+		) as Effect.Effect<Awaited<A>, ConvexError>;
 	};
 
 	return {
