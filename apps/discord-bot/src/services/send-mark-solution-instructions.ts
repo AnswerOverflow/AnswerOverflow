@@ -6,6 +6,7 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Effect } from "effect";
+import { catchAllSilentWithReport } from "../utils/error-reporting";
 import {
 	trackAskedQuestion,
 	trackMarkSolutionInstructionsSent,
@@ -90,14 +91,16 @@ export function handleSendMarkSolutionInstructions(
 			channelSettings.flags.indexingEnabled ||
 			channelSettings.flags.markSolutionEnabled
 		) {
-			yield* trackAskedQuestion(
-				thread,
-				channelSettings,
-				threadOwner,
-				server,
-				serverPreferences,
-				question,
-			).pipe(Effect.catchAll(() => Effect.void));
+			yield* catchAllSilentWithReport(
+				trackAskedQuestion(
+					thread,
+					channelSettings,
+					threadOwner,
+					server,
+					serverPreferences,
+					question,
+				),
+			);
 		}
 
 		if (!channelSettings.flags.sendMarkSolutionInstructionsInNewThreads) {
@@ -137,14 +140,16 @@ export function handleSendMarkSolutionInstructions(
 			},
 		});
 
-		yield* trackMarkSolutionInstructionsSent(
-			thread,
-			channelSettings,
-			threadOwner,
-			server,
-			serverPreferences,
-			question,
-		).pipe(Effect.catchAll(() => Effect.void));
+		yield* catchAllSilentWithReport(
+			trackMarkSolutionInstructionsSent(
+				thread,
+				channelSettings,
+				threadOwner,
+				server,
+				serverPreferences,
+				question,
+			),
+		);
 
 		console.log(
 			`Sent mark solution instructions to thread ${thread.id} (owner: ${threadOwner.id})`,

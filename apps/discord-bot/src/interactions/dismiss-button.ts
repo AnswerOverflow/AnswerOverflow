@@ -1,6 +1,10 @@
 import type { ButtonInteraction, GuildMember } from "discord.js";
 import { Message, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { Console, Effect, Layer } from "effect";
+import {
+	catchAllSilentWithReport,
+	catchAllWithReport,
+} from "../utils/error-reporting";
 import { Discord, UnknownDiscordError } from "../core/discord-service";
 import { trackDismissButtonClicked } from "../utils/analytics";
 
@@ -99,8 +103,8 @@ export function handleDismissButtonInteraction(interaction: ButtonInteraction) {
 			return yield* Effect.fail(new Error("Message not found"));
 		}
 
-		yield* trackDismissButtonClicked(dismisser, messageToDismiss).pipe(
-			Effect.catchAll(() => Effect.void),
+		yield* catchAllSilentWithReport(
+			trackDismissButtonClicked(dismisser, messageToDismiss),
 		);
 
 		yield* handleDismissMessage({
@@ -108,7 +112,7 @@ export function handleDismissButtonInteraction(interaction: ButtonInteraction) {
 			dismisser: dismisser,
 			allowedToDismissId,
 		}).pipe(
-			Effect.catchAll((error) =>
+			catchAllWithReport((error) =>
 				Effect.gen(function* () {
 					const discord = yield* Discord;
 					if (interaction.deferred || interaction.replied) {
@@ -160,7 +164,7 @@ export const DismissButtonHandlerLayer = Layer.scopedDiscard(
 					interaction.customId.startsWith("dismiss:")
 				) {
 					yield* handleDismissButtonInteraction(interaction).pipe(
-						Effect.catchAll((error) =>
+						catchAllWithReport((error) =>
 							Console.error("Error in dismiss button handler:", error),
 						),
 					);

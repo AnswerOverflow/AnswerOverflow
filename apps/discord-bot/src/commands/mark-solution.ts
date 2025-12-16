@@ -2,6 +2,12 @@ import { Database } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType, MessageFlags } from "discord.js";
 import { Data, Duration, Effect, Layer } from "effect";
+import {
+	catchAllSilentWithReport,
+	catchAllSucceedNullWithReport,
+	catchAllWithReport,
+	catchAllDefectWithReport,
+} from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { makeMarkSolutionResponse } from "../services/mark-solution";
 import {
@@ -112,17 +118,17 @@ export function handleMarkSolutionCommand(
 		let questionMessage = null;
 
 		if (parentChannel.type === ChannelType.GuildForum) {
-			const fetchedMessage = yield* discord
-				.callClient(() => thread.messages.fetch(thread.id))
-				.pipe(Effect.catchAll(() => Effect.succeed(null)));
+			const fetchedMessage = yield* catchAllSucceedNullWithReport(
+				discord.callClient(() => thread.messages.fetch(thread.id)),
+			);
 			questionMessage = fetchedMessage ?? null;
 		} else if (
 			parentChannel.type === ChannelType.GuildText ||
 			parentChannel.type === ChannelType.GuildAnnouncement
 		) {
-			const fetchedMessage = yield* discord
-				.callClient(() => parentChannel.messages.fetch(thread.id))
-				.pipe(Effect.catchAll(() => Effect.succeed(null)));
+			const fetchedMessage = yield* catchAllSucceedNullWithReport(
+				discord.callClient(() => parentChannel.messages.fetch(thread.id)),
+			);
 			questionMessage = fetchedMessage ?? null;
 		}
 
@@ -154,9 +160,9 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		const guildMember = yield* discord
-			.callClient(() => guild.members.fetch(interaction.user.id))
-			.pipe(Effect.catchAll(() => Effect.succeed(null)));
+		const guildMember = yield* catchAllSucceedNullWithReport(
+			discord.callClient(() => guild.members.fetch(interaction.user.id)),
+		);
 
 		if (!guildMember) {
 			yield* discord.callClient(() =>
@@ -235,11 +241,11 @@ export function handleMarkSolutionCommand(
 				yield* discord.callClient(() => questionMessage.react("✅"));
 			}
 
-			yield* discord
-				.callClient(() => targetMessage.react("✅"))
-				.pipe(Effect.catchAll(() => Effect.void));
+			yield* catchAllSilentWithReport(
+				discord.callClient(() => targetMessage.react("✅")),
+			);
 		}).pipe(
-			Effect.catchAll((error) =>
+			catchAllWithReport((error) =>
 				Effect.gen(function* () {
 					console.error("Error marking solution:", error);
 					yield* discord.callClient(() =>
@@ -261,41 +267,43 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		const questionAsker = yield* discord
-			.callClient(() => guild.members.fetch(questionMessage.author.id))
-			.pipe(Effect.catchAll(() => Effect.succeed(null)));
+		const questionAsker = yield* catchAllSucceedNullWithReport(
+			discord.callClient(() => guild.members.fetch(questionMessage.author.id)),
+		);
 
-		const solutionAuthor = yield* discord
-			.callClient(() => guild.members.fetch(targetMessage.author.id))
-			.pipe(Effect.catchAll(() => Effect.succeed(null)));
+		const solutionAuthor = yield* catchAllSucceedNullWithReport(
+			discord.callClient(() => guild.members.fetch(targetMessage.author.id)),
+		);
 
 		if (questionAsker && solutionAuthor) {
 			yield* Effect.forkDaemon(
-				trackSolvedQuestion(
-					thread,
-					channelSettings,
-					questionAsker,
-					solutionAuthor,
-					guildMember,
-					questionMessage,
-					targetMessage,
-					{
-						discordId: server.discordId.toString(),
-						name: server.name,
-					},
-					serverPreferences
-						? {
-								readTheRulesConsentEnabled:
-									serverPreferences.readTheRulesConsentEnabled,
-							}
-						: undefined,
-				).pipe(Effect.catchAll(() => Effect.void)),
+				catchAllSilentWithReport(
+					trackSolvedQuestion(
+						thread,
+						channelSettings,
+						questionAsker,
+						solutionAuthor,
+						guildMember,
+						questionMessage,
+						targetMessage,
+						{
+							discordId: server.discordId.toString(),
+							name: server.name,
+						},
+						serverPreferences
+							? {
+									readTheRulesConsentEnabled:
+										serverPreferences.readTheRulesConsentEnabled,
+								}
+							: undefined,
+					),
+				),
 			);
 		}
 
 		yield* Effect.forkDaemon(
-			trackMarkSolutionCommandUsed(guildMember, "Success").pipe(
-				Effect.catchAll(() => Effect.void),
+			catchAllSilentWithReport(
+				trackMarkSolutionCommandUsed(guildMember, "Success"),
 			),
 		);
 
@@ -349,55 +357,55 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 					);
 
 					yield* commandWithTimeout.pipe(
-						Effect.catchAll((error) =>
+						catchAllWithReport((error) =>
 							Effect.gen(function* () {
 								console.error("Mark solution command failed:", error);
 
 								const errorMessage = "An unexpected error occurred";
 
 								if (interaction.deferred || interaction.replied) {
-									yield* discord
-										.callClient(() =>
+									yield* catchAllSilentWithReport(
+										discord.callClient(() =>
 											interaction.editReply({
 												content: `An error occurred: ${errorMessage}`,
 											}),
-										)
-										.pipe(Effect.catchAll(() => Effect.void));
+										),
+									);
 								} else {
-									yield* discord
-										.callClient(() =>
+									yield* catchAllSilentWithReport(
+										discord.callClient(() =>
 											interaction.reply({
 												content: `An error occurred: ${errorMessage}`,
 												flags: MessageFlags.Ephemeral,
 											}),
-										)
-										.pipe(Effect.catchAll(() => Effect.void));
+										),
+									);
 								}
 							}),
 						),
-						Effect.catchAllDefect((defect) =>
+						catchAllDefectWithReport((defect) =>
 							Effect.gen(function* () {
 								console.error("Mark solution command defect:", defect);
 
 								if (interaction.deferred || interaction.replied) {
-									yield* discord
-										.callClient(() =>
+									yield* catchAllSilentWithReport(
+										discord.callClient(() =>
 											interaction.editReply({
 												content:
 													"An unexpected error occurred. Please try again.",
 											}),
-										)
-										.pipe(Effect.catchAll(() => Effect.void));
+										),
+									);
 								} else {
-									yield* discord
-										.callClient(() =>
+									yield* catchAllSilentWithReport(
+										discord.callClient(() =>
 											interaction.reply({
 												content:
 													"An unexpected error occurred. Please try again.",
 												flags: MessageFlags.Ephemeral,
 											}),
-										)
-										.pipe(Effect.catchAll(() => Effect.void));
+										),
+									);
 								}
 							}),
 						),

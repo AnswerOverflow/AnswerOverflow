@@ -1,6 +1,10 @@
 import { Database } from "@packages/database/database";
 import type { GuildMember, PartialGuildMember } from "discord.js";
 import { Console, Effect, Layer } from "effect";
+import {
+	catchAllSilentWithReport,
+	catchAllWithReport,
+} from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
@@ -55,15 +59,15 @@ export function handleReadTheRulesConsent(
 		);
 
 		if (granted) {
-			yield* trackUserGrantConsent(newMember, ConsentSource.ReadTheRules).pipe(
-				Effect.catchAll(() => Effect.void),
+			yield* catchAllSilentWithReport(
+				trackUserGrantConsent(newMember, ConsentSource.ReadTheRules),
 			);
 			yield* Console.log(
 				`Granted read the rules consent for user ${newMember.user.id} in server ${server.discordId}`,
 			);
 		}
 	}).pipe(
-		Effect.catchAll((error) =>
+		catchAllWithReport((error) =>
 			Console.error(
 				`Error processing read the rules consent for member ${newMember.user.id}:`,
 				error,
