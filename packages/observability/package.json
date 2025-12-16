@@ -6,18 +6,23 @@
 		"./*": "./src/*.ts",
 		"./effect-otel": "./src/effect-otel.ts",
 		"./convex-effect-otel": "./src/convex-effect-otel.ts",
-		"./sentry": "./src/sentry.ts"
+		"./sentry": "./src/sentry.ts",
+		"./sentry-effect": "./src/sentry-effect.ts"
 	},
 	"scripts": {},
 	"dependencies": {
 		"@effect/opentelemetry": "^0.59.0",
 		"@effect/platform": "catalog:",
+		"@opentelemetry/auto-instrumentations-node": "^0.67.2",
+		"@opentelemetry/context-async-hooks": "^2.2.0",
 		"@opentelemetry/core": "^1.30.0",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
+		"@opentelemetry/sdk-node": "^0.208.0",
 		"@opentelemetry/sdk-trace-base": "^2.2.0",
 		"@opentelemetry/sdk-trace-node": "^2.2.0",
 		"@opentelemetry/sdk-trace-web": "^2.2.0",
 		"@sentry/node": "^10.30.0",
+		"@sentry/opentelemetry": "^10.30.0",
 		"effect": "catalog:"
 	},
 	"devDependencies": {
