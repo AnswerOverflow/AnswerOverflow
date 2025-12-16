@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
 	experimental: {
 		turbopackFileSystemCacheForDev: true,
 	},
-	productionBrowserSourceMaps: false,
+	productionBrowserSourceMaps: true,
 	rewrites: async () => {
 		return [
 			{
@@ -96,4 +96,10 @@ export default withSentryConfig(withBotId(withMDX(nextConfig)), {
 	widenClientFileUpload: true,
 	disableLogger: true,
 	automaticVercelMonitors: true,
+	sourcemaps: {
+		deleteSourcemapsAfterUpload: false,
+	},
+	reactComponentAnnotation: {
+		enabled: true,
+	},
 });
