@@ -13,6 +13,7 @@ import {
 	toAOMessage,
 	toUpsertMessageArgs,
 } from "../utils/conversions";
+import { catchAllWithReport } from "../utils/error-reporting";
 import { isHumanMessage } from "../utils/message-utils";
 
 const BATCH_CONFIG = {
@@ -123,7 +124,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					const embedImagesToUpload = extractEmbedImagesToUpload(newMessage);
 					if (embedImagesToUpload.length > 0) {
 						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
-							Effect.catchAll((error) =>
+							catchAllWithReport((error) =>
 								Console.warn(
 									`Failed to upload embed images for message ${newMessage.id}:`,
 									error,
@@ -158,7 +159,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				});
 				yield* Console.log(`Deleted message ${message.id}`);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(`Error deleting message ${message.id}:`, error),
 				),
 			),
@@ -180,7 +181,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				});
 				yield* Console.log(`Bulk deleted ${messageIds.length} messages`);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(`Error bulk deleting messages:`, error),
 				),
 			),
@@ -234,7 +235,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					const embedImagesToUpload = extractEmbedImagesToUpload(message);
 					if (embedImagesToUpload.length > 0) {
 						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
-							Effect.catchAll((error) =>
+							catchAllWithReport((error) =>
 								Console.warn(
 									`Failed to upload embed images for message ${message.id}:`,
 									error,
