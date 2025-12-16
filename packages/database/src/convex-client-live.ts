@@ -9,6 +9,25 @@ import {
 	type WrappedUnifiedClient,
 } from "./convex-unified-client";
 
+const isTransientError = (error: ConvexError): boolean => {
+	const cause = error.cause;
+	if (cause instanceof Error) {
+		console.log("Is transient error", cause.message, "falling back to http");
+		const message = cause.message.toLowerCase();
+		return (
+			message.includes("try again") ||
+			message.includes("couldn't be completed") ||
+			message.includes("network") ||
+			message.includes("connection") ||
+			message.includes("websocket") ||
+			message.includes("socket") ||
+			message.includes("econnreset") ||
+			message.includes("econnrefused")
+		);
+	}
+	return false;
+};
+
 type ConvexClientWithClose = ConvexClientShared & { close: () => void };
 
 const createWebSocketClient = (convexUrl: string): ConvexClientWithClose => {
@@ -82,8 +101,10 @@ const createLiveService = Effect.gen(function* () {
 		}).pipe(Effect.withSpan("use_convex_http_fallback"));
 
 		return wsAttempt.pipe(
-			Effect.tapError(() => recreateWsClient),
-			Effect.orElse(() => httpFallback),
+			Effect.tapError((error) =>
+				isTransientError(error) ? recreateWsClient : Effect.void,
+			),
+			Effect.catchIf(isTransientError, () => httpFallback),
 			Effect.timeoutFail({
 				duration: Duration.seconds(20),
 				onTimeout: () =>
