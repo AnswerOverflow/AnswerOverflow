@@ -1,8 +1,9 @@
 import { Database } from "@packages/database/database";
 import { Storage } from "@packages/database/storage";
-import type { Guild } from "discord.js";
+import { EmbedBuilder, type Guild } from "discord.js";
 import { Array as Arr, Console, Effect, Layer } from "effect";
 import { registerCommands } from "../commands/register";
+import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import {
 	registerServerGroup,
@@ -12,6 +13,62 @@ import {
 import { isAllowedRootChannelType } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
 import { syncChannel } from "./channel";
+
+function notifySuperUserOfServerJoin(guild: Guild) {
+	return Effect.gen(function* () {
+		const discord = yield* Discord;
+
+		const embed = new EmbedBuilder()
+			.setTitle("Bot Joined New Server")
+			.setColor("#57F287")
+			.setTimestamp()
+			.addFields(
+				{
+					name: "Server Name",
+					value: guild.name,
+					inline: true,
+				},
+				{
+					name: "Server ID",
+					value: guild.id,
+					inline: true,
+				},
+				{
+					name: "Member Count",
+					value: String(guild.memberCount ?? "Unknown"),
+					inline: true,
+				},
+				{
+					name: "Owner ID",
+					value: guild.ownerId,
+					inline: true,
+				},
+			);
+
+		if (guild.description) {
+			embed.addFields({
+				name: "Description",
+				value: guild.description,
+				inline: false,
+			});
+		}
+
+		if (guild.iconURL()) {
+			embed.setThumbnail(guild.iconURL());
+		}
+
+		yield* discord
+			.callClient(async () => {
+				const superUser = await guild.client.users.fetch(SUPER_USER_ID);
+				await superUser.send({ embeds: [embed] });
+			})
+			.pipe(
+				Effect.catchAll((error) =>
+					Console.error("Failed to notify super user of server join:", error),
+				),
+			);
+	});
+}
 
 function toAOServer(guild: Guild) {
 	return {
@@ -108,6 +165,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 				yield* syncGuild(guild);
 				yield* trackServerJoin(guild).pipe(Effect.catchAll(() => Effect.void));
+				yield* notifySuperUserOfServerJoin(guild);
 			}).pipe(
 				Effect.catchAll((error) =>
 					Console.error(`Error handling guild create ${guild.id}:`, error),
@@ -128,7 +186,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
 				const db = yield* Database;
-				db.private.servers.updateServer({
+				yield* db.private.servers.updateServer({
 					serverId: BigInt(guild.id),
 					server: {
 						kickedTime: Date.now(),
