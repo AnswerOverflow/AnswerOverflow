@@ -243,6 +243,66 @@ const getDiscordGuildsCache = () =>
 
 export const discordGuildsCacheName = "discordGuilds";
 
+type AnalyticsResult = Record<string, { aggregated_value: number }>;
+
+export const fetchTopQuestionSolvers = internalAction({
+	args: {
+		serverId: v.string(),
+	},
+	handler: async (_ctx, args): Promise<AnalyticsResult> => {
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopQuestionSolversForServer();
+		});
+
+		const result = await Effect.runPromise(
+			program.pipe(
+				Effect.provide(ServerAnalyticsLayer({ serverId: args.serverId })),
+				Effect.timeout("30 seconds"),
+				Effect.catchAll(() => Effect.succeed(null)),
+			),
+		);
+
+		return result ?? {};
+	},
+});
+
+export const fetchTopPages = internalAction({
+	args: {
+		serverId: v.string(),
+	},
+	handler: async (_ctx, args): Promise<AnalyticsResult> => {
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopPages();
+		});
+
+		const result = await Effect.runPromise(
+			program.pipe(
+				Effect.provide(ServerAnalyticsLayer({ serverId: args.serverId })),
+				Effect.timeout("30 seconds"),
+				Effect.catchAll(() => Effect.succeed(null)),
+			),
+		);
+
+		return result ?? {};
+	},
+});
+
+const getTopQuestionSolversCache = () =>
+	new ActionCache(components.actionCache, {
+		action: internal.authenticated.dashboard.fetchTopQuestionSolvers,
+		name: "topQuestionSolvers",
+		ttl: 3600 * 1000, // 1 hour - analytics data doesn't need real-time updates
+	});
+
+const getTopPagesCache = () =>
+	new ActionCache(components.actionCache, {
+		action: internal.authenticated.dashboard.fetchTopPages,
+		name: "topPages",
+		ttl: 3600 * 1000, // 1 hour
+	});
+
 type ServerWithMetadata = {
 	discordId: string;
 	name: string;
@@ -337,20 +397,11 @@ export const getUserServers = authenticatedAction({
 export const getTopQuestionSolversForServer = guildManagerAction({
 	args: {},
 	handler: async (ctx, args) => {
-		const program = Effect.gen(function* () {
-			const analytics = yield* Analytics;
-			return yield* analytics.server.getTopQuestionSolversForServer();
+		const analyticsData = await getTopQuestionSolversCache().fetch(ctx, {
+			serverId: args.serverId.toString(),
 		});
 
-		const analyticsData = await Effect.runPromise(
-			program.pipe(
-				Effect.provide(
-					ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
-				),
-			),
-		);
-
-		if (!analyticsData) return {};
+		if (!analyticsData || Object.keys(analyticsData).length === 0) return {};
 
 		const userIds = Object.keys(analyticsData).map((id) => BigInt(id));
 
@@ -441,18 +492,11 @@ export const getQuestionsAndAnswers = guildManagerAction({
 export const getTopPagesForServer = guildManagerAction({
 	args: {},
 	handler: async (ctx, args) => {
-		const program = Effect.gen(function* () {
-			const analytics = yield* Analytics;
-			return yield* analytics.server.getTopPages();
-		}).pipe(
-			Effect.provide(
-				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
-			),
-		);
+		const analyticsData = await getTopPagesCache().fetch(ctx, {
+			serverId: args.serverId.toString(),
+		});
 
-		const analyticsData = await Effect.runPromise(program);
-
-		if (!analyticsData) return {};
+		if (!analyticsData || Object.keys(analyticsData).length === 0) return {};
 
 		const messageIds = Object.keys(analyticsData).map((id) => BigInt(id));
 
