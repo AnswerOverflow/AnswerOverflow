@@ -1,0 +1,29 @@
+---
+description: Patterns for the Discord bot codebase
+globs: apps/discord-bot/**/*.ts
+---
+
+# Discord Bot Patterns
+
+## Discord API Calls
+
+**Always use `discord.callClient()`** for Discord API calls instead of `Effect.tryPromise()` directly.
+
+The Discord service provides a `callClient` method that properly wraps Discord API calls with error handling for `DiscordAPIError` and `UnknownDiscordError`.
+
+### Usage
+
+```typescript
+const discord = yield* Discord;
+
+yield* discord.callClient(async () => {
+  const user = await client.users.fetch(userId);
+  await user.send({ embeds: [embed] });
+});
+```
+
+### Why
+
+- Consistent error handling across the codebase
+- Properly types Discord-specific errors
+- Centralizes Discord API interaction patterns
