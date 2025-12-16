@@ -13,6 +13,7 @@ import {
 import { Console, Effect, Layer } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 const BUG_REPORT_MODAL_ID = "bug-report-modal";
 const BUG_DESCRIPTION_INPUT_ID = "bug-description-input";
@@ -134,7 +135,7 @@ export function handleBugReportModalSubmit(
 			},
 			catch: (error) => error,
 		}).pipe(
-			Effect.catchAll((error) =>
+			catchAllWithReport((error) =>
 				Console.error("Failed to send bug report to super user:", error),
 			),
 		);

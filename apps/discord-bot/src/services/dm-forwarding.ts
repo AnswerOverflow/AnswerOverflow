@@ -3,6 +3,7 @@ import { Console, Effect, Layer } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import { makeDmReplyButton } from "../utils/discord-components";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 export const DMForwardingHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
@@ -62,7 +63,7 @@ export const DMForwardingHandlerLayer = Layer.scopedDiscard(
 					},
 					catch: (error) => error,
 				}).pipe(
-					Effect.catchAll((error) =>
+					catchAllWithReport((error) =>
 						Console.error("Failed to forward DM to super user:", error),
 					),
 				);
