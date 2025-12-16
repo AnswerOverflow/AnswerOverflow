@@ -1,6 +1,5 @@
 import { Console, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
-import { catchAllWithReport } from "../utils/error-reporting";
 import { syncChannel } from "./channel";
 
 export const BotPermissionsSyncLayer = Layer.scopedDiscard(
@@ -30,7 +29,7 @@ export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 					},
 				);
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(
 						`Error syncing bot permissions after member update:`,
 						error,
@@ -71,7 +70,7 @@ export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 					},
 				);
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(
 						`Error syncing bot permissions after role update:`,
 						error,

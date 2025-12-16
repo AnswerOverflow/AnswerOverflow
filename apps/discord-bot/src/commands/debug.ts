@@ -4,7 +4,6 @@ import { EmbedBuilder, MessageFlags } from "discord.js";
 import { Effect, Layer } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
-import { catchAllWithReport } from "../utils/error-reporting";
 
 export function handleDebugCommand(interaction: ChatInputCommandInteraction) {
 	return Effect.gen(function* () {
@@ -95,7 +94,7 @@ export function handleDebugCommand(interaction: ChatInputCommandInteraction) {
 			}),
 		);
 	}).pipe(
-		catchAllWithReport((error) =>
+		Effect.catchAll((error) =>
 			Effect.gen(function* () {
 				const discord = yield* Discord;
 				console.error("Debug command error:", error);

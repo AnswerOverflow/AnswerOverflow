@@ -12,10 +12,6 @@ import {
 } from "../utils/analytics";
 import { isAllowedRootChannelType } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
-import {
-	catchAllSilentWithReport,
-	catchAllWithReport,
-} from "../utils/error-reporting";
 import { syncChannel } from "./channel";
 
 function notifySuperUserOfServerJoin(guild: Guild) {
@@ -67,7 +63,7 @@ function notifySuperUserOfServerJoin(guild: Guild) {
 				await superUser.send({ embeds: [embed] });
 			})
 			.pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error("Failed to notify super user of server join:", error),
 				),
 			);
@@ -97,7 +93,9 @@ export function syncGuild(guild: Guild) {
 			yield* database.private.servers.upsertServer(aoServerData);
 
 		if (isNew) {
-			yield* catchAllSilentWithReport(registerServerGroup(guild, guild.id));
+			yield* registerServerGroup(guild, guild.id).pipe(
+				Effect.catchAll(() => Effect.void),
+			);
 
 			yield* database.private.server_preferences.updateServerPreferences({
 				serverId: BigInt(guild.id),
@@ -127,7 +125,7 @@ export function syncGuild(guild: Guild) {
 							`Uploaded server icon for ${guild.name} (custom domain: ${preferences.customDomain})`,
 						),
 					),
-					catchAllWithReport((error) =>
+					Effect.catchAll((error) =>
 						Console.warn(
 							`Failed to upload server icon for ${guild.name}:`,
 							error,
@@ -143,7 +141,7 @@ export function syncGuild(guild: Guild) {
 
 		yield* Effect.forEach(rootChannels, (channel) => syncChannel(channel));
 	}).pipe(
-		catchAllWithReport((error) =>
+		Effect.catchAll((error) =>
 			Console.error(`Error syncing guild ${guild.id}:`, error),
 		),
 	);
@@ -166,10 +164,10 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				}
 
 				yield* syncGuild(guild);
-				yield* catchAllSilentWithReport(trackServerJoin(guild));
+				yield* trackServerJoin(guild).pipe(Effect.catchAll(() => Effect.void));
 				yield* notifySuperUserOfServerJoin(guild);
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(`Error handling guild create ${guild.id}:`, error),
 				),
 			),
@@ -179,7 +177,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				yield* syncGuild(newGuild);
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(`Error updating guild ${newGuild.id}:`, error),
 				),
 			),
@@ -194,9 +192,9 @@ export const ServerParityLayer = Layer.scopedDiscard(
 						kickedTime: Date.now(),
 					},
 				});
-				yield* catchAllSilentWithReport(trackServerLeave(guild));
+				yield* trackServerLeave(guild).pipe(Effect.catchAll(() => Effect.void));
 			}).pipe(
-				catchAllWithReport((error) =>
+				Effect.catchAll((error) =>
 					Console.error(`Error handling guild delete ${guild.id}:`, error),
 				),
 			),
@@ -205,7 +203,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("clientReady", (client) =>
 			Effect.gen(function* () {
 				yield* registerCommands().pipe(
-					catchAllWithReport((error) =>
+					Effect.catchAll((error) =>
 						Console.error("Error registering commands:", error),
 					),
 				);
@@ -247,7 +245,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 							});
 							yield* Console.log(`Marked server ${server.name} as kicked`);
 						}).pipe(
-							catchAllWithReport((error) =>
+							Effect.catchAll((error) =>
 								Console.error(
 									`Error marking server ${server.discordId} as kicked:`,
 									error,
