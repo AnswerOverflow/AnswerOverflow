@@ -12,9 +12,8 @@ import {
 const isTransientError = (error: ConvexError): boolean => {
 	const cause = error.cause;
 	if (cause instanceof Error) {
-		console.log("Is transient error", cause.message, "falling back to http");
 		const message = cause.message.toLowerCase();
-		return (
+		const isTransient =
 			message.includes("try again") ||
 			message.includes("couldn't be completed") ||
 			message.includes("network") ||
@@ -22,8 +21,13 @@ const isTransientError = (error: ConvexError): boolean => {
 			message.includes("websocket") ||
 			message.includes("socket") ||
 			message.includes("econnreset") ||
-			message.includes("econnrefused")
-		);
+			message.includes("econnrefused") ||
+			message.includes("timeout") ||
+			message.includes("timed out");
+		if (isTransient) {
+			console.log("Transient error detected, falling back to HTTP:", message);
+		}
+		return isTransient;
 	}
 	return false;
 };
@@ -93,23 +97,35 @@ const createLiveService = Effect.gen(function* () {
 				try: () => Promise.resolve(fn(client, { api, internal })),
 				catch: (cause) => new ConvexError({ cause }),
 			});
-		});
+		}).pipe(
+			Effect.timeoutFail({
+				duration: Duration.seconds(15),
+				onTimeout: () =>
+					new ConvexError({
+						cause: new Error("WebSocket request timed out after 15s"),
+					}),
+			}),
+		);
 
 		const httpFallback = Effect.tryPromise({
 			try: () => Promise.resolve(fn(httpClient, { api, internal })),
 			catch: (cause) => new ConvexError({ cause }),
-		}).pipe(Effect.withSpan("use_convex_http_fallback"));
+		}).pipe(
+			Effect.timeoutFail({
+				duration: Duration.seconds(20),
+				onTimeout: () =>
+					new ConvexError({
+						cause: new Error("HTTP fallback request timed out after 20s"),
+					}),
+			}),
+			Effect.withSpan("use_convex_http_fallback"),
+		);
 
 		return wsAttempt.pipe(
 			Effect.tapError((error) =>
 				isTransientError(error) ? recreateWsClient : Effect.void,
 			),
 			Effect.catchIf(isTransientError, () => httpFallback),
-			Effect.timeoutFail({
-				duration: Duration.seconds(20),
-				onTimeout: () =>
-					new ConvexError({ cause: new Error("Request timed out after 20s") }),
-			}),
 			Effect.withSpan("use_convex_live_client"),
 		) as Effect.Effect<Awaited<A>, ConvexError>;
 	};
