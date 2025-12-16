@@ -224,7 +224,10 @@ async function getServerHeaderData(
 			return 0;
 		});
 
-	const inviteCode = indexedSettings.find((s) => s.inviteCode)?.inviteCode;
+	const channelInviteCode = indexedSettings.find(
+		(s) => s.inviteCode,
+	)?.inviteCode;
+	const inviteCode = server.vanityInviteCode ?? channelInviteCode;
 
 	return {
 		server: {
