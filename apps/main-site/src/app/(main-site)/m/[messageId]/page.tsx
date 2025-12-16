@@ -15,8 +15,6 @@ type Props = {
 	searchParams: Promise<{ cursor?: string; focus?: string }>;
 };
 
-export const dynamic = "force-static";
-
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const [params, searchParams] = await Promise.all([
 		props.params,
