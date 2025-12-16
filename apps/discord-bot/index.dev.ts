@@ -19,12 +19,11 @@ const LoggerLayer = Logger.minimumLogLevel(LogLevel.Debug);
 
 const BaseLayer = Layer.mergeAll(
 	DiscordLayer,
-	DatabaseLayer,
-	ConvexStorageLayer.pipe(Layer.provide(DatabaseLayer)),
+	ConvexStorageLayer,
 	PostHogCaptureClientLayer,
 	SentryLayer,
 	LoggerLayer,
-);
+).pipe(Layer.provideMerge(DatabaseLayer));
 
 export const AppLayer = Layer.mergeAll(
 	BaseLayer,
