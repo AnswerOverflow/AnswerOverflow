@@ -9,10 +9,8 @@ export type SentryConfig = {
 	profilesSampleRate?: number;
 };
 
-let isInitialized = false;
-
 export const initSentry = (config: SentryConfig) => {
-	if (isInitialized) {
+	if (Sentry.getClient()) {
 		return;
 	}
 
@@ -28,8 +26,6 @@ export const initSentry = (config: SentryConfig) => {
 		tracesSampleRate: config.tracesSampleRate ?? 0.1,
 		profilesSampleRate: config.profilesSampleRate ?? 0.1,
 	});
-
-	isInitialized = true;
 };
 
 export const captureException = (
@@ -40,10 +36,6 @@ export const captureException = (
 		user?: { id: string; username?: string };
 	},
 ) => {
-	if (!isInitialized) {
-		return;
-	}
-
 	Sentry.withScope((scope) => {
 		if (context?.tags) {
 			for (const [key, value] of Object.entries(context.tags)) {
@@ -66,37 +58,22 @@ export const captureMessage = (
 	message: string,
 	level: "info" | "warning" | "error" = "info",
 ) => {
-	if (!isInitialized) {
-		return;
-	}
 	Sentry.captureMessage(message, level);
 };
 
 export const setUser = (user: { id: string; username?: string } | null) => {
-	if (!isInitialized) {
-		return;
-	}
 	Sentry.setUser(user);
 };
 
 export const setContext = (name: string, context: Record<string, unknown>) => {
-	if (!isInitialized) {
-		return;
-	}
 	Sentry.setContext(name, context);
 };
 
 export const setTag = (key: string, value: string) => {
-	if (!isInitialized) {
-		return;
-	}
 	Sentry.setTag(key, value);
 };
 
 export const flush = (timeout?: number) => {
-	if (!isInitialized) {
-		return Promise.resolve(true);
-	}
 	return Sentry.flush(timeout);
 };
 
