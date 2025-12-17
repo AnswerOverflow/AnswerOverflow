@@ -8,18 +8,19 @@
  * @module
  */
 
-import type {
-	ApiFromModules,
-	FilterApi,
-	FunctionReference,
-} from "convex/server";
-import { anyApi, componentsGeneric } from "convex/server";
 import type * as adapter from "../adapter.js";
 import type * as auth from "../auth.js";
 
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
+import { anyApi, componentsGeneric } from "convex/server";
+
 const fullApi: ApiFromModules<{
-	adapter: typeof adapter;
-	auth: typeof auth;
+  adapter: typeof adapter;
+  auth: typeof auth;
 }> = anyApi as any;
 
 /**
@@ -31,8 +32,8 @@ const fullApi: ApiFromModules<{
  * ```
  */
 export const api: FilterApi<
-	typeof fullApi,
-	FunctionReference<any, "public">
+  typeof fullApi,
+  FunctionReference<any, "public">
 > = anyApi as any;
 
 /**
@@ -44,8 +45,8 @@ export const api: FilterApi<
  * ```
  */
 export const internal: FilterApi<
-	typeof fullApi,
-	FunctionReference<any, "internal">
+  typeof fullApi,
+  FunctionReference<any, "internal">
 > = anyApi as any;
 
 export const components = componentsGeneric() as unknown as {};
