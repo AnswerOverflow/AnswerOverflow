@@ -1,9 +1,10 @@
+import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../client";
 import { CHANNEL_TYPE } from "./channels";
-import { getThreadStarterMessages } from "./messages";
+import { getThreadStartMessage } from "./messages";
 
 export async function findSimilarThreads(
 	ctx: QueryCtx,
@@ -14,7 +15,7 @@ export async function findSimilarThreads(
 		serverId?: bigint;
 		limit: number;
 	},
-): Promise<Doc<"messages">[]> {
+) {
 	const { searchQuery, currentThreadId, currentServerId, serverId, limit } =
 		args;
 
@@ -128,15 +129,8 @@ export async function findSimilarThreads(
 		return thread !== undefined && thread.parentId !== null;
 	});
 
-	const firstMessages = await getThreadStarterMessages(
-		ctx,
-		validThreadIds.map((id) => BigInt(id)),
-	);
-
-	const orderedMessages = Arr.filter(
-		validThreadIds.map((id) => firstMessages[id] ?? null),
-		Predicate.isNotNull,
-	);
-
-	return Arr.take(orderedMessages, limit);
+	const firstMessages = await asyncMap(validThreadIds, async (id) => {
+		return getThreadStartMessage(ctx, BigInt(id));
+	});
+	return Arr.filter(firstMessages, Predicate.isNotNullable).slice(0, limit);
 }

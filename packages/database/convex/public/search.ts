@@ -71,6 +71,7 @@ export const getSimilarThreads = publicQuery({
 			limit,
 		});
 
+		// todo: we're doing double lookups here, not great
 		return await enrichMessagesWithServerAndChannels(ctx, similarThreads);
 	},
 });
