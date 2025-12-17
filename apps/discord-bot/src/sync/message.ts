@@ -216,6 +216,28 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
+				const channelIdToCheck = message.channel.isThread()
+					? message.channel.parentId
+					: message.channelId;
+
+				if (!channelIdToCheck) {
+					return;
+				}
+
+				const channel = yield* database.private.channels.findChannelByDiscordId(
+					{
+						discordId: BigInt(channelIdToCheck),
+					},
+				);
+
+				if (!channel) {
+					return;
+				}
+
+				if (!channel.flags?.indexingEnabled) {
+					return;
+				}
+
 				const data = yield* Effect.promise(() =>
 					toAOMessage(message, server.discordId.toString()),
 				);
