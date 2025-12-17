@@ -130,7 +130,7 @@ export function DashboardClient({
 					</CardHeader>
 					<CardContent>
 						<Button asChild>
-							<Link href="/dashboard/onboarding">Get Started</Link>
+							<Link href="/dashboard">Get Started</Link>
 						</Button>
 					</CardContent>
 				</Card>

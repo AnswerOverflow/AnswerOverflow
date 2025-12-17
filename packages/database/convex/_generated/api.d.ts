@@ -13,6 +13,8 @@ import type * as authenticated_dashboard from "../authenticated/dashboard.js";
 import type * as authenticated_dashboard_mutations from "../authenticated/dashboard_mutations.js";
 import type * as authenticated_dashboard_queries from "../authenticated/dashboard_queries.js";
 import type * as authenticated_discord_token from "../authenticated/discord_token.js";
+import type * as authenticated_onboarding from "../authenticated/onboarding.js";
+import type * as authenticated_onboarding_action from "../authenticated/onboarding_action.js";
 import type * as authenticated_stripe from "../authenticated/stripe.js";
 import type * as authenticated_stripe_actions from "../authenticated/stripe_actions.js";
 import type * as authenticated_vercel_domains from "../authenticated/vercel_domains.js";
@@ -37,6 +39,7 @@ import type * as public_custom_functions from "../public/custom_functions.js";
 import type * as public_discord_accounts from "../public/discord_accounts.js";
 import type * as public_messages from "../public/messages.js";
 import type * as public_search from "../public/search.js";
+import type * as shared_ai from "../shared/ai.js";
 import type * as shared_anonymization from "../shared/anonymization.js";
 import type * as shared_attachments from "../shared/attachments.js";
 import type * as shared_auth from "../shared/auth.js";
@@ -56,6 +59,7 @@ import type * as shared_shared from "../shared/shared.js";
 import type * as shared_similarThreads from "../shared/similarThreads.js";
 import type * as shared_stripe from "../shared/stripe.js";
 import type * as shared_users from "../shared/users.js";
+import type * as shared_validators from "../shared/validators.js";
 import type * as stripe_internal from "../stripe/internal.js";
 
 import type {
@@ -70,6 +74,8 @@ declare const fullApi: ApiFromModules<{
   "authenticated/dashboard_mutations": typeof authenticated_dashboard_mutations;
   "authenticated/dashboard_queries": typeof authenticated_dashboard_queries;
   "authenticated/discord_token": typeof authenticated_discord_token;
+  "authenticated/onboarding": typeof authenticated_onboarding;
+  "authenticated/onboarding_action": typeof authenticated_onboarding_action;
   "authenticated/stripe": typeof authenticated_stripe;
   "authenticated/stripe_actions": typeof authenticated_stripe_actions;
   "authenticated/vercel_domains": typeof authenticated_vercel_domains;
@@ -94,6 +100,7 @@ declare const fullApi: ApiFromModules<{
   "public/discord_accounts": typeof public_discord_accounts;
   "public/messages": typeof public_messages;
   "public/search": typeof public_search;
+  "shared/ai": typeof shared_ai;
   "shared/anonymization": typeof shared_anonymization;
   "shared/attachments": typeof shared_attachments;
   "shared/auth": typeof shared_auth;
@@ -113,6 +120,7 @@ declare const fullApi: ApiFromModules<{
   "shared/similarThreads": typeof shared_similarThreads;
   "shared/stripe": typeof shared_stripe;
   "shared/users": typeof shared_users;
+  "shared/validators": typeof shared_validators;
   "stripe/internal": typeof stripe_internal;
 }>;
 

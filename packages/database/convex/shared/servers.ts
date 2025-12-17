@@ -1,6 +1,14 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../client";
+import type { ServerPreferences } from "../schema";
+
+export const DEFAULT_SERVER_PREFERENCES = {
+	plan: "FREE" as const,
+	readTheRulesConsentEnabled: false,
+	considerAllMessagesPublicEnabled: true,
+	anonymizeMessagesEnabled: false,
+};
 
 type ServerWithMetadata = {
 	hasBot: boolean;
@@ -70,5 +78,39 @@ export async function getServerByDiscordId(
 	ctx: QueryCtx | MutationCtx,
 	discordId: bigint,
 ) {
-	return await getOneFrom(ctx.db, "servers", "by_discordId", discordId);
+	const server = await getOneFrom(ctx.db, "servers", "by_discordId", discordId);
+	if (!server || server.kickedTime) {
+		return null;
+	}
+
+	return server;
+}
+
+export async function upsertServerPreferencesLogic(
+	ctx: MutationCtx,
+	serverId: bigint,
+	preferences: Partial<Omit<ServerPreferences, "serverId">>,
+) {
+	const existing = await getOneFrom(
+		ctx.db,
+		"serverPreferences",
+		"by_serverId",
+		serverId,
+	);
+
+	if (existing) {
+		await ctx.db.patch(existing._id, {
+			...existing,
+			...preferences,
+			serverId,
+		});
+	} else {
+		await ctx.db.insert("serverPreferences", {
+			...DEFAULT_SERVER_PREFERENCES,
+			...preferences,
+			serverId,
+		});
+	}
+
+	return serverId;
 }

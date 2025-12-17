@@ -17,7 +17,8 @@ import {
 	DEFAULT_CHANNEL_SETTINGS,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
-} from "../shared/shared";
+	upsertChannelSettingsLogic,
+} from "../shared";
 
 type Channel = Infer<typeof channelSchema>;
 type ChannelSettings = Infer<typeof channelSettingsSchema>;
@@ -131,38 +132,7 @@ export const updateChannelSettings = privateMutation({
 		settings: channelSettingsSchema.partial(),
 	},
 	handler: async (ctx, args) => {
-		const [existingSettings, channel] = await Promise.all([
-			getOneFrom(ctx.db, "channelSettings", "by_channelId", args.channelId),
-			getOneFrom(
-				ctx.db,
-				"channels",
-				"by_discordChannelId",
-				args.channelId,
-				"id",
-			),
-		]);
-
-		if (!channel) {
-			throw new Error(`Channel ${args.channelId} not found`);
-		}
-
-		if (existingSettings) {
-			await ctx.db.patch(existingSettings._id, {
-				...existingSettings,
-				...args.settings,
-				channelId: args.channelId,
-				serverId: channel.serverId,
-			});
-		} else {
-			await ctx.db.insert("channelSettings", {
-				...DEFAULT_CHANNEL_SETTINGS,
-				...args.settings,
-				channelId: args.channelId,
-				serverId: channel.serverId,
-			});
-		}
-
-		return args.channelId;
+		return await upsertChannelSettingsLogic(ctx, args.channelId, args.settings);
 	},
 });
 
