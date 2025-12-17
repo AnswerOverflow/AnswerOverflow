@@ -148,6 +148,9 @@ export declare const components: {
           input:
             | {
                 data: {
+                  banExpires?: null | number;
+                  banReason?: null | string;
+                  banned?: null | boolean;
                   createdAt: number;
                   displayUsername?: null | string;
                   email: string;
@@ -157,6 +160,7 @@ export declare const components: {
                   name: string;
                   phoneNumber?: null | string;
                   phoneNumberVerified?: null | boolean;
+                  role?: null | string;
                   twoFactorEnabled?: null | boolean;
                   updatedAt: number;
                   userId?: null | string;
@@ -168,6 +172,7 @@ export declare const components: {
                 data: {
                   createdAt: number;
                   expiresAt: number;
+                  impersonatedBy?: null | string;
                   ipAddress?: null | string;
                   token: string;
                   updatedAt: number;
@@ -311,6 +316,10 @@ export declare const components: {
                     | "phoneNumber"
                     | "phoneNumberVerified"
                     | "userId"
+                    | "role"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -345,6 +354,7 @@ export declare const components: {
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -721,6 +731,10 @@ export declare const components: {
                     | "phoneNumber"
                     | "phoneNumberVerified"
                     | "userId"
+                    | "role"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -755,6 +769,7 @@ export declare const components: {
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1198,12 +1213,6 @@ export declare const components: {
         },
         any
       >;
-      migrationRemoveUserId: FunctionReference<
-        "mutation",
-        "internal",
-        { userId: string },
-        any
-      >;
       updateMany: FunctionReference<
         "mutation",
         "internal",
@@ -1212,6 +1221,9 @@ export declare const components: {
             | {
                 model: "user";
                 update: {
+                  banExpires?: null | number;
+                  banReason?: null | string;
+                  banned?: null | boolean;
                   createdAt?: number;
                   displayUsername?: null | string;
                   email?: string;
@@ -1221,6 +1233,7 @@ export declare const components: {
                   name?: string;
                   phoneNumber?: null | string;
                   phoneNumberVerified?: null | boolean;
+                  role?: null | string;
                   twoFactorEnabled?: null | boolean;
                   updatedAt?: number;
                   userId?: null | string;
@@ -1242,6 +1255,10 @@ export declare const components: {
                     | "phoneNumber"
                     | "phoneNumberVerified"
                     | "userId"
+                    | "role"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1269,6 +1286,7 @@ export declare const components: {
                 update: {
                   createdAt?: number;
                   expiresAt?: number;
+                  impersonatedBy?: null | string;
                   ipAddress?: null | string;
                   token?: string;
                   updatedAt?: number;
@@ -1285,6 +1303,7 @@ export declare const components: {
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1727,6 +1746,9 @@ export declare const components: {
             | {
                 model: "user";
                 update: {
+                  banExpires?: null | number;
+                  banReason?: null | string;
+                  banned?: null | boolean;
                   createdAt?: number;
                   displayUsername?: null | string;
                   email?: string;
@@ -1736,6 +1758,7 @@ export declare const components: {
                   name?: string;
                   phoneNumber?: null | string;
                   phoneNumberVerified?: null | boolean;
+                  role?: null | string;
                   twoFactorEnabled?: null | boolean;
                   updatedAt?: number;
                   userId?: null | string;
@@ -1757,6 +1780,10 @@ export declare const components: {
                     | "phoneNumber"
                     | "phoneNumberVerified"
                     | "userId"
+                    | "role"
+                    | "banned"
+                    | "banReason"
+                    | "banExpires"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1784,6 +1811,7 @@ export declare const components: {
                 update: {
                   createdAt?: number;
                   expiresAt?: number;
+                  impersonatedBy?: null | string;
                   ipAddress?: null | string;
                   token?: string;
                   updatedAt?: number;
@@ -1800,6 +1828,7 @@ export declare const components: {
                     | "ipAddress"
                     | "userAgent"
                     | "userId"
+                    | "impersonatedBy"
                     | "_id";
                   operator?:
                     | "lt"
@@ -2226,16 +2255,6 @@ export declare const components: {
         },
         any
       >;
-    };
-    adapterTest: {
-      count: FunctionReference<"query", "internal", any, any>;
-      create: FunctionReference<"mutation", "internal", any, any>;
-      delete: FunctionReference<"mutation", "internal", any, any>;
-      deleteMany: FunctionReference<"mutation", "internal", any, any>;
-      findMany: FunctionReference<"query", "internal", any, any>;
-      findOne: FunctionReference<"query", "internal", any, any>;
-      update: FunctionReference<"mutation", "internal", any, any>;
-      updateMany: FunctionReference<"mutation", "internal", any, any>;
     };
   };
   actionCache: {
