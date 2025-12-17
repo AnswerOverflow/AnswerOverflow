@@ -22,6 +22,7 @@ import {
 import { api, internal } from "../convex/_generated/api";
 import type { Emoji, Message } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
+import { ConvexClientHttpUnifiedLayer } from "./convex-client-http";
 import { ConvexClientLiveUnifiedLayer } from "./convex-client-live";
 import { ConvexClientUnified, ConvexError } from "./convex-unified-client";
 import { FUNCTION_TYPE_MAP, isNamespace } from "./generated/function-types";
@@ -346,6 +347,10 @@ export class Database extends Context.Tag("Database")<
 
 export const DatabaseLayer = Layer.effect(Database, service).pipe(
 	Layer.provide(ConvexClientLiveUnifiedLayer),
+);
+
+export const DatabaseHttpLayer = Layer.effect(Database, service).pipe(
+	Layer.provide(ConvexClientHttpUnifiedLayer),
 );
 
 export type BaseMessageWithRelations = Message & {
