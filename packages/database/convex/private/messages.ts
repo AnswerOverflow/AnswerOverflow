@@ -177,7 +177,12 @@ export const upsertManyMessages = privateMutation({
 		ignoreChecks: v.optional(v.boolean()),
 	},
 	handler: async (ctx, args) => {
-		if (args.messages.length === 0) return null;
+		const created: bigint[] = [];
+		const ignored: bigint[] = [];
+
+		if (args.messages.length === 0) {
+			return { created, ignored };
+		}
 
 		if (!args.ignoreChecks) {
 			const authorIds = new Set(args.messages.map((m) => m.message.authorId));
@@ -188,6 +193,13 @@ export const upsertManyMessages = privateMutation({
 			const ignoredAccountIds = new Set(
 				Array.from(authorIds).filter((_, idx) => ignoredAccounts[idx]),
 			);
+
+			const ignoredByAccount = args.messages.filter((msg) =>
+				ignoredAccountIds.has(msg.message.authorId),
+			);
+			for (const msg of ignoredByAccount) {
+				ignored.push(msg.message.id);
+			}
 
 			const messagesToProcess = args.messages.filter(
 				(msg) => !ignoredAccountIds.has(msg.message.authorId),
@@ -200,7 +212,9 @@ export const upsertManyMessages = privateMutation({
 					msg.message.authorId,
 					msg.message.serverId,
 				);
-				if (!indexingDisabled) {
+				if (indexingDisabled) {
+					ignored.push(msg.message.id);
+				} else {
 					messagesToUpsert.push(msg);
 				}
 			}
@@ -211,6 +225,7 @@ export const upsertManyMessages = privateMutation({
 					attachments: msgData.attachments,
 					reactions: msgData.reactions,
 				});
+				created.push(msgData.message.id);
 			}
 		} else {
 			for (const msgData of args.messages) {
@@ -219,10 +234,11 @@ export const upsertManyMessages = privateMutation({
 					attachments: msgData.attachments,
 					reactions: msgData.reactions,
 				});
+				created.push(msgData.message.id);
 			}
 		}
 
-		return null;
+		return { created, ignored };
 	},
 });
 
