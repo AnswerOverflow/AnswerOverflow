@@ -8,10 +8,10 @@ import {
 	TextInputStyle,
 } from "discord.js";
 import { Console, Effect, Layer } from "effect";
-import { catchAllWithReport } from "../utils/error-reporting";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import { DM_REPLY_ACTION_PREFIX } from "../utils/discord-components";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 const DM_REPLY_MODAL_ID_PREFIX = "dm-reply-modal";
 const DM_REPLY_INPUT_ID = "dm-reply-input";

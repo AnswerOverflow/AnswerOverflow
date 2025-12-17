@@ -1,12 +1,12 @@
 import type { ButtonInteraction, GuildMember } from "discord.js";
 import { Message, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { Console, Effect, Layer } from "effect";
+import { Discord, UnknownDiscordError } from "../core/discord-service";
+import { trackDismissButtonClicked } from "../utils/analytics";
 import {
 	catchAllSilentWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
-import { Discord, UnknownDiscordError } from "../core/discord-service";
-import { trackDismissButtonClicked } from "../utils/analytics";
 
 const DISMISS_ACTION_PREFIX = "dismiss";
 const DISMISS_OVERRIDE_PERMISSIONS = [

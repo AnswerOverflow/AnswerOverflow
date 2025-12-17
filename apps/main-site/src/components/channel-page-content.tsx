@@ -13,6 +13,7 @@ import {
 import { Link } from "@packages/ui/components/link";
 import { SearchInput } from "@packages/ui/components/search-input";
 import { ServerIcon } from "@packages/ui/components/server-icon";
+import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
 import {
 	Sheet,
 	SheetContent,
@@ -28,7 +29,6 @@ import {
 	ThreadCardSkeleton,
 } from "@packages/ui/components/thread-card";
 import { TrackLoad } from "@packages/ui/components/track-load";
-import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
 import { cn } from "@packages/ui/lib/utils";
 import { encodeCursor } from "@packages/ui/utils/cursor";
 import { getChannelIcon } from "@packages/ui/utils/discord";

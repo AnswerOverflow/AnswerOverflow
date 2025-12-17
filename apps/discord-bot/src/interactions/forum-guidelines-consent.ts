@@ -2,13 +2,13 @@ import { Database } from "@packages/database/database";
 import type { Message } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Console, Effect, Layer } from "effect";
+import { Discord } from "../core/discord-service";
+import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
+import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
 import {
 	catchAllSilentWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
-import { Discord } from "../core/discord-service";
-import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
-import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
 import { isHumanMessage } from "../utils/message-utils";
 
 export function handleForumGuidelinesConsent(message: Message) {

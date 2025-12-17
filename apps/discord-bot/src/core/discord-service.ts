@@ -13,7 +13,6 @@ import {
 } from "discord.js";
 import {
 	Array as Arr,
-	Cause,
 	Context,
 	Data,
 	Effect,

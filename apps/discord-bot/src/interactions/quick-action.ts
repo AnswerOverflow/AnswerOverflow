@@ -17,17 +17,17 @@ import {
 	Option,
 	Predicate,
 } from "effect";
-import {
-	catchAllSucceedNullWithReport,
-	catchAllSilentWithReport,
-	catchAllWithReport,
-} from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { trackQuickActionCommandSent } from "../utils/analytics";
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	makeDismissButton,
 } from "../utils/discord-components";
+import {
+	catchAllSilentWithReport,
+	catchAllSucceedNullWithReport,
+	catchAllWithReport,
+} from "../utils/error-reporting";
 
 export function handleQuickActionCommand(
 	interaction: ContextMenuCommandInteraction,
