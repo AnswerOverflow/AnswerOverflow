@@ -10,6 +10,7 @@ import {
 } from "../analytics/client";
 import { ConvexClientProvider, useSession } from "./convex-client-provider";
 import { HydrationProvider } from "./hydration-context";
+import { ImpersonationBanner } from "./impersonation-banner";
 import { SignInIfAnon } from "./sign-in-if-anon";
 import { type Tenant, TenantProvider } from "./tenant-context";
 
@@ -56,6 +57,7 @@ export function Providers({
 						<ConvexClientProvider tenant={tenant}>
 							<SignInIfAnon />
 							<IdentifyUser />
+							<ImpersonationBanner />
 							{children}
 						</ConvexClientProvider>
 					</NextThemesProvider>

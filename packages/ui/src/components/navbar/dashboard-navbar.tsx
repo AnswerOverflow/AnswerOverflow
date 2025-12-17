@@ -5,6 +5,7 @@ import Link from "next/link";
 import * as React from "react";
 import { AnswerOverflowLogo } from "../answer-overflow-logo";
 import { Button } from "../button";
+import { useIsImpersonating } from "../impersonation-banner";
 import {
 	ServerSelectDropdown,
 	type ServerSelectDropdownProps,
@@ -39,6 +40,7 @@ export function DashboardNavbar({
 	children,
 }: DashboardNavbarProps) {
 	const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
+	const isImpersonating = useIsImpersonating();
 
 	return (
 		<DashboardNavbarContext.Provider
@@ -46,7 +48,10 @@ export function DashboardNavbar({
 		>
 			<div className="relative flex w-full flex-col">
 				{/* Header - Fixed at top */}
-				<header className="fixed top-0 left-0 right-0 z-50 flex h-navbar items-center gap-4 border-b bg-background px-4">
+				<header
+					className="fixed left-0 right-0 z-50 flex h-navbar items-center gap-4 border-b bg-background px-4"
+					style={{ top: isImpersonating ? "40px" : "0" }}
+				>
 					{/* Mobile Menu Button */}
 					<Button
 						variant="ghost"

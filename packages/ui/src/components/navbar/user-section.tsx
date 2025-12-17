@@ -1,6 +1,8 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { ImpersonateDialog } from "../admin/impersonate-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { useAuthClient, useSession } from "../convex-client-provider";
 import {
@@ -37,10 +39,14 @@ function UserAvatar({
 	user,
 	onSignOut,
 	showDashboardLink,
+	isAdmin,
+	onOpenImpersonate,
 }: {
 	user: User;
 	onSignOut?: () => void | Promise<void>;
 	showDashboardLink?: boolean;
+	isAdmin?: boolean;
+	onOpenImpersonate?: () => void;
 }) {
 	return (
 		<DropdownMenu modal={false}>
@@ -53,13 +59,21 @@ function UserAvatar({
 					<AvatarFallback>{getInitials(user.name ?? "User")}</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className="z-[100] mr-4 mt-4 w-32">
+			<DropdownMenuContent className="z-[100] mr-4 mt-4 w-40">
 				{showDashboardLink && (
 					<>
 						<DropdownMenuItem asChild className="md:hidden">
 							<Link href="/dashboard">Dashboard</Link>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator className="md:hidden" />
+					</>
+				)}
+				{isAdmin && (
+					<>
+						<DropdownMenuItem onClick={onOpenImpersonate}>
+							Impersonate User
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
 					</>
 				)}
 				<DropdownMenuItem
@@ -104,6 +118,7 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const authClient = useAuthClient();
+	const [impersonateDialogOpen, setImpersonateDialogOpen] = useState(false);
 	const {
 		data: session,
 		isPending,
@@ -112,6 +127,8 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 		allowAnonymous: false,
 	});
 	const isOnDashboard = pathname?.startsWith("/dashboard");
+
+	const isAdmin = session?.user?.role === "admin";
 
 	if (isPending) {
 		return <UserSectionSkeleton />;
@@ -145,7 +162,7 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 			});
 		}
 
-		await refetch();
+		refetch();
 		router.push("/");
 	};
 
@@ -180,7 +197,15 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 				user={user}
 				onSignOut={handleSignOut}
 				showDashboardLink={!isOnDashboard}
+				isAdmin={isAdmin === true}
+				onOpenImpersonate={() => setImpersonateDialogOpen(true)}
 			/>
+			{isAdmin && (
+				<ImpersonateDialog
+					open={impersonateDialogOpen}
+					onOpenChange={setImpersonateDialogOpen}
+				/>
+			)}
 		</>
 	);
 }
