@@ -11,7 +11,7 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
 import { MessagePage, RepliesSection, RepliesSkeleton } from "./message-page";
-// import { SimilarThreads, SimilarThreadsSkeleton } from "./similar-threads";
+import { SimilarThreads, SimilarThreadsSkeleton } from "./similar-threads";
 
 export type MessagePageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.private.messages.getMessagePageHeaderData>
@@ -182,22 +182,21 @@ export function MessagePageLoader(props: {
 				)
 			}
 			similarThreadsSlot={
-				null
-				// <Suspense fallback={<SimilarThreadsSkeleton />}>
-				// 	<SimilarThreads
-				// 		searchQuery={
-				// 			headerData.thread?.name ??
-				// 			headerData.firstMessage?.message.content?.slice(0, 100) ??
-				// 			""
-				// 		}
-				// 		currentThreadId={(
-				// 			headerData.thread?.id ??
-				// 			headerData.firstMessage?.message.id ??
-				// 			headerData.canonicalId
-				// 		).toString()}
-				// 		currentServerId={headerData.server.discordId.toString()}
-				// 	/>
-				// </Suspense>
+				<Suspense fallback={<SimilarThreadsSkeleton />}>
+					<SimilarThreads
+						searchQuery={
+							headerData.thread?.name ??
+							headerData.firstMessage?.message.content?.slice(0, 100) ??
+							""
+						}
+						currentThreadId={(
+							headerData.thread?.id ??
+							headerData.firstMessage?.message.id ??
+							headerData.canonicalId
+						).toString()}
+						currentServerId={headerData.server.discordId.toString()}
+					/>
+				</Suspense>
 			}
 		/>
 	);
