@@ -31,7 +31,7 @@ const getNavigation = (baseUrl: string): NavigationData => ({
 				name: "Product",
 				data: [
 					{ name: "Pricing", href: `${baseUrl}/pricing` },
-					{ name: "Docs", href: `${baseUrl}/docs` },
+					{ name: "Docs", href: `${baseUrl}/docs/overview` },
 					{ name: "Communities", href: `${baseUrl}/browse` },
 				],
 			},
