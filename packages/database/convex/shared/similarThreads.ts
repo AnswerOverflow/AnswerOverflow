@@ -24,29 +24,23 @@ export async function findSimilarThreads(
 	}
 
 	const fetchLimit = Math.ceil(limit * 1.5);
+	const searchServerId = serverId ?? currentServerId;
 
 	const [threadsByName, messageResults] = await Promise.all([
 		ctx.db
 			.query("channels")
-			.withSearchIndex("search_name", (q) => {
-				const search = q
+			.withSearchIndex("search_name", (q) =>
+				q
 					.search("name", searchQuery)
-					.eq("type", CHANNEL_TYPE.PublicThread);
-				if (serverId) {
-					return search.eq("serverId", serverId);
-				}
-				return search;
-			})
+					.eq("type", CHANNEL_TYPE.PublicThread)
+					.eq("serverId", searchServerId),
+			)
 			.take(fetchLimit),
 		ctx.db
 			.query("messages")
-			.withSearchIndex("search_content", (q) => {
-				const search = q.search("content", searchQuery);
-				if (serverId) {
-					return search.eq("serverId", serverId);
-				}
-				return search;
-			})
+			.withSearchIndex("search_content", (q) =>
+				q.search("content", searchQuery).eq("serverId", searchServerId),
+			)
 			.take(fetchLimit),
 	]);
 
