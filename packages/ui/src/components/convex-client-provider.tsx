@@ -4,7 +4,7 @@ import { convexClient } from "@convex-dev/better-auth/client/plugins";
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { ConvexQueryClient } from "@convex-dev/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { anonymousClient } from "better-auth/client/plugins";
+import { adminClient, anonymousClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
@@ -32,7 +32,7 @@ function createAuthClientWithBaseURL(tenant: TenantInfo | null | undefined) {
 		: undefined;
 	return createAuthClient({
 		baseURL,
-		plugins: [anonymousClient(), convexClient()],
+		plugins: [anonymousClient(), convexClient(), adminClient()],
 	});
 }
 

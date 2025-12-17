@@ -1,10 +1,11 @@
-import { createClient, type GenericCtx } from "@convex-dev/better-auth";
+import { type GenericCtx, createClient } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
-import { betterAuth } from "better-auth";
+import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { anonymous } from "better-auth/plugins";
+import { admin, anonymous } from "better-auth/plugins";
 import { components, internal } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
+import authSchema from "../betterAuth/schema";
 import type { Plan } from "../schema";
 
 export type { Plan };
@@ -37,18 +38,25 @@ const getTrustedOrigins = (siteUrl: string): string[] => {
 	return origins;
 };
 
-export const authComponent = createClient<DataModel>(components.betterAuth);
+export const authComponent = createClient<DataModel, typeof authSchema>(
+	components.betterAuth,
+	{
+		local: {
+			schema: authSchema,
+		},
+	},
+);
 
-export const createAuth = (
+export const createAuthOptions = (
 	ctx: GenericCtx<DataModel>,
 	{ optionsOnly } = { optionsOnly: false },
-): ReturnType<typeof betterAuth> => {
+): BetterAuthOptions => {
 	const siteUrl = process.env.SITE_URL;
 	if (!siteUrl) {
 		throw new Error("SITE_URL environment variable is required");
 	}
 
-	return betterAuth({
+	return {
 		logger: {
 			disabled: optionsOnly,
 		},
@@ -137,9 +145,18 @@ export const createAuth = (
 		plugins: [
 			convex(),
 			anonymous({
-				// https://github.com/better-auth/better-auth/pull/5825 anon users with convex is partly bugged
 				disableDeleteAnonymousUser: true,
 			}),
+			admin({
+				impersonationSessionDuration: 60 * 60,
+			}),
 		],
-	});
+	} satisfies BetterAuthOptions;
+};
+
+export const createAuth = (
+	ctx: GenericCtx<DataModel>,
+	{ optionsOnly } = { optionsOnly: false },
+): ReturnType<typeof betterAuth> => {
+	return betterAuth(createAuthOptions(ctx, { optionsOnly }));
 };
