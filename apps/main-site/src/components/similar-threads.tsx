@@ -5,7 +5,7 @@ import { ServerIcon } from "@packages/ui/components/server-icon";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { TimeAgo } from "@packages/ui/components/time-ago";
 import type { FunctionReturnType } from "convex/server";
-import { Effect } from "effect";
+import { Effect, Exit } from "effect";
 import { CheckCircle2 } from "lucide-react";
 import { runtime } from "@/lib/runtime";
 
@@ -53,8 +53,8 @@ export function SimilarThreadsSkeleton() {
 
 async function fetchSimilarThreads(
 	args: SimilarThreadsProps & { limit: number },
-): Promise<SimilarThreadsResult> {
-	return Effect.gen(function* () {
+): Promise<SimilarThreadsResult | null> {
+	const exit = await Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.search.getSimilarThreads({
 			searchQuery: args.searchQuery,
@@ -63,7 +63,12 @@ async function fetchSimilarThreads(
 			serverId: args.serverId,
 			limit: args.limit,
 		});
-	}).pipe(runtime.runPromise);
+	}).pipe(runtime.runPromiseExit);
+
+	if (Exit.isFailure(exit)) {
+		return null;
+	}
+	return exit.value;
 }
 
 function SimilarThreadsList(props: { results: SimilarThreadsResult }) {
@@ -134,6 +139,10 @@ export async function SimilarThreads(props: SimilarThreadsProps) {
 		...props,
 		limit: 4,
 	});
+
+	if (results === null) {
+		return null;
+	}
 
 	return <SimilarThreadsList results={results} />;
 }
