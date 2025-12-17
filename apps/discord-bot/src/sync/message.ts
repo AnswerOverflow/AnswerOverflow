@@ -17,7 +17,7 @@ import { catchAllWithReport } from "../utils/error-reporting";
 import { isHumanMessage } from "../utils/message-utils";
 
 const BATCH_CONFIG = {
-	maxBatchSize: process.env.NODE_ENV === "production" ? 100 : 1,
+	maxBatchSize: process.env.NODE_ENV === "production" ? 15 : 1,
 	maxWait: Duration.millis(10000),
 } as const;
 

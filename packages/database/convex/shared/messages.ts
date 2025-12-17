@@ -328,6 +328,94 @@ function createBulkUpsertCache(ctx: MutationCtx) {
 	};
 }
 
+function computeAttachmentsDiff(
+	existingAttachments: Doc<"attachments">[],
+	newAttachments: DatabaseAttachment[] | undefined,
+) {
+	if (newAttachments === undefined) {
+		return { toDelete: [], toInsert: [] };
+	}
+
+	const existingById = new Map(
+		existingAttachments.map((a) => [a.id.toString(), a]),
+	);
+	const newById = new Map(newAttachments.map((a) => [a.id.toString(), a]));
+
+	const toDelete: Doc<"attachments">["_id"][] = [];
+	const toInsert: DatabaseAttachment[] = [];
+
+	for (const existing of existingAttachments) {
+		if (!newById.has(existing.id.toString())) {
+			toDelete.push(existing._id);
+		}
+	}
+
+	for (const newAtt of newAttachments) {
+		if (!existingById.has(newAtt.id.toString())) {
+			toInsert.push(newAtt);
+		}
+	}
+
+	return { toDelete, toInsert };
+}
+
+function computeReactionsDiff(
+	existingReactions: Doc<"reactions">[],
+	newReactions: Array<{ userId: bigint; emoji: Emoji }> | undefined,
+	messageId: bigint,
+) {
+	if (newReactions === undefined) {
+		return { toDelete: [], toInsert: [] };
+	}
+
+	const reactionKey = (r: { userId: bigint; emojiId: bigint }) =>
+		`${r.userId}:${r.emojiId}`;
+
+	const existingByKey = new Map(
+		existingReactions.map((r) => [reactionKey(r), r]),
+	);
+
+	const newReactionsWithEmojiId = newReactions.filter(
+		(r): r is { userId: bigint; emoji: Emoji & { id: bigint } } =>
+			r.emoji.id !== undefined,
+	);
+	const newByKey = new Map(
+		newReactionsWithEmojiId.map((r) => [
+			reactionKey({ userId: r.userId, emojiId: r.emoji.id }),
+			r,
+		]),
+	);
+
+	const toDelete: Doc<"reactions">["_id"][] = [];
+	const toInsert: Array<{
+		messageId: bigint;
+		userId: bigint;
+		emojiId: bigint;
+	}> = [];
+
+	for (const existing of existingReactions) {
+		if (!newByKey.has(reactionKey(existing))) {
+			toDelete.push(existing._id);
+		}
+	}
+
+	for (const newReaction of newReactionsWithEmojiId) {
+		const key = reactionKey({
+			userId: newReaction.userId,
+			emojiId: newReaction.emoji.id,
+		});
+		if (!existingByKey.has(key)) {
+			toInsert.push({
+				messageId,
+				userId: newReaction.userId,
+				emojiId: newReaction.emoji.id,
+			});
+		}
+	}
+
+	return { toDelete, toInsert };
+}
+
 async function processMessageInput(
 	_ctx: MutationCtx,
 	cache: ReturnType<typeof createBulkUpsertCache>,
@@ -363,15 +451,25 @@ async function processMessageInput(
 		existingEmojis.filter((e) => e !== null).map((e) => e.id.toString()),
 	);
 
+	const attachmentsDiff = computeAttachmentsDiff(
+		existingAttachments,
+		input.attachments,
+	);
+	const reactionsDiff = computeReactionsDiff(
+		existingReactions,
+		input.reactions,
+		messageData.id,
+	);
+
 	return {
 		messageToWrite: existingMessage
 			? { type: "update" as const, id: existingMessage._id, data: messageData }
 			: { type: "insert" as const, data: messageData },
 
-		attachmentsToDelete: existingAttachments.map((a) => a._id),
-		attachmentsToInsert: input.attachments ?? [],
+		attachmentsToDelete: attachmentsDiff.toDelete,
+		attachmentsToInsert: attachmentsDiff.toInsert,
 
-		reactionsToDelete: existingReactions.map((r) => r._id),
+		reactionsToDelete: reactionsDiff.toDelete,
 		emojisToInsert: (input.reactions ?? [])
 			.filter((r) => {
 				if (!r.emoji.id) return false;
@@ -382,13 +480,7 @@ async function processMessageInput(
 				return true;
 			})
 			.map((r) => r.emoji),
-		reactionsToInsert: (input.reactions ?? [])
-			.filter((r) => r.emoji.id)
-			.map((r) => ({
-				messageId: messageData.id,
-				userId: r.userId,
-				emojiId: r.emoji.id!,
-			})),
+		reactionsToInsert: reactionsDiff.toInsert,
 	};
 }
 

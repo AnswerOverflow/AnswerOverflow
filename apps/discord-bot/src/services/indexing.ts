@@ -53,7 +53,8 @@ const INDEXING_CONFIG = {
 	messagesPerPage: 100,
 	channelProcessDelay: Duration.millis(100),
 	guildProcessDelay: Duration.millis(500),
-	convexBatchSize: 50,
+	convexBatchSize: 15,
+	batchWriteDelay: Duration.millis(50),
 	maxThreadsToCollect: 5000,
 	recentUpdateThreshold: Duration.hours(6),
 	lookbackPeriod: Duration.weeks(2),
@@ -473,9 +474,13 @@ function upsertMessages(
 				INDEXING_CONFIG.convexBatchSize,
 			),
 			(chunk) =>
-				database.private.messages.upsertManyMessages({
-					messages: chunk,
-					ignoreChecks: false,
+				Effect.gen(function* () {
+					const result = yield* database.private.messages.upsertManyMessages({
+						messages: chunk,
+						ignoreChecks: false,
+					});
+					yield* Effect.sleep(INDEXING_CONFIG.batchWriteDelay);
+					return result;
 				}),
 			{ concurrency: 1 },
 		);
