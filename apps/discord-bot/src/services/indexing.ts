@@ -354,8 +354,12 @@ function storeMessages(
 
 		yield* upsertAuthors(indexableMessages);
 		yield* upsertBotSettings(indexableMessages, discordServerId);
-		yield* upsertMessages(aoMessages, channelId);
-		yield* uploadMedia(indexableMessages, channelId);
+		const createdMessageIds = yield* upsertMessages(aoMessages, channelId);
+
+		const createdMessages = Arr.filter(indexableMessages, (msg) =>
+			createdMessageIds.has(BigInt(msg.id)),
+		);
+		yield* uploadMedia(createdMessages, channelId);
 
 		const latestMessage = Arr.sort(indexableMessages, sortMessagesByIdDesc)[0];
 		if (latestMessage) {
@@ -463,7 +467,7 @@ function upsertMessages(
 	return Effect.gen(function* () {
 		const database = yield* Database;
 
-		yield* Effect.forEach(
+		const results = yield* Effect.forEach(
 			Arr.chunksOf(
 				Arr.map(aoMessages, toUpsertMessageArgs),
 				INDEXING_CONFIG.convexBatchSize,
@@ -476,9 +480,13 @@ function upsertMessages(
 			{ concurrency: 1 },
 		);
 
+		const createdIds = new Set(Arr.flatMap(results, (r) => r.created));
+
 		yield* Effect.logDebug(
-			`Upserted ${aoMessages.length} messages for channel ${channelId}`,
+			`Upserted ${createdIds.size} messages for channel ${channelId}`,
 		);
+
+		return createdIds;
 	});
 }
 
