@@ -310,7 +310,7 @@ function SearchResults({
 			pageSize={20}
 			initialLoaderCount={5}
 			loader={<ThreadCardSkeleton />}
-			className="space-y-4 max-h-[calc(100vh-var(--navbar-height)-theme(spacing.6)-140px-theme(spacing.6)-theme(spacing.6))] overflow-y-auto"
+			className="space-y-4"
 			emptyState={emptyState}
 			renderItem={(result) => (
 				<ThreadCard
@@ -344,7 +344,7 @@ export function ServerThreadsList({
 				loader={<ChannelThreadCardSkeleton />}
 				initialData={initialData}
 				initialCursor={currentCursor}
-				className="space-y-4 max-h-[calc(100vh-var(--navbar-height)-theme(spacing.6)-140px-theme(spacing.6)-theme(spacing.6))] overflow-y-auto"
+				className="space-y-4"
 				emptyState={
 					<Empty className="py-16">
 						<EmptyHeader>
@@ -401,7 +401,7 @@ export function ThreadsList({
 				loader={<ChannelThreadCardSkeleton />}
 				initialData={initialData}
 				initialCursor={currentCursor}
-				className="space-y-4 max-h-[calc(100vh-var(--navbar-height)-theme(spacing.6)-140px-theme(spacing.6)-theme(spacing.6))] overflow-y-auto"
+				className="space-y-4"
 				emptyState={
 					<Empty className="py-16">
 						<EmptyHeader>
