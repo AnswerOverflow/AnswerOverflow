@@ -35,40 +35,13 @@ export const findManyUserServerSettings = privateQuery({
 	handler: async (ctx, args) => {
 		if (args.settings.length === 0) return [];
 
-		const uniqueUserIds = new Set(args.settings.map((s) => s.userId));
-		const serverIds = new Set(args.settings.map((s) => s.serverId));
-
-		if (uniqueUserIds.size === 1) {
-			const userIdArray = Array.from(uniqueUserIds);
-			if (userIdArray.length === 0) {
-				return [];
-			}
-			const userId = userIdArray[0];
-			if (!userId) {
-				return [];
-			}
-			const allUserSettings = await getManyFrom(
-				ctx.db,
-				"userServerSettings",
-				"by_userId",
-				userId,
-			);
-
-			const filtered = allUserSettings.filter((setting) =>
-				serverIds.has(setting.serverId),
-			);
-			return filtered;
-		}
-
 		const results: UserServerSettings[] = [];
 		for (const setting of args.settings) {
-			const userSettings = await getManyFrom(
-				ctx.db,
-				"userServerSettings",
-				"by_userId",
+			const found = await findUserServerSettingsByIdShared(
+				ctx,
 				setting.userId,
+				setting.serverId,
 			);
-			const found = userSettings.find((s) => s.serverId === setting.serverId);
 			if (found) {
 				results.push(found);
 			}
@@ -82,14 +55,10 @@ export const upsertUserServerSettings = privateMutation({
 		settings: userServerSettingsSchema,
 	},
 	handler: async (ctx, args) => {
-		const userSettings = await getManyFrom(
-			ctx.db,
-			"userServerSettings",
-			"by_userId",
+		const existing = await findUserServerSettingsByIdShared(
+			ctx,
 			args.settings.userId,
-		);
-		const existing = userSettings.find(
-			(s) => s.serverId === args.settings.serverId,
+			args.settings.serverId,
 		);
 
 		if (existing) {
@@ -118,14 +87,10 @@ export const upsertUserServerSettings = privateMutation({
 			}
 
 			await ctx.db.patch(existing._id, updatedSettings);
-			const updatedUserSettings = await getManyFrom(
-				ctx.db,
-				"userServerSettings",
-				"by_userId",
+			const updated = await findUserServerSettingsByIdShared(
+				ctx,
 				args.settings.userId,
-			);
-			const updated = updatedUserSettings.find(
-				(s) => s.serverId === args.settings.serverId,
+				args.settings.serverId,
 			);
 			if (!updated) {
 				throw new Error("Failed to update user server settings");
@@ -138,14 +103,10 @@ export const upsertUserServerSettings = privateMutation({
 			}
 
 			await ctx.db.insert("userServerSettings", newSettings);
-			const createdUserSettings = await getManyFrom(
-				ctx.db,
-				"userServerSettings",
-				"by_userId",
+			const created = await findUserServerSettingsByIdShared(
+				ctx,
 				args.settings.userId,
-			);
-			const created = createdUserSettings.find(
-				(s) => s.serverId === args.settings.serverId,
+				args.settings.serverId,
 			);
 			if (!created) {
 				throw new Error("Failed to create user server settings");
@@ -163,14 +124,10 @@ export const upsertManyBotUserServerSettings = privateMutation({
 		if (args.settings.length === 0) return [];
 
 		for (const setting of args.settings) {
-			const userSettings = await getManyFrom(
-				ctx.db,
-				"userServerSettings",
-				"by_userId",
+			const existing = await findUserServerSettingsByIdShared(
+				ctx,
 				setting.userId,
-			);
-			const existing = userSettings.find(
-				(s) => s.serverId === setting.serverId,
+				setting.serverId,
 			);
 
 			if (existing) {
