@@ -26,15 +26,25 @@ import {
 } from "effect";
 import { DiscordClient, DiscordClientLayer } from "./discord-client-service";
 
-class DiscordAPIError extends Data.TaggedError("DiscordAPIError")<{
+export class DiscordAPIError extends Data.TaggedError("DiscordAPIError")<{
 	cause: RawDiscordAPIError;
-}> {}
+}> {
+	override get message() {
+		return this.cause.message;
+	}
+}
 
 export class UnknownDiscordError extends Data.TaggedError(
 	"UnknownDiscordError",
 )<{
 	cause: unknown;
-}> {}
+}> {
+	override get message() {
+		return this.cause instanceof Error
+			? this.cause.message
+			: "Unknown Discord error";
+	}
+}
 
 export const createDiscordService = Effect.gen(function* () {
 	const client = yield* DiscordClient;
@@ -243,18 +253,16 @@ export const createDiscordService = Effect.gen(function* () {
 		});
 
 	const callClient = <T>(call: () => T | Promise<T>) =>
-		Effect.gen(function* () {
-			return yield* Effect.tryPromise({
-				try: async () => {
-					return await call();
-				},
-				catch: (cause) => {
-					if (cause instanceof RawDiscordAPIError) {
-						return new DiscordAPIError({ cause });
-					}
-					return new UnknownDiscordError({ cause });
-				},
-			});
+		Effect.tryPromise({
+			try: async () => {
+				return await call();
+			},
+			catch: (cause) => {
+				if (cause instanceof RawDiscordAPIError) {
+					return new DiscordAPIError({ cause });
+				}
+				return new UnknownDiscordError({ cause });
+			},
 		});
 
 	const setActivity = (name: string, options?: { type?: ActivityType }) =>

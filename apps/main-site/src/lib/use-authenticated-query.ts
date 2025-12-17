@@ -6,7 +6,7 @@ export function useAuthenticatedQuery<
 	Query extends FunctionReference<"query">,
 	Args extends Query["_args"],
 >(query: Query, args: Args): Query["_returnType"] | undefined {
-	const session = useSession();
+	const session = useSession({ allowAnonymous: false });
 
 	return useStableQuery(query, session?.data ? args : ("skip" as const));
 }
