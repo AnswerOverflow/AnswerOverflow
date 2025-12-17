@@ -9,6 +9,7 @@
 		"includes": [
 			"**",
 			"!**/convex/_generated/**",
+			"!**/convex/betterAuth/_generated/**",
 			"!**/*.css",
 			"!.context/**",
 			"!**/.context/**",
