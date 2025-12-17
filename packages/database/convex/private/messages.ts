@@ -325,7 +325,11 @@ export const updateEmbedStorageId = privateMutation({
 			"id",
 		);
 		if (!message) {
-			throw new Error("Message not found");
+			console.warn(
+				"Message not found during updateEmbedStorageId",
+				args.messageId,
+			);
+			return null;
 		}
 
 		const embeds = message.embeds ?? [];
@@ -401,7 +405,8 @@ export const updateEmbedS3Key = privateMutation({
 			"id",
 		);
 		if (!message) {
-			throw new Error("Message not found");
+			console.warn("Message not found during updateEmbedS3Key", args.messageId);
+			return null;
 		}
 
 		const embeds = message.embeds ?? [];
@@ -470,7 +475,11 @@ export const markMessageAsSolution = privateMutation({
 			"id",
 		);
 		if (!solutionMessage) {
-			throw new Error("Solution message not found");
+			console.warn(
+				"Solution message not found during markMessageAsSolution",
+				args.solutionMessageId,
+			);
+			return null;
 		}
 		await ctx.db.patch(solutionMessage._id, {
 			questionId: args.questionMessageId,
