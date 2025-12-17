@@ -87,8 +87,16 @@ export const captureEffectCause = <E>(
 		user?: { id: string; username?: string };
 	},
 ) => {
-	const squashed = Cause.squash(cause);
-	captureException(squashed, context);
+	const prettyErrors = Cause.prettyErrors(cause);
+	for (const error of prettyErrors) {
+		captureException(error, {
+			...context,
+			extra: {
+				...context?.extra,
+				effectCausePretty: Cause.pretty(cause),
+			},
+		});
+	}
 };
 
 export const tapErrorCauseToSentry = <A, E, R>(
