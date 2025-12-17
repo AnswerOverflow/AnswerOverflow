@@ -789,10 +789,7 @@ export async function enrichMessageForDisplay(
 				if (!url) {
 					return null;
 				}
-				return {
-					...attachment,
-					url,
-				};
+				return { ...attachment, url };
 			}
 			return {
 				...attachment,
@@ -819,19 +816,11 @@ export async function enrichMessageForDisplay(
 
 			if (embed.thumbnail?.s3Key) {
 				const url = `https://${cdnDomain}/${embed.thumbnail.s3Key}`;
-				resolvedEmbed.thumbnail = {
-					...embed.thumbnail,
-					url,
-					proxyUrl: url,
-				};
+				resolvedEmbed.thumbnail = { ...embed.thumbnail, url, proxyUrl: url };
 			} else if (embed.thumbnail?.storageId) {
 				const url = await ctx.storage.getUrl(embed.thumbnail.storageId);
 				if (url) {
-					resolvedEmbed.thumbnail = {
-						...embed.thumbnail,
-						url,
-						proxyUrl: url,
-					};
+					resolvedEmbed.thumbnail = { ...embed.thumbnail, url, proxyUrl: url };
 				}
 			}
 
