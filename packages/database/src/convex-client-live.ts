@@ -99,10 +99,10 @@ const createLiveService = Effect.gen(function* () {
 			});
 		}).pipe(
 			Effect.timeoutFail({
-				duration: Duration.seconds(15),
+				duration: Duration.seconds(5),
 				onTimeout: () =>
 					new ConvexError({
-						cause: new Error("WebSocket request timed out after 15s"),
+						cause: new Error("WebSocket request timed out after 5s"),
 					}),
 			}),
 		);
