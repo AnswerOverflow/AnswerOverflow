@@ -9,6 +9,10 @@ import {
 	MessageFlags,
 } from "discord.js";
 import { Effect, Layer } from "effect";
+import {
+	catchAllSucceedNullWithReport,
+	catchAllSilentWithReport,
+} from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { trackLeaderboardViewed } from "../utils/analytics";
 
@@ -109,13 +113,11 @@ export function handleLeaderboardCommand(
 
 		const guild = interaction.guild;
 		if (guild) {
-			const member = yield* discord
-				.callClient(() => guild.members.fetch(interaction.user.id))
-				.pipe(Effect.catchAll(() => Effect.succeed(null)));
+			const member = yield* catchAllSucceedNullWithReport(
+				discord.callClient(() => guild.members.fetch(interaction.user.id)),
+			);
 			if (member) {
-				yield* trackLeaderboardViewed(member).pipe(
-					Effect.catchAll(() => Effect.void),
-				);
+				yield* catchAllSilentWithReport(trackLeaderboardViewed(member));
 			}
 		}
 

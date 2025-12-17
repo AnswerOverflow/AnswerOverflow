@@ -11,6 +11,7 @@ import {
 	MessageFlags,
 } from "discord.js";
 import { Effect, Layer } from "effect";
+import { catchAllSilentWithReport } from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 
@@ -309,12 +310,10 @@ function handleManageAccountButtonPress(
 				});
 
 				if (canPubliclyDisplayMessages && member) {
-					yield* trackUserGrantConsent(
-						member,
-						ConsentSource.ManageAccountMenu,
-					).pipe(
-						Effect.provide(PostHogCaptureClientLayer),
-						Effect.catchAll(() => Effect.void),
+					yield* catchAllSilentWithReport(
+						trackUserGrantConsent(member, ConsentSource.ManageAccountMenu).pipe(
+							Effect.provide(PostHogCaptureClientLayer),
+						),
 					);
 				}
 

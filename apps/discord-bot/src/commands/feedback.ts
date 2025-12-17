@@ -13,6 +13,7 @@ import {
 import { Console, Effect, Layer } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 const FEEDBACK_MODAL_ID = "feedback-modal";
 const FEEDBACK_INPUT_ID = "feedback-input";
@@ -90,7 +91,7 @@ export function handleFeedbackModalSubmit(interaction: ModalSubmitInteraction) {
 			},
 			catch: (error) => error,
 		}).pipe(
-			Effect.catchAll((error) =>
+			catchAllWithReport((error) =>
 				Console.error("Failed to send feedback to super user:", error),
 			),
 		);

@@ -10,7 +10,7 @@ import {
 } from "@packages/database/analytics/server/index";
 import { make } from "@packages/discord-api/generated";
 import { v } from "convex/values";
-import { Effect } from "effect";
+import { Cause, Effect, Runtime } from "effect";
 import { api, components, internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import { authenticatedAction, internalAction } from "../client";
@@ -59,24 +59,97 @@ const discordApi = (token: string) =>
 		});
 	}).pipe(Effect.provide(FetchHttpClient.layer));
 
+function extractDiscordErrorInfo(error: unknown): {
+	status?: number;
+	message?: string;
+} {
+	if (Runtime.isFiberFailure(error)) {
+		const cause = error[Runtime.FiberFailureCauseId];
+		const failures = Cause.failures(cause);
+		for (const failure of failures) {
+			const info = extractDiscordErrorInfo(failure);
+			if (info.status || info.message) {
+				return info;
+			}
+		}
+	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"_tag" in error &&
+		"response" in error
+	) {
+		const clientError = error as {
+			_tag: string;
+			response: { status: number };
+			cause?: { message?: string };
+		};
+		return {
+			status: clientError.response?.status,
+			message: clientError.cause?.message ?? clientError._tag,
+		};
+	}
+	return {};
+}
+
 async function fetchGuildsWithToken(token: string) {
 	const program = Effect.gen(function* () {
 		const client = yield* discordApi(token);
 		return yield* client.listMyGuilds();
 	});
 
-	const guilds = await Effect.runPromise(program);
-
-	return guilds.map((guild) => ({
-		id: guild.id,
-		name: guild.name,
-		icon: guild.icon ?? null,
-		owner: guild.owner,
-		permissions: guild.permissions,
-	}));
+	try {
+		const guilds = await Effect.runPromise(program);
+		return guilds.map((guild) => ({
+			id: guild.id,
+			name: guild.name,
+			icon: guild.icon ?? null,
+			owner: guild.owner,
+			permissions: guild.permissions,
+		}));
+	} catch (error) {
+		const errorInfo = extractDiscordErrorInfo(error);
+		if (errorInfo.status) {
+			const newError = new Error(
+				`Discord API error (${errorInfo.status}): ${errorInfo.message ?? "Unknown error"}`,
+			);
+			(newError as Error & { discordStatus: number }).discordStatus =
+				errorInfo.status;
+			throw newError;
+		}
+		throw error;
+	}
 }
 
 function isDiscord401Error(error: unknown): boolean {
+	if (Runtime.isFiberFailure(error)) {
+		const cause = error[Runtime.FiberFailureCauseId];
+		const failures = Cause.failures(cause);
+		for (const failure of failures) {
+			if (isDiscord401Error(failure)) {
+				return true;
+			}
+		}
+	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"discordStatus" in error &&
+		(error as { discordStatus: number }).discordStatus === 401
+	) {
+		return true;
+	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"_tag" in error &&
+		"response" in error
+	) {
+		const clientError = error as { response: { status: number } };
+		if (clientError.response?.status === 401) {
+			return true;
+		}
+	}
 	if (error instanceof Error) {
 		const message = error.message;
 		return message.includes("401") || message.includes("Unauthorized");
@@ -169,6 +242,66 @@ const getDiscordGuildsCache = () =>
 	});
 
 export const discordGuildsCacheName = "discordGuilds";
+
+type AnalyticsResult = Record<string, { aggregated_value: number }>;
+
+export const fetchTopQuestionSolvers = internalAction({
+	args: {
+		serverId: v.string(),
+	},
+	handler: async (_ctx, args): Promise<AnalyticsResult> => {
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopQuestionSolversForServer();
+		});
+
+		const result = await Effect.runPromise(
+			program.pipe(
+				Effect.provide(ServerAnalyticsLayer({ serverId: args.serverId })),
+				Effect.timeout("30 seconds"),
+				Effect.catchAll(() => Effect.succeed(null)),
+			),
+		);
+
+		return result ?? {};
+	},
+});
+
+export const fetchTopPages = internalAction({
+	args: {
+		serverId: v.string(),
+	},
+	handler: async (_ctx, args): Promise<AnalyticsResult> => {
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopPages();
+		});
+
+		const result = await Effect.runPromise(
+			program.pipe(
+				Effect.provide(ServerAnalyticsLayer({ serverId: args.serverId })),
+				Effect.timeout("30 seconds"),
+				Effect.catchAll(() => Effect.succeed(null)),
+			),
+		);
+
+		return result ?? {};
+	},
+});
+
+const getTopQuestionSolversCache = () =>
+	new ActionCache(components.actionCache, {
+		action: internal.authenticated.dashboard.fetchTopQuestionSolvers,
+		name: "topQuestionSolvers",
+		ttl: 3600 * 1000, // 1 hour - analytics data doesn't need real-time updates
+	});
+
+const getTopPagesCache = () =>
+	new ActionCache(components.actionCache, {
+		action: internal.authenticated.dashboard.fetchTopPages,
+		name: "topPages",
+		ttl: 3600 * 1000, // 1 hour
+	});
 
 type ServerWithMetadata = {
 	discordId: string;
@@ -264,20 +397,11 @@ export const getUserServers = authenticatedAction({
 export const getTopQuestionSolversForServer = guildManagerAction({
 	args: {},
 	handler: async (ctx, args) => {
-		const program = Effect.gen(function* () {
-			const analytics = yield* Analytics;
-			return yield* analytics.server.getTopQuestionSolversForServer();
+		const analyticsData = await getTopQuestionSolversCache().fetch(ctx, {
+			serverId: args.serverId.toString(),
 		});
 
-		const analyticsData = await Effect.runPromise(
-			program.pipe(
-				Effect.provide(
-					ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
-				),
-			),
-		);
-
-		if (!analyticsData) return {};
+		if (!analyticsData || Object.keys(analyticsData).length === 0) return {};
 
 		const userIds = Object.keys(analyticsData).map((id) => BigInt(id));
 
@@ -368,18 +492,11 @@ export const getQuestionsAndAnswers = guildManagerAction({
 export const getTopPagesForServer = guildManagerAction({
 	args: {},
 	handler: async (ctx, args) => {
-		const program = Effect.gen(function* () {
-			const analytics = yield* Analytics;
-			return yield* analytics.server.getTopPages();
-		}).pipe(
-			Effect.provide(
-				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
-			),
-		);
+		const analyticsData = await getTopPagesCache().fetch(ctx, {
+			serverId: args.serverId.toString(),
+		});
 
-		const analyticsData = await Effect.runPromise(program);
-
-		if (!analyticsData) return {};
+		if (!analyticsData || Object.keys(analyticsData).length === 0) return {};
 
 		const messageIds = Object.keys(analyticsData).map((id) => BigInt(id));
 

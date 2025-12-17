@@ -53,3 +53,4 @@ temp-*
 # fumadocs generated files
 .source/
 next-env.d.ts
+personal-notes/

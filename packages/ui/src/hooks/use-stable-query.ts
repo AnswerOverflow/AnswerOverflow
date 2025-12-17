@@ -7,8 +7,17 @@ import type {
 } from "convex/react";
 import { usePaginatedQuery, useQueries, useQuery } from "convex/react";
 import type { FunctionReference } from "convex/server";
-import { convexToJson, type Value } from "convex/values";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type Value, convexToJson } from "convex/values";
+import {
+	useCallback,
+	useEffect,
+	useEffectEvent,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+
+import { useDelayedSubscription } from "./use-delayed-subscription";
 
 export const useQueryWithStatus = makeUseQueryWithStatus(useQueries);
 
@@ -34,15 +43,16 @@ export const useStablePaginatedQuery = ((name, args, options) => {
 	return stored.current;
 }) as typeof usePaginatedQuery;
 
-type PaginatedQueryOptions = {
-	initialNumItems: number;
-	initialCursor?: string | null;
-};
-
 type PageResult<Query extends PaginatedQueryReference> = {
 	page: Array<PaginatedQueryItem<Query>>;
 	isDone: boolean;
 	continueCursor: string;
+};
+
+type PaginatedQueryOptions<Query extends PaginatedQueryReference> = {
+	initialNumItems: number;
+	initialCursor?: string | null;
+	initialData?: PageResult<Query>;
 };
 
 export function usePaginatedQueryWithCursor<
@@ -50,9 +60,9 @@ export function usePaginatedQueryWithCursor<
 >(
 	query: Query,
 	args: PaginatedQueryArgs<Query> | "skip",
-	options: PaginatedQueryOptions,
+	options: PaginatedQueryOptions<Query>,
 ): UsePaginatedQueryReturnType<Query> {
-	const { initialNumItems, initialCursor = null } = options;
+	const { initialNumItems, initialCursor = null, initialData } = options;
 	const skip = args === "skip";
 
 	const argsKey = skip
@@ -63,22 +73,48 @@ export function usePaginatedQueryWithCursor<
 		Array<{ cursor: string; numItems: number }>
 	>([]);
 
+	const { shouldSkip: shouldSkipInitialPage, forceEnable } =
+		useDelayedSubscription({
+			hasInitialData: initialData !== undefined,
+		});
+
 	const prevArgsKeyRef = useRef(argsKey);
+	const hasInitializedRef = useRef(false);
+
+	const onArgsChange = useEffectEvent(
+		(newArgsKey: string, prevArgsKey: string) => {
+			const wasSkip = prevArgsKey === "skip";
+			setAdditionalPages([]);
+
+			if (!wasSkip && newArgsKey !== "skip" && hasInitializedRef.current) {
+				forceEnable();
+			}
+
+			if (newArgsKey !== "skip") {
+				hasInitializedRef.current = true;
+			}
+		},
+	);
+
 	useEffect(() => {
 		if (prevArgsKeyRef.current !== argsKey) {
+			onArgsChange(argsKey, prevArgsKeyRef.current);
 			prevArgsKeyRef.current = argsKey;
-			setAdditionalPages([]);
 		}
 	}, [argsKey]);
 
 	const queries = useMemo(() => {
-		if (skip) return {};
+		if (skip) {
+			return {};
+		}
 
 		const queryMap: Record<
 			string,
 			{ query: FunctionReference<"query">; args: Record<string, Value> }
-		> = {
-			page0: {
+		> = {};
+
+		if (!shouldSkipInitialPage) {
+			queryMap.page0 = {
 				query: query as FunctionReference<"query">,
 				args: {
 					...(args as Record<string, Value>),
@@ -87,11 +123,14 @@ export function usePaginatedQueryWithCursor<
 						cursor: initialCursor,
 					},
 				},
-			},
-		};
+			};
+		}
 
 		additionalPages.forEach((page, index) => {
-			queryMap[`page${index + 1}`] = {
+			const pageKey = shouldSkipInitialPage
+				? `page${index}`
+				: `page${index + 1}`;
+			queryMap[pageKey] = {
 				query: query as FunctionReference<"query">,
 				args: {
 					...(args as Record<string, Value>),
@@ -104,24 +143,43 @@ export function usePaginatedQueryWithCursor<
 		});
 
 		return queryMap;
-	}, [skip, query, args, initialNumItems, initialCursor, additionalPages]);
+	}, [
+		skip,
+		query,
+		args,
+		initialNumItems,
+		initialCursor,
+		additionalPages,
+		shouldSkipInitialPage,
+	]);
 
 	const results = useQueries(queries);
 
 	const pageResults = useMemo(() => {
 		const pages: Array<PageResult<Query> | undefined> = [];
-		const totalPages = 1 + additionalPages.length;
 
-		for (let i = 0; i < totalPages; i++) {
-			const result = results[`page${i}`];
-			if (result instanceof Error) {
-				throw result;
+		if (shouldSkipInitialPage && initialData) {
+			pages.push(initialData);
+			for (let i = 0; i < additionalPages.length; i++) {
+				const result = results[`page${i}`];
+				if (result instanceof Error) {
+					throw result;
+				}
+				pages.push(result as PageResult<Query> | undefined);
 			}
-			pages.push(result as PageResult<Query> | undefined);
+		} else {
+			const totalPages = 1 + additionalPages.length;
+			for (let i = 0; i < totalPages; i++) {
+				const result = results[`page${i}`];
+				if (result instanceof Error) {
+					throw result;
+				}
+				pages.push(result as PageResult<Query> | undefined);
+			}
 		}
 
 		return pages;
-	}, [results, additionalPages.length]);
+	}, [results, additionalPages.length, shouldSkipInitialPage, initialData]);
 
 	const allItems = useMemo(() => {
 		const items: Array<PaginatedQueryItem<Query>> = [];
@@ -156,12 +214,14 @@ export function usePaginatedQueryWithCursor<
 			);
 			if (alreadyLoading) return;
 
+			forceEnable();
+
 			setAdditionalPages((prev) => [
 				...prev,
 				{ cursor: lastLoadedResult.continueCursor, numItems },
 			]);
 		},
-		[lastLoadedResult, additionalPages],
+		[lastLoadedResult, additionalPages, forceEnable],
 	);
 
 	const stored = useRef<UsePaginatedQueryReturnType<Query> | undefined>(

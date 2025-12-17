@@ -27,7 +27,7 @@ export function ServerInviteJoinButton(
 		>,
 ) {
 	const { server, channel, location, className, ...rest } = props;
-	const inviteCode = channel?.inviteCode || server.vanityInviteCode;
+	const inviteCode = server.vanityInviteCode || channel?.inviteCode;
 	const posthog = usePostHog();
 
 	if (!inviteCode) {

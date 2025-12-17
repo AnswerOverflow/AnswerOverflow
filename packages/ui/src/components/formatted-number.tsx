@@ -1,5 +1,9 @@
 "use client";
 
 export function FormattedNumber(props: { value: number }) {
-	return <>{new Intl.NumberFormat("en-US").format(props.value)}</>;
+	return (
+		<span suppressHydrationWarning>
+			{new Intl.NumberFormat("en-US").format(props.value)}
+		</span>
+	);
 }

@@ -41,6 +41,10 @@ import {
 	toAOMessage,
 	toUpsertMessageArgs,
 } from "../utils/conversions";
+import {
+	catchAllCauseWithReport,
+	catchAllWithReport,
+} from "../utils/error-reporting";
 
 const INDEXING_CONFIG = {
 	cronExpression: "0 */6 * * *",
@@ -184,7 +188,7 @@ function ensureInviteCode(
 					)
 					.pipe(
 						Effect.map((invite) => invite.code),
-						Effect.catchAll((error) =>
+						catchAllWithReport((error) =>
 							Console.warn(
 								`Failed to create invite for channel ${channel.name} (${channel.id}):`,
 								error,
@@ -339,7 +343,7 @@ function storeMessages(
 			indexableMessages,
 			(msg) =>
 				Effect.tryPromise(() => toAOMessage(msg, discordServerId)).pipe(
-					Effect.catchAll((error) =>
+					catchAllWithReport((error) =>
 						Console.warn(`Failed to convert message ${msg.id}:`, error).pipe(
 							Effect.as(null),
 						),
@@ -497,7 +501,7 @@ function uploadMedia(messages: Message[], channelId: string) {
 
 		if (allEmbedImages.length > 0) {
 			yield* uploadEmbedImagesInBatches(allEmbedImages).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.warn(
 						`Failed to upload embed images for channel ${channelId}:`,
 						error,
@@ -630,7 +634,7 @@ function indexTextChannel(
 							threadChannel?.flags?.lastIndexedSnowflake,
 						);
 					}).pipe(
-						Effect.catchAll((error) =>
+						catchAllWithReport((error) =>
 							Console.error(
 								`Error indexing thread ${thread.name} (${thread.id}):`,
 								error,
@@ -766,7 +770,7 @@ function indexForumChannel(
 
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
-					Effect.catchAll((error) => {
+					catchAllWithReport((error) => {
 						completedThreads++;
 						return Console.error(
 							`Forum ${channel.name}: Error indexing thread ${thread.name} (${thread.id}):`,
@@ -867,7 +871,7 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
-					Effect.catchAll((error) => {
+					catchAllWithReport((error) => {
 						completedChannels++;
 						const channelId = channel.isDMBased() ? channel.id : channel.name;
 						return Console.error(
@@ -904,7 +908,7 @@ function runIndexing() {
 				Effect.gen(function* () {
 					yield* indexGuild(guild, index, totalGuilds);
 				}).pipe(
-					Effect.catchAll((error) =>
+					catchAllWithReport((error) =>
 						Console.error(
 							`[${index + 1}/${totalGuilds}] Error indexing guild ${guild.name}:`,
 							error,
@@ -921,7 +925,7 @@ function runIndexing() {
 			`=== Indexing complete - ${totalGuilds} guilds indexed in ${formatDurationMs(duration)} ===`,
 		);
 	}).pipe(
-		Effect.catchAll((error) =>
+		catchAllWithReport((error) =>
 			Console.error("Fatal error during indexing:", error),
 		),
 	);
@@ -940,7 +944,7 @@ export function startIndexingLoop() {
 
 		yield* Effect.fork(
 			Effect.repeat(runIndexing(), schedule).pipe(
-				Effect.catchAllCause((cause) =>
+				catchAllCauseWithReport((cause) =>
 					Console.error("Error in scheduled indexing run:", cause),
 				),
 			),
@@ -961,7 +965,7 @@ export const IndexingHandlerLayer = Layer.scopedDiscard(
 		yield* discord.client.on("clientReady", () =>
 			Effect.gen(function* () {
 				yield* startIndexingLoop().pipe(
-					Effect.catchAllCause((cause) =>
+					catchAllCauseWithReport((cause) =>
 						Console.error("Error starting indexing loop:", cause),
 					),
 				);

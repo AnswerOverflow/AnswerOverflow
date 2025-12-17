@@ -1,8 +1,9 @@
 import { Database } from "@packages/database/database";
 import { Storage } from "@packages/database/storage";
-import type { Guild } from "discord.js";
+import { ChannelType, EmbedBuilder, type Guild } from "discord.js";
 import { Array as Arr, Console, Effect, Layer } from "effect";
 import { registerCommands } from "../commands/register";
+import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import {
 	registerServerGroup,
@@ -11,15 +12,81 @@ import {
 } from "../utils/analytics";
 import { isAllowedRootChannelType } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
+import {
+	catchAllSilentWithReport,
+	catchAllWithReport,
+} from "../utils/error-reporting";
 import { syncChannel } from "./channel";
 
+function makeGuildEmbed(guild: Guild, joined: boolean) {
+	const numberOfForumChannels = (
+		guild.channels?.cache?.filter((c) => c.type === ChannelType.GuildForum)
+			?.size ?? 0
+	).toString();
+
+	return new EmbedBuilder()
+		.setTitle(joined ? "Joined Server" : "Left Server")
+		.setDescription(
+			joined ? `Joined server ${guild.name}` : `Left server ${guild.name}`,
+		)
+		.setThumbnail(guild.iconURL())
+		.setTimestamp()
+		.setColor(joined ? "Green" : "Red")
+		.setImage(guild.bannerURL() ?? guild.splashURL())
+		.setFields([
+			{
+				name: "Members",
+				value: (guild.memberCount ?? 0).toString(),
+				inline: true,
+			},
+			{
+				name: "Forum Channels",
+				value: numberOfForumChannels,
+				inline: true,
+			},
+			{
+				name: "Age",
+				value: guild.createdAt?.toDateString() ?? "Unknown",
+				inline: false,
+			},
+			{
+				name: "Id",
+				value: guild.id,
+				inline: false,
+			},
+		]);
+}
+
+function notifySuperUserOfServerJoin(guild: Guild) {
+	return Effect.gen(function* () {
+		const discord = yield* Discord;
+
+		yield* discord
+			.callClient(async () => {
+				const superUser = await guild.client.users.fetch(SUPER_USER_ID);
+				await superUser.send({ embeds: [makeGuildEmbed(guild, true)] });
+			})
+			.pipe(
+				catchAllWithReport((error) =>
+					Console.error("Failed to notify super user of server join:", error),
+				),
+			);
+	});
+}
+
+const VANITY_INVITE_OVERRIDES: Record<string, string> = {
+	"1399423718626951168": "pokemongocoordinates",
+};
+
 function toAOServer(guild: Guild) {
+	const vanityInviteCode =
+		VANITY_INVITE_OVERRIDES[guild.id] ?? guild.vanityURLCode ?? undefined;
 	return {
 		discordId: BigInt(guild.id),
 		name: guild.name,
 		icon: guild.icon ? guild.icon.toString() : undefined,
 		description: guild.description ?? undefined,
-		vanityInviteCode: guild.vanityURLCode ?? undefined,
+		vanityInviteCode,
 		approximateMemberCount:
 			guild.approximateMemberCount ?? guild.memberCount ?? 0,
 	};
@@ -36,9 +103,7 @@ export function syncGuild(guild: Guild) {
 			yield* database.private.servers.upsertServer(aoServerData);
 
 		if (isNew) {
-			yield* registerServerGroup(guild, guild.id).pipe(
-				Effect.catchAll(() => Effect.void),
-			);
+			yield* catchAllSilentWithReport(registerServerGroup(guild, guild.id));
 
 			yield* database.private.server_preferences.updateServerPreferences({
 				serverId: BigInt(guild.id),
@@ -68,7 +133,7 @@ export function syncGuild(guild: Guild) {
 							`Uploaded server icon for ${guild.name} (custom domain: ${preferences.customDomain})`,
 						),
 					),
-					Effect.catchAll((error) =>
+					catchAllWithReport((error) =>
 						Console.warn(
 							`Failed to upload server icon for ${guild.name}:`,
 							error,
@@ -84,7 +149,7 @@ export function syncGuild(guild: Guild) {
 
 		yield* Effect.forEach(rootChannels, (channel) => syncChannel(channel));
 	}).pipe(
-		Effect.catchAll((error) =>
+		catchAllWithReport((error) =>
 			Console.error(`Error syncing guild ${guild.id}:`, error),
 		),
 	);
@@ -107,9 +172,10 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				}
 
 				yield* syncGuild(guild);
-				yield* trackServerJoin(guild).pipe(Effect.catchAll(() => Effect.void));
+				yield* catchAllSilentWithReport(trackServerJoin(guild));
+				yield* notifySuperUserOfServerJoin(guild);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(`Error handling guild create ${guild.id}:`, error),
 				),
 			),
@@ -119,7 +185,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 			Effect.gen(function* () {
 				yield* syncGuild(newGuild);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(`Error updating guild ${newGuild.id}:`, error),
 				),
 			),
@@ -128,15 +194,29 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
 				const db = yield* Database;
+				const discord = yield* Discord;
 				yield* db.private.servers.updateServer({
 					serverId: BigInt(guild.id),
 					server: {
 						kickedTime: Date.now(),
 					},
 				});
-				yield* trackServerLeave(guild).pipe(Effect.catchAll(() => Effect.void));
+				yield* catchAllSilentWithReport(trackServerLeave(guild));
+				yield* discord
+					.callClient(async () => {
+						const superUser = await guild.client.users.fetch(SUPER_USER_ID);
+						await superUser.send({ embeds: [makeGuildEmbed(guild, false)] });
+					})
+					.pipe(
+						catchAllWithReport((error) =>
+							Console.error(
+								"Failed to notify super user of server leave:",
+								error,
+							),
+						),
+					);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(`Error handling guild delete ${guild.id}:`, error),
 				),
 			),
@@ -145,7 +225,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("clientReady", (client) =>
 			Effect.gen(function* () {
 				yield* registerCommands().pipe(
-					Effect.catchAll((error) =>
+					catchAllWithReport((error) =>
 						Console.error("Error registering commands:", error),
 					),
 				);
@@ -187,7 +267,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 							});
 							yield* Console.log(`Marked server ${server.name} as kicked`);
 						}).pipe(
-							Effect.catchAll((error) =>
+							catchAllWithReport((error) =>
 								Console.error(
 									`Error marking server ${server.discordId} as kicked:`,
 									error,

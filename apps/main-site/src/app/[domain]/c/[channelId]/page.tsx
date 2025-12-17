@@ -1,5 +1,6 @@
 import { Database } from "@packages/database/database";
 import { decodeCursor } from "@packages/ui/utils/cursor";
+import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import type { Metadata } from "next";
@@ -82,6 +83,10 @@ export default async function TenantChannelPage(props: Props) {
 		tenantData.server.discordId,
 		parsedChannelId.value.id,
 	);
+
+	if (tenantData.server.discordId === parsedChannelId.value.id) {
+		return redirect(getTenantCanonicalUrl(tenantData.preferences, `/`));
+	}
 
 	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
 }

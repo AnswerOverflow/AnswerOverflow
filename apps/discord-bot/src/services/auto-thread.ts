@@ -114,7 +114,9 @@ export const AutoThreadHandlerLayer = Layer.scopedDiscard(
 		const discord = yield* Discord;
 
 		yield* discord.client.on("messageCreate", (message) =>
-			handleAutoThread(message),
+			handleAutoThread(message).pipe(
+				Effect.catchTag("AutoThreadError", () => Effect.void),
+			),
 		);
 	}),
 );

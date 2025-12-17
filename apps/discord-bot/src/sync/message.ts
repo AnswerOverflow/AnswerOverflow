@@ -1,22 +1,71 @@
+import type { DiscordAccount } from "@packages/database/convex/schema";
 import { Database } from "@packages/database/database";
-import { Console, Effect, Layer } from "effect";
+import { Console, Duration, Effect, Layer } from "effect";
 import { Discord } from "../core/discord-service";
 import {
 	uploadAttachmentsInBatches,
 	uploadEmbedImagesInBatches,
 } from "../utils/attachment-upload";
+import { createBatchedQueue } from "../utils/batched-queue";
 import {
 	extractEmbedImagesToUpload,
 	toAODiscordAccount,
 	toAOMessage,
 	toUpsertMessageArgs,
 } from "../utils/conversions";
+import { catchAllWithReport } from "../utils/error-reporting";
 import { isHumanMessage } from "../utils/message-utils";
+
+const BATCH_CONFIG = {
+	maxBatchSize: process.env.NODE_ENV === "production" ? 100 : 1,
+	maxWait: Duration.millis(10000),
+} as const;
+
+type MessageUpsertArgs = ReturnType<typeof toUpsertMessageArgs>;
 
 export const MessageParityLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 		const database = yield* Database;
+
+		const messageQueue = yield* createBatchedQueue<
+			MessageUpsertArgs,
+			unknown,
+			Database
+		>({
+			process: (batch) =>
+				Effect.gen(function* () {
+					yield* Effect.logDebug(
+						`Processing message batch of ${batch.length} items`,
+					);
+					yield* database.private.messages.upsertManyMessages({
+						messages: batch,
+						ignoreChecks: false,
+					});
+				}),
+			maxBatchSize: BATCH_CONFIG.maxBatchSize,
+			maxWait: BATCH_CONFIG.maxWait,
+		});
+
+		const accountQueue = yield* createBatchedQueue<
+			DiscordAccount,
+			unknown,
+			Database
+		>({
+			process: (batch) =>
+				Effect.gen(function* () {
+					yield* Effect.logDebug(
+						`Processing account batch of ${batch.length} items`,
+					);
+					yield* database.private.discord_accounts.upsertManyDiscordAccounts({
+						accounts: batch,
+					});
+				}),
+			maxBatchSize: BATCH_CONFIG.maxBatchSize,
+			maxWait: BATCH_CONFIG.maxWait,
+		});
+
+		yield* Effect.logInfo("Message parity batched queues initialized");
 
 		yield* discord.client.on("messageUpdate", (_oldMessage, newMessage) =>
 			Effect.gen(function* () {
@@ -31,11 +80,9 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const serverLiveData =
-					yield* database.private.servers.getServerByDiscordId({
-						discordId: BigInt(newMessage.guildId ?? ""),
-					});
-				const server = serverLiveData;
+				const server = yield* database.private.servers.getServerByDiscordId({
+					discordId: BigInt(newMessage.guildId ?? ""),
+				});
 
 				if (!server) {
 					yield* Console.warn(
@@ -44,12 +91,11 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const messageLiveData = yield* database.private.messages.getMessageById(
+				const existingMessage = yield* database.private.messages.getMessageById(
 					{
 						id: BigInt(newMessage.id),
 					},
 				);
-				const existingMessage = messageLiveData;
 
 				if (!existingMessage) {
 					return;
@@ -72,16 +118,13 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					yield* uploadAttachmentsInBatches(attachmentsToUpload);
 				}
 
-				yield* database.private.messages.upsertMessage({
-					...toUpsertMessageArgs(data),
-					ignoreChecks: false,
-				});
+				yield* messageQueue.offer(toUpsertMessageArgs(data));
 
 				if (newMessage.embeds.length > 0) {
 					const embedImagesToUpload = extractEmbedImagesToUpload(newMessage);
 					if (embedImagesToUpload.length > 0) {
 						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
-							Effect.catchAll((error) =>
+							catchAllWithReport((error) =>
 								Console.warn(
 									`Failed to upload embed images for message ${newMessage.id}:`,
 									error,
@@ -91,19 +134,12 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					}
 				}
 
-				yield* database.private.discord_accounts
-					.upsertDiscordAccount({
-						account: toAODiscordAccount(newMessage.author),
-					})
-					.pipe(
-						Effect.catchAll((error) =>
-							Console.error(
-								`Error maintaining Discord account parity ${newMessage.author.id}:`,
-								error,
-							),
-						),
-					);
-			}),
+				yield* accountQueue.offer(toAODiscordAccount(newMessage.author));
+			}).pipe(
+				catchAllWithReport((error) =>
+					Console.error(`Error updating message ${newMessage.id}:`, error),
+				),
+			),
 		);
 
 		yield* discord.client.on("messageDelete", (message) =>
@@ -112,12 +148,11 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const messageLiveData = yield* database.private.messages.getMessageById(
+				const existingMessage = yield* database.private.messages.getMessageById(
 					{
 						id: BigInt(message.id),
 					},
 				);
-				const existingMessage = messageLiveData;
 
 				if (!existingMessage) {
 					return;
@@ -128,7 +163,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				});
 				yield* Console.log(`Deleted message ${message.id}`);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(`Error deleting message ${message.id}:`, error),
 				),
 			),
@@ -150,7 +185,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				});
 				yield* Console.log(`Bulk deleted ${messageIds.length} messages`);
 			}).pipe(
-				Effect.catchAll((error) =>
+				catchAllWithReport((error) =>
 					Console.error(`Error bulk deleting messages:`, error),
 				),
 			),
@@ -170,11 +205,9 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					yield* Console.log("Received ping command!");
 				}
 
-				const serverLiveData =
-					yield* database.private.servers.getServerByDiscordId({
-						discordId: BigInt(message.guildId ?? ""),
-					});
-				const server = serverLiveData;
+				const server = yield* database.private.servers.getServerByDiscordId({
+					discordId: BigInt(message.guildId ?? ""),
+				});
 
 				if (!server) {
 					yield* Console.warn(
@@ -187,10 +220,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					toAOMessage(message, server.discordId.toString()),
 				);
 
-				yield* database.private.messages.upsertMessage({
-					...toUpsertMessageArgs(data),
-					ignoreChecks: false,
-				});
+				yield* messageQueue.offer(toUpsertMessageArgs(data));
 
 				if (message.attachments.size > 0) {
 					const attachmentsToUpload = Array.from(
@@ -209,7 +239,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					const embedImagesToUpload = extractEmbedImagesToUpload(message);
 					if (embedImagesToUpload.length > 0) {
 						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
-							Effect.catchAll((error) =>
+							catchAllWithReport((error) =>
 								Console.warn(
 									`Failed to upload embed images for message ${message.id}:`,
 									error,
@@ -219,17 +249,12 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					}
 				}
 
-				yield* database.private.discord_accounts
-					.upsertDiscordAccount({ account: toAODiscordAccount(message.author) })
-					.pipe(
-						Effect.catchAll((error) =>
-							Console.error(
-								`Error maintaining Discord account parity ${message.author.id}:`,
-								error,
-							),
-						),
-					);
-			}),
+				yield* accountQueue.offer(toAODiscordAccount(message.author));
+			}).pipe(
+				catchAllWithReport((error) =>
+					Console.error(`Error creating message ${message.id}:`, error),
+				),
+			),
 		);
 	}),
 );

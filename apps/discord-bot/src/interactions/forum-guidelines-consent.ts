@@ -2,6 +2,10 @@ import { Database } from "@packages/database/database";
 import type { Message } from "discord.js";
 import { ChannelType } from "discord.js";
 import { Console, Effect, Layer } from "effect";
+import {
+	catchAllSilentWithReport,
+	catchAllWithReport,
+} from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
@@ -70,17 +74,16 @@ export function handleForumGuidelinesConsent(message: Message) {
 		if (granted) {
 			const member = message.member;
 			if (member) {
-				yield* trackUserGrantConsent(
-					member,
-					ConsentSource.ForumPostGuidelines,
-				).pipe(Effect.catchAll(() => Effect.void));
+				yield* catchAllSilentWithReport(
+					trackUserGrantConsent(member, ConsentSource.ForumPostGuidelines),
+				);
 			}
 			yield* Console.log(
 				`Granted forum guidelines consent for user ${message.author.id} in server ${server.discordId}`,
 			);
 		}
 	}).pipe(
-		Effect.catchAll((error) =>
+		catchAllWithReport((error) =>
 			Console.error(
 				`Error processing forum guidelines consent for message ${message.id}:`,
 				error,

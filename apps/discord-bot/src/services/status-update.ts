@@ -1,6 +1,7 @@
 import { type ActivityOptions, ActivityType } from "discord.js";
 import { Console, Duration, Effect, Layer, Ref, Schedule } from "effect";
 import { Discord } from "../core/discord-service";
+import { catchAllCauseWithReport } from "../utils/error-reporting";
 
 type StatusUpdate = {
 	getStatus: (() => Effect.Effect<string>) | string;
@@ -80,7 +81,7 @@ function updateStatus(statusIndex: Ref.Ref<number>) {
 
 		yield* Console.log(`Setting status to ${statusText}`);
 	}).pipe(
-		Effect.catchAllCause((cause) =>
+		catchAllCauseWithReport((cause) =>
 			Console.error("Failed to update status:", cause),
 		),
 	);
@@ -100,7 +101,7 @@ function startStatusUpdateLoop() {
 
 		yield* Effect.fork(
 			Effect.repeat(updateStatus(statusIndex), schedule).pipe(
-				Effect.catchAllCause((cause) =>
+				catchAllCauseWithReport((cause) =>
 					Console.error("Error in scheduled status update:", cause),
 				),
 			),
