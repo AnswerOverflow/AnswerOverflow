@@ -27,6 +27,8 @@ import {
 	ThreadCard,
 	ThreadCardSkeleton,
 } from "@packages/ui/components/thread-card";
+import { TrackLoad } from "@packages/ui/components/track-load";
+import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
 import { cn } from "@packages/ui/lib/utils";
 import { encodeCursor } from "@packages/ui/utils/cursor";
 import { getChannelIcon } from "@packages/ui/utils/discord";
@@ -196,10 +198,6 @@ function ServerHeader({
 }: {
 	server: CommunityPageHeaderData["server"];
 }) {
-	const inviteUrl = server.inviteCode
-		? `https://discord.gg/${server.inviteCode}`
-		: `https://discord.com/servers/${server.discordId}`;
-
 	const description =
 		server.description ??
 		`Browse and search through archived Discord discussions from ${server.name}`;
@@ -227,11 +225,17 @@ function ServerHeader({
 									{description}
 								</p>
 							</div>
-							<Button size="sm" asChild className="shrink-0">
-								<a href={inviteUrl} target="_blank" rel="noopener noreferrer">
-									Join Discord
-								</a>
-							</Button>
+							<ServerInviteJoinButton
+								server={{
+									discordId: server.discordId,
+									name: server.name,
+									icon: server.icon,
+									vanityInviteCode: server.inviteCode,
+								}}
+								location="Community Page"
+								size="sm"
+								className="shrink-0"
+							/>
 						</div>
 					</div>
 				</div>
@@ -462,6 +466,24 @@ export function CommunityPageContent({
 
 	return (
 		<div className="min-h-screen bg-background">
+			<TrackLoad
+				eventName="Community Page View"
+				eventData={{
+					server: {
+						discordId: server.discordId,
+						name: server.name,
+					},
+					channel: selectedChannel
+						? {
+								id: selectedChannel.id,
+								name: selectedChannel.name,
+								type: selectedChannel.type,
+								serverId: server.discordId,
+								inviteCode: selectedChannel.flags?.inviteCode ?? null,
+							}
+						: null,
+				}}
+			/>
 			<ServerHeader server={server} />
 
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
