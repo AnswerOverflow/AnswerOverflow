@@ -19,6 +19,7 @@ export {
 	getMentionMetadata,
 } from "./mentions";
 export {
+	type BulkMessageInput,
 	compareIds,
 	type DatabaseAttachment,
 	deleteMessageInternalLogic,
@@ -31,6 +32,7 @@ export {
 	getFirstMessagesInChannels,
 	getMessageById,
 	getThreadStartMessage,
+	upsertManyMessagesOptimized,
 	upsertMessageInternalLogic,
 } from "./messages";
 export {
