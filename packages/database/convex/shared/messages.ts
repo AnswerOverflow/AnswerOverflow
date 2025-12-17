@@ -40,6 +40,33 @@ export async function getThreadStartMessage(
 	return getOneFrom(ctx.db, "messages", "by_messageId", threadId, "id");
 }
 
+export async function getThreadStarterMessages(
+	ctx: QueryCtx | MutationCtx,
+	threadIds: bigint[],
+): Promise<Record<string, MessageDoc | null>> {
+	const results: Record<string, MessageDoc | null> = {};
+
+	if (threadIds.length === 0) {
+		return results;
+	}
+
+	const messages = await Promise.all(
+		threadIds.map((threadId) =>
+			getOneFrom(ctx.db, "messages", "by_messageId", threadId, "id"),
+		),
+	);
+
+	for (let i = 0; i < threadIds.length; i++) {
+		const threadId = threadIds[i];
+		const message = messages[i];
+		if (threadId) {
+			results[threadId.toString()] = message ?? null;
+		}
+	}
+
+	return results;
+}
+
 export async function getFirstMessagesInChannels(
 	ctx: QueryCtx | MutationCtx,
 	channelIds: bigint[],
