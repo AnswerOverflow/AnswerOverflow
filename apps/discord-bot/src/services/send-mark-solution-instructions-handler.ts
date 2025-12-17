@@ -3,7 +3,10 @@ import { Console, Effect, Layer } from "effect";
 import { catchAllWithReport } from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { isAllowedThreadChannel } from "../utils/conversions";
-import { handleSendMarkSolutionInstructions } from "./send-mark-solution-instructions";
+import {
+	handleSendMarkSolutionInstructions,
+	trackQuestionAsked,
+} from "./send-mark-solution-instructions";
 
 export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
@@ -25,10 +28,6 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 					});
 
 				if (!parentChannel) {
-					return;
-				}
-
-				if (!parentChannel.flags?.sendMarkSolutionInstructionsInNewThreads) {
 					return;
 				}
 
@@ -55,6 +54,17 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 				);
 
 				if (!questionAsker) {
+					return;
+				}
+
+				yield* trackQuestionAsked(
+					thread,
+					parentChannel,
+					questionAsker,
+					firstMessage ?? null,
+				);
+
+				if (!parentChannel.flags?.sendMarkSolutionInstructionsInNewThreads) {
 					return;
 				}
 
