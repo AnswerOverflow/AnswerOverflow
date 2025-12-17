@@ -1,4 +1,5 @@
 export {
+	type BulkMessageInput,
 	CHANNEL_TYPE,
 	compareIds,
 	type DatabaseAttachment,
@@ -34,6 +35,7 @@ export {
 	uploadAttachmentFromUrlLogic,
 	uploadFromUrlLogic,
 	upsertIgnoredDiscordAccountInternalLogic,
+	upsertManyMessagesOptimized,
 	upsertMessageInternalLogic,
 	validateCustomDomain,
 	validateCustomDomainUniqueness,

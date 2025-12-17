@@ -1,7 +1,7 @@
 import type { Infer } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
-import type { Doc } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../client";
 import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { anonymizeDiscordAccount } from "./anonymization.js";
@@ -10,6 +10,7 @@ type Message = Infer<typeof messageSchema>;
 type MessageDoc = Doc<"messages">;
 type AttachmentDoc = Doc<"attachments"> & { url: string };
 export type DatabaseAttachment = Infer<typeof attachmentSchema>;
+type Emoji = Infer<typeof emojiSchema>;
 
 export async function getMessageById(ctx: QueryCtx | MutationCtx, id: bigint) {
 	return await getOneFrom(ctx.db, "messages", "by_messageId", id, "id");
@@ -270,6 +271,188 @@ export async function upsertMessageInternalLogic(
 					emojiId: reaction.emoji.id,
 				});
 			}
+		}
+	}
+}
+
+export type BulkMessageInput = {
+	message: Message;
+	attachments?: DatabaseAttachment[];
+	reactions?: Array<{
+		userId: bigint;
+		emoji: Emoji;
+	}>;
+};
+
+function createBulkUpsertCache(ctx: MutationCtx) {
+	const messageCache = new Map<string, Promise<Doc<"messages"> | null>>();
+	const attachmentsCache = new Map<string, Promise<Doc<"attachments">[]>>();
+	const reactionsCache = new Map<string, Promise<Doc<"reactions">[]>>();
+	const emojiCache = new Map<string, Promise<Doc<"emojis"> | null>>();
+
+	return {
+		getMessage: (id: bigint) => {
+			const key = id.toString();
+			const existing = messageCache.get(key);
+			if (existing) return existing;
+			const promise = getOneFrom(ctx.db, "messages", "by_messageId", id, "id");
+			messageCache.set(key, promise);
+			return promise;
+		},
+
+		getAttachments: (messageId: bigint) => {
+			const key = messageId.toString();
+			const existing = attachmentsCache.get(key);
+			if (existing) return existing;
+			const promise = getManyFrom(
+				ctx.db,
+				"attachments",
+				"by_messageId",
+				messageId,
+				"messageId",
+			);
+			attachmentsCache.set(key, promise);
+			return promise;
+		},
+
+		getReactions: (messageId: bigint) => {
+			const key = messageId.toString();
+			const existing = reactionsCache.get(key);
+			if (existing) return existing;
+			const promise = getManyFrom(
+				ctx.db,
+				"reactions",
+				"by_messageId",
+				messageId,
+				"messageId",
+			);
+			reactionsCache.set(key, promise);
+			return promise;
+		},
+
+		getEmoji: (id: bigint) => {
+			const key = id.toString();
+			const existing = emojiCache.get(key);
+			if (existing) return existing;
+			const promise = getOneFrom(ctx.db, "emojis", "by_emojiId", id, "id");
+			emojiCache.set(key, promise);
+			return promise;
+		},
+	};
+}
+
+async function processMessageInput(
+	ctx: MutationCtx,
+	cache: ReturnType<typeof createBulkUpsertCache>,
+	input: BulkMessageInput,
+	seenEmojiIds: Set<string>,
+) {
+	const messageData = { ...input.message };
+	if (messageData.id === messageData.channelId) {
+		messageData.childThreadId = messageData.channelId;
+	}
+
+	const [existingMessage, existingAttachments, existingReactions] =
+		await Promise.all([
+			cache.getMessage(messageData.id),
+			input.attachments !== undefined
+				? cache.getAttachments(messageData.id)
+				: Promise.resolve([]),
+			input.reactions !== undefined
+				? cache.getReactions(messageData.id)
+				: Promise.resolve([]),
+		]);
+
+	const emojiIdsToCheck =
+		input.reactions
+			?.map((r) => r.emoji.id)
+			.filter((id): id is bigint => id !== undefined) ?? [];
+
+	const existingEmojis = await Promise.all(
+		emojiIdsToCheck.map((id) => cache.getEmoji(id)),
+	);
+
+	const existingEmojiIds = new Set(
+		existingEmojis.filter((e) => e !== null).map((e) => e.id.toString()),
+	);
+
+	return {
+		messageToWrite: existingMessage
+			? { type: "update" as const, id: existingMessage._id, data: messageData }
+			: { type: "insert" as const, data: messageData },
+
+		attachmentsToDelete: existingAttachments.map((a) => a._id),
+		attachmentsToInsert: input.attachments ?? [],
+
+		reactionsToDelete: existingReactions.map((r) => r._id),
+		emojisToInsert: (input.reactions ?? [])
+			.filter((r) => {
+				if (!r.emoji.id) return false;
+				const idStr = r.emoji.id.toString();
+				if (existingEmojiIds.has(idStr) || seenEmojiIds.has(idStr))
+					return false;
+				seenEmojiIds.add(idStr);
+				return true;
+			})
+			.map((r) => r.emoji),
+		reactionsToInsert: (input.reactions ?? [])
+			.filter((r) => r.emoji.id)
+			.map((r) => ({
+				messageId: messageData.id,
+				userId: r.userId,
+				emojiId: r.emoji.id!,
+			})),
+	};
+}
+
+export async function upsertManyMessagesOptimized(
+	ctx: MutationCtx,
+	inputs: BulkMessageInput[],
+): Promise<void> {
+	if (inputs.length === 0) return;
+
+	const cache = createBulkUpsertCache(ctx);
+	const seenEmojiIds = new Set<string>();
+
+	const processedInputs = await Promise.all(
+		inputs.map((input) => processMessageInput(ctx, cache, input, seenEmojiIds)),
+	);
+
+	for (const processed of processedInputs) {
+		for (const id of processed.attachmentsToDelete) {
+			await ctx.db.delete(id);
+		}
+		for (const id of processed.reactionsToDelete) {
+			await ctx.db.delete(id);
+		}
+	}
+
+	for (const processed of processedInputs) {
+		if (processed.messageToWrite.type === "insert") {
+			await ctx.db.insert("messages", processed.messageToWrite.data);
+		} else {
+			await ctx.db.replace(
+				processed.messageToWrite.id,
+				processed.messageToWrite.data,
+			);
+		}
+	}
+
+	for (const processed of processedInputs) {
+		for (const attachment of processed.attachmentsToInsert) {
+			await ctx.db.insert("attachments", attachment);
+		}
+	}
+
+	for (const processed of processedInputs) {
+		for (const emoji of processed.emojisToInsert) {
+			await ctx.db.insert("emojis", emoji);
+		}
+	}
+
+	for (const processed of processedInputs) {
+		for (const reaction of processed.reactionsToInsert) {
+			await ctx.db.insert("reactions", reaction);
 		}
 	}
 }

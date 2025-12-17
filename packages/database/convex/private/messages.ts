@@ -10,11 +10,13 @@ import {
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { enrichMessages } from "../shared/dataAccess";
 import {
+	type BulkMessageInput,
 	deleteMessageInternalLogic,
 	findIgnoredDiscordAccountById,
 	findUserServerSettingsById,
 	getChannelWithSettings,
 	getMessageById as getMessageByIdShared,
+	upsertManyMessagesOptimized,
 	upsertMessageInternalLogic,
 } from "../shared/shared";
 
@@ -184,6 +186,8 @@ export const upsertManyMessages = privateMutation({
 			return { created, ignored };
 		}
 
+		let messagesToUpsert: BulkMessageInput[];
+
 		if (!args.ignoreChecks) {
 			const authorIds = new Set(args.messages.map((m) => m.message.authorId));
 			const ignoredAccounts = await asyncMap(Array.from(authorIds), (id) =>
@@ -205,7 +209,7 @@ export const upsertManyMessages = privateMutation({
 				(msg) => !ignoredAccountIds.has(msg.message.authorId),
 			);
 
-			const messagesToUpsert: typeof args.messages = [];
+			messagesToUpsert = [];
 			for (const msg of messagesToProcess) {
 				const indexingDisabled = await hasMessageIndexingDisabled(
 					ctx,
@@ -218,24 +222,14 @@ export const upsertManyMessages = privateMutation({
 					messagesToUpsert.push(msg);
 				}
 			}
-
-			for (const msgData of messagesToUpsert) {
-				await upsertMessageInternalLogic(ctx, {
-					message: msgData.message,
-					attachments: msgData.attachments,
-					reactions: msgData.reactions,
-				});
-				created.push(msgData.message.id);
-			}
 		} else {
-			for (const msgData of args.messages) {
-				await upsertMessageInternalLogic(ctx, {
-					message: msgData.message,
-					attachments: msgData.attachments,
-					reactions: msgData.reactions,
-				});
-				created.push(msgData.message.id);
-			}
+			messagesToUpsert = args.messages;
+		}
+
+		await upsertManyMessagesOptimized(ctx, messagesToUpsert);
+
+		for (const msg of messagesToUpsert) {
+			created.push(msg.message.id);
 		}
 
 		return { created, ignored };
