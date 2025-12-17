@@ -5,6 +5,7 @@ export type SentryConfig = {
 	dsn: string | undefined;
 	environment: string;
 	release?: string;
+	sampleRate?: number;
 	tracesSampleRate?: number;
 	profilesSampleRate?: number;
 };
@@ -23,6 +24,7 @@ export const initSentry = (config: SentryConfig) => {
 		dsn: config.dsn,
 		environment: config.environment,
 		release: config.release,
+		sampleRate: config.sampleRate ?? 0.25,
 		tracesSampleRate: config.tracesSampleRate ?? 0.1,
 		profilesSampleRate: config.profilesSampleRate ?? 0.1,
 	});
