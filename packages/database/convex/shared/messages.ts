@@ -5,7 +5,6 @@ import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../client";
 import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { anonymizeDiscordAccount } from "./anonymization.js";
-import { enrichMessages } from "./dataAccess";
 
 type Message = Infer<typeof messageSchema>;
 type MessageDoc = Doc<"messages">;
@@ -26,37 +25,6 @@ export async function getThreadStartMessage(
 	threadId: bigint,
 ): Promise<MessageDoc | null> {
 	return getOneFrom(ctx.db, "messages", "by_messageId", threadId, "id");
-}
-
-export async function getThreadStarterMessages(
-	ctx: QueryCtx | MutationCtx,
-	threadIds: bigint[],
-): Promise<Record<string, EnrichedMessage | null>> {
-	const results: Record<string, EnrichedMessage | null> = {};
-
-	if (threadIds.length === 0) {
-		return results;
-	}
-
-	const baseMessages = await Promise.all(
-		threadIds.map((threadId) =>
-			getOneFrom(ctx.db, "messages", "by_messageId", threadId, "id"),
-		),
-	);
-	const messages = await enrichMessages(
-		ctx,
-		Arr.filter(baseMessages, Predicate.isNotNullable),
-	);
-
-	for (let i = 0; i < threadIds.length; i++) {
-		const threadId = threadIds[i];
-		const message = messages[i];
-		if (threadId && message) {
-			results[threadId.toString()] = message ?? null;
-		}
-	}
-
-	return results;
 }
 
 export async function getFirstMessagesInChannels(
