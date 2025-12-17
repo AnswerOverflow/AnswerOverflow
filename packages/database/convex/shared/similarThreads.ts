@@ -23,7 +23,7 @@ export async function findSimilarThreads(
 		return [];
 	}
 
-	const fetchLimit = limit * 2;
+	const fetchLimit = Math.ceil(limit * 1.5);
 
 	const [threadsByName, messageResults] = await Promise.all([
 		ctx.db
