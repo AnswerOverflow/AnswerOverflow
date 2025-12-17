@@ -23,7 +23,7 @@ function useHighlightedCode(
 					theme: theme === "dark" ? "github-dark" : "github-light",
 				});
 			} catch {
-				return `<pre class="shiki"><code>${code.replace(/</g, "&lt;")}</code></pre>`;
+				return `<pre class="shiki"><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`;
 			}
 		},
 		staleTime: Infinity,
