@@ -26,7 +26,7 @@ export class SendMarkSolutionInstructionsError extends Error {
 	}
 }
 
-type ChannelWithFlags = {
+export type ChannelWithFlags = {
 	id: bigint;
 	name: string;
 	type: number;
@@ -42,15 +42,21 @@ type ChannelWithFlags = {
 	} | null;
 };
 
-export function handleSendMarkSolutionInstructions(
+export function trackQuestionAsked(
 	thread: ThreadChannel,
-	newlyCreated: boolean,
 	channelSettings: ChannelWithFlags | null,
 	threadOwner: GuildMember,
 	question: Message | null,
 ) {
 	return Effect.gen(function* () {
-		if (!channelSettings) {
+		if (!channelSettings?.flags) {
+			return;
+		}
+
+		if (
+			!channelSettings.flags.indexingEnabled &&
+			!channelSettings.flags.markSolutionEnabled
+		) {
 			return;
 		}
 
@@ -83,24 +89,29 @@ export function handleSendMarkSolutionInstructions(
 				}
 			: undefined;
 
-		if (!channelSettings.flags) {
-			return;
-		}
+		yield* catchAllSilentWithReport(
+			trackAskedQuestion(
+				thread,
+				channelSettings,
+				threadOwner,
+				server,
+				serverPreferences,
+				question,
+			),
+		);
+	});
+}
 
-		if (
-			channelSettings.flags.indexingEnabled ||
-			channelSettings.flags.markSolutionEnabled
-		) {
-			yield* catchAllSilentWithReport(
-				trackAskedQuestion(
-					thread,
-					channelSettings,
-					threadOwner,
-					server,
-					serverPreferences,
-					question,
-				),
-			);
+export function handleSendMarkSolutionInstructions(
+	thread: ThreadChannel,
+	newlyCreated: boolean,
+	channelSettings: ChannelWithFlags | null,
+	threadOwner: GuildMember,
+	question: Message | null,
+) {
+	return Effect.gen(function* () {
+		if (!channelSettings?.flags) {
+			return;
 		}
 
 		if (!channelSettings.flags.sendMarkSolutionInstructionsInNewThreads) {
@@ -110,6 +121,35 @@ export function handleSendMarkSolutionInstructions(
 		if (!newlyCreated) {
 			return;
 		}
+
+		const database = yield* Database;
+
+		const serverData = yield* database.private.servers.getServerByDiscordId({
+			discordId: BigInt(thread.guildId),
+		});
+
+		if (!serverData) {
+			return;
+		}
+
+		const preferencesData =
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId: BigInt(thread.guildId),
+				},
+			);
+
+		const server = {
+			discordId: serverData.discordId.toString(),
+			name: serverData.name,
+		};
+
+		const serverPreferences = preferencesData
+			? {
+					readTheRulesConsentEnabled:
+						preferencesData.readTheRulesConsentEnabled,
+				}
+			: undefined;
 
 		const embed = new EmbedBuilder()
 			.setDescription(
