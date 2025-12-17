@@ -11,9 +11,9 @@ import {
 	MessageFlags,
 } from "discord.js";
 import { Effect, Layer } from "effect";
-import { catchAllSilentWithReport } from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
+import { catchAllSilentWithReport } from "../utils/error-reporting";
 
 export const menuButtonIds = {
 	consentButton: "consent-button",

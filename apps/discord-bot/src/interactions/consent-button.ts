@@ -2,14 +2,14 @@ import { Database } from "@packages/database/database";
 import type { ButtonInteraction, GuildMember } from "discord.js";
 import { MessageFlags } from "discord.js";
 import { Console, Effect, Layer } from "effect";
+import { Discord } from "../core/discord-service";
+import { CONSENT_ACTION_PREFIX } from "../services/mark-solution";
+import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
+import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
 import {
 	catchAllSilentWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
-import { Discord } from "../core/discord-service";
-import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
-import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
-import { CONSENT_ACTION_PREFIX } from "../services/mark-solution";
 
 const CONSENT_SOURCES = [
 	ConsentSource.ForumPostGuidelines,

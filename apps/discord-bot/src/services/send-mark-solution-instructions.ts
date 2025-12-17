@@ -6,7 +6,6 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { Effect } from "effect";
-import { catchAllSilentWithReport } from "../utils/error-reporting";
 import {
 	trackAskedQuestion,
 	trackMarkSolutionInstructionsSent,
@@ -15,6 +14,7 @@ import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	makeDismissButton,
 } from "../utils/discord-components";
+import { catchAllSilentWithReport } from "../utils/error-reporting";
 
 export class SendMarkSolutionInstructionsError extends Error {
 	constructor(

@@ -11,11 +11,11 @@
 import type {
 	DataModelFromSchemaDefinition,
 	DocumentByName,
-	TableNamesInDataModel,
 	SystemTableNames,
+	TableNamesInDataModel,
 } from "convex/server";
 import type { GenericId } from "convex/values";
-import schema from "../schema.js";
+import type schema from "../schema.js";
 
 /**
  * The names of all of your Convex tables.

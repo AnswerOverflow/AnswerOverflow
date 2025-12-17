@@ -1,7 +1,7 @@
 import type { Infer } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../client";
 import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { anonymizeDiscordAccount } from "./anonymization.js";
@@ -342,7 +342,7 @@ function createBulkUpsertCache(ctx: MutationCtx) {
 }
 
 async function processMessageInput(
-	ctx: MutationCtx,
+	_ctx: MutationCtx,
 	cache: ReturnType<typeof createBulkUpsertCache>,
 	input: BulkMessageInput,
 	seenEmojiIds: Set<string>,

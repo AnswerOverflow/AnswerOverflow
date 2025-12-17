@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { getCookie } from "hono/cookie";
 import { handle } from "hono/vercel";
 import { handleAuth } from "../handlers/auth";
 import { handleConvexWebhook } from "../handlers/convex-webhooks";
@@ -18,12 +17,12 @@ const ALLOWED_DEV_ORIGINS = [
 
 const PRODUCTION_ORIGIN = "https://www.answeroverflow.com";
 
-function isAllowedDevOrigin(origin: string | undefined): boolean {
+function _isAllowedDevOrigin(origin: string | undefined): boolean {
 	if (!origin) return false;
 	return ALLOWED_DEV_ORIGINS.some((pattern) => pattern.test(origin));
 }
 
-function isDevAuthPageReferer(referer: string | undefined): boolean {
+function _isDevAuthPageReferer(referer: string | undefined): boolean {
 	if (!referer) return false;
 	try {
 		const url = new URL(referer);
@@ -33,7 +32,7 @@ function isDevAuthPageReferer(referer: string | undefined): boolean {
 	}
 }
 
-function isLocalhostRequest(requestUrl: string): boolean {
+function _isLocalhostRequest(requestUrl: string): boolean {
 	try {
 		const url = new URL(requestUrl);
 		return (

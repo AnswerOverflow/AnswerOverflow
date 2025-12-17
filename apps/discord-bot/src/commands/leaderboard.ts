@@ -9,12 +9,12 @@ import {
 	MessageFlags,
 } from "discord.js";
 import { Effect, Layer } from "effect";
-import {
-	catchAllSucceedNullWithReport,
-	catchAllSilentWithReport,
-} from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { trackLeaderboardViewed } from "../utils/analytics";
+import {
+	catchAllSilentWithReport,
+	catchAllSucceedNullWithReport,
+} from "../utils/error-reporting";
 
 const medalMap = new Map<number, string>([
 	[0, ":first_place:"],

@@ -10,7 +10,7 @@ import type {
 	Message,
 	ModalSubmitInteraction,
 } from "discord.js";
-import { Cause, Effect } from "effect";
+import { type Cause, Effect } from "effect";
 
 type DiscordContext = {
 	guildId?: string | null;

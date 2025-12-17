@@ -1,7 +1,5 @@
 "use client";
 
-import { AlertTriangle, LogIn, RefreshCw } from "lucide-react";
-
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,
@@ -11,6 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { AlertTriangle, LogIn, RefreshCw } from "lucide-react";
 import { useAuthClient } from "../../../lib/auth-client";
 
 export default function DashboardError({

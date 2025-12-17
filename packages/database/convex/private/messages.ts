@@ -17,7 +17,6 @@ import {
 	getChannelWithSettings,
 	getMessageById as getMessageByIdShared,
 	upsertManyMessagesOptimized,
-	upsertMessageInternalLogic,
 } from "../shared/shared";
 
 async function isIgnoredAccount(
