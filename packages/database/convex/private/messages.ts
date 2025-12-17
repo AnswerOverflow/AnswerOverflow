@@ -8,13 +8,12 @@ import {
 	type QueryCtx,
 } from "../client";
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
-import { enrichMessages } from "../shared/dataAccess";
+import { createDataAccessCache, enrichMessages } from "../shared/dataAccess";
 import {
 	type BulkMessageInput,
 	deleteMessageInternalLogic,
 	findIgnoredDiscordAccountById,
 	findUserServerSettingsById,
-	getChannelWithSettings,
 	getMessageById as getMessageByIdShared,
 	upsertManyMessagesOptimized,
 } from "../shared/shared";
@@ -492,15 +491,16 @@ export const getMessagePageHeaderData = privateQuery({
 		messageId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		const targetMessage = await getMessageByIdShared(ctx, args.messageId);
+		const cache = createDataAccessCache(ctx);
 
-		const thread = await getOneFrom(
-			ctx.db,
-			"channels",
-			"by_discordChannelId",
-			targetMessage?.parentChannelId ? targetMessage.channelId : args.messageId,
-			"id",
-		);
+		const [targetMessage, threadAsChannel] = await Promise.all([
+			cache.getMessage(args.messageId),
+			cache.getChannel(args.messageId),
+		]);
+
+		const thread = targetMessage?.parentChannelId
+			? await cache.getChannel(targetMessage.channelId)
+			: threadAsChannel;
 
 		const channelId =
 			thread?.parentId ??
@@ -510,41 +510,42 @@ export const getMessagePageHeaderData = privateQuery({
 			return null;
 		}
 
-		const channel = await getChannelWithSettings(ctx, channelId);
+		const [channel, server, serverPreferences] = await Promise.all([
+			cache.getChannelWithSettings(channelId),
+			targetMessage
+				? cache.getServer(targetMessage.serverId)
+				: thread
+					? cache.getServer(thread.serverId)
+					: null,
+			targetMessage
+				? cache.getServerPreferences(targetMessage.serverId)
+				: thread
+					? cache.getServerPreferences(thread.serverId)
+					: null,
+		]);
+
 		if (!channel?.flags?.indexingEnabled) {
 			console.error("Channel indexing not enabled", channel?.id);
 			return null;
 		}
-
-		const firstMessage = targetMessage;
-
-		const [enrichedFirstMessage, server] = await Promise.all([
-			firstMessage ? enrichMessages(ctx, [firstMessage]) : [],
-			getOneFrom(
-				ctx.db,
-				"servers",
-				"by_discordId",
-				channel.serverId,
-				"discordId",
-			),
-		]);
 
 		if (!server) {
 			console.error("Server not found", channel.serverId);
 			return null;
 		}
 
-		const enrichedFirst = enrichedFirstMessage[0] ?? null;
-		const solutionMessageId = enrichedFirst?.solutions?.at(0)?.id;
-
-		const [solutionMessage, serverPreferences] = await Promise.all([
-			solutionMessageId
-				? getMessageByIdShared(ctx, solutionMessageId).then((msg) =>
-						msg ? enrichMessages(ctx, [msg]) : [],
-					)
+		const [enrichedFirstMessage, solutionMessages] = await Promise.all([
+			targetMessage ? enrichMessages(ctx, [targetMessage], cache) : [],
+			targetMessage
+				? cache.getSolutionsByQuestionId(targetMessage.id)
 				: Promise.resolve([]),
-			getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
 		]);
+		const enrichedFirst = enrichedFirstMessage[0] ?? null;
+
+		const solutionMsg = solutionMessages[0];
+		const solutionMessage = solutionMsg
+			? await enrichMessages(ctx, [solutionMsg], cache)
+			: [];
 
 		return {
 			canonicalId: thread?.id ?? targetMessage?.id ?? args.messageId,

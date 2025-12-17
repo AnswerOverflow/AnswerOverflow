@@ -1,4 +1,4 @@
-import { getOneFrom } from "convex-helpers/server/relationships";
+import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../client";
@@ -10,7 +10,7 @@ import {
 	getDiscordAccountIdFromAuth,
 	getUserServerSettingsForServerByDiscordId,
 } from "./auth";
-import { isChannelIndexingEnabled } from "./channels";
+import { getChannelWithSettings, isChannelIndexingEnabled } from "./channels";
 import {
 	isMessagePublic,
 	type MessageWithPrivacyFlags,
@@ -57,9 +57,73 @@ export function createDataAccessCache(ctx: QueryCtx) {
 				getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
 			),
 
+		getChannelWithSettings: (channelId: bigint) =>
+			cache.get(`channelWithSettings:${channelId}`, () =>
+				getChannelWithSettings(ctx, channelId),
+			),
+
+		getChannelSettings: (channelId: bigint) =>
+			cache.get(`channelSettings:${channelId}`, () =>
+				getOneFrom(ctx.db, "channelSettings", "by_channelId", channelId),
+			),
+
 		getServer: (serverId: bigint) =>
 			cache.get(`server:${serverId}`, () =>
 				getOneFrom(ctx.db, "servers", "by_discordId", serverId, "discordId"),
+			),
+
+		getDiscordAccount: (accountId: bigint) =>
+			cache.get(`discordAccount:${accountId}`, () =>
+				getOneFrom(
+					ctx.db,
+					"discordAccounts",
+					"by_discordAccountId",
+					accountId,
+					"id",
+				),
+			),
+
+		getMessage: (messageId: bigint) =>
+			cache.get(`message:${messageId}`, () =>
+				getOneFrom(ctx.db, "messages", "by_messageId", messageId, "id"),
+			),
+
+		getAttachmentsByMessageId: (messageId: bigint) =>
+			cache.get(`attachments:${messageId}`, () =>
+				getManyFrom(
+					ctx.db,
+					"attachments",
+					"by_messageId",
+					messageId,
+					"messageId",
+				),
+			),
+
+		getReactionsByMessageId: (messageId: bigint) =>
+			cache.get(`reactions:${messageId}`, () =>
+				getManyFrom(
+					ctx.db,
+					"reactions",
+					"by_messageId",
+					messageId,
+					"messageId",
+				),
+			),
+
+		getSolutionsByQuestionId: (questionId: bigint) =>
+			cache.get(`solutions:${questionId}`, () =>
+				getManyFrom(
+					ctx.db,
+					"messages",
+					"by_questionId",
+					questionId,
+					"questionId",
+				),
+			),
+
+		getEmoji: (emojiId: bigint) =>
+			cache.get(`emoji:${emojiId}`, () =>
+				getOneFrom(ctx.db, "emojis", "by_emojiId", emojiId, "id"),
 			),
 
 		isChannelIndexingEnabled: (channelId: bigint, parentChannelId?: bigint) =>
@@ -73,6 +137,8 @@ export function createDataAccessCache(ctx: QueryCtx) {
 			),
 	};
 }
+
+export type DataAccessCache = ReturnType<typeof createDataAccessCache>;
 
 async function fetchMessagePrivacyData(
 	cache: DataAccessCache,
@@ -132,13 +198,12 @@ export async function enrichMessage(
 	return await enrichMessageForDisplay(ctx, message, { isAnonymous });
 }
 
-type DataAccessCache = ReturnType<typeof createDataAccessCache>;
-
 export async function enrichMessages(
 	ctx: QueryCtx,
 	messages: Message[],
+	existingCache?: DataAccessCache,
 ): Promise<SharedEnrichedMessage[]> {
-	const cache = createDataAccessCache(ctx);
+	const cache = existingCache ?? createDataAccessCache(ctx);
 	const results = await Promise.all(
 		messages.map((message) => enrichMessage(ctx, cache, message)),
 	);
