@@ -44,7 +44,7 @@ export function makeMarkSolutionResponse({
 }: {
 	solution: Message;
 	server: { name: string; _id: string };
-	serverPreferences: ServerPreferences;
+	serverPreferences: ServerPreferences | null;
 	channelSettings: {
 		flags: {
 			indexingEnabled: boolean;

@@ -2,12 +2,6 @@ import { Database } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType, MessageFlags } from "discord.js";
 import { Data, Duration, Effect, Layer } from "effect";
-import {
-	catchAllSilentWithReport,
-	catchAllSucceedNullWithReport,
-	catchAllWithReport,
-	catchAllDefectWithReport,
-} from "../utils/error-reporting";
 import { Discord } from "../core/discord-service";
 import { makeMarkSolutionResponse } from "../services/mark-solution";
 import {
@@ -15,6 +9,12 @@ import {
 	trackSolvedQuestion,
 } from "../utils/analytics";
 import { toAOMessage, toUpsertMessageArgs } from "../utils/conversions";
+import {
+	catchAllDefectWithReport,
+	catchAllSilentWithReport,
+	catchAllSucceedNullWithReport,
+	catchAllWithReport,
+} from "../utils/error-reporting";
 
 class MarkSolutionTimeoutError extends Data.TaggedError(
 	"MarkSolutionTimeoutError",
@@ -315,7 +315,7 @@ export function handleMarkSolutionCommand(
 						name: server.name,
 						_id: server._id,
 					},
-					serverPreferences,
+					serverPreferences: serverPreferences ?? null,
 					channelSettings: {
 						...channelSettings,
 						flags: channelSettings.flags,
