@@ -20,7 +20,6 @@ export {
 	findUserServerSettingsById,
 	getChannelWithSettings,
 	getDiscordAccountById,
-	getFirstMessageInChannel,
 	getFirstMessagesInChannels,
 	getHighestRoleFromPermissions,
 	getInternalLinksMetadata,
