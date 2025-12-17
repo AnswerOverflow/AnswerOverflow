@@ -3,7 +3,7 @@ import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../client";
 import { CHANNEL_TYPE } from "./channels";
-import { getFirstMessageInChannel } from "./messages";
+import { getThreadStarterMessages } from "./messages";
 
 export async function findSimilarThreads(
 	ctx: QueryCtx,
@@ -22,6 +22,8 @@ export async function findSimilarThreads(
 		return [];
 	}
 
+	const fetchLimit = limit * 2;
+
 	const [threadsByName, messageResults] = await Promise.all([
 		ctx.db
 			.query("channels")
@@ -34,7 +36,7 @@ export async function findSimilarThreads(
 				}
 				return search;
 			})
-			.take(limit * 4),
+			.take(fetchLimit),
 		ctx.db
 			.query("messages")
 			.withSearchIndex("search_content", (q) => {
@@ -44,7 +46,7 @@ export async function findSimilarThreads(
 				}
 				return search;
 			})
-			.take(limit * 4),
+			.take(fetchLimit),
 	]);
 
 	const threadIdsFromMessages = new Set(
@@ -67,8 +69,11 @@ export async function findSimilarThreads(
 	allThreadIds.delete(currentThreadId.toString());
 
 	const threadServerMap = new Map<string, bigint>();
+	const threadsByIdMap = new Map<string, Doc<"channels">>();
 	for (const thread of threadsByName) {
-		threadServerMap.set(thread.id.toString(), thread.serverId);
+		const idStr = thread.id.toString();
+		threadServerMap.set(idStr, thread.serverId);
+		threadsByIdMap.set(idStr, thread);
 	}
 	for (const message of messageResults) {
 		if (message.parentChannelId) {
@@ -90,26 +95,48 @@ export async function findSimilarThreads(
 		return 0;
 	});
 
-	const firstMessages = await Promise.all(
-		sortedThreadIds.slice(0, limit * 2).map(async (threadIdStr) => {
-			const threadId = BigInt(threadIdStr);
-			const cachedThread = threadsByName.find((t) => t.id === threadId);
-			if (cachedThread && !cachedThread.parentId) return null;
+	const candidateThreadIds = sortedThreadIds.slice(0, fetchLimit);
 
-			if (!cachedThread) {
-				const thread = await getOneFrom(
+	const unknownThreadIds = Arr.filter(
+		candidateThreadIds,
+		(id) => !threadsByIdMap.has(id),
+	);
+
+	if (unknownThreadIds.length > 0) {
+		const unknownThreads = await Promise.all(
+			unknownThreadIds.map((idStr) =>
+				getOneFrom(
 					ctx.db,
 					"channels",
 					"by_discordChannelId",
-					threadId,
+					BigInt(idStr),
 					"id",
-				);
-				if (!thread || !thread.parentId) return null;
+				),
+			),
+		);
+		for (let i = 0; i < unknownThreadIds.length; i++) {
+			const thread = unknownThreads[i];
+			const threadId = unknownThreadIds[i];
+			if (thread && threadId) {
+				threadsByIdMap.set(threadId, thread);
 			}
+		}
+	}
 
-			return await getFirstMessageInChannel(ctx, threadId);
-		}),
+	const validThreadIds = Arr.filter(candidateThreadIds, (idStr) => {
+		const thread = threadsByIdMap.get(idStr);
+		return thread !== undefined && thread.parentId !== null;
+	});
+
+	const firstMessages = await getThreadStarterMessages(
+		ctx,
+		validThreadIds.map((id) => BigInt(id)),
 	);
 
-	return Arr.take(Arr.filter(firstMessages, Predicate.isNotNull), limit);
+	const orderedMessages = Arr.filter(
+		validThreadIds.map((id) => firstMessages[id] ?? null),
+		Predicate.isNotNull,
+	);
+
+	return Arr.take(orderedMessages, limit);
 }
