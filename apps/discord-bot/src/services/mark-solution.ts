@@ -1,13 +1,33 @@
+import type { ServerPreferences } from "@packages/database/convex/schema";
 import type { Message } from "discord.js";
 import {
 	ActionRowBuilder,
+	type APIButtonComponent,
 	ButtonBuilder,
 	ButtonStyle,
+	ComponentType,
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
+import { ConsentSource } from "../utils/analytics";
 
 const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
+const CONSENT_BUTTON_LABEL = "Publicly Display My Messages";
+
+export const CONSENT_ACTION_PREFIX = "consent";
+
+export function makeConsentButtonData(source: ConsentSource) {
+	return {
+		label: CONSENT_BUTTON_LABEL,
+		style: ButtonStyle.Success,
+		custom_id: `${CONSENT_ACTION_PREFIX}:${source}`,
+		type: ComponentType.Button,
+	} as APIButtonComponent;
+}
+
+export function makeConsentButton(source: ConsentSource) {
+	return new ButtonBuilder(makeConsentButtonData(source));
+}
 
 function makeMainSiteLink(path: string): string {
 	const baseUrl =
@@ -24,10 +44,7 @@ export function makeMarkSolutionResponse({
 }: {
 	solution: Message;
 	server: { name: string; _id: string };
-	serverPreferences: {
-		customDomain?: string;
-		considerAllMessagesPublicEnabled?: boolean;
-	} | null;
+	serverPreferences: ServerPreferences;
 	channelSettings: {
 		flags: {
 			indexingEnabled: boolean;
@@ -41,13 +58,32 @@ export function makeMarkSolutionResponse({
 		ANSWER_OVERFLOW_BLUE_HEX as `#${string}`,
 	);
 
+	const shouldShowConsentButton =
+		channelSettings.flags.indexingEnabled &&
+		!channelSettings.flags.forumGuidelinesConsentEnabled &&
+		!serverPreferences?.readTheRulesConsentEnabled &&
+		!serverPreferences?.considerAllMessagesPublicEnabled;
+
+	if (shouldShowConsentButton) {
+		embed.setDescription(
+			[
+				"**Thank you for marking this question as solved!**",
+				`Want to help others find the answer to this question? Use the button below to display your messages in ${server.name} on the web!`,
+			].join("\n\n"),
+		);
+		components.addComponents(
+			makeConsentButton(ConsentSource.MarkSolutionResponse),
+		);
+	} else {
+		embed.setDescription("**Thank you for marking this question as solved!**");
+	}
+
 	if (!serverPreferences?.customDomain) {
 		embed.addFields({
 			name: "Learn more",
 			value: "https://answeroverflow.com/about",
 		});
 	}
-	embed.setDescription("**Thank you for marking this question as solved!**");
 
 	components.addComponents(
 		new ButtonBuilder()
