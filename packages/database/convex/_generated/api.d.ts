@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as authenticated_admin from "../authenticated/admin.js";
 import type * as authenticated_dashboard from "../authenticated/dashboard.js";
 import type * as authenticated_dashboard_mutations from "../authenticated/dashboard_mutations.js";
 import type * as authenticated_dashboard_queries from "../authenticated/dashboard_queries.js";
@@ -15,6 +16,7 @@ import type * as authenticated_discord_token from "../authenticated/discord_toke
 import type * as authenticated_stripe from "../authenticated/stripe.js";
 import type * as authenticated_stripe_actions from "../authenticated/stripe_actions.js";
 import type * as authenticated_vercel_domains from "../authenticated/vercel_domains.js";
+import type * as client_admin from "../client/admin.js";
 import type * as client_authenticated from "../client/authenticated.js";
 import type * as client_guildManager from "../client/guildManager.js";
 import type * as client_index from "../client/index.js";
@@ -63,6 +65,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "authenticated/admin": typeof authenticated_admin;
   "authenticated/dashboard": typeof authenticated_dashboard;
   "authenticated/dashboard_mutations": typeof authenticated_dashboard_mutations;
   "authenticated/dashboard_queries": typeof authenticated_dashboard_queries;
@@ -70,6 +73,7 @@ declare const fullApi: ApiFromModules<{
   "authenticated/stripe": typeof authenticated_stripe;
   "authenticated/stripe_actions": typeof authenticated_stripe_actions;
   "authenticated/vercel_domains": typeof authenticated_vercel_domains;
+  "client/admin": typeof client_admin;
   "client/authenticated": typeof client_authenticated;
   "client/guildManager": typeof client_guildManager;
   "client/index": typeof client_index;

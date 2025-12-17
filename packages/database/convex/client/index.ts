@@ -11,5 +11,6 @@ export {
 	internalMutation,
 	internalQuery,
 } from "../_generated/server";
+export * from "./admin";
 export * from "./authenticated";
 export * from "./private";

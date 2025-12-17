@@ -8,6 +8,13 @@ import type { DataModel } from "../_generated/dataModel";
 import authSchema from "../betterAuth/schema";
 import type { Plan } from "../schema";
 
+// This is the REAL auth configuration used at runtime with secrets, OAuth
+// providers, trusted origins, and tenant site hooks.
+// There is also a stub config at packages/database/convex/betterAuth/auth.ts
+// used only for schema type inference by the vendored component.
+//
+// Keep `user.additionalFields` and `plugins` in sync with the stub config.
+
 export type { Plan };
 
 const ALLOWED_TENANT_PATHS = [
@@ -78,6 +85,14 @@ export const createAuthOptions = (
 			}
 			return secret;
 		})(),
+		user: {
+			additionalFields: {
+				role: {
+					type: "string",
+					required: false,
+				},
+			},
+		},
 		hooks: {
 			before: createAuthMiddleware(async (authCtx) => {
 				const origin = authCtx.headers?.get("origin");
