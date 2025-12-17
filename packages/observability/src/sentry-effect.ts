@@ -10,6 +10,7 @@ export type SentryEffectConfig = {
 	serviceName: string;
 	environment: string;
 	release?: string;
+	sampleRate?: number;
 	tracesSampleRate?: number;
 	profilesSampleRate?: number;
 };
@@ -29,6 +30,7 @@ const makeSentryTracer = (config: SentryEffectConfig) =>
 			dsn: config.dsn,
 			environment: config.environment,
 			release: config.release,
+			sampleRate: config.sampleRate ?? 0.25,
 			tracesSampleRate: config.tracesSampleRate ?? 0.1,
 			skipOpenTelemetrySetup: true,
 		});
