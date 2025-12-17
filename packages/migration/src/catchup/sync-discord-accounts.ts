@@ -6,7 +6,7 @@ import { transformDiscordAccount } from "../transformers/discord-account";
 import type { DatabaseService, SyncContext, SyncResult } from "./types";
 
 const BATCH_SIZE = 100;
-const CONCURRENT_WRITES = 50;
+const CONCURRENT_WRITES = 10;
 
 export function syncDiscordAccounts(
 	database: DatabaseService,

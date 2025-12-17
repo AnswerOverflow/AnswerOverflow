@@ -7,7 +7,7 @@ import { transformMessage } from "../transformers/message";
 import type { DatabaseService, SyncContext, SyncResult } from "./types";
 
 const BATCH_SIZE = 100;
-const CONCURRENT_WRITES = 50;
+const CONCURRENT_WRITES = 5;
 
 interface MessageWithRelations {
 	messageId: string;

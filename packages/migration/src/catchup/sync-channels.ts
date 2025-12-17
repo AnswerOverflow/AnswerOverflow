@@ -6,7 +6,7 @@ import { transformChannel } from "../transformers/channel";
 import type { DatabaseService, SyncContext, SyncResult } from "./types";
 
 const BATCH_SIZE = 100;
-const CONCURRENT_WRITES = 50;
+const CONCURRENT_WRITES = 10;
 
 export function syncChannels(
 	database: DatabaseService,

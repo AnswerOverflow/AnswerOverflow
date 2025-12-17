@@ -53,7 +53,7 @@ const INDEXING_CONFIG = {
 	messagesPerPage: 100,
 	channelProcessDelay: Duration.millis(100),
 	guildProcessDelay: Duration.millis(500),
-	convexBatchSize: 500,
+	convexBatchSize: 50,
 	maxThreadsToCollect: 5000,
 	recentUpdateThreshold: Duration.hours(6),
 	lookbackPeriod: Duration.weeks(2),
