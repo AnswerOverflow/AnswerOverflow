@@ -28,7 +28,6 @@ export {
 	findMessagesByAuthorId,
 	findReactionsByMessageId,
 	findSolutionsByQuestionId,
-	getFirstMessageInChannel,
 	getFirstMessagesInChannels,
 	getMessageById,
 	getThreadStartMessage,
