@@ -14,11 +14,11 @@ import {
 	type QueryCtx,
 	query,
 } from "../_generated/server";
+import { getDiscordAccountWithToken } from "../shared/auth";
 import {
-	getDiscordAccountWithToken,
-	getUserServerSettingsForServerByDiscordId,
-	isSuperUser,
-} from "../shared/auth";
+	assertGuildManagerPermission,
+	checkGuildManagerPermissions,
+} from "../shared/guildManagerPermissions";
 
 async function getDiscordAccountIdForWrapper(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
@@ -36,16 +36,12 @@ export const guildManagerQuery = customQuery(query, {
 		if (!discordAccountId) {
 			throw new Error("Not authenticated or Discord account not linked");
 		}
-		const userServerSettings = await getUserServerSettingsForServerByDiscordId(
+		const permissionResult = await checkGuildManagerPermissions(
 			ctx,
 			discordAccountId,
 			args.serverId,
 		);
-		if (!userServerSettings) {
-			throw new Error(
-				"You are not a member of the server you are trying to manage",
-			);
-		}
+		assertGuildManagerPermission(permissionResult);
 		return {
 			ctx,
 			args: {
@@ -56,40 +52,17 @@ export const guildManagerQuery = customQuery(query, {
 	},
 });
 
-const ADMINISTRATOR = 0x8;
-const MANAGE_GUILD = 0x20;
-
-export const checkGuildManagerPermissions = internalQuery({
+export const checkGuildManagerPermissionsInternal = internalQuery({
 	args: {
 		discordAccountId: v.int64(),
 		serverId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		const userServerSettings = await getUserServerSettingsForServerByDiscordId(
+		return checkGuildManagerPermissions(
 			ctx,
 			args.discordAccountId,
 			args.serverId,
 		);
-
-		if (!userServerSettings) {
-			return {
-				hasPermission: false,
-				errorMessage: "You are not a member of the server",
-			};
-		}
-
-		const hasAdminOrManageGuild =
-			(userServerSettings.permissions & ADMINISTRATOR) === ADMINISTRATOR ||
-			(userServerSettings.permissions & MANAGE_GUILD) === MANAGE_GUILD;
-
-		if (!hasAdminOrManageGuild && !isSuperUser(args.discordAccountId)) {
-			return {
-				hasPermission: false,
-				errorMessage: "Insufficient permissions",
-			};
-		}
-
-		return { hasPermission: true };
 	},
 });
 
@@ -102,27 +75,12 @@ export const guildManagerMutation = customMutation(mutation, {
 		if (!discordAccountId) {
 			throw new Error("Not authenticated or Discord account not linked");
 		}
-		const userServerSettings = await getUserServerSettingsForServerByDiscordId(
+		const permissionResult = await checkGuildManagerPermissions(
 			ctx,
 			discordAccountId,
 			args.serverId,
 		);
-
-		if (!userServerSettings) {
-			throw new Error(
-				"You are not a member of the server you are trying to manage",
-			);
-		}
-
-		const hasAdminOrManageGuild =
-			(userServerSettings.permissions & ADMINISTRATOR) === ADMINISTRATOR ||
-			(userServerSettings.permissions & MANAGE_GUILD) === MANAGE_GUILD;
-
-		if (!hasAdminOrManageGuild && !isSuperUser(discordAccountId)) {
-			throw new Error(
-				"You are not a member of the server you are trying to manage",
-			);
-		}
+		assertGuildManagerPermission(permissionResult);
 		return {
 			ctx,
 			args: {
@@ -143,19 +101,14 @@ export const guildManagerAction = customAction(action, {
 			throw new Error("Not authenticated or Discord account not linked");
 		}
 
-		const permissionCheck = await ctx.runQuery(
-			internal.client.guildManager.checkGuildManagerPermissions,
+		const permissionResult = await ctx.runQuery(
+			internal.client.guildManager.checkGuildManagerPermissionsInternal,
 			{
 				discordAccountId,
 				serverId: args.serverId,
 			},
 		);
-
-		if (!permissionCheck.hasPermission) {
-			throw new Error(
-				permissionCheck.errorMessage ?? "Insufficient permissions",
-			);
-		}
+		assertGuildManagerPermission(permissionResult);
 
 		return {
 			ctx,
