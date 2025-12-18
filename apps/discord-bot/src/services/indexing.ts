@@ -1013,5 +1013,16 @@ export const IndexingHandlerLayer = Layer.scopedDiscard(
 				);
 			}),
 		);
+
+		yield* Effect.addFinalizer(() =>
+			Effect.gen(function* () {
+				yield* Console.log(
+					"Shutdown requested - waiting for indexing to complete if in progress...",
+				);
+				yield* indexingLock.withPermits(1)(
+					Console.log("Indexing lock released, proceeding with shutdown"),
+				);
+			}),
+		);
 	}),
 );

@@ -55,6 +55,41 @@ export const getChannelPageThreads = publicQuery({
 	},
 });
 
+export const getChannelPageMessages = publicQuery({
+	args: {
+		channelDiscordId: v.int64(),
+		paginationOpts: paginationOptsValidator,
+	},
+	returns: paginatedValidator(
+		v.object({
+			message: v.union(enrichedMessageValidator, v.null()),
+		}),
+	),
+	handler: async (ctx, args) => {
+		const paginatedResult = await ctx.db
+			.query("messages")
+			.withIndex("by_channelId_and_id", (q) =>
+				q.eq("channelId", args.channelDiscordId),
+			)
+			.order("desc")
+			.paginate(args.paginationOpts);
+
+		const cache = createDataAccessCache(ctx);
+		const page = await asyncMap(paginatedResult.page, async (message) => {
+			const enrichedMessage = await enrichMessage(ctx, cache, message);
+			return {
+				message: enrichedMessage,
+			};
+		});
+
+		return {
+			page,
+			isDone: paginatedResult.isDone,
+			continueCursor: paginatedResult.continueCursor,
+		};
+	},
+});
+
 export const getServerPageThreads = publicQuery({
 	args: {
 		serverDiscordId: v.int64(),

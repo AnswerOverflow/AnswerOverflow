@@ -171,6 +171,76 @@ export function ThreadCard({ result, hideServer = false }: ThreadCardProps) {
 	);
 }
 
+export type MessageCardProps = {
+	message: EnrichedMessage;
+	channel?: {
+		id: bigint;
+		name: string;
+		type: number;
+	} | null;
+};
+
+export function MessageCard({ message, channel }: MessageCardProps) {
+	const href = `/m/${message.message.id}`;
+	const ChannelIcon = channel ? getChannelIcon(channel.type) : Hash;
+	const hasSolution = message.solutions.length > 0;
+
+	return (
+		<div className="group rounded-xl border border-border bg-card overflow-hidden transition-all hover:border-border/80 hover:shadow-md">
+			{channel && (
+				<div className="px-4 py-3 border-b border-border/50 bg-muted/20">
+					<div className="flex items-center gap-2 text-sm">
+						<div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+							<div className="flex items-center gap-1.5">
+								<ChannelIcon className="size-4 text-muted-foreground/70 shrink-0" />
+								<span className="text-muted-foreground">{channel.name}</span>
+							</div>
+						</div>
+						{hasSolution && (
+							<div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-500 shrink-0 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+								<CheckCircle2 className="size-3.5" />
+								<span className="text-xs font-medium">Solved</span>
+							</div>
+						)}
+					</div>
+				</div>
+			)}
+			<MessagePreviewCardBody
+				enrichedMessage={message}
+				href={href}
+				ariaLabel={`Open message: ${message.message.content?.slice(0, 30) || "Message"}`}
+			/>
+		</div>
+	);
+}
+
+export function ChannelMessageCard({ message }: { message: EnrichedMessage }) {
+	const href = `/m/${message.message.id}`;
+	const hasSolution = message.solutions.length > 0;
+
+	return (
+		<div className="group rounded-xl border border-border bg-card overflow-hidden transition-all hover:border-border/80 hover:shadow-md">
+			{hasSolution && (
+				<div className="px-4 py-3 border-b border-border/50 bg-muted/20">
+					<div className="flex items-center gap-2 text-sm justify-end">
+						<div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-500 shrink-0 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+							<CheckCircle2 className="size-3.5" />
+							<span className="text-xs font-medium">Solved</span>
+						</div>
+					</div>
+				</div>
+			)}
+			<MessagePreviewCardBody
+				enrichedMessage={message}
+				href={href}
+				ariaLabel={`Open message: ${message.message.content?.slice(0, 30) || "Message"}`}
+			/>
+		</div>
+	);
+}
+
+export const MessageCardSkeleton = ThreadCardSkeleton;
+
 export function ThreadCardSkeleton() {
 	return (
 		<div className="rounded-xl border border-border bg-card overflow-hidden">

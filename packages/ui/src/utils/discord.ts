@@ -1,4 +1,4 @@
-import { Hash, MessageSquare } from "lucide-react";
+import { Hash, Megaphone, MessageSquare } from "lucide-react";
 
 export enum ChannelType {
 	GuildText = 0,
@@ -21,6 +21,7 @@ export enum ChannelType {
 
 export function getChannelIcon(type: number) {
 	if (type === ChannelType.GuildForum) return MessageSquare;
+	if (type === ChannelType.GuildAnnouncement) return Megaphone;
 	return Hash;
 }
 

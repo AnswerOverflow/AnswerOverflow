@@ -1,7 +1,12 @@
 #!/usr/bin/env bun
 
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { kill } from "node:process";
+
+spawnSync("bun", ["run", "generate-function-types"], {
+	stdio: "inherit",
+	shell: false,
+});
 
 const chokidar = spawn("bun", ["run", "generate-function-types:watch"], {
 	stdio: "inherit",

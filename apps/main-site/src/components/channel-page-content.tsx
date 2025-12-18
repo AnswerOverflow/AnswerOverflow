@@ -23,8 +23,10 @@ import {
 } from "@packages/ui/components/sheet";
 import { useTenant } from "@packages/ui/components/tenant-context";
 import {
+	ChannelMessageCard,
 	ChannelThreadCard,
 	ChannelThreadCardSkeleton,
+	MessageCardSkeleton,
 	ThreadCard,
 	ThreadCardSkeleton,
 } from "@packages/ui/components/thread-card";
@@ -248,6 +250,10 @@ type ChannelPageThreads = FunctionReturnType<
 	typeof api.public.channels.getChannelPageThreads
 >;
 
+type ChannelPageMessages = FunctionReturnType<
+	typeof api.public.channels.getChannelPageMessages
+>;
+
 type ServerPageThreads = FunctionReturnType<
 	typeof api.public.channels.getServerPageThreads
 >;
@@ -422,6 +428,63 @@ export function ThreadsList({
 						message={message}
 					/>
 				)}
+			/>
+			{nextCursor && (
+				<a
+					href={`?cursor=${encodeCursor(nextCursor)}`}
+					className="sr-only"
+					aria-hidden="true"
+				>
+					Next page
+				</a>
+			)}
+		</>
+	);
+}
+
+export function MessagesList({
+	channelDiscordId,
+	initialData,
+	nextCursor,
+	currentCursor,
+}: {
+	channelDiscordId: bigint;
+	initialData?: ChannelPageMessages;
+	nextCursor?: string | null;
+	currentCursor?: string | null;
+}) {
+	return (
+		<>
+			<ConvexInfiniteList
+				query={api.public.channels.getChannelPageMessages}
+				queryArgs={{ channelDiscordId }}
+				pageSize={20}
+				initialLoaderCount={5}
+				loader={<MessageCardSkeleton />}
+				initialData={initialData}
+				initialCursor={currentCursor}
+				className="space-y-4"
+				emptyState={
+					<Empty className="py-16">
+						<EmptyHeader>
+							<EmptyMedia variant="icon">
+								<FileQuestion />
+							</EmptyMedia>
+							<EmptyTitle>No messages found</EmptyTitle>
+							<EmptyDescription>
+								This channel doesn't have any indexed messages yet.
+							</EmptyDescription>
+						</EmptyHeader>
+					</Empty>
+				}
+				renderItem={({ message }) =>
+					message ? (
+						<ChannelMessageCard
+							key={message.message.id.toString()}
+							message={message}
+						/>
+					) : null
+				}
 			/>
 			{nextCursor && (
 				<a

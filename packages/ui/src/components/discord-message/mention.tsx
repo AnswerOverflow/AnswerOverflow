@@ -1,5 +1,5 @@
 import { ChannelType } from "discord-api-types/v10";
-import { Hash, Lock, MessageSquare } from "lucide-react";
+import { Hash, Lock, Megaphone, MessageSquare } from "lucide-react";
 import type React from "react";
 import { cn } from "../../lib/utils";
 import { Link } from "../link";
@@ -191,6 +191,8 @@ export function ChannelIcon({ type }: { type: number }) {
 			return <MessageSquare className="inline-block size-4" />;
 		case ChannelType.PublicThread:
 			return <ThreadIcon className="inline-block size-4" />;
+		case ChannelType.GuildAnnouncement:
+			return <Megaphone className="inline-block size-4" />;
 		default:
 			return <Hash className="inline-block size-4" />;
 	}

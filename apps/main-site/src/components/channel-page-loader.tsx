@@ -11,8 +11,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
+import { ChannelType } from "@packages/ui/utils/discord";
 import {
 	ChannelPageContent,
+	MessagesList,
 	ServerPageContent,
 	ServerThreadsList,
 	ThreadsList,
@@ -32,6 +34,10 @@ export type ChannelPageHeaderData = CommunityPageHeaderData & {
 
 export type ChannelPageThreads = FunctionReturnType<
 	typeof api.public.channels.getChannelPageThreads
+>;
+
+export type ChannelPageMessages = FunctionReturnType<
+	typeof api.public.channels.getChannelPageMessages
 >;
 
 export type ServerPageThreads = FunctionReturnType<
@@ -97,6 +103,19 @@ export async function fetchServerPageThreads(
 	}).pipe(runtime.runPromise);
 }
 
+export async function fetchChannelPageMessages(
+	channelDiscordId: bigint,
+	cursor: string | null = null,
+): Promise<ChannelPageMessages> {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.public.channels.getChannelPageMessages({
+			channelDiscordId,
+			paginationOpts: { numItems: 20, cursor },
+		});
+	}).pipe(runtime.runPromise);
+}
+
 export function generateServerPageMetadata(
 	headerData: ServerPageHeaderData | null,
 	basePath: string,
@@ -152,7 +171,12 @@ export function generateChannelPageMetadata(
 
 	const isTenant = tenant !== null;
 	const { server, selectedChannel } = headerData;
-	const description = `Browse threads from #${selectedChannel.name} in the ${server.name} Discord community`;
+	const isAnnouncement =
+		selectedChannel.type === ChannelType.GuildAnnouncement ||
+		selectedChannel.type === ChannelType.GuildNews;
+	const description = isAnnouncement
+		? `Browse announcements from #${selectedChannel.name} in the ${server.name} Discord community`
+		: `Browse threads from #${selectedChannel.name} in the ${server.name} Discord community`;
 	const title = `#${selectedChannel.name} - ${server.name}`;
 	const ogImage = isTenant
 		? `/og/community?id=${server.discordId.toString()}&tenant=true`
@@ -231,6 +255,25 @@ async function ChannelThreadsLoader(props: {
 	);
 }
 
+async function ChannelMessagesLoader(props: {
+	channelDiscordId: bigint;
+	cursor: string | null;
+}) {
+	const initialData = await fetchChannelPageMessages(
+		props.channelDiscordId,
+		props.cursor,
+	);
+
+	return (
+		<MessagesList
+			channelDiscordId={props.channelDiscordId}
+			initialData={initialData}
+			nextCursor={initialData.isDone ? null : initialData.continueCursor}
+			currentCursor={props.cursor}
+		/>
+	);
+}
+
 export async function ServerPageLoader(props: {
 	headerData: ServerPageHeaderData | null;
 	cursor?: string;
@@ -256,6 +299,12 @@ export async function ServerPageLoader(props: {
 	);
 }
 
+function isAnnouncementChannel(type: number): boolean {
+	return (
+		type === ChannelType.GuildAnnouncement || type === ChannelType.GuildNews
+	);
+}
+
 export async function ChannelPageLoader(props: {
 	headerData: ChannelPageHeaderData | null;
 	cursor?: string;
@@ -266,6 +315,8 @@ export async function ChannelPageLoader(props: {
 		return notFound();
 	}
 
+	const isAnnouncement = isAnnouncementChannel(headerData.selectedChannel.type);
+
 	return (
 		<ChannelPageContent
 			server={headerData.server}
@@ -273,10 +324,17 @@ export async function ChannelPageLoader(props: {
 			selectedChannel={headerData.selectedChannel}
 		>
 			<Suspense fallback={<ThreadsSkeleton />}>
-				<ChannelThreadsLoader
-					channelDiscordId={headerData.selectedChannel.id}
-					cursor={cursor ?? null}
-				/>
+				{isAnnouncement ? (
+					<ChannelMessagesLoader
+						channelDiscordId={headerData.selectedChannel.id}
+						cursor={cursor ?? null}
+					/>
+				) : (
+					<ChannelThreadsLoader
+						channelDiscordId={headerData.selectedChannel.id}
+						cursor={cursor ?? null}
+					/>
+				)}
 			</Suspense>
 		</ChannelPageContent>
 	);
