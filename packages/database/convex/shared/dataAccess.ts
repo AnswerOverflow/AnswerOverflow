@@ -195,7 +195,7 @@ export async function enrichMessage(
 		return null;
 	}
 
-	return await enrichMessageForDisplay(ctx, message, { isAnonymous });
+	return await enrichMessageForDisplay(ctx, message, { isAnonymous, cache });
 }
 
 export async function enrichMessages(
