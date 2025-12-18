@@ -905,7 +905,9 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 	});
 }
 
-function runIndexing() {
+export const indexingLock = Effect.unsafeMakeSemaphore(1);
+
+export function runIndexingCore() {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 		const startTime = yield* Clock.currentTimeMillis;
@@ -918,9 +920,7 @@ function runIndexing() {
 		yield* Effect.forEach(
 			Arr.map(guilds, (guild, index) => ({ guild, index })),
 			({ guild, index }) =>
-				Effect.gen(function* () {
-					yield* indexGuild(guild, index, totalGuilds);
-				}).pipe(
+				indexGuild(guild, index, totalGuilds).pipe(
 					catchAllWithReport((error) =>
 						Console.error(
 							`[${index + 1}/${totalGuilds}] Error indexing guild ${guild.name}:`,
@@ -944,6 +944,43 @@ function runIndexing() {
 	);
 }
 
+export function runIndexingForGuild(guild: Guild) {
+	return Effect.gen(function* () {
+		const startTime = yield* Clock.currentTimeMillis;
+		yield* Console.log(`=== Starting indexing for guild: ${guild.name} ===`);
+
+		yield* indexGuild(guild, 0, 1).pipe(
+			catchAllWithReport((error) =>
+				Console.error(`Error indexing guild ${guild.name}:`, error),
+			),
+		);
+
+		const endTime = yield* Clock.currentTimeMillis;
+		const duration = endTime - startTime;
+
+		yield* Console.log(
+			`=== Indexing complete for ${guild.name} in ${formatDurationMs(duration)} ===`,
+		);
+	}).pipe(
+		catchAllWithReport((error) =>
+			Console.error("Fatal error during guild indexing:", error),
+		),
+	);
+}
+
+function runIndexing() {
+	return Effect.gen(function* () {
+		const acquired = yield* indexingLock.withPermitsIfAvailable(1)(
+			Effect.as(runIndexingCore(), true),
+		);
+		if (Option.isNone(acquired)) {
+			yield* Console.log(
+				"=== Skipping indexing run - previous run still in progress ===",
+			);
+		}
+	});
+}
+
 export function startIndexingLoop() {
 	return Effect.gen(function* () {
 		yield* Console.log(
@@ -955,7 +992,7 @@ export function startIndexingLoop() {
 			INDEXING_CONFIG.cronTimezone,
 		);
 
-		yield* Effect.fork(
+		yield* Effect.forkDaemon(
 			Effect.repeat(runIndexing(), schedule).pipe(
 				catchAllCauseWithReport((cause) =>
 					Console.error("Error in scheduled indexing run:", cause),
