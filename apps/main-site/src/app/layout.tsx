@@ -1,5 +1,4 @@
 import "@packages/ui/globals.css";
-import { Providers } from "@packages/ui/components/providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -21,9 +20,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body>
-				<NuqsAdapter>
-					<Providers tenant={null}>{children}</Providers>
-				</NuqsAdapter>
+				<NuqsAdapter>{children}</NuqsAdapter>
 				<SpeedInsights sampleRate={0.1} />
 			</body>
 		</html>

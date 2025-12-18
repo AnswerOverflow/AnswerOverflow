@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { NavbarWrapper } from "@/components/navbar-wrapper";
+import { Providers } from "@packages/ui/components/providers";
 
 export const metadata: Metadata = {
 	title: "Answer Overflow - Discord Content Discovery",
@@ -38,5 +39,9 @@ export default function MainSiteLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	return <NavbarWrapper>{children}</NavbarWrapper>;
+	return (
+		<Providers tenant={null}>
+			<NavbarWrapper>{children}</NavbarWrapper>
+		</Providers>
+	);
 }
