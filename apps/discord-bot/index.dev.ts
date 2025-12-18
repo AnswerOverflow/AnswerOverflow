@@ -1,6 +1,6 @@
 import { NodeRuntime } from "@effect/platform-node";
 import { PostHogCaptureClientLayer } from "@packages/database/analytics/server";
-import { DatabaseLayer } from "@packages/database/database";
+import { DatabaseHttpLayer } from "@packages/database/database";
 import { ConvexStorageLayer } from "@packages/database/storage";
 import { createSentryEffectLayer } from "@packages/observability/sentry-effect";
 import { Effect, Layer, Logger, LogLevel } from "effect";
@@ -23,7 +23,7 @@ const BaseLayer = Layer.mergeAll(
 	PostHogCaptureClientLayer,
 	SentryLayer,
 	LoggerLayer,
-).pipe(Layer.provideMerge(DatabaseLayer));
+).pipe(Layer.provideMerge(DatabaseHttpLayer));
 
 export const AppLayer = Layer.mergeAll(
 	BaseLayer,
