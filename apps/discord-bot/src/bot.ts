@@ -4,6 +4,7 @@ import { ChannelSettingsCommandHandlerLayer } from "./commands/channel-settings"
 import { DebugCommandHandlerLayer } from "./commands/debug";
 import { FeedbackCommandHandlerLayer } from "./commands/feedback";
 import { IndexCommandHandlerLayer } from "./commands/index-command";
+import { LeaveCommandHandlerLayer } from "./commands/leave-command";
 import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
 import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
@@ -44,6 +45,7 @@ export const BotLayers = Layer.mergeAll(
 	ChannelSettingsCommandHandlerLayer,
 	DebugCommandHandlerLayer,
 	IndexCommandHandlerLayer,
+	LeaveCommandHandlerLayer,
 	SendMarkSolutionInstructionsHandlerLayer,
 	StatusUpdateHandlerLayer,
 	IndexingHandlerLayer,
