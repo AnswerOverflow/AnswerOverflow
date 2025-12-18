@@ -673,7 +673,7 @@ async function getMentionMetadataInternal(
 	userIds: bigint[],
 	channelIds: bigint[],
 	serverDiscordId: bigint,
-	cache?: DataAccessCache,
+	cache: DataAccessCache,
 ) {
 	const users: Record<
 		string,
@@ -696,11 +696,7 @@ async function getMentionMetadataInternal(
 	> = {};
 
 	const userResults = await Promise.all(
-		userIds.map((userId) =>
-			cache
-				? cache.getDiscordAccount(userId)
-				: getDiscordAccountByIdInternal(ctx, userId),
-		),
+		userIds.map((userId) => cache.getDiscordAccount(userId)),
 	);
 
 	for (let i = 0; i < userIds.length; i++) {
@@ -728,18 +724,8 @@ async function getMentionMetadataInternal(
 	const channelResults = await Promise.all(
 		channelIds.map(async (channelId) => {
 			const [channel, settings] = await Promise.all([
-				cache
-					? cache.getChannel(channelId)
-					: getOneFrom(
-							ctx.db,
-							"channels",
-							"by_discordChannelId",
-							channelId,
-							"id",
-						),
-				cache
-					? cache.getChannelSettings(channelId)
-					: getOneFrom(ctx.db, "channelSettings", "by_channelId", channelId),
+				cache.getChannel(channelId),
+				cache.getChannelSettings(channelId),
 			]);
 			return { channelId, channel, settings };
 		}),
@@ -780,7 +766,7 @@ async function getInternalLinksMetadataInternal(
 		channelId: bigint;
 		messageId?: bigint;
 	}>,
-	cache?: DataAccessCache,
+	cache: DataAccessCache,
 ) {
 	if (discordLinks.length === 0) {
 		return [];
@@ -789,26 +775,9 @@ async function getInternalLinksMetadataInternal(
 	const results = await Promise.all(
 		discordLinks.map(async (link) => {
 			const [server, channel, settings] = await Promise.all([
-				cache
-					? cache.getServer(link.guildId)
-					: getOneFrom(ctx.db, "servers", "by_discordId", link.guildId),
-				cache
-					? cache.getChannel(link.channelId)
-					: getOneFrom(
-							ctx.db,
-							"channels",
-							"by_discordChannelId",
-							link.channelId,
-							"id",
-						),
-				cache
-					? cache.getChannelSettings(link.channelId)
-					: getOneFrom(
-							ctx.db,
-							"channelSettings",
-							"by_channelId",
-							link.channelId,
-						),
+				cache.getServer(link.guildId),
+				cache.getChannel(link.channelId),
+				cache.getChannelSettings(link.channelId),
 			]);
 
 			if (!server || !channel) {
@@ -816,24 +785,14 @@ async function getInternalLinksMetadataInternal(
 			}
 
 			if (link.messageId) {
-				const message = cache
-					? await cache.getMessage(link.messageId)
-					: await getMessageById(ctx, link.messageId);
+				const message = await cache.getMessage(link.messageId);
 				if (!message) {
 					return undefined;
 				}
 			}
 
 			const parentChannel = channel.parentId
-				? cache
-					? await cache.getChannel(channel.parentId)
-					: await getOneFrom(
-							ctx.db,
-							"channels",
-							"by_discordChannelId",
-							channel.parentId,
-							"id",
-						)
+				? await cache.getChannel(channel.parentId)
 				: undefined;
 
 			return {
@@ -863,34 +822,22 @@ async function getInternalLinksMetadataInternal(
 export async function enrichMessageForDisplay(
 	ctx: QueryCtx | MutationCtx,
 	message: MessageDoc,
-	options?: {
+	options: {
 		isAnonymous?: boolean;
 		skipReference?: boolean;
-		cache?: DataAccessCache;
+		cache: DataAccessCache;
 	},
 ): Promise<EnrichedMessage> {
-	const cache = options?.cache;
+	const { cache } = options;
 	const [author, server, attachments, reactions, solutions, referenceMessage] =
 		await Promise.all([
-			cache
-				? cache.getDiscordAccount(message.authorId)
-				: getDiscordAccountByIdInternal(ctx, message.authorId),
-			cache
-				? cache.getServer(message.serverId)
-				: getServerByDiscordIdInternal(ctx, message.serverId),
-			cache
-				? cache.getAttachmentsByMessageId(message.id)
-				: findAttachmentsByMessageIdInternal(ctx, message.id),
-			cache
-				? cache.getReactionsByMessageId(message.id)
-				: findReactionsByMessageId(ctx, message.id),
-			cache
-				? cache.getSolutionsByQuestionId(message.id)
-				: findSolutionsByQuestionId(ctx, message.id),
-			message.referenceId && !options?.skipReference
-				? cache
-					? cache.getMessage(message.referenceId)
-					: getMessageById(ctx, message.referenceId)
+			cache.getDiscordAccount(message.authorId),
+			cache.getServer(message.serverId),
+			cache.getAttachmentsByMessageId(message.id),
+			cache.getReactionsByMessageId(message.id),
+			cache.getSolutionsByQuestionId(message.id),
+			message.referenceId && !options.skipReference
+				? cache.getMessage(message.referenceId)
 				: null,
 		]);
 
@@ -902,11 +849,7 @@ export async function enrichMessageForDisplay(
 	);
 
 	const emojis = await Promise.all(
-		emojiIds.map((emojiId) =>
-			cache
-				? cache.getEmoji(emojiId)
-				: getOneFrom(ctx.db, "emojis", "by_emojiId", emojiId, "id"),
-		),
+		emojiIds.map((emojiId) => cache.getEmoji(emojiId)),
 	);
 
 	const emojiMap = new Map<
@@ -1047,7 +990,7 @@ export async function enrichMessageForDisplay(
 	}
 
 	let referenceData: EnrichedMessage["reference"];
-	if (message.referenceId && !options?.skipReference) {
+	if (message.referenceId && !options.skipReference) {
 		if (referenceMessage) {
 			const enrichedReference = await enrichMessageForDisplay(
 				ctx,
