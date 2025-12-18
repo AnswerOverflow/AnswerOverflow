@@ -2,7 +2,7 @@ import { FeaturedCommunitiesSection } from "@packages/ui/components/pages/home/F
 import { FeaturesSection } from "@packages/ui/components/pages/home/Features";
 import { PricingOptions } from "@packages/ui/components/pricing";
 import type { Metadata } from "next";
-import { metadata as baseMetadata } from "../../layout";
+import { metadata as baseMetadata } from "../../../layout";
 import { HowDoesItWorkArea } from "../_components/HowDoesItWorkArea";
 
 export const metadata: Metadata = {

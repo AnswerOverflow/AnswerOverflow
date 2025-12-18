@@ -1,3 +1,4 @@
+import { Providers } from "@packages/ui/components/providers";
 import type { Metadata } from "next";
 import { NavbarWrapper } from "@/components/navbar-wrapper";
 
@@ -38,5 +39,9 @@ export default function MainSiteLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	return <NavbarWrapper>{children}</NavbarWrapper>;
+	return (
+		<Providers tenant={null}>
+			<NavbarWrapper>{children}</NavbarWrapper>
+		</Providers>
+	);
 }
