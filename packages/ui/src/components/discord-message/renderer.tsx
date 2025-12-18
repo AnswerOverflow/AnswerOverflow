@@ -3,7 +3,6 @@
 import dayjs from "dayjs";
 import { parse } from "discord-markdown-parser";
 import { CornerUpRight } from "lucide-react";
-import { emojify } from "node-emoji";
 import type React from "react";
 import { Code } from "../code";
 import { Attachments } from "./attachments";
@@ -217,12 +216,10 @@ function renderASTNode(
 }
 
 function preprocessMarkdown(content: string): string {
-	return emojify(
-		content
-			.replace(/^[ \t]+(```)/gm, "$1")
-			.replace(/(```)[ \t]*$/gm, "$1")
-			.replace(/^(\d+\..*)\n\n(?=\d+\.)/gm, "$1\n"),
-	);
+	return content
+		.replace(/^[ \t]+(```)/gm, "$1")
+		.replace(/(```)[ \t]*$/gm, "$1")
+		.replace(/^(\d+\..*)\n\n(?=\d+\.)/gm, "$1\n");
 }
 
 export const DiscordMarkdown = ({
