@@ -13,6 +13,11 @@ export async function checkGuildManagerPermissions(
 	discordAccountId: bigint,
 	serverId: bigint,
 ): Promise<GuildManagerPermissionResult> {
+	if (isSuperUser(discordAccountId)) {
+		return {
+			hasPermission: true,
+		};
+	}
 	const userServerSettings = await getUserServerSettingsForServerByDiscordId(
 		ctx,
 		discordAccountId,
@@ -30,7 +35,7 @@ export async function checkGuildManagerPermissions(
 		(userServerSettings.permissions & ADMINISTRATOR) === ADMINISTRATOR ||
 		(userServerSettings.permissions & MANAGE_GUILD) === MANAGE_GUILD;
 
-	if (hasAdminOrManageGuild || isSuperUser(discordAccountId)) {
+	if (hasAdminOrManageGuild) {
 		return {
 			hasPermission: true,
 		};

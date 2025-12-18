@@ -44,6 +44,7 @@ import type * as shared_authIdentity from "../shared/authIdentity.js";
 import type * as shared_betterAuth from "../shared/betterAuth.js";
 import type * as shared_channels from "../shared/channels.js";
 import type * as shared_dataAccess from "../shared/dataAccess.js";
+import type * as shared_guildManagerPermissions from "../shared/guildManagerPermissions.js";
 import type * as shared_index from "../shared/index.js";
 import type * as shared_mentions from "../shared/mentions.js";
 import type * as shared_messagePrivacy from "../shared/messagePrivacy.js";
@@ -101,6 +102,7 @@ declare const fullApi: ApiFromModules<{
   "shared/betterAuth": typeof shared_betterAuth;
   "shared/channels": typeof shared_channels;
   "shared/dataAccess": typeof shared_dataAccess;
+  "shared/guildManagerPermissions": typeof shared_guildManagerPermissions;
   "shared/index": typeof shared_index;
   "shared/mentions": typeof shared_mentions;
   "shared/messagePrivacy": typeof shared_messagePrivacy;
