@@ -97,21 +97,18 @@ export function createQueryCacheKey(
 function callClientMethod(
 	funcType: "query" | "mutation" | "action",
 	funcRef: FunctionReference<any, any>,
-	client: { query: any; mutation: any; action: any },
+	convexClient: Effect.Effect.Success<typeof ConvexClientUnified>,
 	fullArgs: any,
 ): Effect.Effect<any, ConvexError> {
-	return Effect.tryPromise({
-		try: async () => {
-			switch (funcType) {
-				case "query":
-					return await client.query(funcRef, fullArgs);
-				case "mutation":
-					return await client.mutation(funcRef, fullArgs);
-				case "action":
-					return await client.action(funcRef, fullArgs);
-			}
-		},
-		catch: (cause) => new ConvexError({ cause }),
+	return convexClient.use((client) => {
+		switch (funcType) {
+			case "query":
+				return client.query(funcRef, fullArgs);
+			case "mutation":
+				return client.mutation(funcRef, fullArgs);
+			case "action":
+				return client.action(funcRef, fullArgs);
+		}
 	});
 }
 
@@ -174,7 +171,7 @@ export const service = Effect.gen(function* () {
 				return yield* callClientMethod(
 					"query",
 					context.funcRef,
-					convexClient.client,
+					convexClient,
 					context.args,
 				);
 			}),
@@ -273,12 +270,7 @@ export const service = Effect.gen(function* () {
 					const fullArgs = isPublic
 						? (args ?? {})
 						: { ...(args ?? {}), backendAccessToken };
-					return callClientMethod(
-						funcType,
-						funcRef,
-						convexClient.client,
-						fullArgs,
-					);
+					return callClientMethod(funcType, funcRef, convexClient, fullArgs);
 				}) as TransformToFunctions<T>[typeof prop];
 
 				return wrappedFunction;
