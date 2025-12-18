@@ -993,7 +993,7 @@ export function startIndexingLoop() {
 		);
 
 		yield* Effect.forkDaemon(
-			Effect.repeat(runIndexing(), schedule).pipe(
+			Effect.schedule(runIndexing(), schedule).pipe(
 				catchAllCauseWithReport((cause) =>
 					Console.error("Error in scheduled indexing run:", cause),
 				),
