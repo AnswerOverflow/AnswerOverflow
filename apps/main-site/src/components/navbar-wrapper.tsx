@@ -1,6 +1,9 @@
 "use client";
 
-import { MainSiteFooter } from "@packages/ui/components/footer";
+import {
+	CompactStickyFooter,
+	MainSiteFooter,
+} from "@packages/ui/components/footer";
 import { MainSiteNavbar } from "@packages/ui/components/navbar";
 import { usePathname } from "next/navigation";
 
@@ -15,8 +18,11 @@ export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 	return (
 		<>
 			<MainSiteNavbar />
-			<div className="pt-navbar">{children}</div>
-			<MainSiteFooter />
+			<div className="pt-navbar sm:pb-14">{children}</div>
+			<div className="sm:hidden">
+				<MainSiteFooter />
+			</div>
+			<CompactStickyFooter />
 		</>
 	);
 }
