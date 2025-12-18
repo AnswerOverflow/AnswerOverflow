@@ -3,6 +3,7 @@ import { BugReportCommandHandlerLayer } from "./commands/bug-report";
 import { ChannelSettingsCommandHandlerLayer } from "./commands/channel-settings";
 import { DebugCommandHandlerLayer } from "./commands/debug";
 import { FeedbackCommandHandlerLayer } from "./commands/feedback";
+import { IndexCommandHandlerLayer } from "./commands/index-command";
 import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
 import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
@@ -42,6 +43,7 @@ export const BotLayers = Layer.mergeAll(
 	QuickActionCommandHandlerLayer,
 	ChannelSettingsCommandHandlerLayer,
 	DebugCommandHandlerLayer,
+	IndexCommandHandlerLayer,
 	SendMarkSolutionInstructionsHandlerLayer,
 	StatusUpdateHandlerLayer,
 	IndexingHandlerLayer,
