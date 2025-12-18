@@ -26,20 +26,37 @@ const queryClient = new QueryClient({
 
 convexQueryClient.connect(queryClient);
 
-function createAuthClientWithBaseURL(tenant: TenantInfo | null | undefined) {
-	const baseURL = tenant
-		? getTenantCanonicalUrl(tenant, "/api/auth/")
-		: undefined;
+function createAuthClientInstance(baseURL: string | undefined) {
 	return createAuthClient({
 		baseURL,
 		plugins: [anonymousClient(), convexClient(), adminClient()],
 	});
 }
 
-type AuthClient = ReturnType<typeof createAuthClientWithBaseURL>;
+type AuthClient = ReturnType<typeof createAuthClientInstance>;
+
+const authClientCache = new Map<string, AuthClient>();
+
+function getOrCreateAuthClient(
+	tenant: TenantInfo | null | undefined,
+): AuthClient {
+	const baseURL = tenant
+		? getTenantCanonicalUrl(tenant, "/api/auth/")
+		: undefined;
+	const cacheKey = baseURL ?? "__default__";
+
+	const existing = authClientCache.get(cacheKey);
+	if (existing) {
+		return existing;
+	}
+
+	const client = createAuthClientInstance(baseURL);
+	authClientCache.set(cacheKey, client);
+	return client;
+}
 
 const AuthClientContext = createContext<AuthClient | null>(null);
-const authClient = createAuthClientWithBaseURL(null);
+
 function AuthClientProvider({
 	children,
 	tenant,
@@ -47,7 +64,7 @@ function AuthClientProvider({
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
 }) {
-	// const [authClient] = useState(() => createAuthClientWithBaseURL(tenant));
+	const authClient = useMemo(() => getOrCreateAuthClient(tenant), [tenant]);
 	return (
 		<AuthClientContext.Provider value={authClient}>
 			<ConvexBetterAuthProvider client={convex} authClient={authClient}>
