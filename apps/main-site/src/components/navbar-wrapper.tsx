@@ -18,7 +18,7 @@ export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 	return (
 		<>
 			<MainSiteNavbar />
-			<div className="pt-navbar sm:pb-14">{children}</div>
+			<div className="pt-navbar">{children}</div>
 			<div className="sm:hidden">
 				<MainSiteFooter />
 			</div>

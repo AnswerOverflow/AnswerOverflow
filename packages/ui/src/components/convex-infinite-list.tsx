@@ -150,13 +150,17 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 				<div className={itemClassName}>{renderItem(item, index)}</div>
 			)}
 			components={{
-				Footer: () =>
-					isLoadingMore || canLoadMore ? (
-						<LoadingSkeletons
-							count={loadMoreLoaderCount}
-							loader={loaderElement}
-						/>
-					) : null,
+				Footer: () => (
+					<>
+						{(isLoadingMore || canLoadMore) && (
+							<LoadingSkeletons
+								count={loadMoreLoaderCount}
+								loader={loaderElement}
+							/>
+						)}
+						<div className="hidden sm:block h-16" aria-hidden="true" />
+					</>
+				),
 			}}
 		/>
 	);
