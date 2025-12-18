@@ -6,6 +6,7 @@ import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { DataModel } from "../_generated/dataModel";
 import {
+	internalMutation,
 	type MutationCtx,
 	privateMutation,
 	privateQuery,
@@ -265,5 +266,25 @@ export const getCommunityPageHeaderData = privateQuery({
 			...headerData,
 			selectedChannel: channel,
 		};
+	},
+});
+
+export const resetServerIndexingSnowflakes = internalMutation({
+	args: {
+		serverId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		const indexedChannels = await ctx.db
+			.query("channelSettings")
+			.withIndex("by_serverId_and_indexingEnabled", (q) =>
+				q.eq("serverId", args.serverId).eq("indexingEnabled", true),
+			)
+			.collect();
+
+		await asyncMap(indexedChannels, (channel) =>
+			ctx.db.patch(channel._id, {
+				lastIndexedSnowflake: undefined,
+			}),
+		);
 	},
 });

@@ -1,8 +1,5 @@
 import { Database } from "@packages/database/database";
-import {
-	getSnowflakeFromDurationAgo,
-	wasRecentlyUpdated,
-} from "@packages/database-utils/snowflakes";
+import { wasRecentlyUpdated } from "@packages/database-utils/snowflakes";
 import type {
 	AnyThreadChannel,
 	Channel,
@@ -57,7 +54,6 @@ const INDEXING_CONFIG = {
 	batchWriteDelay: Duration.millis(50),
 	maxThreadsToCollect: 5000,
 	recentUpdateThreshold: Duration.hours(6),
-	lookbackPeriod: Duration.weeks(2),
 } as const;
 
 function canBotViewChannel(channel: GuildChannel): boolean {
@@ -76,15 +72,11 @@ function isIndexableMessage(message: Message): boolean {
 function getEffectiveStartSnowflake(
 	rawLastIndexedSnowflake: bigint | null | undefined,
 ): bigint {
-	const lookbackSnowflake = getSnowflakeFromDurationAgo(
-		INDEXING_CONFIG.lookbackPeriod,
-	);
 	if (
 		rawLastIndexedSnowflake === null ||
-		rawLastIndexedSnowflake === undefined ||
-		rawLastIndexedSnowflake < lookbackSnowflake
+		rawLastIndexedSnowflake === undefined
 	) {
-		return lookbackSnowflake;
+		return 0n;
 	}
 	return rawLastIndexedSnowflake;
 }
