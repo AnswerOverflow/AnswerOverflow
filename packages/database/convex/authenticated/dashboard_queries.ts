@@ -4,6 +4,11 @@ import { Array as Arr, Predicate } from "effect";
 import { authenticatedQuery } from "../client";
 import { guildManagerQuery } from "../client/guildManager";
 import {
+	rootChannelMessageCounts,
+	threadCounts,
+	threadMessageCounts,
+} from "../private/counts";
+import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
 	getServerByDiscordId,
@@ -11,6 +16,7 @@ import {
 	isThreadType,
 	sortServersByBotAndRole,
 } from "../shared/shared";
+import { ChannelType } from "discord.js";
 export const getDashboardData = guildManagerQuery({
 	args: {},
 	handler: async (ctx, args) => {
@@ -122,5 +128,88 @@ export const getUserServersForDropdown = authenticatedQuery({
 		const validServers = Arr.filter(servers, Predicate.isNotNull);
 
 		return sortServersByBotAndRole(validServers);
+	},
+});
+
+export const getIndexedMessageCount = guildManagerQuery({
+	args: {},
+	handler: async (ctx, args) => {
+		const [rootCount, threadMsgCount, threadCount, recentThreads] =
+			await Promise.all([
+				rootChannelMessageCounts.count(ctx, {
+					bounds: { prefix: [args.serverId] },
+				}),
+				threadMessageCounts.count(ctx, {
+					bounds: { prefix: [args.serverId] },
+				}),
+				threadCounts.count(ctx, {
+					bounds: { prefix: [args.serverId] },
+				}),
+				ctx.db
+					.query("channels")
+					.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
+					.order("desc")
+					.filter((q) =>
+						q.or(
+							q.eq(q.field("type"), ChannelType.AnnouncementThread),
+							q.eq(q.field("type"), ChannelType.PublicThread),
+							q.eq(q.field("type"), ChannelType.PrivateThread),
+						),
+					)
+					.take(5),
+			]);
+
+		const recentThreadsWithAuthors = await asyncMap(
+			recentThreads,
+			async (thread) => {
+				const starterMessage = await getOneFrom(
+					ctx.db,
+					"messages",
+					"by_messageId",
+					thread.id,
+					"id",
+				);
+
+				let author: {
+					id: string;
+					name: string;
+					avatar: string | null;
+				} | null = null;
+
+				if (starterMessage) {
+					const discordAccount = await getOneFrom(
+						ctx.db,
+						"discordAccounts",
+						"by_discordAccountId",
+						starterMessage.authorId,
+						"id",
+					);
+					if (discordAccount) {
+						author = {
+							id: discordAccount.id.toString(),
+							name: discordAccount.name,
+							avatar: discordAccount.avatar ?? null,
+						};
+					}
+				}
+
+				return {
+					id: thread.id,
+					name: thread.name,
+					author,
+				};
+			},
+		);
+
+		const totalMessages = rootCount + threadMsgCount;
+		const avgMessagesPerThread =
+			threadCount > 0 ? Math.round(totalMessages / threadCount) : 0;
+
+		return {
+			messages: totalMessages,
+			threads: threadCount,
+			avgMessagesPerThread,
+			recentThreads: recentThreadsWithAuthors,
+		};
 	},
 });

@@ -2,6 +2,13 @@ import { Migrations } from "@convex-dev/migrations";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
+import {
+	isThreadMessage,
+	rootChannelMessageCounts,
+	threadCounts,
+	threadMessageCounts,
+} from "../private/counts";
+import { isThreadType } from "../shared/channels";
 
 const migrations = new Migrations<DataModel>(components.migrations);
 
@@ -37,6 +44,26 @@ export const backfillChildThreadIdForThreadStarters = migrations.define({
 			message.childThreadId === undefined
 		) {
 			await ctx.db.patch(message._id, { childThreadId: message.channelId });
+		}
+	},
+});
+
+export const backfillMessageCounts = migrations.define({
+	table: "messages",
+	migrateOne: async (ctx, message) => {
+		if (isThreadMessage(message)) {
+			await threadMessageCounts.insertIfDoesNotExist(ctx, message);
+		} else {
+			await rootChannelMessageCounts.insertIfDoesNotExist(ctx, message);
+		}
+	},
+});
+
+export const backfillThreadCounts = migrations.define({
+	table: "channels",
+	migrateOne: async (ctx, channel) => {
+		if (isThreadType(channel.type)) {
+			await threadCounts.insertIfDoesNotExist(ctx, channel);
 		}
 	},
 });

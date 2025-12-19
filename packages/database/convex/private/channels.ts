@@ -12,6 +12,7 @@ import {
 	privateQuery,
 	type QueryCtx,
 } from "../client";
+import { insertThreadCount } from "./counts";
 import { channelSchema, channelSettingsSchema } from "../schema";
 import {
 	CHANNEL_TYPE,
@@ -111,7 +112,10 @@ export const upsertChannel = privateMutation({
 		if (existing) {
 			return await ctx.db.patch(existing._id, args.channel);
 		} else {
-			return await ctx.db.insert("channels", args.channel);
+			const id = await ctx.db.insert("channels", args.channel);
+			const newDoc = (await ctx.db.get(id))!;
+			await insertThreadCount(ctx, newDoc);
+			return id;
 		}
 	},
 });

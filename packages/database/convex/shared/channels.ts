@@ -1,5 +1,6 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import type { MutationCtx, QueryCtx } from "../client";
+import { deleteThreadCount } from "../private/counts";
 import type { Channel } from "../schema";
 
 export const CHANNEL_TYPE = {
@@ -111,6 +112,7 @@ export async function deleteChannelInternalLogic(
 	);
 
 	if (channel) {
+		await deleteThreadCount(ctx, channel);
 		await ctx.db.delete(channel._id);
 	}
 }

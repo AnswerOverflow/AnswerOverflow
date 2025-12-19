@@ -31,6 +31,7 @@
 		"@aws-sdk/lib-storage": "^3.940.0",
 		"@better-auth/stripe": "^1.4.2",
 		"@convex-dev/action-cache": "^0.3.0",
+		"@convex-dev/aggregate": "^0.2.0",
 		"@convex-dev/better-auth": "catalog:",
 		"@convex-dev/migrations": "^0.3.1",
 		"@effect-aws/client-s3": "^1.10.6",

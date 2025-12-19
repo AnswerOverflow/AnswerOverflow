@@ -22,7 +22,13 @@ import {
 } from "@packages/ui/components/table";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
-import { ExternalLink } from "lucide-react";
+import {
+	ExternalLink,
+	FileText,
+	MessageSquare,
+	MessagesSquare,
+	TrendingUp,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import type { DateRange } from "react-day-picker";
 import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
@@ -296,6 +302,141 @@ function TopQuestionSolversTable(props: { serverId: bigint }) {
 	);
 }
 
+function StatCard(props: {
+	icon: React.ReactNode;
+	label: string;
+	value: number | undefined;
+	description?: string;
+}) {
+	return (
+		<div className="flex items-center gap-4 rounded-lg border bg-card p-4">
+			<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+				{props.icon}
+			</div>
+			<div className="min-w-0 flex-1">
+				<p className="text-sm font-medium text-muted-foreground">
+					{props.label}
+				</p>
+				<p className="text-2xl font-bold tracking-tight">
+					{props.value === undefined ? (
+						<Spinner />
+					) : (
+						props.value.toLocaleString()
+					)}
+				</p>
+				{props.description && (
+					<p className="text-xs text-muted-foreground">{props.description}</p>
+				)}
+			</div>
+		</div>
+	);
+}
+
+function IndexedStatsWidget(props: {
+	serverId: bigint;
+	hasIndexingEnabled: boolean;
+}) {
+	const stats = useAuthenticatedQuery(
+		api.authenticated.dashboard_queries.getIndexedMessageCount,
+		{
+			serverId: props.serverId,
+		},
+	);
+
+	return (
+		<Card className="col-span-full">
+			<CardHeader>
+				<div className="flex items-center justify-between">
+					<div>
+						<CardTitle className="flex items-center gap-2">
+							Indexed Content
+						</CardTitle>
+					</div>
+				</div>
+			</CardHeader>
+			<CardContent className="space-y-6">
+				<div className="grid gap-4 sm:grid-cols-3">
+					<StatCard
+						icon={<MessageSquare className="h-6 w-6" />}
+						label="Total Messages"
+						value={stats?.messages}
+						description="Indexed from Discord"
+					/>
+					<StatCard
+						icon={<MessagesSquare className="h-6 w-6" />}
+						label="Total Threads"
+						value={stats?.threads}
+						description="Questions & discussions"
+					/>
+					<StatCard
+						icon={<FileText className="h-6 w-6" />}
+						label="Avg. Messages/Thread"
+						value={stats?.avgMessagesPerThread}
+						description="Thread depth"
+					/>
+				</div>
+
+				{stats && stats.recentThreads.length > 0 && (
+					<div>
+						<h4 className="mb-3 text-sm font-semibold text-foreground">
+							Recently Indexed
+						</h4>
+						<div className="space-y-2">
+							{stats.recentThreads.map((thread) => (
+								<Link
+									key={thread.id.toString()}
+									href={`/m/${thread.id}`}
+									className="group flex items-center gap-3 rounded-md border bg-muted/30 px-3 py-2.5 transition-colors hover:bg-muted/60"
+								>
+									{thread.author ? (
+										<DiscordAvatar
+											user={{
+												id: thread.author.id,
+												name: thread.author.name,
+												avatar: thread.author.avatar ?? undefined,
+											}}
+											size={32}
+										/>
+									) : (
+										<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+											<MessagesSquare className="h-4 w-4" />
+										</div>
+									)}
+									<span className="min-w-0 flex-1 truncate text-sm font-medium">
+										{thread.name}
+									</span>
+									<ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+								</Link>
+							))}
+						</div>
+					</div>
+				)}
+
+				{stats && stats.recentThreads.length === 0 && (
+					<div className="rounded-lg border border-dashed bg-muted/30 px-6 py-8 text-center">
+						<MessagesSquare className="mx-auto h-10 w-10 text-muted-foreground/50" />
+						<p className="mt-3 text-sm font-medium text-muted-foreground">
+							No threads indexed yet
+						</p>
+						<p className="mt-1 max-w-md mx-auto text-xs text-muted-foreground">
+							{props.hasIndexingEnabled
+								? "Historical threads are being backfilled and will appear in 1-2 days. New threads will appear in real time as they are posted."
+								: "Enable indexing on a channel to start indexing threads"}
+						</p>
+						{!props.hasIndexingEnabled && (
+							<Button asChild className="mt-4">
+								<Link href={`/dashboard/${props.serverId}/channels`}>
+									Setup Indexing
+								</Link>
+							</Button>
+						)}
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
+
 function TopPagesTable(props: { serverId: bigint }) {
 	const getTopPages = useAction(
 		api.authenticated.dashboard.getTopPagesForServer,
@@ -412,8 +553,9 @@ export default function DashboardOverviewPage() {
 		return <div className="text-muted-foreground">Loading dashboard...</div>;
 	}
 
-	const { server } = dashboardData;
+	const { server, channels } = dashboardData;
 	const serverIdBigInt = BigInt(serverId);
+	const hasIndexingEnabled = channels.some((c) => c.flags.indexingEnabled);
 
 	return (
 		<div className="w-full max-w-[1200px]">
@@ -439,9 +581,13 @@ export default function DashboardOverviewPage() {
 			</div>
 
 			<div className="grid gap-6 lg:grid-cols-2">
+				<IndexedStatsWidget
+					serverId={serverIdBigInt}
+					hasIndexingEnabled={hasIndexingEnabled}
+				/>
 				<PageViewsChart serverId={serverIdBigInt} />
-				<ServerInvitesChart serverId={serverIdBigInt} />
 				<QuestionsAndAnswersChart serverId={serverIdBigInt} />
+				<ServerInvitesChart serverId={serverIdBigInt} />
 				<TopQuestionSolversTable serverId={serverIdBigInt} />
 				<TopPagesTable serverId={serverIdBigInt} />
 			</div>

@@ -7,6 +7,7 @@ import {
 	privateQuery,
 	type QueryCtx,
 } from "../client";
+import { insertMessageCount } from "./counts";
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { createDataAccessCache, enrichMessages } from "../shared/dataAccess";
 import {
@@ -86,7 +87,9 @@ export const upsertMessage = privateMutation({
 		if (existing) {
 			await ctx.db.replace(existing._id, messageData);
 		} else {
-			await ctx.db.insert("messages", messageData);
+			const id = await ctx.db.insert("messages", messageData);
+			const newDoc = (await ctx.db.get(id))!;
+			await insertMessageCount(ctx, newDoc);
 		}
 
 		if (attachments !== undefined) {
