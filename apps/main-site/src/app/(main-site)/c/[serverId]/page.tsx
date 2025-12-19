@@ -1,14 +1,16 @@
-import { Database } from "@packages/database/database";
+import { Button } from "@packages/ui/components/button";
+import { ServerIcon } from "@packages/ui/components/server-icon";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
-import { Effect, Option } from "effect";
+import { Option } from "effect";
+import { Hash, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import {
-	ChannelPageLoader,
-	fetchChannelPageHeaderData,
+	fetchServerPageHeaderData,
+	generateServerPageMetadata,
+	ServerPageLoader,
 } from "../../../../components/channel-page-loader";
-import { runtime } from "../../../../lib/runtime";
 
 type Props = {
 	params: Promise<{ serverId: string }>;
@@ -25,47 +27,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		redirect(`/c/${parsed.value.cleaned}`);
 	}
 
-	const serverData = await Effect.gen(function* () {
-		const database = yield* Database;
-		const liveData =
-			yield* database.private.servers.getServerByDiscordIdWithChannels({
-				discordId: parsed.value.id,
-			});
-		return liveData;
-	}).pipe(runtime.runPromise);
+	const headerData = await fetchServerPageHeaderData(parsed.value.id);
 
-	if (!serverData) {
-		return {};
-	}
-
-	const { server, channels } = serverData;
-	const description =
-		server.description ??
-		`Browse ${channels.length} indexed channels from the ${server.name} Discord community`;
-
-	const title = `${server.name} - AnswerOverflow`;
-	const ogImage = `/og/community?id=${parsed.value.cleaned}`;
-
-	return {
-		title,
-		description,
-		openGraph: {
-			type: "website",
-			siteName: "Answer Overflow",
-			images: [ogImage],
-			title,
-			description,
-		},
-		twitter: {
-			card: "summary_large_image",
-			title,
-			description,
-			images: [ogImage],
-		},
-		alternates: {
-			canonical: `/c/${parsed.value.cleaned}`,
-		},
-	};
+	const basePath = `/c/${parsed.value.cleaned}`;
+	return generateServerPageMetadata(headerData, basePath);
 }
 
 export default async function ServerPage(props: Props) {
@@ -79,20 +44,13 @@ export default async function ServerPage(props: Props) {
 		redirect(`/c/${parsed.value.cleaned}`);
 	}
 
-	const serverData = await Effect.gen(function* () {
-		const database = yield* Database;
-		const liveData =
-			yield* database.private.servers.getServerByDiscordIdWithChannels({
-				discordId: parsed.value.id,
-			});
-		return liveData;
-	}).pipe(runtime.runPromise);
+	const headerData = await fetchServerPageHeaderData(parsed.value.id);
 
-	if (!serverData || serverData?.server.kickedTime) {
+	if (!headerData) {
 		return notFound();
 	}
 
-	const { server, channels } = serverData;
+	const { server, channels } = headerData;
 
 	if (server.customDomain) {
 		const customUrl = getServerCustomUrl(server, `/c/${parsed.value.cleaned}`);
@@ -102,47 +60,78 @@ export default async function ServerPage(props: Props) {
 	}
 
 	if (channels.length === 0) {
+		const inviteUrl = `https://discord.com/servers/${server.discordId}`;
+		const description =
+			server.description ??
+			`Browse and search through archived Discord discussions from ${server.name}`;
+
 		return (
 			<div className="min-h-screen bg-background">
-				<div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-					<div className="mb-8 pb-6 border-b border-border">
-						<div className="flex items-center gap-4">
-							{server.icon && (
-								<img
-									src={`https://cdn.discordapp.com/icons/${server.discordId}/${server.icon}.webp?size=64`}
-									alt={server.name}
-									className="w-16 h-16 rounded-full"
-								/>
-							)}
-							<div>
-								<h1 className="text-3xl font-bold text-foreground">
-									{server.name}
-								</h1>
-								{server.description && (
-									<p className="text-muted-foreground mt-1">
-										{server.description}
-									</p>
-								)}
+				<div className="border-b">
+					<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+						<div className="flex items-start gap-4">
+							<ServerIcon
+								server={{
+									discordId: server.discordId,
+									name: server.name,
+									icon: server.icon ?? "",
+								}}
+								size={64}
+								className="shrink-0"
+							/>
+							<div className="flex-1 min-w-0">
+								<div className="flex items-start gap-4">
+									<div className="flex-1 min-w-0">
+										<h1 className="text-xl sm:text-2xl font-semibold text-foreground">
+											{server.name}
+										</h1>
+										<p className="text-muted-foreground text-sm mt-1 line-clamp-2">
+											{description}
+										</p>
+									</div>
+									<Button
+										variant="secondary"
+										size="sm"
+										asChild
+										className="shrink-0 font-medium"
+									>
+										<a
+											href={inviteUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											Join Discord
+										</a>
+									</Button>
+								</div>
 							</div>
 						</div>
 					</div>
-					<div className="text-center py-12 text-muted-foreground">
-						No channels available
+				</div>
+
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+					<div className="flex flex-col items-center justify-center text-center">
+						<div className="size-16 rounded-full bg-muted flex items-center justify-center mb-4">
+							<Hash className="size-8 text-muted-foreground" />
+						</div>
+						<h2 className="text-xl font-semibold text-foreground mb-2">
+							No channels indexed yet
+						</h2>
+						<p className="text-muted-foreground max-w-md mb-6">
+							This community hasn't set up any channels for indexing. Join the
+							Discord server to participate in discussions!
+						</p>
+						<Button variant="secondary" asChild className="font-medium">
+							<a href={inviteUrl} target="_blank" rel="noopener noreferrer">
+								<Users className="size-4 mr-2" />
+								Join {server.name}
+							</a>
+						</Button>
 					</div>
 				</div>
 			</div>
 		);
 	}
 
-	const defaultChannel = channels[0];
-	if (!defaultChannel) {
-		return notFound();
-	}
-
-	const headerData = await fetchChannelPageHeaderData(
-		parsed.value.id,
-		defaultChannel.id,
-	);
-
-	return <ChannelPageLoader headerData={headerData} />;
+	return <ServerPageLoader headerData={headerData} />;
 }
