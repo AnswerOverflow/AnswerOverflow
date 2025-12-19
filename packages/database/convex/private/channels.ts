@@ -12,7 +12,6 @@ import {
 	privateQuery,
 	type QueryCtx,
 } from "../client";
-import { insertThreadCount } from "./counts";
 import { channelSchema, channelSettingsSchema } from "../schema";
 import {
 	CHANNEL_TYPE,
@@ -20,6 +19,7 @@ import {
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
 } from "../shared/shared";
+import { insertThreadCount } from "./counts";
 
 type Channel = Infer<typeof channelSchema>;
 type ChannelSettings = Infer<typeof channelSettingsSchema>;

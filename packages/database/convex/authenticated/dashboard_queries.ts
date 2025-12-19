@@ -1,5 +1,6 @@
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import { ChannelType } from "discord.js";
 import { Array as Arr, Predicate } from "effect";
 import { authenticatedQuery } from "../client";
 import { guildManagerQuery } from "../client/guildManager";
@@ -16,7 +17,6 @@ import {
 	isThreadType,
 	sortServersByBotAndRole,
 } from "../shared/shared";
-import { ChannelType } from "discord.js";
 export const getDashboardData = guildManagerQuery({
 	args: {},
 	handler: async (ctx, args) => {

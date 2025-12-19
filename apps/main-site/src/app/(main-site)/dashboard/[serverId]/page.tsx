@@ -27,7 +27,6 @@ import {
 	FileText,
 	MessageSquare,
 	MessagesSquare,
-	TrendingUp,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import type { DateRange } from "react-day-picker";

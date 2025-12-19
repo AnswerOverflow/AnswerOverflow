@@ -7,7 +7,6 @@ import {
 	privateQuery,
 	type QueryCtx,
 } from "../client";
-import { insertMessageCount } from "./counts";
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { createDataAccessCache, enrichMessages } from "../shared/dataAccess";
 import {
@@ -18,6 +17,7 @@ import {
 	getMessageById as getMessageByIdShared,
 	upsertManyMessagesOptimized,
 } from "../shared/shared";
+import { insertMessageCount } from "./counts";
 
 async function isIgnoredAccount(
 	ctx: QueryCtx | MutationCtx,

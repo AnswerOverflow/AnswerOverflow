@@ -1,6 +1,7 @@
 import type { api } from "@packages/database/convex/_generated/api";
 import { Database } from "@packages/database/database";
 import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
+import { ChannelType } from "@packages/ui/utils/discord";
 import {
 	getTenantCanonicalUrl,
 	type TenantInfo,
@@ -11,7 +12,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
-import { ChannelType } from "@packages/ui/utils/discord";
 import {
 	ChannelPageContent,
 	MessagesList,

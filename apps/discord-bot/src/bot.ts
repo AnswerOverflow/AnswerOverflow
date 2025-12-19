@@ -4,8 +4,8 @@ import { ChannelSettingsCommandHandlerLayer } from "./commands/channel-settings"
 import { DebugCommandHandlerLayer } from "./commands/debug";
 import { FeedbackCommandHandlerLayer } from "./commands/feedback";
 import { IndexCommandHandlerLayer } from "./commands/index-command";
-import { LeaveCommandHandlerLayer } from "./commands/leave-command";
 import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
+import { LeaveCommandHandlerLayer } from "./commands/leave-command";
 import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
 import { Discord } from "./core/discord-service";

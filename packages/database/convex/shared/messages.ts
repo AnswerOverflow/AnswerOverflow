@@ -63,19 +63,6 @@ export async function getFirstMessagesInChannels(
 	return results;
 }
 
-async function findAttachmentsByMessageIdInternal(
-	ctx: QueryCtx | MutationCtx,
-	messageId: bigint,
-) {
-	return await getManyFrom(
-		ctx.db,
-		"attachments",
-		"by_messageId",
-		messageId,
-		"messageId",
-	);
-}
-
 export async function findReactionsByMessageId(
 	ctx: QueryCtx | MutationCtx,
 	messageId: bigint,
@@ -600,26 +587,6 @@ export type EnrichedMessage = {
 	};
 };
 
-async function getDiscordAccountByIdInternal(
-	ctx: QueryCtx | MutationCtx,
-	id: bigint,
-) {
-	return await getOneFrom(
-		ctx.db,
-		"discordAccounts",
-		"by_discordAccountId",
-		id,
-		"id",
-	);
-}
-
-async function getServerByDiscordIdInternal(
-	ctx: QueryCtx | MutationCtx,
-	discordId: bigint,
-) {
-	return await getOneFrom(ctx.db, "servers", "by_discordId", discordId);
-}
-
 function extractMentionIdsInternal(content: string): {
 	userIds: bigint[];
 	channelIds: bigint[];
@@ -675,7 +642,7 @@ function extractDiscordLinksInternal(content: string): Array<{
 }
 
 async function getMentionMetadataInternal(
-	ctx: QueryCtx | MutationCtx,
+	_ctx: QueryCtx | MutationCtx,
 	userIds: bigint[],
 	channelIds: bigint[],
 	serverDiscordId: bigint,
@@ -765,7 +732,7 @@ async function getMentionMetadataInternal(
 }
 
 async function getInternalLinksMetadataInternal(
-	ctx: QueryCtx | MutationCtx,
+	_ctx: QueryCtx | MutationCtx,
 	discordLinks: Array<{
 		original: string;
 		guildId: bigint;
