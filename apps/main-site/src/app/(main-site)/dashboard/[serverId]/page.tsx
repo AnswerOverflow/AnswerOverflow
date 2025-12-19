@@ -383,8 +383,8 @@ function IndexedStatsWidget(props: {
 						<div className="space-y-2">
 							{stats.recentThreads.map((thread) => (
 								<Link
-									key={thread.id.toString()}
-									href={`/m/${thread.id}`}
+									key={thread.message.id.toString()}
+									href={`/m/${thread.message.id}`}
 									className="group flex items-center gap-3 rounded-md border bg-muted/30 px-3 py-2.5 transition-colors hover:bg-muted/60"
 								>
 									{thread.author ? (
@@ -402,7 +402,8 @@ function IndexedStatsWidget(props: {
 										</div>
 									)}
 									<span className="min-w-0 flex-1 truncate text-sm font-medium">
-										{thread.name}
+										{thread?.thread?.name ||
+											thread.message.content.slice(0, 50)}
 									</span>
 									<ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
 								</Link>

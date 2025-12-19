@@ -9,9 +9,11 @@ import {
 	threadCounts,
 	threadMessageCounts,
 } from "../private/counts";
+import { enrichMessages } from "../shared/dataAccess";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
+	getMessageById,
 	getServerByDiscordId,
 	hasPermission,
 	isThreadType,
@@ -158,47 +160,13 @@ export const getIndexedMessageCount = guildManagerQuery({
 					)
 					.take(5),
 			]);
-
-		const recentThreadsWithAuthors = await asyncMap(
-			recentThreads,
-			async (thread) => {
-				const starterMessage = await getOneFrom(
-					ctx.db,
-					"messages",
-					"by_messageId",
-					thread.id,
-					"id",
-				);
-
-				let author: {
-					id: string;
-					name: string;
-					avatar: string | null;
-				} | null = null;
-
-				if (starterMessage) {
-					const discordAccount = await getOneFrom(
-						ctx.db,
-						"discordAccounts",
-						"by_discordAccountId",
-						starterMessage.authorId,
-						"id",
-					);
-					if (discordAccount) {
-						author = {
-							id: discordAccount.id.toString(),
-							name: discordAccount.name,
-							avatar: discordAccount.avatar ?? null,
-						};
-					}
-				}
-
-				return {
-					id: thread.id,
-					name: thread.name,
-					author,
-				};
-			},
+		const messageIds = recentThreads.map((thread) => thread.id);
+		const messages = await asyncMap(messageIds, async (messageId) => {
+			return getMessageById(ctx, messageId);
+		}).then(Arr.filter(Predicate.isNotNullable));
+		const enriched = await enrichMessages(ctx, messages);
+		const threadLookup = new Map(
+			recentThreads.map((thread) => [thread.id, thread]),
 		);
 
 		const totalMessages = rootCount + threadMsgCount;
@@ -209,7 +177,10 @@ export const getIndexedMessageCount = guildManagerQuery({
 			messages: totalMessages,
 			threads: threadCount,
 			avgMessagesPerThread,
-			recentThreads: recentThreadsWithAuthors,
+			recentThreads: enriched.map((message) => ({
+				...message,
+				thread: threadLookup.get(message.message.id),
+			})),
 		};
 	},
 });
