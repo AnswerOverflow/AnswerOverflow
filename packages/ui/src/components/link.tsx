@@ -60,6 +60,8 @@ export function Link(
 				<a
 					{...anchorProps}
 					href={finalHref}
+					target="_blank"
+					rel="noopener noreferrer"
 					className={cn("flex flex-row items-center gap-2", className)}
 				>
 					{props.icon}
@@ -68,7 +70,13 @@ export function Link(
 			);
 		}
 		return (
-			<a {...anchorProps} href={finalHref} className={className}>
+			<a
+				{...anchorProps}
+				href={finalHref}
+				target="_blank"
+				rel="noopener noreferrer"
+				className={className}
+			>
 				{props.children}
 			</a>
 		);

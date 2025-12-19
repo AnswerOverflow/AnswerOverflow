@@ -431,6 +431,8 @@ export function MessagePage(props: {
 									{discordUrl && (
 										<Link
 											href={discordUrl}
+											target="_blank"
+											rel="noopener noreferrer"
 											className="flex flex-row-reverse items-center gap-1 text-sm font-semibold hover:underline"
 										>
 											<ExternalLink size={16} />
