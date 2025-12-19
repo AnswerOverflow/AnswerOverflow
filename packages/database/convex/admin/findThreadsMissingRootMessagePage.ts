@@ -1,5 +1,7 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { Array as Arr, Predicate } from "effect";
+import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import type { Id } from "../_generated/dataModel";
 import { internalQuery } from "../client";
@@ -35,9 +37,7 @@ export const findThreadsMissingRootMessagePage = internalQuery({
 			.withIndex("by_type", (q) => q.eq("type", args.threadType))
 			.paginate(args.paginationOpts);
 
-		const threadsWithMissingRootMessage: Array<ThreadMissingRootMessage> = [];
-
-		for (const channel of paginatedChannels.page) {
+		const results = await asyncMap(paginatedChannels.page, async (channel) => {
 			const rootMessage = await getOneFrom(
 				ctx.db,
 				"messages",
@@ -47,14 +47,20 @@ export const findThreadsMissingRootMessagePage = internalQuery({
 			);
 
 			if (!rootMessage) {
-				threadsWithMissingRootMessage.push({
+				return {
 					threadId: channel.id,
 					threadConvexId: channel._id,
 					serverId: channel.serverId,
 					parentChannelId: channel.parentId,
-				});
+				};
 			}
-		}
+			return null;
+		});
+
+		const threadsWithMissingRootMessage = Arr.filter(
+			results,
+			Predicate.isNotNull,
+		);
 
 		return {
 			threadsWithMissingRootMessage,
