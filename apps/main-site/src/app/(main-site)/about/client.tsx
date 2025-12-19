@@ -380,7 +380,7 @@ function HeroSection() {
 			<div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 to-transparent" />
 			<div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
 				<h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-					Make Your <span className="text-[#5865F2]">Discord</span> Community{" "}
+					Making <span className="text-[#5865F2]">Discord</span> Content{" "}
 					<span className="text-primary">Discoverable</span>
 				</h1>
 				<HeroDemo />
