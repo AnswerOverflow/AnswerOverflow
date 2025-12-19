@@ -1,29 +1,25 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
+import { ChannelType } from "discord-api-types/v10";
 import type { MutationCtx, QueryCtx } from "../client";
 import { deleteThreadCount } from "../private/counts";
 import type { Channel } from "../schema";
 
-export const CHANNEL_TYPE = {
-	GuildText: 0,
-	GuildAnnouncement: 5,
-	GuildForum: 15,
-	AnnouncementThread: 10,
-	PublicThread: 11,
-	PrivateThread: 12,
-} as const;
+export { ChannelType };
+
+export const CHANNEL_TYPE = ChannelType;
 
 export function isThreadType(type: number): boolean {
 	return (
-		type === CHANNEL_TYPE.AnnouncementThread ||
-		type === CHANNEL_TYPE.PublicThread ||
-		type === CHANNEL_TYPE.PrivateThread
+		type === ChannelType.AnnouncementThread ||
+		type === ChannelType.PublicThread ||
+		type === ChannelType.PrivateThread
 	);
 }
 
 export const ROOT_CHANNEL_TYPES = [
-	CHANNEL_TYPE.GuildText,
-	CHANNEL_TYPE.GuildAnnouncement,
-	CHANNEL_TYPE.GuildForum,
+	ChannelType.GuildText,
+	ChannelType.GuildAnnouncement,
+	ChannelType.GuildForum,
 ] as const;
 
 export const DEFAULT_CHANNEL_SETTINGS = {

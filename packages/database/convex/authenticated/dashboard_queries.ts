@@ -1,6 +1,6 @@
 import { asyncMap } from "convex-helpers";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
-import { ChannelType } from "discord.js";
+import { ChannelType } from "discord-api-types/v10";
 import { Array as Arr, Predicate } from "effect";
 import { authenticatedQuery } from "../client";
 import { guildManagerQuery } from "../client/guildManager";
