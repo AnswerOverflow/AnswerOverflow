@@ -1,5 +1,6 @@
 import type { api } from "@packages/database/convex/_generated/api";
 import { Database } from "@packages/database/database";
+import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import {
 	getTenantCanonicalUrl,
 	type TenantInfo,
@@ -105,7 +106,7 @@ async function RepliesLoader(props: {
 	channelId: bigint;
 	after: bigint;
 	solutionMessageId: bigint | undefined;
-	firstMessageAuthorId?: bigint;
+	firstMessage?: EnrichedMessage;
 	server?: MessagePageHeaderData["server"];
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
@@ -121,7 +122,7 @@ async function RepliesLoader(props: {
 			channelId={props.channelId}
 			after={props.after}
 			solutionMessageId={props.solutionMessageId}
-			firstMessageAuthorId={props.firstMessageAuthorId}
+			firstMessage={props.firstMessage}
 			server={props.server}
 			channel={props.channel}
 			initialData={initialData}
@@ -171,7 +172,7 @@ export function MessagePageLoader(props: {
 							channelId={queryChannelId}
 							after={afterMessageId}
 							solutionMessageId={solutionMessageId}
-							firstMessageAuthorId={headerData.firstMessage?.author?.id}
+							firstMessage={headerData.firstMessage ?? undefined}
 							server={headerData.server}
 							channel={headerData.channel}
 							cursor={cursor ?? null}

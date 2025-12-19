@@ -115,7 +115,7 @@ export function RepliesSection(props: {
 	channelId: bigint;
 	after: bigint;
 	solutionMessageId: bigint | undefined;
-	firstMessageAuthorId?: bigint;
+	firstMessage?: EnrichedMessage;
 	server?: MessagePageHeaderData["server"];
 	channel?: MessagePageHeaderData["channel"];
 	initialData?: MessagePageReplies;
@@ -126,7 +126,7 @@ export function RepliesSection(props: {
 		channelId,
 		after,
 		solutionMessageId,
-		firstMessageAuthorId,
+		firstMessage,
 		server,
 		channel,
 		initialData,
@@ -170,7 +170,10 @@ export function RepliesSection(props: {
 						}
 						renderItem={(message) => {
 							const HIDDEN_AUTHOR_IDS = [958907348389339146n];
-							if (HIDDEN_AUTHOR_IDS.includes(message.message.authorId)) {
+							if (
+								HIDDEN_AUTHOR_IDS.includes(message.message.authorId) ||
+								message.message.id === firstMessage?.message.id
+							) {
 								return null;
 							}
 							return (
@@ -178,7 +181,7 @@ export function RepliesSection(props: {
 									key={message.message.id.toString()}
 									message={message}
 									solutionMessageId={solutionMessageId}
-									firstMessageAuthorId={firstMessageAuthorId}
+									firstMessageAuthorId={firstMessage?.author?.id}
 									isLast={false}
 								/>
 							);

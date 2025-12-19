@@ -1,4 +1,5 @@
 import { Database } from "@packages/database/database";
+import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
@@ -69,7 +70,7 @@ async function RepliesLoader(props: {
 	channelId: bigint;
 	after: bigint;
 	solutionMessageId: bigint | undefined;
-	firstMessageAuthorId?: bigint;
+	firstMessage?: EnrichedMessage;
 	server?: MessagePageHeaderData["server"];
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
@@ -85,7 +86,7 @@ async function RepliesLoader(props: {
 			channelId={props.channelId}
 			after={props.after}
 			solutionMessageId={props.solutionMessageId}
-			firstMessageAuthorId={props.firstMessageAuthorId}
+			firstMessage={props.firstMessage}
 			server={props.server}
 			channel={props.channel}
 			initialData={initialData}
@@ -149,7 +150,7 @@ export default async function TenantMessagePage(props: Props) {
 							channelId={queryChannelId}
 							after={afterMessageId}
 							solutionMessageId={solutionMessageId}
-							firstMessageAuthorId={headerData.firstMessage?.author?.id}
+							firstMessage={headerData.firstMessage ?? undefined}
 							server={headerData.server}
 							channel={headerData.channel}
 							cursor={cursor}
