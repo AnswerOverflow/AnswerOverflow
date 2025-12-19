@@ -3,7 +3,6 @@ import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../client";
-import { deleteMessageCount, insertMessageCount } from "../private/counts";
 import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { anonymizeDiscordAccount } from "./anonymization.js";
 import type { DataAccessCache } from "./dataAccess";
@@ -170,7 +169,6 @@ export async function deleteMessageInternalLogic(
 	);
 
 	if (message) {
-		await deleteMessageCount(ctx, message);
 		await ctx.db.delete(message._id);
 	}
 }
@@ -204,9 +202,7 @@ export async function upsertMessageInternalLogic(
 	if (existing) {
 		await ctx.db.replace(existing._id, messageData);
 	} else {
-		const id = await ctx.db.insert("messages", messageData);
-		const newDoc = (await ctx.db.get(id))!;
-		await insertMessageCount(ctx, newDoc);
+		await ctx.db.insert("messages", messageData);
 	}
 
 	if (attachments !== undefined) {
@@ -527,9 +523,7 @@ export async function upsertManyMessagesOptimized(
 
 	for (const processed of processedInputs) {
 		if (processed.messageToWrite.type === "insert") {
-			const id = await ctx.db.insert("messages", processed.messageToWrite.data);
-			const newDoc = (await ctx.db.get(id))!;
-			await insertMessageCount(ctx, newDoc);
+			await ctx.db.insert("messages", processed.messageToWrite.data);
 		} else {
 			await ctx.db.replace(
 				processed.messageToWrite.id,

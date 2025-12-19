@@ -5,12 +5,13 @@ import {
 	customMutation,
 	customQuery,
 } from "convex-helpers/server/customFunctions";
-import { action, mutation, query } from "../_generated/server";
+import { action, query } from "../_generated/server";
 import {
 	getDiscordAccountIdFromAuth,
 	getDiscordAccountWithToken,
 } from "../shared/auth";
 import { getAuthIdentity } from "../shared/authIdentity";
+import { mutation } from "../triggers";
 
 function validateBackendAccessToken(token: string | undefined): boolean {
 	if (!token) {

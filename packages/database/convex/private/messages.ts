@@ -22,7 +22,6 @@ import {
 	getMessageById as getMessageByIdShared,
 	upsertManyMessagesOptimized,
 } from "../shared/shared";
-import { insertMessageCount } from "./counts";
 
 async function isIgnoredAccount(
 	ctx: QueryCtx | MutationCtx,
@@ -92,9 +91,7 @@ export const upsertMessage = privateMutation({
 		if (existing) {
 			await ctx.db.replace(existing._id, messageData);
 		} else {
-			const id = await ctx.db.insert("messages", messageData);
-			const newDoc = (await ctx.db.get(id))!;
-			await insertMessageCount(ctx, newDoc);
+			await ctx.db.insert("messages", messageData);
 		}
 
 		if (attachments !== undefined) {

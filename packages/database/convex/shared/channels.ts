@@ -1,7 +1,6 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { ChannelType } from "discord-api-types/v10";
 import type { MutationCtx, QueryCtx } from "../client";
-import { deleteThreadCount } from "../private/counts";
 import type { Channel } from "../schema";
 
 export { ChannelType };
@@ -108,7 +107,6 @@ export async function deleteChannelInternalLogic(
 	);
 
 	if (channel) {
-		await deleteThreadCount(ctx, channel);
 		await ctx.db.delete(channel._id);
 	}
 }

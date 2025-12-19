@@ -6,9 +6,10 @@ import {
 } from "convex-helpers/server/customFunctions";
 import { api } from "../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
-import { action, mutation, query } from "../_generated/server";
+import { action, query } from "../_generated/server";
 import { getDiscordAccountWithToken } from "../shared/auth";
 import { DISCORD_PERMISSIONS, hasPermission } from "../shared/shared";
+import { mutation } from "../triggers";
 
 async function getDiscordAccountIdForWrapper(
 	ctx: QueryCtx | MutationCtx | ActionCtx,

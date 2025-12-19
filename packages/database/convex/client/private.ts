@@ -4,7 +4,8 @@ import {
 	customMutation,
 	customQuery,
 } from "convex-helpers/server/customFunctions";
-import { action, mutation, query } from "../_generated/server";
+import { action, query } from "../_generated/server";
+import { mutation } from "../triggers";
 
 function validateBackendAccessToken(token: string | undefined): void {
 	const expectedToken = process.env.BACKEND_ACCESS_TOKEN;
