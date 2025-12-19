@@ -40,7 +40,11 @@ const getSocialLinks = () => [
 	},
 ];
 
-export function CompactStickyFooter() {
+export function CompactStickyFooter({
+	disableHideOnScroll = false,
+}: {
+	disableHideOnScroll?: boolean;
+}) {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [isVisible, setIsVisible] = useState(true);
 	const lastScrollY = useRef(0);
@@ -49,6 +53,8 @@ export function CompactStickyFooter() {
 	const socialLinks = getSocialLinks();
 
 	useEffect(() => {
+		if (disableHideOnScroll) return;
+
 		let scrollTimeout: ReturnType<typeof setTimeout>;
 
 		const handleScroll = () => {
@@ -73,7 +79,7 @@ export function CompactStickyFooter() {
 			window.removeEventListener("scroll", handleScroll);
 			clearTimeout(scrollTimeout);
 		};
-	}, []);
+	}, [disableHideOnScroll]);
 
 	return (
 		<div

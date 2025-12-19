@@ -37,7 +37,7 @@ export function MainSiteNavbar() {
 					variant="default"
 					href="/dashboard"
 				>
-					Get Started
+					Setup for Free
 				</LinkButton>
 			)}
 			<UserSection showSignIn={true} />

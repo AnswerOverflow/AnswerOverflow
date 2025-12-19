@@ -128,11 +128,6 @@ export function DashboardClient({
 							haven't connected your Discord account.
 						</CardDescription>
 					</CardHeader>
-					<CardContent>
-						<Button asChild>
-							<Link href="/dashboard/onboarding">Get Started</Link>
-						</Button>
-					</CardContent>
 				</Card>
 			</main>
 		);
