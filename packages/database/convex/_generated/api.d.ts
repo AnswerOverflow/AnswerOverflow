@@ -61,6 +61,7 @@ import type * as shared_similarThreads from "../shared/similarThreads.js";
 import type * as shared_stripe from "../shared/stripe.js";
 import type * as shared_users from "../shared/users.js";
 import type * as stripe_internal from "../stripe/internal.js";
+import type * as triggers from "../triggers.js";
 
 import type {
   ApiFromModules,
@@ -122,6 +123,7 @@ declare const fullApi: ApiFromModules<{
   "shared/stripe": typeof shared_stripe;
   "shared/users": typeof shared_users;
   "stripe/internal": typeof stripe_internal;
+  triggers: typeof triggers;
 }>;
 
 /**

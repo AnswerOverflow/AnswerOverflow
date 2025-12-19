@@ -20,30 +20,46 @@ import { isThreadType } from "./shared/channels";
 const triggers = new Triggers<DataModel>();
 
 triggers.register("messages", async (ctx, change) => {
-	if (change.operation === "insert" && change.newDoc) {
-		if (isThreadMessage(change.newDoc)) {
-			await threadMessageCounts.insertIfDoesNotExist(ctx, change.newDoc);
-		} else {
-			await rootChannelMessageCounts.insertIfDoesNotExist(ctx, change.newDoc);
+	try {
+		if (change.operation === "insert" && change.newDoc) {
+			if (isThreadMessage(change.newDoc)) {
+				await threadMessageCounts.insertIfDoesNotExist(ctx, change.newDoc);
+			} else {
+				await rootChannelMessageCounts.insertIfDoesNotExist(ctx, change.newDoc);
+			}
+		} else if (change.operation === "delete" && change.oldDoc) {
+			if (isThreadMessage(change.oldDoc)) {
+				await threadMessageCounts.deleteIfExists(ctx, change.oldDoc);
+			} else {
+				await rootChannelMessageCounts.deleteIfExists(ctx, change.oldDoc);
+			}
 		}
-	} else if (change.operation === "delete" && change.oldDoc) {
-		if (isThreadMessage(change.oldDoc)) {
-			await threadMessageCounts.deleteIfExists(ctx, change.oldDoc);
-		} else {
-			await rootChannelMessageCounts.deleteIfExists(ctx, change.oldDoc);
+	} catch (e) {
+		if (e instanceof Error && e.message.includes("is not registered. Call")) {
+			console.error(e.message);
+			return;
 		}
+		throw e;
 	}
 });
 
 triggers.register("channels", async (ctx, change) => {
-	if (change.operation === "insert" && change.newDoc) {
-		if (isThreadType(change.newDoc.type)) {
-			await threadCounts.insertIfDoesNotExist(ctx, change.newDoc);
+	try {
+		if (change.operation === "insert" && change.newDoc) {
+			if (isThreadType(change.newDoc.type)) {
+				await threadCounts.insertIfDoesNotExist(ctx, change.newDoc);
+			}
+		} else if (change.operation === "delete" && change.oldDoc) {
+			if (isThreadType(change.oldDoc.type)) {
+				await threadCounts.deleteIfExists(ctx, change.oldDoc);
+			}
 		}
-	} else if (change.operation === "delete" && change.oldDoc) {
-		if (isThreadType(change.oldDoc.type)) {
-			await threadCounts.deleteIfExists(ctx, change.oldDoc);
+	} catch (e) {
+		if (e instanceof Error && e.message.includes("is not registered. Call")) {
+			console.error(e.message);
+			return;
 		}
+		throw e;
 	}
 });
 
