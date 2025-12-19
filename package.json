@@ -85,6 +85,8 @@
 		"@better-auth/stripe": "^1.4.2",
 		"better-auth": "1.3.27",
 		"jsdom": "^27.3.0",
+		"main-site": "^7.4.2",
+		"react-tweet": "^3.3.0",
 		"stripe": "^20"
 	},
 	"lint-staged": {

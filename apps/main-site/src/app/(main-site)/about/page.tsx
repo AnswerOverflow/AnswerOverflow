@@ -4,6 +4,7 @@ import { Effect } from "effect";
 import type { Metadata } from "next";
 import { runtime } from "../../../lib/runtime";
 import { AboutPageClient } from "./client";
+import { TestimonialsSection } from "./testimonials";
 
 export const metadata: Metadata = {
 	title: "About - Answer Overflow",
@@ -28,7 +29,10 @@ export default async function AboutPage() {
 	return (
 		<>
 			<SessionRecording />
-			<AboutPageClient servers={servers} />
+			<AboutPageClient
+				servers={servers}
+				testimonialsSection={<TestimonialsSection />}
+			/>
 		</>
 	);
 }

@@ -5,7 +5,14 @@ import { Link } from "@packages/ui/components/link";
 import { LinkButton } from "@packages/ui/components/link-button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { cn } from "@packages/ui/lib/utils";
-import { ArrowRight, BarChart3, Search, Sparkles, Zap } from "lucide-react";
+import {
+	ArrowRight,
+	BarChart3,
+	Plus,
+	Search,
+	Sparkles,
+	Zap,
+} from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -361,15 +368,11 @@ function HeroSection() {
 			<div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 to-transparent" />
 			<div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
 				<h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-					Make Your Discord Community{" "}
+					Make Your <span className="text-[#5865F2]">Discord</span> Community{" "}
 					<span className="text-primary">Discoverable</span>
 				</h1>
 				<HeroDemo />
-				<p className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-					Answer Overflow indexes your Discord discussions into Google, enabling
-					AI-powered answers, and providing insights to help your community
-					thrive.
-				</p>
+
 				<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
 					<LinkButton href="/dashboard" size="lg">
 						Setup for Free
@@ -590,6 +593,22 @@ function UsedBySection({ servers }: { servers: Server[] }) {
 	);
 }
 
+export function AddTestimonialCard() {
+	return (
+		<Link
+			href="https://x.com/intent/tweet?text=I%20love%20%40AnswerOverflow%20because"
+			className="flex min-h-[120px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/30 bg-card/50 p-4 text-center transition-colors hover:border-primary/50 hover:bg-card"
+		>
+			<div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+				<Plus className="h-5 w-5 text-muted-foreground" />
+			</div>
+			<span className="mt-3 text-sm font-medium text-muted-foreground">
+				Add your own
+			</span>
+		</Link>
+	);
+}
+
 function PricingCard({
 	name,
 	price,
@@ -719,11 +738,18 @@ function CTASection() {
 	);
 }
 
-export function AboutPageClient({ servers }: { servers: Server[] }) {
+export function AboutPageClient({
+	servers,
+	testimonialsSection,
+}: {
+	servers: Server[];
+	testimonialsSection: React.ReactNode;
+}) {
 	return (
 		<div className="min-h-screen bg-background">
 			<HeroSection />
 			<UsedBySection servers={servers} />
+			{testimonialsSection}
 			<PricingSection />
 			<CTASection />
 		</div>
