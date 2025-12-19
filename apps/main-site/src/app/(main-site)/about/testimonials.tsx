@@ -3,7 +3,7 @@ import { unstable_cache } from "next/cache";
 import { fetchTweet, type Tweet } from "react-tweet/api";
 import { AddTestimonialCard } from "./client";
 
-const TESTIMONIAL_IDS = ["2001595778066764211"];
+const TESTIMONIAL_IDS = ["2001595778066764211", "2002124605507711318"];
 
 const getTweet = unstable_cache(
 	async (id: string): Promise<Tweet | undefined> => {
