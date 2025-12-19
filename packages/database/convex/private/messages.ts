@@ -8,7 +8,12 @@ import {
 	type QueryCtx,
 } from "../client";
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
-import { createDataAccessCache, enrichMessages } from "../shared/dataAccess";
+import {
+	createDataAccessCache,
+	enrichMessage,
+	enrichMessages,
+} from "../shared/dataAccess";
+import { getThreadStartMessage } from "../shared/messages";
 import {
 	type BulkMessageInput,
 	deleteMessageInternalLogic,
@@ -495,36 +500,27 @@ export const getMessagePageHeaderData = privateQuery({
 	},
 	handler: async (ctx, args) => {
 		const cache = createDataAccessCache(ctx);
-
-		const [targetMessage, threadAsChannel] = await Promise.all([
+		const [targetMessage, thread] = await Promise.all([
 			cache.getMessage(args.messageId),
 			cache.getChannel(args.messageId),
 		]);
 
-		const thread = targetMessage?.parentChannelId
-			? await cache.getChannel(targetMessage.channelId)
-			: threadAsChannel;
+		const rootMessage =
+			targetMessage ?? (await getThreadStartMessage(cache, args.messageId));
 
 		const channelId =
 			thread?.parentId ??
-			targetMessage?.parentChannelId ??
-			targetMessage?.channelId;
-		if (!channelId) {
+			rootMessage?.parentChannelId ??
+			rootMessage?.channelId;
+		const serverId = rootMessage?.serverId ?? thread?.serverId;
+		if (!channelId || !serverId) {
 			return null;
 		}
 
 		const [channel, server, serverPreferences] = await Promise.all([
 			cache.getChannelWithSettings(channelId),
-			targetMessage
-				? cache.getServer(targetMessage.serverId)
-				: thread
-					? cache.getServer(thread.serverId)
-					: null,
-			targetMessage
-				? cache.getServerPreferences(targetMessage.serverId)
-				: thread
-					? cache.getServerPreferences(thread.serverId)
-					: null,
+			cache.getServer(serverId),
+			cache.getServerPreferences(serverId),
 		]);
 
 		if (!channel?.flags?.indexingEnabled) {
@@ -537,13 +533,12 @@ export const getMessagePageHeaderData = privateQuery({
 			return null;
 		}
 
-		const [enrichedFirstMessage, solutionMessages] = await Promise.all([
-			targetMessage ? enrichMessages(ctx, [targetMessage], cache) : [],
-			targetMessage
-				? cache.getSolutionsByQuestionId(targetMessage.id)
+		const [enrichedFirst, solutionMessages] = await Promise.all([
+			rootMessage ? enrichMessage(ctx, cache, rootMessage) : null,
+			rootMessage
+				? cache.getSolutionsByQuestionId(rootMessage.id)
 				: Promise.resolve([]),
 		]);
-		const enrichedFirst = enrichedFirstMessage[0] ?? null;
 
 		const solutionMsg = solutionMessages[0];
 		const solutionMessage = solutionMsg
@@ -551,7 +546,7 @@ export const getMessagePageHeaderData = privateQuery({
 			: [];
 
 		return {
-			canonicalId: thread?.id ?? targetMessage?.id ?? args.messageId,
+			canonicalId: thread?.id ?? rootMessage?.id ?? args.messageId,
 			firstMessage: enrichedFirst,
 			solutionMessage: solutionMessage[0] ?? null,
 			channelId,

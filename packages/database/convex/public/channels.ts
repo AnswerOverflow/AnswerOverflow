@@ -4,12 +4,12 @@ import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr } from "effect";
 import { createDataAccessCache, enrichMessage } from "../shared/dataAccess";
+import { getThreadStartMessage } from "../shared/messages";
 import {
 	channelWithSystemFieldsValidator,
 	enrichedMessageValidator,
 	paginatedValidator,
 } from "../shared/publicSchemas";
-import { getMessageById } from "../shared/shared";
 import { publicQuery } from "./custom_functions";
 
 export const getChannelPageThreads = publicQuery({
@@ -24,6 +24,8 @@ export const getChannelPageThreads = publicQuery({
 		}),
 	),
 	handler: async (ctx, args) => {
+		const cache = createDataAccessCache(ctx);
+
 		const paginatedResult = await ctx.db
 			.query("channels")
 			.withIndex("by_parentId_and_id", (q) =>
@@ -34,9 +36,8 @@ export const getChannelPageThreads = publicQuery({
 
 		const threads = paginatedResult.page;
 
-		const cache = createDataAccessCache(ctx);
 		const page = await asyncMap(threads, async (thread) => {
-			const message = await getMessageById(ctx, thread.id);
+			const message = await getThreadStartMessage(cache, thread.id);
 			const enrichedMessage = message
 				? await enrichMessage(ctx, cache, message)
 				: null;
@@ -162,13 +163,13 @@ export const getServerPageThreads = publicQuery({
 
 		const cache = createDataAccessCache(ctx);
 		const page = await asyncMap(threads, async (thread) => {
-			const message = await getMessageById(ctx, thread.id);
-			const enrichedMessage = message
-				? await enrichMessage(ctx, cache, message)
-				: null;
-
 			const channel = thread.parentId
 				? (channelIdToInfo.get(thread.parentId) ?? null)
+				: null;
+
+			const message = await getThreadStartMessage(cache, thread.id);
+			const enrichedMessage = message
+				? await enrichMessage(ctx, cache, message)
 				: null;
 
 			return {

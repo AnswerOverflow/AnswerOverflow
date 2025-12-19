@@ -23,10 +23,34 @@ export function compareIds(a: bigint, b: bigint): number {
 }
 
 export async function getThreadStartMessage(
-	ctx: QueryCtx | MutationCtx,
+	cache: DataAccessCache,
 	threadId: bigint,
 ): Promise<MessageDoc | null> {
-	return getOneFrom(ctx.db, "messages", "by_messageId", threadId, "id");
+	const rootMessage = await cache.getMessage(threadId);
+	if (rootMessage) {
+		return rootMessage;
+	}
+
+	const thread = await cache.getChannel(threadId);
+	if (!thread?.parentId) {
+		return null;
+	}
+
+	const firstMessageInThread = await cache.getFirstMessageInChannel(threadId);
+	if (!firstMessageInThread) {
+		return null;
+	}
+
+	if (firstMessageInThread.referenceId) {
+		const referencedMessage = await cache.getMessage(
+			firstMessageInThread.referenceId,
+		);
+		if (referencedMessage) {
+			return referencedMessage;
+		}
+	}
+
+	return firstMessageInThread;
 }
 
 export async function getFirstMessagesInChannels(

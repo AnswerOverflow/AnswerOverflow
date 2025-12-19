@@ -135,6 +135,15 @@ export function createDataAccessCache(ctx: QueryCtx) {
 						parentId: parentChannelId,
 					}),
 			),
+		getFirstMessageAfter: (args: { messageId: bigint; channelId: bigint }) =>
+			cache.get(`firstMessageAfter:${args.messageId}:${args.channelId}`, () =>
+				ctx.db
+					.query("messages")
+					.withIndex("by_channelId_and_id", (q) =>
+						q.eq("channelId", args.channelId).gt("id", args.messageId),
+					)
+					.first(),
+			),
 	};
 }
 
