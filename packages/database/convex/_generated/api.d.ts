@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as admin_findThreadsMissingRootMessage from "../admin/findThreadsMissingRootMessage.js";
+import type * as admin_findThreadsMissingRootMessagePage from "../admin/findThreadsMissingRootMessagePage.js";
 import type * as authenticated_admin from "../authenticated/admin.js";
 import type * as authenticated_dashboard from "../authenticated/dashboard.js";
 import type * as authenticated_dashboard_mutations from "../authenticated/dashboard_mutations.js";
@@ -67,6 +69,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "admin/findThreadsMissingRootMessage": typeof admin_findThreadsMissingRootMessage;
+  "admin/findThreadsMissingRootMessagePage": typeof admin_findThreadsMissingRootMessagePage;
   "authenticated/admin": typeof authenticated_admin;
   "authenticated/dashboard": typeof authenticated_dashboard;
   "authenticated/dashboard_mutations": typeof authenticated_dashboard_mutations;
