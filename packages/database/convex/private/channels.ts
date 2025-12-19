@@ -19,7 +19,6 @@ import {
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
 } from "../shared/shared";
-import { insertThreadCount } from "./counts";
 
 type Channel = Infer<typeof channelSchema>;
 type ChannelSettings = Infer<typeof channelSettingsSchema>;
@@ -113,8 +112,6 @@ export const upsertChannel = privateMutation({
 			return await ctx.db.patch(existing._id, args.channel);
 		} else {
 			const id = await ctx.db.insert("channels", args.channel);
-			const newDoc = (await ctx.db.get(id))!;
-			await insertThreadCount(ctx, newDoc);
 			return id;
 		}
 	},
