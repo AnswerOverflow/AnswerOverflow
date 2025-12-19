@@ -364,14 +364,16 @@ export function ServerThreadsList({
 						</EmptyHeader>
 					</Empty>
 				}
-				renderItem={({ thread, message, channel }) => (
-					<ChannelThreadCard
-						key={thread.id.toString()}
-						thread={thread}
-						message={message}
-						channel={channel}
-					/>
-				)}
+				renderItem={({ thread, message, channel }) =>
+					message ? (
+						<ChannelThreadCard
+							key={thread.id.toString()}
+							thread={thread}
+							message={message}
+							channel={channel}
+						/>
+					) : null
+				}
 			/>
 			{nextCursor && (
 				<a
@@ -421,13 +423,15 @@ export function ThreadsList({
 						</EmptyHeader>
 					</Empty>
 				}
-				renderItem={({ thread, message }) => (
-					<ChannelThreadCard
-						key={thread.id.toString()}
-						thread={thread}
-						message={message}
-					/>
-				)}
+				renderItem={({ thread, message }) =>
+					message ? (
+						<ChannelThreadCard
+							key={thread.id.toString()}
+							thread={thread}
+							message={message}
+						/>
+					) : null
+				}
 			/>
 			{nextCursor && (
 				<a
