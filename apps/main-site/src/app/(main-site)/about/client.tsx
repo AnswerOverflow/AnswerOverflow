@@ -97,18 +97,18 @@ function GoogleMockup({ withAnswerOverflow }: { withAnswerOverflow: boolean }) {
 
 	return (
 		<div className="bg-white dark:bg-[#202124] h-[400px] text-left flex flex-col">
-			<header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-neutral-700">
-				<div className="flex items-center gap-4 flex-1">
+			<header className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-neutral-700">
+				<div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
 					<img
 						src="/googlelogo.png"
 						alt="Google"
-						className="h-7 object-contain"
+						className="h-5 sm:h-7 object-contain flex-shrink-0"
 					/>
-					<div className="flex items-center gap-3 px-4 py-2 border border-gray-300 dark:border-neutral-600 rounded-full hover:shadow-md transition-shadow flex-1 bg-white dark:bg-[#303134]">
-						<span className="flex-1 text-sm text-gray-900 dark:text-neutral-200 truncate">
+					<div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 border border-gray-300 dark:border-neutral-600 rounded-full hover:shadow-md transition-shadow flex-1 min-w-0 bg-white dark:bg-[#303134]">
+						<span className="flex-1 text-xs sm:text-sm text-gray-900 dark:text-neutral-200 truncate">
 							{searchQuery}
 						</span>
-						<Search className="w-5 h-5 text-blue-500" />
+						<Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0" />
 					</div>
 				</div>
 			</header>
@@ -121,33 +121,37 @@ function GoogleMockup({ withAnswerOverflow }: { withAnswerOverflow: boolean }) {
 				</p>
 			</div>
 
-			<main className="px-4 mt-4 flex-1">
+			<main className="px-3 sm:px-4 mt-4 flex-1 overflow-hidden">
 				{withAnswerOverflow ? (
-					<div className="space-y-6">
-						<article className="mb-6">
+					<div className="space-y-4 sm:space-y-6">
+						<article className="mb-4 sm:mb-6">
 							<Link
 								href="/m/1234567890"
 								className="block hover:no-underline group"
 							>
-								<div className="flex items-start gap-3 mb-1">
-									<div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center flex-shrink-0">
-										<img src="/favicon.ico" alt="" className="w-4 h-4" />
+								<div className="flex items-start gap-2 sm:gap-3 mb-1">
+									<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center flex-shrink-0">
+										<img
+											src="/favicon.ico"
+											alt=""
+											className="w-3 h-3 sm:w-4 sm:h-4"
+										/>
 									</div>
-									<div className="flex-1">
+									<div className="flex-1 min-w-0">
 										<div className="flex items-center gap-2 mb-0.5">
-											<span className="text-sm text-gray-900 dark:text-neutral-200">
+											<span className="text-xs sm:text-sm text-gray-900 dark:text-neutral-200">
 												answeroverflow.com
 											</span>
 										</div>
-										<div className="text-xs text-gray-600 dark:text-neutral-400 mb-1">
+										<div className="text-xs text-gray-600 dark:text-neutral-400 mb-1 truncate">
 											https://answeroverflow.com › discord-bot-help
 										</div>
 									</div>
 								</div>
-								<h3 className="text-xl text-blue-800 dark:text-[#8ab4f8] group-hover:underline cursor-pointer mb-1 ml-10">
+								<h3 className="text-base sm:text-xl text-blue-800 dark:text-[#8ab4f8] group-hover:underline cursor-pointer mb-1 ml-8 sm:ml-10">
 									How do I fix the Discord bot not responding?
 								</h3>
-								<p className="text-sm text-gray-600 dark:text-neutral-400 leading-relaxed ml-10">
+								<p className="text-xs sm:text-sm text-gray-600 dark:text-neutral-400 leading-relaxed ml-8 sm:ml-10 line-clamp-2">
 									Make sure your bot token is valid and the bot has the correct
 									permissions. Check that MESSAGE_CONTENT intent is enabled in
 									the Discord Developer Portal...
@@ -155,30 +159,34 @@ function GoogleMockup({ withAnswerOverflow }: { withAnswerOverflow: boolean }) {
 							</Link>
 						</article>
 
-						<article className="mb-6">
+						<article className="mb-4 sm:mb-6">
 							<Link
 								href="/m/1234567891"
 								className="block hover:no-underline group"
 							>
-								<div className="flex items-start gap-3 mb-1">
-									<div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center flex-shrink-0">
-										<img src="/favicon.ico" alt="" className="w-4 h-4" />
+								<div className="flex items-start gap-2 sm:gap-3 mb-1">
+									<div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center flex-shrink-0">
+										<img
+											src="/favicon.ico"
+											alt=""
+											className="w-3 h-3 sm:w-4 sm:h-4"
+										/>
 									</div>
-									<div className="flex-1">
+									<div className="flex-1 min-w-0">
 										<div className="flex items-center gap-2 mb-0.5">
-											<span className="text-sm text-gray-900 dark:text-neutral-200">
+											<span className="text-xs sm:text-sm text-gray-900 dark:text-neutral-200">
 												answeroverflow.com
 											</span>
 										</div>
-										<div className="text-xs text-gray-600 dark:text-neutral-400 mb-1">
+										<div className="text-xs text-gray-600 dark:text-neutral-400 mb-1 truncate">
 											https://answeroverflow.com › bot-troubleshooting
 										</div>
 									</div>
 								</div>
-								<h3 className="text-xl text-blue-800 dark:text-[#8ab4f8] group-hover:underline cursor-pointer mb-1 ml-10">
+								<h3 className="text-base sm:text-xl text-blue-800 dark:text-[#8ab4f8] group-hover:underline cursor-pointer mb-1 ml-8 sm:ml-10">
 									Bot not responding to commands - Troubleshooting Guide
 								</h3>
-								<p className="text-sm text-gray-600 dark:text-neutral-400 leading-relaxed ml-10">
+								<p className="text-xs sm:text-sm text-gray-600 dark:text-neutral-400 leading-relaxed ml-8 sm:ml-10 line-clamp-2">
 									Common issues include: missing intents, incorrect command
 									prefix, bot is offline, or rate limiting. Here&apos;s how to
 									debug each...
@@ -187,12 +195,12 @@ function GoogleMockup({ withAnswerOverflow }: { withAnswerOverflow: boolean }) {
 						</article>
 					</div>
 				) : (
-					<div className="flex flex-col items-center justify-center flex-1 text-center">
-						<Search className="h-16 w-16 text-gray-300 dark:text-neutral-600 mb-4" />
-						<p className="text-gray-600 dark:text-neutral-400">
+					<div className="flex flex-col items-center justify-center flex-1 text-center px-2">
+						<Search className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 dark:text-neutral-600 mb-4" />
+						<p className="text-sm sm:text-base text-gray-600 dark:text-neutral-400">
 							No results found for &quot;{searchQuery}&quot;
 						</p>
-						<p className="text-sm text-gray-400 dark:text-neutral-500 mt-2">
+						<p className="text-xs sm:text-sm text-gray-400 dark:text-neutral-500 mt-2">
 							Your Discord discussions aren&apos;t indexed by Google
 						</p>
 					</div>
@@ -211,7 +219,7 @@ function ChatGPTMockup({
 
 	return (
 		<div className="bg-white dark:bg-[#212121] h-[400px] flex flex-col text-left">
-			<div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-700">
+			<div className="px-3 sm:px-4 py-3 border-b border-neutral-200 dark:border-neutral-700">
 				<span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
 					ChatGPT
 				</span>
@@ -220,22 +228,22 @@ function ChatGPTMockup({
 					Thinking
 				</span>
 			</div>
-			<div className="flex-1 p-4 space-y-4 max-w-2xl mx-auto w-full">
+			<div className="flex-1 p-3 sm:p-4 space-y-4 max-w-2xl mx-auto w-full overflow-hidden">
 				<div className="flex justify-end">
-					<div className="bg-[#f4f4f4] dark:bg-[#2f2f2f] rounded-2xl px-4 py-2 max-w-[80%]">
-						<p className="text-sm text-neutral-800 dark:text-white">
+					<div className="bg-[#f4f4f4] dark:bg-[#2f2f2f] rounded-2xl px-3 sm:px-4 py-2 max-w-[85%] sm:max-w-[80%]">
+						<p className="text-xs sm:text-sm text-neutral-800 dark:text-white">
 							{userQuery}
 						</p>
 					</div>
 				</div>
-				<div className="text-left space-y-3">
+				<div className="text-left space-y-2 sm:space-y-3">
 					<p className="text-xs text-neutral-500 dark:text-neutral-400">
 						Thought for 12s &gt;
 					</p>
 					{withAnswerOverflow ? (
-						<div className="text-sm text-neutral-800 dark:text-neutral-200 space-y-3 text-left">
+						<div className="text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 space-y-2 sm:space-y-3 text-left">
 							<p>Based on discussions from the Discord Bot Help community:</p>
-							<ol className="list-decimal list-inside space-y-1.5 text-left">
+							<ol className="list-decimal list-inside space-y-1 sm:space-y-1.5 text-left">
 								<li>
 									Check that your bot token is valid and hasn&apos;t been
 									regenerated
@@ -247,34 +255,38 @@ function ChatGPTMockup({
 								<li>Verify the bot has proper permissions in the server</li>
 								<li>Check if the bot is online and not rate limited</li>
 							</ol>
-							<div className="mt-4 flex items-center gap-2 flex-wrap">
-								<div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs">
-									<img src="/favicon.ico" alt="" className="h-4 w-4" />
+							<div className="mt-3 sm:mt-4 flex items-center gap-1.5 sm:gap-2 flex-wrap">
+								<div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs">
+									<img
+										src="/favicon.ico"
+										alt=""
+										className="h-3 w-3 sm:h-4 sm:w-4"
+									/>
 									<span className="text-neutral-600 dark:text-neutral-400">
 										Sources
 									</span>
 								</div>
 								<Link
 									href="/m/1234567890"
-									className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+									className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
 								>
 									Discord Bot Help
 								</Link>
 								<Link
 									href="/m/1234567891"
-									className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+									className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
 								>
 									Bot Troubleshooting
 								</Link>
 							</div>
 						</div>
 					) : (
-						<div className="text-sm text-neutral-800 dark:text-neutral-200 space-y-3 text-left">
+						<div className="text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 space-y-2 sm:space-y-3 text-left">
 							<p>
 								I don&apos;t have specific information about your Discord bot
 								setup. Here are some general suggestions:
 							</p>
-							<ul className="list-disc list-inside space-y-1.5 text-neutral-500 dark:text-neutral-400 text-left">
+							<ul className="list-disc list-inside space-y-1 sm:space-y-1.5 text-neutral-500 dark:text-neutral-400 text-left">
 								<li>Check if your bot is online</li>
 								<li>Verify your code for errors</li>
 								<li>Review Discord&apos;s documentation</li>
@@ -297,7 +309,7 @@ function HeroDemo() {
 
 	return (
 		<div className="mt-12 mx-auto max-w-2xl">
-			<div className="flex items-center justify-between mb-3">
+			<div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between mb-3">
 				<div className="flex items-center gap-1">
 					<button
 						type="button"
