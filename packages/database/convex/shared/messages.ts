@@ -38,7 +38,7 @@ export async function getThreadStartMessage(
 
 	const firstMessageInThread = await cache.getFirstMessageAfter({
 		messageId: threadId,
-		channelId: thread.parentId,
+		channelId: thread.id,
 	});
 	if (!firstMessageInThread) {
 		return null;
