@@ -17,7 +17,7 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	queryArgs: PaginatedQueryArgs<Query>;
 	pageSize?: number;
 	renderItem: (item: PaginatedQueryItem<Query>, index: number) => ReactNode;
-	loader?: ReactNode;
+	loader: ReactNode;
 	initialLoaderCount?: number;
 	loadMoreLoaderCount?: number;
 	emptyState?: ReactNode;
@@ -54,14 +54,14 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	queryArgs,
 	pageSize = 30,
 	renderItem,
-	loader,
+	loader: loaderElement,
 	initialLoaderCount = 5,
 	loadMoreLoaderCount = 3,
 	emptyState,
 	authenticationType = "all",
 	initialData,
 	initialCursor = null,
-	showLoadMoreButton = false,
+	showLoadMoreButton = true,
 	className,
 	itemClassName = "mb-4",
 }: ConvexInfiniteListProps<Query>) {
@@ -82,11 +82,6 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 			loadMore(pageSize);
 		}
 	}, [canLoadMore, loadMore, pageSize]);
-
-	const defaultLoader = (
-		<div className="py-2 text-sm text-muted-foreground">Loading…</div>
-	);
-	const loaderElement = loader ?? defaultLoader;
 
 	const isWaitingForSession = !isSessionReady;
 	const isLoadingFirstPage = status === "LoadingFirstPage";

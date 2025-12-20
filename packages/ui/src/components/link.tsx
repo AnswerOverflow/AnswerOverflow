@@ -2,7 +2,7 @@
 import NextLink from "next/link";
 import type React from "react";
 import { cn } from "../lib/utils";
-import { normalizeSubpath } from "../utils/links";
+import { isOnMainSite, normalizeSubpath } from "../utils/links";
 import { useTenant } from "./tenant-context";
 
 function isExternalUrl(href: string): boolean {
@@ -11,21 +11,7 @@ function isExternalUrl(href: string): boolean {
 	}
 	try {
 		const url = new URL(href);
-		const currentHost =
-			typeof window !== "undefined" ? window.location.host : null;
-		if (currentHost === null) {
-			const mainSiteHosts = [
-				"www.answeroverflow.com",
-				"answeroverflow.com",
-				"www.answeroverflow.com",
-				"localhost",
-				"localhost:3000",
-			];
-			return !mainSiteHosts.some(
-				(host) => url.host === host || url.host.endsWith(".vercel.app"),
-			);
-		}
-		return url.host !== currentHost;
+		return !isOnMainSite(url.host);
 	} catch {
 		return false;
 	}
