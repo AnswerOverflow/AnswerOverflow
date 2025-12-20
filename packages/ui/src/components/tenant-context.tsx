@@ -4,11 +4,12 @@ import type React from "react";
 import { createContext, useContext } from "react";
 
 export type Tenant = {
-	name?: string | null;
-	icon?: string | null;
+	name: string;
+	icon: string | undefined;
+	description: string;
 	customDomain?: string | null;
 	subpath?: string | null;
-	discordId?: bigint;
+	discordId: bigint;
 };
 
 const TenantContext = createContext<Tenant | null>(null);

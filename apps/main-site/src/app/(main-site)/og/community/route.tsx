@@ -1,17 +1,19 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { Database } from "@packages/database/database";
 import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import { ImageResponse } from "next/og";
 import { runtime } from "../../../../lib/runtime";
+import {
+	formatNumber,
+	getOgFontConfig,
+	loadOgFonts,
+	makeServerIconLink,
+	truncate,
+	validateImageUrl,
+} from "../shared";
 
 export const preferredRegion = "iad1";
-
-const fontDir = join(process.cwd(), "src/styles");
-const satoshiBold = readFile(join(fontDir, "Satoshi-Black.ttf"));
-const satoshiBoldFont = readFile(join(fontDir, "Satoshi-Bold.ttf"));
 
 const UsersIcon = () => (
 	<svg
@@ -50,44 +52,8 @@ const ChannelsIcon = () => (
 	</svg>
 );
 
-function truncate(str: string, n = 30) {
-	const truncated = str.length > n ? `${str.slice(0, n - 1)}...` : str;
-	return truncated.replace(/[^\p{L}\d\s-]+/gu, "");
-}
-
-function makeServerIconLink(
-	server: { discordId: bigint; icon?: string | null },
-	size = 64,
-) {
-	if (!server.icon) return undefined;
-	return `https://cdn.discordapp.com/icons/${server.discordId}/${server.icon}.png?size=${size}`;
-}
-
-async function validateImageUrl(url: string | undefined): Promise<boolean> {
-	if (!url) return false;
-	try {
-		const response = await fetch(url, { method: "HEAD" });
-		return response.ok;
-	} catch {
-		return false;
-	}
-}
-
-function formatNumber(num: number): string {
-	if (num >= 1000000) {
-		return `${(num / 1000000).toFixed(1)}M`;
-	}
-	if (num >= 1000) {
-		return `${(num / 1000).toFixed(1)}K`;
-	}
-	return num.toString();
-}
-
 export async function GET(req: Request) {
-	const [satoshiBoldData, satoshiBoldFontData] = await Promise.all([
-		satoshiBold,
-		satoshiBoldFont,
-	]);
+	const fonts = await loadOgFonts();
 
 	const { searchParams } = new URL(req.url);
 	const id = searchParams.get("id");
@@ -274,16 +240,7 @@ export async function GET(req: Request) {
 		{
 			width: 1200,
 			height: 630,
-			fonts: [
-				{
-					name: "Satoshi Black",
-					data: satoshiBoldData,
-				},
-				{
-					name: "Satoshi Bold",
-					data: satoshiBoldFontData,
-				},
-			],
+			fonts: getOgFontConfig(fonts),
 		},
 	);
 }

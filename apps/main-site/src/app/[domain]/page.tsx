@@ -1,7 +1,5 @@
-import { Database } from "@packages/database/database";
 import { Button } from "@packages/ui/components/button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
-import { Effect } from "effect";
 import { Hash, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -10,39 +8,23 @@ import {
 	generateServerPageMetadata,
 	ServerPageLoader,
 } from "../../components/channel-page-loader";
-import { runtime } from "../../lib/runtime";
+import { getTenantData } from "../../lib/tenant";
 
 type Props = {
 	params: Promise<{ domain: string }>;
 };
 
-async function getTenantData(domain: string) {
-	return Effect.gen(function* () {
-		const database = yield* Database;
-		const tenant = yield* database.private.servers.getServerByDomain({
-			domain,
-		});
-		return tenant;
-	}).pipe(runtime.runPromise);
-}
-
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const domain = decodeURIComponent(params.domain);
 
-	const tenantData = await getTenantData(domain);
-	if (!tenantData?.server) {
+	const data = await getTenantData(domain);
+	if (!data) {
 		return {};
 	}
+	const { tenant } = data;
 
-	const headerData = await fetchServerPageHeaderData(
-		tenantData.server.discordId,
-	);
-
-	const tenant = {
-		customDomain: tenantData.preferences?.customDomain,
-		subpath: tenantData.preferences?.subpath,
-	};
+	const headerData = await fetchServerPageHeaderData(tenant.discordId);
 
 	return generateServerPageMetadata(headerData, "/", tenant);
 }
@@ -51,26 +33,20 @@ export default async function DomainPage(props: Props) {
 	const params = await props.params;
 	const domain = decodeURIComponent(params.domain);
 
-	const tenantData = await getTenantData(domain);
-	if (!tenantData?.server) {
+	const data = await getTenantData(domain);
+	if (!data) {
+		return notFound();
+	}
+	const { tenant } = data;
+	if (!tenant) {
 		return notFound();
 	}
 
-	const headerData = await fetchServerPageHeaderData(
-		tenantData.server.discordId,
-	);
+	const headerData = await fetchServerPageHeaderData(tenant.discordId);
 
 	if (!headerData || headerData.channels.length === 0) {
-		const server = headerData?.server ?? {
-			discordId: tenantData.server.discordId,
-			name: tenantData.server.name,
-			icon: tenantData.server.icon,
-			description: tenantData.server.description,
-		};
-		const inviteUrl = `https://discord.com/servers/${server.discordId}`;
-		const description =
-			server.description ??
-			`Browse and search through archived Discord discussions from ${server.name}`;
+		const inviteUrl = `https://discord.com/servers/${tenant.discordId}`;
+		const description = tenant.description;
 
 		return (
 			<div className="min-h-screen bg-background">
@@ -79,9 +55,9 @@ export default async function DomainPage(props: Props) {
 						<div className="flex items-start gap-4">
 							<ServerIcon
 								server={{
-									discordId: server.discordId,
-									name: server.name,
-									icon: server.icon ?? "",
+									discordId: tenant.discordId,
+									name: tenant.name,
+									icon: tenant.icon ?? "",
 								}}
 								size={64}
 								className="shrink-0"
@@ -90,7 +66,7 @@ export default async function DomainPage(props: Props) {
 								<div className="flex items-start gap-4">
 									<div className="flex-1 min-w-0">
 										<h1 className="text-xl sm:text-2xl font-semibold text-foreground">
-											{server.name}
+											{tenant.name}
 										</h1>
 										<p className="text-muted-foreground text-sm mt-1 line-clamp-2">
 											{description}
@@ -131,7 +107,7 @@ export default async function DomainPage(props: Props) {
 						<Button variant="secondary" asChild className="font-medium">
 							<a href={inviteUrl} target="_blank" rel="noopener noreferrer">
 								<Users className="size-4 mr-2" />
-								Join {server.name}
+								Join {tenant.name}
 							</a>
 						</Button>
 					</div>

@@ -7,7 +7,7 @@
 		"./*": "./src/*.ts"
 	},
 	"dependencies": {
-		"fast-check": "^3.23.2"
+		"@packages/database-utils": "workspace:*"
 	},
 	"devDependencies": {
 		"typescript": "catalog:"

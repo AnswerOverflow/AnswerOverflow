@@ -1,16 +1,11 @@
+import {
+	nullableSnowflakeArbitrary,
+	snowflakeArbitrary,
+} from "@packages/database-utils/snowflakes-test";
 import * as fc from "effect/FastCheck";
 
-const SNOWFLAKE_MIN = 100000000000000000n;
-const SNOWFLAKE_MAX = 999999999999999999n;
-
-const snowflakeArb = fc
-	.bigInt({ min: SNOWFLAKE_MIN, max: SNOWFLAKE_MAX })
-	.map((id) => id.toString());
-
-const nullableSnowflakeArb = fc.oneof(fc.constant(null), snowflakeArb);
-
 export const guildDataArb = fc.record({
-	id: snowflakeArb,
+	id: snowflakeArbitrary,
 	name: fc.string({ minLength: 1, maxLength: 100 }),
 	icon: fc.oneof(fc.constant(null), fc.string()),
 	description: fc.oneof(fc.constant(null), fc.string({ maxLength: 4096 })),
@@ -23,13 +18,13 @@ export const guildDataArb = fc.record({
 });
 
 export const channelDataArb = fc.record({
-	id: snowflakeArb,
+	id: snowflakeArbitrary,
 	name: fc.string({ minLength: 1, maxLength: 100 }),
-	parentId: nullableSnowflakeArb,
+	parentId: nullableSnowflakeArbitrary,
 });
 
 export const channelDataWithoutParentArb = fc.record({
-	id: snowflakeArb,
+	id: snowflakeArbitrary,
 	name: fc.string({ minLength: 1, maxLength: 100 }),
 });
 

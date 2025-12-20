@@ -4,6 +4,7 @@
 	"type": "module",
 	"exports": {
 		"./snowflakes": "./src/snowflakes.ts",
+		"./snowflakes-test": "./src/snowflakes-test.ts",
 		"./*": "./src/*.ts"
 	},
 	"dependencies": {

@@ -212,7 +212,7 @@
       "name": "@packages/test-utils",
       "version": "1.0.0",
       "dependencies": {
-        "fast-check": "^3.23.2",
+        "@packages/database-utils": "workspace:*",
       },
       "devDependencies": {
         "typescript": "catalog:",
@@ -296,6 +296,7 @@
       },
       "devDependencies": {
         "@packages/database": "workspace:*",
+        "@packages/database-utils": "workspace:*",
         "@packages/typescript-config": "workspace:*",
         "@tailwindcss/postcss": "catalog:",
         "@types/hast": "^3.0.4",

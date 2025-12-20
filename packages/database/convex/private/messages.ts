@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
-import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import {
 	type MutationCtx,
 	privateMutation,
@@ -21,6 +21,7 @@ import {
 	findUserServerSettingsById,
 	getMessageById as getMessageByIdShared,
 	upsertManyMessagesOptimized,
+	upsertMessageInternalLogic,
 } from "../shared/shared";
 
 async function isIgnoredAccount(
@@ -73,91 +74,11 @@ export const upsertMessage = privateMutation({
 			}
 		}
 
-		const { attachments, reactions } = args;
-		const messageData = { ...args.message };
-
-		if (messageData.id === messageData.channelId) {
-			messageData.childThreadId = messageData.channelId;
-		}
-
-		const existing = await getOneFrom(
-			ctx.db,
-			"messages",
-			"by_messageId",
-			messageData.id,
-			"id",
-		);
-
-		if (existing) {
-			await ctx.db.replace(existing._id, messageData);
-		} else {
-			await ctx.db.insert("messages", messageData);
-		}
-
-		if (attachments !== undefined) {
-			const existingAttachments = await getManyFrom(
-				ctx.db,
-				"attachments",
-				"by_messageId",
-				messageData.id,
-			);
-
-			for (const attachment of existingAttachments) {
-				await ctx.db.delete(attachment._id);
-			}
-
-			if (attachments.length > 0) {
-				for (const attachment of attachments) {
-					await ctx.db.insert("attachments", attachment);
-				}
-			}
-		}
-
-		if (reactions !== undefined) {
-			const existingReactions = await getManyFrom(
-				ctx.db,
-				"reactions",
-				"by_messageId",
-				messageData.id,
-			);
-
-			for (const reaction of existingReactions) {
-				await ctx.db.delete(reaction._id);
-			}
-
-			if (reactions.length > 0) {
-				const emojiSet = new Set<bigint>();
-				for (const reaction of reactions) {
-					emojiSet.add(reaction.emoji.id);
-				}
-
-				for (const reaction of reactions) {
-					const emojiId = reaction.emoji.id;
-					if (!emojiId) continue;
-
-					const existingEmoji = await getOneFrom(
-						ctx.db,
-						"emojis",
-						"by_emojiId",
-						emojiId,
-						"id",
-					);
-
-					if (!existingEmoji) {
-						await ctx.db.insert("emojis", reaction.emoji);
-					}
-				}
-
-				for (const reaction of reactions) {
-					if (!reaction.emoji.id) continue;
-					await ctx.db.insert("reactions", {
-						messageId: messageData.id,
-						userId: reaction.userId,
-						emojiId: reaction.emoji.id,
-					});
-				}
-			}
-		}
+		await upsertMessageInternalLogic(ctx, {
+			message: args.message,
+			attachments: args.attachments,
+			reactions: args.reactions,
+		});
 
 		return null;
 	},

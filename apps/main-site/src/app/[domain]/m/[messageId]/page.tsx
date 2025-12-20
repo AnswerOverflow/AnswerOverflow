@@ -22,21 +22,12 @@ import {
 	SimilarThreadsSkeleton,
 } from "../../../../components/similar-threads";
 import { runtime } from "../../../../lib/runtime";
+import { getTenantData } from "../../../../lib/tenant";
 
 type Props = {
 	params: Promise<{ domain: string; messageId: string }>;
 	searchParams: Promise<{ cursor?: string; focus?: string }>;
 };
-
-async function getTenantData(domain: string) {
-	return Effect.gen(function* () {
-		const database = yield* Database;
-		const tenant = yield* database.private.servers.getServerByDomain({
-			domain,
-		});
-		return tenant;
-	}).pipe(runtime.runPromise);
-}
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const [params, searchParams] = await Promise.all([
@@ -51,13 +42,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		redirect(`/m/${parsed.value.cleaned}`);
 	}
 	const domain = decodeURIComponent(params.domain);
-	const tenantData = await getTenantData(domain);
+	const data = await getTenantData(domain);
+	if (!data) {
+		return {};
+	}
+	const { tenant } = data;
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
-	const tenant = {
-		customDomain: tenantData?.preferences?.customDomain,
-		subpath: tenantData?.preferences?.subpath,
-	};
 	return generateMessagePageMetadata(
 		headerData,
 		params.messageId,

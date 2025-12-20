@@ -1,8 +1,7 @@
-import { Database } from "@packages/database/database";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
-import { Effect, Option } from "effect";
+import { Option } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import {
@@ -10,22 +9,12 @@ import {
 	fetchChannelPageHeaderData,
 	generateChannelPageMetadata,
 } from "../../../../components/channel-page-loader";
-import { runtime } from "../../../../lib/runtime";
+import { getTenantData } from "../../../../lib/tenant";
 
 type Props = {
 	params: Promise<{ domain: string; channelId: string }>;
 	searchParams: Promise<{ cursor?: string }>;
 };
-
-async function getTenantData(domain: string) {
-	return Effect.gen(function* () {
-		const database = yield* Database;
-		const tenant = yield* database.private.servers.getServerByDomain({
-			domain,
-		});
-		return tenant;
-	}).pipe(runtime.runPromise);
-}
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
@@ -39,22 +28,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		redirect(`/c/${parsedChannelId.value.cleaned}`);
 	}
 
-	const tenantData = await getTenantData(domain);
-
-	if (!tenantData?.server) {
+	const data = await getTenantData(domain);
+	if (!data) {
 		return {};
 	}
+	const { tenant } = data;
 
 	const headerData = await fetchChannelPageHeaderData(
-		tenantData.server.discordId,
+		tenant.discordId,
 		parsedChannelId.value.id,
 	);
 
 	const basePath = `/c/${parsedChannelId.value.cleaned}`;
-	const tenant = {
-		customDomain: tenantData.preferences?.customDomain,
-		subpath: tenantData.preferences?.subpath,
-	};
 	return generateChannelPageMetadata(headerData, basePath, tenant);
 }
 
@@ -73,19 +58,23 @@ export default async function TenantChannelPage(props: Props) {
 		redirect(`/c/${parsedChannelId.value.cleaned}`);
 	}
 
-	const tenantData = await getTenantData(domain);
+	const data = await getTenantData(domain);
+	if (!data) {
+		return notFound();
+	}
+	const { tenant } = data;
 
-	if (!tenantData?.server) {
+	if (!tenant) {
 		return notFound();
 	}
 
 	const headerData = await fetchChannelPageHeaderData(
-		tenantData.server.discordId,
+		tenant.discordId,
 		parsedChannelId.value.id,
 	);
 
-	if (tenantData.server.discordId === parsedChannelId.value.id) {
-		return redirect(getTenantCanonicalUrl(tenantData.preferences, `/`));
+	if (tenant.discordId === parsedChannelId.value.id) {
+		return redirect(getTenantCanonicalUrl(tenant, `/`));
 	}
 
 	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
