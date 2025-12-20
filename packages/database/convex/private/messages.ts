@@ -497,14 +497,27 @@ export const getMessagePageHeaderData = privateQuery({
 	},
 	handler: async (ctx, args) => {
 		const cache = createDataAccessCache(ctx);
-		const [targetMessage, thread] = await Promise.all([
-			cache.getMessage(args.messageId),
-			cache.getChannel(args.messageId),
-		]);
+		const targetMessage = await cache.getMessage(args.messageId);
 
-		const rootMessage =
-			targetMessage ?? (await getThreadStartMessage(cache, args.messageId));
+		const getThread = async () => {
+			if (targetMessage?.parentChannelId) {
+				return cache.getChannel(targetMessage.channelId);
+			}
+			return cache.getChannel(args.messageId);
+		};
 
+		const getRootMessage = async () => {
+			if (targetMessage) {
+				return targetMessage;
+			}
+			if (thread?.parentId) {
+				return cache.getMessage(thread.id);
+			}
+			return getThreadStartMessage(cache, args.messageId);
+		};
+
+		const rootMessage = await getRootMessage();
+		const thread = await getThread();
 		const channelId =
 			thread?.parentId ??
 			rootMessage?.parentChannelId ??
