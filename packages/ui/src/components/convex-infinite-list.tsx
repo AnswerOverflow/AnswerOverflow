@@ -6,7 +6,7 @@ import type {
 	PaginatedQueryReference,
 } from "convex/react";
 
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { usePaginatedQueryWithCursor } from "../hooks/use-stable-query";
 import { Button } from "./button";
@@ -49,6 +49,33 @@ function LoadingSkeletons({
 	);
 }
 
+function useIntersectionObserver(onIntersect: () => void, enabled: boolean) {
+	const ref = useRef<HTMLDivElement>(null);
+	const onIntersectRef = useRef(onIntersect);
+	onIntersectRef.current = onIntersect;
+
+	useEffect(() => {
+		if (!enabled) return;
+
+		const element = ref.current;
+		if (!element) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0]?.isIntersecting) {
+					onIntersectRef.current();
+				}
+			},
+			{ rootMargin: "100%" },
+		);
+
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [enabled]);
+
+	return ref;
+}
+
 export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	query,
 	queryArgs,
@@ -83,9 +110,15 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 		}
 	}, [canLoadMore, loadMore, pageSize]);
 
+	const sentinelRef = useIntersectionObserver(
+		handleLoadMore,
+		canLoadMore && !showLoadMoreButton,
+	);
+
 	const isWaitingForSession = !isSessionReady;
 	const isLoadingFirstPage = status === "LoadingFirstPage";
 	const hasResults = results && results.length > 0;
+
 	const isInitialLoading =
 		(isWaitingForSession || isLoadingFirstPage) && !initialData;
 	const isEmpty =
@@ -109,7 +142,9 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 		);
 	}
 
-	if (showLoadMoreButton) {
+	const useSimpleRender = showLoadMoreButton || initialData !== undefined;
+
+	if (useSimpleRender) {
 		return (
 			<div className={className}>
 				{results.map((item, i) => (
@@ -117,12 +152,15 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 						{renderItem(item, i)}
 					</div>
 				))}
-				{canLoadMore && !isLoadingMore && (
+				{canLoadMore && !isLoadingMore && showLoadMoreButton && (
 					<div className="py-4 flex justify-center">
 						<Button variant="outline" onClick={handleLoadMore}>
 							Load More
 						</Button>
 					</div>
+				)}
+				{canLoadMore && !showLoadMoreButton && (
+					<div ref={sentinelRef} className="h-4" />
 				)}
 				{isLoadingMore && (
 					<LoadingSkeletons

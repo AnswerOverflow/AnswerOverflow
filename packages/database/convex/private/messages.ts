@@ -427,6 +427,8 @@ export const getMessagePageHeaderData = privateQuery({
 			return cache.getChannel(args.messageId);
 		};
 
+		const thread = await getThread();
+
 		const getRootMessage = async () => {
 			if (targetMessage) {
 				return targetMessage;
@@ -438,7 +440,6 @@ export const getMessagePageHeaderData = privateQuery({
 		};
 
 		const rootMessage = await getRootMessage();
-		const thread = await getThread();
 		const channelId =
 			thread?.parentId ??
 			rootMessage?.parentChannelId ??

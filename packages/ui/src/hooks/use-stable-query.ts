@@ -174,7 +174,11 @@ export function usePaginatedQueryWithCursor<
 				if (result instanceof Error) {
 					throw result;
 				}
-				pages.push(result as PageResult<Query> | undefined);
+				if (i === 0 && result === undefined && initialData) {
+					pages.push(initialData);
+				} else {
+					pages.push(result as PageResult<Query> | undefined);
+				}
 			}
 		}
 
