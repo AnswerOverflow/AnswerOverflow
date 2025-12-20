@@ -10,7 +10,7 @@ import { ThemeSwitcher } from "../theme-switcher";
 
 const getQuickLinks = (baseUrl: string) => [
 	{ name: "Communities", href: `${baseUrl}/browse` },
-	{ name: "Docs", href: `${baseUrl}/docs` },
+	{ name: "Docs", href: `${baseUrl}/docs`, prefetch: false },
 	{ name: "About", href: `${baseUrl}/about` },
 	{ name: "Terms", href: `${baseUrl}/tos` },
 	{ name: "Privacy", href: `${baseUrl}/privacy` },
@@ -167,6 +167,7 @@ export function CompactStickyFooter({
 								{quickLinks.map((link) => (
 									<Link
 										key={link.name}
+										prefetch={link.prefetch}
 										href={link.href}
 										className="text-sm text-muted-foreground hover:text-foreground transition-colors"
 									>
