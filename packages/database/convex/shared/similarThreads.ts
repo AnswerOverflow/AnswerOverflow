@@ -2,13 +2,12 @@ import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
-import type { QueryCtx } from "../client";
 import { CHANNEL_TYPE } from "./channels";
-import { createDataAccessCache } from "./dataAccess";
+import type { QueryCtxWithCache } from "./dataAccess";
 import { getThreadStartMessage } from "./messages";
 
 export async function findSimilarThreads(
-	ctx: QueryCtx,
+	ctx: QueryCtxWithCache,
 	args: {
 		searchQuery: string;
 		currentThreadId: bigint;
@@ -124,10 +123,8 @@ export async function findSimilarThreads(
 		return thread !== undefined && thread.parentId !== null;
 	});
 
-	const cache = createDataAccessCache(ctx);
-
 	const firstMessages = await asyncMap(validThreadIds, async (idStr) => {
-		return getThreadStartMessage(cache, BigInt(idStr));
+		return getThreadStartMessage(ctx, BigInt(idStr));
 	});
 	return Arr.filter(firstMessages, Predicate.isNotNullable).slice(0, limit);
 }

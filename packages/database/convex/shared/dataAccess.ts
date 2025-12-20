@@ -1,10 +1,11 @@
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
-import type { QueryCtx } from "../client";
+import type { MutationCtx, QueryCtx } from "../client";
 import type { ServerPreferences, UserServerSettings } from "../schema";
 
 type Message = Doc<"messages">;
+type BaseCtx = QueryCtx | MutationCtx;
 
 import {
 	getDiscordAccountIdFromAuth,
@@ -149,16 +150,18 @@ export function createDataAccessCache(ctx: QueryCtx) {
 
 export type DataAccessCache = ReturnType<typeof createDataAccessCache>;
 
+export type QueryCtxWithCache = BaseCtx & { cache: DataAccessCache };
+
 async function fetchMessagePrivacyData(
-	cache: DataAccessCache,
+	ctx: QueryCtxWithCache,
 	message: Message,
 ): Promise<{
 	serverPreferences: ServerPreferences | null;
 	authorServerSettings: UserServerSettings | null;
 }> {
 	const [serverPreferences, authorServerSettings] = await Promise.all([
-		cache.getServerPreferences(message.serverId),
-		cache.getUserServerSettings(message.authorId, message.serverId),
+		ctx.cache.getServerPreferences(message.serverId),
+		ctx.cache.getUserServerSettings(message.authorId, message.serverId),
 	]);
 
 	return {
@@ -168,16 +171,15 @@ async function fetchMessagePrivacyData(
 }
 
 export async function enrichMessage(
-	ctx: QueryCtx,
-	cache: DataAccessCache,
+	ctx: QueryCtxWithCache,
 	message: Message,
 ): Promise<SharedEnrichedMessage | null> {
 	const [privacyData, userServerSettings] = await Promise.all([
-		fetchMessagePrivacyData(cache, message),
-		cache
+		fetchMessagePrivacyData(ctx, message),
+		ctx.cache
 			.getDiscordAccountIdFromAuth()
 			.then((id) =>
-				id ? cache.getUserServerSettings(id, message.serverId) : null,
+				id ? ctx.cache.getUserServerSettings(id, message.serverId) : null,
 			),
 	]);
 
@@ -204,39 +206,36 @@ export async function enrichMessage(
 		return null;
 	}
 
-	return await enrichMessageForDisplay(ctx, message, { isAnonymous, cache });
+	return await enrichMessageForDisplay(ctx, message, { isAnonymous });
 }
 
 export async function enrichMessages(
-	ctx: QueryCtx,
+	ctx: QueryCtxWithCache,
 	messages: Message[],
-	existingCache?: DataAccessCache,
 ): Promise<SharedEnrichedMessage[]> {
-	const cache = existingCache ?? createDataAccessCache(ctx);
 	const results = await Promise.all(
-		messages.map((message) => enrichMessage(ctx, cache, message)),
+		messages.map((message) => enrichMessage(ctx, message)),
 	);
 	return Arr.filter(results, Predicate.isNotNullable);
 }
 
 async function enrichedMessageWithServerAndChannelsInternal(
-	ctx: QueryCtx,
-	cache: DataAccessCache,
+	ctx: QueryCtxWithCache,
 	message: Message,
 ) {
 	const { parentChannelId } = message;
 
-	const indexingEnabled = await cache.isChannelIndexingEnabled(
+	const indexingEnabled = await ctx.cache.isChannelIndexingEnabled(
 		message.channelId,
 		parentChannelId ?? undefined,
 	);
 	if (!indexingEnabled) return null;
 
 	const [enrichedMessage, parentChannel, channel, server] = await Promise.all([
-		enrichMessage(ctx, cache, message),
-		parentChannelId ? cache.getChannel(parentChannelId) : undefined,
-		cache.getChannel(message.channelId),
-		cache.getServer(message.serverId),
+		enrichMessage(ctx, message),
+		parentChannelId ? ctx.cache.getChannel(parentChannelId) : undefined,
+		ctx.cache.getChannel(message.channelId),
+		ctx.cache.getServer(message.serverId),
 	]);
 
 	if (!channel || !server || server.kickedTime || !enrichedMessage) return null;
@@ -250,15 +249,12 @@ async function enrichedMessageWithServerAndChannelsInternal(
 }
 
 export async function enrichMessagesWithServerAndChannels(
-	ctx: QueryCtx,
+	ctx: QueryCtxWithCache,
 	messages: Message[],
 ): Promise<SearchResult[]> {
-	const cache = createDataAccessCache(ctx);
 	return Arr.filter(
 		await Promise.all(
-			messages.map((m) =>
-				enrichedMessageWithServerAndChannelsInternal(ctx, cache, m),
-			),
+			messages.map((m) => enrichedMessageWithServerAndChannelsInternal(ctx, m)),
 		),
 		Predicate.isNotNullable,
 	);
@@ -272,7 +268,7 @@ export type SearchResult = {
 };
 
 export async function searchMessages(
-	ctx: QueryCtx,
+	ctx: QueryCtxWithCache,
 	args: {
 		query: string;
 		serverId?: bigint;
@@ -298,11 +294,10 @@ export async function searchMessages(
 		})
 		.paginate(args.paginationOpts);
 
-	const cache = createDataAccessCache(ctx);
 	const allResults = Arr.filter(
 		await Promise.all(
 			paginatedResult.page.map((m) =>
-				enrichedMessageWithServerAndChannelsInternal(ctx, cache, m),
+				enrichedMessageWithServerAndChannelsInternal(ctx, m),
 			),
 		),
 		Predicate.isNotNullable,

@@ -8,11 +8,7 @@ import {
 	type QueryCtx,
 } from "../client";
 import { attachmentSchema, emojiSchema, messageSchema } from "../schema";
-import {
-	createDataAccessCache,
-	enrichMessage,
-	enrichMessages,
-} from "../shared/dataAccess";
+import { enrichMessage, enrichMessages } from "../shared/dataAccess";
 import { getThreadStartMessage } from "../shared/messages";
 import {
 	type BulkMessageInput,
@@ -496,14 +492,13 @@ export const getMessagePageHeaderData = privateQuery({
 		messageId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		const cache = createDataAccessCache(ctx);
-		const targetMessage = await cache.getMessage(args.messageId);
+		const targetMessage = await ctx.cache.getMessage(args.messageId);
 
 		const getThread = async () => {
 			if (targetMessage?.parentChannelId) {
-				return cache.getChannel(targetMessage.channelId);
+				return ctx.cache.getChannel(targetMessage.channelId);
 			}
-			return cache.getChannel(args.messageId);
+			return ctx.cache.getChannel(args.messageId);
 		};
 
 		const getRootMessage = async () => {
@@ -511,9 +506,9 @@ export const getMessagePageHeaderData = privateQuery({
 				return targetMessage;
 			}
 			if (thread?.parentId) {
-				return cache.getMessage(thread.id);
+				return ctx.cache.getMessage(thread.id);
 			}
-			return getThreadStartMessage(cache, args.messageId);
+			return getThreadStartMessage(ctx, args.messageId);
 		};
 
 		const rootMessage = await getRootMessage();
@@ -528,9 +523,9 @@ export const getMessagePageHeaderData = privateQuery({
 		}
 
 		const [channel, server, serverPreferences] = await Promise.all([
-			cache.getChannelWithSettings(channelId),
-			cache.getServer(serverId),
-			cache.getServerPreferences(serverId),
+			ctx.cache.getChannelWithSettings(channelId),
+			ctx.cache.getServer(serverId),
+			ctx.cache.getServerPreferences(serverId),
 		]);
 
 		if (!channel?.flags?.indexingEnabled) {
@@ -544,15 +539,15 @@ export const getMessagePageHeaderData = privateQuery({
 		}
 
 		const [enrichedFirst, solutionMessages] = await Promise.all([
-			rootMessage ? enrichMessage(ctx, cache, rootMessage) : null,
+			rootMessage ? enrichMessage(ctx, rootMessage) : null,
 			rootMessage
-				? cache.getSolutionsByQuestionId(rootMessage.id)
+				? ctx.cache.getSolutionsByQuestionId(rootMessage.id)
 				: Promise.resolve([]),
 		]);
 
 		const solutionMsg = solutionMessages[0];
 		const solutionMessage = solutionMsg
-			? await enrichMessages(ctx, [solutionMsg], cache)
+			? await enrichMessages(ctx, [solutionMsg])
 			: [];
 
 		return {
