@@ -5,7 +5,7 @@ import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../client";
 import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
 import { anonymizeDiscordAccount } from "./anonymization.js";
-import type { DataAccessCache } from "./dataAccess";
+import type { QueryCtxWithCache } from "./dataAccess";
 
 type Message = Infer<typeof messageSchema>;
 type MessageDoc = Doc<"messages">;
@@ -22,20 +22,20 @@ export function compareIds(a: bigint, b: bigint): number {
 }
 
 export async function getThreadStartMessage(
-	cache: DataAccessCache,
+	ctx: QueryCtxWithCache,
 	threadId: bigint,
 ): Promise<MessageDoc | null> {
-	const rootMessage = await cache.getMessage(threadId);
+	const rootMessage = await ctx.cache.getMessage(threadId);
 	if (rootMessage) {
 		return rootMessage;
 	}
 
-	const thread = await cache.getChannel(threadId);
+	const thread = await ctx.cache.getChannel(threadId);
 	if (!thread?.parentId) {
 		return null;
 	}
 
-	const firstMessageInThread = await cache.getFirstMessageAfter({
+	const firstMessageInThread = await ctx.cache.getFirstMessageAfter({
 		messageId: threadId,
 		channelId: thread.id,
 	});
@@ -44,7 +44,7 @@ export async function getThreadStartMessage(
 	}
 
 	if (firstMessageInThread.referenceId) {
-		const referencedMessage = await cache.getMessage(
+		const referencedMessage = await ctx.cache.getMessage(
 			firstMessageInThread.referenceId,
 		);
 		if (referencedMessage) {
@@ -663,11 +663,10 @@ function extractDiscordLinksInternal(content: string): Array<{
 }
 
 async function getMentionMetadataInternal(
-	_ctx: QueryCtx | MutationCtx,
+	ctx: QueryCtxWithCache,
 	userIds: bigint[],
 	channelIds: bigint[],
 	serverDiscordId: bigint,
-	cache: DataAccessCache,
 ) {
 	const users: Record<
 		string,
@@ -690,7 +689,7 @@ async function getMentionMetadataInternal(
 	> = {};
 
 	const userResults = await Promise.all(
-		userIds.map((userId) => cache.getDiscordAccount(userId)),
+		userIds.map((userId) => ctx.cache.getDiscordAccount(userId)),
 	);
 
 	for (let i = 0; i < userIds.length; i++) {
@@ -718,8 +717,8 @@ async function getMentionMetadataInternal(
 	const channelResults = await Promise.all(
 		channelIds.map(async (channelId) => {
 			const [channel, settings] = await Promise.all([
-				cache.getChannel(channelId),
-				cache.getChannelSettings(channelId),
+				ctx.cache.getChannel(channelId),
+				ctx.cache.getChannelSettings(channelId),
 			]);
 			return { channelId, channel, settings };
 		}),
@@ -753,14 +752,13 @@ async function getMentionMetadataInternal(
 }
 
 async function getInternalLinksMetadataInternal(
-	_ctx: QueryCtx | MutationCtx,
+	ctx: QueryCtxWithCache,
 	discordLinks: Array<{
 		original: string;
 		guildId: bigint;
 		channelId: bigint;
 		messageId?: bigint;
 	}>,
-	cache: DataAccessCache,
 ) {
 	if (discordLinks.length === 0) {
 		return [];
@@ -769,9 +767,9 @@ async function getInternalLinksMetadataInternal(
 	const results = await Promise.all(
 		discordLinks.map(async (link) => {
 			const [server, channel, settings] = await Promise.all([
-				cache.getServer(link.guildId),
-				cache.getChannel(link.channelId),
-				cache.getChannelSettings(link.channelId),
+				ctx.cache.getServer(link.guildId),
+				ctx.cache.getChannel(link.channelId),
+				ctx.cache.getChannelSettings(link.channelId),
 			]);
 
 			if (!server || !channel) {
@@ -779,14 +777,14 @@ async function getInternalLinksMetadataInternal(
 			}
 
 			if (link.messageId) {
-				const message = await cache.getMessage(link.messageId);
+				const message = await ctx.cache.getMessage(link.messageId);
 				if (!message) {
 					return undefined;
 				}
 			}
 
 			const parentChannel = channel.parentId
-				? await cache.getChannel(channel.parentId)
+				? await ctx.cache.getChannel(channel.parentId)
 				: undefined;
 
 			return {
@@ -814,24 +812,22 @@ async function getInternalLinksMetadataInternal(
 }
 
 export async function enrichMessageForDisplay(
-	ctx: QueryCtx | MutationCtx,
+	ctx: QueryCtxWithCache,
 	message: MessageDoc,
-	options: {
+	options?: {
 		isAnonymous?: boolean;
 		skipReference?: boolean;
-		cache: DataAccessCache;
 	},
 ): Promise<EnrichedMessage> {
-	const { cache } = options;
 	const [author, server, attachments, reactions, solutions, referenceMessage] =
 		await Promise.all([
-			cache.getDiscordAccount(message.authorId),
-			cache.getServer(message.serverId),
-			cache.getAttachmentsByMessageId(message.id),
-			cache.getReactionsByMessageId(message.id),
-			cache.getSolutionsByQuestionId(message.id),
-			message.referenceId && !options.skipReference
-				? cache.getMessage(message.referenceId)
+			ctx.cache.getDiscordAccount(message.authorId),
+			ctx.cache.getServer(message.serverId),
+			ctx.cache.getAttachmentsByMessageId(message.id),
+			ctx.cache.getReactionsByMessageId(message.id),
+			ctx.cache.getSolutionsByQuestionId(message.id),
+			message.referenceId && !options?.skipReference
+				? ctx.cache.getMessage(message.referenceId)
 				: null,
 		]);
 
@@ -843,7 +839,7 @@ export async function enrichMessageForDisplay(
 	);
 
 	const emojis = await Promise.all(
-		emojiIds.map((emojiId) => cache.getEmoji(emojiId)),
+		emojiIds.map((emojiId) => ctx.cache.getEmoji(emojiId)),
 	);
 
 	const emojiMap = new Map<
@@ -984,12 +980,12 @@ export async function enrichMessageForDisplay(
 	}
 
 	let referenceData: EnrichedMessage["reference"];
-	if (message.referenceId && !options.skipReference) {
+	if (message.referenceId && !options?.skipReference) {
 		if (referenceMessage) {
 			const enrichedReference = await enrichMessageForDisplay(
 				ctx,
 				referenceMessage,
-				{ ...options, skipReference: true, cache },
+				{ ...options, skipReference: true },
 			);
 			referenceData = {
 				messageId: message.referenceId,
@@ -1029,7 +1025,6 @@ export async function enrichMessageForDisplay(
 		userIds,
 		channelIds,
 		serverDiscordId,
-		cache,
 	);
 
 	const messageUsers: Record<
@@ -1068,7 +1063,6 @@ export async function enrichMessageForDisplay(
 	const messageInternalLinks = await getInternalLinksMetadataInternal(
 		ctx,
 		messageDiscordLinks,
-		cache,
 	);
 
 	return {

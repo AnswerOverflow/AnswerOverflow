@@ -11,6 +11,7 @@ import {
 	getDiscordAccountWithToken,
 } from "../shared/auth";
 import { getAuthIdentity } from "../shared/authIdentity";
+import { createDataAccessCache } from "../shared/dataAccess";
 import { mutation } from "../triggers";
 
 function validateBackendAccessToken(token: string | undefined): boolean {
@@ -46,9 +47,11 @@ export const publicQuery = customQuery(query, {
 			args.backendAccessToken,
 		);
 
+		const cache = createDataAccessCache(ctx);
+
 		if (isBackendRequest) {
 			return {
-				ctx,
+				ctx: { ...ctx, cache },
 				args: {
 					...args,
 					rateLimitKey: "backend",
@@ -78,7 +81,7 @@ export const publicQuery = customQuery(query, {
 			throw new Error("Not discord account or anonymous session found");
 		}
 		return {
-			ctx,
+			ctx: { ...ctx, cache },
 			args: {
 				...args,
 				rateLimitKey,
@@ -97,6 +100,7 @@ export const publicMutation = customMutation(mutation, {
 		type: v.optional(v.union(v.literal("signed-in"), v.literal("admin"))),
 	},
 	input: async (ctx, args) => {
+		const cache = createDataAccessCache(ctx);
 		let discordAccountId: bigint | undefined;
 		let type: "signed-in" | "admin";
 
@@ -118,7 +122,7 @@ export const publicMutation = customMutation(mutation, {
 		}
 
 		return {
-			ctx,
+			ctx: { ...ctx, cache },
 			args: {
 				...args,
 				discordAccountId,

@@ -15,6 +15,7 @@ import {
 	query,
 } from "../_generated/server";
 import { getDiscordAccountWithToken } from "../shared/auth";
+import { createDataAccessCache } from "../shared/dataAccess";
 import {
 	assertGuildManagerPermission,
 	checkGuildManagerPermissions,
@@ -42,8 +43,9 @@ export const guildManagerQuery = customQuery(query, {
 			args.serverId,
 		);
 		assertGuildManagerPermission(permissionResult);
+		const cache = createDataAccessCache(ctx);
 		return {
-			ctx,
+			ctx: { ...ctx, cache },
 			args: {
 				...args,
 				discordAccountId,
@@ -81,8 +83,9 @@ export const guildManagerMutation = customMutation(mutation, {
 			args.serverId,
 		);
 		assertGuildManagerPermission(permissionResult);
+		const cache = createDataAccessCache(ctx);
 		return {
-			ctx,
+			ctx: { ...ctx, cache },
 			args: {
 				...args,
 				discordAccountId,

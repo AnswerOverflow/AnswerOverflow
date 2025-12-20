@@ -5,6 +5,7 @@ import {
 	customQuery,
 } from "convex-helpers/server/customFunctions";
 import { action, query } from "../_generated/server";
+import { createDataAccessCache } from "../shared/dataAccess";
 import { mutation } from "../triggers";
 
 function validateBackendAccessToken(token: string | undefined): void {
@@ -25,11 +26,11 @@ export const privateQuery = customQuery(query, {
 	},
 	input: async (ctx, args) => {
 		validateBackendAccessToken(args.backendAccessToken);
-
+		const cache = createDataAccessCache(ctx);
 		const { backendAccessToken: _, ...handlerArgs } = args;
 
 		return {
-			ctx,
+			ctx: { ...ctx, cache },
 			args: handlerArgs,
 		};
 	},
@@ -41,11 +42,11 @@ export const privateMutation = customMutation(mutation, {
 	},
 	input: async (ctx, args) => {
 		validateBackendAccessToken(args.backendAccessToken);
-
+		const cache = createDataAccessCache(ctx);
 		const { backendAccessToken: _, ...handlerArgs } = args;
 
 		return {
-			ctx,
+			ctx: { ...ctx, cache },
 			args: handlerArgs,
 		};
 	},

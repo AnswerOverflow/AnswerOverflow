@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr } from "effect";
-import { createDataAccessCache, enrichMessage } from "../shared/dataAccess";
+import { enrichMessage } from "../shared/dataAccess";
 import { getThreadStartMessage } from "../shared/messages";
 import {
 	channelWithSystemFieldsValidator,
@@ -24,8 +24,6 @@ export const getChannelPageThreads = publicQuery({
 		}),
 	),
 	handler: async (ctx, args) => {
-		const cache = createDataAccessCache(ctx);
-
 		const paginatedResult = await ctx.db
 			.query("channels")
 			.withIndex("by_parentId_and_id", (q) =>
@@ -37,9 +35,9 @@ export const getChannelPageThreads = publicQuery({
 		const threads = paginatedResult.page;
 
 		const page = await asyncMap(threads, async (thread) => {
-			const message = await getThreadStartMessage(cache, thread.id);
+			const message = await getThreadStartMessage(ctx, thread.id);
 			const enrichedMessage = message
-				? await enrichMessage(ctx, cache, message)
+				? await enrichMessage(ctx, message)
 				: null;
 
 			return {
@@ -75,9 +73,8 @@ export const getChannelPageMessages = publicQuery({
 			.order("desc")
 			.paginate(args.paginationOpts);
 
-		const cache = createDataAccessCache(ctx);
 		const page = await asyncMap(paginatedResult.page, async (message) => {
-			const enrichedMessage = await enrichMessage(ctx, cache, message);
+			const enrichedMessage = await enrichMessage(ctx, message);
 			return {
 				message: enrichedMessage,
 			};
@@ -161,15 +158,14 @@ export const getServerPageThreads = publicQuery({
 				indexedChannelIds.includes(channel.parentId),
 		);
 
-		const cache = createDataAccessCache(ctx);
 		const page = await asyncMap(threads, async (thread) => {
 			const channel = thread.parentId
 				? (channelIdToInfo.get(thread.parentId) ?? null)
 				: null;
 
-			const message = await getThreadStartMessage(cache, thread.id);
+			const message = await getThreadStartMessage(ctx, thread.id);
 			const enrichedMessage = message
-				? await enrichMessage(ctx, cache, message)
+				? await enrichMessage(ctx, message)
 				: null;
 
 			return {
