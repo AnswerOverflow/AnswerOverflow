@@ -61,7 +61,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	authenticationType = "all",
 	initialData,
 	initialCursor = null,
-	showLoadMoreButton = true,
+	showLoadMoreButton = false,
 	className,
 	itemClassName = "mb-4",
 }: ConvexInfiniteListProps<Query>) {
