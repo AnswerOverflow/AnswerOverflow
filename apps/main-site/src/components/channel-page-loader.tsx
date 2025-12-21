@@ -50,7 +50,7 @@ export async function fetchCommunityPageHeaderData(
 ): Promise<CommunityPageHeaderData | null> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.public.channels.getCommunityPageHeaderData({
+		return yield* database.private.channels.getCommunityPageHeaderData({
 			serverDiscordId,
 			channelDiscordId,
 		});

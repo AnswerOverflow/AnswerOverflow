@@ -29,15 +29,10 @@ import { FUNCTION_TYPE_MAP, isNamespace } from "./generated/function-types";
 import type { LiveData } from "./live-data";
 import { createWatchQueryToLiveData } from "./watch-query-cached";
 
-type InternalArgs =
-	| "backendAccessToken"
-	| "publicBackendAccessToken"
-	| "discordAccountId"
-	| "anonymousSessionId"
-	| "type"
-	| "rateLimitKey";
-
-type IsEmptyArgs<Args> = Omit<Args, InternalArgs> extends Record<string, never>
+type IsEmptyArgs<Args> = Omit<Args, "backendAccessToken"> extends Record<
+	string,
+	never
+>
 	? true
 	: false;
 
@@ -52,25 +47,23 @@ type QueryReturnType<
 	? LiveData<FunctionReturnType<Ref>>
 	: FunctionReturnType<Ref>;
 
-type OmitInternalArgs<Args> = Omit<Args, InternalArgs>;
-
 type FunctionRefToFunction<Ref extends FunctionReference<any, any>> =
 	Ref extends FunctionReference<"query", any>
 		? IsEmptyArgs<FunctionArgs<Ref>> extends true
 			? <Opts extends QueryOptions | undefined = undefined>(
-					args?: OmitInternalArgs<FunctionArgs<Ref>>,
+					args?: Omit<FunctionArgs<Ref>, "backendAccessToken">,
 					options?: Opts,
 				) => Effect.Effect<QueryReturnType<Ref, Opts>, ConvexError>
 			: <Opts extends QueryOptions | undefined = undefined>(
-					args: OmitInternalArgs<FunctionArgs<Ref>>,
+					args: Omit<FunctionArgs<Ref>, "backendAccessToken">,
 					options?: Opts,
 				) => Effect.Effect<QueryReturnType<Ref, Opts>, ConvexError>
 		: IsEmptyArgs<FunctionArgs<Ref>> extends true
 			? (
-					args?: OmitInternalArgs<FunctionArgs<Ref>>,
+					args?: Omit<FunctionArgs<Ref>, "backendAccessToken">,
 				) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>
 			: (
-					args: OmitInternalArgs<FunctionArgs<Ref>>,
+					args: Omit<FunctionArgs<Ref>, "backendAccessToken">,
 				) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>;
 
 type TransformToFunctions<T> = {
