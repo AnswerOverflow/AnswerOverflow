@@ -10,7 +10,7 @@ import { ThemeSwitcher } from "../theme-switcher";
 
 const getQuickLinks = (baseUrl: string) => [
 	{ name: "Communities", href: `${baseUrl}/browse` },
-	{ name: "Docs", href: `${baseUrl}/docs`, prefetch: false },
+	{ name: "Docs", href: `${baseUrl}/docs/overview`, prefetch: false },
 	{ name: "About", href: `${baseUrl}/about` },
 	{ name: "Terms", href: `${baseUrl}/tos` },
 	{ name: "Privacy", href: `${baseUrl}/privacy` },
