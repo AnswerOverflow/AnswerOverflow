@@ -12,11 +12,11 @@ import {
 import { runtime } from "../lib/runtime";
 
 export type UserPageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.discord_accounts.getUserPageHeaderData>
+	FunctionReturnType<typeof api.public.discord_accounts.getUserPageHeaderData>
 >;
 
 export type UserPosts = FunctionReturnType<
-	typeof api.discord_accounts.getUserPosts
+	typeof api.public.discord_accounts.getUserPosts
 >;
 
 export async function fetchUserPageHeaderData(
