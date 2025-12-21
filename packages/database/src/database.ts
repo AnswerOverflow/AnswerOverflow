@@ -119,7 +119,6 @@ const isDevelopment = process.env.NODE_ENV === "development";
 
 export const service = Effect.gen(function* () {
 	const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN!;
-	const publicBackendAccessToken = process.env.PUBLIC_BACKEND_ACCESS_TOKEN!;
 	const convexClient = yield* ConvexClientUnified;
 
 	const watchQueryToLiveData = createWatchQueryToLiveData(convexClient, {
@@ -246,7 +245,7 @@ export const service = Effect.gen(function* () {
 						},
 					) => {
 						const fullArgs: Record<string, unknown> = isPublic
-							? { ...(args ?? {}), publicBackendAccessToken }
+							? (args ?? {})
 							: { ...(args ?? {}), backendAccessToken };
 						const cacheKey = createQueryCacheKey(
 							getFunctionName(funcRef),
@@ -272,7 +271,7 @@ export const service = Effect.gen(function* () {
 
 				const wrappedFunction = ((args?: any) => {
 					const fullArgs = isPublic
-						? { ...(args ?? {}), publicBackendAccessToken }
+						? (args ?? {})
 						: { ...(args ?? {}), backendAccessToken };
 					return callClientMethod(
 						funcType,
@@ -294,7 +293,7 @@ export const service = Effect.gen(function* () {
 	};
 
 	const privateProxy = createProxy(api.private, [], false);
-	const publicProxy = createProxy(api.public, [], true);
+	const publicProxy = createProxy(api.public, [], false);
 	const authenticatedProxy = createProxy(api.authenticated, [], false);
 
 	const getQueryMetricsByKey = (cacheKey: string) => {

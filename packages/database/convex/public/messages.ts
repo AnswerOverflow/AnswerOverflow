@@ -1,7 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { enrichMessage, enrichMessages } from "../shared/dataAccess";
-import { getThreadStartMessage } from "../shared/messages";
+import { enrichMessages } from "../shared/dataAccess";
 import { publicQuery } from "./custom_functions";
 
 export const getMessages = publicQuery({
@@ -27,98 +26,6 @@ export const getMessages = publicQuery({
 			page: enrichedMessages,
 			isDone: paginatedResult.isDone,
 			continueCursor: paginatedResult.continueCursor,
-		};
-	},
-});
-
-export const getMessagePageHeaderData = publicQuery({
-	args: {
-		messageId: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		const targetMessage = await ctx.cache.getMessage(args.messageId);
-
-		const getThread = async () => {
-			if (targetMessage?.parentChannelId) {
-				return ctx.cache.getChannel(targetMessage.channelId);
-			}
-			return ctx.cache.getChannel(args.messageId);
-		};
-
-		const thread = await getThread();
-
-		const getRootMessage = async () => {
-			if (targetMessage) {
-				return targetMessage;
-			}
-			if (thread?.parentId) {
-				return ctx.cache.getMessage(thread.id);
-			}
-			return getThreadStartMessage(ctx, args.messageId);
-		};
-
-		const rootMessage = await getRootMessage();
-		const channelId =
-			thread?.parentId ??
-			rootMessage?.parentChannelId ??
-			rootMessage?.channelId;
-		const serverId = rootMessage?.serverId ?? thread?.serverId;
-		if (!channelId || !serverId) {
-			return null;
-		}
-
-		const [channel, server, serverPreferences] = await Promise.all([
-			ctx.cache.getChannelWithSettings(channelId),
-			ctx.cache.getServer(serverId),
-			ctx.cache.getServerPreferences(serverId),
-		]);
-
-		if (!channel?.flags?.indexingEnabled) {
-			console.error("Channel indexing not enabled", channel?.id);
-			return null;
-		}
-
-		if (!server) {
-			console.error("Server not found", channel.serverId);
-			return null;
-		}
-
-		const [enrichedFirst, solutionMessages] = await Promise.all([
-			rootMessage ? enrichMessage(ctx, rootMessage) : null,
-			rootMessage
-				? ctx.cache.getSolutionsByQuestionId(rootMessage.id)
-				: Promise.resolve([]),
-		]);
-
-		const solutionMsg = solutionMessages[0];
-		const solutionMessage = solutionMsg
-			? await enrichMessages(ctx, [solutionMsg])
-			: [];
-
-		return {
-			canonicalId: thread?.id ?? rootMessage?.id ?? args.messageId,
-			firstMessage: enrichedFirst,
-			solutionMessage: solutionMessage[0] ?? null,
-			channelId,
-			threadId: thread?.id ?? null,
-			server: {
-				_id: server._id,
-				discordId: server.discordId,
-				name: server.name,
-				icon: server.icon,
-				description: server.description,
-				approximateMemberCount: server.approximateMemberCount,
-				customDomain: serverPreferences?.customDomain,
-				subpath: serverPreferences?.subpath,
-				vanityInviteCode: server.vanityInviteCode,
-			},
-			channel: {
-				id: channel.id,
-				name: channel.name,
-				type: channel.type,
-				inviteCode: channel.flags.inviteCode,
-			},
-			thread,
 		};
 	},
 });

@@ -74,7 +74,7 @@ export async function GET(req: Request) {
 	const data = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData =
-			yield* database.public.servers.getServerByDiscordIdWithChannels({
+			yield* database.private.servers.getServerByDiscordIdWithChannels({
 				discordId: parsed.value.id,
 			});
 		return liveData;

@@ -47,7 +47,7 @@ export type FirstThreadAuthor = {
 } | null;
 
 type CommunityPageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.public.channels.getCommunityPageHeaderData>
+	FunctionReturnType<typeof api.private.channels.getCommunityPageHeaderData>
 >;
 
 function getChannelHref({

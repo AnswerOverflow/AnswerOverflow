@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default async function AboutPage() {
 	const serversLiveData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* database.public.servers.getBrowseServers();
+		const liveData = yield* database.private.servers.getBrowseServers();
 		return liveData;
 	}).pipe(runtime.runPromise);
 

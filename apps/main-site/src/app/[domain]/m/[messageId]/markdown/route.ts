@@ -38,10 +38,10 @@ export async function GET(
 
 	const [tenantData, headerData] = await Effect.gen(function* () {
 		const database = yield* Database;
-		const tenant = yield* database.public.servers.getServerByDomain({
+		const tenant = yield* database.private.servers.getServerByDomain({
 			domain,
 		});
-		const header = yield* database.public.messages.getMessagePageHeaderData({
+		const header = yield* database.private.messages.getMessagePageHeaderData({
 			messageId: parsed.value.id,
 		});
 		return [tenant, header] as const;

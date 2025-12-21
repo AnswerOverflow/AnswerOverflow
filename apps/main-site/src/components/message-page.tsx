@@ -36,7 +36,7 @@ import { useEffect } from "react";
 import { JsonLdScript } from "@/components/json-ld-script";
 
 export type MessagePageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.public.messages.getMessagePageHeaderData>
+	FunctionReturnType<typeof api.private.messages.getMessagePageHeaderData>
 >;
 
 export type MessagePageReplies = FunctionReturnType<

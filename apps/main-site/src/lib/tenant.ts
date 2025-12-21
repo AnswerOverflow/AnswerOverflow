@@ -30,7 +30,7 @@ export async function getTenantData(
 ): Promise<TenantMetadata | null> {
 	const raw = await Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.public.servers.getServerByDomain({ domain });
+		return yield* database.private.servers.getServerByDomain({ domain });
 	}).pipe(runtime.runPromise);
 
 	if (!raw) {

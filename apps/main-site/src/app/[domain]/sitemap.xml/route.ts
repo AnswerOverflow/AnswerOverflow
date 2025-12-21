@@ -29,7 +29,7 @@ export async function GET(
 
 	const result = await Effect.gen(function* () {
 		const database = yield* Database;
-		const tenant = yield* database.public.servers.getServerByDomain({
+		const tenant = yield* database.private.servers.getServerByDomain({
 			domain,
 		});
 		if (!tenant?.server || !tenant?.preferences) {

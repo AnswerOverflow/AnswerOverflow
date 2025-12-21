@@ -33,7 +33,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 	const tenantData = await Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.public.servers.getServerByDomain({ domain });
+		return yield* database.private.servers.getServerByDomain({ domain });
 	}).pipe(runtime.runPromise);
 
 	const headerData = await fetchUserPageHeaderData(parsed.value.id);
@@ -97,7 +97,7 @@ export default async function TenantUserPage(props: Props) {
 
 	const tenantData = await Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.public.servers.getServerByDomain({ domain });
+		return yield* database.private.servers.getServerByDomain({ domain });
 	}).pipe(runtime.runPromise);
 
 	if (!tenantData?.server) {
