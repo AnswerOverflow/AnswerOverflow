@@ -44,6 +44,10 @@ const nextConfig: NextConfig = {
 	rewrites: async () => {
 		return [
 			{
+				source: "/api/auth/:path*",
+				destination: "https://www.answeroverflow.com/api/auth/:path*",
+			},
+			{
 				source: "/sitemap-:path",
 				destination:
 					"https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path",
