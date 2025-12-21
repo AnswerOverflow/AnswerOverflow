@@ -1,0 +1,20 @@
+diff --git a/dist/plugins/convex/index.js b/dist/plugins/convex/index.js
+index 030e7f18b940ee5ddecea125800a6c7d6ab52ff3..bef131cef7d6b49372b4bcab154f0de085985008 100644
+--- a/dist/plugins/convex/index.js
++++ b/dist/plugins/convex/index.js
+@@ -178,13 +178,13 @@ export const convex = (opts) => {
+                 },
+                 {
+                     matcher: (ctx) => {
+-                        console.log(ctx.path, ctx.context.session);
++                        
+                         return (ctx.path?.startsWith("/sign-out") ||
+                             ctx.path?.startsWith("/delete-user") ||
+                             (ctx.path?.startsWith("/get-session") && !ctx.context.session));
+                     },
+                     handler: createAuthMiddleware(async (ctx) => {
+-                        console.log("clearing jwt cookie");
++                        
+                         const jwtCookie = ctx.context.createAuthCookie(JWT_COOKIE_NAME, {
+                             maxAge: 0,
+                         });

@@ -74,7 +74,8 @@
 	"packageManager": "bun@1.3.3",
 	"patchedDependencies": {
 		"discord-markdown-parser@1.2.0": "patches/discord-markdown-parser@1.2.0.patch",
-		"convex-helpers@0.1.104": "patches/convex-helpers@0.1.104.patch"
+		"convex-helpers@0.1.104": "patches/convex-helpers@0.1.104.patch",
+		"@convex-dev/better-auth@0.10.6": "patches/@convex-dev%2Fbetter-auth@0.10.6.patch"
 	},
 	"overrides": {
 		"@modelcontextprotocol/sdk": "^1.24.0",
