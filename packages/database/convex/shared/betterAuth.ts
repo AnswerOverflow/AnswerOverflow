@@ -82,6 +82,10 @@ export const createAuthOptions = (
 						return;
 					}
 
+					if (domain === "localhost") {
+						return;
+					}
+
 					const preferences = await ctx.runQuery(
 						internal.private.server_preferences
 							.getServerPreferencesByCustomDomain,
