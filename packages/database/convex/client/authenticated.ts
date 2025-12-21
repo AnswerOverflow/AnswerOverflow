@@ -8,6 +8,7 @@ import { api } from "../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
 import { action, query } from "../_generated/server";
 import { getDiscordAccountWithToken } from "../shared/auth";
+import { createDataAccessCache } from "../shared/dataAccess";
 import { DISCORD_PERMISSIONS, hasPermission } from "../shared/shared";
 import { mutation } from "../triggers";
 
@@ -29,8 +30,9 @@ export const authenticatedQuery = customQuery(query, {
 			throw new Error("Not authenticated or Discord account not linked");
 		}
 
+		const cache = createDataAccessCache(ctx);
 		return {
-			ctx,
+			ctx: { ...ctx, cache },
 			args: {
 				...args,
 				discordAccountId,
@@ -50,8 +52,9 @@ export const authenticatedMutation = customMutation(mutation, {
 			throw new Error("Not authenticated or Discord account not linked");
 		}
 
+		const cache = createDataAccessCache(ctx);
 		return {
-			ctx,
+			ctx: { ...ctx, cache },
 			args: {
 				...args,
 				discordAccountId,
