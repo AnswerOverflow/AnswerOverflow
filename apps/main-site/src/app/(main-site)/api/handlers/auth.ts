@@ -1,4 +1,4 @@
-import { nextJsHandler } from "@convex-dev/better-auth/nextjs";
+import { convexBetterAuthNextJs } from "@convex-dev/better-auth/nextjs";
 import type { Context } from "hono";
 
 function createRequestWithoutHost(request: Request): Request {
@@ -13,11 +13,14 @@ function createRequestWithoutHost(request: Request): Request {
 	});
 }
 
+const { handler } = convexBetterAuthNextJs({
+	convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL ?? "",
+	convexSiteUrl: process.env.NEXT_PUBLIC_CONVEX_SITE_URL ?? "",
+});
+
 export async function handleAuth(c: Context) {
 	const method = c.req.method;
 	const request = createRequestWithoutHost(c.req.raw);
-
-	const handler = nextJsHandler();
 
 	if (method === "GET") {
 		return handler.GET(request);

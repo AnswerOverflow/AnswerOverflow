@@ -5,6 +5,7 @@ import { APIError, createAuthMiddleware } from "better-auth/api";
 import { admin, anonymous } from "better-auth/plugins";
 import { components, internal } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
+import authConfig from "../auth.config";
 import authSchema from "../betterAuth/schema";
 import type { Plan } from "../schema";
 
@@ -131,7 +132,7 @@ export const createAuthOptions = (
 			},
 		},
 		plugins: [
-			convex(),
+			convex({ authConfig }),
 			anonymous({
 				disableDeleteAnonymousUser: true,
 			}),
