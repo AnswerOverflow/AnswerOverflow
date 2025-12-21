@@ -29,10 +29,15 @@ import { FUNCTION_TYPE_MAP, isNamespace } from "./generated/function-types";
 import type { LiveData } from "./live-data";
 import { createWatchQueryToLiveData } from "./watch-query-cached";
 
-type IsEmptyArgs<Args> = Omit<Args, "backendAccessToken"> extends Record<
-	string,
-	never
->
+type InternalArgs =
+	| "backendAccessToken"
+	| "publicBackendAccessToken"
+	| "discordAccountId"
+	| "anonymousSessionId"
+	| "type"
+	| "rateLimitKey";
+
+type IsEmptyArgs<Args> = Omit<Args, InternalArgs> extends Record<string, never>
 	? true
 	: false;
 
@@ -47,23 +52,25 @@ type QueryReturnType<
 	? LiveData<FunctionReturnType<Ref>>
 	: FunctionReturnType<Ref>;
 
+type OmitInternalArgs<Args> = Omit<Args, InternalArgs>;
+
 type FunctionRefToFunction<Ref extends FunctionReference<any, any>> =
 	Ref extends FunctionReference<"query", any>
 		? IsEmptyArgs<FunctionArgs<Ref>> extends true
 			? <Opts extends QueryOptions | undefined = undefined>(
-					args?: Omit<FunctionArgs<Ref>, "backendAccessToken">,
+					args?: OmitInternalArgs<FunctionArgs<Ref>>,
 					options?: Opts,
 				) => Effect.Effect<QueryReturnType<Ref, Opts>, ConvexError>
 			: <Opts extends QueryOptions | undefined = undefined>(
-					args: Omit<FunctionArgs<Ref>, "backendAccessToken">,
+					args: OmitInternalArgs<FunctionArgs<Ref>>,
 					options?: Opts,
 				) => Effect.Effect<QueryReturnType<Ref, Opts>, ConvexError>
 		: IsEmptyArgs<FunctionArgs<Ref>> extends true
 			? (
-					args?: Omit<FunctionArgs<Ref>, "backendAccessToken">,
+					args?: OmitInternalArgs<FunctionArgs<Ref>>,
 				) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>
 			: (
-					args: Omit<FunctionArgs<Ref>, "backendAccessToken">,
+					args: OmitInternalArgs<FunctionArgs<Ref>>,
 				) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>;
 
 type TransformToFunctions<T> = {
@@ -119,6 +126,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 
 export const service = Effect.gen(function* () {
 	const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN!;
+	const publicBackendAccessToken = process.env.PUBLIC_BACKEND_ACCESS_TOKEN!;
 	const convexClient = yield* ConvexClientUnified;
 
 	const watchQueryToLiveData = createWatchQueryToLiveData(convexClient, {
@@ -245,7 +253,7 @@ export const service = Effect.gen(function* () {
 						},
 					) => {
 						const fullArgs: Record<string, unknown> = isPublic
-							? (args ?? {})
+							? { ...(args ?? {}), publicBackendAccessToken }
 							: { ...(args ?? {}), backendAccessToken };
 						const cacheKey = createQueryCacheKey(
 							getFunctionName(funcRef),
@@ -271,7 +279,7 @@ export const service = Effect.gen(function* () {
 
 				const wrappedFunction = ((args?: any) => {
 					const fullArgs = isPublic
-						? (args ?? {})
+						? { ...(args ?? {}), publicBackendAccessToken }
 						: { ...(args ?? {}), backendAccessToken };
 					return callClientMethod(
 						funcType,
@@ -293,7 +301,7 @@ export const service = Effect.gen(function* () {
 	};
 
 	const privateProxy = createProxy(api.private, [], false);
-	const publicProxy = createProxy(api.public, [], false);
+	const publicProxy = createProxy(api.public, [], true);
 	const authenticatedProxy = createProxy(api.authenticated, [], false);
 
 	const getQueryMetricsByKey = (cacheKey: string) => {

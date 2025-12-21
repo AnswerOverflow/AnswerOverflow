@@ -21,7 +21,7 @@ import {
 } from "./channel-page-content";
 
 export type CommunityPageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.private.channels.getCommunityPageHeaderData>
+	FunctionReturnType<typeof api.public.channels.getCommunityPageHeaderData>
 >;
 
 export type ServerPageHeaderData = CommunityPageHeaderData & {
@@ -50,7 +50,7 @@ export async function fetchCommunityPageHeaderData(
 ): Promise<CommunityPageHeaderData | null> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.private.channels.getCommunityPageHeaderData({
+		return yield* database.public.channels.getCommunityPageHeaderData({
 			serverDiscordId,
 			channelDiscordId,
 		});
