@@ -135,13 +135,6 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 	}
 
 	const handleSignIn = async () => {
-		if (
-			window.location.href.includes("localhost") &&
-			process.env.NEXT_PUBLIC_CONVEX_URL?.includes("api.answeroverflow.com")
-		) {
-			window.location.href = `/dev-auth/receive?redirect=${encodeURIComponent(window.location.pathname)}`;
-			return;
-		}
 		await authClient.signIn.social({
 			provider: "discord",
 			callbackURL: window.location.href,
