@@ -24,11 +24,6 @@ const ALLOWED_TENANT_PATHS = [
 	"/get-session",
 ];
 
-const TRUSTED_ORIGINS = [
-	"https://www.answeroverflow.com",
-	"http://localhost:3000",
-];
-
 export const authComponent = createClient<DataModel, typeof authSchema>(
 	components.betterAuth,
 	{
@@ -42,16 +37,20 @@ export const createAuthOptions = (
 	ctx: GenericCtx<DataModel>,
 	{ optionsOnly } = { optionsOnly: false },
 ): BetterAuthOptions => {
+	const siteUrl = process.env.SITE_URL;
+	if (!siteUrl) {
+		throw new Error("SITE_URL environment variable is required");
+	}
+
 	return {
 		logger: {
 			disabled: optionsOnly,
 		},
-		trustedOrigins: TRUSTED_ORIGINS,
+		trustedOrigins: ["https://www.answeroverflow.com", "http://localhost:3000"],
 		advanced: {
-			trustedProxyHeaders: true,
-
 			disableCSRFCheck: true,
 		},
+		baseURL: siteUrl,
 		database: authComponent.adapter(ctx),
 		secret: (() => {
 			const secret = process.env.BETTER_AUTH_SECRET;
@@ -70,13 +69,13 @@ export const createAuthOptions = (
 		},
 		hooks: {
 			before: createAuthMiddleware(async (authCtx) => {
-				const hookOrigin = authCtx.headers?.get("origin");
-				if (!hookOrigin) return;
+				const origin = authCtx.headers?.get("origin");
+				if (!origin) return;
 
 				try {
-					const url = new URL(hookOrigin);
+					const url = new URL(origin);
 					const domain = url.hostname;
-					const mainSiteUrl = new URL("https://www.answeroverflow.com");
+					const mainSiteUrl = new URL(siteUrl);
 					const mainSiteDomain = mainSiteUrl.hostname;
 
 					if (domain === mainSiteDomain) {
