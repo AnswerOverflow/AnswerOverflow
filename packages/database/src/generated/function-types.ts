@@ -56,6 +56,7 @@ export const FUNCTION_TYPE_MAP = {
   "servers.getServerByDomain": "query",
   "servers.updateServer": "mutation",
   "servers.upsertServer": "mutation",
+  "threads.findThreadsMissingRootMessage": "action",
   "user_server_settings.findManyUserServerSettings": "query",
   "user_server_settings.findUserServerSettingsById": "query",
   "user_server_settings.upsertManyBotUserServerSettings": "mutation",
@@ -63,7 +64,7 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
-export const NAMESPACES = ["attachments","cache","channels","counts","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","user_server_settings"] as const;
+export const NAMESPACES = ["attachments","cache","channels","counts","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","threads","user_server_settings"] as const;
 
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
@@ -76,6 +77,7 @@ export const NAMESPACE_STRUCTURE = {
   "search": ["getRecentThreads","getSimilarThreads","publicSearch"],
   "server_preferences": ["getServerPreferencesByServerId","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
+  "threads": ["findThreadsMissingRootMessage"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
 } as const;
 

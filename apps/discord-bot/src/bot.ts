@@ -8,6 +8,7 @@ import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
 import { LeaveCommandHandlerLayer } from "./commands/leave-command";
 import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
+import { SyncThreadsCommandHandlerLayer } from "./commands/sync-threads";
 import { Discord } from "./core/discord-service";
 import { ConsentButtonHandlerLayer } from "./interactions/consent-button";
 import { DismissButtonHandlerLayer } from "./interactions/dismiss-button";
@@ -52,6 +53,7 @@ export const BotLayers = Layer.mergeAll(
 	DMForwardingHandlerLayer,
 	FeedbackCommandHandlerLayer,
 	BugReportCommandHandlerLayer,
+	SyncThreadsCommandHandlerLayer,
 );
 
 export const program = Effect.gen(function* () {
