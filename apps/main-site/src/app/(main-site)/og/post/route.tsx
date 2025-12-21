@@ -5,7 +5,7 @@ import {
 	parseSnowflakeId,
 } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
-import { ImageResponse } from "next/og";
+import { ImageResponse } from "@takumi-rs/image-response";
 import { runtime } from "../../../../lib/runtime";
 import {
 	CalendarIcon,
@@ -269,6 +269,7 @@ export async function GET(req: Request) {
 		{
 			width: 1200,
 			height: 630,
+			format: "webp",
 			fonts: getOgFontConfig(fonts),
 		},
 	);

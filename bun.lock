@@ -65,6 +65,7 @@
         "@packages/observability": "workspace:*",
         "@packages/ui": "workspace:*",
         "@sentry/nextjs": "^9",
+        "@takumi-rs/image-response": "^0.58.0",
         "@tanstack/react-query": "catalog:",
         "@uidotdev/usehooks": "^2.4.1",
         "@vercel/speed-insights": "^1.3.1",
@@ -1713,6 +1714,30 @@
     "@tailwindcss/postcss": ["@tailwindcss/postcss@4.1.17", "", { "dependencies": { "@alloc/quick-lru": "^5.2.0", "@tailwindcss/node": "4.1.17", "@tailwindcss/oxide": "4.1.17", "postcss": "^8.4.41", "tailwindcss": "4.1.17" } }, "sha512-+nKl9N9mN5uJ+M7dBOOCzINw94MPstNR/GtIhz1fpZysxL/4a+No64jCBD6CPN+bIHWFx3KWuu8XJRrj/572Dw=="],
 
     "@tailwindcss/typography": ["@tailwindcss/typography@0.5.19", "", { "dependencies": { "postcss-selector-parser": "6.0.10" }, "peerDependencies": { "tailwindcss": ">=3.0.0 || insiders || >=4.0.0-alpha.20 || >=4.0.0-beta.1" } }, "sha512-w31dd8HOx3k9vPtcQh5QHP9GwKcgbMp87j58qi6xgiBnFFtKEAgCWnDw4qUT8aHwkCp8bKvb/KGKWWHedP0AAg=="],
+
+    "@takumi-rs/core": ["@takumi-rs/core@0.58.0", "", { "optionalDependencies": { "@takumi-rs/core-darwin-arm64": "0.58.0", "@takumi-rs/core-darwin-x64": "0.58.0", "@takumi-rs/core-linux-arm64-gnu": "0.58.0", "@takumi-rs/core-linux-arm64-musl": "0.58.0", "@takumi-rs/core-linux-x64-gnu": "0.58.0", "@takumi-rs/core-linux-x64-musl": "0.58.0", "@takumi-rs/core-win32-arm64-msvc": "0.58.0", "@takumi-rs/core-win32-x64-msvc": "0.58.0" } }, "sha512-4tBR+KARPIrj0gXm2UoFmEiu2qQkpyVM+K/o/U1atxLfk1wEL062Vq7Xrnh4pikn7pB2+qcsrjBUjFjxK/T1ZQ=="],
+
+    "@takumi-rs/core-darwin-arm64": ["@takumi-rs/core-darwin-arm64@0.58.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-diiCIWrODIJq7Sby4c+YhbtH2ekq5oK8jjnEcaS6vGSn4k9ex19vcpj0Ad05qqVtoYgX9vQ5tmkLkRX1glWwTw=="],
+
+    "@takumi-rs/core-darwin-x64": ["@takumi-rs/core-darwin-x64@0.58.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-7t+DtBE6brwoG3bbpVd+0n0QH4Uh7sH9SPOLP+9YmfNgZ7uNUuS5rJoU3Q21XDh+Sv6GNO6472RLsx+0se09Xw=="],
+
+    "@takumi-rs/core-linux-arm64-gnu": ["@takumi-rs/core-linux-arm64-gnu@0.58.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-N4Epv7EjAPqz1ZEhf3VTSX2w1SPZEaZ55cfytllumY76JEByPs/573cp2an0w+oXEUTfsJ+kHywq+DfXn8GmCA=="],
+
+    "@takumi-rs/core-linux-arm64-musl": ["@takumi-rs/core-linux-arm64-musl@0.58.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-uOrue+ssxUWqJEKFik39rRRDmBElPHEoXYj5+3Aan2+JIehnPN0Fh0STgMEPbO+f4KjHWxTKzMyBrHOt55RgFw=="],
+
+    "@takumi-rs/core-linux-x64-gnu": ["@takumi-rs/core-linux-x64-gnu@0.58.0", "", { "os": "linux", "cpu": "x64" }, "sha512-a5RCFNb6dxQDXpScmEipDMb+LwmKGGQJnowj0ryzM5qVM0kDLCTa36HSkIvw6ks/KWwHYoH4xm4TchBN010u6Q=="],
+
+    "@takumi-rs/core-linux-x64-musl": ["@takumi-rs/core-linux-x64-musl@0.58.0", "", { "os": "linux", "cpu": "x64" }, "sha512-Af1JyvDxN1z3yvVqeG+MZT7bFTpr26IBD0O7NYdLJhM3kDd6HPsWp1htTv3v4uIF4Kb8u+zcaD594Y3B66g+1A=="],
+
+    "@takumi-rs/core-win32-arm64-msvc": ["@takumi-rs/core-win32-arm64-msvc@0.58.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-L6imTAC7fqsmvCLc5ZaSxffnRBk2YKF/N3nEUQ4i9yVNsupiOv8wnNhPWDAKT5ETKpgn5tkH7KHpVYMAafqymA=="],
+
+    "@takumi-rs/core-win32-x64-msvc": ["@takumi-rs/core-win32-x64-msvc@0.58.0", "", { "os": "win32", "cpu": "x64" }, "sha512-0XUhfy1sv4h517+I6SL557zuwcwbgepCnaywal4oFs+hTeGESzImMxUDqF34uuONY/CazibptVseoiC2/njZ9A=="],
+
+    "@takumi-rs/helpers": ["@takumi-rs/helpers@0.58.0", "", {}, "sha512-0oEosvus9AiS+zB7obWYf/Fp3//mIqgTptZJ7zZZC81MGNgPozBGNZg0HIJrPnoFmebiEtBTpFz1soqM6BNLcw=="],
+
+    "@takumi-rs/image-response": ["@takumi-rs/image-response@0.58.0", "", { "dependencies": { "@takumi-rs/core": "0.58.0", "@takumi-rs/helpers": "0.58.0", "@takumi-rs/wasm": "0.58.0" } }, "sha512-lC34cL3TMlCO5mrx8N31dgNzu5x+oobG2M1kd22rJ+XnTiG4bvA1WtTKiAJ58LJDOWgZTOCHGi2aQn84vQFohw=="],
+
+    "@takumi-rs/wasm": ["@takumi-rs/wasm@0.58.0", "", {}, "sha512-E/9mVeT03H+gHrh6eL/PbNMAIFEstqiS1+JUpR6HbYImYpAT1Iv6PM3aaUm0wo4hdAS+zfyESiDuiOqvYJcoSA=="],
 
     "@tanstack/query-core": ["@tanstack/query-core@5.90.10", "", {}, "sha512-EhZVFu9rl7GfRNuJLJ3Y7wtbTnENsvzp+YpcAV7kCYiXni1v8qZh++lpw4ch4rrwC0u/EZRnBHIehzCGzwXDSQ=="],
 

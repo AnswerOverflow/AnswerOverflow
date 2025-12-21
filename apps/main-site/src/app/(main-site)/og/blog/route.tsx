@@ -1,5 +1,5 @@
 import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo";
-import { ImageResponse } from "next/og";
+import { ImageResponse } from "@takumi-rs/image-response";
 import { blog } from "@/.source/server";
 import {
 	CalendarIconSmall,
@@ -238,6 +238,7 @@ export async function GET(req: Request) {
 		{
 			width: 1200,
 			height: 630,
+			format: "webp",
 			fonts: getOgFontConfig(fonts),
 		},
 	);

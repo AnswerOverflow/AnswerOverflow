@@ -25,6 +25,7 @@
 		"@packages/observability": "workspace:*",
 		"@packages/ui": "workspace:*",
 		"@sentry/nextjs": "^9",
+		"@takumi-rs/image-response": "^0.58.0",
 		"@tanstack/react-query": "catalog:",
 		"@uidotdev/usehooks": "^2.4.1",
 		"@vercel/speed-insights": "^1.3.1",
