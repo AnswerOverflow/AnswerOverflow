@@ -6,7 +6,6 @@
       "name": "convex-monorepo",
       "dependencies": {
         "@better-auth/stripe": "^1.4.7",
-        "better-auth": "^1.4.7",
         "jsdom": "^27.3.0",
         "main-site": "^7.4.2",
         "react-tweet": "^3.3.0",
@@ -142,6 +141,7 @@
         "@packages/discord-api": "workspace:*",
         "@typelytics/posthog": "^0.1.5",
         "@vercel/sdk": "^1.17.7",
+        "better-auth": "catalog:",
         "convex": "catalog:",
         "convex-helpers": "^0.1.104",
         "cookie": "^1.1.1",
