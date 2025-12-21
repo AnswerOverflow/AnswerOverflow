@@ -21,7 +21,7 @@ import {
 } from "./channel-page-content";
 
 export type CommunityPageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.private.channels.getCommunityPageHeaderData>
+	FunctionReturnType<typeof api.public.channels.getCommunityPageHeaderData>
 >;
 
 export type ServerPageHeaderData = CommunityPageHeaderData & {

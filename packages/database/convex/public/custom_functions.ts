@@ -14,12 +14,12 @@ import { getAuthIdentity } from "../shared/authIdentity";
 import { createDataAccessCache } from "../shared/dataAccess";
 import { mutation } from "../triggers";
 
-function validateBackendAccessToken(token: string | undefined): boolean {
+function validatePublicBackendAccessToken(token: string | undefined): boolean {
 	if (!token) {
 		return false;
 	}
 
-	const expectedToken = process.env.BACKEND_ACCESS_TOKEN;
+	const expectedToken = process.env.PUBLIC_BACKEND_ACCESS_TOKEN;
 
 	if (!expectedToken) {
 		return false;
@@ -32,7 +32,7 @@ export const publicQuery = customQuery(query, {
 	args: {
 		discordAccountId: v.optional(v.string()),
 		anonymousSessionId: v.optional(v.string()),
-		backendAccessToken: v.optional(v.string()),
+		publicBackendAccessToken: v.optional(v.string()),
 		type: v.optional(
 			v.union(
 				v.literal("signed-in"),
@@ -43,8 +43,8 @@ export const publicQuery = customQuery(query, {
 		rateLimitKey: v.optional(v.string()),
 	},
 	input: async (ctx, args) => {
-		const isBackendRequest = validateBackendAccessToken(
-			args.backendAccessToken,
+		const isBackendRequest = validatePublicBackendAccessToken(
+			args.publicBackendAccessToken,
 		);
 
 		const cache = createDataAccessCache(ctx);
@@ -104,7 +104,7 @@ export const publicMutation = customMutation(mutation, {
 		let discordAccountId: bigint | undefined;
 		let type: "signed-in" | "admin";
 
-		if (validateBackendAccessToken(args.backendAccessToken)) {
+		if (validatePublicBackendAccessToken(args.backendAccessToken)) {
 			discordAccountId = undefined;
 			type = "admin";
 		} else {
@@ -142,7 +142,7 @@ export const publicAction = customAction(action, {
 		let discordAccountId: bigint | undefined;
 		let type: "signed-in" | "admin";
 
-		if (validateBackendAccessToken(args.backendAccessToken)) {
+		if (validatePublicBackendAccessToken(args.backendAccessToken)) {
 			discordAccountId = undefined;
 			type = "admin";
 		} else {

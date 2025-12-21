@@ -14,7 +14,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 	const tenantData = await Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.private.servers.getServerByDomain({ domain });
+		return yield* database.public.servers.getServerByDomain({ domain });
 	}).pipe(runtime.runPromise);
 
 	const serverName = tenantData?.server?.name ?? "this community";
