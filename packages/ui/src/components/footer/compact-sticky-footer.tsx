@@ -55,29 +55,24 @@ export function CompactStickyFooter({
 	useEffect(() => {
 		if (disableHideOnScroll) return;
 
-		let scrollTimeout: ReturnType<typeof setTimeout>;
-
 		const handleScroll = () => {
 			const currentScrollY = window.scrollY;
 			const isScrollingDown = currentScrollY > lastScrollY.current;
+			const isScrollingUp = currentScrollY < lastScrollY.current;
 
 			if (isScrollingDown && currentScrollY > 100) {
 				setIsVisible(false);
 				setIsExpanded(false);
+			} else if (isScrollingUp) {
+				setIsVisible(true);
 			}
 
 			lastScrollY.current = currentScrollY;
-
-			clearTimeout(scrollTimeout);
-			scrollTimeout = setTimeout(() => {
-				setIsVisible(true);
-			}, 150);
 		};
 
 		window.addEventListener("scroll", handleScroll, { passive: true });
 		return () => {
 			window.removeEventListener("scroll", handleScroll);
-			clearTimeout(scrollTimeout);
 		};
 	}, [disableHideOnScroll]);
 
