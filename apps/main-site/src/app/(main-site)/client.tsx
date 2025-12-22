@@ -76,9 +76,7 @@ export function HomePageClient({
 					<h1 className="text-3xl font-bold text-foreground mb-2">
 						Recent Threads
 					</h1>
-					<p className="text-muted-foreground">
-						Live feed of Discord threads as they come in
-					</p>
+
 					<SearchInput
 						value={searchQuery}
 						onChange={(value) => setSearchQuery(value || null)}
