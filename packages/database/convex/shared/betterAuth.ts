@@ -48,8 +48,6 @@ export const createAuthOptions = (
 		},
 		trustedOrigins: TRUSTED_ORIGINS,
 		advanced: {
-			trustedProxyHeaders: true,
-
 			disableCSRFCheck: true,
 		},
 		baseURL: process.env.SITE_URL,

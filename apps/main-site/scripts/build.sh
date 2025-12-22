@@ -8,7 +8,10 @@ CURRENT_SHA="$VERCEL_GIT_COMMIT_SHA"
 
 SHOULD_DEPLOY_CONVEX=true
 
-if [ -n "$PREVIOUS_SHA" ] && [ -n "$CURRENT_SHA" ]; then
+if [ "$VERCEL_ENV" = "preview" ]; then
+    SHOULD_DEPLOY_CONVEX=false
+    echo "Preview build detected, skipping Convex deploy"
+elif [ -n "$PREVIOUS_SHA" ] && [ -n "$CURRENT_SHA" ]; then
     CHANGED_FILES=$(git diff --name-only "$PREVIOUS_SHA" "$CURRENT_SHA")
     if ! echo "$CHANGED_FILES" | grep -q "^packages/database/convex/"; then
         SHOULD_DEPLOY_CONVEX=false
