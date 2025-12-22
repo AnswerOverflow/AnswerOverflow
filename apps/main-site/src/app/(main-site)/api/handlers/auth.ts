@@ -1,28 +1,40 @@
-import { convexBetterAuthNextJs } from "@convex-dev/better-auth/nextjs";
 import type { Context } from "hono";
 
-const { handler } = convexBetterAuthNextJs({
-	convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL ?? "",
-	convexSiteUrl: process.env.NEXT_PUBLIC_CONVEX_SITE_URL ?? "",
-});
+const convexSiteUrl = process.env.NEXT_PUBLIC_CONVEX_SITE_URL ?? "";
+
+function proxyToConvex(
+	request: Request,
+	originHost: string,
+): Promise<Response> {
+	const requestUrl = new URL(request.url);
+	const convexUrl = `${convexSiteUrl}${requestUrl.pathname}${requestUrl.search}`;
+
+	const headers = new Headers(request.headers);
+	headers.set("accept-encoding", "application/json");
+	headers.set("x-forwarded-host", originHost);
+	headers.set(
+		"x-forwarded-proto",
+		originHost.includes("localhost") ? "http" : "https",
+	);
+
+	const newRequest = new Request(convexUrl, {
+		method: request.method,
+		headers,
+		body: request.body,
+		duplex: "half",
+	} as RequestInit);
+
+	return fetch(newRequest, { redirect: "manual" });
+}
 
 export async function handleAuth(c: Context) {
 	const method = c.req.method;
 
-	const forwardedHost =
-		c.req.header("x-forwarded-host") ?? "www.answeroverflow.com";
-	const forwardedProto = c.req.header("x-forwarded-proto") ?? "https";
-	c.req.raw.headers.set("x-forwarded-host", forwardedHost);
-	c.req.raw.headers.set("x-forwarded-proto", forwardedProto);
-	c.req.raw.headers.set("host", forwardedHost);
-	c.req.raw.headers.set("protocol", forwardedProto);
-
-	if (method === "GET") {
-		return handler.GET(c.req.raw);
-	}
-	if (method === "POST") {
-		return handler.POST(c.req.raw);
+	if (method !== "GET" && method !== "POST") {
+		return c.text("Method not allowed", 405);
 	}
 
-	return c.text("Method not allowed", 405);
+	const host = c.req.header("host") ?? "www.answeroverflow.com";
+
+	return proxyToConvex(c.req.raw, host);
 }
