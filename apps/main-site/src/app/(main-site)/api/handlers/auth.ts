@@ -10,9 +10,10 @@ export async function handleAuth(c: Context) {
 	const method = c.req.method;
 
 	const forwardedHost = c.req.header("x-forwarded-host");
-	if (forwardedHost) {
-		c.req.raw.headers.set("host", forwardedHost);
-	}
+	c.req.raw.headers.set(
+		"x-forwarded-host",
+		forwardedHost ?? "https://www.answeroverflow.com",
+	);
 
 	if (method === "GET") {
 		return handler.GET(c.req.raw);
