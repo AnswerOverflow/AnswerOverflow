@@ -20,6 +20,10 @@ class MarkSolutionTimeoutError extends Data.TaggedError(
 	"MarkSolutionTimeoutError",
 )<{
 	readonly message: string;
+	readonly guildId?: string;
+	readonly channelId?: string;
+	readonly userId?: string;
+	readonly targetMessageId?: string;
 }> {}
 
 class MarkSolutionResponseBuildError extends Data.TaggedError(
@@ -35,9 +39,11 @@ export function handleMarkSolutionCommand(
 		const database = yield* Database;
 		const discord = yield* Discord;
 
-		yield* discord.callClient(() =>
-			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
-		);
+		yield* discord
+			.callClient(() =>
+				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+			)
+			.pipe(Effect.withSpan("defer_reply"));
 
 		if (!interaction.channel) {
 			yield* discord.callClient(() =>
@@ -46,9 +52,11 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		const targetMessage = yield* discord.callClient(() =>
-			interaction.channel?.messages.fetch(interaction.targetId),
-		);
+		const targetMessage = yield* discord
+			.callClient(() =>
+				interaction.channel?.messages.fetch(interaction.targetId),
+			)
+			.pipe(Effect.withSpan("fetch_target_message"));
 		if (!targetMessage) {
 			yield* discord.callClient(() =>
 				interaction.editReply({
@@ -67,9 +75,11 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		const server = yield* database.private.servers.getServerByDiscordId({
-			discordId: BigInt(targetMessage.guildId),
-		});
+		const server = yield* database.private.servers
+			.getServerByDiscordId({
+				discordId: BigInt(targetMessage.guildId),
+			})
+			.pipe(Effect.withSpan("get_server"));
 
 		if (!server) {
 			yield* discord.callClient(() =>
@@ -101,10 +111,11 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		const channelSettings =
-			yield* database.private.channels.findChannelByDiscordId({
+		const channelSettings = yield* database.private.channels
+			.findChannelByDiscordId({
 				discordId: BigInt(parentChannel.id),
-			});
+			})
+			.pipe(Effect.withSpan("get_channel_settings"));
 
 		if (!channelSettings || !channelSettings.flags?.markSolutionEnabled) {
 			yield* discord.callClient(() =>
@@ -119,7 +130,9 @@ export function handleMarkSolutionCommand(
 
 		if (parentChannel.type === ChannelType.GuildForum) {
 			const fetchedMessage = yield* catchAllSucceedNullWithReport(
-				discord.callClient(() => thread.messages.fetch(thread.id)),
+				discord
+					.callClient(() => thread.messages.fetch(thread.id))
+					.pipe(Effect.withSpan("fetch_forum_question_message")),
 			);
 			questionMessage = fetchedMessage ?? null;
 		} else if (
@@ -127,7 +140,9 @@ export function handleMarkSolutionCommand(
 			parentChannel.type === ChannelType.GuildAnnouncement
 		) {
 			const fetchedMessage = yield* catchAllSucceedNullWithReport(
-				discord.callClient(() => parentChannel.messages.fetch(thread.id)),
+				discord
+					.callClient(() => parentChannel.messages.fetch(thread.id))
+					.pipe(Effect.withSpan("fetch_text_question_message")),
 			);
 			questionMessage = fetchedMessage ?? null;
 		}
@@ -161,7 +176,9 @@ export function handleMarkSolutionCommand(
 		}
 
 		const guildMember = yield* catchAllSucceedNullWithReport(
-			discord.callClient(() => guild.members.fetch(interaction.user.id)),
+			discord
+				.callClient(() => guild.members.fetch(interaction.user.id))
+				.pipe(Effect.withSpan("fetch_guild_member")),
 		);
 
 		if (!guildMember) {
@@ -195,70 +212,33 @@ export function handleMarkSolutionCommand(
 			return;
 		}
 
-		const serverPreferencesLiveData =
-			yield* database.private.server_preferences.getServerPreferencesByServerId(
-				{
-					serverId: server.discordId,
-				},
-			);
+		const serverPreferencesLiveData = yield* database.private.server_preferences
+			.getServerPreferencesByServerId({
+				serverId: server.discordId,
+			})
+			.pipe(Effect.withSpan("get_server_preferences"));
 
 		const serverPreferences = serverPreferencesLiveData ?? null;
-		const data = yield* discord.callClient(() =>
-			toAOMessage(targetMessage, server.discordId.toString()),
-		);
 
-		yield* database.private.messages.upsertMessage({
-			...toUpsertMessageArgs(data),
-			ignoreChecks: false,
-		});
+		const data = yield* discord
+			.callClient(() => toAOMessage(targetMessage, server.discordId.toString()))
+			.pipe(Effect.withSpan("convert_message"));
 
-		yield* database.private.messages.markMessageAsSolution({
-			solutionMessageId: BigInt(targetMessage.id),
-			questionMessageId: BigInt(questionMessage.id),
-		});
+		yield* database.private.messages
+			.upsertMessage({
+				...toUpsertMessageArgs(data),
+				ignoreChecks: false,
+			})
+			.pipe(Effect.withSpan("upsert_message"));
 
-		yield* Effect.gen(function* () {
-			const solutionTagId = channelSettings?.flags?.solutionTagId;
-			const PUBG_MOBILE_SERVER_ID = "393088095840370689";
+		yield* database.private.messages
+			.markMessageAsSolution({
+				solutionMessageId: BigInt(targetMessage.id),
+				questionMessageId: BigInt(questionMessage.id),
+			})
+			.pipe(Effect.withSpan("mark_as_solution"));
 
-			if (thread.guildId === PUBG_MOBILE_SERVER_ID && solutionTagId) {
-				yield* discord.callClient(() =>
-					thread.setAppliedTags([solutionTagId.toString()]),
-				);
-			} else if (
-				parentChannel.type === ChannelType.GuildForum &&
-				solutionTagId &&
-				thread.appliedTags.length < 5 &&
-				!thread.appliedTags.includes(solutionTagId.toString())
-			) {
-				yield* discord.callClient(() =>
-					thread.setAppliedTags([
-						...thread.appliedTags,
-						solutionTagId.toString(),
-					]),
-				);
-			} else {
-				yield* discord.callClient(() => questionMessage.react("✅"));
-			}
-
-			yield* catchAllSilentWithReport(
-				discord.callClient(() => targetMessage.react("✅")),
-			);
-		}).pipe(
-			catchAllWithReport((error) =>
-				Effect.gen(function* () {
-					console.error("Error marking solution:", error);
-					yield* discord.callClient(() =>
-						interaction.editReply({
-							content: "An error occurred while marking the solution",
-						}),
-					);
-					return yield* Effect.fail(error);
-				}),
-			),
-		);
-
-		if (!channelSettings || !channelSettings.flags) {
+		if (!channelSettings.flags) {
 			yield* discord.callClient(() =>
 				interaction.editReply({
 					content: "Channel settings not found",
@@ -266,46 +246,6 @@ export function handleMarkSolutionCommand(
 			);
 			return;
 		}
-
-		const questionAsker = yield* catchAllSucceedNullWithReport(
-			discord.callClient(() => guild.members.fetch(questionMessage.author.id)),
-		);
-
-		const solutionAuthor = yield* catchAllSucceedNullWithReport(
-			discord.callClient(() => guild.members.fetch(targetMessage.author.id)),
-		);
-
-		if (questionAsker && solutionAuthor) {
-			yield* Effect.forkDaemon(
-				catchAllSilentWithReport(
-					trackSolvedQuestion(
-						thread,
-						channelSettings,
-						questionAsker,
-						solutionAuthor,
-						guildMember,
-						questionMessage,
-						targetMessage,
-						{
-							discordId: server.discordId.toString(),
-							name: server.name,
-						},
-						serverPreferences
-							? {
-									readTheRulesConsentEnabled:
-										serverPreferences.readTheRulesConsentEnabled,
-								}
-							: undefined,
-					),
-				),
-			);
-		}
-
-		yield* Effect.forkDaemon(
-			catchAllSilentWithReport(
-				trackMarkSolutionCommandUsed(guildMember, "Success"),
-			),
-		);
 
 		const { embed, components } = yield* Effect.try({
 			try: () =>
@@ -322,16 +262,107 @@ export function handleMarkSolutionCommand(
 					},
 				}),
 			catch: (cause) => new MarkSolutionResponseBuildError({ cause }),
-		});
+		}).pipe(Effect.withSpan("build_response"));
 
-		yield* discord.callClient(() => interaction.deleteReply());
-		yield* discord.callClient(() =>
-			interaction.followUp({
-				embeds: [embed],
-				components: components ? [components] : undefined,
-			}),
+		yield* discord
+			.callClient(() => interaction.deleteReply())
+			.pipe(Effect.withSpan("delete_reply"));
+		yield* discord
+			.callClient(() =>
+				interaction.followUp({
+					embeds: [embed],
+					components: components ? [components] : undefined,
+				}),
+			)
+			.pipe(Effect.withSpan("send_followup"));
+
+		yield* Effect.forkDaemon(
+			Effect.gen(function* () {
+				const solutionTagId = channelSettings?.flags?.solutionTagId;
+				const PUBG_MOBILE_SERVER_ID = "393088095840370689";
+
+				if (thread.guildId === PUBG_MOBILE_SERVER_ID && solutionTagId) {
+					yield* catchAllSilentWithReport(
+						discord.callClient(() =>
+							thread.setAppliedTags([solutionTagId.toString()]),
+						),
+					);
+				} else if (
+					parentChannel.type === ChannelType.GuildForum &&
+					solutionTagId &&
+					thread.appliedTags.length < 5 &&
+					!thread.appliedTags.includes(solutionTagId.toString())
+				) {
+					yield* catchAllSilentWithReport(
+						discord.callClient(() =>
+							thread.setAppliedTags([
+								...thread.appliedTags,
+								solutionTagId.toString(),
+							]),
+						),
+					);
+				} else {
+					yield* catchAllSilentWithReport(
+						discord.callClient(() => questionMessage.react("✅")),
+					);
+				}
+
+				yield* catchAllSilentWithReport(
+					discord.callClient(() => targetMessage.react("✅")),
+				);
+
+				const [questionAsker, solutionAuthor] = yield* Effect.all([
+					catchAllSucceedNullWithReport(
+						discord.callClient(() =>
+							guild.members.fetch(questionMessage.author.id),
+						),
+					),
+					catchAllSucceedNullWithReport(
+						discord.callClient(() =>
+							guild.members.fetch(targetMessage.author.id),
+						),
+					),
+				]);
+
+				if (questionAsker && solutionAuthor) {
+					yield* catchAllSilentWithReport(
+						trackSolvedQuestion(
+							thread,
+							channelSettings,
+							questionAsker,
+							solutionAuthor,
+							guildMember,
+							questionMessage,
+							targetMessage,
+							{
+								discordId: server.discordId.toString(),
+								name: server.name,
+							},
+							serverPreferences
+								? {
+										readTheRulesConsentEnabled:
+											serverPreferences.readTheRulesConsentEnabled,
+									}
+								: undefined,
+						),
+					);
+				}
+
+				yield* catchAllSilentWithReport(
+					trackMarkSolutionCommandUsed(guildMember, "Success"),
+				);
+			}).pipe(Effect.withSpan("post_response_tasks")),
 		);
-	});
+	}).pipe(
+		Effect.withSpan("mark_solution_command", {
+			attributes: {
+				"discord.guild_id": interaction.guildId ?? "unknown",
+				"discord.channel_id": interaction.channelId ?? "unknown",
+				"discord.user_id": interaction.user.id,
+				"discord.target_message_id": interaction.targetId,
+			},
+		}),
+	);
 }
 
 export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
@@ -352,6 +383,10 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 							onTimeout: () =>
 								new MarkSolutionTimeoutError({
 									message: "Mark solution command timed out after 25 seconds",
+									guildId: interaction.guildId ?? undefined,
+									channelId: interaction.channelId ?? undefined,
+									userId: interaction.user.id,
+									targetMessageId: interaction.targetId,
 								}),
 						}),
 					);
