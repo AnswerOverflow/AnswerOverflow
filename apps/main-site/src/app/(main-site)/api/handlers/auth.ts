@@ -14,6 +14,8 @@ export async function handleAuth(c: Context) {
 	const forwardedProto = c.req.header("x-forwarded-proto") ?? "https";
 	c.req.raw.headers.set("x-forwarded-host", forwardedHost);
 	c.req.raw.headers.set("x-forwarded-proto", forwardedProto);
+	c.req.raw.headers.set("host", forwardedHost);
+	c.req.raw.headers.set("protocol", forwardedProto);
 
 	if (method === "GET") {
 		return handler.GET(c.req.raw);
