@@ -1,5 +1,6 @@
-import { Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
+import { eventsProcessed, syncOperations } from "../metrics";
 import { catchAllWithReport } from "../utils/error-reporting";
 import { syncChannel } from "./channel";
 
@@ -18,6 +19,15 @@ export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 					return;
 				}
 
+				yield* Effect.annotateCurrentSpan({
+					"discord.guild_id": newMember.guild.id,
+					"discord.guild_name": newMember.guild.name,
+					"bot.user_id": botUser.id,
+					"channels.count": newMember.guild.channels.cache.size.toString(),
+				});
+				yield* Metric.increment(eventsProcessed);
+				yield* Metric.increment(syncOperations);
+
 				yield* Console.log(
 					`Bot permissions updated in guild ${newMember.guild.id}, syncing all channels`,
 				);
@@ -30,6 +40,7 @@ export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 					},
 				);
 			}).pipe(
+				Effect.withSpan("event.bot_member_update"),
 				catchAllWithReport((error) =>
 					Console.error(
 						`Error syncing bot permissions after member update:`,
@@ -59,6 +70,16 @@ export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 					return;
 				}
 
+				yield* Effect.annotateCurrentSpan({
+					"discord.role_id": newRole.id,
+					"discord.role_name": newRole.name,
+					"discord.guild_id": newRole.guild.id,
+					"discord.guild_name": newRole.guild.name,
+					"channels.count": newRole.guild.channels.cache.size.toString(),
+				});
+				yield* Metric.increment(eventsProcessed);
+				yield* Metric.increment(syncOperations);
+
 				yield* Console.log(
 					`Bot role ${newRole.id} updated in guild ${newRole.guild.id}, syncing all channels`,
 				);
@@ -71,6 +92,7 @@ export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 					},
 				);
 			}).pipe(
+				Effect.withSpan("event.bot_role_update"),
 				catchAllWithReport((error) =>
 					Console.error(
 						`Error syncing bot permissions after role update:`,

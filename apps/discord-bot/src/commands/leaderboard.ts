@@ -8,8 +8,9 @@ import {
 	type MessageActionRowComponentBuilder,
 	MessageFlags,
 } from "discord.js";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
+import { commandsExecuted } from "../metrics";
 import { trackLeaderboardViewed } from "../utils/analytics";
 import {
 	catchAllSilentWithReport,
@@ -33,10 +34,15 @@ function makeDismissButton(dismisserId: string): ButtonBuilder {
 	});
 }
 
-export function handleLeaderboardCommand(
-	interaction: ChatInputCommandInteraction,
-) {
-	return Effect.gen(function* () {
+export const handleLeaderboardCommand = Effect.fn("leaderboard_command")(
+	function* (interaction: ChatInputCommandInteraction) {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": interaction.guildId ?? "unknown",
+			"discord.channel_id": interaction.channelId ?? "unknown",
+			"discord.user_id": interaction.user.id,
+		});
+		yield* Metric.increment(commandsExecuted);
+
 		const database = yield* Database;
 		const discord = yield* Discord;
 
@@ -127,8 +133,8 @@ export function handleLeaderboardCommand(
 				components,
 			}),
 		);
-	});
-}
+	},
+);
 
 export const LeaderboardCommandHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {

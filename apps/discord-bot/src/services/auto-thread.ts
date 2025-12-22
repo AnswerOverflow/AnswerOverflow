@@ -1,9 +1,10 @@
 import { Database } from "@packages/database/database";
 import type { Message } from "discord.js";
 import { MessageType } from "discord.js";
-import { Data, Effect, Layer } from "effect";
+import { Data, Effect, Layer, Metric } from "effect";
 import { ALLOWED_AUTO_THREAD_CHANNEL_TYPES } from "../constants/channel-types";
 import { Discord } from "../core/discord-service";
+import { autoThreadsCreated } from "../metrics";
 import { isHumanMessage, removeDiscordMarkdown } from "../utils/message-utils";
 
 export enum AutoThreadErrorCode {
@@ -106,7 +107,18 @@ export function handleAutoThread(message: Message) {
 				reason: "Answer Overflow auto thread",
 			}),
 		);
-	});
+
+		yield* Metric.increment(autoThreadsCreated);
+	}).pipe(
+		Effect.withSpan("auto_thread.handle", {
+			attributes: {
+				"message.id": message.id,
+				"channel.id": message.channel.id,
+				"author.id": message.author.id,
+				"channel.type": message.channel.type.toString(),
+			},
+		}),
+	);
 }
 
 export const AutoThreadHandlerLayer = Layer.scopedDiscard(

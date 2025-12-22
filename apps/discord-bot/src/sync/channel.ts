@@ -4,8 +4,9 @@ import type {
 	GuildBasedChannel,
 	GuildChannel,
 } from "discord.js";
-import { Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
+import { syncOperations } from "../metrics";
 import {
 	isAllowedRootChannel,
 	isAllowedThreadChannel,
@@ -17,6 +18,13 @@ export function syncChannel(
 	channel: GuildBasedChannel | GuildChannel | AnyThreadChannel,
 ) {
 	return Effect.gen(function* () {
+		yield* Effect.annotateCurrentSpan({
+			"discord.channel_id": channel.id,
+			"discord.channel_name": channel.name,
+			"discord.guild_id": channel.guildId,
+		});
+		yield* Metric.increment(syncOperations);
+
 		const database = yield* Database;
 
 		const discordChannelData = yield* toAOChannel(channel);
@@ -25,6 +33,7 @@ export function syncChannel(
 			channel: discordChannelData,
 		});
 	}).pipe(
+		Effect.withSpan("sync.channel"),
 		catchAllWithReport((error) =>
 			Console.warn(`Failed to sync channel ${channel.id}:`, error),
 		),
@@ -41,8 +50,14 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(channel)) {
 					return;
 				}
+				yield* Effect.annotateCurrentSpan({
+					"discord.channel_id": channel.id,
+					"discord.channel_name": channel.name,
+					"discord.guild_id": channel.guildId,
+				});
 				yield* syncChannel(channel);
 			}).pipe(
+				Effect.withSpan("event.channel_create"),
 				catchAllWithReport((error) =>
 					Console.error(
 						`Error maintaining channel parity ${channel.id}:`,
@@ -60,6 +75,13 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!thread.parentId) {
 					return;
 				}
+				yield* Effect.annotateCurrentSpan({
+					"discord.thread_id": thread.id,
+					"discord.thread_name": thread.name,
+					"discord.parent_channel_id": thread.parentId,
+					"discord.guild_id": thread.guild.id,
+				});
+
 				const parentChannelLiveData =
 					yield* database.private.channels.findChannelByDiscordId({
 						discordId: BigInt(thread.parentId),
@@ -84,6 +106,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				}
 				yield* syncChannel(thread);
 			}).pipe(
+				Effect.withSpan("event.thread_create"),
 				catchAllWithReport((error) =>
 					Console.error(`Error maintaining thread parity ${thread.id}:`, error),
 				),
@@ -95,8 +118,14 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(newChannel)) {
 					return;
 				}
+				yield* Effect.annotateCurrentSpan({
+					"discord.channel_id": newChannel.id,
+					"discord.channel_name": newChannel.name,
+					"discord.guild_id": newChannel.guildId,
+				});
 				yield* syncChannel(newChannel);
 			}).pipe(
+				Effect.withSpan("event.channel_update"),
 				catchAllWithReport((error) =>
 					Console.error(`Error updating channel ${newChannel.id}:`, error),
 				),
@@ -108,10 +137,16 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedRootChannel(channel)) {
 					return;
 				}
+				yield* Effect.annotateCurrentSpan({
+					"discord.channel_id": channel.id,
+					"discord.channel_name": channel.name,
+					"discord.guild_id": channel.guildId,
+				});
 				yield* database.private.channels.deleteChannel({
 					id: BigInt(channel.id),
 				});
 			}).pipe(
+				Effect.withSpan("event.channel_delete"),
 				catchAllWithReport((error) =>
 					Console.error(`Error deleting channel ${channel.id}:`, error),
 				),
@@ -123,8 +158,15 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedThreadChannel(newThread)) {
 					return;
 				}
+				yield* Effect.annotateCurrentSpan({
+					"discord.thread_id": newThread.id,
+					"discord.thread_name": newThread.name,
+					"discord.parent_channel_id": newThread.parentId,
+					"discord.guild_id": newThread.guild.id,
+				});
 				yield* syncChannel(newThread);
 			}).pipe(
+				Effect.withSpan("event.thread_update"),
 				catchAllWithReport((error) =>
 					Console.error(`Error updating thread ${newThread.id}:`, error),
 				),
@@ -136,6 +178,12 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedThreadChannel(thread)) {
 					return;
 				}
+				yield* Effect.annotateCurrentSpan({
+					"discord.thread_id": thread.id,
+					"discord.thread_name": thread.name,
+					"discord.guild_id": thread.guild.id,
+				});
+
 				const channelLiveData =
 					yield* database.private.channels.findChannelByDiscordId({
 						discordId: BigInt(thread.id),
@@ -153,6 +201,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					id: BigInt(thread.id),
 				});
 			}).pipe(
+				Effect.withSpan("event.thread_delete"),
 				catchAllWithReport((error) =>
 					Console.error(`Error deleting thread ${thread.id}:`, error),
 				),
@@ -164,8 +213,14 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!invite.channel || invite.channel.isDMBased()) {
 					return;
 				}
+				yield* Effect.annotateCurrentSpan({
+					"discord.invite_code": invite.code,
+					"discord.channel_id": invite.channel.id,
+					"discord.guild_id": invite.channel.guildId,
+				});
 				yield* syncChannel(invite.channel);
 			}).pipe(
+				Effect.withSpan("event.invite_delete"),
 				catchAllWithReport((error) =>
 					Console.error(
 						`Error removing invite code from channel (invite: ${invite.code}):`,

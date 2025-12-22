@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
-import { Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
+import { eventsProcessed, syncOperations } from "../metrics";
 import { trackUserJoinedServer, trackUserLeftServer } from "../utils/analytics";
 import { toAODiscordAccount } from "../utils/conversions";
 import {
@@ -41,22 +42,35 @@ export const UserParityLayer = Layer.scopedDiscard(
 		const database = yield* Database;
 
 		yield* discord.client.on("userUpdate", (_oldUser, newUser) =>
-			database.private.discord_accounts
-				.upsertDiscordAccount({
+			Effect.gen(function* () {
+				yield* Effect.annotateCurrentSpan({
+					"discord.user_id": newUser.id,
+					"discord.username": newUser.username,
+				});
+				yield* Metric.increment(eventsProcessed);
+				yield* Metric.increment(syncOperations);
+
+				yield* database.private.discord_accounts.upsertDiscordAccount({
 					account: toAODiscordAccount(newUser),
-				})
-				.pipe(
-					catchAllWithReport((error) =>
-						Console.error(
-							`Error updating Discord account ${newUser.id}:`,
-							error,
-						),
-					),
+				});
+			}).pipe(
+				Effect.withSpan("event.user_update"),
+				catchAllWithReport((error) =>
+					Console.error(`Error updating Discord account ${newUser.id}:`, error),
 				),
+			),
 		);
 
 		yield* discord.client.on("guildMemberAdd", (member) =>
 			Effect.gen(function* () {
+				yield* Effect.annotateCurrentSpan({
+					"discord.user_id": member.user.id,
+					"discord.username": member.user.username,
+					"discord.guild_id": member.guild.id,
+					"discord.guild_name": member.guild.name,
+				});
+				yield* Metric.increment(eventsProcessed);
+
 				yield* invalidateUserGuildsCacheForMember(database, member.user.id);
 
 				const serverData = yield* database.private.servers.getServerByDiscordId(
@@ -89,6 +103,7 @@ export const UserParityLayer = Layer.scopedDiscard(
 					),
 				);
 			}).pipe(
+				Effect.withSpan("event.guild_member_add"),
 				catchAllWithReport((error) =>
 					Console.error(`Error handling guild member add ${member.id}:`, error),
 				),
@@ -97,6 +112,14 @@ export const UserParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildMemberRemove", (member) =>
 			Effect.gen(function* () {
+				yield* Effect.annotateCurrentSpan({
+					"discord.user_id": member.user.id,
+					"discord.username": member.user.username,
+					"discord.guild_id": member.guild.id,
+					"discord.guild_name": member.guild.name,
+				});
+				yield* Metric.increment(eventsProcessed);
+
 				yield* invalidateUserGuildsCacheForMember(database, member.user.id);
 
 				const serverData = yield* database.private.servers.getServerByDiscordId(
@@ -129,6 +152,7 @@ export const UserParityLayer = Layer.scopedDiscard(
 					),
 				);
 			}).pipe(
+				Effect.withSpan("event.guild_member_remove"),
 				catchAllWithReport((error) =>
 					Console.error(
 						`Error handling guild member remove ${member.id}:`,

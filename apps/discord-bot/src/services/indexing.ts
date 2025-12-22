@@ -20,12 +20,18 @@ import {
 	Effect,
 	HashMap,
 	Layer,
+	Metric,
 	Option,
 	Order,
 	Predicate,
 	Schedule,
 } from "effect";
 import { Discord } from "../core/discord-service";
+import {
+	indexingBatchSize,
+	indexingDuration,
+	messagesIndexed,
+} from "../metrics";
 import { syncChannel } from "../sync/channel";
 import { syncGuild } from "../sync/server";
 import {
@@ -143,7 +149,15 @@ function updateLastIndexedSnowflake(
 		yield* Effect.logDebug(
 			`Successfully updated lastIndexedSnowflake for channel ${channelId}`,
 		);
-	});
+	}).pipe(
+		Effect.withSpan("indexing.update_last_indexed_snowflake", {
+			attributes: {
+				"channel.id": channelId,
+				"snowflake.new": newSnowflake.toString(),
+				"snowflake.current": currentSnowflake?.toString() ?? "null",
+			},
+		}),
+	);
 }
 
 function ensureInviteCode(
@@ -201,7 +215,18 @@ function ensureInviteCode(
 				`Created invite code ${inviteCode} for channel ${channel.name} (${channel.id})`,
 			);
 		}
-	});
+	}).pipe(
+		Effect.withSpan("indexing.ensure_invite_code", {
+			attributes: {
+				"channel.id": channel.id,
+				"channel.name": channel.name,
+				"channel.type": channel.type.toString(),
+				has_existing_invite: channelSettings?.flags.inviteCode
+					? "true"
+					: "false",
+			},
+		}),
+	);
 }
 
 function fetchChannelMessages(
@@ -259,7 +284,16 @@ function fetchChannelMessages(
 			`Fetched ${messages.length} messages from channel ${channelName} (${channelId})`,
 		);
 		return messages;
-	});
+	}).pipe(
+		Effect.withSpan("indexing.fetch_channel_messages", {
+			attributes: {
+				"channel.id": channelId,
+				"channel.name": channelName,
+				start_from_id: startFromId ?? "none",
+				max_messages: INDEXING_CONFIG.maxMessagesPerChannel.toString(),
+			},
+		}),
+	);
 }
 
 function fetchForumThreads(
@@ -311,7 +345,16 @@ function fetchForumThreads(
 			`Found ${threads.length} threads in forum ${forumChannelName} (${forumChannelId}), limited to ${limitedThreads.length}`,
 		);
 		return limitedThreads;
-	});
+	}).pipe(
+		Effect.withSpan("indexing.fetch_forum_threads", {
+			attributes: {
+				"forum.id": forumChannelId,
+				"forum.name": forumChannelName,
+				thread_cutoff_id: threadCutoffId?.toString() ?? "none",
+				max_threads: INDEXING_CONFIG.maxThreadsToCollect.toString(),
+			},
+		}),
+	);
 }
 
 function storeMessages(
@@ -331,6 +374,8 @@ function storeMessages(
 		yield* Effect.logDebug(
 			`Storing ${indexableMessages.length} indexable messages (filtered from ${messages.length} total)`,
 		);
+
+		yield* Metric.update(indexingBatchSize, indexableMessages.length);
 
 		const aoMessages = yield* Effect.forEach(
 			indexableMessages,
@@ -369,8 +414,21 @@ function storeMessages(
 			}
 		}
 
+		yield* Metric.incrementBy(messagesIndexed, indexableMessages.length);
 		yield* Effect.logDebug(`Successfully stored ${aoMessages.length} messages`);
-	});
+	}).pipe(
+		Effect.withSpan("indexing.store_messages", {
+			attributes: {
+				"channel.id": channelId,
+				"server.id": discordServerId,
+				"messages.total": messages.length.toString(),
+				"messages.indexable": Arr.filter(
+					messages,
+					isIndexableMessage,
+				).length.toString(),
+			},
+		}),
+	);
 }
 
 function upsertAuthors(messages: Message[]) {
@@ -398,7 +456,24 @@ function upsertAuthors(messages: Message[]) {
 				}),
 			{ concurrency: 3 },
 		);
-	});
+	}).pipe(
+		Effect.withSpan("indexing.upsert_authors", {
+			attributes: {
+				"authors.count": Arr.fromIterable(
+					HashMap.values(
+						HashMap.fromIterable(
+							Arr.map(
+								messages,
+								(msg) =>
+									[msg.author.id, toAODiscordAccount(msg.author)] as const,
+							),
+						),
+					),
+				).length.toString(),
+				"messages.count": messages.length.toString(),
+			},
+		}),
+	);
 }
 
 function upsertBotSettings(messages: Message[], discordServerId: string) {
@@ -450,7 +525,23 @@ function upsertBotSettings(messages: Message[], discordServerId: string) {
 				}),
 			{ concurrency: 1 },
 		);
-	});
+	}).pipe(
+		Effect.withSpan("indexing.upsert_bot_settings", {
+			attributes: {
+				"server.id": discordServerId,
+				"bot_messages.count": Arr.filter(
+					messages,
+					(msg) => msg.author.bot,
+				).length.toString(),
+				"unique_bots.count": Arr.dedupe(
+					Arr.map(
+						Arr.filter(messages, (msg) => msg.author.bot),
+						(msg) => msg.author.id,
+					),
+				).length.toString(),
+			},
+		}),
+	);
 }
 
 function upsertMessages(
@@ -484,7 +575,15 @@ function upsertMessages(
 		);
 
 		return createdIds;
-	});
+	}).pipe(
+		Effect.withSpan("indexing.upsert_messages", {
+			attributes: {
+				"channel.id": channelId,
+				"messages.count": aoMessages.length.toString(),
+				"batch.size": INDEXING_CONFIG.convexBatchSize.toString(),
+			},
+		}),
+	);
 }
 
 function uploadMedia(messages: Message[], channelId: string) {
@@ -514,7 +613,21 @@ function uploadMedia(messages: Message[], channelId: string) {
 				),
 			);
 		}
-	});
+	}).pipe(
+		Effect.withSpan("indexing.upload_media", {
+			attributes: {
+				"channel.id": channelId,
+				"messages.count": messages.length.toString(),
+				"attachments.count": Arr.flatMap(messages, (msg) =>
+					Arr.fromIterable(msg.attachments.values()),
+				).length.toString(),
+				"embed_images.count": Arr.flatMap(
+					messages,
+					extractEmbedImagesToUpload,
+				).length.toString(),
+			},
+		}),
+	);
 }
 
 type ChannelSettings = {
@@ -568,7 +681,16 @@ function indexThread(
 			thread.id,
 			lastIndexedSnowflake,
 		);
-	});
+	}).pipe(
+		Effect.withSpan("indexing.index_thread", {
+			attributes: {
+				"thread.id": thread.id,
+				"thread.name": thread.name,
+				"server.id": discordServerId,
+				last_indexed_snowflake: lastIndexedSnowflake?.toString() ?? "none",
+			},
+		}),
+	);
 }
 
 function extractThreadsFromMessages(messages: Message[]) {
@@ -651,7 +773,16 @@ function indexTextChannel(
 		}
 
 		yield* ensureInviteCode(channel, channelSettings);
-	});
+	}).pipe(
+		Effect.withSpan("indexing.index_text_channel", {
+			attributes: {
+				"channel.id": channel.id,
+				"channel.name": channel.name,
+				"channel.type": channel.type.toString(),
+				"server.id": discordServerId,
+			},
+		}),
+	);
 }
 
 function fetchThreadChannelMap(threads: AnyThreadChannel[]) {
@@ -805,7 +936,15 @@ function indexForumChannel(
 		}
 
 		yield* ensureInviteCode(channel, channelSettings);
-	});
+	}).pipe(
+		Effect.withSpan("indexing.index_forum_channel", {
+			attributes: {
+				"channel.id": channel.id,
+				"channel.name": channel.name,
+				"server.id": discordServerId,
+			},
+		}),
+	);
 }
 
 function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
@@ -891,10 +1030,21 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 		const guildEndTime = yield* Clock.currentTimeMillis;
 		const guildDuration = guildEndTime - guildStartTime;
 
+		yield* Metric.update(indexingDuration, guildDuration);
+
 		yield* Console.log(
 			`[${guildIndex + 1}/${totalGuilds}] Completed indexing for guild: ${guild.name} (${totalChannels} channels in ${formatDurationMs(guildDuration)})`,
 		);
-	});
+	}).pipe(
+		Effect.withSpan("indexing.index_guild", {
+			attributes: {
+				"guild.id": guild.id,
+				"guild.name": guild.name,
+				"guild.index": guildIndex.toString(),
+				total_guilds: totalGuilds.toString(),
+			},
+		}),
+	);
 }
 
 export const indexingLock = Effect.unsafeMakeSemaphore(1);
@@ -926,10 +1076,13 @@ export function runIndexingCore() {
 		const endTime = yield* Clock.currentTimeMillis;
 		const duration = endTime - startTime;
 
+		yield* Metric.update(indexingDuration, duration);
+
 		yield* Console.log(
 			`=== Indexing complete - ${totalGuilds} guilds indexed in ${formatDurationMs(duration)} ===`,
 		);
 	}).pipe(
+		Effect.withSpan("indexing.run_core"),
 		catchAllWithReport((error) =>
 			Console.error("Fatal error during indexing:", error),
 		),
@@ -950,10 +1103,18 @@ export function runIndexingForGuild(guild: Guild) {
 		const endTime = yield* Clock.currentTimeMillis;
 		const duration = endTime - startTime;
 
+		yield* Metric.update(indexingDuration, duration);
+
 		yield* Console.log(
 			`=== Indexing complete for ${guild.name} in ${formatDurationMs(duration)} ===`,
 		);
 	}).pipe(
+		Effect.withSpan("indexing.run_for_guild", {
+			attributes: {
+				"guild.id": guild.id,
+				"guild.name": guild.name,
+			},
+		}),
 		catchAllWithReport((error) =>
 			Console.error("Fatal error during guild indexing:", error),
 		),

@@ -19,11 +19,14 @@ import {
 	Fiber,
 	HashMap,
 	Layer,
+	Metric,
 	Option,
 	Ref,
 	Runtime,
 } from "effect";
+
 import { DiscordClient, DiscordClientLayer } from "./discord-client-service";
+import { discordApiCalls, discordApiErrors } from "../metrics";
 
 export class DiscordAPIError extends Data.TaggedError("DiscordAPIError")<{
 	cause: RawDiscordAPIError;
@@ -65,7 +68,11 @@ export const createDiscordService = Effect.gen(function* () {
 				}
 				return new UnknownDiscordError({ cause });
 			},
-		});
+		}).pipe(
+			Effect.tap(() => Metric.increment(discordApiCalls)),
+			Effect.tapError(() => Metric.increment(discordApiErrors)),
+			Effect.withSpan("discord.api_call"),
+		);
 
 	const setupErrorListeners = () => {
 		client.on("error", (error) => {
@@ -262,7 +269,11 @@ export const createDiscordService = Effect.gen(function* () {
 				}
 				return new UnknownDiscordError({ cause });
 			},
-		});
+		}).pipe(
+			Effect.tap(() => Metric.increment(discordApiCalls)),
+			Effect.tapError(() => Metric.increment(discordApiErrors)),
+			Effect.withSpan("discord.api_call"),
+		);
 
 	const setActivity = (name: string, options?: { type?: ActivityType }) =>
 		use((c) => {

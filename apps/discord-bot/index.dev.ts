@@ -2,17 +2,37 @@ import { NodeRuntime } from "@effect/platform-node";
 import { PostHogCaptureClientLayer } from "@packages/database/analytics/server";
 import { DatabaseHttpLayer } from "@packages/database/database";
 import { ConvexStorageLayer } from "@packages/database/storage";
-import { createSentryEffectLayer } from "@packages/observability/sentry-effect";
-import { Effect, Layer, Logger, LogLevel } from "effect";
+import { createObservabilityLayer } from "@packages/observability/observability";
+import { Duration, Effect, Layer, Logger, LogLevel } from "effect";
+
 import { BotLayers, program } from "./src/bot";
 import { DiscordLayer } from "./src/core/discord-service";
 
-const SentryLayer = createSentryEffectLayer({
-	dsn: process.env.SENTRY_DSN,
-	serviceName: "discord-bot",
-	environment: process.env.NODE_ENV ?? "development",
-	release: process.env.SENTRY_RELEASE,
-	tracesSampleRate: 1.0,
+const ObservabilityLayer = createObservabilityLayer({
+	sentry: {
+		dsn: process.env.SENTRY_DSN,
+		serviceName: "discord-bot",
+		environment: process.env.NODE_ENV ?? "development",
+		release: process.env.SENTRY_RELEASE,
+		tracesSampleRate: 1.0,
+	},
+	axiom: process.env.AXIOM_API_TOKEN
+		? {
+				apiToken: process.env.AXIOM_API_TOKEN,
+				tracesDataset:
+					process.env.AXIOM_TRACES_DATASET ?? "discord-bot-traces-dev",
+				logsDataset: process.env.AXIOM_LOGS_DATASET ?? "discord-bot-logs-dev",
+				metricsDataset:
+					process.env.AXIOM_METRICS_DATASET ?? "discord-bot-metrics-dev",
+				domain: process.env.AXIOM_DOMAIN,
+				serviceName: "discord-bot",
+				serviceVersion: process.env.SENTRY_RELEASE,
+				environment: process.env.NODE_ENV ?? "development",
+				tracesExportInterval: Duration.seconds(2),
+				logsExportInterval: Duration.millis(500),
+				metricsExportInterval: Duration.seconds(5),
+			}
+		: undefined,
 });
 
 const LoggerLayer = Logger.minimumLogLevel(LogLevel.Debug);
@@ -21,7 +41,7 @@ const BaseLayer = Layer.mergeAll(
 	DiscordLayer,
 	ConvexStorageLayer,
 	PostHogCaptureClientLayer,
-	SentryLayer,
+	ObservabilityLayer,
 	LoggerLayer,
 ).pipe(Layer.provideMerge(DatabaseHttpLayer));
 

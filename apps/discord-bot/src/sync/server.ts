@@ -1,10 +1,11 @@
 import { Database } from "@packages/database/database";
 import { Storage } from "@packages/database/storage";
 import { ChannelType, EmbedBuilder, type Guild } from "discord.js";
-import { Array as Arr, Console, Effect, Layer } from "effect";
+import { Array as Arr, Console, Effect, Layer, Metric } from "effect";
 import { registerCommands } from "../commands/register";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
+import { activeGuilds, syncOperations } from "../metrics";
 import {
 	registerServerGroup,
 	trackServerJoin,
@@ -79,26 +80,39 @@ const VANITY_INVITE_OVERRIDES: Record<string, string> = {
 };
 
 function toAOServer(guild: Guild) {
-	const vanityInviteCode =
-		VANITY_INVITE_OVERRIDES[guild.id] ?? guild.vanityURLCode ?? undefined;
-	return {
-		discordId: BigInt(guild.id),
-		name: guild.name,
-		icon: guild.icon ? guild.icon.toString() : undefined,
-		description: guild.description ?? undefined,
-		vanityInviteCode,
-		approximateMemberCount:
-			guild.approximateMemberCount ?? guild.memberCount ?? 0,
-	};
+	return Effect.gen(function* () {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": guild.id,
+			"discord.guild_name": guild.name,
+		});
+
+		const vanityInviteCode =
+			VANITY_INVITE_OVERRIDES[guild.id] ?? guild.vanityURLCode ?? undefined;
+		return {
+			discordId: BigInt(guild.id),
+			name: guild.name,
+			icon: guild.icon ? guild.icon.toString() : undefined,
+			description: guild.description ?? undefined,
+			vanityInviteCode,
+			approximateMemberCount:
+				guild.approximateMemberCount ?? guild.memberCount ?? 0,
+		};
+	}).pipe(Effect.withSpan("sync.server.to_ao_server"));
 }
 
 export function syncGuild(guild: Guild) {
 	return Effect.gen(function* () {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": guild.id,
+			"discord.guild_name": guild.name,
+		});
+		yield* Metric.increment(syncOperations);
+
 		const database = yield* Database;
 
 		yield* Console.log(`Syncing server ${guild.id} ${guild.name}`);
 
-		const aoServerData = toAOServer(guild);
+		const aoServerData = yield* toAOServer(guild);
 		const { isNew } =
 			yield* database.private.servers.upsertServer(aoServerData);
 
@@ -149,6 +163,7 @@ export function syncGuild(guild: Guild) {
 
 		yield* Effect.forEach(rootChannels, (channel) => syncChannel(channel));
 	}).pipe(
+		Effect.withSpan("sync.guild"),
 		catchAllWithReport((error) =>
 			Console.error(`Error syncing guild ${guild.id}:`, error),
 		),
@@ -162,6 +177,12 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildCreate", (guild) =>
 			Effect.gen(function* () {
+				yield* Effect.annotateCurrentSpan({
+					"discord.guild_id": guild.id,
+					"discord.guild_name": guild.name,
+				});
+				yield* Metric.incrementBy(activeGuilds, 1);
+
 				yield* Console.log(
 					`Bot joined new server: ${guild.name} (${guild.id})`,
 				);
@@ -175,6 +196,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				yield* catchAllSilentWithReport(trackServerJoin(guild));
 				yield* notifySuperUserOfServerJoin(guild);
 			}).pipe(
+				Effect.withSpan("event.guild_create"),
 				catchAllWithReport((error) =>
 					Console.error(`Error handling guild create ${guild.id}:`, error),
 				),
@@ -183,8 +205,13 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildUpdate", (_oldGuild, newGuild) =>
 			Effect.gen(function* () {
+				yield* Effect.annotateCurrentSpan({
+					"discord.guild_id": newGuild.id,
+					"discord.guild_name": newGuild.name,
+				});
 				yield* syncGuild(newGuild);
 			}).pipe(
+				Effect.withSpan("event.guild_update"),
 				catchAllWithReport((error) =>
 					Console.error(`Error updating guild ${newGuild.id}:`, error),
 				),
@@ -193,6 +220,12 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("guildDelete", (guild) =>
 			Effect.gen(function* () {
+				yield* Effect.annotateCurrentSpan({
+					"discord.guild_id": guild.id,
+					"discord.guild_name": guild.name,
+				});
+				yield* Metric.incrementBy(activeGuilds, -1);
+
 				const db = yield* Database;
 				const discord = yield* Discord;
 				yield* db.private.servers.updateServer({
@@ -216,6 +249,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 						),
 					);
 			}).pipe(
+				Effect.withSpan("event.guild_delete"),
 				catchAllWithReport((error) =>
 					Console.error(`Error handling guild delete ${guild.id}:`, error),
 				),

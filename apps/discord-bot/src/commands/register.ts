@@ -54,24 +54,32 @@ const guildCommands = [
 		.setContexts(InteractionContextType.Guild),
 ] as const;
 
+const registerCommandsEffect = Effect.fn("register_commands")(function* () {
+	yield* Effect.annotateCurrentSpan({
+		operation: "register_commands",
+	});
+
+	const discord = yield* Discord;
+
+	// Register global commands
+	yield* discord.use((client) =>
+		client.application?.commands.set(globalCommands),
+	);
+
+	// Register guild-specific commands for debug server
+	yield* discord.use((client) => {
+		const targetGuildId = "1037547185492996207";
+		const guild = client.guilds.cache.get(targetGuildId);
+		if (guild) {
+			return guild.commands.set(guildCommands);
+		}
+		// Return undefined if guild not found - this maintains the proper return type
+		return Promise.resolve(undefined);
+	});
+});
+
 export function registerCommands() {
-	return Effect.gen(function* () {
-		const discord = yield* Discord;
-
-		// Register global commands
-		yield* discord.use((client) =>
-			client.application?.commands.set(globalCommands),
-		);
-
-		// Register guild-specific commands for debug server
-		yield* discord.use((client) => {
-			const targetGuildId = "1037547185492996207";
-			const guild = client.guilds.cache.get(targetGuildId);
-			if (guild) {
-				return guild.commands.set(guildCommands);
-			}
-			// Return undefined if guild not found - this maintains the proper return type
-			return Promise.resolve(undefined);
-		});
-	}).pipe(Effect.mapError((error) => new Error(String(error))));
+	return registerCommandsEffect().pipe(
+		Effect.mapError((error) => new Error(String(error))),
+	);
 }

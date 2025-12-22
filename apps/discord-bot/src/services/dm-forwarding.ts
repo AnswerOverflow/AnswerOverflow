@@ -1,7 +1,8 @@
 import { ActionRowBuilder, type ButtonBuilder, EmbedBuilder } from "discord.js";
-import { Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
+import { eventsProcessed } from "../metrics";
 import { makeDmReplyButton } from "../utils/discord-components";
 import { catchAllWithReport } from "../utils/error-reporting";
 
@@ -11,6 +12,8 @@ export const DMForwardingHandlerLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("messageCreate", (message) =>
 			Effect.gen(function* () {
+				yield* Metric.increment(eventsProcessed);
+
 				if (!message.channel.isDMBased()) {
 					return;
 				}
@@ -67,7 +70,16 @@ export const DMForwardingHandlerLayer = Layer.scopedDiscard(
 						Console.error("Failed to forward DM to super user:", error),
 					),
 				);
-			}),
+			}).pipe(
+				Effect.withSpan("dm_forwarding.message_create", {
+					attributes: {
+						"message.id": message.id,
+						"author.id": message.author.id,
+						has_attachments: message.attachments.size > 0 ? "true" : "false",
+						content_length: message.content.length.toString(),
+					},
+				}),
+			),
 		);
 	}),
 );

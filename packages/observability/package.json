@@ -7,7 +7,9 @@
 		"./effect-otel": "./src/effect-otel.ts",
 		"./convex-effect-otel": "./src/convex-effect-otel.ts",
 		"./sentry": "./src/sentry.ts",
-		"./sentry-effect": "./src/sentry-effect.ts"
+		"./sentry-effect": "./src/sentry-effect.ts",
+		"./axiom": "./src/axiom.ts",
+		"./observability": "./src/observability.ts"
 	},
 	"scripts": {},
 	"dependencies": {

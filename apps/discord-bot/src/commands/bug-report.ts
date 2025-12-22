@@ -10,20 +10,26 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js";
-import { Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import { catchAllWithReport } from "../utils/error-reporting";
+import { commandsExecuted } from "../metrics";
 
 const BUG_REPORT_MODAL_ID = "bug-report-modal";
 const BUG_DESCRIPTION_INPUT_ID = "bug-description-input";
 const STEPS_TO_REPRODUCE_INPUT_ID = "steps-to-reproduce-input";
 const EXPECTED_BEHAVIOR_INPUT_ID = "expected-behavior-input";
 
-export function handleBugReportCommand(
-	interaction: ChatInputCommandInteraction,
-) {
-	return Effect.gen(function* () {
+export const handleBugReportCommand = Effect.fn("bug_report_command")(
+	function* (interaction: ChatInputCommandInteraction) {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": interaction.guildId ?? "unknown",
+			"discord.channel_id": interaction.channelId ?? "unknown",
+			"discord.user_id": interaction.user.id,
+		});
+		yield* Metric.increment(commandsExecuted);
+
 		const discord = yield* Discord;
 
 		const modal = new ModalBuilder()
@@ -67,13 +73,18 @@ export function handleBugReportCommand(
 		modal.addComponents(row1, row2, row3);
 
 		yield* discord.callClient(() => interaction.showModal(modal));
-	});
-}
+	},
+);
 
-export function handleBugReportModalSubmit(
-	interaction: ModalSubmitInteraction,
-) {
-	return Effect.gen(function* () {
+export const handleBugReportModalSubmit = Effect.fn("bug_report_modal_submit")(
+	function* (interaction: ModalSubmitInteraction) {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": interaction.guildId ?? "unknown",
+			"discord.channel_id": interaction.channelId ?? "unknown",
+			"discord.user_id": interaction.user.id,
+		});
+		yield* Metric.increment(commandsExecuted);
+
 		const discord = yield* Discord;
 
 		if (interaction.customId !== BUG_REPORT_MODAL_ID) {
@@ -147,8 +158,8 @@ export function handleBugReportModalSubmit(
 				flags: MessageFlags.Ephemeral,
 			}),
 		);
-	});
-}
+	},
+);
 
 export const BugReportCommandHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
