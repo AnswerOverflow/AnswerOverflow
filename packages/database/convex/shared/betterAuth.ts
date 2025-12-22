@@ -1,8 +1,8 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
-import { convex } from "@convex-dev/better-auth/plugins";
+import { convex, crossDomain } from "@convex-dev/better-auth/plugins";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { admin, anonymous, oAuthProxy } from "better-auth/plugins";
+import { admin, anonymous } from "better-auth/plugins";
 import { components, internal } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
@@ -52,6 +52,7 @@ export const createAuthOptions = (
 
 			disableCSRFCheck: true,
 		},
+		baseURL: process.env.SITE_URL,
 		database: authComponent.adapter(ctx),
 		secret: (() => {
 			const secret = process.env.BETTER_AUTH_SECRET;
@@ -138,7 +139,9 @@ export const createAuthOptions = (
 		},
 		plugins: [
 			convex({ authConfig }),
-			oAuthProxy(),
+			crossDomain({
+				siteUrl: process.env.SITE_URL ?? "https://www.answeroverflow.com",
+			}),
 			anonymous({
 				disableDeleteAnonymousUser: true,
 			}),
