@@ -44,6 +44,7 @@ export const serverSchema = v.object({
 	discordId: v.int64(),
 	name: v.string(),
 	icon: v.optional(v.string()),
+	banner: v.optional(v.string()),
 	description: v.optional(v.string()),
 	vanityInviteCode: v.optional(v.string()),
 	kickedTime: v.optional(v.number()),

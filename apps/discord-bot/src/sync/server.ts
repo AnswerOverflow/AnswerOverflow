@@ -92,6 +92,7 @@ function toAOServer(guild: Guild) {
 			discordId: BigInt(guild.id),
 			name: guild.name,
 			icon: guild.icon ? guild.icon.toString() : undefined,
+			banner: guild.banner ? guild.banner.toString() : undefined,
 			description: guild.description ?? undefined,
 			vanityInviteCode,
 			approximateMemberCount:
@@ -150,6 +151,32 @@ export function syncGuild(guild: Guild) {
 					catchAllWithReport((error) =>
 						Console.warn(
 							`Failed to upload server icon for ${guild.name}:`,
+							error,
+						),
+					),
+				);
+		}
+
+		if (guild.banner) {
+			const storage = yield* Storage;
+			const isAnimated = guild.banner.startsWith("a_");
+			const extension = isAnimated ? "gif" : "png";
+			const contentType = isAnimated ? "image/gif" : "image/png";
+
+			yield* storage
+				.uploadFileFromUrl({
+					id: `${guild.id}/${guild.banner}`,
+					filename: `banner.${extension}`,
+					contentType,
+					url: `https://cdn.discordapp.com/banners/${guild.id}/${guild.banner}.${extension}?size=4096`,
+				})
+				.pipe(
+					Effect.tap(() =>
+						Console.log(`Uploaded server banner for ${guild.name}`),
+					),
+					catchAllWithReport((error) =>
+						Console.warn(
+							`Failed to upload server banner for ${guild.name}:`,
 							error,
 						),
 					),
