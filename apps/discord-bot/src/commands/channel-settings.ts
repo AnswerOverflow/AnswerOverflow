@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
-import { commandsExecuted } from "../metrics";
+import { commandExecuted } from "../metrics";
 
 function getDashboardUrl(serverId: string, channelId: string): string {
 	const baseUrl =
@@ -26,7 +26,7 @@ export const handleChannelSettingsCommand = Effect.fn(
 		"discord.channel_id": interaction.channelId ?? "unknown",
 		"discord.user_id": interaction.user.id,
 	});
-	yield* Metric.increment(commandsExecuted);
+	yield* Metric.increment(commandExecuted("channel_settings"));
 
 	const database = yield* Database;
 	const discord = yield* Discord;

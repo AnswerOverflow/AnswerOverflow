@@ -12,7 +12,7 @@ import {
 } from "discord.js";
 import { Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
-import { commandsExecuted } from "../metrics";
+import { commandExecuted } from "../metrics";
 import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 import { catchAllSilentWithReport } from "../utils/error-reporting";
 
@@ -139,7 +139,7 @@ export const handleManageAccountCommand = Effect.fn("manage_account_command")(
 			"discord.channel_id": interaction.channelId ?? "unknown",
 			"discord.user_id": interaction.user.id,
 		});
-		yield* Metric.increment(commandsExecuted);
+		yield* Metric.increment(commandExecuted("manage_account"));
 
 		const database = yield* Database;
 		const discord = yield* Discord;

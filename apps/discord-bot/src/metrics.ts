@@ -1,9 +1,10 @@
 import * as Metric from "effect/Metric";
 import * as MetricBoundaries from "effect/MetricBoundaries";
 
-export const commandsExecuted = Metric.counter("discord.commands.executed", {
-	description: "Number of Discord commands executed",
-});
+export const commandExecuted = (commandName: string) =>
+	Metric.counter("discord.commands.executed", {
+		description: "Number of Discord commands executed",
+	}).pipe(Metric.tagged("command", commandName));
 
 export const commandDuration = Metric.histogram(
 	"discord.commands.duration_ms",

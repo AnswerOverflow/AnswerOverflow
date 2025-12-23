@@ -4,7 +4,7 @@ import { EmbedBuilder, MessageFlags } from "discord.js";
 import { Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
-import { commandsExecuted } from "../metrics";
+import { commandExecuted } from "../metrics";
 import { catchAllWithReport } from "../utils/error-reporting";
 
 export const handleDebugCommand = Effect.fn("debug_command")(function* (
@@ -15,7 +15,7 @@ export const handleDebugCommand = Effect.fn("debug_command")(function* (
 		"discord.channel_id": interaction.channelId ?? "unknown",
 		"discord.user_id": interaction.user.id,
 	});
-	yield* Metric.increment(commandsExecuted);
+	yield* Metric.increment(commandExecuted("debug"));
 
 	const database = yield* Database;
 	const discord = yield* Discord;

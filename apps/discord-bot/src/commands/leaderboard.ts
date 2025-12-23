@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
-import { commandsExecuted } from "../metrics";
+import { commandExecuted } from "../metrics";
 import { trackLeaderboardViewed } from "../utils/analytics";
 import {
 	catchAllSilentWithReport,
@@ -41,7 +41,7 @@ export const handleLeaderboardCommand = Effect.fn("leaderboard_command")(
 			"discord.channel_id": interaction.channelId ?? "unknown",
 			"discord.user_id": interaction.user.id,
 		});
-		yield* Metric.increment(commandsExecuted);
+		yield* Metric.increment(commandExecuted("leaderboard"));
 
 		const database = yield* Database;
 		const discord = yield* Discord;

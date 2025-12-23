@@ -3,7 +3,7 @@ import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType, MessageFlags } from "discord.js";
 import { Data, Duration, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
-import { commandsExecuted, solutionsMarked } from "../metrics";
+import { commandExecuted, solutionsMarked } from "../metrics";
 import { makeMarkSolutionResponse } from "../services/mark-solution";
 import {
 	trackMarkSolutionCommandUsed,
@@ -41,7 +41,7 @@ export const handleMarkSolutionCommand = Effect.fn("mark_solution_command")(
 			"discord.user_id": interaction.user.id,
 			"discord.target_message_id": interaction.targetId,
 		});
-		yield* Metric.increment(commandsExecuted);
+		yield* Metric.increment(commandExecuted("mark_solution"));
 
 		const database = yield* Database;
 		const discord = yield* Discord;

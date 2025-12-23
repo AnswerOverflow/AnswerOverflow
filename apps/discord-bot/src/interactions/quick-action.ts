@@ -19,7 +19,7 @@ import {
 	Predicate,
 } from "effect";
 import { Discord } from "../core/discord-service";
-import { commandsExecuted } from "../metrics";
+import { commandExecuted } from "../metrics";
 import { trackQuickActionCommandSent } from "../utils/analytics";
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
@@ -39,7 +39,7 @@ export const handleQuickActionCommand = Effect.fn("interaction.quick_action")(
 			"discord.user_id": interaction.user.id,
 			"interaction.command_name": interaction.commandName,
 		});
-		yield* Metric.increment(commandsExecuted);
+		yield* Metric.increment(commandExecuted("quick_action"));
 
 		const database = yield* Database;
 		const discord = yield* Discord;

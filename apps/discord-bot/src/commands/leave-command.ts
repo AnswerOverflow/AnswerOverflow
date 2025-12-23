@@ -4,7 +4,7 @@ import { Console, Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import { catchAllWithReport } from "../utils/error-reporting";
-import { commandsExecuted } from "../metrics";
+import { commandExecuted } from "../metrics";
 
 const handleLeaveDMCommand = Effect.fn("leave_dm_command")(function* (
 	message: Message,
@@ -13,7 +13,7 @@ const handleLeaveDMCommand = Effect.fn("leave_dm_command")(function* (
 		"discord.channel_id": message.channelId,
 		"discord.user_id": message.author.id,
 	});
-	yield* Metric.increment(commandsExecuted);
+	yield* Metric.increment(commandExecuted("leave"));
 
 	const discord = yield* Discord;
 	const content = message.content.trim();

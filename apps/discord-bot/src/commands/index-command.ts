@@ -3,7 +3,7 @@ import { ChannelType } from "discord.js";
 import { Clock, Console, Effect, Layer, Metric, Option } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
-import { commandsExecuted } from "../metrics";
+import { commandExecuted } from "../metrics";
 import {
 	indexingLock,
 	runIndexingCore,
@@ -30,7 +30,7 @@ const handleIndexDMCommand = Effect.fn("index_dm_command")(function* (
 		"discord.channel_id": message.channelId,
 		"discord.user_id": message.author.id,
 	});
-	yield* Metric.increment(commandsExecuted);
+	yield* Metric.increment(commandExecuted("index"));
 
 	const discord = yield* Discord;
 	const content = message.content.trim();

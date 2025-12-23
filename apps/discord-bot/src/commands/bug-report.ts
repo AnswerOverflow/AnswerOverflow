@@ -14,7 +14,7 @@ import { Console, Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import { catchAllWithReport } from "../utils/error-reporting";
-import { commandsExecuted } from "../metrics";
+import { commandExecuted } from "../metrics";
 
 const BUG_REPORT_MODAL_ID = "bug-report-modal";
 const BUG_DESCRIPTION_INPUT_ID = "bug-description-input";
@@ -28,7 +28,7 @@ export const handleBugReportCommand = Effect.fn("bug_report_command")(
 			"discord.channel_id": interaction.channelId ?? "unknown",
 			"discord.user_id": interaction.user.id,
 		});
-		yield* Metric.increment(commandsExecuted);
+		yield* Metric.increment(commandExecuted("bug_report"));
 
 		const discord = yield* Discord;
 
@@ -83,7 +83,7 @@ export const handleBugReportModalSubmit = Effect.fn("bug_report_modal_submit")(
 			"discord.channel_id": interaction.channelId ?? "unknown",
 			"discord.user_id": interaction.user.id,
 		});
-		yield* Metric.increment(commandsExecuted);
+		yield* Metric.increment(commandExecuted("bug_report_modal_submit"));
 
 		const discord = yield* Discord;
 

@@ -14,7 +14,7 @@ import { Console, Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import { catchAllWithReport } from "../utils/error-reporting";
-import { commandsExecuted } from "../metrics";
+import { commandExecuted } from "../metrics";
 
 const FEEDBACK_MODAL_ID = "feedback-modal";
 const FEEDBACK_INPUT_ID = "feedback-input";
@@ -27,7 +27,7 @@ export const handleFeedbackCommand = Effect.fn("feedback_command")(function* (
 		"discord.channel_id": interaction.channelId ?? "unknown",
 		"discord.user_id": interaction.user.id,
 	});
-	yield* Metric.increment(commandsExecuted);
+	yield* Metric.increment(commandExecuted("feedback"));
 
 	const discord = yield* Discord;
 
@@ -59,7 +59,7 @@ export const handleFeedbackModalSubmit = Effect.fn("feedback_modal_submit")(
 			"discord.channel_id": interaction.channelId ?? "unknown",
 			"discord.user_id": interaction.user.id,
 		});
-		yield* Metric.increment(commandsExecuted);
+		yield* Metric.increment(commandExecuted("feedback"));
 
 		const discord = yield* Discord;
 
