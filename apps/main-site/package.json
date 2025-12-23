@@ -41,6 +41,7 @@
 		"import-in-the-middle": "^2.0.0",
 		"jose": "^6.1.2",
 		"lucide-react": "catalog:",
+		"mcp-handler": "^1.0.4",
 		"next": "catalog:",
 		"next-themes": "^0.4.6",
 		"nuqs": "catalog:",

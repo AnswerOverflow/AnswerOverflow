@@ -314,6 +314,11 @@
 			"headers": {
 				"Authorization": "Bearer {env:KERNEL_API_KEY}"
 			}
+		},
+		"answeroverflow-dev": {
+			"type": "remote",
+			"url": "http://localhost:3000/mcp",
+			"enabled": true
 		}
 	},
 	"tools": {
