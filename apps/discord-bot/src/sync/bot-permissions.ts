@@ -14,7 +14,7 @@ export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				const botUser = yield* discord.use((c) => c.user);
+				const botUser = yield* discord.use("get_bot_user", (c) => c.user);
 				if (!botUser || newMember.user.id !== botUser.id) {
 					return;
 				}

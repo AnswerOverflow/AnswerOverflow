@@ -62,12 +62,12 @@ const registerCommandsEffect = Effect.fn("register_commands")(function* () {
 	const discord = yield* Discord;
 
 	// Register global commands
-	yield* discord.use((client) =>
+	yield* discord.use("register_global_commands", (client) =>
 		client.application?.commands.set(globalCommands),
 	);
 
 	// Register guild-specific commands for debug server
-	yield* discord.use((client) => {
+	yield* discord.use("register_guild_commands", (client) => {
 		const targetGuildId = "1037547185492996207";
 		const guild = client.guilds.cache.get(targetGuildId);
 		if (guild) {

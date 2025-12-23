@@ -128,7 +128,7 @@ const handleIndexServer = Effect.fn("index_server_command")(function* (
 
 	const discord = yield* Discord;
 
-	const guild = yield* discord.use((client) =>
+	const guild = yield* discord.use("get_guild", (client) =>
 		client.guilds.cache.get(serverId),
 	);
 

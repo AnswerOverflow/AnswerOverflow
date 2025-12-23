@@ -55,7 +55,10 @@ export const createDiscordService = Effect.gen(function* () {
 		HashMap.empty<string, ReadonlyArray<Fiber.RuntimeFiber<void, unknown>>>(),
 	);
 
-	const use = <A>(fn: (client: Client) => A | Promise<A>) =>
+	const use = <A>(
+		operationName: string,
+		fn: (client: Client) => A | Promise<A>,
+	) =>
 		Effect.tryPromise({
 			try: async (): Promise<Awaited<A>> => {
 				const result = await fn(client);
@@ -70,7 +73,7 @@ export const createDiscordService = Effect.gen(function* () {
 		}).pipe(
 			Effect.tap(() => Metric.increment(discordApiCalls)),
 			Effect.tapError(() => Metric.increment(discordApiErrors)),
-			Effect.withSpan("discord.api_call"),
+			Effect.withSpan(`discord.${operationName}`),
 		);
 
 	const setupErrorListeners = () => {
@@ -94,7 +97,7 @@ export const createDiscordService = Effect.gen(function* () {
 		Effect.gen(function* () {
 			setupErrorListeners();
 
-			yield* use((c) => c.login(token));
+			yield* use("login", (c) => c.login(token));
 
 			yield* Effect.async<void, UnknownDiscordError>((resume) => {
 				client.once("clientReady", () => {
@@ -185,15 +188,16 @@ export const createDiscordService = Effect.gen(function* () {
 		});
 
 	const getGuild = (id: string) =>
-		use((c) => {
+		use("get_guild", (c) => {
 			const guild = c.guilds.cache.get(id);
 			return guild ?? null;
 		});
 
-	const getGuilds = () => use((c) => Arr.fromIterable(c.guilds.cache.values()));
+	const getGuilds = () =>
+		use("get_guilds", (c) => Arr.fromIterable(c.guilds.cache.values()));
 
 	const getChannel = (id: string) =>
-		use((c) => {
+		use("get_channel", (c) => {
 			const channel = c.channels.cache.get(id);
 			return channel ?? null;
 		});
@@ -202,7 +206,7 @@ export const createDiscordService = Effect.gen(function* () {
 		channelId: string,
 		options: { limit: number; after?: string },
 	) =>
-		use(async (c) => {
+		use("fetch_channel_messages", async (c) => {
 			const channel = c.channels.cache.get(channelId);
 			if (!channel) {
 				throw new Error(`Channel ${channelId} not found`);
@@ -224,7 +228,7 @@ export const createDiscordService = Effect.gen(function* () {
 		});
 
 	const fetchActiveThreads = (forumChannelId: string) =>
-		use(async (c) => {
+		use("fetch_active_threads", async (c) => {
 			const channel = c.channels.cache.get(forumChannelId);
 			if (!channel) {
 				throw new Error(`Channel ${forumChannelId} not found`);
@@ -241,7 +245,7 @@ export const createDiscordService = Effect.gen(function* () {
 		forumChannelId: string,
 		options: { before?: string },
 	) =>
-		use(async (c) => {
+		use("fetch_archived_threads", async (c) => {
 			const channel = c.channels.cache.get(forumChannelId);
 			if (!channel) {
 				throw new Error(`Channel ${forumChannelId} not found`);
@@ -275,12 +279,12 @@ export const createDiscordService = Effect.gen(function* () {
 		);
 
 	const setActivity = (name: string, options?: { type?: ActivityType }) =>
-		use((c) => {
+		use("set_activity", (c) => {
 			return c.user?.setActivity(name, options);
 		});
 
 	const getBotPermissionsForChannel = (channelId: string, guildId: string) =>
-		use(async (c) => {
+		use("get_bot_permissions", async (c) => {
 			const guild = c.guilds.cache.get(guildId);
 			if (!guild) {
 				return null;

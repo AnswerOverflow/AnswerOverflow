@@ -59,7 +59,7 @@ export const handleFeedbackModalSubmit = Effect.fn("feedback_modal_submit")(
 			"discord.channel_id": interaction.channelId ?? "unknown",
 			"discord.user_id": interaction.user.id,
 		});
-		yield* Metric.increment(commandExecuted("feedback"));
+		yield* Metric.increment(commandExecuted("feedback_modal_submit"));
 
 		const discord = yield* Discord;
 

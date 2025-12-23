@@ -258,6 +258,11 @@ export const ServerParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("clientReady", (client) =>
 			Effect.gen(function* () {
+				yield* Effect.annotateCurrentSpan({
+					"discord.bot_user_id": client.user.id,
+					"discord.bot_user_tag": client.user.tag,
+				});
+
 				yield* registerCommands().pipe(
 					catchAllWithReport((error) =>
 						Console.error("Error registering commands:", error),
@@ -271,6 +276,11 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				);
 				const guilds = yield* discord.getGuilds();
 				const activeServerIds = new Set(guilds.map((guild) => guild.id));
+
+				yield* Effect.annotateCurrentSpan({
+					"servers.total": serverCount.toString(),
+					"servers.active": activeServerIds.size.toString(),
+				});
 
 				yield* Console.table([
 					{
@@ -288,6 +298,9 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				);
 
 				if (serversToMarkAsKicked.length > 0) {
+					yield* Effect.annotateCurrentSpan({
+						"servers.to_mark_kicked": serversToMarkAsKicked.length.toString(),
+					});
 					yield* Console.log(
 						`Marking ${serversToMarkAsKicked.length} servers as kicked`,
 					);
@@ -310,7 +323,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 						),
 					);
 				}
-			}),
+			}).pipe(Effect.withSpan("event.client_ready")),
 		);
 	}),
 );
