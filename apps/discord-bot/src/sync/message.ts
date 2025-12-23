@@ -58,7 +58,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 						`Processing message batch of ${batch.length} items for channel ${channelId}`,
 					);
 					yield* database.private.messages.upsertManyMessages({
-						messages: batch,
+						messages: batch.map(({ channelId: _, ...rest }) => rest),
 						ignoreChecks: false,
 					});
 				}).pipe(Effect.withSpan("sync.message_batch")),
