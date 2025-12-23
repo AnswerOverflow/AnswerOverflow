@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@packages/ui/components/card";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@packages/ui/components/link";
 import { blog } from "@/.source/server";
 import { formatDate, parseDate } from "@/lib/date-utils";
 

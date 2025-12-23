@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@packages/ui/components/card";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@packages/ui/components/link";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 

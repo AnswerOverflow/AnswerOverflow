@@ -1,7 +1,7 @@
 "use client";
 
 import { PanelLeftIcon } from "lucide-react";
-import Link from "next/link";
+import { Link } from "../link";
 import * as React from "react";
 import { AnswerOverflowLogo } from "../answer-overflow-logo";
 import { Button } from "../button";
