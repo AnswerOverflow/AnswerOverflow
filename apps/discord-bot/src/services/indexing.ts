@@ -56,11 +56,17 @@ const INDEXING_CONFIG = {
 	messagesPerPage: 100,
 	channelProcessDelay: Duration.millis(100),
 	guildProcessDelay: Duration.millis(500),
-	convexBatchSize: 15,
-	batchWriteDelay: Duration.millis(50),
+	convexBatchSize: 5,
+	batchWriteDelayBase: 100,
+	batchWriteDelayJitter: 50,
 	maxThreadsToCollect: 5000,
 	recentUpdateThreshold: Duration.hours(6),
 } as const;
+
+function getJitteredDelay(): Duration.Duration {
+	const jitter = Math.random() * INDEXING_CONFIG.batchWriteDelayJitter;
+	return Duration.millis(INDEXING_CONFIG.batchWriteDelayBase + jitter);
+}
 
 function canBotViewChannel(channel: GuildChannel): boolean {
 	const permissions = channel.permissionsFor(channel.client.user);
@@ -562,7 +568,7 @@ function upsertMessages(
 						messages: chunk,
 						ignoreChecks: false,
 					});
-					yield* Effect.sleep(INDEXING_CONFIG.batchWriteDelay);
+					yield* Effect.sleep(getJitteredDelay());
 					return result;
 				}),
 			{ concurrency: 1 },
@@ -914,7 +920,7 @@ function indexForumChannel(
 						);
 					}),
 				),
-			{ concurrency: 3 },
+			{ concurrency: 1 },
 		);
 
 		if (threadsToIndex.length > 0) {
@@ -1024,7 +1030,7 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 						);
 					}),
 				),
-			{ concurrency: 3 },
+			{ concurrency: 1 },
 		);
 
 		const guildEndTime = yield* Clock.currentTimeMillis;
@@ -1070,7 +1076,7 @@ export function runIndexingCore() {
 						),
 					),
 				),
-			{ concurrency: 2 },
+			{ concurrency: 1 },
 		);
 
 		const endTime = yield* Clock.currentTimeMillis;

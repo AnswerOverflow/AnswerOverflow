@@ -277,6 +277,50 @@
 				"JAEGER_PORT": "16686",
 				"JAEGER_PROTOCOL": "HTTP"
 			}
+		},
+		"axiom": {
+			"url": "https://mcp.axiom.co/mcp",
+			"type": "remote",
+			"oauth": {
+				"scope": "tools:read tools:execute"
+			}
+		},
+		"sentry": {
+			"url": "https://mcp.sentry.dev/mcp",
+			"type": "remote",
+			"oauth": {
+				"scope": "tools:read tools:execute"
+			}
+		},
+		"vercel": {
+			"type": "remote",
+			"url": "https://mcp.vercel.com",
+			"oauth": {
+				"scope": "tools:read tools:execute"
+			}
+		},
+		"posthog": {
+			"type": "remote",
+			"url": "https://mcp.posthog.com/mcp",
+			"oauth": false,
+			"headers": {
+				"Authorization": "Bearer {env:POSTHOG_PERSONAL_API_KEY}"
+			}
+		},
+		"kernel": {
+			"type": "remote",
+			"url": "https://mcp.onkernel.com/mcp",
+			"oauth": false,
+			"headers": {
+				"Authorization": "Bearer {env:KERNEL_API_KEY}"
+			}
 		}
+	},
+	"tools": {
+		"posthog_*": false,
+		"axiom_*": false,
+		"sentry_*": false,
+		"vercel_*": false,
+		"kernel_*": false
 	}
 }

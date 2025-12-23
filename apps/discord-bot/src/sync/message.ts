@@ -9,6 +9,10 @@ import {
 } from "../utils/attachment-upload";
 import { createBatchedQueue } from "../utils/batched-queue";
 import {
+	type ChannelKeyedItem,
+	createChannelBatchedQueue,
+} from "../utils/channel-batched-queue";
+import {
 	extractEmbedImagesToUpload,
 	toAODiscordAccount,
 	toAOMessage,
@@ -18,30 +22,40 @@ import { catchAllWithReport } from "../utils/error-reporting";
 import { isHumanMessage } from "../utils/message-utils";
 
 const BATCH_CONFIG = {
-	maxBatchSize: process.env.NODE_ENV === "production" ? 15 : 1,
-	maxWait: Duration.millis(10000),
+	maxBatchSize: process.env.NODE_ENV === "production" ? 5 : 1,
+	maxWait: Duration.millis(5000),
 } as const;
 
 type MessageUpsertArgs = ReturnType<typeof toUpsertMessageArgs>;
+type ChannelKeyedMessageArgs = MessageUpsertArgs & ChannelKeyedItem;
+
+function toChannelKeyedArgs(args: MessageUpsertArgs): ChannelKeyedMessageArgs {
+	return {
+		...args,
+		channelId: args.message.channelId.toString(),
+	};
+}
 
 export const MessageParityLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 		const database = yield* Database;
 
-		const messageQueue = yield* createBatchedQueue<
-			MessageUpsertArgs,
+		const messageQueue = yield* createChannelBatchedQueue<
+			ChannelKeyedMessageArgs,
 			unknown,
 			Database
 		>({
 			process: (batch) =>
 				Effect.gen(function* () {
+					const channelId = batch[0]?.channelId ?? "unknown";
 					yield* Effect.annotateCurrentSpan({
 						"batch.size": batch.length.toString(),
 						"batch.type": "messages",
+						"channel.id": channelId,
 					});
 					yield* Effect.logDebug(
-						`Processing message batch of ${batch.length} items`,
+						`Processing message batch of ${batch.length} items for channel ${channelId}`,
 					);
 					yield* database.private.messages.upsertManyMessages({
 						messages: batch,
@@ -142,7 +156,9 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					);
 				}
 
-				yield* messageQueue.offer(toUpsertMessageArgs(data));
+				yield* messageQueue.offer(
+					toChannelKeyedArgs(toUpsertMessageArgs(data)),
+				);
 
 				if (newMessage.embeds.length > 0) {
 					const embedImagesToUpload = extractEmbedImagesToUpload(newMessage);
@@ -297,7 +313,9 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					toAOMessage(message, server.discordId.toString()),
 				);
 
-				yield* messageQueue.offer(toUpsertMessageArgs(data));
+				yield* messageQueue.offer(
+					toChannelKeyedArgs(toUpsertMessageArgs(data)),
+				);
 
 				if (message.attachments.size > 0) {
 					const attachmentsToUpload = Array.from(
