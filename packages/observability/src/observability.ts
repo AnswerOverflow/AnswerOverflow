@@ -1,6 +1,6 @@
 import * as Layer from "effect/Layer";
 
-import { createAxiomLayer, type AxiomConfig } from "./axiom";
+import { type AxiomConfig, createAxiomLayer } from "./axiom";
 import {
 	createSentryEffectLayer,
 	type SentryEffectConfig,

@@ -3,8 +3,8 @@ import { ChannelType } from "discord.js";
 import { Console, Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
-import { catchAllWithReport } from "../utils/error-reporting";
 import { commandExecuted } from "../metrics";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 const handleLeaveDMCommand = Effect.fn("leave_dm_command")(function* (
 	message: Message,

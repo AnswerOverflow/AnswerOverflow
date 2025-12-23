@@ -13,8 +13,8 @@ import {
 import { Console, Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
-import { catchAllWithReport } from "../utils/error-reporting";
 import { commandExecuted } from "../metrics";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 const FEEDBACK_MODAL_ID = "feedback-modal";
 const FEEDBACK_INPUT_ID = "feedback-input";

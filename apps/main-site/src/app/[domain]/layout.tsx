@@ -2,8 +2,8 @@ import { Providers } from "@packages/ui/components/providers";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DomainNavbarFooterWrapper } from "../../components/domain-navbar-footer-wrapper";
 import { getTenantData } from "@/lib/tenant";
+import { DomainNavbarFooterWrapper } from "../../components/domain-navbar-footer-wrapper";
 
 type Props = {
 	children: React.ReactNode;
