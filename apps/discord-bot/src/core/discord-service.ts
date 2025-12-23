@@ -225,7 +225,10 @@ export const createDiscordService = Effect.gen(function* () {
 				limit: options.limit,
 				after: options.after,
 			});
-		});
+		}).pipe(
+			Effect.annotateLogs({ channelId }),
+			Effect.annotateSpans({ "discord.channel_id": channelId }),
+		);
 
 	const fetchActiveThreads = (forumChannelId: string) =>
 		use("fetch_active_threads", async (c) => {
@@ -239,7 +242,10 @@ export const createDiscordService = Effect.gen(function* () {
 			}
 
 			return await channel.threads.fetchActive();
-		});
+		}).pipe(
+			Effect.annotateLogs({ channelId: forumChannelId }),
+			Effect.annotateSpans({ "discord.channel_id": forumChannelId }),
+		);
 
 	const fetchArchivedThreads = (
 		forumChannelId: string,
@@ -259,7 +265,10 @@ export const createDiscordService = Effect.gen(function* () {
 				type: "public",
 				before: options.before,
 			});
-		});
+		}).pipe(
+			Effect.annotateLogs({ channelId: forumChannelId }),
+			Effect.annotateSpans({ "discord.channel_id": forumChannelId }),
+		);
 
 	const callClient = <T>(call: () => T | Promise<T>) =>
 		Effect.tryPromise({

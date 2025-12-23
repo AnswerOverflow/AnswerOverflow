@@ -107,6 +107,7 @@ function callClientMethod(
 	client: { query: any; mutation: any; action: any },
 	fullArgs: any,
 ): Effect.Effect<any, ConvexError> {
+	const functionName = getFunctionName(funcRef);
 	return Effect.tryPromise({
 		try: async () => {
 			switch (funcType) {
@@ -119,7 +120,14 @@ function callClientMethod(
 			}
 		},
 		catch: (cause) => new ConvexError({ cause }),
-	});
+	}).pipe(
+		Effect.withSpan(`convex.${funcType}`, {
+			attributes: {
+				"convex.function": functionName,
+				"convex.type": funcType,
+			},
+		}),
+	);
 }
 
 const isDevelopment = process.env.NODE_ENV === "development";
