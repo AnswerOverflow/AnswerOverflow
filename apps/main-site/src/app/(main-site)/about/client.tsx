@@ -5,14 +5,7 @@ import { Link } from "@packages/ui/components/link";
 import { LinkButton } from "@packages/ui/components/link-button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { cn } from "@packages/ui/lib/utils";
-import {
-	ArrowRight,
-	BarChart3,
-	Plus,
-	Search,
-	Sparkles,
-	Zap,
-} from "lucide-react";
+import { ArrowRight, Plus, Search } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -416,56 +409,6 @@ function FeatureCard({
 			<h3 className="mt-4 text-lg font-semibold text-foreground">{title}</h3>
 			<p className="mt-2 text-sm text-muted-foreground">{description}</p>
 		</div>
-	);
-}
-
-function FeaturesSection() {
-	const features = [
-		{
-			icon: Search,
-			title: "Google Indexing",
-			description:
-				"Your Discord threads appear in Google search results, driving organic traffic to your community.",
-		},
-		{
-			icon: Sparkles,
-			title: "AI-Powered Answers",
-			description:
-				"Let AI answer common questions using your existing Discord discussions as context.",
-		},
-		{
-			icon: BarChart3,
-			title: "Community Analytics",
-			description:
-				"Gain insights into what your community is discussing and identify trending topics.",
-		},
-		{
-			icon: Zap,
-			title: "Instant Setup",
-			description:
-				"Add the bot to your server and start indexing in minutes. No complex configuration needed.",
-		},
-	];
-
-	return (
-		<section className="py-16 sm:py-24">
-			<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-				<div className="text-center">
-					<h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-						Why Answer Overflow?
-					</h2>
-					<p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-						Everything you need to make your Discord community&apos;s knowledge
-						accessible to the world.
-					</p>
-				</div>
-				<div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-					{features.map((feature) => (
-						<FeatureCard key={feature.title} {...feature} />
-					))}
-				</div>
-			</div>
-		</section>
 	);
 }
 

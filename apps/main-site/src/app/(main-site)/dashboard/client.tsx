@@ -6,7 +6,6 @@ import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,
-	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,

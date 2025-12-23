@@ -1,6 +1,9 @@
 "use client";
 
-import { convexClient } from "@convex-dev/better-auth/client/plugins";
+import {
+	convexClient,
+	crossDomainClient,
+} from "@convex-dev/better-auth/client/plugins";
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { ConvexQueryClient } from "@convex-dev/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -29,7 +32,12 @@ convexQueryClient.connect(queryClient);
 function createAuthClientInstance(baseURL: string | undefined) {
 	return createAuthClient({
 		baseURL,
-		plugins: [anonymousClient(), convexClient(), adminClient()],
+		plugins: [
+			anonymousClient(),
+			convexClient(),
+			crossDomainClient(),
+			adminClient(),
+		],
 	});
 }
 

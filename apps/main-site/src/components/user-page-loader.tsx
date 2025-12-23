@@ -12,7 +12,7 @@ import {
 import { runtime } from "../lib/runtime";
 
 export type UserPageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.private.discord_accounts.getUserPageHeaderData>
+	FunctionReturnType<typeof api.public.discord_accounts.getUserPageHeaderData>
 >;
 
 export type UserPosts = FunctionReturnType<
@@ -24,7 +24,7 @@ export async function fetchUserPageHeaderData(
 ): Promise<UserPageHeaderData | null> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.private.discord_accounts.getUserPageHeaderData({
+		return yield* database.public.discord_accounts.getUserPageHeaderData({
 			userId,
 		});
 	}).pipe(runtime.runPromise);

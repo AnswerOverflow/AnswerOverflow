@@ -1,7 +1,8 @@
 import type { DiscordAccount } from "@packages/database/convex/schema";
 import { Database } from "@packages/database/database";
-import { Console, Duration, Effect, Layer } from "effect";
+import { Console, Duration, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
+import { eventsProcessed, syncOperations } from "../metrics";
 import {
 	uploadAttachmentsInBatches,
 	uploadEmbedImagesInBatches,
@@ -35,6 +36,10 @@ export const MessageParityLayer = Layer.scopedDiscard(
 		>({
 			process: (batch) =>
 				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"batch.size": batch.length.toString(),
+						"batch.type": "messages",
+					});
 					yield* Effect.logDebug(
 						`Processing message batch of ${batch.length} items`,
 					);
@@ -42,7 +47,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 						messages: batch,
 						ignoreChecks: false,
 					});
-				}),
+				}).pipe(Effect.withSpan("sync.message_batch")),
 			maxBatchSize: BATCH_CONFIG.maxBatchSize,
 			maxWait: BATCH_CONFIG.maxWait,
 		});
@@ -54,13 +59,17 @@ export const MessageParityLayer = Layer.scopedDiscard(
 		>({
 			process: (batch) =>
 				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"batch.size": batch.length.toString(),
+						"batch.type": "accounts",
+					});
 					yield* Effect.logDebug(
 						`Processing account batch of ${batch.length} items`,
 					);
 					yield* database.private.discord_accounts.upsertManyDiscordAccounts({
 						accounts: batch,
 					});
-				}),
+				}).pipe(Effect.withSpan("sync.account_batch")),
 			maxBatchSize: BATCH_CONFIG.maxBatchSize,
 			maxWait: BATCH_CONFIG.maxWait,
 		});
@@ -79,6 +88,15 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				if (!isHumanMessage(newMessage)) {
 					return;
 				}
+
+				yield* Effect.annotateCurrentSpan({
+					"discord.message_id": newMessage.id,
+					"discord.channel_id": newMessage.channelId,
+					"discord.guild_id": newMessage.guildId ?? "",
+					"discord.author_id": newMessage.author.id,
+				});
+				yield* Metric.increment(eventsProcessed);
+				yield* Metric.increment(syncOperations);
 
 				const server = yield* database.private.servers.getServerByDiscordId({
 					discordId: BigInt(newMessage.guildId ?? ""),
@@ -115,7 +133,13 @@ export const MessageParityLayer = Layer.scopedDiscard(
 						contentType: att.contentType ?? undefined,
 					}));
 
-					yield* uploadAttachmentsInBatches(attachmentsToUpload);
+					yield* uploadAttachmentsInBatches(attachmentsToUpload).pipe(
+						Effect.withSpan("sync.message.upload_attachments", {
+							attributes: {
+								"attachments.count": attachmentsToUpload.length.toString(),
+							},
+						}),
+					);
 				}
 
 				yield* messageQueue.offer(toUpsertMessageArgs(data));
@@ -124,6 +148,11 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					const embedImagesToUpload = extractEmbedImagesToUpload(newMessage);
 					if (embedImagesToUpload.length > 0) {
 						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
+							Effect.withSpan("sync.message.upload_embed_images", {
+								attributes: {
+									"embed_images.count": embedImagesToUpload.length.toString(),
+								},
+							}),
 							catchAllWithReport((error) =>
 								Console.warn(
 									`Failed to upload embed images for message ${newMessage.id}:`,
@@ -136,6 +165,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				yield* accountQueue.offer(toAODiscordAccount(newMessage.author));
 			}).pipe(
+				Effect.withSpan("event.message_update"),
 				catchAllWithReport((error) =>
 					Console.error(`Error updating message ${newMessage.id}:`, error),
 				),
@@ -147,6 +177,13 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				if (message.channel.isDMBased() || message.channel.isVoiceBased()) {
 					return;
 				}
+
+				yield* Effect.annotateCurrentSpan({
+					"discord.message_id": message.id,
+					"discord.channel_id": message.channelId,
+					"discord.guild_id": message.guildId ?? "",
+				});
+				yield* Metric.increment(eventsProcessed);
 
 				const existingMessage = yield* database.private.messages.getMessageById(
 					{
@@ -163,6 +200,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				});
 				yield* Console.log(`Deleted message ${message.id}`);
 			}).pipe(
+				Effect.withSpan("event.message_delete"),
 				catchAllWithReport((error) =>
 					Console.error(`Error deleting message ${message.id}:`, error),
 				),
@@ -180,11 +218,17 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
+				yield* Effect.annotateCurrentSpan({
+					"bulk_delete.count": messageIds.length.toString(),
+				});
+				yield* Metric.increment(eventsProcessed);
+
 				yield* database.private.messages.deleteManyMessages({
 					ids: messageIds,
 				});
 				yield* Console.log(`Bulk deleted ${messageIds.length} messages`);
 			}).pipe(
+				Effect.withSpan("event.message_delete_bulk"),
 				catchAllWithReport((error) =>
 					Console.error(`Error bulk deleting messages:`, error),
 				),
@@ -200,6 +244,17 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				if (!isHumanMessage(message)) {
 					return;
 				}
+
+				yield* Effect.annotateCurrentSpan({
+					"discord.message_id": message.id,
+					"discord.channel_id": message.channelId,
+					"discord.guild_id": message.guildId ?? "",
+					"discord.author_id": message.author.id,
+					"message.has_attachments": (message.attachments.size > 0).toString(),
+					"message.has_embeds": (message.embeds.length > 0).toString(),
+				});
+				yield* Metric.increment(eventsProcessed);
+				yield* Metric.increment(syncOperations);
 
 				if (message.content === "!ping") {
 					yield* Console.log("Received ping command!");
@@ -254,13 +309,24 @@ export const MessageParityLayer = Layer.scopedDiscard(
 						contentType: att.contentType ?? undefined,
 					}));
 
-					yield* uploadAttachmentsInBatches(attachmentsToUpload);
+					yield* uploadAttachmentsInBatches(attachmentsToUpload).pipe(
+						Effect.withSpan("sync.message.upload_attachments", {
+							attributes: {
+								"attachments.count": attachmentsToUpload.length.toString(),
+							},
+						}),
+					);
 				}
 
 				if (message.embeds.length > 0) {
 					const embedImagesToUpload = extractEmbedImagesToUpload(message);
 					if (embedImagesToUpload.length > 0) {
 						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
+							Effect.withSpan("sync.message.upload_embed_images", {
+								attributes: {
+									"embed_images.count": embedImagesToUpload.length.toString(),
+								},
+							}),
 							catchAllWithReport((error) =>
 								Console.warn(
 									`Failed to upload embed images for message ${message.id}:`,
@@ -273,6 +339,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 
 				yield* accountQueue.offer(toAODiscordAccount(message.author));
 			}).pipe(
+				Effect.withSpan("event.message_create"),
 				catchAllWithReport((error) =>
 					Console.error(`Error creating message ${message.id}:`, error),
 				),

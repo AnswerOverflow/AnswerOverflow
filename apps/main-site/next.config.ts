@@ -43,6 +43,10 @@ const nextConfig: NextConfig = {
 	productionBrowserSourceMaps: true,
 	rewrites: async () => {
 		return [
+			// {
+			// 	source: "/api/auth/:path*",
+			// 	destination: "https://www.answeroverflow.com/api/auth/:path*",
+			// },
 			{
 				source: "/sitemap-:path",
 				destination:

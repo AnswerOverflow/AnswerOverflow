@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
-import { Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
+import { eventsProcessed } from "../metrics";
 import { isAllowedThreadChannel } from "../utils/conversions";
 import { catchAllWithReport } from "../utils/error-reporting";
 import {
@@ -15,6 +16,8 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("threadCreate", (thread) =>
 			Effect.gen(function* () {
+				yield* Metric.increment(eventsProcessed);
+
 				if (!isAllowedThreadChannel(thread)) {
 					return;
 				}
@@ -76,6 +79,14 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 					firstMessage ?? null,
 				);
 			}).pipe(
+				Effect.withSpan("mark_solution_handler.thread_create", {
+					attributes: {
+						"thread.id": thread.id,
+						"thread.guild_id": thread.guildId,
+						"thread.parent_id": thread.parentId ?? "none",
+						"thread.archived": thread.archived ? "true" : "false",
+					},
+				}),
 				catchAllWithReport((error) =>
 					Console.error(
 						`Error processing thread create for mark solution instructions ${thread.id}:`,

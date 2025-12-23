@@ -14,10 +14,12 @@ import {
 	Console,
 	Effect,
 	Layer,
+	Metric,
 	Option,
 	Predicate,
 } from "effect";
 import { Discord } from "../core/discord-service";
+import { commandExecuted } from "../metrics";
 import { trackQuickActionCommandSent } from "../utils/analytics";
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
@@ -29,10 +31,16 @@ import {
 	catchAllWithReport,
 } from "../utils/error-reporting";
 
-export function handleQuickActionCommand(
-	interaction: ContextMenuCommandInteraction,
-) {
-	return Effect.gen(function* () {
+export const handleQuickActionCommand = Effect.fn("interaction.quick_action")(
+	function* (interaction: ContextMenuCommandInteraction) {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": interaction.guildId ?? "unknown",
+			"discord.channel_id": interaction.channelId ?? "unknown",
+			"discord.user_id": interaction.user.id,
+			"interaction.command_name": interaction.commandName,
+		});
+		yield* Metric.increment(commandExecuted("quick_action"));
+
 		const database = yield* Database;
 		const discord = yield* Discord;
 
@@ -193,8 +201,8 @@ export function handleQuickActionCommand(
 		}
 
 		yield* discord.callClient(() => interaction.deleteReply());
-	});
-}
+	},
+);
 
 export const QuickActionCommandHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {

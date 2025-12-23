@@ -1,10 +1,11 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
-import { convex } from "@convex-dev/better-auth/plugins";
+import { convex, crossDomain } from "@convex-dev/better-auth/plugins";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { admin, anonymous } from "better-auth/plugins";
 import { components, internal } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
+import authConfig from "../auth.config";
 import authSchema from "../betterAuth/schema";
 import type { Plan } from "../schema";
 
@@ -23,27 +24,10 @@ const ALLOWED_TENANT_PATHS = [
 	"/get-session",
 ];
 
-const getTrustedOrigins = (siteUrl: string): string[] => {
-	const origins = [siteUrl];
-
-	if (siteUrl.includes("localhost")) {
-		if (!origins.includes("http://localhost:3000")) {
-			origins.push("http://localhost:3000");
-		}
-	}
-
-	const additionalOrigins = process.env.ADDITIONAL_TRUSTED_ORIGINS;
-	if (additionalOrigins) {
-		for (const origin of additionalOrigins.split(",")) {
-			const trimmed = origin.trim();
-			if (trimmed && !origins.includes(trimmed)) {
-				origins.push(trimmed);
-			}
-		}
-	}
-
-	return origins;
-};
+const TRUSTED_ORIGINS = [
+	"https://www.answeroverflow.com",
+	"http://localhost:3000",
+];
 
 export const authComponent = createClient<DataModel, typeof authSchema>(
 	components.betterAuth,
@@ -58,25 +42,15 @@ export const createAuthOptions = (
 	ctx: GenericCtx<DataModel>,
 	{ optionsOnly } = { optionsOnly: false },
 ): BetterAuthOptions => {
-	const siteUrl = process.env.SITE_URL;
-	if (!siteUrl) {
-		throw new Error("SITE_URL environment variable is required");
-	}
-
 	return {
 		logger: {
 			disabled: optionsOnly,
 		},
-		trustedOrigins: async (request: Request) => {
-			const staticOrigins = getTrustedOrigins(siteUrl);
-			const origin = request.headers.get("origin");
-			if (!origin) return staticOrigins;
-			return [...staticOrigins, origin];
-		},
+		trustedOrigins: TRUSTED_ORIGINS,
 		advanced: {
 			disableCSRFCheck: true,
 		},
-		baseURL: siteUrl,
+		baseURL: process.env.SITE_URL,
 		database: authComponent.adapter(ctx),
 		secret: (() => {
 			const secret = process.env.BETTER_AUTH_SECRET;
@@ -95,16 +69,20 @@ export const createAuthOptions = (
 		},
 		hooks: {
 			before: createAuthMiddleware(async (authCtx) => {
-				const origin = authCtx.headers?.get("origin");
-				if (!origin) return;
+				const hookOrigin = authCtx.headers?.get("origin");
+				if (!hookOrigin) return;
 
 				try {
-					const url = new URL(origin);
+					const url = new URL(hookOrigin);
 					const domain = url.hostname;
-					const mainSiteUrl = new URL(siteUrl);
+					const mainSiteUrl = new URL("https://www.answeroverflow.com");
 					const mainSiteDomain = mainSiteUrl.hostname;
 
 					if (domain === mainSiteDomain) {
+						return;
+					}
+
+					if (domain === "localhost") {
 						return;
 					}
 
@@ -158,7 +136,10 @@ export const createAuthOptions = (
 			},
 		},
 		plugins: [
-			convex(),
+			convex({ authConfig }),
+			crossDomain({
+				siteUrl: process.env.SITE_URL ?? "https://www.answeroverflow.com",
+			}),
 			anonymous({
 				disableDeleteAnonymousUser: true,
 			}),

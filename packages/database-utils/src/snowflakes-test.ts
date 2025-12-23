@@ -1,5 +1,5 @@
-import { DISCORD_EPOCH, generateSnowflake } from "./snowflakes";
 import * as fc from "effect/FastCheck";
+import { DISCORD_EPOCH, generateSnowflake } from "./snowflakes";
 
 export const SNOWFLAKE_MIN = 100000000000000000n;
 export const SNOWFLAKE_MAX = 999999999999999999n;

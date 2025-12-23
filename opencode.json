@@ -267,6 +267,16 @@
 			"type": "remote",
 			"url": "http://localhost:3456/mcp",
 			"enabled": true
+		},
+		"jaeger": {
+			"type": "local",
+			"command": ["bunx", "-y", "jaeger-mcp-server"],
+			"enabled": false,
+			"environment": {
+				"JAEGER_URL": "http://localhost",
+				"JAEGER_PORT": "16686",
+				"JAEGER_PROTOCOL": "HTTP"
+			}
 		}
 	}
 }

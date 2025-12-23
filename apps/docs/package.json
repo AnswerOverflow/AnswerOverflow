@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "mint dev --port 3003 --no-open"
+		"dev:docs": "mint dev --port 3003 --no-open"
 	},
 	"dependencies": {
 		"mint": "^4.2.240"

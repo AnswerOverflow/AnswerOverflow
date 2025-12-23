@@ -99,7 +99,22 @@ export function trackQuestionAsked(
 				question,
 			),
 		);
-	});
+	}).pipe(
+		Effect.withSpan("mark_solution.track_question_asked", {
+			attributes: {
+				"thread.id": thread.id,
+				"thread.guild_id": thread.guildId,
+				"thread_owner.id": threadOwner.id,
+				has_question: question ? "true" : "false",
+				indexing_enabled: channelSettings?.flags?.indexingEnabled
+					? "true"
+					: "false",
+				mark_solution_enabled: channelSettings?.flags?.markSolutionEnabled
+					? "true"
+					: "false",
+			},
+		}),
+	);
 }
 
 export function handleSendMarkSolutionInstructions(
@@ -194,5 +209,19 @@ export function handleSendMarkSolutionInstructions(
 		console.log(
 			`Sent mark solution instructions to thread ${thread.id} (owner: ${threadOwner.id})`,
 		);
-	});
+	}).pipe(
+		Effect.withSpan("mark_solution.send_instructions", {
+			attributes: {
+				"thread.id": thread.id,
+				"thread.guild_id": thread.guildId,
+				"thread_owner.id": threadOwner.id,
+				newly_created: newlyCreated ? "true" : "false",
+				has_question: question ? "true" : "false",
+				instructions_enabled: channelSettings?.flags
+					?.sendMarkSolutionInstructionsInNewThreads
+					? "true"
+					: "false",
+			},
+		}),
+	);
 }

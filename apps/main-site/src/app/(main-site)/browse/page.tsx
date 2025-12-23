@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default async function BrowsePage() {
 	const serversLiveData = await Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* database.private.servers.getBrowseServers();
+		const liveData = yield* database.public.servers.getBrowseServers({});
 		return liveData;
 	}).pipe(runtime.runPromise);
 

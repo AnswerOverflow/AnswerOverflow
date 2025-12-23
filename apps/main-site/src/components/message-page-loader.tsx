@@ -15,7 +15,7 @@ import { MessagePage, RepliesSection, RepliesSkeleton } from "./message-page";
 import { SimilarThreads, SimilarThreadsSkeleton } from "./similar-threads";
 
 export type MessagePageHeaderData = NonNullable<
-	FunctionReturnType<typeof api.private.messages.getMessagePageHeaderData>
+	FunctionReturnType<typeof api.public.messages.getMessagePageHeaderData>
 >;
 
 export type MessagePageReplies = FunctionReturnType<
@@ -27,7 +27,7 @@ export async function fetchMessagePageHeaderData(
 ): Promise<MessagePageHeaderData | null> {
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.private.messages.getMessagePageHeaderData({
+		return yield* database.public.messages.getMessagePageHeaderData({
 			messageId,
 		});
 	}).pipe(runtime.runPromise);

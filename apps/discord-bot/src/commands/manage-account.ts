@@ -10,8 +10,9 @@ import {
 	type MessageActionRowComponentBuilder,
 	MessageFlags,
 } from "discord.js";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
+import { commandExecuted } from "../metrics";
 import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 import { catchAllSilentWithReport } from "../utils/error-reporting";
 
@@ -131,10 +132,15 @@ function generateManageAccountActionRow(
 	return actionRow;
 }
 
-export function handleManageAccountCommand(
-	interaction: ChatInputCommandInteraction,
-) {
-	return Effect.gen(function* () {
+export const handleManageAccountCommand = Effect.fn("manage_account_command")(
+	function* (interaction: ChatInputCommandInteraction) {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": interaction.guildId ?? "unknown",
+			"discord.channel_id": interaction.channelId ?? "unknown",
+			"discord.user_id": interaction.user.id,
+		});
+		yield* Metric.increment(commandExecuted("manage_account"));
+
 		const database = yield* Database;
 		const discord = yield* Discord;
 
@@ -254,8 +260,8 @@ export function handleManageAccountCommand(
 					console.error("Error updating interaction:", error);
 				});
 		});
-	});
-}
+	},
+);
 
 function handleManageAccountButtonPress(
 	interaction: { customId: string },
