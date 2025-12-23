@@ -70,6 +70,13 @@ export const getDashboardData = guildManagerQuery({
 			};
 		});
 
+		const botAvatarUrl = preferences?.botAvatarStorageId
+			? await ctx.storage.getUrl(preferences.botAvatarStorageId)
+			: null;
+		const botBannerUrl = preferences?.botBannerStorageId
+			? await ctx.storage.getUrl(preferences.botBannerStorageId)
+			: null;
+
 		return {
 			server: {
 				discordId: server.discordId,
@@ -84,6 +91,14 @@ export const getDashboardData = guildManagerQuery({
 						preferences?.considerAllMessagesPublicEnabled ?? false,
 					anonymizeMessagesEnabled:
 						preferences?.anonymizeMessagesEnabled ?? false,
+				},
+				botCustomization: {
+					nickname: preferences?.botNickname ?? null,
+					avatarStorageId: preferences?.botAvatarStorageId ?? null,
+					avatarUrl: botAvatarUrl,
+					bannerStorageId: preferences?.botBannerStorageId ?? null,
+					bannerUrl: botBannerUrl,
+					bio: preferences?.botBio ?? null,
 				},
 			},
 			channels: channelsWithFlags,

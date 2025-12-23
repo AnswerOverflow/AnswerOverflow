@@ -316,6 +316,28 @@ export const createDiscordService = Effect.gen(function* () {
 			return permissions.bitfield.toString();
 		});
 
+	const updateBotMemberProfile = (
+		guildId: string,
+		options: {
+			nick?: string | null;
+			avatar?: string | null;
+			banner?: string | null;
+			bio?: string | null;
+		},
+	) =>
+		use("update_bot_member_profile", async (c) => {
+			const body: Record<string, string | null> = {};
+			if (options.nick !== undefined) body.nick = options.nick;
+			if (options.avatar !== undefined) body.avatar = options.avatar;
+			if (options.banner !== undefined) body.banner = options.banner;
+			if (options.bio !== undefined) body.bio = options.bio;
+
+			await c.rest.patch(`/guilds/${guildId}/members/@me`, { body });
+		}).pipe(
+			Effect.annotateLogs({ guildId }),
+			Effect.annotateSpans({ "discord.guild_id": guildId }),
+		);
+
 	return {
 		getGuild,
 		getGuilds,
@@ -327,6 +349,7 @@ export const createDiscordService = Effect.gen(function* () {
 		setActivity,
 		use,
 		getBotPermissionsForChannel,
+		updateBotMemberProfile,
 		client: {
 			login,
 			on,

@@ -1,7 +1,15 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
+import { literals } from "convex-helpers/validators";
 import { guildManagerMutation } from "../client/guildManager";
 import { getServerByDiscordId, validateCustomDomain } from "../shared/shared";
+
+const ADVANCED_AND_ABOVE_PLANS: ReadonlyArray<string> = [
+	"ADVANCED",
+	"PRO",
+	"ENTERPRISE",
+	"OPEN_SOURCE",
+];
 
 export const updateServerPreferencesFlags = guildManagerMutation({
 	args: {
@@ -244,5 +252,93 @@ export const updateChannelSolutionTag = guildManagerMutation({
 		});
 
 		return settings._id;
+	},
+});
+
+export const generateBotCustomizationUploadUrl = guildManagerMutation({
+	args: {
+		type: literals("avatar", "banner"),
+	},
+	handler: async (ctx, args) => {
+		const server = await getServerByDiscordId(ctx, args.serverId);
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		const preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+			"serverId",
+		);
+
+		const plan = preferences?.plan ?? "FREE";
+		if (!ADVANCED_AND_ABOVE_PLANS.includes(plan)) {
+			throw new Error("Bot customization requires Advanced plan or higher");
+		}
+
+		return await ctx.storage.generateUploadUrl();
+	},
+});
+
+export const updateBotCustomization = guildManagerMutation({
+	args: {
+		botNickname: v.optional(v.union(v.string(), v.null())),
+		botAvatarStorageId: v.optional(v.union(v.id("_storage"), v.null())),
+		botBannerStorageId: v.optional(v.union(v.id("_storage"), v.null())),
+		botBio: v.optional(v.union(v.string(), v.null())),
+	},
+	handler: async (ctx, args) => {
+		const server = await getServerByDiscordId(ctx, args.serverId);
+		if (!server) {
+			throw new Error("Server not found");
+		}
+
+		let preferences = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+			"serverId",
+		);
+
+		const plan = preferences?.plan ?? "FREE";
+		if (!ADVANCED_AND_ABOVE_PLANS.includes(plan)) {
+			throw new Error("Bot customization requires Advanced plan or higher");
+		}
+
+		const updateFields: Record<string, string | undefined> = {};
+
+		if (args.botNickname !== undefined) {
+			updateFields.botNickname = args.botNickname ?? undefined;
+		}
+		if (args.botAvatarStorageId !== undefined) {
+			updateFields.botAvatarStorageId = args.botAvatarStorageId ?? undefined;
+		}
+		if (args.botBannerStorageId !== undefined) {
+			updateFields.botBannerStorageId = args.botBannerStorageId ?? undefined;
+		}
+		if (args.botBio !== undefined) {
+			updateFields.botBio = args.botBio ?? undefined;
+		}
+
+		if (!preferences) {
+			const preferencesId = await ctx.db.insert("serverPreferences", {
+				serverId: args.serverId,
+				plan: "FREE",
+				...updateFields,
+			});
+			preferences = await ctx.db.get(preferencesId);
+		} else {
+			await ctx.db.patch(preferences._id, updateFields);
+			preferences = await ctx.db.get(preferences._id);
+		}
+
+		if (!preferences) {
+			throw new Error("Failed to update bot customization");
+		}
+
+		return preferences;
 	},
 });

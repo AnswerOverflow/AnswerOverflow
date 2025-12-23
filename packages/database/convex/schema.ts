@@ -34,6 +34,10 @@ const serverPreferencesSchema = v.object({
 	customDomain: v.optional(v.string()),
 	subpath: v.optional(v.string()),
 	addedByUserId: v.optional(v.int64()),
+	botNickname: v.optional(v.string()),
+	botAvatarStorageId: v.optional(v.id("_storage")),
+	botBannerStorageId: v.optional(v.id("_storage")),
+	botBio: v.optional(v.string()),
 });
 
 export const serverSchema = v.object({

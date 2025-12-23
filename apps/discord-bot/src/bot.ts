@@ -16,6 +16,7 @@ import { ForumGuidelinesConsentHandlerLayer } from "./interactions/forum-guideli
 import { QuickActionCommandHandlerLayer } from "./interactions/quick-action";
 import { ReadTheRulesConsentHandlerLayer } from "./interactions/read-the-rules-consent";
 import { AutoThreadHandlerLayer } from "./services/auto-thread";
+import { BotIdentitySyncHandlerLayer } from "./services/bot-identity-sync";
 import { DMForwardingHandlerLayer } from "./services/dm-forwarding";
 import { IndexingHandlerLayer } from "./services/indexing";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./services/send-mark-solution-instructions-handler";
@@ -52,6 +53,7 @@ export const BotLayers = Layer.mergeAll(
 	DMForwardingHandlerLayer,
 	FeedbackCommandHandlerLayer,
 	BugReportCommandHandlerLayer,
+	BotIdentitySyncHandlerLayer,
 );
 
 export const program = Effect.gen(function* () {

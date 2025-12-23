@@ -198,3 +198,97 @@ export const getServerPreferencesByCustomDomain = internalQuery({
 		return preferences ?? null;
 	},
 });
+
+const ADVANCED_AND_ABOVE_PLANS = [
+	"ADVANCED",
+	"PRO",
+	"ENTERPRISE",
+	"OPEN_SOURCE",
+];
+
+export const getServersWithBotCustomization = privateQuery({
+	args: {},
+	handler: async (ctx) => {
+		const allPreferences = await ctx.db.query("serverPreferences").collect();
+
+		const serversWithCustomization = allPreferences.filter((prefs) => {
+			if (!ADVANCED_AND_ABOVE_PLANS.includes(prefs.plan)) {
+				return false;
+			}
+
+			return (
+				prefs.botNickname ||
+				prefs.botAvatarStorageId ||
+				prefs.botBannerStorageId ||
+				prefs.botBio
+			);
+		});
+
+		const results = await Promise.all(
+			serversWithCustomization.map(async (prefs) => {
+				const avatarUrl = prefs.botAvatarStorageId
+					? await ctx.storage.getUrl(prefs.botAvatarStorageId)
+					: null;
+				const bannerUrl = prefs.botBannerStorageId
+					? await ctx.storage.getUrl(prefs.botBannerStorageId)
+					: null;
+
+				return {
+					serverId: prefs.serverId,
+					botNickname: prefs.botNickname ?? null,
+					botAvatarUrl: avatarUrl,
+					botBannerUrl: bannerUrl,
+					botBio: prefs.botBio ?? null,
+				};
+			}),
+		);
+
+		return results;
+	},
+});
+
+export const getBotCustomizationForServer = privateQuery({
+	args: {
+		serverId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		const prefs = await getOneFrom(
+			ctx.db,
+			"serverPreferences",
+			"by_serverId",
+			args.serverId,
+		);
+
+		if (!prefs) {
+			return null;
+		}
+
+		if (!ADVANCED_AND_ABOVE_PLANS.includes(prefs.plan)) {
+			return null;
+		}
+
+		if (
+			!prefs.botNickname &&
+			!prefs.botAvatarStorageId &&
+			!prefs.botBannerStorageId &&
+			!prefs.botBio
+		) {
+			return null;
+		}
+
+		const avatarUrl = prefs.botAvatarStorageId
+			? await ctx.storage.getUrl(prefs.botAvatarStorageId)
+			: null;
+		const bannerUrl = prefs.botBannerStorageId
+			? await ctx.storage.getUrl(prefs.botBannerStorageId)
+			: null;
+
+		return {
+			serverId: prefs.serverId,
+			botNickname: prefs.botNickname ?? null,
+			botAvatarUrl: avatarUrl,
+			botBannerUrl: bannerUrl,
+			botBio: prefs.botBio ?? null,
+		};
+	},
+});
