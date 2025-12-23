@@ -7,9 +7,10 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js";
-import { Console, Effect, Layer } from "effect";
+import { Console, Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
+import { eventsProcessed } from "../metrics";
 import { DM_REPLY_ACTION_PREFIX } from "../utils/discord-components";
 import { catchAllWithReport } from "../utils/error-reporting";
 
@@ -42,35 +43,51 @@ function parseDmReplyModalId(customId: string): string {
 	return userId;
 }
 
-function handleDmReplyButton(interaction: ButtonInteraction) {
-	return Effect.gen(function* () {
-		const discord = yield* Discord;
-		const userId = parseDmReplyButtonId(interaction.customId);
-
-		const modal = new ModalBuilder()
-			.setCustomId(`${DM_REPLY_MODAL_ID_PREFIX}:${userId}`)
-			.setTitle("Reply to DM");
-
-		const replyInput = new TextInputBuilder()
-			.setCustomId(DM_REPLY_INPUT_ID)
-			.setLabel("Your reply")
-			.setPlaceholder("Type your response...")
-			.setStyle(TextInputStyle.Paragraph)
-			.setRequired(true)
-			.setMaxLength(2000);
-
-		const actionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(
-			replyInput,
-		);
-
-		modal.addComponents(actionRow);
-
-		yield* discord.callClient(() => interaction.showModal(modal));
+const handleDmReplyButton = Effect.fn("interaction.dm_reply_button")(function* (
+	interaction: ButtonInteraction,
+) {
+	yield* Effect.annotateCurrentSpan({
+		"discord.guild_id": interaction.guildId ?? "unknown",
+		"discord.channel_id": interaction.channelId ?? "unknown",
+		"discord.user_id": interaction.user.id,
+		"interaction.custom_id": interaction.customId,
 	});
-}
+	yield* Metric.increment(eventsProcessed);
 
-function handleDmReplyModalSubmit(interaction: ModalSubmitInteraction) {
-	return Effect.gen(function* () {
+	const discord = yield* Discord;
+	const userId = parseDmReplyButtonId(interaction.customId);
+
+	const modal = new ModalBuilder()
+		.setCustomId(`${DM_REPLY_MODAL_ID_PREFIX}:${userId}`)
+		.setTitle("Reply to DM");
+
+	const replyInput = new TextInputBuilder()
+		.setCustomId(DM_REPLY_INPUT_ID)
+		.setLabel("Your reply")
+		.setPlaceholder("Type your response...")
+		.setStyle(TextInputStyle.Paragraph)
+		.setRequired(true)
+		.setMaxLength(2000);
+
+	const actionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(
+		replyInput,
+	);
+
+	modal.addComponents(actionRow);
+
+	yield* discord.callClient(() => interaction.showModal(modal));
+});
+
+const handleDmReplyModalSubmit = Effect.fn("interaction.dm_reply_modal")(
+	function* (interaction: ModalSubmitInteraction) {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": interaction.guildId ?? "unknown",
+			"discord.channel_id": interaction.channelId ?? "unknown",
+			"discord.user_id": interaction.user.id,
+			"interaction.custom_id": interaction.customId,
+		});
+		yield* Metric.increment(eventsProcessed);
+
 		const discord = yield* Discord;
 		const userId = parseDmReplyModalId(interaction.customId);
 		const replyContent =
@@ -144,8 +161,8 @@ function handleDmReplyModalSubmit(interaction: ModalSubmitInteraction) {
 				flags: MessageFlags.Ephemeral,
 			}),
 		);
-	});
-}
+	},
+);
 
 export const DMReplyHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {

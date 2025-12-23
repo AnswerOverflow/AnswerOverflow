@@ -81,6 +81,7 @@ function updateStatus(statusIndex: Ref.Ref<number>) {
 
 		yield* Console.log(`Setting status to ${statusText}`);
 	}).pipe(
+		Effect.withSpan("status_update.update"),
 		catchAllCauseWithReport((cause) =>
 			Console.error("Failed to update status:", cause),
 		),
@@ -108,7 +109,7 @@ function startStatusUpdateLoop() {
 		);
 
 		yield* Console.log("Status update loop started");
-	});
+	}).pipe(Effect.withSpan("status_update.start_loop"));
 }
 
 export const StatusUpdateHandlerLayer = Layer.scopedDiscard(

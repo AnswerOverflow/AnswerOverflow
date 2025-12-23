@@ -1,8 +1,9 @@
 import { Database } from "@packages/database/database";
 import type { ContextMenuCommandInteraction } from "discord.js";
 import { ChannelType, MessageFlags } from "discord.js";
-import { Data, Duration, Effect, Layer } from "effect";
+import { Data, Duration, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
+import { commandExecuted, solutionsMarked } from "../metrics";
 import { makeMarkSolutionResponse } from "../services/mark-solution";
 import {
 	trackMarkSolutionCommandUsed,
@@ -32,10 +33,16 @@ class MarkSolutionResponseBuildError extends Data.TaggedError(
 	readonly cause: unknown;
 }> {}
 
-export function handleMarkSolutionCommand(
-	interaction: ContextMenuCommandInteraction,
-) {
-	return Effect.gen(function* () {
+export const handleMarkSolutionCommand = Effect.fn("mark_solution_command")(
+	function* (interaction: ContextMenuCommandInteraction) {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": interaction.guildId ?? "unknown",
+			"discord.channel_id": interaction.channelId ?? "unknown",
+			"discord.user_id": interaction.user.id,
+			"discord.target_message_id": interaction.targetId,
+		});
+		yield* Metric.increment(commandExecuted("mark_solution"));
+
 		const database = yield* Database;
 		const discord = yield* Discord;
 
@@ -238,6 +245,8 @@ export function handleMarkSolutionCommand(
 			})
 			.pipe(Effect.withSpan("mark_as_solution"));
 
+		yield* Metric.increment(solutionsMarked);
+
 		if (!channelSettings.flags) {
 			yield* discord.callClient(() =>
 				interaction.editReply({
@@ -353,17 +362,8 @@ export function handleMarkSolutionCommand(
 				);
 			}).pipe(Effect.withSpan("post_response_tasks")),
 		);
-	}).pipe(
-		Effect.withSpan("mark_solution_command", {
-			attributes: {
-				"discord.guild_id": interaction.guildId ?? "unknown",
-				"discord.channel_id": interaction.channelId ?? "unknown",
-				"discord.user_id": interaction.user.id,
-				"discord.target_message_id": interaction.targetId,
-			},
-		}),
-	);
-}
+	},
+);
 
 export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
