@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, Plus } from "lucide-react";
-import Link from "next/link";
+import { Link } from "../link";
 import * as React from "react";
 import { cn } from "../../lib/utils";
 import { Button } from "../button";

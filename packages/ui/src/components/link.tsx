@@ -72,6 +72,7 @@ export function Link(
 		return (
 			<NextLink
 				scroll={true}
+				prefetch={false}
 				{...rest}
 				href={finalHref}
 				className={cn("flex flex-row items-center gap-2", className)}
@@ -80,5 +81,5 @@ export function Link(
 				{props.children}
 			</NextLink>
 		);
-	return <NextLink scroll={true} {...props} href={finalHref} />;
+	return <NextLink scroll={true} prefetch={false} {...props} href={finalHref} />;
 }

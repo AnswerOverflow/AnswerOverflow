@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "../link";
 import { useParams, usePathname } from "next/navigation";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
