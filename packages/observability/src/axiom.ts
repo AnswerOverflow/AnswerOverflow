@@ -4,6 +4,7 @@ import * as OtlpTracer from "@effect/opentelemetry/OtlpTracer";
 import * as FetchHttpClient from "@effect/platform/FetchHttpClient";
 import * as Duration from "effect/Duration";
 import * as Layer from "effect/Layer";
+import { AxiomMetricsHttpClientLayer } from "./axiom-metrics-protobuf";
 
 export type AxiomConfig = {
 	apiToken: string;
@@ -66,7 +67,12 @@ export const createAxiomLayer = (config: AxiomConfig): Layer.Layer<never> => {
 		shutdownTimeout: Duration.seconds(3),
 	});
 
+	const httpClientLayer = Layer.provideMerge(
+		AxiomMetricsHttpClientLayer,
+		FetchHttpClient.layer,
+	);
+
 	return Layer.mergeAll(tracesLayer, logsLayer, metricsLayer).pipe(
-		Layer.provide(FetchHttpClient.layer),
+		Layer.provide(httpClientLayer),
 	);
 };
