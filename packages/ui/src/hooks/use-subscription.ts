@@ -46,7 +46,6 @@ export function useSubscription(serverId: bigint) {
 
 	const startCheckout = useCallback(
 		async (
-			plan: "STARTER" | "ADVANCED",
 			successUrl: string,
 			cancelUrl: string,
 		): Promise<CheckoutSessionResult | null> => {
@@ -55,7 +54,7 @@ export function useSubscription(serverId: bigint) {
 			try {
 				const result = await createCheckoutSessionAction({
 					serverId,
-					plan,
+					plan: "ADVANCED",
 					successUrl,
 					cancelUrl,
 				});

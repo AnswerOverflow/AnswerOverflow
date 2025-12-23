@@ -30,18 +30,10 @@ function planToPrettyText(plan: Plan): string {
 	switch (plan) {
 		case "FREE":
 			return "Free";
-		case "PRO":
-			return "Pro";
-		case "OPEN_SOURCE":
-			return "Open Source";
-		case "ENTERPRISE":
-			return "Enterprise";
-		case "STARTER":
-			return "Starter";
 		case "ADVANCED":
 			return "Advanced";
 		default:
-			return plan;
+			return "Advanced";
 	}
 }
 
@@ -92,10 +84,7 @@ function SubscriptionStatus(props: { serverId: bigint }) {
 	);
 }
 
-function UpgradeButton(props: {
-	serverId: bigint;
-	plan: "STARTER" | "ADVANCED";
-}) {
+function UpgradeButton(props: { serverId: bigint }) {
 	const createCheckoutSession = useAction(
 		api.authenticated.stripe.createCheckoutSession,
 	);
@@ -103,7 +92,7 @@ function UpgradeButton(props: {
 	const handleUpgrade = async () => {
 		const result = await createCheckoutSession({
 			serverId: props.serverId,
-			plan: props.plan,
+			plan: "ADVANCED",
 			successUrl: `${window.location.origin}/dashboard/${props.serverId}/settings?success=true`,
 			cancelUrl: `${window.location.origin}/dashboard/${props.serverId}/settings?canceled=true`,
 		});
@@ -115,7 +104,7 @@ function UpgradeButton(props: {
 
 	return (
 		<Button onClick={handleUpgrade} className="gap-2">
-			Upgrade to {props.plan === "STARTER" ? "Starter" : "Advanced"}
+			Upgrade to Advanced
 		</Button>
 	);
 }
@@ -223,13 +212,7 @@ export function CurrentPlanCard({ serverId }: { serverId: string }) {
 				<SubscriptionStatus serverId={serverIdBigInt} />
 			</CardContent>
 			<CardFooter className="flex flex-wrap gap-2">
-				{!isPaidPlan && (
-					<>
-						<UpgradeButton serverId={serverIdBigInt} plan="STARTER" />
-						{/* We will re enable this once subpath is configurable in dashboard */}
-						{/* <UpgradeButton serverId={serverIdBigInt} plan="ADVANCED" /> */}
-					</>
-				)}
+				{!isPaidPlan && <UpgradeButton serverId={serverIdBigInt} />}
 				{(isPaidPlan || hasActiveSubscription) && (
 					<ManageBillingButton serverId={serverIdBigInt} />
 				)}

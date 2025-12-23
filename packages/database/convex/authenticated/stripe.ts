@@ -41,12 +41,12 @@ type SubscriptionInfoResult =
 
 export const createCheckoutSession = manageGuildAction({
 	args: {
-		plan: v.union(v.literal("STARTER"), v.literal("ADVANCED")),
+		plan: v.literal("ADVANCED"),
 		successUrl: v.string(),
 		cancelUrl: v.string(),
 	},
 	handler: async (ctx, args): Promise<CheckoutResult> => {
-		const { discordAccountId, serverId, plan, successUrl, cancelUrl } = args;
+		const { discordAccountId, serverId, successUrl, cancelUrl } = args;
 
 		const serverResult = await ctx.runQuery(
 			internal.stripe.internal.getServerForStripe,
@@ -93,13 +93,10 @@ export const createCheckoutSession = manageGuildAction({
 
 		const customerId = await ensureStripeCustomer();
 
-		const priceId =
-			plan === "STARTER"
-				? STRIPE_PLAN_PRICE_IDS.STARTER
-				: STRIPE_PLAN_PRICE_IDS.ADVANCED;
+		const priceId = STRIPE_PLAN_PRICE_IDS.ADVANCED;
 
 		if (!priceId) {
-			throw new Error(`Price ID for plan ${plan} not configured`);
+			throw new Error("Price ID for ADVANCED plan not configured");
 		}
 
 		return createStripeCheckoutSession({

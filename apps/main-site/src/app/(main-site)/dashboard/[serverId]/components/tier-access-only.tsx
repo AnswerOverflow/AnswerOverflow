@@ -33,7 +33,10 @@ export function TierAccessOnly({
 	}
 
 	const currentPlan = dashboardData.server.plan;
-	const enabled = enabledFor.includes(currentPlan);
+	const isPaidPlan = currentPlan !== "FREE";
+	const enabled = enabledFor.includes("FREE")
+		? enabledFor.includes(currentPlan)
+		: isPaidPlan;
 
 	if (enabled) {
 		return <>{children}</>;

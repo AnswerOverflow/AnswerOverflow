@@ -2,6 +2,7 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { BlueLink } from "@packages/ui/components/blue-link";
+import { BotCustomization } from "@packages/ui/components/bot-customization";
 import {
 	Card,
 	CardContent,
@@ -120,15 +121,6 @@ export default function SettingsPage() {
 	return (
 		<div className="flex max-w-[800px] w-full mx-auto flex-col gap-4">
 			<CurrentPlanCard serverId={serverId} />
-			<TierAccessOnly
-				enabledFor={["PRO", "ENTERPRISE", "ADVANCED", "STARTER", "OPEN_SOURCE"]}
-				serverId={serverId}
-			>
-				<CustomDomain
-					defaultDomain={server.customDomain ?? undefined}
-					serverId={BigInt(serverId)}
-				/>
-			</TierAccessOnly>
 			<ToggleServerFlag
 				title="Consider All Messages Public"
 				description={
@@ -179,6 +171,24 @@ export default function SettingsPage() {
 					handleServerToggle("readTheRulesConsentEnabled", checked)
 				}
 			/>
+			<TierAccessOnly
+				enabledFor={["PRO", "ENTERPRISE", "ADVANCED", "STARTER", "OPEN_SOURCE"]}
+				serverId={serverId}
+			>
+				<CustomDomain
+					defaultDomain={server.customDomain ?? undefined}
+					serverId={BigInt(serverId)}
+				/>
+			</TierAccessOnly>
+			<TierAccessOnly
+				enabledFor={["PRO", "ENTERPRISE", "ADVANCED", "OPEN_SOURCE"]}
+				serverId={serverId}
+			>
+				<BotCustomization
+					serverId={BigInt(serverId)}
+					data={server.botCustomization}
+				/>
+			</TierAccessOnly>
 		</div>
 	);
 }

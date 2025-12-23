@@ -89,6 +89,11 @@ const nextConfig: NextConfig = {
 				destination: "/docs/changelog/:slug",
 				permanent: false,
 			},
+			{
+				source: "/pricing",
+				destination: "/about#pricing",
+				permanent: false,
+			},
 		];
 	},
 };

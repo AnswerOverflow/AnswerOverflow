@@ -19,10 +19,10 @@ export const STRIPE_PLAN_PRICE_IDS = {
 } as const;
 
 export function getPlanFromPriceId(priceId: string): Plan {
-	if (priceId === STRIPE_PLAN_PRICE_IDS.STARTER) return "STARTER";
 	if (priceId === STRIPE_PLAN_PRICE_IDS.ADVANCED) return "ADVANCED";
-	if (priceId === STRIPE_PLAN_PRICE_IDS.PRO) return "PRO";
-	if (priceId === STRIPE_PLAN_PRICE_IDS.ENTERPRISE) return "ENTERPRISE";
+	if (priceId === STRIPE_PLAN_PRICE_IDS.STARTER) return "ADVANCED";
+	if (priceId === STRIPE_PLAN_PRICE_IDS.PRO) return "ADVANCED";
+	if (priceId === STRIPE_PLAN_PRICE_IDS.ENTERPRISE) return "ADVANCED";
 	throw new Error(`Unknown price ID: ${priceId}`);
 }
 

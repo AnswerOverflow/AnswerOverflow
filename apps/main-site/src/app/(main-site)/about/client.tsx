@@ -625,27 +625,22 @@ function PricingSection() {
 			features: ["Unlimited page views", "Ad supported"],
 		},
 		{
-			name: "Starter",
-			price: "$125",
-			description: "Perfect for growing communities",
-			features: ["Ad free", "Host on your own domain", "Unlimited page views"],
-		},
-		{
 			name: "Advanced",
 			price: "$250",
 			description: "For established communities",
 			features: [
+				"Custom domain",
+				"Custom subpath (e.g. /community)",
+				"Bot profile picture customization",
+				"Bot name customization",
 				"Ad free",
-				"Host on your own domain",
-				"Host on your own subpath (e.g. /community)",
 				"Unlimited page views",
-				"Priority support",
 			],
 		},
 	];
 
 	return (
-		<section className="py-16 sm:py-24">
+		<section id="pricing" className="py-16 sm:py-24">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 				<div className="text-center">
 					<h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -655,9 +650,56 @@ function PricingSection() {
 						Start for free. Upgrade at any time and your content will redirect.
 					</p>
 				</div>
-				<div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				<div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:max-w-4xl lg:mx-auto">
 					{plans.map((plan) => (
 						<PricingCard key={plan.name} {...plan} />
+					))}
+				</div>
+			</div>
+		</section>
+	);
+}
+
+const pricingFaqs = [
+	{
+		question: "What does a site hosted on my domain look like?",
+		answer:
+			"Check out questions.answeroverflow.com and discord-questions.trpc.io to see live examples of Answer Overflow hosted on custom domains.",
+	},
+	{
+		question: "What if I cancel my subscription?",
+		answer:
+			"Your custom domain will redirect back to answeroverflow.com, ensuring all your content stays accessible. In the future, you'll also have the option to self-host Answer Overflow.",
+	},
+	{
+		question:
+			"What happens if I have content indexed on answeroverflow.com and I upgrade?",
+		answer:
+			"All of your pages on answeroverflow.com will permanently redirect to your new custom domain. Visitors will be redirected while Google updates its index to point directly to your site.",
+	},
+	{
+		question: "Is there a free trial?",
+		answer:
+			"Yes! New subscribers get a 14-day free trial to test out all Advanced features before being charged.",
+	},
+];
+
+function PricingFAQ() {
+	return (
+		<section className="py-16 sm:py-24 bg-muted/30">
+			<div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+				<h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl text-center mb-8">
+					Frequently Asked Questions
+				</h2>
+				<div className="space-y-6">
+					{pricingFaqs.map((faq) => (
+						<div
+							key={faq.question}
+							className="rounded-lg border bg-card p-6 shadow-sm"
+						>
+							<h3 className="font-semibold text-foreground">{faq.question}</h3>
+							<p className="mt-2 text-sm text-muted-foreground">{faq.answer}</p>
+						</div>
 					))}
 				</div>
 			</div>
@@ -706,6 +748,7 @@ export function AboutPageClient({
 			<UsedBySection servers={servers} />
 			{testimonialsSection}
 			<PricingSection />
+			<PricingFAQ />
 			<CTASection />
 		</div>
 	);
