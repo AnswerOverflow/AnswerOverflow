@@ -149,7 +149,6 @@ export function RepliesSection(props: {
 						initialLoaderCount={3}
 						loader={<ReplyMessageSkeleton />}
 						initialData={initialData}
-						initialCursor={currentCursor}
 						emptyState={
 							server && channel ? (
 								<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">

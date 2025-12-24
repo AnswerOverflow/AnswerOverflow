@@ -161,7 +161,6 @@ export function UserPostsList({
 				initialLoaderCount={5}
 				loader={<ThreadCardSkeleton />}
 				initialData={initialData}
-				initialCursor={currentCursor}
 				emptyState={<EmptyState message="No posts found" />}
 				renderItem={(result: SearchResult) => (
 					<ThreadCard

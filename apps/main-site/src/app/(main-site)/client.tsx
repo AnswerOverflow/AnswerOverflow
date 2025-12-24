@@ -125,7 +125,6 @@ export function HomePageClient({
 							initialLoaderCount={5}
 							loader={<ThreadCardSkeleton />}
 							initialData={initialData}
-							initialCursor={currentCursor}
 							emptyState={
 								<div className="text-center py-12 text-muted-foreground">
 									No threads found
