@@ -1,6 +1,7 @@
 export type MCPProvider = {
 	id: string;
 	name: string;
+	icon: string;
 	getRemoteConfig: (mcpUrl: string) => {
 		type: "command" | "json";
 		description: string;
@@ -12,6 +13,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "claude-code",
 		name: "Claude Code",
+		icon: "https://claude.ai/favicon.ico",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "command",
 			description: "Run this command in your terminal:",
@@ -21,6 +23,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "cursor",
 		name: "Cursor",
+		icon: "https://cursor.com/favicon.ico",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to ~/.cursor/mcp.json:",
@@ -40,6 +43,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "vscode",
 		name: "VS Code",
+		icon: "https://code.visualstudio.com/assets/favicon.ico",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to VS Code settings (MCP extension):",
@@ -62,6 +66,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "windsurf",
 		name: "Windsurf",
+		icon: "https://windsurf.com/favicon.png",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to your Windsurf MCP config file:",
@@ -81,6 +86,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "claude-desktop",
 		name: "Claude Desktop",
+		icon: "https://claude.ai/favicon.ico",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description:
@@ -102,6 +108,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "opencode",
 		name: "OpenCode",
+		icon: "https://opencode.ai/favicon-96x96.png",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to your OpenCode configuration file (opencode.json):",
@@ -123,6 +130,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "cline",
 		name: "Cline",
+		icon: "https://saoudrizwan.gallerycdn.vsassets.io/extensions/saoudrizwan/claude-dev/3.46.1/1766441409033/Microsoft.VisualStudio.Services.Icons.Default",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description:
@@ -144,6 +152,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "amp",
 		name: "Amp",
+		icon: "https://amp.dev/static/img/favicon.png",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "command",
 			description: "Run this command in your terminal:",
@@ -153,6 +162,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "zed",
 		name: "Zed",
+		icon: "https://zed.dev/favicon.ico",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to your Zed settings.json:",
@@ -174,6 +184,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "roo-code",
 		name: "Roo Code",
+		icon: "https://rooveterinaryinc.gallerycdn.vsassets.io/extensions/rooveterinaryinc/roo-cline/3.37.1/1766531704474/Microsoft.VisualStudio.Services.Icons.Default",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to your Roo Code MCP configuration file:",
@@ -194,6 +205,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "gemini-cli",
 		name: "Gemini CLI",
+		icon: "https://www.gstatic.com/lamda/images/gemini_favicon_f069958c85030f37fce5f06a5fd3d7b3.png",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to ~/.gemini/settings.json:",
@@ -216,6 +228,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "copilot-coding-agent",
 		name: "Copilot Coding Agent",
+		icon: "https://github.githubassets.com/assets/copilot-logo-26f6a05d9d39.svg",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description:
@@ -238,6 +251,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "jetbrains",
 		name: "JetBrains AI Assistant",
+		icon: "https://www.jetbrains.com/favicon.ico",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description:
@@ -259,6 +273,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "openai-codex",
 		name: "OpenAI Codex",
+		icon: "https://openai.com/favicon.ico",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to your OpenAI Codex MCP server settings (TOML):",
@@ -269,6 +284,7 @@ url = "${mcpUrl}"`,
 	{
 		id: "kilo-code",
 		name: "Kilo Code",
+		icon: "https://kilo.ai/favicon.ico",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description:
