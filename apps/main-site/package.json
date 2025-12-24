@@ -6,9 +6,7 @@
 	"scripts": {
 		"postinstall": "fumadocs-mdx",
 		"with-env": "bun run --env-file=../../.env.production --",
-		"dev-next": "bun with-env next dev --turbo",
-		"dev-proxy": "bun run scripts/proxy.ts",
-		"dev": "NODE_ENV=development bun run dev-next & bun run dev-proxy; wait",
+		"dev": "NODE_ENV=development bun with-env next dev --turbo",
 		"build": "bun with-env next build",
 		"start": "bun with-env next start",
 		"typecheck": "tsgo --noEmit",
