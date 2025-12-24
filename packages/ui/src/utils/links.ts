@@ -109,13 +109,13 @@ export function getTenantUrl(tenant: TenantInfo | null, path: string): string {
 	}
 
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+	const isApiPath = normalizedPath.startsWith("/api/");
 	const subpathTenant = subpathLookup[tenant.customDomain];
 
 	if (isLocalDev()) {
 		const subpath = subpathTenant?.split("/")[1];
-		const pathWithSubpath = subpath
-			? `/${subpath}${normalizedPath}`
-			: normalizedPath;
+		const pathWithSubpath =
+			subpath && !isApiPath ? `/${subpath}${normalizedPath}` : normalizedPath;
 		return `http://${tenant.customDomain}.localhost:3000${pathWithSubpath}`;
 	}
 
@@ -124,9 +124,8 @@ export function getTenantUrl(tenant: TenantInfo | null, path: string): string {
 	}
 
 	const subpath = normalizeSubpath(tenant.subpath);
-	const pathWithSubpath = subpath
-		? `/${subpath}${normalizedPath}`
-		: normalizedPath;
+	const pathWithSubpath =
+		subpath && !isApiPath ? `/${subpath}${normalizedPath}` : normalizedPath;
 	return `https://${tenant.customDomain}${pathWithSubpath}`;
 }
 
