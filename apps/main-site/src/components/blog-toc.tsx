@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, CardContent } from "@packages/ui/components/card";
-import Image from "next/image";
 import { Link } from "@packages/ui/components/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 

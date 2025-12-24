@@ -1,7 +1,7 @@
 import { CodeBlock, InlineCode } from "@packages/ui/components/code";
+import { Link } from "@packages/ui/components/link";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Link } from "@packages/ui/components/link";
 import { notFound } from "next/navigation";
 import React from "react";
 import { blog } from "@/.source/server";

@@ -81,5 +81,7 @@ export function Link(
 				{props.children}
 			</NextLink>
 		);
-	return <NextLink scroll={true} prefetch={false} {...props} href={finalHref} />;
+	return (
+		<NextLink scroll={true} prefetch={false} {...props} href={finalHref} />
+	);
 }

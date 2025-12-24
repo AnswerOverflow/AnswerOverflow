@@ -16,6 +16,11 @@ function toEnhancedSearchResult(result: SearchResult) {
 	const threadId = thread?.id ?? message.message.id;
 	const messageTimestamp = snowflakeToTimestamp(message.message.id);
 
+	const firstSolution = message.solutions[0];
+	const solutionTimestamp = firstSolution
+		? snowflakeToTimestamp(firstSolution.id)
+		: null;
+
 	return {
 		threadId: threadId.toString(),
 		threadTitle: thread?.name,
@@ -24,12 +29,17 @@ function toEnhancedSearchResult(result: SearchResult) {
 		serverMemberCount: server.approximateMemberCount,
 		channelName: channel.name,
 		channelId: channel.id.toString(),
-		message: {
+		question: {
 			content: message.message.content,
+			author: message.author?.name ?? null,
 			timestamp: messageTimestamp.toISOString(),
-			hasSolution: message.solutions.length > 0,
 		},
-		author: message.author?.name ?? null,
+		solution: firstSolution
+			? {
+					content: firstSolution.content,
+					timestamp: solutionTimestamp?.toISOString() ?? null,
+				}
+			: null,
 		url: `https://www.answeroverflow.com/m/${threadId}`,
 	};
 }
@@ -169,158 +179,6 @@ const handler = createMcpHandler(
 		);
 
 		server.registerTool(
-			"get_server_channels",
-			{
-				title: "Get Server Channels",
-				description:
-					"Get all indexed channels for a specific Discord server.\n\nUse this after search_servers to see what channels are available for searching within a community.",
-				inputSchema: z.object({
-					serverId: z
-						.string()
-						.describe(
-							"The Discord server ID (use search_servers to find this)",
-						),
-				}),
-			},
-			async ({ serverId }) => {
-				const result = await Effect.gen(function* () {
-					const database = yield* Database;
-					const serverWithChannels =
-						yield* database.public.servers.getServerByDiscordIdWithChannels({
-							discordId: BigInt(serverId),
-						});
-					return serverWithChannels;
-				}).pipe(runtime.runPromise);
-
-				if (!result) {
-					return {
-						content: [
-							{
-								type: "text",
-								text: JSON.stringify({ error: "Server not found", serverId }),
-							},
-						],
-					};
-				}
-
-				const channelTypes: Record<number, string> = {
-					0: "text",
-					5: "announcement",
-					15: "forum",
-				};
-
-				return {
-					content: [
-						{
-							type: "text",
-							text: JSON.stringify(
-								{
-									server: {
-										id: result.server.discordId.toString(),
-										name: result.server.name,
-										description: result.server.description ?? null,
-									},
-									channels: result.channels.map((c) => ({
-										id: c.id.toString(),
-										name: c.name,
-										type: channelTypes[c.type] ?? `unknown (${c.type})`,
-									})),
-									totalChannels: result.channels.length,
-								},
-								null,
-								2,
-							),
-						},
-					],
-				};
-			},
-		);
-
-		server.registerTool(
-			"read_thread",
-			{
-				title: "Read Thread",
-				description:
-					"Read the full content of a thread from Answer Overflow.\n\nUse this after searching to get complete thread details including:\n- The original question/post\n- Solution (if marked)\n- Server and channel context\n- Direct link to view on Answer Overflow",
-				inputSchema: z.object({
-					threadId: z.string().describe("The thread ID from search results"),
-				}),
-			},
-			async ({ threadId }) => {
-				const thread = await Effect.gen(function* () {
-					const database = yield* Database;
-					const data = yield* database.public.messages.getMessagePageHeaderData(
-						{
-							messageId: BigInt(threadId),
-						},
-					);
-					return data;
-				}).pipe(runtime.runPromise);
-
-				if (!thread) {
-					return {
-						content: [
-							{
-								type: "text",
-								text: JSON.stringify({ error: "Thread not found", threadId }),
-							},
-						],
-					};
-				}
-
-				const firstMessageTimestamp = thread.firstMessage
-					? snowflakeToTimestamp(thread.firstMessage.message.id)
-					: null;
-
-				const response = {
-					threadId: (thread.threadId ?? thread.canonicalId).toString(),
-					title: thread.thread?.name ?? null,
-					url: `https://www.answeroverflow.com/m/${thread.canonicalId}`,
-					server: {
-						id: thread.server.discordId.toString(),
-						name: thread.server.name,
-						description: thread.server.description ?? null,
-					},
-					channel: {
-						id: thread.channel.id.toString(),
-						name: thread.channel.name,
-					},
-					question: thread.firstMessage
-						? {
-								content: thread.firstMessage.message.content,
-								author: thread.firstMessage.author?.name ?? null,
-								timestamp: firstMessageTimestamp?.toISOString() ?? null,
-								attachments: thread.firstMessage.attachments.map((a) => ({
-									filename: a.filename,
-									url: a.url,
-									contentType: a.contentType ?? null,
-								})),
-							}
-						: null,
-					solution: thread.solutionMessage
-						? {
-								content: thread.solutionMessage.message.content,
-								author: thread.solutionMessage.author?.name ?? null,
-								timestamp: snowflakeToTimestamp(
-									thread.solutionMessage.message.id,
-								).toISOString(),
-							}
-						: null,
-					hasSolution: thread.solutionMessage !== null,
-				};
-
-				return {
-					content: [
-						{
-							type: "text",
-							text: JSON.stringify(response, null, 2),
-						},
-					],
-				};
-			},
-		);
-
-		server.registerTool(
 			"get_thread_messages",
 			{
 				title: "Get Thread Messages",
@@ -357,11 +215,11 @@ const handler = createMcpHandler(
 					}
 
 					const channelId = headerData.threadId ?? headerData.canonicalId;
-					const startMessageId = headerData.firstMessage?.message.id ?? 0n;
+					const firstMessageId = headerData.firstMessage?.message.id;
 
 					const messages = yield* database.public.messages.getMessages({
 						channelId,
-						after: startMessageId - 1n,
+						after: firstMessageId ? firstMessageId - 1n : 0n,
 						paginationOpts: {
 							numItems: limit ?? 50,
 							cursor: null,
@@ -386,6 +244,37 @@ const handler = createMcpHandler(
 					};
 				}
 
+				const formatMessage = (m: {
+					message: { id: bigint; content: string };
+					author?: { name: string } | null;
+					solutions: Array<{ id: bigint }>;
+					attachments: Array<{ filename: string; url: string }>;
+				}) => ({
+					id: m.message.id.toString(),
+					content: m.message.content,
+					author: m.author?.name ?? null,
+					timestamp: snowflakeToTimestamp(m.message.id).toISOString(),
+					isSolution: m.solutions.length > 0,
+					attachments: m.attachments.map((a) => ({
+						filename: a.filename,
+						url: a.url,
+					})),
+				});
+
+				const firstMessage = result.headerData.firstMessage;
+				const firstMessageId = firstMessage?.message.id;
+
+				const messagesFromQuery = result.messages.filter(
+					(m) => m.message.id !== firstMessageId,
+				);
+
+				const allMessages = firstMessage
+					? [
+							formatMessage(firstMessage),
+							...messagesFromQuery.map(formatMessage),
+						]
+					: messagesFromQuery.map(formatMessage);
+
 				const response = {
 					threadId: (
 						result.headerData.threadId ?? result.headerData.canonicalId
@@ -396,18 +285,8 @@ const handler = createMcpHandler(
 						id: result.headerData.server.discordId.toString(),
 						name: result.headerData.server.name,
 					},
-					messages: result.messages.map((m) => ({
-						id: m.message.id.toString(),
-						content: m.message.content,
-						author: m.author?.name ?? null,
-						timestamp: snowflakeToTimestamp(m.message.id).toISOString(),
-						isSolution: m.solutions.length > 0,
-						attachments: m.attachments.map((a) => ({
-							filename: a.filename,
-							url: a.url,
-						})),
-					})),
-					totalMessages: result.messages.length,
+					messages: allMessages,
+					totalMessages: allMessages.length,
 					hasMore: result.hasMore,
 				};
 

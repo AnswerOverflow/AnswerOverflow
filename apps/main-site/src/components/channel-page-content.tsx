@@ -4,12 +4,22 @@ import { api } from "@packages/database/convex/_generated/api";
 import { Button } from "@packages/ui/components/button";
 import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@packages/ui/components/dialog";
+import {
 	Empty,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
 } from "@packages/ui/components/empty";
+import { ModelContextProtocol } from "@packages/ui/components/icons/mcp";
+import { Input } from "@packages/ui/components/input";
 import { Link } from "@packages/ui/components/link";
 import { SearchInput } from "@packages/ui/components/search-input";
 import { ServerIcon } from "@packages/ui/components/server-icon";
@@ -21,6 +31,12 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@packages/ui/components/sheet";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@packages/ui/components/tabs";
 import { useTenant } from "@packages/ui/components/tenant-context";
 import {
 	ChannelMessageCard,
@@ -35,10 +51,175 @@ import { cn } from "@packages/ui/lib/utils";
 import { encodeCursor } from "@packages/ui/utils/cursor";
 import { getChannelIcon } from "@packages/ui/utils/discord";
 import type { FunctionReturnType } from "convex/server";
-import { FileQuestion, Menu } from "lucide-react";
+import { Check, Copy, FileQuestion, Menu } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
+
+function CopyButton({ text }: { text: string }) {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = async () => {
+		await navigator.clipboard.writeText(text);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2000);
+	};
+
+	return (
+		<Button
+			type="button"
+			size="icon"
+			variant="outline"
+			onClick={handleCopy}
+			className="shrink-0"
+		>
+			{copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+			<span className="sr-only">{copied ? "Copied" : "Copy"}</span>
+		</Button>
+	);
+}
+
+function MCPConfigBlock({ config }: { config: string }) {
+	return (
+		<div className="relative">
+			<pre className="bg-muted p-3 rounded-md text-xs font-mono overflow-x-auto max-h-48">
+				{config}
+			</pre>
+			<div className="absolute top-2 right-2">
+				<CopyButton text={config} />
+			</div>
+		</div>
+	);
+}
+
+function MCPServerResource({ serverDiscordId }: { serverDiscordId: bigint }) {
+	const mcpUrl = `https://www.answeroverflow.com/mcp/${serverDiscordId.toString()}`;
+
+	const cursorConfig = JSON.stringify(
+		{
+			mcpServers: {
+				answeroverflow: {
+					url: mcpUrl,
+				},
+			},
+		},
+		null,
+		2,
+	);
+
+	const claudeDesktopConfig = JSON.stringify(
+		{
+			mcpServers: {
+				answeroverflow: {
+					command: "npx",
+					args: ["-y", "mcp-remote", mcpUrl],
+				},
+			},
+		},
+		null,
+		2,
+	);
+
+	const vsCodeConfig = JSON.stringify(
+		{
+			servers: {
+				answeroverflow: {
+					type: "sse",
+					url: mcpUrl,
+				},
+			},
+		},
+		null,
+		2,
+	);
+
+	return (
+		<Dialog>
+			<DialogTrigger asChild>
+				<button
+					type="button"
+					className={cn(
+						"flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors w-full",
+						"text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+					)}
+				>
+					<ModelContextProtocol className="size-4 shrink-0 opacity-60" />
+					<span className="truncate">MCP Server</span>
+				</button>
+			</DialogTrigger>
+			<DialogContent className="sm:max-w-lg">
+				<DialogHeader>
+					<DialogTitle>MCP Server</DialogTitle>
+					<DialogDescription>
+						Connect your AI tools to this community's knowledge base via the
+						Model Context Protocol (MCP).
+					</DialogDescription>
+				</DialogHeader>
+
+				<div className="space-y-4">
+					<div>
+						<label className="text-sm font-medium mb-1.5 block">
+							Server URL
+						</label>
+						<div className="flex items-center gap-2">
+							<Input value={mcpUrl} readOnly className="font-mono text-sm" />
+							<CopyButton text={mcpUrl} />
+						</div>
+					</div>
+
+					<div>
+						<label className="text-sm font-medium mb-1.5 block">
+							Installation
+						</label>
+						<Tabs defaultValue="cursor" className="w-full">
+							<TabsList className="w-full">
+								<TabsTrigger value="cursor">Cursor</TabsTrigger>
+								<TabsTrigger value="claude">Claude</TabsTrigger>
+								<TabsTrigger value="vscode">VS Code</TabsTrigger>
+							</TabsList>
+							<TabsContent value="cursor" className="mt-3">
+								<p className="text-xs text-muted-foreground mb-2">
+									Add to <code>~/.cursor/mcp.json</code>:
+								</p>
+								<MCPConfigBlock config={cursorConfig} />
+							</TabsContent>
+							<TabsContent value="claude" className="mt-3">
+								<p className="text-xs text-muted-foreground mb-2">
+									Add to{" "}
+									<code>
+										~/Library/Application
+										Support/Claude/claude_desktop_config.json
+									</code>
+									:
+								</p>
+								<MCPConfigBlock config={claudeDesktopConfig} />
+							</TabsContent>
+							<TabsContent value="vscode" className="mt-3">
+								<p className="text-xs text-muted-foreground mb-2">
+									Add to VS Code settings (MCP extension):
+								</p>
+								<MCPConfigBlock config={vsCodeConfig} />
+							</TabsContent>
+						</Tabs>
+					</div>
+				</div>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+function ResourcesSidebar({ serverDiscordId }: { serverDiscordId: bigint }) {
+	return (
+		<div className="mb-4">
+			<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
+				Resources
+			</div>
+			<nav className="space-y-0.5">
+				<MCPServerResource serverDiscordId={serverDiscordId} />
+			</nav>
+		</div>
+	);
+}
 
 export type FirstThreadAuthor = {
 	id: string;
@@ -114,6 +295,7 @@ function ChannelsSidebar({
 	return (
 		<aside className="w-52 shrink-0">
 			<div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
+				<ResourcesSidebar serverDiscordId={serverDiscordId} />
 				<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
 					Channels
 				</div>
@@ -169,27 +351,33 @@ function MobileChannelSheet({
 			</SheetTrigger>
 			<SheetContent side="left" className="w-72 p-0">
 				<SheetHeader className="px-4 py-3 border-b">
-					<SheetTitle className="text-left">Channels</SheetTitle>
+					<SheetTitle className="text-left">Navigation</SheetTitle>
 				</SheetHeader>
-				<nav className="p-2 space-y-0.5">
-					{channels.map((channel) => {
-						const isSelected = channel.id === selectedChannelId;
-						return (
-							<ChannelLink
-								key={channel.id.toString()}
-								channel={channel}
-								isSelected={isSelected}
-								href={getChannelHref({
-									channelId: channel.id,
-									isSelected,
-									serverDiscordId,
-									tenantMode,
-								})}
-								onClick={() => setOpen(false)}
-							/>
-						);
-					})}
-				</nav>
+				<div className="p-2">
+					<ResourcesSidebar serverDiscordId={serverDiscordId} />
+					<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
+						Channels
+					</div>
+					<nav className="space-y-0.5">
+						{channels.map((channel) => {
+							const isSelected = channel.id === selectedChannelId;
+							return (
+								<ChannelLink
+									key={channel.id.toString()}
+									channel={channel}
+									isSelected={isSelected}
+									href={getChannelHref({
+										channelId: channel.id,
+										isSelected,
+										serverDiscordId,
+										tenantMode,
+									})}
+									onClick={() => setOpen(false)}
+								/>
+							);
+						})}
+					</nav>
+				</div>
 			</SheetContent>
 		</Sheet>
 	);
