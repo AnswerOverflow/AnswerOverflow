@@ -5,7 +5,7 @@
 	"private": true,
 	"scripts": {
 		"postinstall": "fumadocs-mdx",
-		"with-env": "bun run --env-file=../../.env --",
+		"with-env": "bun run --env-file=../../.env.production --",
 		"dev-next": "bun with-env next dev --turbo",
 		"dev-proxy": "bun run scripts/proxy.ts",
 		"dev": "NODE_ENV=development bun run dev-next & bun run dev-proxy; wait",

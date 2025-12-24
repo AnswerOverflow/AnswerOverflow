@@ -11,10 +11,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@packages/ui/components/select";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { getBaseUrl } from "@packages/ui/utils/links";
 import { Check, Copy } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { mcpProviders } from "@/components/mcp-install-configs";
 
 function CopyButton({ text }: { text: string }) {
@@ -40,8 +41,20 @@ function CopyButton({ text }: { text: string }) {
 	);
 }
 
-export default function MCPPage() {
-	const mcpUrl = `${getBaseUrl()}/mcp`;
+function ProviderSelectorFallback() {
+	return (
+		<div className="space-y-4">
+			<div>
+				<label className="text-sm font-medium mb-1.5 block">
+					Select Your Tool
+				</label>
+				<Skeleton className="h-10 w-full" />
+			</div>
+		</div>
+	);
+}
+
+function ProviderSelector({ mcpUrl }: { mcpUrl: string }) {
 	const [selectedProvider, setSelectedProvider] = useQueryState(
 		"provider",
 		parseAsString.withDefault("claude-code"),
@@ -49,6 +62,54 @@ export default function MCPPage() {
 
 	const provider = mcpProviders.find((p) => p.id === selectedProvider);
 	const config = provider?.getRemoteConfig(mcpUrl);
+
+	return (
+		<>
+			<div>
+				<label className="text-sm font-medium mb-1.5 block">
+					Select Your Tool
+				</label>
+				<Select value={selectedProvider} onValueChange={setSelectedProvider}>
+					<SelectTrigger className="w-full">
+						{provider ? (
+							<div className="flex items-center gap-2">
+								<img src={provider.icon} alt="" className="size-4 rounded-sm" />
+								<span>{provider.name}</span>
+							</div>
+						) : (
+							<SelectValue placeholder="Select your tool" />
+						)}
+					</SelectTrigger>
+					<SelectContent>
+						{mcpProviders.map((p) => (
+							<SelectItem key={p.id} value={p.id}>
+								<div className="flex items-center gap-2">
+									<img src={p.icon} alt="" className="size-4 rounded-sm" />
+									<span>{p.name}</span>
+								</div>
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
+
+			{config && (
+				<div className="mt-4">
+					<p className="text-sm text-muted-foreground mb-2">
+						{config.description}
+					</p>
+					<Code
+						code={config.content}
+						language={config.type === "json" ? "json" : "bash"}
+					/>
+				</div>
+			)}
+		</>
+	);
+}
+
+export default function MCPPage() {
+	const mcpUrl = `${getBaseUrl()}/mcp`;
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -83,56 +144,9 @@ export default function MCPPage() {
 								</div>
 							</div>
 
-							<div>
-								<label className="text-sm font-medium mb-1.5 block">
-									Select Your Tool
-								</label>
-								<Select
-									value={selectedProvider}
-									onValueChange={setSelectedProvider}
-								>
-									<SelectTrigger className="w-full">
-										{provider ? (
-											<div className="flex items-center gap-2">
-												<img
-													src={provider.icon}
-													alt=""
-													className="size-4 rounded-sm"
-												/>
-												<span>{provider.name}</span>
-											</div>
-										) : (
-											<SelectValue placeholder="Select your tool" />
-										)}
-									</SelectTrigger>
-									<SelectContent>
-										{mcpProviders.map((p) => (
-											<SelectItem key={p.id} value={p.id}>
-												<div className="flex items-center gap-2">
-													<img
-														src={p.icon}
-														alt=""
-														className="size-4 rounded-sm"
-													/>
-													<span>{p.name}</span>
-												</div>
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-
-							{config && (
-								<div className="mt-4">
-									<p className="text-sm text-muted-foreground mb-2">
-										{config.description}
-									</p>
-									<Code
-										code={config.content}
-										language={config.type === "json" ? "json" : "bash"}
-									/>
-								</div>
-							)}
+							<Suspense fallback={<ProviderSelectorFallback />}>
+								<ProviderSelector mcpUrl={mcpUrl} />
+							</Suspense>
 						</div>
 					</section>
 

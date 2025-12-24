@@ -152,7 +152,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "amp",
 		name: "Amp",
-		icon: "https://amp.dev/static/img/favicon.png",
+		icon: "https://ampcode.com/app-icon.png",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "command",
 			description: "Run this command in your terminal:",
@@ -162,7 +162,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "zed",
 		name: "Zed",
-		icon: "https://zed.dev/favicon.ico",
+		icon: "https://zed.dev/favicon_black_32.png",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to your Zed settings.json:",
@@ -205,7 +205,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "gemini-cli",
 		name: "Gemini CLI",
-		icon: "https://www.gstatic.com/lamda/images/gemini_favicon_f069958c85030f37fce5f06a5fd3d7b3.png",
+		icon: "https://www.gstatic.com/devrel-devsite/prod/ve08add287a6b4bdf8961ab8a1be50bf551be3816cdd70b7cc934114ff3ad5f10/googledevai/images/favicon-new.png",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description: "Add to ~/.gemini/settings.json:",
@@ -228,7 +228,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "copilot-coding-agent",
 		name: "Copilot Coding Agent",
-		icon: "https://github.githubassets.com/assets/copilot-logo-26f6a05d9d39.svg",
+		icon: "https://github.githubassets.com/favicons/favicon.svg",
 		getRemoteConfig: (mcpUrl) => ({
 			type: "json",
 			description:
