@@ -45,30 +45,37 @@ function CodeBlockButtons({
 	content,
 	wrap,
 	onToggleWrap,
+	hideWrap,
+	onCopy,
 }: {
 	content: string;
 	wrap: boolean;
 	onToggleWrap: () => void;
+	hideWrap?: boolean;
+	onCopy?: () => void;
 }) {
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = async () => {
 		await navigator.clipboard.writeText(content);
 		setCopied(true);
+		onCopy?.();
 		setTimeout(() => setCopied(false), 2000);
 	};
 
 	return (
 		<div className="absolute top-2 right-2 z-10 flex gap-1">
-			<Button
-				variant="ghost"
-				size="icon-sm"
-				onClick={onToggleWrap}
-				className={`bg-background/80 backdrop-blur-sm hover:bg-background/90 ${wrap ? "text-primary" : ""}`}
-				aria-label={wrap ? "Disable text wrap" : "Enable text wrap"}
-			>
-				<WrapText className="size-4" />
-			</Button>
+			{!hideWrap && (
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					onClick={onToggleWrap}
+					className={`bg-background/80 backdrop-blur-sm hover:bg-background/90 ${wrap ? "text-primary" : ""}`}
+					aria-label={wrap ? "Disable text wrap" : "Enable text wrap"}
+				>
+					<WrapText className="size-4" />
+				</Button>
+			)}
 			<Button
 				variant="ghost"
 				size="icon-sm"
@@ -179,9 +186,13 @@ function InlineCodeInternal({
 export function CodeBlock({
 	lang,
 	content,
+	hideWrap,
+	onCopy,
 }: {
 	lang?: string;
 	content: string;
+	hideWrap?: boolean;
+	onCopy?: () => void;
 }) {
 	const [wrap, setWrap] = useState(false);
 
@@ -191,6 +202,8 @@ export function CodeBlock({
 				content={content}
 				wrap={wrap}
 				onToggleWrap={() => setWrap(!wrap)}
+				hideWrap={hideWrap}
+				onCopy={onCopy}
 			/>
 			<div className="overflow-x-auto">
 				<SuspenseClientOnly
@@ -279,10 +292,14 @@ export function Code({
 	code,
 	language,
 	isInline = false,
+	hideWrap = false,
+	onCopy,
 }: {
 	code: string;
 	language?: string;
 	isInline?: boolean;
+	hideWrap?: boolean;
+	onCopy?: () => void;
 }) {
 	if (isInline) {
 		return <InlineCode code={code} language={language} />;
@@ -290,7 +307,12 @@ export function Code({
 
 	return (
 		<div className="not-prose w-full overflow-auto rounded border dark:border-neutral-700 border-neutral-300 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2">
-			<CodeBlock lang={language} content={code} />
+			<CodeBlock
+				lang={language}
+				content={code}
+				hideWrap={hideWrap}
+				onCopy={onCopy}
+			/>
 		</div>
 	);
 }

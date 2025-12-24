@@ -1,6 +1,5 @@
-import { Button } from "@packages/ui/components/button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
-import { Hash, Users } from "lucide-react";
+import { Hash } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
@@ -45,7 +44,6 @@ export default async function DomainPage(props: Props) {
 	const headerData = await fetchServerPageHeaderData(tenant.discordId);
 
 	if (!headerData || headerData.channels.length === 0) {
-		const inviteUrl = `https://discord.com/servers/${tenant.discordId}`;
 		const description = tenant.description;
 
 		return (
@@ -72,20 +70,6 @@ export default async function DomainPage(props: Props) {
 											{description}
 										</p>
 									</div>
-									<Button
-										variant="secondary"
-										size="sm"
-										asChild
-										className="shrink-0 font-medium"
-									>
-										<a
-											href={inviteUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											Join Discord
-										</a>
-									</Button>
 								</div>
 							</div>
 						</div>
@@ -100,16 +84,6 @@ export default async function DomainPage(props: Props) {
 						<h2 className="text-xl font-semibold text-foreground mb-2">
 							No channels indexed yet
 						</h2>
-						<p className="text-muted-foreground max-w-md mb-6">
-							This community hasn't set up any channels for indexing. Join the
-							Discord server to participate in discussions!
-						</p>
-						<Button variant="secondary" asChild className="font-medium">
-							<a href={inviteUrl} target="_blank" rel="noopener noreferrer">
-								<Users className="size-4 mr-2" />
-								Join {tenant.name}
-							</a>
-						</Button>
 					</div>
 				</div>
 			</div>

@@ -115,6 +115,19 @@ export type ViewOnDiscordClickProps = {
 	message: AnalyticsMessage;
 };
 
+export type MCPUrlCopyClickProps = {
+	url: string;
+};
+
+export type MCPInstallCopyClickProps = {
+	provider: string;
+	url: string;
+};
+
+export type MCPProviderSelectProps = {
+	provider: string;
+};
+
 export type EventMap = {
 	"Message Page View": MessagePageViewProps;
 	"Community Page View": CommunityPageViewProps;
@@ -122,6 +135,9 @@ export type EventMap = {
 	"Server Invite Click": ServerInviteClickProps;
 	"Community Page Link Click": CommunityPageLinkClickProps;
 	"View On Discord Click": ViewOnDiscordClickProps;
+	"MCP URL Copy Click": MCPUrlCopyClickProps;
+	"MCP Install Copy Click": MCPInstallCopyClickProps;
+	"MCP Provider Select": MCPProviderSelectProps;
 };
 
 export type EventName = keyof EventMap;

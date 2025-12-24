@@ -1,116 +1,39 @@
 "use client";
 
-import { Button } from "@packages/ui/components/button";
-import { Code } from "@packages/ui/components/code";
-import { Input } from "@packages/ui/components/input";
 import { Link } from "@packages/ui/components/link";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@packages/ui/components/select";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { getBaseUrl } from "@packages/ui/utils/links";
-import { Check, Copy } from "lucide-react";
-import { parseAsString, useQueryState } from "nuqs";
-import { Suspense, useState } from "react";
-import { mcpProviders } from "@/components/mcp-install-configs";
+import { useTenant } from "@packages/ui/components/tenant-context";
+import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
+import { Suspense } from "react";
+import {
+	getMCPServerName,
+	MCPInstallForm,
+} from "@/components/resources-sidebar";
 
-function CopyButton({ text }: { text: string }) {
-	const [copied, setCopied] = useState(false);
-
-	const handleCopy = async () => {
-		await navigator.clipboard.writeText(text);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
-	};
-
-	return (
-		<Button
-			type="button"
-			size="icon"
-			variant="outline"
-			onClick={handleCopy}
-			className="shrink-0"
-		>
-			{copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-			<span className="sr-only">{copied ? "Copied" : "Copy"}</span>
-		</Button>
-	);
-}
-
-function ProviderSelectorFallback() {
+function MCPInstallFormFallback() {
 	return (
 		<div className="space-y-4">
 			<div>
-				<label className="text-sm font-medium mb-1.5 block">
-					Select Your Tool
-				</label>
+				<label className="text-sm font-medium mb-1.5 block">Server URL</label>
+				<Skeleton className="h-10 w-full" />
+			</div>
+			<div>
+				<label className="text-sm font-medium mb-1.5 block">Installation</label>
 				<Skeleton className="h-10 w-full" />
 			</div>
 		</div>
 	);
 }
 
-function ProviderSelector({ mcpUrl }: { mcpUrl: string }) {
-	const [selectedProvider, setSelectedProvider] = useQueryState(
-		"provider",
-		parseAsString.withDefault("claude-code"),
-	);
+function MCPInstallFormWithTenant() {
+	const tenant = useTenant();
+	const mcpUrl = getTenantCanonicalUrl(tenant, "/mcp");
+	const serverName = getMCPServerName(tenant);
 
-	const provider = mcpProviders.find((p) => p.id === selectedProvider);
-	const config = provider?.getRemoteConfig(mcpUrl);
-
-	return (
-		<>
-			<div>
-				<label className="text-sm font-medium mb-1.5 block">
-					Select Your Tool
-				</label>
-				<Select value={selectedProvider} onValueChange={setSelectedProvider}>
-					<SelectTrigger className="w-full">
-						{provider ? (
-							<div className="flex items-center gap-2">
-								<img src={provider.icon} alt="" className="size-4 rounded-sm" />
-								<span>{provider.name}</span>
-							</div>
-						) : (
-							<SelectValue placeholder="Select your tool" />
-						)}
-					</SelectTrigger>
-					<SelectContent>
-						{mcpProviders.map((p) => (
-							<SelectItem key={p.id} value={p.id}>
-								<div className="flex items-center gap-2">
-									<img src={p.icon} alt="" className="size-4 rounded-sm" />
-									<span>{p.name}</span>
-								</div>
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-			</div>
-
-			{config && (
-				<div className="mt-4">
-					<p className="text-sm text-muted-foreground mb-2">
-						{config.description}
-					</p>
-					<Code
-						code={config.content}
-						language={config.type === "json" ? "json" : "bash"}
-					/>
-				</div>
-			)}
-		</>
-	);
+	return <MCPInstallForm mcpUrl={mcpUrl} serverName={serverName} />;
 }
 
 export default function MCPPage() {
-	const mcpUrl = `${getBaseUrl()}/mcp`;
-
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
@@ -129,25 +52,9 @@ export default function MCPPage() {
 					<section className="bg-card border rounded-lg p-6">
 						<h2 className="text-xl font-semibold mb-4">Installation</h2>
 
-						<div className="space-y-4">
-							<div>
-								<label className="text-sm font-medium mb-1.5 block">
-									Server URL
-								</label>
-								<div className="flex items-center gap-2">
-									<Input
-										value={mcpUrl}
-										readOnly
-										className="font-mono text-sm"
-									/>
-									<CopyButton text={mcpUrl} />
-								</div>
-							</div>
-
-							<Suspense fallback={<ProviderSelectorFallback />}>
-								<ProviderSelector mcpUrl={mcpUrl} />
-							</Suspense>
-						</div>
+						<Suspense fallback={<MCPInstallFormFallback />}>
+							<MCPInstallFormWithTenant />
+						</Suspense>
 					</section>
 
 					<section className="bg-card border rounded-lg p-6">

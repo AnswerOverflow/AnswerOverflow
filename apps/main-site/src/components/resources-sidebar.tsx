@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { Button } from "@packages/ui/components/button";
 import { Code } from "@packages/ui/components/code";
 import {
@@ -27,12 +28,19 @@ import { parseAsBoolean, useQueryState } from "nuqs";
 import { useState } from "react";
 import { mcpProviders } from "./mcp-install-configs";
 
-function CopyButton({ text }: { text: string }) {
+export function CopyButton({
+	text,
+	onCopy,
+}: {
+	text: string;
+	onCopy?: () => void;
+}) {
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = async () => {
 		await navigator.clipboard.writeText(text);
 		setCopied(true);
+		onCopy?.();
 		setTimeout(() => setCopied(false), 2000);
 	};
 
@@ -50,16 +58,122 @@ function CopyButton({ text }: { text: string }) {
 	);
 }
 
-export function MCPServerResource() {
-	const tenant = useTenant();
-	const mcpUrl = getTenantCanonicalUrl(tenant, "/mcp");
-	const [isOpen, setIsOpen] = useQueryState("mcp", parseAsBoolean);
+export function ProviderSelector({
+	mcpUrl,
+	serverName,
+}: {
+	mcpUrl: string;
+	serverName: string;
+}) {
+	const posthog = usePostHog();
 	const [selectedProvider, setSelectedProvider] = useQueryState("provider", {
 		defaultValue: "claude-code",
 	});
 
 	const provider = mcpProviders.find((p) => p.id === selectedProvider);
-	const config = provider?.getRemoteConfig(mcpUrl);
+	const config = provider?.getRemoteConfig(mcpUrl, serverName);
+
+	const handleProviderChange = (value: string) => {
+		setSelectedProvider(value);
+		trackEvent("MCP Provider Select", { provider: value }, posthog);
+	};
+
+	const handleInstallCopy = () => {
+		trackEvent(
+			"MCP Install Copy Click",
+			{ provider: selectedProvider, url: mcpUrl },
+			posthog,
+		);
+	};
+
+	return (
+		<div className="min-w-0">
+			<label className="text-sm font-medium mb-1.5 block">Installation</label>
+			<Select value={selectedProvider} onValueChange={handleProviderChange}>
+				<SelectTrigger className="w-full">
+					{provider ? (
+						<div className="flex items-center gap-2">
+							<img src={provider.icon} alt="" className="size-4 rounded-sm" />
+							<span>{provider.name}</span>
+						</div>
+					) : (
+						<SelectValue placeholder="Select your tool" />
+					)}
+				</SelectTrigger>
+				<SelectContent>
+					{mcpProviders.map((p) => (
+						<SelectItem key={p.id} value={p.id}>
+							<div className="flex items-center gap-2">
+								<img src={p.icon} alt="" className="size-4 rounded-sm" />
+								<span>{p.name}</span>
+							</div>
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+
+			{config && (
+				<div className="mt-3">
+					<p className="text-xs text-muted-foreground mb-2">
+						{config.description}
+					</p>
+					<Code
+						code={config.content}
+						language={config.type === "json" ? "json" : "bash"}
+						hideWrap
+						onCopy={handleInstallCopy}
+					/>
+				</div>
+			)}
+		</div>
+	);
+}
+
+export function MCPInstallForm({
+	mcpUrl,
+	serverName,
+}: {
+	mcpUrl: string;
+	serverName: string;
+}) {
+	const posthog = usePostHog();
+
+	const handleUrlCopy = () => {
+		trackEvent("MCP URL Copy Click", { url: mcpUrl }, posthog);
+	};
+
+	return (
+		<div className="space-y-4 min-w-0">
+			<div className="min-w-0">
+				<label className="text-sm font-medium mb-1.5 block">Server URL</label>
+				<div className="flex items-center gap-2 min-w-0">
+					<Input
+						value={mcpUrl}
+						readOnly
+						className="font-mono text-sm min-w-0"
+					/>
+					<CopyButton text={mcpUrl} onCopy={handleUrlCopy} />
+				</div>
+			</div>
+
+			<ProviderSelector mcpUrl={mcpUrl} serverName={serverName} />
+		</div>
+	);
+}
+
+export function getMCPServerName(tenant: ReturnType<typeof useTenant>) {
+	if (tenant) {
+		const slug = tenant.customDomain?.split(".")[0] ?? tenant.name;
+		return `${slug.toLowerCase().replace(/\s+/g, "-")}-discord`;
+	}
+	return "answeroverflow";
+}
+
+export function MCPServerResource() {
+	const tenant = useTenant();
+	const mcpUrl = getTenantCanonicalUrl(tenant, "/mcp");
+	const serverName = getMCPServerName(tenant);
+	const [isOpen, setIsOpen] = useQueryState("mcp", parseAsBoolean);
 
 	return (
 		<Dialog open={isOpen ?? false} onOpenChange={setIsOpen}>
@@ -84,68 +198,7 @@ export function MCPServerResource() {
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="space-y-4 min-w-0">
-					<div className="min-w-0">
-						<label className="text-sm font-medium mb-1.5 block">
-							Server URL
-						</label>
-						<div className="flex items-center gap-2 min-w-0">
-							<Input
-								value={mcpUrl}
-								readOnly
-								className="font-mono text-sm min-w-0"
-							/>
-							<CopyButton text={mcpUrl} />
-						</div>
-					</div>
-
-					<div className="min-w-0">
-						<label className="text-sm font-medium mb-1.5 block">
-							Installation
-						</label>
-						<Select
-							value={selectedProvider}
-							onValueChange={setSelectedProvider}
-						>
-							<SelectTrigger className="w-full">
-								{provider ? (
-									<div className="flex items-center gap-2">
-										<img
-											src={provider.icon}
-											alt=""
-											className="size-4 rounded-sm"
-										/>
-										<span>{provider.name}</span>
-									</div>
-								) : (
-									<SelectValue placeholder="Select your tool" />
-								)}
-							</SelectTrigger>
-							<SelectContent>
-								{mcpProviders.map((p) => (
-									<SelectItem key={p.id} value={p.id}>
-										<div className="flex items-center gap-2">
-											<img src={p.icon} alt="" className="size-4 rounded-sm" />
-											<span>{p.name}</span>
-										</div>
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-
-						{config && (
-							<div className="mt-3">
-								<p className="text-xs text-muted-foreground mb-2">
-									{config.description}
-								</p>
-								<Code
-									code={config.content}
-									language={config.type === "json" ? "json" : "bash"}
-								/>
-							</div>
-						)}
-					</div>
-				</div>
+				<MCPInstallForm mcpUrl={mcpUrl} serverName={serverName} />
 			</DialogContent>
 		</Dialog>
 	);

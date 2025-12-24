@@ -2,7 +2,10 @@ export type MCPProvider = {
 	id: string;
 	name: string;
 	icon: string;
-	getRemoteConfig: (mcpUrl: string) => {
+	getRemoteConfig: (
+		mcpUrl: string,
+		serverName: string,
+	) => {
 		type: "command" | "json";
 		description: string;
 		content: string;
@@ -14,23 +17,23 @@ export const mcpProviders: MCPProvider[] = [
 		id: "claude-code",
 		name: "Claude Code",
 		icon: "https://claude.ai/favicon.ico",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "command",
 			description: "Run this command in your terminal:",
-			content: `claude mcp add --transport http answeroverflow ${mcpUrl}`,
+			content: `claude mcp add --transport http ${serverName} ${mcpUrl}`,
 		}),
 	},
 	{
 		id: "cursor",
 		name: "Cursor",
 		icon: "https://cursor.com/favicon.ico",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description: "Add to ~/.cursor/mcp.json:",
 			content: JSON.stringify(
 				{
 					mcpServers: {
-						answeroverflow: {
+						[serverName]: {
 							url: mcpUrl,
 						},
 					},
@@ -44,14 +47,14 @@ export const mcpProviders: MCPProvider[] = [
 		id: "vscode",
 		name: "VS Code",
 		icon: "https://code.visualstudio.com/assets/favicon.ico",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description: "Add to VS Code settings (MCP extension):",
 			content: JSON.stringify(
 				{
 					mcp: {
 						servers: {
-							answeroverflow: {
+							[serverName]: {
 								type: "http",
 								url: mcpUrl,
 							},
@@ -67,13 +70,13 @@ export const mcpProviders: MCPProvider[] = [
 		id: "windsurf",
 		name: "Windsurf",
 		icon: "https://windsurf.com/favicon.png",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description: "Add to your Windsurf MCP config file:",
 			content: JSON.stringify(
 				{
 					mcpServers: {
-						answeroverflow: {
+						[serverName]: {
 							serverUrl: mcpUrl,
 						},
 					},
@@ -87,14 +90,14 @@ export const mcpProviders: MCPProvider[] = [
 		id: "claude-desktop",
 		name: "Claude Desktop",
 		icon: "https://claude.ai/favicon.ico",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description:
 				"Open Claude Desktop Settings > Connectors > Add Custom Connector, or add to ~/Library/Application Support/Claude/claude_desktop_config.json:",
 			content: JSON.stringify(
 				{
 					mcpServers: {
-						answeroverflow: {
+						[serverName]: {
 							command: "npx",
 							args: ["-y", "mcp-remote", mcpUrl],
 						},
@@ -109,13 +112,13 @@ export const mcpProviders: MCPProvider[] = [
 		id: "opencode",
 		name: "OpenCode",
 		icon: "https://opencode.ai/favicon-96x96.png",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description: "Add to your OpenCode configuration file (opencode.json):",
 			content: JSON.stringify(
 				{
 					mcp: {
-						answeroverflow: {
+						[serverName]: {
 							type: "remote",
 							url: mcpUrl,
 							enabled: true,
@@ -131,14 +134,14 @@ export const mcpProviders: MCPProvider[] = [
 		id: "cline",
 		name: "Cline",
 		icon: "https://saoudrizwan.gallerycdn.vsassets.io/extensions/saoudrizwan/claude-dev/3.46.1/1766441409033/Microsoft.VisualStudio.Services.Icons.Default",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description:
 				"Open Cline > MCP Servers > Remote Servers > Edit Configuration:",
 			content: JSON.stringify(
 				{
 					mcpServers: {
-						answeroverflow: {
+						[serverName]: {
 							url: mcpUrl,
 							type: "streamableHttp",
 						},
@@ -153,23 +156,23 @@ export const mcpProviders: MCPProvider[] = [
 		id: "amp",
 		name: "Amp",
 		icon: "https://ampcode.com/app-icon.png",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "command",
 			description: "Run this command in your terminal:",
-			content: `amp mcp add answeroverflow ${mcpUrl}`,
+			content: `amp mcp add ${serverName} ${mcpUrl}`,
 		}),
 	},
 	{
 		id: "zed",
 		name: "Zed",
 		icon: "https://zed.dev/favicon_black_32.png",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description: "Add to your Zed settings.json:",
 			content: JSON.stringify(
 				{
 					context_servers: {
-						answeroverflow: {
+						[serverName]: {
 							source: "custom",
 							command: "npx",
 							args: ["-y", "mcp-remote", mcpUrl],
@@ -185,13 +188,13 @@ export const mcpProviders: MCPProvider[] = [
 		id: "roo-code",
 		name: "Roo Code",
 		icon: "https://rooveterinaryinc.gallerycdn.vsassets.io/extensions/rooveterinaryinc/roo-cline/3.37.1/1766531704474/Microsoft.VisualStudio.Services.Icons.Default",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description: "Add to your Roo Code MCP configuration file:",
 			content: JSON.stringify(
 				{
 					mcpServers: {
-						answeroverflow: {
+						[serverName]: {
 							type: "streamable-http",
 							url: mcpUrl,
 						},
@@ -206,13 +209,13 @@ export const mcpProviders: MCPProvider[] = [
 		id: "gemini-cli",
 		name: "Gemini CLI",
 		icon: "https://www.gstatic.com/devrel-devsite/prod/ve08add287a6b4bdf8961ab8a1be50bf551be3816cdd70b7cc934114ff3ad5f10/googledevai/images/favicon-new.png",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description: "Add to ~/.gemini/settings.json:",
 			content: JSON.stringify(
 				{
 					mcpServers: {
-						answeroverflow: {
+						[serverName]: {
 							httpUrl: mcpUrl,
 							headers: {
 								Accept: "application/json, text/event-stream",
@@ -229,14 +232,14 @@ export const mcpProviders: MCPProvider[] = [
 		id: "copilot-coding-agent",
 		name: "Copilot Coding Agent",
 		icon: "https://github.githubassets.com/favicons/favicon.svg",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description:
 				"Add to Repository > Settings > Copilot > Coding agent > MCP configuration:",
 			content: JSON.stringify(
 				{
 					mcpServers: {
-						answeroverflow: {
+						[serverName]: {
 							type: "http",
 							url: mcpUrl,
 							tools: ["search_answeroverflow", "get_thread_messages"],
@@ -252,14 +255,14 @@ export const mcpProviders: MCPProvider[] = [
 		id: "jetbrains",
 		name: "JetBrains AI Assistant",
 		icon: "https://www.jetbrains.com/favicon.ico",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description:
 				"Go to Settings > Tools > AI Assistant > Model Context Protocol (MCP), click + Add, select 'As JSON':",
 			content: JSON.stringify(
 				{
 					mcpServers: {
-						answeroverflow: {
+						[serverName]: {
 							command: "npx",
 							args: ["-y", "mcp-remote", mcpUrl],
 						},
@@ -274,10 +277,10 @@ export const mcpProviders: MCPProvider[] = [
 		id: "openai-codex",
 		name: "OpenAI Codex",
 		icon: "https://openai.com/favicon.ico",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description: "Add to your OpenAI Codex MCP server settings (TOML):",
-			content: `[mcp_servers.answeroverflow]
+			content: `[mcp_servers.${serverName}]
 url = "${mcpUrl}"`,
 		}),
 	},
@@ -285,14 +288,14 @@ url = "${mcpUrl}"`,
 		id: "kilo-code",
 		name: "Kilo Code",
 		icon: "https://kilo.ai/favicon.ico",
-		getRemoteConfig: (mcpUrl) => ({
+		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description:
 				"Open Settings > MCP Servers > Add Server, or add to .kilocode/mcp.json:",
 			content: JSON.stringify(
 				{
 					mcpServers: {
-						answeroverflow: {
+						[serverName]: {
 							type: "streamable-http",
 							url: mcpUrl,
 							disabled: false,

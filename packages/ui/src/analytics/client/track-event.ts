@@ -36,6 +36,12 @@ function enrichProps(props: EventProps): Record<string, unknown> {
 	if ("Link Location" in props) {
 		result["Link Location"] = props["Link Location"];
 	}
+	if ("url" in props) {
+		result.url = props.url;
+	}
+	if ("provider" in props) {
+		result.provider = props.provider;
+	}
 
 	return result;
 }

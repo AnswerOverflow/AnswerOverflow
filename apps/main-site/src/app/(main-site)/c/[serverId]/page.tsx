@@ -1,9 +1,8 @@
-import { Button } from "@packages/ui/components/button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Option } from "effect";
-import { Hash, Users } from "lucide-react";
+import { Hash } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import {
@@ -60,7 +59,6 @@ export default async function ServerPage(props: Props) {
 	}
 
 	if (channels.length === 0) {
-		const inviteUrl = `https://discord.com/servers/${server.discordId}`;
 		const description =
 			server.description ??
 			`Browse and search through archived Discord discussions from ${server.name}`;
@@ -89,20 +87,6 @@ export default async function ServerPage(props: Props) {
 											{description}
 										</p>
 									</div>
-									<Button
-										variant="secondary"
-										size="sm"
-										asChild
-										className="shrink-0 font-medium"
-									>
-										<a
-											href={inviteUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											Join Discord
-										</a>
-									</Button>
 								</div>
 							</div>
 						</div>
@@ -117,16 +101,6 @@ export default async function ServerPage(props: Props) {
 						<h2 className="text-xl font-semibold text-foreground mb-2">
 							No channels indexed yet
 						</h2>
-						<p className="text-muted-foreground max-w-md mb-6">
-							This community hasn't set up any channels for indexing. Join the
-							Discord server to participate in discussions!
-						</p>
-						<Button variant="secondary" asChild className="font-medium">
-							<a href={inviteUrl} target="_blank" rel="noopener noreferrer">
-								<Users className="size-4 mr-2" />
-								Join {server.name}
-							</a>
-						</Button>
 					</div>
 				</div>
 			</div>
