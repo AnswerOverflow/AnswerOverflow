@@ -53,6 +53,7 @@ export const FUNCTION_TYPE_MAP = {
   "servers.findManyServersById": "query",
   "servers.getAllServers": "query",
   "servers.getBrowseServers": "query",
+  "servers.getCachedBrowsableServers": "action",
   "servers.getServerByDiscordId": "query",
   "servers.getServerByDiscordIdWithChannels": "query",
   "servers.getServerByDomain": "query",
@@ -77,7 +78,7 @@ export const NAMESPACE_STRUCTURE = {
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","markMessageAsSolution","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
   "search": ["getRecentThreads","getSimilarThreads","publicSearch"],
   "server_preferences": ["getBotCustomizationForServer","getServerPreferencesByServerId","getServersWithBotCustomization","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
-  "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
+  "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getCachedBrowsableServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
 } as const;
 

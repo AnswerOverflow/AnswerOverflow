@@ -104,7 +104,7 @@ export const publicQuery = customQuery(query, {
 export const publicMutation = customMutation(mutation, {
 	args: {
 		discordAccountId: v.optional(v.string()),
-		backendAccessToken: v.optional(v.string()),
+		publicBackendAccessToken: v.optional(v.string()),
 		type: v.optional(v.union(v.literal("signed-in"), v.literal("admin"))),
 	},
 	input: async (ctx, args) => {
@@ -112,7 +112,7 @@ export const publicMutation = customMutation(mutation, {
 		let discordAccountId: bigint | undefined;
 		let type: "signed-in" | "admin";
 
-		if (validatePublicBackendAccessToken(args.backendAccessToken)) {
+		if (validatePublicBackendAccessToken(args.publicBackendAccessToken)) {
 			discordAccountId = undefined;
 			type = "admin";
 		} else {
@@ -143,14 +143,14 @@ export const publicMutation = customMutation(mutation, {
 export const publicAction = customAction(action, {
 	args: {
 		discordAccountId: v.optional(v.string()),
-		backendAccessToken: v.optional(v.string()),
+		publicBackendAccessToken: v.optional(v.string()),
 		type: v.optional(v.union(v.literal("signed-in"), v.literal("admin"))),
 	},
 	input: async (ctx, args) => {
 		let discordAccountId: bigint | undefined;
 		let type: "signed-in" | "admin";
 
-		if (validatePublicBackendAccessToken(args.backendAccessToken)) {
+		if (validatePublicBackendAccessToken(args.publicBackendAccessToken)) {
 			discordAccountId = undefined;
 			type = "admin";
 		} else {

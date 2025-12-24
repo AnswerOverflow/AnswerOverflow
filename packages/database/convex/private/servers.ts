@@ -2,9 +2,23 @@ import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
-import { privateMutation, privateQuery } from "../client";
+import { internal } from "../_generated/api";
+import {
+	internalAction,
+	internalQuery,
+	privateMutation,
+	privateQuery,
+} from "../client";
 import { serverSchema } from "../schema";
 import { CHANNEL_TYPE } from "../shared/shared";
+
+export type BrowsableServer = {
+	discordId: string;
+	name: string;
+	icon: string | null;
+	description: string | null;
+	approximateMemberCount: number;
+};
 
 export const upsertServer = privateMutation({
 	args: serverSchema,
@@ -214,5 +228,53 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 			},
 			channels,
 		};
+	},
+});
+
+export const getBrowseServersInternal = internalQuery({
+	args: {},
+	handler: async (ctx) => {
+		const allServers = await ctx.db.query("servers").collect();
+
+		const nonKickedServers = allServers.filter(
+			(server) => server.kickedTime === undefined || server.kickedTime === null,
+		);
+
+		const filteredServers: typeof nonKickedServers = [];
+
+		for (const server of nonKickedServers) {
+			const hasIndexingEnabled = await ctx.db
+				.query("channelSettings")
+				.withIndex("by_serverId_and_indexingEnabled", (q) =>
+					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+				)
+				.first();
+
+			if (hasIndexingEnabled) {
+				filteredServers.push(server);
+			}
+		}
+
+		return filteredServers.sort(
+			(a, b) => b.approximateMemberCount - a.approximateMemberCount,
+		);
+	},
+});
+
+export const fetchBrowsableServersInternal = internalAction({
+	args: {},
+	handler: async (ctx): Promise<BrowsableServer[]> => {
+		const servers = await ctx.runQuery(
+			internal.private.servers.getBrowseServersInternal,
+			{},
+		);
+
+		return servers.map((s) => ({
+			discordId: s.discordId.toString(),
+			name: s.name,
+			icon: s.icon ?? null,
+			description: s.description ?? null,
+			approximateMemberCount: s.approximateMemberCount,
+		}));
 	},
 });

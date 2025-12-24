@@ -41,7 +41,7 @@ const handler = createMcpHandler(
 			{
 				title: "Search Answer Overflow",
 				description:
-					"Search for answers on Answer Overflow - a searchable archive of Discord help channels.\n\nUse this to find solutions to programming questions, library-specific issues, and community discussions.\n\nTips for effective searching:\n- Use specific error messages or function names\n- Filter by serverId to search within a specific community (e.g., Effect Discord, Next.js Discord)\n- Use list_servers first to discover available communities and their IDs",
+					"Search for answers on Answer Overflow - a searchable archive of Discord help channels.\n\nUse this to find solutions to programming questions, library-specific issues, and community discussions.\n\nTips for effective searching:\n- Use specific error messages or function names\n- Filter by serverId to search within a specific community (e.g., Effect Discord, Next.js Discord)\n- Use search_servers first to discover available communities and their IDs",
 				inputSchema: z.object({
 					query: z
 						.string()
@@ -52,7 +52,7 @@ const handler = createMcpHandler(
 						.string()
 						.optional()
 						.describe(
-							"Filter results to a specific Discord server. Use list_servers to find server IDs.",
+							"Filter results to a specific Discord server. Use search_servers to find server IDs.",
 						),
 					channelId: z
 						.string()
@@ -101,12 +101,18 @@ const handler = createMcpHandler(
 		);
 
 		server.registerTool(
-			"list_servers",
+			"search_servers",
 			{
-				title: "List Available Servers",
+				title: "Search Discord Servers",
 				description:
-					"List all Discord servers indexed on Answer Overflow.\n\nUse this to discover communities and get their server IDs for filtered searching.\nResults are sorted by member count (largest first).",
+					"Search for Discord servers indexed on Answer Overflow by name.\n\nUse this to discover communities and get their server IDs for filtered searching.\nResults are sorted by member count (largest first).\n\nExamples:\n- 'Effect' to find the Effect Community Discord\n- 'React' to find React-related servers\n- 'Next' to find Next.js servers",
 				inputSchema: z.object({
+					query: z
+						.string()
+						.optional()
+						.describe(
+							"Search query to filter servers by name. Leave empty to list all servers.",
+						),
 					limit: z
 						.number()
 						.min(1)
@@ -118,14 +124,23 @@ const handler = createMcpHandler(
 						),
 				}),
 			},
-			async ({ limit }) => {
+			async ({ query, limit }) => {
 				const servers = await Effect.gen(function* () {
 					const database = yield* Database;
-					const allServers = yield* database.private.servers.getBrowseServers(
-						{},
-					);
-					return allServers.slice(0, limit ?? 25);
-				}).pipe(runtime.runPromise);
+					const allServers =
+						yield* database.public.servers.getCachedBrowsableServers({});
+
+					const filteredServers = query
+						? allServers.filter((s) =>
+								s.name.toLowerCase().includes(query.toLowerCase()),
+							)
+						: allServers;
+
+					return filteredServers.slice(0, limit ?? 25);
+				}).pipe(
+					Effect.tapError((e) => Effect.logError(e)),
+					runtime.runPromise,
+				);
 
 				return {
 					content: [
@@ -134,9 +149,9 @@ const handler = createMcpHandler(
 							text: JSON.stringify(
 								{
 									servers: servers.map((s) => ({
-										id: s.discordId.toString(),
+										id: s.discordId,
 										name: s.name,
-										description: s.description ?? null,
+										description: s.description,
 										memberCount: s.approximateMemberCount,
 										icon: s.icon
 											? `https://cdn.discordapp.com/icons/${s.discordId}/${s.icon}.png`
@@ -158,18 +173,20 @@ const handler = createMcpHandler(
 			{
 				title: "Get Server Channels",
 				description:
-					"Get all indexed channels for a specific Discord server.\n\nUse this after list_servers to see what channels are available for searching within a community.",
+					"Get all indexed channels for a specific Discord server.\n\nUse this after search_servers to see what channels are available for searching within a community.",
 				inputSchema: z.object({
 					serverId: z
 						.string()
-						.describe("The Discord server ID (use list_servers to find this)"),
+						.describe(
+							"The Discord server ID (use search_servers to find this)",
+						),
 				}),
 			},
 			async ({ serverId }) => {
 				const result = await Effect.gen(function* () {
 					const database = yield* Database;
 					const serverWithChannels =
-						yield* database.private.servers.getServerByDiscordIdWithChannels({
+						yield* database.public.servers.getServerByDiscordIdWithChannels({
 							discordId: BigInt(serverId),
 						});
 					return serverWithChannels;

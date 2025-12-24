@@ -1,9 +1,12 @@
+import { ActionCache } from "@convex-dev/action-cache";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
+import { components, internal } from "../_generated/api";
+import type { BrowsableServer } from "../private/servers";
 import { CHANNEL_TYPE } from "../shared/shared";
-import { publicQuery } from "./custom_functions";
+import { publicAction, publicQuery } from "./custom_functions";
 
 export const getServerByDomain = publicQuery({
 	args: {
@@ -126,5 +129,19 @@ export const getServerByDiscordIdWithChannels = publicQuery({
 			},
 			channels,
 		};
+	},
+});
+
+const getBrowsableServersCache = () =>
+	new ActionCache(components.actionCache, {
+		action: internal.private.servers.fetchBrowsableServersInternal,
+		name: "browsableServers",
+		ttl: 30 * 60 * 1000, // 30 minutes
+	});
+
+export const getCachedBrowsableServers = publicAction({
+	args: {},
+	handler: async (ctx): Promise<BrowsableServer[]> => {
+		return await getBrowsableServersCache().fetch(ctx, {});
 	},
 });
