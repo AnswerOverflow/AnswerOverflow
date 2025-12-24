@@ -106,6 +106,7 @@ export const getMessagePageHeaderData = publicQuery({
 				discordId: server.discordId,
 				name: server.name,
 				icon: server.icon,
+				banner: server.banner,
 				description: server.description,
 				approximateMemberCount: server.approximateMemberCount,
 				customDomain: serverPreferences?.customDomain,

@@ -397,7 +397,14 @@ export function MessagePage(props: {
 					</main>
 
 					<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:sticky md:top-[calc(var(--navbar-height)+1rem)] md:self-start md:w-[400px]">
-						<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block">
+						<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block overflow-hidden">
+							{headerData.server.banner && (
+								<img
+									src={`https://cdn.discordapp.com/banners/${headerData.server.discordId}/${headerData.server.banner}.webp?size=480`}
+									alt={`${headerData.server.name} banner`}
+									className="w-full aspect-[5/2] object-cover"
+								/>
+							)}
 							<div className="flex flex-col items-start gap-4 p-4">
 								<div className="flex w-full flex-row items-center justify-between truncate font-bold">
 									<Link
