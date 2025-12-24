@@ -318,6 +318,11 @@
 		"answeroverflow-dev": {
 			"type": "remote",
 			"url": "http://localhost:3000/mcp",
+			"enabled": false
+		},
+		"answeroverflow": {
+			"type": "remote",
+			"url": "https://www.answeroverflow.com/mcp",
 			"enabled": true
 		}
 	},

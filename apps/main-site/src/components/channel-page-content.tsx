@@ -40,6 +40,7 @@ import {
 	SheetTrigger,
 } from "@packages/ui/components/sheet";
 import { useTenant } from "@packages/ui/components/tenant-context";
+import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import {
 	ChannelMessageCard,
 	ChannelThreadCard,
@@ -83,7 +84,8 @@ function CopyButton({ text }: { text: string }) {
 }
 
 function MCPServerResource(_props: { serverDiscordId: bigint }) {
-	const mcpUrl = `https://www.answeroverflow.com/mcp`;
+	const tenant = useTenant();
+	const mcpUrl = getTenantCanonicalUrl(tenant, "/mcp");
 	const [selectedProvider, setSelectedProvider] = useState("claude-code");
 
 	const provider = mcpProviders.find((p) => p.id === selectedProvider);
