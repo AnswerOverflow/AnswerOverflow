@@ -82,7 +82,7 @@ function CopyButton({ text }: { text: string }) {
 	);
 }
 
-function MCPServerResource({ _serverDiscordId }: { serverDiscordId: bigint }) {
+function MCPServerResource(_props: { serverDiscordId: bigint }) {
 	const mcpUrl = `https://www.answeroverflow.com/mcp`;
 	const [selectedProvider, setSelectedProvider] = useState("claude-code");
 
