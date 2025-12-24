@@ -34,6 +34,7 @@ import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { JsonLdScript } from "@/components/json-ld-script";
+import { ResourcesSidebar } from "@/components/resources-sidebar";
 
 export type MessagePageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.public.messages.getMessagePageHeaderData>
@@ -443,6 +444,7 @@ export function MessagePage(props: {
 										</Link>
 									)}
 								</div>
+								<ResourcesSidebar className="w-full pt-4 border-t" />
 							</div>
 						</div>
 						{similarThreadsSlot}
