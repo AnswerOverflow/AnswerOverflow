@@ -2,6 +2,7 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { Button } from "@packages/ui/components/button";
+import { Code } from "@packages/ui/components/code";
 import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import {
 	Dialog,
@@ -32,12 +33,14 @@ import {
 	SheetTrigger,
 } from "@packages/ui/components/sheet";
 import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from "@packages/ui/components/tabs";
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@packages/ui/components/select";
 import { useTenant } from "@packages/ui/components/tenant-context";
+import { mcpProviders } from "./mcp-install-configs";
 import {
 	ChannelMessageCard,
 	ChannelThreadCard,
@@ -79,59 +82,12 @@ function CopyButton({ text }: { text: string }) {
 	);
 }
 
-function MCPConfigBlock({ config }: { config: string }) {
-	return (
-		<div className="relative">
-			<pre className="bg-muted p-3 rounded-md text-xs font-mono overflow-x-auto max-h-48">
-				{config}
-			</pre>
-			<div className="absolute top-2 right-2">
-				<CopyButton text={config} />
-			</div>
-		</div>
-	);
-}
-
 function MCPServerResource({ serverDiscordId }: { serverDiscordId: bigint }) {
 	const mcpUrl = `https://www.answeroverflow.com/mcp/${serverDiscordId.toString()}`;
+	const [selectedProvider, setSelectedProvider] = useState("claude-code");
 
-	const cursorConfig = JSON.stringify(
-		{
-			mcpServers: {
-				answeroverflow: {
-					url: mcpUrl,
-				},
-			},
-		},
-		null,
-		2,
-	);
-
-	const claudeDesktopConfig = JSON.stringify(
-		{
-			mcpServers: {
-				answeroverflow: {
-					command: "npx",
-					args: ["-y", "mcp-remote", mcpUrl],
-				},
-			},
-		},
-		null,
-		2,
-	);
-
-	const vsCodeConfig = JSON.stringify(
-		{
-			servers: {
-				answeroverflow: {
-					type: "sse",
-					url: mcpUrl,
-				},
-			},
-		},
-		null,
-		2,
-	);
+	const provider = mcpProviders.find((p) => p.id === selectedProvider);
+	const config = provider?.getRemoteConfig(mcpUrl);
 
 	return (
 		<Dialog>
@@ -147,7 +103,7 @@ function MCPServerResource({ serverDiscordId }: { serverDiscordId: bigint }) {
 					<span className="truncate">MCP Server</span>
 				</button>
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-lg">
+			<DialogContent className="sm:max-w-lg overflow-hidden">
 				<DialogHeader>
 					<DialogTitle>MCP Server</DialogTitle>
 					<DialogDescription>
@@ -156,51 +112,52 @@ function MCPServerResource({ serverDiscordId }: { serverDiscordId: bigint }) {
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="space-y-4">
-					<div>
+				<div className="space-y-4 min-w-0">
+					<div className="min-w-0">
 						<label className="text-sm font-medium mb-1.5 block">
 							Server URL
 						</label>
-						<div className="flex items-center gap-2">
-							<Input value={mcpUrl} readOnly className="font-mono text-sm" />
+						<div className="flex items-center gap-2 min-w-0">
+							<Input
+								value={mcpUrl}
+								readOnly
+								className="font-mono text-sm min-w-0"
+							/>
 							<CopyButton text={mcpUrl} />
 						</div>
 					</div>
 
-					<div>
+					<div className="min-w-0">
 						<label className="text-sm font-medium mb-1.5 block">
 							Installation
 						</label>
-						<Tabs defaultValue="cursor" className="w-full">
-							<TabsList className="w-full">
-								<TabsTrigger value="cursor">Cursor</TabsTrigger>
-								<TabsTrigger value="claude">Claude</TabsTrigger>
-								<TabsTrigger value="vscode">VS Code</TabsTrigger>
-							</TabsList>
-							<TabsContent value="cursor" className="mt-3">
+						<Select
+							value={selectedProvider}
+							onValueChange={setSelectedProvider}
+						>
+							<SelectTrigger className="w-full">
+								<SelectValue placeholder="Select your tool" />
+							</SelectTrigger>
+							<SelectContent>
+								{mcpProviders.map((p) => (
+									<SelectItem key={p.id} value={p.id}>
+										{p.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+
+						{config && (
+							<div className="mt-3">
 								<p className="text-xs text-muted-foreground mb-2">
-									Add to <code>~/.cursor/mcp.json</code>:
+									{config.description}
 								</p>
-								<MCPConfigBlock config={cursorConfig} />
-							</TabsContent>
-							<TabsContent value="claude" className="mt-3">
-								<p className="text-xs text-muted-foreground mb-2">
-									Add to{" "}
-									<code>
-										~/Library/Application
-										Support/Claude/claude_desktop_config.json
-									</code>
-									:
-								</p>
-								<MCPConfigBlock config={claudeDesktopConfig} />
-							</TabsContent>
-							<TabsContent value="vscode" className="mt-3">
-								<p className="text-xs text-muted-foreground mb-2">
-									Add to VS Code settings (MCP extension):
-								</p>
-								<MCPConfigBlock config={vsCodeConfig} />
-							</TabsContent>
-						</Tabs>
+								<Code
+									code={config.content}
+									language={config.type === "json" ? "json" : "bash"}
+								/>
+							</div>
+						)}
 					</div>
 				</div>
 			</DialogContent>

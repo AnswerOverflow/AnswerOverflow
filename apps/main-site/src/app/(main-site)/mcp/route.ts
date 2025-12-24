@@ -5,6 +5,36 @@ import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 import { runtime } from "@/lib/runtime";
 
+function withToolSpan<T>(
+	toolName: string,
+	args: Record<string, unknown>,
+	effect: Effect.Effect<T, unknown, Database>,
+	getResultCount?: (result: T) => number,
+): Effect.Effect<T, unknown, Database> {
+	return effect.pipe(
+		Effect.tap((result) =>
+			Effect.annotateCurrentSpan({
+				"mcp.tool.success": true,
+				...(getResultCount
+					? { "mcp.tool.result_count": getResultCount(result) }
+					: {}),
+			}),
+		),
+		Effect.tapError((error) =>
+			Effect.annotateCurrentSpan({
+				"mcp.tool.success": false,
+				"mcp.tool.error": String(error),
+			}),
+		),
+		Effect.withSpan(`mcp.tool.${toolName}`, {
+			attributes: {
+				"mcp.tool.name": toolName,
+				"mcp.tool.args": JSON.stringify(args),
+			},
+		}),
+	);
+}
+
 function snowflakeToTimestamp(snowflake: bigint): Date {
 	const DISCORD_EPOCH = 1420070400000n;
 	const timestamp = Number((snowflake >> 22n) + DISCORD_EPOCH);
@@ -78,19 +108,25 @@ const handler = createMcpHandler(
 				}),
 			},
 			async ({ query, serverId, channelId, limit }) => {
-				const results = await Effect.gen(function* () {
-					const database = yield* Database;
-					const searchResults = yield* database.public.search.publicSearch({
-						query,
-						serverId,
-						channelId,
-						paginationOpts: {
-							numItems: limit ?? 10,
-							cursor: null,
-						},
-					});
-					return searchResults;
-				}).pipe(runtime.runPromise);
+				const args = { query, serverId, channelId, limit };
+				const results = await withToolSpan(
+					"search_answeroverflow",
+					args,
+					Effect.gen(function* () {
+						const database = yield* Database;
+						const searchResults = yield* database.public.search.publicSearch({
+							query,
+							serverId,
+							channelId,
+							paginationOpts: {
+								numItems: limit ?? 10,
+								cursor: null,
+							},
+						});
+						return searchResults;
+					}),
+					(r) => r.page.length,
+				).pipe(runtime.runPromise);
 				return {
 					content: [
 						{
@@ -135,22 +171,25 @@ const handler = createMcpHandler(
 				}),
 			},
 			async ({ query, limit }) => {
-				const servers = await Effect.gen(function* () {
-					const database = yield* Database;
-					const allServers =
-						yield* database.public.servers.getCachedBrowsableServers({});
+				const args = { query, limit };
+				const servers = await withToolSpan(
+					"search_servers",
+					args,
+					Effect.gen(function* () {
+						const database = yield* Database;
+						const allServers =
+							yield* database.public.servers.getCachedBrowsableServers({});
 
-					const filteredServers = query
-						? allServers.filter((s) =>
-								s.name.toLowerCase().includes(query.toLowerCase()),
-							)
-						: allServers;
+						const filteredServers = query
+							? allServers.filter((s) =>
+									s.name.toLowerCase().includes(query.toLowerCase()),
+								)
+							: allServers;
 
-					return filteredServers.slice(0, limit ?? 25);
-				}).pipe(
-					Effect.tapError((e) => Effect.logError(e)),
-					runtime.runPromise,
-				);
+						return filteredServers.slice(0, limit ?? 25);
+					}),
+					(r) => r.length,
+				).pipe(runtime.runPromise);
 
 				return {
 					content: [
@@ -202,36 +241,42 @@ const handler = createMcpHandler(
 				}),
 			},
 			async ({ threadId, limit }) => {
-				const result = await Effect.gen(function* () {
-					const database = yield* Database;
+				const args = { threadId, limit };
+				const result = await withToolSpan(
+					"get_thread_messages",
+					args,
+					Effect.gen(function* () {
+						const database = yield* Database;
 
-					const headerData =
-						yield* database.public.messages.getMessagePageHeaderData({
-							messageId: BigInt(threadId),
+						const headerData =
+							yield* database.public.messages.getMessagePageHeaderData({
+								messageId: BigInt(threadId),
+							});
+
+						if (!headerData) {
+							return null;
+						}
+
+						const channelId = headerData.threadId ?? headerData.canonicalId;
+						const firstMessageId = headerData.firstMessage?.message.id;
+
+						const messages = yield* database.public.messages.getMessages({
+							channelId,
+							after: firstMessageId ? firstMessageId - 1n : 0n,
+							paginationOpts: {
+								numItems: limit ?? 50,
+								cursor: null,
+							},
 						});
 
-					if (!headerData) {
-						return null;
-					}
-
-					const channelId = headerData.threadId ?? headerData.canonicalId;
-					const firstMessageId = headerData.firstMessage?.message.id;
-
-					const messages = yield* database.public.messages.getMessages({
-						channelId,
-						after: firstMessageId ? firstMessageId - 1n : 0n,
-						paginationOpts: {
-							numItems: limit ?? 50,
-							cursor: null,
-						},
-					});
-
-					return {
-						headerData,
-						messages: messages.page,
-						hasMore: !messages.isDone,
-					};
-				}).pipe(runtime.runPromise);
+						return {
+							headerData,
+							messages: messages.page,
+							hasMore: !messages.isDone,
+						};
+					}),
+					(r) => r?.messages.length ?? 0,
+				).pipe(runtime.runPromise);
 
 				if (!result) {
 					return {
@@ -324,17 +369,23 @@ const handler = createMcpHandler(
 				}),
 			},
 			async ({ query, serverId, limit }) => {
-				const results = await Effect.gen(function* () {
-					const database = yield* Database;
-					const similar = yield* database.public.search.getSimilarThreads({
-						searchQuery: query,
-						currentThreadId: "0",
-						currentServerId: serverId,
-						serverId,
-						limit: limit ?? 5,
-					});
-					return similar;
-				}).pipe(runtime.runPromise);
+				const args = { query, serverId, limit };
+				const results = await withToolSpan(
+					"find_similar_threads",
+					args,
+					Effect.gen(function* () {
+						const database = yield* Database;
+						const similar = yield* database.public.search.getSimilarThreads({
+							searchQuery: query,
+							currentThreadId: "0",
+							currentServerId: serverId,
+							serverId,
+							limit: limit ?? 5,
+						});
+						return similar;
+					}),
+					(r) => r.length,
+				).pipe(runtime.runPromise);
 
 				return {
 					content: [
