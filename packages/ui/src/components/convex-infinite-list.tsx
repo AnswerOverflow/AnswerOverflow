@@ -22,15 +22,14 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	loadMoreLoaderCount?: number;
 	emptyState?: ReactNode;
 	authenticationType?: "all" | "non-anonymous";
+	showLoadMoreButton?: boolean;
+	className?: string;
+	itemClassName?: string;
 	initialData?: {
 		page: Array<PaginatedQueryItem<Query>>;
 		continueCursor: string;
 		isDone: boolean;
 	};
-	initialCursor?: string | null;
-	showLoadMoreButton?: boolean;
-	className?: string;
-	itemClassName?: string;
 };
 
 function LoadingSkeletons({
@@ -97,7 +96,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	const { results, status, loadMore } = useCachedPaginatedQuery(
 		query,
 		isSessionReady ? queryArgs : "skip",
-		{ initialNumItems: pageSize },
+		{ initialNumItems: pageSize, initialData },
 	);
 
 	const canLoadMore = status === "CanLoadMore";

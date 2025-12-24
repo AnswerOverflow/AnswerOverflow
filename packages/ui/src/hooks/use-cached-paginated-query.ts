@@ -27,6 +27,7 @@ type PageResult = {
 };
 
 const paginationCache = new Map<string, PaginationState>();
+const cacheTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 const CACHE_EXPIRY_MS = 5 * 60 * 1000;
 
 function getPaginationCacheKey(
@@ -41,20 +42,32 @@ function getCachedPaginationState(key: string): PaginationState | null {
 }
 
 function setCachedPaginationState(key: string, state: PaginationState): void {
+	const existingTimeout = cacheTimeouts.get(key);
+	if (existingTimeout) {
+		clearTimeout(existingTimeout);
+	}
+
 	paginationCache.set(key, state);
-	setTimeout(() => {
-		if (paginationCache.get(key) === state) {
-			paginationCache.delete(key);
-		}
+
+	const timeout = setTimeout(() => {
+		paginationCache.delete(key);
+		cacheTimeouts.delete(key);
 	}, CACHE_EXPIRY_MS);
+
+	cacheTimeouts.set(key, timeout);
 }
+
+type CachedPaginatedQueryOptions = {
+	initialNumItems: number;
+	initialData?: PageResult;
+};
 
 export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 	query: Query,
 	args: PaginatedQueryArgs<Query> | "skip",
-	options: { initialNumItems: number },
+	options: CachedPaginatedQueryOptions,
 ): UsePaginatedQueryReturnType<Query> {
-	const { initialNumItems } = options;
+	const { initialNumItems, initialData } = options;
 	const skip = args === "skip";
 
 	const queryName = getFunctionName(query);
@@ -119,10 +132,14 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 			if (result instanceof Error) {
 				throw result;
 			}
-			pageData.push(result as PageResult | undefined);
+			if (i === 0 && result === undefined && initialData) {
+				pageData.push(initialData);
+			} else {
+				pageData.push(result as PageResult | undefined);
+			}
 		}
 		return pageData;
-	}, [results, pages.length]);
+	}, [results, pages.length, initialData]);
 
 	const allItems = useMemo(() => {
 		const items: Array<Value> = [];
@@ -173,12 +190,14 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 			if (!lastLoadedResult || lastLoadedResult.isDone) return;
 
 			const nextCursor = lastLoadedResult.continueCursor;
-			const alreadyLoading = pages.some((p) => p.cursor === nextCursor);
-			if (alreadyLoading) return;
 
-			setPages((prev) => [...prev, { cursor: nextCursor, numItems }]);
+			setPages((prev) => {
+				const alreadyLoading = prev.some((p) => p.cursor === nextCursor);
+				if (alreadyLoading) return prev;
+				return [...prev, { cursor: nextCursor, numItems }];
+			});
 		},
-		[lastLoadedResult, pages],
+		[lastLoadedResult],
 	);
 
 	const noopLoadMore = useCallback((_numItems: number) => {}, []);
