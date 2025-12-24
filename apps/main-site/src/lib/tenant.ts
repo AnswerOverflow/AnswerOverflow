@@ -1,23 +1,9 @@
 import { Database } from "@packages/database/database";
 import type { Tenant } from "@packages/ui/components/tenant-context";
 import { normalizeSubpath } from "@packages/ui/utils/links";
+import { getSubpathForDomain } from "@packages/ui/utils/tenant-config";
 import { Effect } from "effect";
 import { runtime } from "./runtime";
-
-const subpathTenants = [
-	{
-		rewriteDomain: "migaku.com",
-		subpath: "community",
-	},
-	{
-		rewriteDomain: "rhys.ltd",
-		subpath: "idk",
-	},
-	{
-		rewriteDomain: "vapi.ai",
-		subpath: "community",
-	},
-];
 
 export type TenantMetadata = {
 	tenant: Tenant;
@@ -37,15 +23,15 @@ export async function getTenantData(
 		return null;
 	}
 
-	const subpathTenant = subpathTenants.find((t) => t.rewriteDomain === domain);
+	const overrideSubpath = getSubpathForDomain(domain);
 
 	const tenant: Tenant = {
 		customDomain: raw.preferences.customDomain,
 		description:
 			raw.server.description ??
 			`Browse the ${raw.server.name} Discord community`,
-		subpath: subpathTenant
-			? normalizeSubpath(subpathTenant.subpath)
+		subpath: overrideSubpath
+			? normalizeSubpath(overrideSubpath)
 			: raw.preferences.subpath
 				? normalizeSubpath(raw.preferences.subpath)
 				: null,

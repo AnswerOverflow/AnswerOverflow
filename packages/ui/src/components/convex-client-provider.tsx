@@ -12,7 +12,7 @@ import { createAuthClient } from "better-auth/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
-import { getTenantUrl, type TenantInfo } from "../utils/links";
+import { buildUrl, type UrlTenant } from "../utils/links";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
 	expectAuth: false,
@@ -46,10 +46,8 @@ type AuthClient = ReturnType<typeof createAuthClientInstance>;
 
 const authClientCache = new Map<string, AuthClient>();
 
-function getOrCreateAuthClient(
-	tenant: TenantInfo | null | undefined,
-): AuthClient {
-	const baseURL = tenant ? getTenantUrl(tenant, "/api/auth/") : undefined;
+function getOrCreateAuthClient(tenant: UrlTenant | undefined): AuthClient {
+	const baseURL = tenant ? buildUrl(tenant, "/api/auth/") : undefined;
 	const cacheKey = baseURL ?? "__default__";
 
 	const existing = authClientCache.get(cacheKey);
@@ -69,7 +67,7 @@ function AuthClientProvider({
 	tenant,
 }: {
 	children: ReactNode;
-	tenant: TenantInfo | null | undefined;
+	tenant: UrlTenant | undefined;
 }) {
 	const authClient = useMemo(() => getOrCreateAuthClient(tenant), [tenant]);
 	return (
@@ -117,7 +115,7 @@ export function ConvexClientProvider({
 	tenant,
 }: {
 	children: ReactNode;
-	tenant: TenantInfo | null | undefined;
+	tenant: UrlTenant | undefined;
 }) {
 	return (
 		<QueryClientProvider client={queryClient}>

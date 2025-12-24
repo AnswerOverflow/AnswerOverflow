@@ -3,26 +3,12 @@ import {
 	extractLocalhostSubdomain,
 	isOnMainSite,
 } from "@packages/ui/utils/links";
+import {
+	getTenantOverrideByContentDomain,
+	getTenantOverrideByRewriteDomain,
+} from "@packages/ui/utils/tenant-config";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-
-const subpathTenants = [
-	{
-		contentDomain: "community.migaku.com",
-		rewriteDomain: "migaku.com",
-		subpath: "community",
-	},
-	{
-		contentDomain: "testing.rhys.ltd",
-		rewriteDomain: "rhys.ltd",
-		subpath: "idk",
-	},
-	{
-		contentDomain: "discord.vapi.ai",
-		rewriteDomain: "vapi.ai",
-		subpath: "community",
-	},
-];
 
 export function proxy(request: NextRequest) {
 	const url = request.nextUrl;
@@ -60,14 +46,10 @@ export function proxy(request: NextRequest) {
 
 	const localhostSubdomain = extractLocalhostSubdomain(host);
 	if (localhostSubdomain) {
-		const subpathTenant = subpathTenants.find(
-			(tenant) => tenant.rewriteDomain === localhostSubdomain,
-		);
-		if (subpathTenant) {
-			const pathnameWithoutSubpath = pathname.startsWith(
-				`/${subpathTenant.subpath}`,
-			)
-				? pathname.slice(subpathTenant.subpath.length + 1) || "/"
+		const override = getTenantOverrideByRewriteDomain(localhostSubdomain);
+		if (override) {
+			const pathnameWithoutSubpath = pathname.startsWith(`/${override.subpath}`)
+				? pathname.slice(override.subpath.length + 1) || "/"
 				: pathname;
 			url.pathname = `/${localhostSubdomain}${pathnameWithoutSubpath}`;
 			return NextResponse.rewrite(url);
@@ -76,9 +58,7 @@ export function proxy(request: NextRequest) {
 		return NextResponse.rewrite(url);
 	}
 
-	const subpathTenant = subpathTenants.find((tenant) =>
-		host.includes(tenant.contentDomain),
-	);
+	const subpathTenant = getTenantOverrideByContentDomain(host);
 
 	if (subpathTenant) {
 		const bypass = request.headers.get(

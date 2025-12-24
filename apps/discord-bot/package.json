@@ -18,6 +18,7 @@
 		"@packages/database": "workspace:*",
 		"@packages/database-utils": "workspace:*",
 		"@packages/observability": "workspace:*",
+		"@packages/ui": "workspace:*",
 		"@sentry/node": "^10.30.0",
 		"@sentry/profiling-node": "^10.30.0",
 		"discord.js": "^14.22.1",
