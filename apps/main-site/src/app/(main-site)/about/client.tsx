@@ -392,26 +392,6 @@ function HeroSection() {
 	);
 }
 
-function FeatureCard({
-	icon: Icon,
-	title,
-	description,
-}: {
-	icon: typeof Search;
-	title: string;
-	description: string;
-}) {
-	return (
-		<div className="flex flex-col items-center rounded-xl border bg-card p-6 text-center shadow-sm transition-shadow hover:shadow-md">
-			<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-				<Icon className="h-6 w-6 text-primary" />
-			</div>
-			<h3 className="mt-4 text-lg font-semibold text-foreground">{title}</h3>
-			<p className="mt-2 text-sm text-muted-foreground">{description}</p>
-		</div>
-	);
-}
-
 function MarqueeRow({
 	servers,
 	direction = "left",
