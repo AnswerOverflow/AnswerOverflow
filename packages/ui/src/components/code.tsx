@@ -1,44 +1,114 @@
 "use client";
 
 import { Button } from "@packages/ui/components/button";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { Check, Copy, WrapText } from "lucide-react";
-import { Suspense, useState } from "react";
-import type { BundledLanguage } from "shiki";
-import { codeToHtml } from "shiki";
+import { use, useState } from "react";
+import type { BundledLanguage, BundledTheme, HighlighterGeneric } from "shiki";
+import { createHighlighter } from "shiki";
 import { cn } from "../lib/utils";
 
-function useHighlightedCode(
+const COMMON_LANGUAGES: BundledLanguage[] = [
+	"javascript",
+	"typescript",
+	"jsx",
+	"tsx",
+	"json",
+	"html",
+	"css",
+	"markdown",
+	"bash",
+	"shell",
+	"python",
+	"rust",
+	"go",
+	"java",
+	"c",
+	"cpp",
+	"csharp",
+	"ruby",
+	"php",
+	"sql",
+	"yaml",
+	"toml",
+	"xml",
+	"diff",
+];
+
+const THEMES: BundledTheme[] = ["github-dark", "github-light"];
+
+let highlighterPromise: Promise<
+	HighlighterGeneric<BundledLanguage, BundledTheme>
+> | null = null;
+let highlighterInstance: HighlighterGeneric<
+	BundledLanguage,
+	BundledTheme
+> | null = null;
+
+function getHighlighter(): Promise<
+	HighlighterGeneric<BundledLanguage, BundledTheme>
+> {
+	if (highlighterInstance) {
+		return Promise.resolve(highlighterInstance);
+	}
+
+	if (!highlighterPromise) {
+		highlighterPromise = createHighlighter({
+			themes: THEMES,
+			langs: COMMON_LANGUAGES,
+		}).then((h) => {
+			highlighterInstance = h;
+			return h;
+		});
+	}
+
+	return highlighterPromise;
+}
+
+if (typeof window !== "undefined") {
+	getHighlighter();
+}
+
+const highlightCache = new Map<string, Promise<string>>();
+
+function getHighlightedCode(
 	code: string,
 	lang: string | undefined,
 	theme: "light" | "dark",
-) {
-	return useSuspenseQuery({
-		queryKey: ["code-highlight", code, lang, theme],
-		queryFn: async () => {
-			try {
-				const language = (lang?.toLowerCase() || "text") as BundledLanguage;
-				return await codeToHtml(code, {
-					lang: language,
-					theme: theme === "dark" ? "github-dark" : "github-light",
-				});
-			} catch {
-				return `<pre class="shiki"><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`;
-			}
-		},
-		staleTime: Infinity,
-	});
-}
+): Promise<string> {
+	const cacheKey = `${code}-${lang}-${theme}`;
+	const cached = highlightCache.get(cacheKey);
+	if (cached) {
+		return cached;
+	}
 
-function SuspenseClientOnly({
-	children,
-	fallback,
-}: {
-	children: React.ReactNode;
-	fallback: React.ReactNode;
-}) {
-	// suspesne is bad here and we need to make it work isomorphicly on the server and the client
-	return <Suspense fallback={fallback}>{children}</Suspense>;
+	const promise = (async () => {
+		try {
+			const highlighter = await getHighlighter();
+			const language = (lang?.toLowerCase() || "plaintext") as BundledLanguage;
+
+			const loadedLangs = highlighter.getLoadedLanguages();
+			if (!loadedLangs.includes(language)) {
+				try {
+					await highlighter.loadLanguage(language);
+				} catch {
+					return highlighter.codeToHtml(code, {
+						lang: "plaintext",
+						theme: theme === "dark" ? "github-dark" : "github-light",
+					});
+				}
+			}
+
+			return highlighter.codeToHtml(code, {
+				lang: language,
+				theme: theme === "dark" ? "github-dark" : "github-light",
+			});
+		} catch {
+			return `<pre class="shiki"><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`;
+		}
+	})();
+
+	highlightCache.set(cacheKey, promise);
+	return promise;
 }
 
 function CodeBlockButtons({
@@ -82,26 +152,6 @@ function CodeBlockButtons({
 	);
 }
 
-function CodeBlockFallback({
-	content,
-	className,
-	wrap,
-}: {
-	content: string;
-	className?: string;
-	wrap: boolean;
-}) {
-	const wrapClasses = wrap
-		? "whitespace-pre-wrap break-words"
-		: "w-fit min-w-full";
-
-	return (
-		<pre className={`p-4 pr-12 m-0 ${wrapClasses} ${className || ""}`}>
-			<code>{content}</code>
-		</pre>
-	);
-}
-
 function CodeBlockInternal({
 	lang,
 	content,
@@ -115,7 +165,7 @@ function CodeBlockInternal({
 	className?: string;
 	wrap: boolean;
 }) {
-	const { data: html } = useHighlightedCode(content, lang, theme);
+	const html = use(getHighlightedCode(content, lang, theme));
 
 	const wrapClasses = wrap
 		? "[&_pre]:whitespace-pre-wrap [&_pre]:break-words"
@@ -131,25 +181,6 @@ function CodeBlockInternal({
 	);
 }
 
-function InlineCodeFallback({
-	code,
-	className,
-}: {
-	code: string;
-	className?: string;
-}) {
-	return (
-		<span
-			className={cn(
-				"inline-code not-prose inline-block rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-sm *:whitespace-normal",
-				className,
-			)}
-		>
-			<code>{code}</code>
-		</span>
-	);
-}
-
 function InlineCodeInternal({
 	code,
 	language,
@@ -161,7 +192,7 @@ function InlineCodeInternal({
 	theme: "light" | "dark";
 	className?: string;
 }) {
-	const { data: html } = useHighlightedCode(code, language, theme);
+	const html = use(getHighlightedCode(code, language, theme));
 
 	return (
 		<span
@@ -193,40 +224,20 @@ export function CodeBlock({
 				onToggleWrap={() => setWrap(!wrap)}
 			/>
 			<div className="overflow-x-auto">
-				<SuspenseClientOnly
-					fallback={
-						<CodeBlockFallback
-							content={content}
-							wrap={wrap}
-							className="dark:hidden block w-full"
-						/>
-					}
-				>
-					<CodeBlockInternal
-						lang={lang}
-						content={content}
-						theme="light"
-						wrap={wrap}
-						className="dark:hidden block w-full"
-					/>
-				</SuspenseClientOnly>
-				<SuspenseClientOnly
-					fallback={
-						<CodeBlockFallback
-							content={content}
-							wrap={wrap}
-							className="hidden dark:block w-full"
-						/>
-					}
-				>
-					<CodeBlockInternal
-						lang={lang}
-						content={content}
-						theme="dark"
-						wrap={wrap}
-						className="hidden dark:block w-full"
-					/>
-				</SuspenseClientOnly>
+				<CodeBlockInternal
+					lang={lang}
+					content={content}
+					theme="light"
+					wrap={wrap}
+					className="dark:hidden block w-full"
+				/>
+				<CodeBlockInternal
+					lang={lang}
+					content={content}
+					theme="dark"
+					wrap={wrap}
+					className="hidden dark:block w-full"
+				/>
 			</div>
 		</div>
 	);
@@ -241,36 +252,18 @@ export function InlineCode({
 }) {
 	return (
 		<span className="relative inline-block">
-			<SuspenseClientOnly
-				fallback={
-					<InlineCodeFallback
-						code={code}
-						className="dark:hidden inline-block"
-					/>
-				}
-			>
-				<InlineCodeInternal
-					code={code}
-					language={language}
-					theme="light"
-					className="dark:hidden inline-block"
-				/>
-			</SuspenseClientOnly>
-			<SuspenseClientOnly
-				fallback={
-					<InlineCodeFallback
-						code={code}
-						className="hidden dark:inline-block"
-					/>
-				}
-			>
-				<InlineCodeInternal
-					code={code}
-					language={language}
-					theme="dark"
-					className="hidden dark:inline-block"
-				/>
-			</SuspenseClientOnly>
+			<InlineCodeInternal
+				code={code}
+				language={language}
+				theme="light"
+				className="dark:hidden inline-block"
+			/>
+			<InlineCodeInternal
+				code={code}
+				language={language}
+				theme="dark"
+				className="hidden dark:inline-block"
+			/>
 		</span>
 	);
 }
