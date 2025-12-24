@@ -310,9 +310,8 @@
 		"kernel": {
 			"type": "remote",
 			"url": "https://mcp.onkernel.com/mcp",
-			"oauth": false,
-			"headers": {
-				"Authorization": "Bearer {env:KERNEL_API_KEY}"
+			"oauth": {
+				"scope": "tools:read tools:execute"
 			}
 		},
 		"answeroverflow-dev": {
