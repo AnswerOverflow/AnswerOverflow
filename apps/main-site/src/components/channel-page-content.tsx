@@ -23,6 +23,13 @@ import { ModelContextProtocol } from "@packages/ui/components/icons/mcp";
 import { Input } from "@packages/ui/components/input";
 import { Link } from "@packages/ui/components/link";
 import { SearchInput } from "@packages/ui/components/search-input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@packages/ui/components/select";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
 import {
@@ -32,15 +39,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@packages/ui/components/sheet";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@packages/ui/components/select";
 import { useTenant } from "@packages/ui/components/tenant-context";
-import { mcpProviders } from "./mcp-install-configs";
 import {
 	ChannelMessageCard,
 	ChannelThreadCard,
@@ -58,6 +57,7 @@ import { Check, Copy, FileQuestion, Menu } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
+import { mcpProviders } from "./mcp-install-configs";
 
 function CopyButton({ text }: { text: string }) {
 	const [copied, setCopied] = useState(false);
@@ -82,8 +82,8 @@ function CopyButton({ text }: { text: string }) {
 	);
 }
 
-function MCPServerResource({ serverDiscordId }: { serverDiscordId: bigint }) {
-	const mcpUrl = `https://www.answeroverflow.com/mcp/${serverDiscordId.toString()}`;
+function MCPServerResource({ _serverDiscordId }: { serverDiscordId: bigint }) {
+	const mcpUrl = `https://www.answeroverflow.com/mcp`;
 	const [selectedProvider, setSelectedProvider] = useState("claude-code");
 
 	const provider = mcpProviders.find((p) => p.id === selectedProvider);
