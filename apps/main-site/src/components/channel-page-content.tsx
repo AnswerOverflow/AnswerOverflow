@@ -357,7 +357,6 @@ export function ServerThreadsList({
 				initialLoaderCount={5}
 				loader={<ChannelThreadCardSkeleton />}
 				initialData={initialData}
-				initialCursor={currentCursor}
 				className="space-y-4"
 				emptyState={
 					<Empty className="py-16">
@@ -414,7 +413,6 @@ export function ThreadsList({
 				initialLoaderCount={5}
 				loader={<ChannelThreadCardSkeleton />}
 				initialData={initialData}
-				initialCursor={currentCursor}
 				className="space-y-4"
 				emptyState={
 					<Empty className="py-16">
@@ -470,7 +468,6 @@ export function MessagesList({
 				initialLoaderCount={5}
 				loader={<MessageCardSkeleton />}
 				initialData={initialData}
-				initialCursor={currentCursor}
 				className="space-y-4"
 				emptyState={
 					<Empty className="py-16">
