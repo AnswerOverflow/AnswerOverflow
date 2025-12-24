@@ -10,7 +10,6 @@ import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { useCachedPaginatedQuery } from "../hooks/use-cached-paginated-query";
 import { Button } from "./button";
-import { useSession } from "./convex-client-provider";
 
 type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	query: Query;
@@ -84,18 +83,14 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	initialLoaderCount = 5,
 	loadMoreLoaderCount = 3,
 	emptyState,
-	authenticationType = "all",
 	initialData,
 	showLoadMoreButton = false,
 	className,
 	itemClassName = "mb-4",
 }: ConvexInfiniteListProps<Query>) {
-	const session = useSession({ allowAnonymous: authenticationType === "all" });
-	const isSessionReady = !session?.isPending && session?.data !== undefined;
-
 	const { results, status, loadMore } = useCachedPaginatedQuery(
 		query,
-		isSessionReady ? queryArgs : "skip",
+		queryArgs,
 		{ initialNumItems: pageSize, initialData },
 	);
 
@@ -113,12 +108,10 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 		canLoadMore && !showLoadMoreButton,
 	);
 
-	const isWaitingForSession = !isSessionReady;
 	const isLoadingFirstPage = status === "LoadingFirstPage";
 	const hasResults = results && results.length > 0;
 
-	const isInitialLoading =
-		(isWaitingForSession || isLoadingFirstPage) && !initialData;
+	const isInitialLoading = isLoadingFirstPage && !initialData;
 	const isEmpty =
 		(status === "Exhausted" ||
 			(initialData?.isDone && initialData.page.length === 0)) &&

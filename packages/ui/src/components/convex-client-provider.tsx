@@ -15,7 +15,7 @@ import { createContext, type ReactNode, useContext, useMemo } from "react";
 import { getTenantUrl, type TenantInfo } from "../utils/links";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
-	expectAuth: true,
+	expectAuth: false,
 	unsavedChangesWarning: false,
 });
 const convexQueryClient = new ConvexQueryClient(convex);
