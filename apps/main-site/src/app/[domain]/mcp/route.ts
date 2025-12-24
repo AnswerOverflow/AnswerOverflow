@@ -34,23 +34,38 @@ async function handleRequest(
 			path,
 		);
 
+	const toolName =
+		tenant.name?.toLowerCase().replace(/\s+/g, "_") ?? "community";
+
+	const instructions = `This is the ${tenant.name} Discord community archive - a searchable collection of help channel conversations.
+
+Use this to find solutions to ${tenant.name}-specific questions from real community discussions.
+
+**Available tools:**
+- search_${toolName}: Search for threads by keywords, error messages, or concepts
+- get_thread_messages: Get the full conversation in a thread
+- find_similar_threads: Find semantically related discussions
+
+**Tips:**
+- Use specific error messages or function names for best results
+- Check if results have solutions before reading full threads`;
+
 	const handler = createMcpHandler(
 		(server) => {
 			server.registerTool(
-				`search_${tenant.name?.toLowerCase().replace(/\s+/g, "_") ?? "community"}`,
+				`search_${toolName}`,
 				{
 					title: `Search ${tenant.name}`,
-					description: `Search for answers in the ${tenant.name} Discord community archive.\n\nUse this to find solutions to questions, library-specific issues, and community discussions.\n\nTips for effective searching:\n- Use specific error messages or function names\n- Filter by channelId to search within a specific channel`,
+					description: `Search for answers in the ${tenant.name} Discord community archive.
+					Use this to find solutions to questions, library-specific issues, and community discussions.
+					Tips for effective searching:
+					- Use specific error messages or function names`,
 					inputSchema: z.object({
 						query: z
 							.string()
 							.describe(
 								"The search query - can be error messages, function names, concepts, etc.",
 							),
-						channelId: z
-							.string()
-							.optional()
-							.describe("Filter results to a specific channel."),
 						limit: z
 							.number()
 							.min(1)
@@ -62,9 +77,9 @@ async function handleRequest(
 							),
 					}),
 				},
-				async ({ query, channelId, limit }) => {
+				async ({ query, limit }) => {
 					return searchAnswerOverflow(
-						{ query, serverId, channelId, limit },
+						{ query, serverId, limit },
 						buildUrl,
 						false,
 					);
@@ -83,7 +98,7 @@ async function handleRequest(
 				includeServerInfo: false,
 			});
 		},
-		{},
+		{ instructions },
 		{
 			basePath: "/",
 			maxDuration: 60,

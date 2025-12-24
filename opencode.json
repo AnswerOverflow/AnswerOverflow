@@ -317,12 +317,12 @@
 		"answeroverflow-dev": {
 			"type": "remote",
 			"url": "http://localhost:3000/mcp",
-			"enabled": false
+			"enabled": true
 		},
 		"answeroverflow": {
 			"type": "remote",
 			"url": "https://www.answeroverflow.com/mcp",
-			"enabled": true
+			"enabled": false
 		}
 	},
 	"tools": {
