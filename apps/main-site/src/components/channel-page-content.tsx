@@ -55,7 +55,7 @@ import { encodeCursor } from "@packages/ui/utils/cursor";
 import { getChannelIcon } from "@packages/ui/utils/discord";
 import type { FunctionReturnType } from "convex/server";
 import { Check, Copy, FileQuestion, Menu } from "lucide-react";
-import { useQueryState } from "nuqs";
+import { parseAsBoolean, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
 import { mcpProviders } from "./mcp-install-configs";
@@ -86,13 +86,16 @@ function CopyButton({ text }: { text: string }) {
 function MCPServerResource(_props: { serverDiscordId: bigint }) {
 	const tenant = useTenant();
 	const mcpUrl = getTenantCanonicalUrl(tenant, "/mcp");
-	const [selectedProvider, setSelectedProvider] = useState("claude-code");
+	const [isOpen, setIsOpen] = useQueryState("mcp", parseAsBoolean);
+	const [selectedProvider, setSelectedProvider] = useQueryState("provider", {
+		defaultValue: "claude-code",
+	});
 
 	const provider = mcpProviders.find((p) => p.id === selectedProvider);
 	const config = provider?.getRemoteConfig(mcpUrl);
 
 	return (
-		<Dialog>
+		<Dialog open={isOpen ?? false} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>
 				<button
 					type="button"

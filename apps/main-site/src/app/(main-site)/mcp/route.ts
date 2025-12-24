@@ -1,4 +1,6 @@
 import { createMcpHandler } from "mcp-handler";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 import {
 	registerFindSimilarThreadsTool,
@@ -97,4 +99,8 @@ const handler = createMcpHandler(
 	},
 );
 
-export { handler as GET, handler as POST };
+export { handler as POST };
+
+export function GET(request: NextRequest) {
+	return NextResponse.redirect(new URL("/mcp/setup", request.url), 307);
+}
