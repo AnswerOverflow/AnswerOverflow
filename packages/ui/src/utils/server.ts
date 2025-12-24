@@ -1,4 +1,4 @@
-import { normalizeSubpath } from "./links";
+import { isLocalDev, normalizeSubpath } from "./links";
 
 type ServerWithCustomDomain = {
 	customDomain?: string;
@@ -11,9 +11,12 @@ export function getServerHomepageUrl(server: ServerWithCustomDomain) {
 	if (!server.customDomain) {
 		return `/c/${server.discordId}`;
 	}
-	const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+	if (isLocalDev()) {
+		const subpathSuffix = subpath ? `/${subpath}` : "";
+		return `http://${server.customDomain}.localhost:3000${subpathSuffix}`;
+	}
 	const subpathSuffix = subpath ? `/${subpath}` : "";
-	return `${protocol}://${server.customDomain}${subpathSuffix}`;
+	return `https://${server.customDomain}${subpathSuffix}`;
 }
 
 export function getServerCustomUrl(
@@ -24,7 +27,10 @@ export function getServerCustomUrl(
 	if (!server.customDomain) {
 		return null;
 	}
-	const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+	if (isLocalDev()) {
+		const subpathSuffix = subpath ? `/${subpath}` : "";
+		return `http://${server.customDomain}.localhost:3000${subpathSuffix}${path}`;
+	}
 	const subpathSuffix = subpath ? `/${subpath}` : "";
-	return `${protocol}://${server.customDomain}${subpathSuffix}${path}`;
+	return `https://${server.customDomain}${subpathSuffix}${path}`;
 }

@@ -1,5 +1,8 @@
 import { isIP } from "node:net";
-import { isOnMainSite } from "@packages/ui/utils/links";
+import {
+	extractLocalhostSubdomain,
+	isOnMainSite,
+} from "@packages/ui/utils/links";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -53,6 +56,24 @@ export function proxy(request: NextRequest) {
 
 	if (isOnMainSite(host)) {
 		return NextResponse.next();
+	}
+
+	const localhostSubdomain = extractLocalhostSubdomain(host);
+	if (localhostSubdomain) {
+		const subpathTenant = subpathTenants.find(
+			(tenant) => tenant.rewriteDomain === localhostSubdomain,
+		);
+		if (subpathTenant) {
+			const pathnameWithoutSubpath = pathname.startsWith(
+				`/${subpathTenant.subpath}`,
+			)
+				? pathname.slice(subpathTenant.subpath.length + 1) || "/"
+				: pathname;
+			url.pathname = `/${localhostSubdomain}${pathnameWithoutSubpath}`;
+			return NextResponse.rewrite(url);
+		}
+		url.pathname = `/${localhostSubdomain}${pathname}`;
+		return NextResponse.rewrite(url);
 	}
 
 	const subpathTenant = subpathTenants.find((tenant) =>

@@ -19,6 +19,22 @@ export function getMainSiteHostname() {
 	return new URL(getBaseUrl()).host;
 }
 
+export function extractLocalhostSubdomain(
+	host: string | null | undefined,
+): string | null {
+	if (!host) return null;
+	const hostWithoutPort = host.split(":")[0];
+	if (!hostWithoutPort) return null;
+	if (
+		hostWithoutPort === "localhost" ||
+		!hostWithoutPort.endsWith(".localhost")
+	) {
+		return null;
+	}
+	const subdomain = hostWithoutPort.slice(0, -".localhost".length);
+	return subdomain.length > 0 ? subdomain : null;
+}
+
 export function isOnMainSite(host: string | null | undefined) {
 	if (!host) return false;
 	const normalizedHost = host.split(":")[0];
@@ -26,6 +42,11 @@ export function isOnMainSite(host: string | null | undefined) {
 	const bareMainHost = mainHost?.startsWith("www.")
 		? mainHost?.slice(4)
 		: mainHost;
+
+	if (normalizedHost?.endsWith(".localhost")) {
+		return false;
+	}
+
 	return (
 		normalizedHost === mainHost ||
 		normalizedHost === bareMainHost ||
@@ -77,15 +98,45 @@ const subpathLookup: Record<string, string> = {
 	"discord.vapi.ai": "vapi.ai/community",
 };
 
+export function isLocalDev(): boolean {
+	return process.env.NODE_ENV !== "production";
+}
+
+export function getTenantUrl(tenant: TenantInfo | null, path: string): string {
+	if (!tenant?.customDomain) {
+		const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+		return `${getBaseUrl()}${normalizedPath}`;
+	}
+
+	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+	const subpathTenant = subpathLookup[tenant.customDomain];
+
+	if (isLocalDev()) {
+		const subpath = subpathTenant?.split("/")[1];
+		const pathWithSubpath = subpath
+			? `/${subpath}${normalizedPath}`
+			: normalizedPath;
+		return `http://${tenant.customDomain}.localhost:3000${pathWithSubpath}`;
+	}
+
+	if (subpathTenant) {
+		return `https://${subpathTenant}${normalizedPath}`;
+	}
+
+	const subpath = normalizeSubpath(tenant.subpath);
+	const pathWithSubpath = subpath
+		? `/${subpath}${normalizedPath}`
+		: normalizedPath;
+	return `https://${tenant.customDomain}${pathWithSubpath}`;
+}
+
 export function getTenantCanonicalUrl(
 	tenant: TenantInfo | null,
 	path: string,
 ): string {
 	if (subpathLookup[tenant?.customDomain ?? ""]) {
 		const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-		// todo make this more general
-		const http = tenant?.customDomain === "tenant:3000" ? "http" : "https";
-		return `${http}://${subpathLookup[tenant?.customDomain ?? ""]}${normalizedPath}`;
+		return `https://${subpathLookup[tenant?.customDomain ?? ""]}${normalizedPath}`;
 	}
 	const baseUrl = getTenantBaseUrl(tenant);
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
