@@ -141,12 +141,26 @@ function MCPServerResource(_props: { serverDiscordId: bigint }) {
 							onValueChange={setSelectedProvider}
 						>
 							<SelectTrigger className="w-full">
-								<SelectValue placeholder="Select your tool" />
+								{provider ? (
+									<div className="flex items-center gap-2">
+										<img
+											src={provider.icon}
+											alt=""
+											className="size-4 rounded-sm"
+										/>
+										<span>{provider.name}</span>
+									</div>
+								) : (
+									<SelectValue placeholder="Select your tool" />
+								)}
 							</SelectTrigger>
 							<SelectContent>
 								{mcpProviders.map((p) => (
 									<SelectItem key={p.id} value={p.id}>
-										{p.name}
+										<div className="flex items-center gap-2">
+											<img src={p.icon} alt="" className="size-4 rounded-sm" />
+											<span>{p.name}</span>
+										</div>
 									</SelectItem>
 								))}
 							</SelectContent>
