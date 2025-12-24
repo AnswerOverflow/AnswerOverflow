@@ -9,7 +9,6 @@ import type {
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { useCachedPaginatedQuery } from "../hooks/use-cached-paginated-query";
-import { useScrollRestoration } from "../hooks/use-scroll-restoration";
 import { Button } from "./button";
 import { useSession } from "./convex-client-provider";
 
@@ -32,7 +31,6 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	showLoadMoreButton?: boolean;
 	className?: string;
 	itemClassName?: string;
-	scrollKey?: string;
 };
 
 function LoadingSkeletons({
@@ -92,43 +90,15 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	showLoadMoreButton = false,
 	className,
 	itemClassName = "mb-4",
-	scrollKey,
 }: ConvexInfiniteListProps<Query>) {
 	const session = useSession({ allowAnonymous: authenticationType === "all" });
 	const isSessionReady = !session?.isPending && session?.data !== undefined;
-
-	const { restoreScroll } = useScrollRestoration({
-		key: scrollKey ?? "default",
-		enabled: scrollKey !== undefined,
-	});
 
 	const { results, status, loadMore } = useCachedPaginatedQuery(
 		query,
 		isSessionReady ? queryArgs : "skip",
 		{ initialNumItems: pageSize },
 	);
-
-	const hasRestoredScrollRef = useRef(false);
-
-	useEffect(() => {
-		if (
-			scrollKey &&
-			results &&
-			results.length > 0 &&
-			!hasRestoredScrollRef.current &&
-			status !== "LoadingFirstPage" &&
-			status !== "LoadingMore"
-		) {
-			const restored = restoreScroll();
-			if (restored) {
-				hasRestoredScrollRef.current = true;
-			}
-		}
-	}, [scrollKey, results, status, restoreScroll]);
-
-	useEffect(() => {
-		hasRestoredScrollRef.current = false;
-	}, [scrollKey]);
 
 	const canLoadMore = status === "CanLoadMore";
 	const isLoadingMore = status === "LoadingMore";
