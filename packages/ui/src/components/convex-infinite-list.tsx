@@ -8,7 +8,8 @@ import type {
 
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { Virtuoso } from "react-virtuoso";
-import { usePaginatedQueryWithCursor } from "../hooks/use-stable-query";
+import { useCachedPaginatedQuery } from "../hooks/use-cached-paginated-query";
+import { useScrollRestoration } from "../hooks/use-scroll-restoration";
 import { Button } from "./button";
 import { useSession } from "./convex-client-provider";
 
@@ -31,6 +32,7 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	showLoadMoreButton?: boolean;
 	className?: string;
 	itemClassName?: string;
+	scrollKey?: string;
 };
 
 function LoadingSkeletons({
@@ -87,19 +89,46 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	emptyState,
 	authenticationType = "all",
 	initialData,
-	initialCursor = null,
 	showLoadMoreButton = false,
 	className,
 	itemClassName = "mb-4",
+	scrollKey,
 }: ConvexInfiniteListProps<Query>) {
 	const session = useSession({ allowAnonymous: authenticationType === "all" });
 	const isSessionReady = !session?.isPending && session?.data !== undefined;
 
-	const { results, status, loadMore } = usePaginatedQueryWithCursor(
+	const { restoreScroll } = useScrollRestoration({
+		key: scrollKey ?? "default",
+		enabled: scrollKey !== undefined,
+	});
+
+	const { results, status, loadMore } = useCachedPaginatedQuery(
 		query,
 		isSessionReady ? queryArgs : "skip",
-		{ initialNumItems: pageSize, initialCursor, initialData },
+		{ initialNumItems: pageSize },
 	);
+
+	const hasRestoredScrollRef = useRef(false);
+
+	useEffect(() => {
+		if (
+			scrollKey &&
+			results &&
+			results.length > 0 &&
+			!hasRestoredScrollRef.current &&
+			status !== "LoadingFirstPage" &&
+			status !== "LoadingMore"
+		) {
+			const restored = restoreScroll();
+			if (restored) {
+				hasRestoredScrollRef.current = true;
+			}
+		}
+	}, [scrollKey, results, status, restoreScroll]);
+
+	useEffect(() => {
+		hasRestoredScrollRef.current = false;
+	}, [scrollKey]);
 
 	const canLoadMore = status === "CanLoadMore";
 	const isLoadingMore = status === "LoadingMore";
@@ -147,7 +176,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	if (useSimpleRender) {
 		return (
 			<div className={className}>
-				{results.map((item, i) => (
+				{results.map((item: PaginatedQueryItem<Query>, i: number) => (
 					<div key={i} className={itemClassName}>
 						{renderItem(item, i)}
 					</div>

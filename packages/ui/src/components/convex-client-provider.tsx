@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { adminClient, anonymousClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 import { getTenantCanonicalUrl, type TenantInfo } from "../utils/links";
 
@@ -123,7 +124,9 @@ export function ConvexClientProvider({
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ConvexProvider client={convex}>
-				<AuthClientProvider tenant={tenant}>{children}</AuthClientProvider>
+				<ConvexQueryCacheProvider>
+					<AuthClientProvider tenant={tenant}>{children}</AuthClientProvider>
+				</ConvexQueryCacheProvider>
 			</ConvexProvider>
 		</QueryClientProvider>
 	);
