@@ -2,7 +2,7 @@ import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex, crossDomain } from "@convex-dev/better-auth/plugins";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { admin, anonymous } from "better-auth/plugins";
+import { admin, anonymous, apiKey } from "better-auth/plugins";
 import { components, internal } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
@@ -145,6 +145,14 @@ export const createAuthOptions = (
 			}),
 			admin({
 				impersonationSessionDuration: 60 * 60,
+			}),
+			apiKey({
+				defaultPrefix: "user_",
+				enableSessionForAPIKeys: true,
+				enableMetadata: false,
+				rateLimit: {
+					enabled: false,
+				},
 			}),
 		],
 	} satisfies BetterAuthOptions;
