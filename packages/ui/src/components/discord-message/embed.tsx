@@ -169,6 +169,7 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 										<img
 											className="mr-2 size-5 rounded-full object-contain"
 											src={embed.footer.proxyIconUrl ?? embed.footer.iconUrl}
+											alt=""
 										/>
 									)}
 									<div className="flex items-center gap-1 text-[13px] text-muted-foreground">

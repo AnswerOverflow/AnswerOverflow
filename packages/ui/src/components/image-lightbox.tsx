@@ -2,7 +2,7 @@
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, Download, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { cn } from "../lib/utils";
 import { Button } from "./button";
 
@@ -26,18 +26,25 @@ export function ImageLightbox({
 	open,
 	onOpenChange,
 }: ImageLightboxProps) {
-	const [currentIndex, setCurrentIndex] = useState(initialIndex);
+	const prevOpen = useRef(open);
+	const [currentIndex, setCurrentIndex] = useState(() =>
+		Math.max(0, Math.min(initialIndex, images.length - 1)),
+	);
 	const [isZoomed, setIsZoomed] = useState(false);
+
+	if (open && !prevOpen.current) {
+		const safeIndex = Math.max(0, Math.min(initialIndex, images.length - 1));
+		if (currentIndex !== safeIndex) {
+			setCurrentIndex(safeIndex);
+		}
+		if (isZoomed) {
+			setIsZoomed(false);
+		}
+	}
+	prevOpen.current = open;
 
 	const currentImage = images[currentIndex];
 	const hasMultipleImages = images.length > 1;
-
-	useEffect(() => {
-		if (open) {
-			setCurrentIndex(initialIndex);
-			setIsZoomed(false);
-		}
-	}, [open, initialIndex]);
 
 	const goToPrevious = useCallback(() => {
 		setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
@@ -60,30 +67,25 @@ export function ImageLightbox({
 		[goToPrevious, goToNext],
 	);
 
-	const handleDownload = useCallback(() => {
+	const handleDownload = useCallback(async () => {
 		if (!currentImage) return;
-		const link = document.createElement("a");
-		link.href = currentImage.src;
-		link.download = currentImage.alt || "image";
-		link.target = "_blank";
-		link.rel = "noopener noreferrer";
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
+		try {
+			const response = await fetch(currentImage.src);
+			const blob = await response.blob();
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = currentImage.alt || "image";
+			link.click();
+			URL.revokeObjectURL(url);
+		} catch {
+			window.open(currentImage.src, "_blank");
+		}
 	}, [currentImage]);
 
 	const toggleZoom = useCallback(() => {
 		setIsZoomed((prev) => !prev);
 	}, []);
-
-	const handleBackdropClick = useCallback(
-		(e: React.MouseEvent) => {
-			if (e.target === e.currentTarget) {
-				onOpenChange(false);
-			}
-		},
-		[onOpenChange],
-	);
 
 	if (!currentImage) return null;
 
@@ -178,6 +180,7 @@ export function ImageLightbox({
 								<button
 									key={idx}
 									type="button"
+									aria-label={`Go to image ${idx + 1} of ${images.length}`}
 									className={cn(
 										"size-2 rounded-full transition-colors",
 										idx === currentIndex
