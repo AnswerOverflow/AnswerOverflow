@@ -1,6 +1,6 @@
 import { convexAdapter } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
-import type { BetterAuthOptions } from "better-auth";
+import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { admin, anonymous, apiKey } from "better-auth/plugins";
 import authConfig from "../auth.config";
 
@@ -34,4 +34,9 @@ export const createAuthOptions = (_ctx: unknown): BetterAuthOptions => ({
 			},
 		}),
 	],
+});
+
+export const auth = betterAuth({
+	...createAuthOptions({}),
+	secret: "cli-only-dummy-secret-not-used-at-runtime",
 });

@@ -19,11 +19,13 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { useSession } from "@packages/ui/components/convex-client-provider";
+import { DNSCopyButton } from "@packages/ui/components/dns-table";
 import { Input } from "@packages/ui/components/input";
-import { Skeleton } from "@packages/ui/components/skeleton";
-import { Copy, Key, RefreshCw } from "lucide-react";
+import { Label } from "@packages/ui/components/label";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useAuthClient } from "../../../../lib/auth-client";
 
@@ -37,97 +39,77 @@ type ApiKeyData = {
 export default function SettingsPage() {
 	const router = useRouter();
 	const authClient = useAuthClient();
+	const queryClient = useQueryClient();
 	const { data: session, isPending: sessionPending } = useSession({
 		allowAnonymous: false,
 	});
 
-	const [apiKey, setApiKey] = useState<ApiKeyData | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
 	const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
-	const [isCreating, setIsCreating] = useState(false);
 	const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
 
-	const fetchApiKeys = useCallback(async () => {
-		try {
+	const { data: apiKey, isLoading } = useQuery({
+		queryKey: ["apiKeys"],
+		queryFn: async (): Promise<ApiKeyData | null> => {
 			const result = await authClient.apiKey.list();
 			const firstKey = result.data?.[0];
 			if (firstKey) {
-				setApiKey({
+				return {
 					id: firstKey.id,
 					start: firstKey.start ?? null,
 					prefix: firstKey.prefix ?? null,
 					createdAt: new Date(firstKey.createdAt),
-				});
-			} else {
-				setApiKey(null);
+				};
 			}
-		} catch {
-			setApiKey(null);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [authClient.apiKey]);
+			return null;
+		},
+		enabled: !!session?.user,
+	});
 
-	useEffect(() => {
-		if (session?.user) {
-			fetchApiKeys();
-		}
-	}, [session?.user, fetchApiKeys]);
-
-	const handleCreateKey = async () => {
-		setIsCreating(true);
-		try {
+	const createKeyMutation = useMutation({
+		mutationFn: async () => {
 			const result = await authClient.apiKey.create({});
-			if (result.data?.key) {
-				setNewlyCreatedKey(result.data.key);
-				setApiKey({
-					id: result.data.id,
-					start: result.data.start ?? null,
-					prefix: result.data.prefix ?? null,
-					createdAt: new Date(result.data.createdAt),
-				});
+			if (result.error) {
+				throw new Error(result.error.message ?? "Failed to create API key");
+			}
+			return result.data;
+		},
+		onSuccess: (data) => {
+			if (data?.key) {
+				setNewlyCreatedKey(data.key);
+				queryClient.invalidateQueries({ queryKey: ["apiKeys"] });
 				toast.success("API key created");
-			} else if (result.error) {
-				toast.error(result.error.message ?? "Failed to create API key");
 			}
-		} catch {
-			toast.error("Failed to create API key");
-		} finally {
-			setIsCreating(false);
-		}
-	};
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		},
+	});
 
-	const handleRegenerateKey = async () => {
-		if (!apiKey) return;
-
-		setIsCreating(true);
-		try {
-			await authClient.apiKey.delete({ keyId: apiKey.id });
+	const regenerateKeyMutation = useMutation({
+		mutationFn: async (keyId: string) => {
+			await authClient.apiKey.delete({ keyId });
 			const result = await authClient.apiKey.create({});
-			if (result.data?.key) {
-				setNewlyCreatedKey(result.data.key);
-				setApiKey({
-					id: result.data.id,
-					start: result.data.start ?? null,
-					prefix: result.data.prefix ?? null,
-					createdAt: new Date(result.data.createdAt),
-				});
-				toast.success("API key regenerated");
-			} else if (result.error) {
-				toast.error(result.error.message ?? "Failed to regenerate API key");
+			if (result.error) {
+				throw new Error(result.error.message ?? "Failed to regenerate API key");
 			}
-		} catch {
-			toast.error("Failed to regenerate API key");
-		} finally {
-			setIsCreating(false);
+			return result.data;
+		},
+		onSuccess: (data) => {
+			if (data?.key) {
+				setNewlyCreatedKey(data.key);
+				queryClient.invalidateQueries({ queryKey: ["apiKeys"] });
+				toast.success("API key regenerated");
+			}
 			setShowRegenerateDialog(false);
-		}
-	};
+		},
+		onError: (error) => {
+			toast.error(error.message);
+			setShowRegenerateDialog(false);
+		},
+	});
 
-	const copyToClipboard = async (text: string) => {
-		await navigator.clipboard.writeText(text);
-		toast.success("Copied to clipboard");
-	};
+	const isCreating =
+		createKeyMutation.isPending || regenerateKeyMutation.isPending;
 
 	const getMaskedKey = () => {
 		if (!apiKey) return "";
@@ -136,21 +118,8 @@ export default function SettingsPage() {
 		return `${prefix}${start}${"•".repeat(20)}`;
 	};
 
-	if (sessionPending) {
-		return (
-			<main className="max-w-2xl mx-auto p-8">
-				<h1 className="text-3xl font-bold mb-6">Settings</h1>
-				<Card>
-					<CardHeader>
-						<Skeleton className="h-6 w-32" />
-						<Skeleton className="h-4 w-64 mt-2" />
-					</CardHeader>
-					<CardContent>
-						<Skeleton className="h-10 w-full" />
-					</CardContent>
-				</Card>
-			</main>
-		);
+	if (sessionPending || isLoading) {
+		return null;
 	}
 
 	if (!session?.user) {
@@ -159,56 +128,68 @@ export default function SettingsPage() {
 	}
 
 	return (
-		<main className="max-w-2xl mx-auto p-8">
-			<h1 className="text-3xl font-bold mb-6">Settings</h1>
+		<div className="flex max-w-[800px] w-full mx-auto flex-col gap-6 py-6">
+			<div>
+				<h1 className="text-2xl font-semibold">Account Settings</h1>
+				<p className="text-muted-foreground">
+					Manage your account and API access
+				</p>
+			</div>
 
 			<Card>
 				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Key className="h-5 w-5" />
-						API Key
-					</CardTitle>
+					<CardTitle>Profile</CardTitle>
 					<CardDescription>
-						Use this key to authenticate API requests. Include it in the{" "}
+						This comes from Discord and cannot be changed.
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="space-y-4">
+					<div className="space-y-2">
+						<Label>Email</Label>
+						<Input disabled value={session.user.email} />
+					</div>
+					<div className="space-y-2">
+						<Label>Name</Label>
+						<Input disabled value={session.user.name} />
+					</div>
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<CardTitle>API Key</CardTitle>
+					<CardDescription>
+						Authenticate API requests with the{" "}
 						<code className="bg-muted px-1 py-0.5 rounded text-sm">
 							x-api-key
 						</code>{" "}
 						header.
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="space-y-4">
-					{isLoading ? (
-						<Skeleton className="h-10 w-full" />
-					) : newlyCreatedKey ? (
-						<div className="space-y-4">
-							<div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-								<p className="text-sm text-amber-600 dark:text-amber-400 font-medium mb-2">
-									Copy your API key now. You won't be able to see it again.
-								</p>
-								<div className="flex gap-2">
-									<Input
-										readOnly
-										value={newlyCreatedKey}
-										className="font-mono text-sm"
-									/>
-									<Button
-										variant="outline"
-										size="icon"
-										onClick={() => copyToClipboard(newlyCreatedKey)}
-									>
-										<Copy className="h-4 w-4" />
-									</Button>
-								</div>
+				<CardContent>
+					{newlyCreatedKey ? (
+						<div className="space-y-3">
+							<p className="text-sm text-muted-foreground">
+								Copy your API key now. You won't be able to see it again.
+							</p>
+							<div className="flex gap-2">
+								<Input
+									readOnly
+									value={newlyCreatedKey}
+									className="font-mono text-sm"
+								/>
+								<DNSCopyButton text={newlyCreatedKey} />
 							</div>
 							<Button
 								variant="secondary"
+								size="sm"
 								onClick={() => setNewlyCreatedKey(null)}
 							>
 								Done
 							</Button>
 						</div>
 					) : apiKey ? (
-						<div className="space-y-4">
+						<div className="space-y-2">
 							<div className="flex gap-2">
 								<Input
 									readOnly
@@ -231,18 +212,11 @@ export default function SettingsPage() {
 							</p>
 						</div>
 					) : (
-						<Button onClick={handleCreateKey} disabled={isCreating}>
-							{isCreating ? (
-								<>
-									<RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-									Creating...
-								</>
-							) : (
-								<>
-									<Key className="h-4 w-4 mr-2" />
-									Generate API Key
-								</>
-							)}
+						<Button
+							onClick={() => createKeyMutation.mutate()}
+							disabled={isCreating}
+						>
+							{isCreating ? "Creating..." : "Generate API Key"}
 						</Button>
 					)}
 				</CardContent>
@@ -263,7 +237,7 @@ export default function SettingsPage() {
 					<AlertDialogFooter>
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
 						<AlertDialogAction
-							onClick={handleRegenerateKey}
+							onClick={() => apiKey && regenerateKeyMutation.mutate(apiKey.id)}
 							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 						>
 							Regenerate
@@ -271,6 +245,6 @@ export default function SettingsPage() {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
-		</main>
+		</div>
 	);
 }
