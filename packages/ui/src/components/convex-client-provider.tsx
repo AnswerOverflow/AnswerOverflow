@@ -7,7 +7,11 @@ import {
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { ConvexQueryClient } from "@convex-dev/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { adminClient, anonymousClient } from "better-auth/client/plugins";
+import {
+	adminClient,
+	anonymousClient,
+	apiKeyClient,
+} from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
@@ -38,6 +42,7 @@ function createAuthClientInstance(baseURL: string | undefined) {
 			convexClient(),
 			crossDomainClient(),
 			adminClient(),
+			apiKeyClient(),
 		],
 	});
 }
