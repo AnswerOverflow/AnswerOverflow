@@ -78,13 +78,13 @@
 		"links": [
 			{
 				"label": "Support",
-				"href": "mailto:contact@answeroverflow.com"
+				"href": "mailto:rhys@answeroverflow.com"
 			}
 		],
 		"primary": {
 			"type": "button",
 			"label": "Dashboard",
-			"href": "https://answeroverflow.com/dashboard"
+			"href": "https://www.answeroverflow.com/dashboard"
 		}
 	},
 	"footer": {
