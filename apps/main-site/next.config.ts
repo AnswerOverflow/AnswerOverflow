@@ -73,7 +73,7 @@ const nextConfig: NextConfig = {
 		];
 	},
 	assetPrefix:
-		process.env.NODE_ENV === "development"
+		process.env.NEXT_PUBLIC_DEPLOYMENT_ENV !== "production"
 			? undefined
 			: "https://www.answeroverflow.com/",
 	skipTrailingSlashRedirect: true,
