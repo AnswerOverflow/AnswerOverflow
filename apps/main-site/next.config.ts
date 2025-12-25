@@ -48,6 +48,10 @@ const nextConfig: NextConfig = {
 			// 	destination: "https://www.answeroverflow.com/api/auth/:path*",
 			// },
 			{
+				source: "/api/stickers/:stickerId.json",
+				destination: "https://cdn.discordapp.com/stickers/:stickerId.json",
+			},
+			{
 				source: "/sitemap-:path",
 				destination:
 					"https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path",

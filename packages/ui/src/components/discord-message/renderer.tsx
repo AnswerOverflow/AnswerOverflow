@@ -12,6 +12,7 @@ import { Link } from "./link";
 import { Mention } from "./mention";
 import { Poll } from "./poll";
 import { Spoiler } from "./spoiler";
+import { Stickers } from "./stickers";
 import type {
 	MessageSnapshot,
 	MessageWithMetadata,
@@ -275,6 +276,7 @@ export function DiscordUIMessage({
 			<>
 				<DiscordMarkdown message={msg}>{msg.content}</DiscordMarkdown>
 				<Attachments attachments={msg.attachments ?? []} />
+				<Stickers stickers={msg.stickers} />
 				<Embeds embeds={msg.embeds ?? null} />
 			</>
 		);

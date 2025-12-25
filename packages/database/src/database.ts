@@ -20,7 +20,7 @@ import {
 	Ref,
 } from "effect";
 import { api, internal } from "../convex/_generated/api";
-import type { Emoji, Message } from "../convex/schema";
+import type { Emoji, Message, Sticker } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
 import { ConvexClientHttpUnifiedLayer } from "./convex-client-http";
 import { ConvexClientLiveUnifiedLayer } from "./convex-client-live";
@@ -375,4 +375,5 @@ export type BaseMessageWithRelations = Message & {
 		userId: bigint;
 		emoji: Emoji;
 	}>;
+	stickers?: Sticker[];
 };

@@ -167,6 +167,12 @@ const embedSchema = v.object({
 	fields: v.optional(v.array(embedFieldSchema)),
 });
 
+export const stickerSchema = v.object({
+	id: v.int64(), // Discord sticker ID
+	name: v.string(),
+	formatType: v.number(), // 1=PNG, 2=APNG, 3=Lottie, 4=GIF
+});
+
 export const messageSchema = v.object({
 	id: v.int64(), // Discord snowflake ID
 	authorId: v.int64(), // Discord account ID
@@ -186,6 +192,7 @@ export const messageSchema = v.object({
 	nonce: v.optional(v.string()),
 	tts: v.optional(v.boolean()),
 	embeds: v.optional(v.array(embedSchema)),
+	stickers: v.optional(v.array(stickerSchema)),
 });
 
 export const attachmentSchema = v.object({
@@ -225,6 +232,7 @@ export type Attachment = Infer<typeof attachmentSchema> & {
 export type Emoji = Infer<typeof emojiSchema>;
 export type Reaction = Infer<typeof reactionSchema>;
 export type Embed = Infer<typeof embedSchema>;
+export type Sticker = Infer<typeof stickerSchema>;
 
 export default defineSchema({
 	servers: defineTable(serverSchema).index("by_discordId", ["discordId"]),

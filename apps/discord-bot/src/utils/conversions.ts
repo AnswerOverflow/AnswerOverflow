@@ -3,6 +3,7 @@ import type {
 	DiscordAccount as AODiscordAccount,
 	Emoji as AOEmoji,
 	ForumTag as AOForumTag,
+	Sticker as AOSticker,
 } from "@packages/database/convex/schema";
 import type { DatabaseAttachment } from "@packages/database/convex/shared/shared";
 import type { BaseMessageWithRelations } from "@packages/database/database";
@@ -226,6 +227,12 @@ export async function toAOMessage(
 		})),
 	}));
 
+	const stickers: AOSticker[] = message.stickers.map((sticker) => ({
+		id: BigInt(sticker.id),
+		name: sticker.name,
+		formatType: sticker.format,
+	}));
+
 	const parentChannelId = message.channel.isThread()
 		? (message.channel.parentId ?? undefined)
 		: undefined;
@@ -253,6 +260,7 @@ export async function toAOMessage(
 		nonce: message.nonce?.toString() ?? undefined,
 		tts: message.tts ?? false,
 		embeds: embeds.length > 0 ? embeds : undefined,
+		stickers: stickers.length > 0 ? stickers : undefined,
 		attachments: attachments.length > 0 ? attachments : undefined,
 		reactions: reactions.length > 0 ? reactions : undefined,
 	};
@@ -281,6 +289,7 @@ export function toUpsertMessageArgs(data: BaseMessageWithRelations) {
 			nonce: data.nonce,
 			tts: data.tts,
 			embeds: data.embeds,
+			stickers: data.stickers,
 		},
 		attachments: data.attachments,
 		reactions: data.reactions,
