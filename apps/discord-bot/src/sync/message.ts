@@ -22,8 +22,8 @@ import { catchAllWithReport } from "../utils/error-reporting";
 import { isHumanMessage } from "../utils/message-utils";
 
 const BATCH_CONFIG = {
-	maxBatchSize: process.env.NODE_ENV === "production" ? 5 : 1,
-	maxWait: Duration.millis(5000),
+	maxBatchSize: process.env.NODE_ENV === "production" ? 3 : 1,
+	maxWait: Duration.millis(3000),
 } as const;
 
 type MessageUpsertArgs = ReturnType<typeof toUpsertMessageArgs>;
