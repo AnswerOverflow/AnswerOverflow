@@ -321,6 +321,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "@convex-dev/better-auth@0.10.9": "patches/@convex-dev%2Fbetter-auth@0.10.9.patch",
+  },
   "overrides": {
     "@modelcontextprotocol/sdk": "^1.24.0",
     "import-in-the-middle": "^2.0.0",

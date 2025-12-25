@@ -1,0 +1,16 @@
+diff --git a/dist/plugins/cross-domain/client.js b/dist/plugins/cross-domain/client.js
+index ea276eac573ab935faf76e9af4e98a9f9192acc0..ff670af43d1e6d4755b3361596de7c4a892c97d8 100644
+--- a/dist/plugins/cross-domain/client.js
++++ b/dist/plugins/cross-domain/client.js
+@@ -131,7 +131,10 @@ export const crossDomainClient = (opts = {}) => {
+                             const prevCookie = await storage.getItem(cookieName);
+                             const toSetCookie = getSetCookie(setCookie || "", prevCookie ?? undefined);
+                             await storage.setItem(cookieName, toSetCookie);
+-                            store?.notify("$sessionSignal");
++                            const isGetSession = context.request.url.toString().includes("/get-session");
++                            if (!isGetSession) {
++                                store?.notify("$sessionSignal");
++                            }
+                         }
+                         if (context.request.url.toString().includes("/get-session") &&
+                             !opts?.disableCache) {
