@@ -16,6 +16,7 @@
 	"dependencies": {
 		"@convex-dev/better-auth": "catalog:",
 		"@effect/language-service": "catalog:",
+		"@elysiajs/openapi": "^1.4.12",
 		"@flags-sdk/posthog": "^0.2.2",
 		"@mdx-js/loader": "^3.1.1",
 		"@mdx-js/react": "^3.1.1",

@@ -12,5 +12,6 @@ export {
 } from "../_generated/server";
 export { internalMutation } from "../triggers";
 export * from "./admin";
+export * from "./apiKey";
 export * from "./authenticated";
 export * from "./private";

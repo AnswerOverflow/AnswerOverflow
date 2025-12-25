@@ -57,6 +57,7 @@
       "dependencies": {
         "@convex-dev/better-auth": "catalog:",
         "@effect/language-service": "catalog:",
+        "@elysiajs/openapi": "^1.4.12",
         "@flags-sdk/posthog": "^0.2.2",
         "@mdx-js/loader": "^3.1.1",
         "@mdx-js/react": "^3.1.1",
@@ -322,6 +323,7 @@
     },
   },
   "patchedDependencies": {
+    "@mintlify/cli@4.0.859": "patches/@mintlify+cli@4.0.859.patch",
     "@convex-dev/better-auth@0.10.9": "patches/@convex-dev%2Fbetter-auth@0.10.9.patch",
   },
   "overrides": {
@@ -646,6 +648,8 @@
     "@effect/vitest": ["@effect/vitest@0.25.1", "", { "peerDependencies": { "effect": "^3.17.7", "vitest": "^3.2.0" } }, "sha512-OMYvOU8iGed8GZXxgVBXlYtjG+jwWj5cJxFk0hOHOfTbCHXtdCMEWlXNba5zxbE7dBnW4srbnSYrP/NGGTC3qQ=="],
 
     "@effect/workflow": ["@effect/workflow@0.15.2", "", { "peerDependencies": { "@effect/experimental": "^0.57.11", "@effect/platform": "^0.93.6", "@effect/rpc": "^0.72.2", "effect": "^3.19.10" } }, "sha512-UAo5QWEvyyKsnf4EQ7WL3zwiuZS4Wd5fmAxdpcpZSIxNOvsABp3DOuyRCiidD8l3sQhdPwES/UsVK4QOCQ7wew=="],
+
+    "@elysiajs/openapi": ["@elysiajs/openapi@1.4.12", "", { "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-FhmWqUFDOidD2tUR0mrLnD2M0OUFF6cFUfKtHkQDbnAmCihFusxs7JvtUJjmEKZ++mzNvYLpbhZeJIXA7tIzLA=="],
 
     "@emnapi/core": ["@emnapi/core@0.45.0", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-DPWjcUDQkCeEM4VnljEOEcXdAD7pp8zSZsgOujk/LGIwCXWbXJngin+MO4zbH429lzeC3WbYLGjE2MaUOwzpyw=="],
 
