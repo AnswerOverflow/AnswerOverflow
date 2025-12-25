@@ -70,10 +70,6 @@
 		"global": {
 			"anchors": [
 				{
-					"anchor": "Documentation",
-					"href": "https://www.answeroverflow.com/docs/overview"
-				},
-				{
 					"anchor": "Community",
 					"href": "https://discord.answeroverflow.com",
 					"icon": "discord"
