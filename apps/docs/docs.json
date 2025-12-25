@@ -62,7 +62,7 @@
 			},
 			{
 				"tab": "API Reference",
-				"openapi": "https://www.answeroverflow.com/api/openapi/json"
+				"openapi": "https://www.answeroverflow.com/api/openapi-mintlify"
 			}
 		],
 		"global": {
