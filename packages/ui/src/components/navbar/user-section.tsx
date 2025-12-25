@@ -76,6 +76,10 @@ function UserAvatar({
 						<DropdownMenuSeparator />
 					</>
 				)}
+				<DropdownMenuItem asChild>
+					<Link href="/dashboard/settings">Settings</Link>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					onClick={() => {
 						if (onSignOut) {
