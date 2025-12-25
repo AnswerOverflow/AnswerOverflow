@@ -63,7 +63,7 @@ const app = new Elysia({ prefix: "/api" })
 				return { error: result.error };
 			}
 
-			return { success: true as const };
+			return { success: true };
 		},
 		{
 			body: t.Object({
@@ -77,7 +77,7 @@ const app = new Elysia({ prefix: "/api" })
 			}),
 			response: {
 				200: t.Object({
-					success: t.Literal(true),
+					success: t.Boolean(),
 				}),
 				400: t.Object({
 					error: t.String(),
