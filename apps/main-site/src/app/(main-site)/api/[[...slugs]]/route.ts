@@ -19,7 +19,7 @@ const app = new Elysia({ prefix: "/api" })
 				},
 				servers: [
 					{
-						url: "https://www.answeroverflow.com/api",
+						url: "https://www.answeroverflow.com/",
 						description: "Production",
 					},
 				],
