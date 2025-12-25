@@ -75,6 +75,26 @@ const app = new Elysia({ prefix: "/api" })
 			headers: t.Object({
 				"x-api-key": t.Optional(t.String()),
 			}),
+			response: {
+				200: t.Object({
+					success: t.Literal(true),
+				}),
+				400: t.Object({
+					error: t.String(),
+				}),
+				401: t.Object({
+					error: t.String(),
+				}),
+				403: t.Object({
+					error: t.String(),
+				}),
+				404: t.Object({
+					error: t.String(),
+				}),
+				500: t.Object({
+					error: t.String(),
+				}),
+			},
 			detail: {
 				summary: "Mark a message as a solution",
 				tags: ["Messages"],
