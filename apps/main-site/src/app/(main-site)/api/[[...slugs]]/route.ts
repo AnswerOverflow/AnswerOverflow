@@ -54,7 +54,7 @@ const app = new Elysia({ prefix: "/api" })
 
 			const result = await handleMarkSolution({
 				messageId: params.id,
-				solutionId: body.solutionId,
+				solutionId: body.solutionId ?? null,
 				apiKey,
 			});
 
@@ -67,7 +67,7 @@ const app = new Elysia({ prefix: "/api" })
 		},
 		{
 			body: t.Object({
-				solutionId: t.String(),
+				solutionId: t.Union([t.String(), t.Null()]),
 			}),
 			params: t.Object({
 				id: t.String(),
@@ -96,7 +96,7 @@ const app = new Elysia({ prefix: "/api" })
 				}),
 			},
 			detail: {
-				summary: "Mark a message as a solution",
+				summary: "Update solution for a message",
 				tags: ["Messages"],
 				security: [{ apiKey: [] }],
 			},

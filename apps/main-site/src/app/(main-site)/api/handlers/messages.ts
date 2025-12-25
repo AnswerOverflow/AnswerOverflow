@@ -11,21 +11,21 @@ type MarkSolutionResult =
 
 export async function handleMarkSolution(args: {
 	messageId: string;
-	solutionId: string;
+	solutionId: string | null;
 	apiKey: string;
 }): Promise<MarkSolutionResult> {
 	const client = getConvexClient();
 
 	try {
-		await client.mutation(api.api.messages.markSolution, {
+		await client.mutation(api.api.messages.updateSolution, {
 			messageId: BigInt(args.messageId),
-			solutionId: BigInt(args.solutionId),
+			solutionId: args.solutionId ? BigInt(args.solutionId) : null,
 			apiKey: args.apiKey,
 		});
 
 		return { success: true };
 	} catch (error) {
-		console.error("Error marking solution:", error);
+		console.error("Error updating solution:", error);
 
 		if (error instanceof Error) {
 			if (

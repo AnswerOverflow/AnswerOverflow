@@ -6,10 +6,10 @@ import {
 	checkGuildManagerPermissions,
 } from "../shared/guildManagerPermissions";
 
-export const markSolution = apiKeyMutation({
+export const updateSolution = apiKeyMutation({
 	args: {
 		messageId: v.int64(),
-		solutionId: v.int64(),
+		solutionId: v.union(v.int64(), v.null()),
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
@@ -31,6 +31,23 @@ export const markSolution = apiKeyMutation({
 		);
 		assertGuildManagerPermission(permissionResult);
 
+		const existingSolutions = await ctx.db
+			.query("messages")
+			.withIndex("by_serverId_and_questionId", (q) =>
+				q.eq("serverId", message.serverId).eq("questionId", args.messageId),
+			)
+			.collect();
+
+		for (const existingSolution of existingSolutions) {
+			await ctx.db.patch(existingSolution._id, {
+				questionId: undefined,
+			});
+		}
+
+		if (args.solutionId === null) {
+			return null;
+		}
+
 		const solutionMessage = await getOneFrom(
 			ctx.db,
 			"messages",
@@ -44,21 +61,6 @@ export const markSolution = apiKeyMutation({
 
 		if (solutionMessage.serverId !== message.serverId) {
 			throw new Error("Solution message does not belong to the same server");
-		}
-
-		const existingSolutions = await ctx.db
-			.query("messages")
-			.withIndex("by_serverId_and_questionId", (q) =>
-				q.eq("serverId", message.serverId).eq("questionId", args.messageId),
-			)
-			.collect();
-
-		for (const existingSolution of existingSolutions) {
-			if (existingSolution._id !== solutionMessage._id) {
-				await ctx.db.patch(existingSolution._id, {
-					questionId: undefined,
-				});
-			}
 		}
 
 		await ctx.db.patch(solutionMessage._id, {
