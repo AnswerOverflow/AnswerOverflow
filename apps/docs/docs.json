@@ -17,51 +17,45 @@
 		"tabs": [
 			{
 				"tab": "Docs",
-				"anchors": [
+				"groups": [
 					{
-						"anchor": "Documentation",
-						"icon": "book-open",
-						"groups": [
-							{
-								"group": "Essentials",
-								"pages": ["overview", "quick-start", "recommended-setup"]
-							},
-							{
-								"group": "Channel Settings",
-								"pages": [
-									"channel-settings/auto-thread",
-									"channel-settings/forum-guidelines-consent",
-									"channel-settings/indexing",
-									"channel-settings/mark-solution",
-									"channel-settings/send-mark-solution-instructions",
-									"channel-settings/solved-tag"
-								]
-							},
-							{
-								"group": "Server Settings",
-								"pages": ["server-settings/read-the-rules-consent"]
-							},
-							{
-								"group": "User Settings",
-								"pages": [
-									"user-settings/displaying-messages",
-									"user-settings/globally-ignore-account",
-									"user-settings/ignore-account-in-server"
-								]
-							},
-							{
-								"group": "Integrations",
-								"pages": ["integrations/inkeep"]
-							},
-							{
-								"group": "Changelog",
-								"pages": [
-									"changelog/solved-posts-now-auto-archive",
-									"changelog/introducing-the-answer-overflow-public-platform",
-									"changelog/app-router",
-									"changelog/answeroverflow-now-has-a-changelog"
-								]
-							}
+						"group": "Essentials",
+						"pages": ["overview", "quick-start", "recommended-setup"]
+					},
+					{
+						"group": "Channel Settings",
+						"pages": [
+							"channel-settings/auto-thread",
+							"channel-settings/forum-guidelines-consent",
+							"channel-settings/indexing",
+							"channel-settings/mark-solution",
+							"channel-settings/send-mark-solution-instructions",
+							"channel-settings/solved-tag"
+						]
+					},
+					{
+						"group": "Server Settings",
+						"pages": ["server-settings/read-the-rules-consent"]
+					},
+					{
+						"group": "User Settings",
+						"pages": [
+							"user-settings/displaying-messages",
+							"user-settings/globally-ignore-account",
+							"user-settings/ignore-account-in-server"
+						]
+					},
+					{
+						"group": "Integrations",
+						"pages": ["integrations/inkeep"]
+					},
+					{
+						"group": "Changelog",
+						"pages": [
+							"changelog/solved-posts-now-auto-archive",
+							"changelog/introducing-the-answer-overflow-public-platform",
+							"changelog/app-router",
+							"changelog/answeroverflow-now-has-a-changelog"
 						]
 					}
 				]
