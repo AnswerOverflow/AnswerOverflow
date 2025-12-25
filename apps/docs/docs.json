@@ -90,7 +90,7 @@
 		],
 		"primary": {
 			"type": "button",
-			"label": "Dashboard",
+			"label": "Setup for free",
 			"href": "https://www.answeroverflow.com/dashboard"
 		}
 	},
