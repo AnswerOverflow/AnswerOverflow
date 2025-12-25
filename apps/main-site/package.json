@@ -20,7 +20,7 @@
 		"@flags-sdk/posthog": "^0.2.2",
 		"@mdx-js/loader": "^3.1.1",
 		"@mdx-js/react": "^3.1.1",
-		"@modelcontextprotocol/sdk": "^1.22.0",
+		"@modelcontextprotocol/sdk": "1.17.5",
 		"@next/mdx": "^16.0.4",
 		"@packages/database": "workspace:*",
 		"@packages/observability": "workspace:*",
