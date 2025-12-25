@@ -2,6 +2,10 @@
 	"$schema": "https://mintlify.com/docs.json",
 	"theme": "mint",
 	"name": "Answer Overflow",
+	"logo": {
+		"dark": "https://www.answeroverflow.com/AnswerOverflowLogoLight.png",
+		"light": "https://www.answeroverflow.com/AnswerOverflowLogoDark.png"
+	},
 	"colors": {
 		"primary": "#88c7e4",
 		"light": "#7dabd2",
