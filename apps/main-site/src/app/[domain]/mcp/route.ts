@@ -60,7 +60,7 @@ Use this to find solutions to ${tenant.name}-specific questions from real commun
 					Use this to find solutions to questions, library-specific issues, and community discussions.
 					Tips for effective searching:
 					- Use specific error messages or function names`,
-					inputSchema: z.object({
+					inputSchema: {
 						query: z
 							.string()
 							.describe(
@@ -75,7 +75,7 @@ Use this to find solutions to ${tenant.name}-specific questions from real commun
 							.describe(
 								"Maximum number of results to return (1-25, default 10)",
 							),
-					}),
+					},
 				},
 				async ({ query, limit }) => {
 					return searchAnswerOverflow(

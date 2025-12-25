@@ -418,7 +418,7 @@ export function registerGetThreadMessagesTool(
 			title: "Get Thread Messages",
 			description:
 				"Get all messages in a thread, not just the first message and solution.\n\nUse this when you need to see the full conversation, follow-up questions, and all responses in a thread.",
-			inputSchema: z.object({
+			inputSchema: {
 				threadId: z
 					.string()
 					.describe(
@@ -431,7 +431,7 @@ export function registerGetThreadMessagesTool(
 					.default(50)
 					.optional()
 					.describe("Maximum number of messages to return (1-100, default 50)"),
-			}),
+			},
 		},
 		async ({ threadId, limit }) => {
 			return getThreadMessages(
@@ -454,7 +454,7 @@ export function registerFindSimilarThreadsTool(
 				title: "Find Similar Threads",
 				description:
 					"Find threads similar to a given search query, useful for finding related discussions.\n\nThis searches both thread titles and message content to find relevant conversations.",
-				inputSchema: z.object({
+				inputSchema: {
 					query: z
 						.string()
 						.describe("The search query to find similar threads for"),
@@ -467,7 +467,7 @@ export function registerFindSimilarThreadsTool(
 						.describe(
 							"Maximum number of similar threads to return (1-10, default 5)",
 						),
-				}),
+				},
 			},
 			async ({ query, limit }) => {
 				return findSimilarThreads(
@@ -484,7 +484,7 @@ export function registerFindSimilarThreadsTool(
 				title: "Find Similar Threads",
 				description:
 					"Find threads similar to a given search query, useful for finding related discussions.\n\nThis searches both thread titles and message content to find relevant conversations.",
-				inputSchema: z.object({
+				inputSchema: {
 					query: z
 						.string()
 						.describe("The search query to find similar threads for"),
@@ -498,7 +498,7 @@ export function registerFindSimilarThreadsTool(
 						.describe(
 							"Maximum number of similar threads to return (1-10, default 5)",
 						),
-				}),
+				},
 			},
 			async ({ query, serverId, limit }) => {
 				return findSimilarThreads(

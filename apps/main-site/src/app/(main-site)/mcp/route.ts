@@ -41,7 +41,7 @@ const handler = createMcpHandler(
 				title: "Search Answer Overflow",
 				description:
 					"Search for answers on Answer Overflow - a searchable archive of Discord help channels.\n\nUse this to find solutions to programming questions, library-specific issues, and community discussions.\n\nTips for effective searching:\n- Use specific error messages or function names\n- Filter by serverId to search within a specific community\n- Use search_servers first to discover available communities and their IDs",
-				inputSchema: z.object({
+				inputSchema: {
 					query: z
 						.string()
 						.describe(
@@ -60,7 +60,7 @@ const handler = createMcpHandler(
 						.default(10)
 						.optional()
 						.describe("Maximum number of results to return (1-25, default 10)"),
-				}),
+				},
 			},
 			async ({ query, serverId, limit }) => {
 				return searchAnswerOverflow({ query, serverId, limit }, buildUrl, true);
@@ -73,7 +73,7 @@ const handler = createMcpHandler(
 				title: "Search Discord Servers",
 				description:
 					"Search for Discord servers indexed on Answer Overflow by name.\n\nUse this to discover communities and get their server IDs for filtered searching.\nResults are sorted by member count (largest first).",
-				inputSchema: z.object({
+				inputSchema: {
 					query: z
 						.string()
 						.optional()
@@ -89,7 +89,7 @@ const handler = createMcpHandler(
 						.describe(
 							"Maximum number of servers to return (1-100, default 25)",
 						),
-				}),
+				},
 			},
 			async ({ query, limit }) => {
 				return searchServers({ query, limit });
