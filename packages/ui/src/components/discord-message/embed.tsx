@@ -1,5 +1,6 @@
 import type { Embed } from "@packages/database/convex/schema";
 import dayjs from "dayjs";
+import { ExpandableImage } from "../image-lightbox";
 import { DiscordMarkdown } from "./renderer";
 
 function EmbedFields({
@@ -74,10 +75,13 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 						height,
 					});
 					const aspectRatio = width / height;
+					const imageSrc =
+						embed.url ?? embed.image?.proxyUrl ?? embed.image?.url ?? "";
 					return (
 						<div className="mt-4 overflow-hidden rounded" key={idx}>
-							<img
-								src={embed.url ?? embed.image?.proxyUrl ?? embed.image?.url}
+							<ExpandableImage
+								src={imageSrc}
+								alt={embed.title ?? "Embedded image"}
 								width={scaledStyle.scaledWidth}
 								height={scaledStyle.scaledHeight}
 								style={{
@@ -86,7 +90,6 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 									maxWidth: scaledStyle.maxWidth,
 									aspectRatio: `${aspectRatio}`,
 								}}
-								loading="lazy"
 							/>
 						</div>
 					);
@@ -143,9 +146,10 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 						)}
 						{previewUrl?.width && previewUrl.height && (
 							<div className="mt-4 max-h-[300px] overflow-hidden rounded">
-								<img
+								<ExpandableImage
 									className="max-h-full overflow-hidden object-cover"
-									src={previewUrl.proxyUrl ?? previewUrl.url}
+									src={previewUrl.proxyUrl ?? previewUrl.url ?? ""}
+									alt={embed.title ?? "Preview image"}
 									width={previewUrl.width}
 									height={previewUrl.height}
 									style={{
@@ -155,7 +159,6 @@ export function Embeds({ embeds }: { embeds: Embed[] | null }) {
 										}),
 										aspectRatio: `${previewUrl.width / previewUrl.height}`,
 									}}
-									loading="lazy"
 								/>
 							</div>
 						)}

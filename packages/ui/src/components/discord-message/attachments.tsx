@@ -3,8 +3,10 @@
 import type { Attachment } from "@packages/database/convex/schema";
 import bytes from "bytes";
 import { ArrowUpRight, File } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "../../components/button";
+import { ImageLightbox } from "../../components/image-lightbox";
 import {
 	Tooltip,
 	TooltipContent,
@@ -77,6 +79,9 @@ function FileShowcase({ attachment }: { attachment: Attachment }) {
 }
 
 function ImageGallery({ images }: { images: Attachment[] }) {
+	const [lightboxOpen, setLightboxOpen] = useState(false);
+	const [selectedIndex, setSelectedIndex] = useState(0);
+
 	if (!images.length) {
 		return null;
 	}
@@ -93,32 +98,54 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 		9: "grid gap-1 grid-cols-3 grid-rows-3 *:h-[181px]",
 		10: "grid gap-1 grid-cols-3 grid-rows-4 *:h-[181px] [&>*:first-child]:col-span-3",
 	};
+
+	const lightboxImages = images.map((attachment) => ({
+		src: attachment.url,
+		alt: attachment.filename,
+		width: attachment.width ?? undefined,
+		height: attachment.height ?? undefined,
+	}));
+
+	const handleImageClick = (index: number) => {
+		setSelectedIndex(index);
+		setLightboxOpen(true);
+	};
+
 	return (
-		<div
-			className={cn(
-				"w-full max-w-[550px] overflow-hidden rounded py-0.5",
-				styles[images.length],
-			)}
-		>
-			{images.map((attachment) => {
-				const hasDimensions = attachment.width && attachment.height;
-				const aspectRatio = hasDimensions
-					? Number(
-							((attachment.width ?? 0) / (attachment.height ?? 1)).toFixed(4),
-						)
-					: 16 / 9;
-				return (
-					<ImageWithAspectRatio
-						key={attachment.id}
-						imageUrl={attachment.url}
-						alt={attachment.filename}
-						width={attachment.width ?? undefined}
-						height={attachment.height ?? undefined}
-						aspectRatio={aspectRatio}
-					/>
-				);
-			})}
-		</div>
+		<>
+			<div
+				className={cn(
+					"w-full max-w-[550px] overflow-hidden rounded py-0.5",
+					styles[images.length],
+				)}
+			>
+				{images.map((attachment, index) => {
+					const hasDimensions = attachment.width && attachment.height;
+					const aspectRatio = hasDimensions
+						? Number(
+								((attachment.width ?? 0) / (attachment.height ?? 1)).toFixed(4),
+							)
+						: 16 / 9;
+					return (
+						<ImageWithAspectRatio
+							key={attachment.id}
+							imageUrl={attachment.url}
+							alt={attachment.filename}
+							width={attachment.width ?? undefined}
+							height={attachment.height ?? undefined}
+							aspectRatio={aspectRatio}
+							onClick={() => handleImageClick(index)}
+						/>
+					);
+				})}
+			</div>
+			<ImageLightbox
+				images={lightboxImages}
+				initialIndex={selectedIndex}
+				open={lightboxOpen}
+				onOpenChange={setLightboxOpen}
+			/>
+		</>
 	);
 }
 
@@ -128,19 +155,30 @@ function ImageWithAspectRatio({
 	width,
 	height,
 	aspectRatio,
+	onClick,
 }: {
 	imageUrl: string;
 	alt: string;
 	width?: number;
 	height?: number;
 	aspectRatio: number;
+	onClick?: () => void;
 }) {
 	return (
 		<div
-			className="relative w-full overflow-hidden rounded"
+			className="relative w-full cursor-pointer overflow-hidden rounded transition-opacity hover:opacity-90"
 			style={{
 				aspectRatio: `${aspectRatio}`,
 			}}
+			onClick={onClick}
+			onKeyDown={(e) => {
+				if (onClick && (e.key === "Enter" || e.key === " ")) {
+					e.preventDefault();
+					onClick();
+				}
+			}}
+			role="button"
+			tabIndex={0}
 		>
 			<img
 				alt={alt}
