@@ -1,5 +1,5 @@
 import { convexBetterAuthNextJs } from "@convex-dev/better-auth/nextjs";
-import type { Context } from "hono";
+import type { Context } from "elysia";
 
 const { handler } = convexBetterAuthNextJs({
 	convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL ?? "",
@@ -7,14 +7,14 @@ const { handler } = convexBetterAuthNextJs({
 });
 
 export async function handleAuth(c: Context) {
-	const method = c.req.method;
+	const method = c.request.method;
 
 	if (method === "GET") {
-		return handler.GET(c.req.raw);
+		return handler.GET(c.request);
 	}
 	if (method === "POST") {
-		return handler.POST(c.req.raw);
+		return handler.POST(c.request);
 	}
 
-	return c.text("Method not allowed", 405);
+	return new Response("Method not allowed", { status: 405 });
 }
