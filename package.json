@@ -79,7 +79,7 @@
 		"@mintlify/cli@4.0.859": "patches/@mintlify+cli@4.0.859.patch"
 	},
 	"overrides": {
-		"@modelcontextprotocol/sdk": "^1.24.0",
+		"@modelcontextprotocol/sdk": "1.24.3",
 		"import-in-the-middle": "^2.0.0",
 		"require-in-the-middle": "^8.0.1"
 	},
