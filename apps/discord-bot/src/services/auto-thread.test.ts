@@ -1,9 +1,8 @@
 import { expect, it } from "@effect/vitest";
-import { assertLeft } from "@effect/vitest/utils";
 import { Database } from "@packages/database/database";
 import type { GuildBasedChannel, Message } from "discord.js";
 import { ChannelType, type Guild, MessageType } from "discord.js";
-import { Effect, type Either } from "effect";
+import { Effect, Either } from "effect";
 import { describe } from "vitest";
 import { DiscordClientMock } from "../core/discord-client-mock";
 import { TestLayer } from "../core/layers";
@@ -53,8 +52,21 @@ const setupTestChannel = (
 		return { guild, channel, discordMock };
 	});
 
-const expectError = <E>(result: Either.Either<unknown, E>, expectedError: E) =>
-	assertLeft(result, expectedError);
+const expectAutoThreadError = (
+	result: Either.Either<unknown, unknown>,
+	expectedError: AutoThreadError,
+) => {
+	expect(Either.isLeft(result)).toBe(true);
+	if (Either.isLeft(result)) {
+		const error = result.left;
+		expect(error).toBeInstanceOf(AutoThreadError);
+		if (error instanceof AutoThreadError) {
+			expect(error._tag).toBe(expectedError._tag);
+			expect(error.code).toBe(expectedError.code);
+			expect(error.message).toBe(expectedError.message);
+		}
+	}
+};
 
 describe("handleAutoThread", () => {
 	it.scoped("returns early for DM channel", () =>
@@ -69,7 +81,7 @@ describe("handleAutoThread", () => {
 				} as unknown as Message["channel"],
 			});
 			const result = yield* handleAutoThread(message).pipe(Effect.either);
-			expectError(
+			expectAutoThreadError(
 				result,
 				new AutoThreadError({
 					message: "Cannot create thread in DM or voice channel",
@@ -91,7 +103,7 @@ describe("handleAutoThread", () => {
 				} as unknown as Message["channel"],
 			});
 			const result = yield* handleAutoThread(message).pipe(Effect.either);
-			expectError(
+			expectAutoThreadError(
 				result,
 				new AutoThreadError({
 					message: "Cannot create thread in DM or voice channel",
@@ -113,7 +125,7 @@ describe("handleAutoThread", () => {
 				} as unknown as Message["channel"],
 			});
 			const result = yield* handleAutoThread(message).pipe(Effect.either);
-			expectError(
+			expectAutoThreadError(
 				result,
 				new AutoThreadError({
 					message: `Channel type ${ChannelType.GuildForum} is not allowed for auto threads`,
@@ -133,7 +145,7 @@ describe("handleAutoThread", () => {
 				authorDisplayName: "BotUser",
 			});
 			const result = yield* handleAutoThread(message).pipe(Effect.either);
-			expectError(
+			expectAutoThreadError(
 				result,
 				new AutoThreadError({
 					message: "Message is not from a human user",
@@ -150,7 +162,7 @@ describe("handleAutoThread", () => {
 				type: MessageType.Reply,
 			});
 			const result = yield* handleAutoThread(message).pipe(Effect.either);
-			expectError(
+			expectAutoThreadError(
 				result,
 				new AutoThreadError({
 					message: `Message type ${MessageType.Reply} is not supported`,
@@ -169,7 +181,7 @@ describe("handleAutoThread", () => {
 				} as unknown as Message["thread"],
 			});
 			const result = yield* handleAutoThread(message).pipe(Effect.either);
-			expectError(
+			expectAutoThreadError(
 				result,
 				new AutoThreadError({
 					message: "Message is already in a thread",
@@ -184,7 +196,7 @@ describe("handleAutoThread", () => {
 			const { channel, discordMock } = yield* setupTestChannel(false);
 			const message = discordMock.utilities.createMockMessage(channel);
 			const result = yield* handleAutoThread(message).pipe(Effect.either);
-			expectError(
+			expectAutoThreadError(
 				result,
 				new AutoThreadError({
 					message: "Auto thread is disabled for this channel",
