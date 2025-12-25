@@ -113,9 +113,8 @@ export default function SettingsPage() {
 
 	const getMaskedKey = () => {
 		if (!apiKey) return "";
-		const prefix = apiKey.prefix ?? "";
 		const start = apiKey.start ?? "";
-		return `${prefix}${start}${"•".repeat(20)}`;
+		return `${start}${"•".repeat(20)}`;
 	};
 
 	if (sessionPending || isLoading) {
@@ -128,10 +127,10 @@ export default function SettingsPage() {
 	}
 
 	return (
-		<div className="flex max-w-[800px] w-full mx-auto flex-col gap-6 py-6">
+		<div className="flex max-w-[800px] w-full mx-auto flex-col gap-6 px-4 py-6">
 			<div>
-				<h1 className="text-2xl font-semibold">Account Settings</h1>
-				<p className="text-muted-foreground">
+				<h1 className="text-xl sm:text-2xl font-semibold">Account Settings</h1>
+				<p className="text-sm text-muted-foreground">
 					Manage your account and API access
 				</p>
 			</div>
@@ -176,7 +175,7 @@ export default function SettingsPage() {
 								<Input
 									readOnly
 									value={newlyCreatedKey}
-									className="font-mono text-sm"
+									className="font-mono text-xs sm:text-sm min-w-0"
 								/>
 								<DNSCopyButton text={newlyCreatedKey} />
 							</div>
@@ -194,11 +193,12 @@ export default function SettingsPage() {
 								<Input
 									readOnly
 									value={getMaskedKey()}
-									className="font-mono text-sm"
+									className="font-mono text-xs sm:text-sm min-w-0"
 								/>
 								<Button
 									variant="outline"
 									size="icon"
+									className="shrink-0"
 									onClick={() => setShowRegenerateDialog(true)}
 									disabled={isCreating}
 								>
