@@ -289,7 +289,7 @@ export async function searchMessages(
 		.withSearchIndex("search_content", (q) => {
 			const searchQuery = q.search("content", args.query);
 			if (args.channelId) {
-				return searchQuery.eq("channelId", args.channelId);
+				return searchQuery.eq("parentChannelId", args.channelId);
 			}
 			if (args.serverId) {
 				return searchQuery.eq("serverId", args.serverId);
@@ -307,17 +307,8 @@ export async function searchMessages(
 		Predicate.isNotNullable,
 	);
 
-	const results = args.channelId
-		? Arr.filter(
-				allResults,
-				(r) =>
-					r.channel.id === args.channelId ||
-					r.channel.parentId === args.channelId,
-			)
-		: allResults;
-
 	return {
-		page: results,
+		page: allResults,
 		isDone: paginatedResult.isDone,
 		continueCursor: paginatedResult.continueCursor,
 	};

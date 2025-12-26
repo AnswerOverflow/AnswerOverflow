@@ -18,6 +18,7 @@ import { publicQuery } from "./custom_functions";
 export const getChannelPageThreads = publicQuery({
 	args: {
 		channelDiscordId: v.int64(),
+		tagIds: v.optional(v.array(v.string())),
 		paginationOpts: paginationOptsValidator,
 	},
 	returns: paginatedValidator(
@@ -27,6 +28,85 @@ export const getChannelPageThreads = publicQuery({
 		}),
 	),
 	handler: async (ctx, args) => {
+		const tagIdStrings = args.tagIds;
+		const hasTagFilter = tagIdStrings && tagIdStrings.length > 0;
+
+		if (hasTagFilter) {
+			const tagIds = tagIdStrings.map((id) => BigInt(id));
+			const threadIdSets: Array<Set<bigint>> = await asyncMap(
+				tagIds,
+				async (tagId) => {
+					const entries = await ctx.db
+						.query("threadTags")
+						.withIndex("by_parentChannelId_and_tagId", (q) =>
+							q.eq("parentChannelId", args.channelDiscordId).eq("tagId", tagId),
+						)
+						.collect();
+					return new Set(entries.map((e) => e.threadId));
+				},
+			);
+
+			const matchingThreadIds = new Set<bigint>();
+			for (const set of threadIdSets) {
+				for (const id of set) {
+					matchingThreadIds.add(id);
+				}
+			}
+
+			if (matchingThreadIds.size === 0) {
+				return { page: [], isDone: true, continueCursor: "" };
+			}
+
+			const sortedThreadIds = Array.from(matchingThreadIds).sort((a, b) =>
+				a > b ? -1 : a < b ? 1 : 0,
+			);
+
+			const cursor = args.paginationOpts.cursor;
+			const numItems = args.paginationOpts.numItems;
+			let startIndex = 0;
+
+			if (cursor) {
+				const cursorId = BigInt(cursor);
+				startIndex = sortedThreadIds.findIndex((id) => id < cursorId);
+				if (startIndex === -1) {
+					return { page: [], isDone: true, continueCursor: "" };
+				}
+			}
+
+			const pageThreadIds = sortedThreadIds.slice(
+				startIndex,
+				startIndex + numItems,
+			);
+			const isDone = startIndex + numItems >= sortedThreadIds.length;
+			const lastId = pageThreadIds[pageThreadIds.length - 1];
+			const continueCursor = isDone || !lastId ? "" : lastId.toString();
+
+			const threads = await asyncMap(pageThreadIds, (threadId) =>
+				getOneFrom(ctx.db, "channels", "by_discordChannelId", threadId, "id"),
+			);
+
+			const page = await asyncMap(
+				Arr.filter(threads, Predicate.isNotNull),
+				async (thread) => {
+					const message = await getThreadStartMessage(ctx, thread.id);
+					const enrichedMessage = message
+						? await enrichMessage(ctx, message)
+						: null;
+
+					return {
+						thread,
+						message: enrichedMessage,
+					};
+				},
+			);
+
+			return {
+				page,
+				isDone,
+				continueCursor,
+			};
+		}
+
 		const paginatedResult = await ctx.db
 			.query("channels")
 			.withIndex("by_parentId_and_id", (q) =>

@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import type { ForumTag } from "@packages/database/convex/schema";
 import { Button } from "@packages/ui/components/button";
 import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import {
@@ -33,15 +34,16 @@ import {
 import { TrackLoad } from "@packages/ui/components/track-load";
 import { cn } from "@packages/ui/lib/utils";
 import { encodeCursor } from "@packages/ui/utils/cursor";
-import { getChannelIcon } from "@packages/ui/utils/discord";
+import { ChannelType, getChannelIcon } from "@packages/ui/utils/discord";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
+import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import type { FunctionReturnType } from "convex/server";
 import { FileQuestion, Menu } from "lucide-react";
-import { useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
 import { JsonLdScript } from "./json-ld-script";
 import { ResourcesSidebar } from "./resources-sidebar";
+import { TagFilter } from "./tag-filter";
 
 export type FirstThreadAuthor = {
 	id: string;
@@ -164,9 +166,13 @@ function MobileChannelSheet({
 	return (
 		<Sheet open={open} onOpenChange={setOpen}>
 			<SheetTrigger asChild>
-				<Button variant="outline" size="sm" className="lg:hidden gap-2">
+				<Button
+					variant="outline"
+					size="sm"
+					className="lg:hidden gap-2 w-full justify-start"
+				>
 					<Menu className="size-4" />
-					<span className="truncate max-w-[140px]">
+					<span className="truncate">
 						{selectedChannel?.name ?? "Channels"}
 					</span>
 				</Button>
@@ -273,6 +279,7 @@ function SearchResults({
 	serverId,
 	channelId,
 	channelName,
+	tagIds,
 	hideServer = false,
 	onSearchWholeServer,
 }: {
@@ -280,6 +287,7 @@ function SearchResults({
 	serverId: string;
 	channelId?: string;
 	channelName?: string;
+	tagIds?: string[];
 	hideServer?: boolean;
 	onSearchWholeServer?: () => void;
 }) {
@@ -319,10 +327,12 @@ function SearchResults({
 		</Empty>
 	);
 
+	const queryTagIds = tagIds && tagIds.length > 0 ? tagIds : undefined;
+
 	return (
 		<ConvexInfiniteList
 			query={api.public.search.publicSearch}
-			queryArgs={{ query, serverId, channelId }}
+			queryArgs={{ query, serverId, channelId, tagIds: queryTagIds }}
 			pageSize={20}
 			initialLoaderCount={5}
 			loader={<ThreadCardSkeleton />}
@@ -406,15 +416,22 @@ export function ThreadsList({
 	nextCursor?: string | null;
 	currentCursor?: string | null;
 }) {
+	const [selectedTagIds] = useQueryState(
+		"tags",
+		parseAsArrayOf(parseAsString).withDefault([]),
+	);
+	const hasTagFilter = selectedTagIds.length > 0;
+	const tagIds = hasTagFilter ? selectedTagIds : undefined;
+
 	return (
 		<>
 			<ConvexInfiniteList
 				query={api.public.channels.getChannelPageThreads}
-				queryArgs={{ channelDiscordId }}
+				queryArgs={{ channelDiscordId, tagIds }}
 				pageSize={20}
 				initialLoaderCount={5}
 				loader={<ChannelThreadCardSkeleton />}
-				initialData={initialData}
+				initialData={hasTagFilter ? undefined : initialData}
 				className="space-y-4"
 				emptyState={
 					<Empty className="py-16">
@@ -424,7 +441,9 @@ export function ThreadsList({
 							</EmptyMedia>
 							<EmptyTitle>No threads found</EmptyTitle>
 							<EmptyDescription>
-								This channel doesn't have any indexed threads yet.
+								{hasTagFilter
+									? "No threads match the selected tags."
+									: "This channel doesn't have any indexed threads yet."}
 							</EmptyDescription>
 						</EmptyHeader>
 					</Empty>
@@ -437,7 +456,7 @@ export function ThreadsList({
 					/>
 				)}
 			/>
-			{nextCursor && (
+			{!hasTagFilter && nextCursor && (
 				<a
 					href={`?cursor=${encodeCursor(nextCursor)}`}
 					className="sr-only"
@@ -528,11 +547,33 @@ export function CommunityPageContent({
 	const [searchScope, setSearchScope] = useQueryState("scope", {
 		defaultValue: "channel",
 	});
+	const [selectedTagIds, setSelectedTagIds] = useQueryState(
+		"tags",
+		parseAsArrayOf(parseAsString).withDefault([]),
+	);
 	const searchChannelScoped = searchScope === "channel" && selectedChannel;
 	const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 	const hasQuery = debouncedSearchQuery.trim().length > 0;
 	const isSearching =
 		searchQuery !== debouncedSearchQuery && searchQuery.trim().length > 0;
+
+	const isForumChannel = selectedChannel?.type === ChannelType.GuildForum;
+	const availableTags: ForumTag[] = isForumChannel
+		? (selectedChannel?.availableTags ?? [])
+		: [];
+
+	const handleTagToggle = (tagId: string) => {
+		if (selectedTagIds.includes(tagId)) {
+			const newTags = selectedTagIds.filter((id) => id !== tagId);
+			setSelectedTagIds(newTags.length > 0 ? newTags : null);
+		} else {
+			setSelectedTagIds([...selectedTagIds, tagId]);
+		}
+	};
+
+	const handleClearTags = () => {
+		setSelectedTagIds(null);
+	};
 
 	const canonicalUrl = getTenantCanonicalUrl(
 		tenant,
@@ -601,7 +642,7 @@ export function CommunityPageContent({
 							/>
 						</div>
 
-						<div className="mb-6">
+						<div className="mb-6 space-y-4">
 							<SearchInput
 								value={searchQuery}
 								onChange={(value) => {
@@ -617,6 +658,14 @@ export function CommunityPageContent({
 								}
 								isSearching={isSearching}
 							/>
+							{availableTags.length > 0 && (
+								<TagFilter
+									availableTags={availableTags}
+									selectedTagIds={selectedTagIds}
+									onTagToggle={handleTagToggle}
+									onClearAll={handleClearTags}
+								/>
+							)}
 						</div>
 
 						{hasQuery ? (
@@ -629,6 +678,7 @@ export function CommunityPageContent({
 										: undefined
 								}
 								channelName={selectedChannel?.name}
+								tagIds={searchChannelScoped ? selectedTagIds : undefined}
 								hideServer={tenantMode}
 								onSearchWholeServer={
 									selectedChannel ? () => setSearchScope("server") : undefined

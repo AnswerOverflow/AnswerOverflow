@@ -1,6 +1,7 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
+import { getManyFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { CHANNEL_TYPE } from "../shared/channels";
 import {
@@ -15,9 +16,39 @@ export const publicSearch = publicQuery({
 		query: v.string(),
 		serverId: v.optional(v.string()),
 		channelId: v.optional(v.string()),
+		tagIds: v.optional(v.array(v.string())),
 		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
+		const tagIdStrings = args.tagIds;
+		const hasTagFilter = tagIdStrings && tagIdStrings.length > 0;
+
+		let threadIdsWithTags: Set<bigint> | null = null;
+		if (hasTagFilter && args.channelId) {
+			const tagIds = tagIdStrings.map((id) => BigInt(id));
+			const parentChannelId = BigInt(args.channelId);
+
+			const threadIdSets: Array<Set<bigint>> = await asyncMap(
+				tagIds,
+				async (tagId) => {
+					const entries = await ctx.db
+						.query("threadTags")
+						.withIndex("by_parentChannelId_and_tagId", (q) =>
+							q.eq("parentChannelId", parentChannelId).eq("tagId", tagId),
+						)
+						.collect();
+					return new Set(entries.map((e) => e.threadId));
+				},
+			);
+
+			threadIdsWithTags = new Set<bigint>();
+			for (const set of threadIdSets) {
+				for (const id of set) {
+					threadIdsWithTags.add(id);
+				}
+			}
+		}
+
 		const results = await searchMessages(ctx, {
 			query: args.query,
 			serverId: args.serverId ? BigInt(args.serverId) : undefined,
@@ -27,6 +58,24 @@ export const publicSearch = publicQuery({
 				cursor: args.paginationOpts.cursor,
 			},
 		});
+
+		if (threadIdsWithTags) {
+			if (threadIdsWithTags.size === 0) {
+				return {
+					page: [],
+					isDone: true,
+					continueCursor: "",
+				};
+			}
+			const filteredPage = Arr.filter(results.page, (result) => {
+				const threadId = result.thread?.id ?? result.message.message.channelId;
+				return threadIdsWithTags.has(threadId);
+			});
+			return {
+				...results,
+				page: filteredPage,
+			};
+		}
 
 		return results;
 	},
