@@ -538,15 +538,15 @@ export function CommunityPageContent({
 				eventName="Community Page View"
 				eventData={{
 					server: {
-						discordId: server.discordId,
+						id: server.discordId.toString(),
 						name: server.name,
 					},
 					channel: selectedChannel
 						? {
-								id: selectedChannel.id,
+								id: selectedChannel.id.toString(),
 								name: selectedChannel.name,
 								type: selectedChannel.type,
-								serverId: server.discordId,
+								serverId: server.discordId.toString(),
 								inviteCode: selectedChannel.flags?.inviteCode ?? null,
 							}
 						: null,

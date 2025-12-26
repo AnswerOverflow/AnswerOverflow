@@ -471,30 +471,30 @@ export function MessagePage(props: {
 							<div className="flex w-full flex-col justify-center gap-2 text-center">
 								<HelpfulFeedback
 									server={{
-										discordId: headerData.server.discordId,
+										id: headerData.server.discordId.toString(),
 										name: headerData.server.name,
 									}}
 									channel={{
-										id: headerData.channel.id,
+										id: headerData.channel.id.toString(),
 										name: headerData.channel.name,
 										type: headerData.channel.type,
-										serverId: headerData.server.discordId,
+										serverId: headerData.server.discordId.toString(),
 										inviteCode: headerData.channel.inviteCode,
 									}}
 									thread={
 										headerData.thread
 											? {
-													id: headerData.thread.id,
+													id: headerData.thread.id.toString(),
 													name: headerData.thread.name,
 													type: headerData.thread.type,
 												}
 											: null
 									}
 									message={{
-										id: firstMessage.message.id,
-										authorId: firstMessage.author?.id ?? 0n,
-										serverId: firstMessage.message.serverId,
-										channelId: firstMessage.message.channelId,
+										id: firstMessage.message.id.toString(),
+										authorId: (firstMessage.author?.id ?? 0n).toString(),
+										serverId: firstMessage.message.serverId.toString(),
+										channelId: firstMessage.message.channelId.toString(),
 									}}
 								/>
 							</div>
@@ -506,28 +506,28 @@ export function MessagePage(props: {
 							eventName="Message Page View"
 							eventData={{
 								server: {
-									discordId: headerData.server.discordId,
+									id: headerData.server.discordId.toString(),
 									name: headerData.server.name,
 								},
 								channel: {
-									id: headerData.channel.id,
+									id: headerData.channel.id.toString(),
 									name: headerData.channel.name,
 									type: headerData.channel.type,
-									serverId: headerData.server.discordId,
+									serverId: headerData.server.discordId.toString(),
 									inviteCode: headerData.channel.inviteCode,
 								},
 								thread: headerData.thread
 									? {
-											id: headerData.thread.id,
+											id: headerData.thread.id.toString(),
 											name: headerData.thread.name,
 											type: headerData.thread.type,
 										}
 									: null,
 								message: {
-									id: firstMessage.message.id,
-									authorId: firstMessage.author?.id ?? 0n,
-									serverId: firstMessage.message.serverId,
-									channelId: firstMessage.message.channelId,
+									id: firstMessage.message.id.toString(),
+									authorId: (firstMessage.author?.id ?? 0n).toString(),
+									serverId: firstMessage.message.serverId.toString(),
+									channelId: firstMessage.message.channelId.toString(),
 								},
 							}}
 						/>
