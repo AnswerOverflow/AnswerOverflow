@@ -17,6 +17,7 @@ import {
 	RecentAnnouncementsSkeleton,
 } from "./recent-announcements";
 import { SimilarThreads, SimilarThreadsSkeleton } from "./similar-threads";
+import { ThreadTags, ThreadTagsSkeleton } from "./thread-tags";
 
 export type MessagePageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.public.messages.getMessagePageHeaderData>
@@ -166,9 +167,20 @@ export function MessagePageLoader(props: {
 	const afterMessageId =
 		headerData.threadId ?? headerData.firstMessage?.message.id;
 
+	const threadTagsSlot =
+		headerData.thread && headerData.channel.availableTags ? (
+			<Suspense fallback={<ThreadTagsSkeleton />}>
+				<ThreadTags
+					threadId={headerData.thread.id.toString()}
+					availableTags={headerData.channel.availableTags}
+				/>
+			</Suspense>
+		) : null;
+
 	return (
 		<MessagePage
 			headerData={headerData}
+			threadTagsSlot={threadTagsSlot}
 			repliesSlot={
 				afterMessageId ? (
 					<Suspense fallback={<RepliesSkeleton />}>

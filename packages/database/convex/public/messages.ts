@@ -134,6 +134,7 @@ export const getMessagePageHeaderData = publicQuery({
 				name: channel.name,
 				type: channel.type,
 				inviteCode: channel.flags.inviteCode,
+				availableTags: channel.availableTags,
 			},
 			thread,
 		};

@@ -204,12 +204,14 @@ export function RepliesSection(props: {
 
 export function MessagePage(props: {
 	headerData: MessagePageHeaderData;
+	threadTagsSlot?: ReactNode;
 	repliesSlot: ReactNode;
 	similarThreadsSlot: ReactNode;
 	recentAnnouncementsSlot?: ReactNode;
 }) {
 	const {
 		headerData,
+		threadTagsSlot,
 		repliesSlot,
 		similarThreadsSlot,
 		recentAnnouncementsSlot,
@@ -379,6 +381,7 @@ export function MessagePage(props: {
 							{headerData.channel.type !== ChannelType.GuildAnnouncement && (
 								<h1 className="text-2xl font-semibold">{title}</h1>
 							)}
+							{threadTagsSlot}
 							<div>
 								{rootMessageDeleted ? (
 									<div className="text-muted-foreground italic">

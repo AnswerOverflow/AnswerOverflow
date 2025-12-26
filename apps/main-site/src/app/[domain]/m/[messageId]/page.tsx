@@ -25,6 +25,10 @@ import {
 	SimilarThreads,
 	SimilarThreadsSkeleton,
 } from "../../../../components/similar-threads";
+import {
+	ThreadTags,
+	ThreadTagsSkeleton,
+} from "../../../../components/thread-tags";
 import { runtime } from "../../../../lib/runtime";
 import { getTenantData } from "../../../../lib/tenant";
 
@@ -135,9 +139,20 @@ export default async function TenantMessagePage(props: Props) {
 	const afterMessageId =
 		headerData.threadId ?? headerData.firstMessage?.message.id;
 
+	const threadTagsSlot =
+		headerData.thread && headerData.channel.availableTags ? (
+			<Suspense fallback={<ThreadTagsSkeleton />}>
+				<ThreadTags
+					threadId={headerData.thread.id.toString()}
+					availableTags={headerData.channel.availableTags}
+				/>
+			</Suspense>
+		) : null;
+
 	return (
 		<MessagePage
 			headerData={headerData}
+			threadTagsSlot={threadTagsSlot}
 			repliesSlot={
 				afterMessageId ? (
 					<Suspense fallback={<RepliesSkeleton />}>

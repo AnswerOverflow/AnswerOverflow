@@ -32,6 +32,15 @@ export function syncChannel(
 		yield* database.private.channels.upsertChannel({
 			channel: discordChannelData,
 		});
+
+		if (channel.isThread() && channel.parentId) {
+			const appliedTags = channel.appliedTags;
+			yield* database.private.threadTags.syncThreadTags({
+				threadId: BigInt(channel.id),
+				parentChannelId: BigInt(channel.parentId),
+				tagIds: appliedTags.map((tagId) => BigInt(tagId)),
+			});
+		}
 	}).pipe(
 		Effect.withSpan("sync.channel"),
 		catchAllWithReport((error) =>
