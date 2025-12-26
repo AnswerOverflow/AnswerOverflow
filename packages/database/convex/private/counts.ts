@@ -17,7 +17,12 @@ export const threadMessageCounts = new TableAggregate<{
 	DataModel: DataModel;
 	TableName: "messages";
 }>(components.threadMessageCounts, {
-	sortKey: (doc) => [doc.serverId, doc.parentChannelId!, doc.channelId, doc.id],
+	sortKey: (doc) => [
+		doc.serverId,
+		doc.parentChannelId ?? doc.channelId,
+		doc.childThreadId ?? doc.channelId,
+		doc.id,
+	],
 });
 
 export const threadCounts = new TableAggregate<{
@@ -28,8 +33,11 @@ export const threadCounts = new TableAggregate<{
 	sortKey: (doc) => [doc.serverId, doc.id],
 });
 
-export function isThreadMessage(doc: { parentChannelId?: bigint }): boolean {
-	return doc.parentChannelId !== undefined;
+export function isThreadMessage(doc: {
+	parentChannelId?: bigint;
+	childThreadId?: bigint;
+}): boolean {
+	return doc.parentChannelId !== undefined || doc.childThreadId !== undefined;
 }
 
 export async function insertMessageCount(

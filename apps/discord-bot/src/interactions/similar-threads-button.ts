@@ -1,5 +1,5 @@
 import { Database } from "@packages/database/database";
-import type { ButtonInteraction } from "discord.js";
+import type { ButtonInteraction, GuildMember } from "discord.js";
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -10,6 +10,7 @@ import {
 import { Array as Arr, Console, Data, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed } from "../metrics";
+import { trackSimilarThreadsButtonClicked } from "../utils/analytics";
 import { SIMILAR_THREADS_ACTION_PREFIX } from "../utils/discord-components";
 import { catchAllWithReport } from "../utils/error-reporting";
 
@@ -195,6 +196,15 @@ export const handleSimilarThreadsButtonInteraction = Effect.fn(
 			components: rows,
 		}),
 	);
+
+	const member = interaction.member;
+	if (member && "user" in member) {
+		yield* trackSimilarThreadsButtonClicked(
+			member as GuildMember,
+			thread,
+			threadCount,
+		);
+	}
 });
 
 export const SimilarThreadsButtonHandlerLayer = Layer.scopedDiscard(

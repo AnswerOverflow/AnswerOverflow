@@ -218,3 +218,17 @@ export function trackQuickActionCommandSent(member: GuildMember) {
 		members: [{ prefix: "User", member }],
 	});
 }
+
+export function trackSimilarThreadsButtonClicked(
+	member: GuildMember,
+	thread: ThreadChannel,
+	resultsCount: number,
+) {
+	return trackEvent("Similar Threads Button Clicked", {
+		"Answer Overflow Account Id": member.id,
+		members: [{ prefix: "User", member }],
+		thread,
+		guild: thread.guild,
+		"Results Count": resultsCount,
+	});
+}
