@@ -31,10 +31,26 @@ async function fetchThreadTags(
 	return exit.value;
 }
 
+function TagEmoji({ tag }: { tag: ForumTag }) {
+	if (tag.emojiId) {
+		return (
+			<img
+				src={`https://cdn.discordapp.com/emojis/${tag.emojiId}.webp?size=16`}
+				alt=""
+				className="size-4"
+			/>
+		);
+	}
+	if (tag.emojiName) {
+		return <span>{tag.emojiName}</span>;
+	}
+	return null;
+}
+
 function TagBadge({ tag }: { tag: ForumTag }) {
 	return (
 		<Badge variant="secondary" className="gap-1 text-xs">
-			{tag.emojiName && <span>{tag.emojiName}</span>}
+			<TagEmoji tag={tag} />
 			{tag.name}
 		</Badge>
 	);
