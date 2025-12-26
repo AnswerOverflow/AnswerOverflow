@@ -1,5 +1,6 @@
 import type { api } from "@packages/database/convex/_generated/api";
 import { Database } from "@packages/database/database";
+import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import { Link } from "@packages/ui/components/link";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { Skeleton } from "@packages/ui/components/skeleton";
@@ -71,8 +72,11 @@ async function fetchSimilarThreads(
 	return exit.value;
 }
 
-function SimilarThreadsList(props: { results: SimilarThreadsResult }) {
-	const { results } = props;
+function SimilarThreadsList(props: {
+	results: SimilarThreadsResult;
+	isTenantSite: boolean;
+}) {
+	const { results, isTenantSite } = props;
 
 	if (results.length === 0) {
 		return null;
@@ -97,6 +101,7 @@ function SimilarThreadsList(props: { results: SimilarThreadsResult }) {
 						icon: result.server.icon,
 					};
 					const hasSolution = result.message.solutions.length > 0;
+					const author = result.message.author;
 					return (
 						<Link
 							key={thread.id}
@@ -116,10 +121,33 @@ function SimilarThreadsList(props: { results: SimilarThreadsResult }) {
 							</div>
 							<div className="mt-1 flex items-center justify-between gap-1.5 text-xs text-muted-foreground">
 								<div className="flex min-w-0 items-center gap-1.5">
-									<ServerIcon server={server} size={16} className="shrink-0" />
-									<span className="truncate">
-										{result.server.name} / {result.channel.name}
-									</span>
+									{isTenantSite && author ? (
+										<>
+											<DiscordAvatar
+												user={{
+													id: author.id.toString(),
+													name: author.name,
+													avatar: author.avatar,
+												}}
+												size={16}
+												className="shrink-0"
+											/>
+											<span className="truncate">
+												{author.name} / {result.channel.name}
+											</span>
+										</>
+									) : (
+										<>
+											<ServerIcon
+												server={server}
+												size={16}
+												className="shrink-0"
+											/>
+											<span className="truncate">
+												{result.server.name} / {result.channel.name}
+											</span>
+										</>
+									)}
 								</div>
 								<TimeAgo
 									snowflake={result.message.message.id.toString()}
@@ -144,5 +172,7 @@ export async function SimilarThreads(props: SimilarThreadsProps) {
 		return null;
 	}
 
-	return <SimilarThreadsList results={results} />;
+	const isTenantSite = props.serverId !== undefined;
+
+	return <SimilarThreadsList results={results} isTenantSite={isTenantSite} />;
 }
