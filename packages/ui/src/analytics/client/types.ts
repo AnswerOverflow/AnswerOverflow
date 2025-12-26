@@ -1,143 +1,41 @@
+export type {
+	ClientEvents as EventMap,
+	ClientEventName as EventName,
+} from "@packages/database/analytics/events/client";
+export type {
+	AnalyticsChannel,
+	AnalyticsMessage,
+	AnalyticsServer,
+	AnalyticsThread,
+	ButtonLocation,
+	LinkLocation,
+} from "@packages/database/analytics/types";
+
 export type Snowflake = string;
-
-export type ServerProps = {
-	"Server Id": Snowflake;
-	"Server Name": string;
-};
-
+export type ServerProps = { "Server Id": string; "Server Name": string };
 export type ChannelProps = {
-	"Channel Id": Snowflake;
+	"Channel Id": string;
 	"Channel Name": string;
 	"Channel Type": number;
-	"Channel Server Id"?: Snowflake;
+	"Channel Server Id"?: string;
 	"Channel Invite Code"?: string;
 };
-
 export type ThreadProps = {
-	"Thread Id": Snowflake;
+	"Thread Id": string;
 	"Thread Name": string;
 	"Thread Type": number;
 	"Thread Archived Timestamp"?: number;
-	"Thread Parent Id"?: Snowflake;
+	"Thread Parent Id"?: string;
 	"Thread Parent Name"?: string;
 	"Thread Parent Type"?: number;
 	"Number of Messages"?: number;
 };
-
 export type MessageProps = {
-	"Message Id": Snowflake;
-	"Message Author Id": Snowflake;
-	"Server Id": Snowflake;
-	"Channel Id": Snowflake;
-	"Thread Id"?: Snowflake;
-	"Solution Id"?: Snowflake;
-	"Solution Author Id"?: Snowflake;
+	"Message Id": string;
+	"Message Author Id": string;
+	"Server Id": string;
+	"Channel Id": string;
+	"Thread Id"?: string;
+	"Solution Id"?: string;
+	"Solution Author Id"?: string;
 };
-
-export type AnalyticsServer = {
-	discordId: bigint;
-	name: string;
-};
-
-export type AnalyticsChannel = {
-	id: bigint;
-	name: string;
-	type: number;
-	serverId?: bigint;
-	inviteCode?: string | null;
-};
-
-export type AnalyticsThread = {
-	id: bigint;
-	name: string;
-	type: number;
-	archivedAt?: Date | null;
-	parentId?: bigint | null;
-	parentName?: string | null;
-	parentType?: number | null;
-	messageCount?: number | null;
-};
-
-export type AnalyticsMessage = {
-	id: bigint;
-	authorId: bigint;
-	serverId: bigint;
-	channelId: bigint;
-	threadId?: bigint | null;
-};
-
-export type MessagePageViewProps = {
-	server: AnalyticsServer;
-	channel: AnalyticsChannel;
-	thread?: AnalyticsThread | null;
-	message: AnalyticsMessage;
-	solutionAuthorId?: bigint | null;
-};
-
-export type CommunityPageViewProps = {
-	server: AnalyticsServer;
-	channel?: AnalyticsChannel | null;
-};
-
-export type HelpfulFeedbackClickProps = {
-	feedback: "Yes" | "No";
-	server: AnalyticsServer;
-	channel: AnalyticsChannel;
-	thread?: AnalyticsThread | null;
-	message: AnalyticsMessage;
-};
-
-export type ServerInviteClickProps = {
-	"Button Location":
-		| "Search Results"
-		| "Community Page"
-		| "Message Result Page";
-	server: AnalyticsServer;
-	channel?: AnalyticsChannel | null;
-	thread?: AnalyticsThread | null;
-};
-
-export type CommunityPageLinkClickProps = {
-	"Link Location":
-		| "Community Page"
-		| "Search Results"
-		| "About Marquee"
-		| "Message Result Page";
-	server: AnalyticsServer;
-	channel?: AnalyticsChannel | null;
-	thread?: AnalyticsThread | null;
-};
-
-export type ViewOnDiscordClickProps = {
-	server: AnalyticsServer;
-	channel: AnalyticsChannel;
-	thread?: AnalyticsThread | null;
-	message: AnalyticsMessage;
-};
-
-export type MCPUrlCopyClickProps = {
-	url: string;
-};
-
-export type MCPInstallCopyClickProps = {
-	provider: string;
-	url: string;
-};
-
-export type MCPProviderSelectProps = {
-	provider: string;
-};
-
-export type EventMap = {
-	"Message Page View": MessagePageViewProps;
-	"Community Page View": CommunityPageViewProps;
-	"Helpful Feedback Click": HelpfulFeedbackClickProps;
-	"Server Invite Click": ServerInviteClickProps;
-	"Community Page Link Click": CommunityPageLinkClickProps;
-	"View On Discord Click": ViewOnDiscordClickProps;
-	"MCP URL Copy Click": MCPUrlCopyClickProps;
-	"MCP Install Copy Click": MCPInstallCopyClickProps;
-	"MCP Provider Select": MCPProviderSelectProps;
-};
-
-export type EventName = keyof EventMap;

@@ -5,7 +5,7 @@ import type {
 	ChannelSettings,
 	Server,
 } from "@packages/database/convex/schema";
-import type { ServerInviteClickProps } from "../analytics/client";
+import type { ButtonLocation } from "../analytics/client";
 import { trackEvent, usePostHog } from "../analytics/client";
 import { cn } from "../lib/utils";
 import { LinkButton } from "./link-button";
@@ -14,7 +14,7 @@ export interface ServerInviteJoinButtonProps {
 	server: Pick<Server, "discordId" | "name" | "icon" | "vanityInviteCode">;
 	channel?: Pick<Channel, "id" | "name" | "type"> &
 		Pick<ChannelSettings, "inviteCode">;
-	location: ServerInviteClickProps["Button Location"];
+	location: ButtonLocation;
 	className?: string;
 	size?: "default" | "sm" | "lg" | "icon";
 }
@@ -40,12 +40,12 @@ export function ServerInviteJoinButton(
 			{
 				"Button Location": location,
 				server: {
-					discordId: server.discordId,
+					id: server.discordId.toString(),
 					name: server.name,
 				},
 				channel: channel
 					? {
-							id: channel.id,
+							id: channel.id.toString(),
 							name: channel.name,
 							type: channel.type,
 							inviteCode: channel.inviteCode,
