@@ -12,6 +12,14 @@ export const forumTagSchema = v.object({
 
 export type ForumTag = Infer<typeof forumTagSchema>;
 
+export const threadTagSchema = v.object({
+	threadId: v.int64(),
+	tagId: v.int64(),
+	parentChannelId: v.int64(),
+});
+
+export type ThreadTag = Infer<typeof threadTagSchema>;
+
 export const planValidator = literals(
 	"FREE",
 	"STARTER",
@@ -291,4 +299,7 @@ export default defineSchema({
 		.index("by_messageId", ["messageId"])
 		.index("by_userId", ["userId"])
 		.index("by_emojiId", ["emojiId"]),
+	threadTags: defineTable(threadTagSchema)
+		.index("by_threadId", ["threadId"])
+		.index("by_parentChannelId_and_tagId", ["parentChannelId", "tagId"]),
 });

@@ -60,6 +60,10 @@ export const FUNCTION_TYPE_MAP = {
   "servers.getServerByDomain": "query",
   "servers.updateServer": "mutation",
   "servers.upsertServer": "mutation",
+  "threadTags.getTagsForThread": "query",
+  "threadTags.getTagsForThreads": "query",
+  "threadTags.getThreadIdsByTags": "query",
+  "threadTags.syncThreadTags": "mutation",
   "user_server_settings.findManyUserServerSettings": "query",
   "user_server_settings.findUserServerSettingsById": "query",
   "user_server_settings.upsertManyBotUserServerSettings": "mutation",
@@ -67,7 +71,7 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
-export const NAMESPACES = ["attachments","cache","channels","counts","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","user_server_settings"] as const;
+export const NAMESPACES = ["attachments","cache","channels","counts","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","threadTags","user_server_settings"] as const;
 
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
@@ -80,6 +84,7 @@ export const NAMESPACE_STRUCTURE = {
   "search": ["getRecentAnnouncements","getRecentThreads","getSimilarThreads","publicSearch"],
   "server_preferences": ["getBotCustomizationForServer","getServerPreferencesByServerId","getServersWithBotCustomization","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getCachedBrowsableServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
+  "threadTags": ["getTagsForThread","getTagsForThreads","getThreadIdsByTags","syncThreadTags"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
 } as const;
 
