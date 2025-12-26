@@ -100,7 +100,7 @@ function RecentAnnouncementsList(props: {
 								/>
 							)}
 							<div className="min-w-0">
-								<p className="truncate text-sm font-medium text-foreground group-hover:underline m-0 p-0">
+								<p className="text-left truncate text-sm font-medium text-foreground group-hover:underline m-0 p-0">
 									{(thread?.name ?? result.message.message.content)?.trim()}
 								</p>
 								<p className="text-xs text-muted-foreground m-0 p-0 text-left">
