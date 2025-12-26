@@ -148,7 +148,7 @@ function InlineCodeFallback({
 	return (
 		<span
 			className={cn(
-				"inline-code not-prose inline-block rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-sm *:whitespace-normal max-w-full overflow-x-auto",
+				"inline-code not-prose inline-block align-middle rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-sm *:whitespace-normal max-w-full overflow-x-auto",
 				className,
 			)}
 		>
@@ -173,7 +173,7 @@ function InlineCodeInternal({
 	return (
 		<span
 			className={cn(
-				"inline-code not-prose inline-block rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-sm *:whitespace-normal max-w-full overflow-x-auto",
+				"inline-code not-prose inline-block align-middle rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-sm *:whitespace-normal max-w-full overflow-x-auto",
 				className,
 			)}
 			data-theme={theme}
