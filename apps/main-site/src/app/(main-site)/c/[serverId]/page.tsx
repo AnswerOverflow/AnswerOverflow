@@ -61,7 +61,7 @@ export default async function ServerPage(props: Props) {
 	if (channels.length === 0) {
 		const description =
 			server.description ??
-			`Browse and search through archived Discord discussions from ${server.name}`;
+			`Explore the ${server.name} community Discord server on the web. Search and browse discussions, find answers, and join the conversation.`;
 
 		return (
 			<div className="min-h-screen bg-background">
@@ -81,7 +81,7 @@ export default async function ServerPage(props: Props) {
 								<div className="flex items-start gap-4">
 									<div className="flex-1 min-w-0">
 										<h1 className="text-xl sm:text-2xl font-semibold text-foreground">
-											{server.name}
+											{server.name} Discord Server
 										</h1>
 										<p className="text-muted-foreground text-sm mt-1 line-clamp-2">
 											{description}

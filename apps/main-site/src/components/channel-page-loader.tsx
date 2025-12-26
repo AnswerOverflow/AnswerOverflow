@@ -129,8 +129,10 @@ export function generateServerPageMetadata(
 	const { server } = headerData;
 	const description =
 		server.description ??
-		`Browse threads from the ${server.name} Discord community`;
-	const title = server.name;
+		`Explore the ${server.name} community Discord server on the web. Search and browse discussions, find answers, and join the conversation.`;
+	const title = isTenant
+		? `${server.name} Discord Server`
+		: `${server.name} Discord Server | Answer Overflow`;
 	const ogImage = isTenant
 		? `/og/community?id=${server.discordId.toString()}&tenant=true`
 		: `/og/community?id=${server.discordId.toString()}`;
@@ -175,9 +177,11 @@ export function generateChannelPageMetadata(
 		selectedChannel.type === ChannelType.GuildAnnouncement ||
 		selectedChannel.type === ChannelType.GuildNews;
 	const description = isAnnouncement
-		? `Browse announcements from #${selectedChannel.name} in the ${server.name} Discord community`
-		: `Browse threads from #${selectedChannel.name} in the ${server.name} Discord community`;
-	const title = `#${selectedChannel.name} - ${server.name}`;
+		? `Browse announcements from #${selectedChannel.name} in the ${server.name} community Discord server on the web.`
+		: `Browse threads from #${selectedChannel.name} in the ${server.name} community Discord server on the web.`;
+	const title = isTenant
+		? `#${selectedChannel.name} - ${server.name} Discord`
+		: `#${selectedChannel.name} - ${server.name} Discord | Answer Overflow`;
 	const ogImage = isTenant
 		? `/og/community?id=${server.discordId.toString()}&tenant=true`
 		: `/og/community?id=${server.discordId.toString()}`;

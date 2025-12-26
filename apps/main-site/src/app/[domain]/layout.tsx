@@ -21,8 +21,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 	const { tenant, description, iconUrl } = data;
 
+	const title = `${tenant.name} Discord Server`;
+
 	return {
-		title: `${tenant.name} Community`,
+		title,
 		metadataBase: new URL(
 			getTenantCanonicalUrl(
 				{
@@ -44,7 +46,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		},
 		openGraph: {
 			type: "website",
-			title: `${tenant.name} Community`,
+			title,
 			siteName: tenant.name ?? undefined,
 			description,
 			images: [
@@ -63,7 +65,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		},
 		twitter: {
 			card: "summary_large_image",
-			title: `${tenant.name} Community`,
+			title,
 			description,
 			images: [
 				getTenantCanonicalUrl(

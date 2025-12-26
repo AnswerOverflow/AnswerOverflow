@@ -34,11 +34,13 @@ import { TrackLoad } from "@packages/ui/components/track-load";
 import { cn } from "@packages/ui/lib/utils";
 import { encodeCursor } from "@packages/ui/utils/cursor";
 import { getChannelIcon } from "@packages/ui/utils/discord";
+import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import type { FunctionReturnType } from "convex/server";
 import { FileQuestion, Menu } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
+import { JsonLdScript } from "./json-ld-script";
 import { ResourcesSidebar } from "./resources-sidebar";
 
 export type FirstThreadAuthor = {
@@ -210,7 +212,7 @@ function ServerHeader({
 }) {
 	const description =
 		server.description ??
-		`Browse and search through archived Discord discussions from ${server.name}`;
+		`Explore the ${server.name} community Discord server on the web. Search and browse discussions, find answers, and join the conversation.`;
 
 	return (
 		<div className="border-b">
@@ -229,7 +231,7 @@ function ServerHeader({
 						<div className="flex items-start gap-4">
 							<div className="flex-1 min-w-0">
 								<h1 className="text-xl sm:text-2xl font-semibold text-foreground">
-									{server.name}
+									{server.name} Discord Server
 								</h1>
 								<p className="text-muted-foreground text-sm mt-1 line-clamp-2">
 									{description}
@@ -532,8 +534,32 @@ export function CommunityPageContent({
 	const isSearching =
 		searchQuery !== debouncedSearchQuery && searchQuery.trim().length > 0;
 
+	const canonicalUrl = getTenantCanonicalUrl(
+		tenant,
+		tenantMode ? "/" : `/c/${server.discordId.toString()}`,
+	);
+
+	const iconUrl = server.icon
+		? `https://cdn.answeroverflow.com/${server.discordId}/${server.icon}/icon.png`
+		: undefined;
+
+	const communityJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "Organization",
+		name: `${server.name} Discord Server`,
+		description:
+			server.description ??
+			`Explore the ${server.name} community Discord server on the web. Search and browse discussions, find answers, and join the conversation.`,
+		url: canonicalUrl,
+		logo: iconUrl,
+		sameAs: server.inviteCode
+			? [`https://discord.gg/${server.inviteCode}`]
+			: undefined,
+	};
+
 	return (
 		<div className="min-h-screen bg-background">
+			<JsonLdScript data={communityJsonLd} scriptKey="community-jsonld" />
 			<TrackLoad
 				eventName="Community Page View"
 				eventData={{

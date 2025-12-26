@@ -39,11 +39,11 @@ export async function getTenantData(
 
 	const subpathTenant = subpathTenants.find((t) => t.rewriteDomain === domain);
 
+	const defaultDescription = `Explore the ${raw.server.name} community Discord server on the web. Search and browse discussions, find answers, and join the conversation.`;
+
 	const tenant: Tenant = {
 		customDomain: raw.preferences.customDomain,
-		description:
-			raw.server.description ??
-			`Browse the ${raw.server.name} Discord community`,
+		description: raw.server.description ?? defaultDescription,
 		subpath: subpathTenant
 			? normalizeSubpath(subpathTenant.subpath)
 			: raw.preferences.subpath
@@ -58,8 +58,7 @@ export async function getTenantData(
 		? `https://cdn.answeroverflow.com/${raw.server.discordId}/${raw.server.icon}/icon.png`
 		: "";
 
-	const description =
-		raw.server.description ?? `Browse the ${raw.server.name} community`;
+	const description = raw.server.description ?? defaultDescription;
 
 	return { tenant, description, iconUrl };
 }
