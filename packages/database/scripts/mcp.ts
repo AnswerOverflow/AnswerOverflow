@@ -54,6 +54,10 @@ function deepConvertBigInts(obj: unknown): unknown {
 	return obj;
 }
 
+const QUERY_FUNCTIONS = Object.fromEntries(
+	Object.entries(FUNCTION_TYPE_MAP).filter(([, type]) => type === "query"),
+);
+
 const registerTools = Effect.gen(function* () {
 	const convexClient = yield* ConvexClientUnified;
 	const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
@@ -69,28 +73,28 @@ const registerTools = Effect.gen(function* () {
 
 	yield* server.addTool({
 		tool: new McpSchema.Tool({
-			name: "list_functions",
+			name: "list_queries",
+			description: "List all available Convex queries (read-only operations)",
 			inputSchema: {
 				type: "object",
 				properties: {
-					namespace: { type: "string" },
-					type: { type: "string", enum: ["query", "mutation", "action"] },
+					namespace: {
+						type: "string",
+						description: "Filter by namespace (e.g., 'servers', 'channels')",
+					},
 				},
 			},
 		}),
-		handle: (payload: { namespace?: string; type?: string } | undefined) =>
+		handle: (payload: { namespace?: string } | undefined) =>
 			Effect.sync(() => {
-				const args = payload ?? {};
-				const namespaceFilter = args.namespace;
-				const typeFilter = args.type;
+				const namespaceFilter = payload?.namespace;
 
-				const functions: Array<{ path: string; type: string }> = [];
+				const queries: Array<{ path: string }> = [];
 
-				for (const [path, funcType] of Object.entries(FUNCTION_TYPE_MAP)) {
+				for (const path of Object.keys(QUERY_FUNCTIONS)) {
 					const [namespace] = path.split(".");
 					if (namespaceFilter && namespace !== namespaceFilter) continue;
-					if (typeFilter && funcType !== typeFilter) continue;
-					functions.push({ path, type: funcType });
+					queries.push({ path });
 				}
 
 				return new McpSchema.CallToolResult({
@@ -101,10 +105,8 @@ const registerTools = Effect.gen(function* () {
 							text: JSON.stringify(
 								{
 									namespaces: Object.keys(NAMESPACE_STRUCTURE),
-									functions: functions.sort((a, b) =>
-										a.path.localeCompare(b.path),
-									),
-									count: functions.length,
+									queries: queries.sort((a, b) => a.path.localeCompare(b.path)),
+									count: queries.length,
 								},
 								null,
 								2,
@@ -117,12 +119,22 @@ const registerTools = Effect.gen(function* () {
 
 	yield* server.addTool({
 		tool: new McpSchema.Tool({
-			name: "call",
+			name: "query",
+			description:
+				"Execute a Convex query (read-only). Use list_queries to see available queries.",
 			inputSchema: {
 				type: "object",
 				properties: {
-					fn: { type: "string" },
-					args: { type: "object", additionalProperties: true },
+					fn: {
+						type: "string",
+						description:
+							"The query function path (e.g., 'servers.getServerByDiscordId')",
+					},
+					args: {
+						type: "object",
+						additionalProperties: true,
+						description: "Arguments to pass to the query",
+					},
 				},
 				required: ["fn"],
 			},
@@ -140,16 +152,16 @@ const registerTools = Effect.gen(function* () {
 					});
 				}
 
-				const funcType =
-					FUNCTION_TYPE_MAP[fn as keyof typeof FUNCTION_TYPE_MAP];
+				const funcType = QUERY_FUNCTIONS[fn];
 
 				if (!funcType) {
+					const availableQueries = Object.keys(QUERY_FUNCTIONS).join(", ");
 					return new McpSchema.CallToolResult({
 						isError: true,
 						content: [
 							{
 								type: "text",
-								text: `Unknown function: ${fn}. Available: ${Object.keys(FUNCTION_TYPE_MAP).join(", ")}`,
+								text: `Unknown or non-query function: ${fn}. Available queries: ${availableQueries}`,
 							},
 						],
 					});
@@ -192,27 +204,11 @@ const registerTools = Effect.gen(function* () {
 					});
 				}
 
-				let result: unknown;
-
-				if (funcType === "query") {
-					result = yield* Effect.tryPromise({
-						try: () =>
-							convexClient.client.query(funcRef as never, fullArgs as never),
-						catch: (e) => new McpConvexError({ cause: e }),
-					});
-				} else if (funcType === "mutation") {
-					result = yield* Effect.tryPromise({
-						try: () =>
-							convexClient.client.mutation(funcRef as never, fullArgs as never),
-						catch: (e) => new McpConvexError({ cause: e }),
-					});
-				} else {
-					result = yield* Effect.tryPromise({
-						try: () =>
-							convexClient.client.action(funcRef as never, fullArgs as never),
-						catch: (e) => new McpConvexError({ cause: e }),
-					});
-				}
+				const result = yield* Effect.tryPromise({
+					try: () =>
+						convexClient.client.query(funcRef as never, fullArgs as never),
+					catch: (e) => new McpConvexError({ cause: e }),
+				});
 
 				return new McpSchema.CallToolResult({
 					isError: false,

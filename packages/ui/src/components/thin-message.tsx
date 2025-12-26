@@ -2,6 +2,11 @@
 
 import type { EnrichedMessage } from "@packages/database/convex/shared/shared";
 import { cn } from "../lib/utils";
+import {
+	getSystemMessageContent,
+	getSystemMessageIcon,
+	isSystemMessage,
+} from "../utils/discord";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { Badge } from "./badge";
 import { makeUserIconLink } from "./discord-avatar";
@@ -10,6 +15,32 @@ import { Link } from "./link";
 import { MessageBlurrer } from "./message-blurrer";
 import { MessageBody } from "./message-body";
 import { MessageTimestamp } from "./message-timestamp";
+
+function SystemMessage(props: { message: EnrichedMessage; isLast?: boolean }) {
+	const { message, isLast } = props;
+	const author = message.author;
+	const systemContent = getSystemMessageContent(
+		message.message.type,
+		author?.name ?? "Someone",
+		message.message.content,
+	);
+	const Icon = getSystemMessageIcon(message.message.type);
+
+	return (
+		<div className="flex flex-col min-w-0">
+			<div className="flex flex-row min-w-0 items-center gap-2 py-1">
+				<div className="w-[40px] flex-shrink-0 flex items-center justify-center">
+					<Icon className="size-4 text-muted-foreground" />
+				</div>
+				<div className="flex flex-row items-center gap-2 text-muted-foreground text-sm min-w-0 flex-1">
+					<span>{systemContent}</span>
+					<MessageTimestamp snowflake={message.message.id.toString()} />
+				</div>
+			</div>
+			{!isLast && <div className="ml-[20px] w-0 h-4 border-l border-border" />}
+		</div>
+	);
+}
 
 export function ThinMessage(props: {
 	message: EnrichedMessage;
@@ -20,6 +51,10 @@ export function ThinMessage(props: {
 	const { message, op, isLast } = props;
 	const author = message.author;
 	const isBot = message.message.applicationId !== undefined;
+
+	if (isSystemMessage(message.message.type)) {
+		return <SystemMessage message={message} isLast={isLast} />;
+	}
 
 	return (
 		<MessageBlurrer message={message}>

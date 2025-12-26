@@ -4,7 +4,11 @@ function formatRelativeTime(timestamp: number, now: number): string {
 	if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
 	if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
 	if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-	return new Date(timestamp).toLocaleDateString();
+	return new Date(timestamp).toLocaleDateString(undefined, {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
 }
 
 export function RelativeTime({
@@ -39,7 +43,7 @@ if(diff<60)text="just now";
 else if(diff<3600)text=Math.floor(diff/60)+"m ago";
 else if(diff<86400)text=Math.floor(diff/3600)+"h ago";
 else if(diff<604800)text=Math.floor(diff/86400)+"d ago";
-else text=new Date(ts).toLocaleDateString();
+else text=new Date(ts).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});
 el.textContent=text;
 })();`,
 				}}

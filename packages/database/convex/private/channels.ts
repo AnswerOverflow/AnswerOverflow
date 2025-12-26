@@ -18,6 +18,7 @@ import {
 	DEFAULT_CHANNEL_SETTINGS,
 	deleteChannelInternalLogic,
 	getChannelWithSettings,
+	ROOT_CHANNEL_TYPES,
 } from "../shared/shared";
 
 type Channel = Infer<typeof channelSchema>;
@@ -57,12 +58,18 @@ export const findAllChannelsByServerId = privateQuery({
 		serverId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		const channels = await getManyFrom(
-			ctx.db,
-			"channels",
-			"by_serverId",
-			args.serverId,
+		const channelsByType = await Promise.all(
+			ROOT_CHANNEL_TYPES.map((type) =>
+				ctx.db
+					.query("channels")
+					.withIndex("by_serverId_and_type", (q) =>
+						q.eq("serverId", args.serverId).eq("type", type),
+					)
+					.collect(),
+			),
 		);
+
+		const channels = channelsByType.flat();
 
 		return await addSettingsToChannels(ctx, channels);
 	},
