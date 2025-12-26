@@ -29,7 +29,7 @@ import {
 } from "@packages/ui/utils/server";
 import { getDate } from "@packages/ui/utils/snowflake";
 import type { FunctionReturnType } from "convex/server";
-import { CheckCircle2, ExternalLink } from "lucide-react";
+import { CheckCircle2, ExternalLink, MessageSquare } from "lucide-react";
 import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
@@ -208,6 +208,7 @@ export function MessagePage(props: {
 	similarThreadsSlot: ReactNode;
 }) {
 	const { headerData, repliesSlot, similarThreadsSlot } = props;
+
 	const tenant = useTenant();
 	const [focusMessageId] = useQueryState("focus");
 
@@ -323,7 +324,7 @@ export function MessagePage(props: {
 
 	return (
 		<MessageResultPageProvider>
-			<div className="mx-auto pt-2">
+			<div className="mx-auto pt-2 pb-16">
 				{jsonLdData && (
 					<JsonLdScript data={jsonLdData} scriptKey="message-jsonld" />
 				)}
@@ -341,7 +342,7 @@ export function MessagePage(props: {
 								)}
 
 								<div className="flex flex-col">
-									<div className="flex flex-row items-center gap-2">
+									<div className="flex flex-row items-center gap-2 flex-wrap">
 										<Link href={serverHref} className="hover:underline">
 											{headerData.server.name}
 										</Link>
@@ -351,6 +352,18 @@ export function MessagePage(props: {
 												<TimeAgo
 													snowflake={firstMessage.message.id.toString()}
 												/>
+											</>
+										)}
+										{headerData.replyCount > 0 && (
+											<>
+												<span className="text-sm text-muted-foreground">•</span>
+												<div className="flex items-center gap-1 text-muted-foreground">
+													<MessageSquare className="size-3.5" />
+													<span className="text-sm">
+														{headerData.replyCount}{" "}
+														{headerData.replyCount === 1 ? "reply" : "replies"}
+													</span>
+												</div>
 											</>
 										)}
 									</div>

@@ -1,5 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { threadMessageCounts } from "../private/counts";
 import { enrichMessage, enrichMessages } from "../shared/dataAccess";
 import { getThreadStartMessage } from "../shared/messages";
 import { publicQuery } from "./custom_functions";
@@ -83,11 +84,22 @@ export const getMessagePageHeaderData = publicQuery({
 			return null;
 		}
 
-		const [enrichedFirst, solutionMessages] = await Promise.all([
+		const getReplyCount = async () => {
+			if (!thread?.parentId) return 0;
+			const count = await threadMessageCounts.count(ctx, {
+				bounds: {
+					prefix: [thread.serverId, thread.parentId, thread.id],
+				},
+			});
+			return Math.max(0, count - 1);
+		};
+
+		const [enrichedFirst, solutionMessages, replyCount] = await Promise.all([
 			rootMessage ? enrichMessage(ctx, rootMessage) : null,
 			rootMessage
 				? ctx.cache.getSolutionsByQuestionId(rootMessage.id)
 				: Promise.resolve([]),
+			getReplyCount(),
 		]);
 
 		const solutionMsg = solutionMessages[0];
@@ -101,6 +113,7 @@ export const getMessagePageHeaderData = publicQuery({
 			solutionMessage: solutionMessage[0] ?? null,
 			channelId,
 			threadId: thread?.id ?? null,
+			replyCount,
 			server: {
 				_id: server._id,
 				discordId: server.discordId,

@@ -1,56 +1,50 @@
 import { type ActivityOptions, ActivityType } from "discord.js";
 import { Console, Duration, Effect, Layer, Ref, Schedule } from "effect";
-import { Discord } from "../core/discord-service";
+import {
+	Discord,
+	type DiscordAPIError,
+	type UnknownDiscordError,
+} from "../core/discord-service";
 import { catchAllCauseWithReport } from "../utils/error-reporting";
 
 type StatusUpdate = {
-	getStatus: (() => Effect.Effect<string>) | string;
+	getStatus:
+		| (() => Effect.Effect<
+				string,
+				DiscordAPIError | UnknownDiscordError,
+				Discord
+		  >)
+		| string;
 } & Omit<ActivityOptions, "name">;
 
 function getStatuses(): StatusUpdate[] {
 	return [
-		// {
-		// 	type: ActivityType.Watching,
-		// 	getStatus: () =>
-		// 		Effect.gen(function* () {
-		// 			const discord = yield* Discord;
-		// 			const guilds = yield* discord.getGuilds();
-		// 			return `${guilds.length.toLocaleString()} communities!`;
-		// 		}),
-		// },
-		// Convex isn't great at find many, we need to find a more efficent way to do this
-		// {
-		// 	type: ActivityType.Listening,
-		// 	getStatus: () =>
-		// 		Effect.gen(function* () {
-		// 			const database = yield* Database;
-		// 			const numMessages = yield* database.private.messages.getTotalMessageCount(
-		// 				{},
-		// 			);
-		// 			return `${numMessages.toLocaleString()} messages`;
-		// 		}),
-		// },
+		{
+			type: ActivityType.Watching,
+			getStatus: () =>
+				Effect.gen(function* () {
+					const discord = yield* Discord;
+					const guilds = yield* discord.getGuilds();
+					return `${guilds.length.toLocaleString()} communities!`;
+				}),
+		},
 		{
 			type: ActivityType.Watching,
 			getStatus: "Open source! github.com/AnswerOverflow",
 		},
-		// {
-		// 	type: ActivityType.Listening,
-		// 	getStatus: () =>
-		// 		Effect.gen(function* () {
-		// 			const discord = yield* Discord;
-		// 			const guilds = yield* discord.getGuilds();
-		// 			const totalMemberCount = guilds.reduce(
-		// 				(total, guild) => total + (guild.memberCount ?? 0),
-		// 				0,
-		// 			);
-		// 			return `${totalMemberCount.toLocaleString()} users asking questions!`;
-		// 		}),
-		// },
-		// {
-		// 	type: ActivityType.Watching,
-		// 	getStatus: () => Effect.succeed("help channels index into Google"),
-		// },
+		{
+			type: ActivityType.Listening,
+			getStatus: () =>
+				Effect.gen(function* () {
+					const discord = yield* Discord;
+					const guilds = yield* discord.getGuilds();
+					const totalMemberCount = guilds.reduce(
+						(total, guild) => total + (guild.memberCount ?? 0),
+						0,
+					);
+					return `${totalMemberCount.toLocaleString()} users asking questions!`;
+				}),
+		},
 	];
 }
 

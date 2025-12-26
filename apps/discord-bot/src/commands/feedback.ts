@@ -3,10 +3,11 @@ import type {
 	ModalSubmitInteraction,
 } from "discord.js";
 import {
-	ActionRowBuilder,
 	EmbedBuilder,
+	LabelBuilder,
 	MessageFlags,
 	ModalBuilder,
+	TextDisplayBuilder,
 	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js";
@@ -33,21 +34,26 @@ export const handleFeedbackCommand = Effect.fn("feedback_command")(function* (
 
 	const modal = new ModalBuilder()
 		.setCustomId(FEEDBACK_MODAL_ID)
-		.setTitle("Send Feedback");
-
-	const feedbackInput = new TextInputBuilder()
-		.setCustomId(FEEDBACK_INPUT_ID)
-		.setLabel("Your feedback")
-		.setPlaceholder("Share your thoughts, suggestions, or ideas...")
-		.setStyle(TextInputStyle.Paragraph)
-		.setRequired(true)
-		.setMaxLength(4000);
-
-	const actionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(
-		feedbackInput,
-	);
-
-	modal.addComponents(actionRow);
+		.setTitle("Feedback")
+		.addTextDisplayComponents(
+			new TextDisplayBuilder().setContent(
+				"**This is for providing feedback about the Answer Overflow bot or answeroverflow.com website.**\n\nThis is NOT for feedback about the topic of this Discord server.",
+			),
+		)
+		.addLabelComponents(
+			new LabelBuilder()
+				.setLabel("Your feedback")
+				.setTextInputComponent(
+					new TextInputBuilder()
+						.setCustomId(FEEDBACK_INPUT_ID)
+						.setPlaceholder(
+							"Share your thoughts about answeroverflow.com or the bot...",
+						)
+						.setStyle(TextInputStyle.Paragraph)
+						.setRequired(true)
+						.setMaxLength(4000),
+				),
+		);
 
 	yield* discord.callClient(() => interaction.showModal(modal));
 });

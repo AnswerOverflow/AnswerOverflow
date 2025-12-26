@@ -3,10 +3,11 @@ import type {
 	ModalSubmitInteraction,
 } from "discord.js";
 import {
-	ActionRowBuilder,
 	EmbedBuilder,
+	LabelBuilder,
 	MessageFlags,
 	ModalBuilder,
+	TextDisplayBuilder,
 	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js";
@@ -34,43 +35,48 @@ export const handleBugReportCommand = Effect.fn("bug_report_command")(
 
 		const modal = new ModalBuilder()
 			.setCustomId(BUG_REPORT_MODAL_ID)
-			.setTitle("Report a Bug");
-
-		const bugDescriptionInput = new TextInputBuilder()
-			.setCustomId(BUG_DESCRIPTION_INPUT_ID)
-			.setLabel("Bug Description")
-			.setPlaceholder("What went wrong? Describe the issue...")
-			.setStyle(TextInputStyle.Paragraph)
-			.setRequired(true)
-			.setMaxLength(1000);
-
-		const stepsToReproduceInput = new TextInputBuilder()
-			.setCustomId(STEPS_TO_REPRODUCE_INPUT_ID)
-			.setLabel("Steps to Reproduce (Optional)")
-			.setPlaceholder("1. Go to...\n2. Click on...\n3. See error...")
-			.setStyle(TextInputStyle.Paragraph)
-			.setRequired(false)
-			.setMaxLength(1000);
-
-		const expectedBehaviorInput = new TextInputBuilder()
-			.setCustomId(EXPECTED_BEHAVIOR_INPUT_ID)
-			.setLabel("Expected Behavior (Optional)")
-			.setPlaceholder("What did you expect to happen?")
-			.setStyle(TextInputStyle.Paragraph)
-			.setRequired(false)
-			.setMaxLength(1000);
-
-		const row1 = new ActionRowBuilder<TextInputBuilder>().addComponents(
-			bugDescriptionInput,
-		);
-		const row2 = new ActionRowBuilder<TextInputBuilder>().addComponents(
-			stepsToReproduceInput,
-		);
-		const row3 = new ActionRowBuilder<TextInputBuilder>().addComponents(
-			expectedBehaviorInput,
-		);
-
-		modal.addComponents(row1, row2, row3);
+			.setTitle("Bug Report")
+			.addTextDisplayComponents(
+				new TextDisplayBuilder().setContent(
+					"**This is for reporting bugs with the Answer Overflow bot or answeroverflow.com website.**\n\nThis is NOT for reporting issues with the topic of this Discord server.",
+				),
+			)
+			.addLabelComponents(
+				new LabelBuilder()
+					.setLabel("Bug Description")
+					.setTextInputComponent(
+						new TextInputBuilder()
+							.setCustomId(BUG_DESCRIPTION_INPUT_ID)
+							.setPlaceholder("Describe the issue with the bot or website...")
+							.setStyle(TextInputStyle.Paragraph)
+							.setRequired(true)
+							.setMaxLength(1000),
+					),
+			)
+			.addLabelComponents(
+				new LabelBuilder()
+					.setLabel("Steps to Reproduce (Optional)")
+					.setTextInputComponent(
+						new TextInputBuilder()
+							.setCustomId(STEPS_TO_REPRODUCE_INPUT_ID)
+							.setPlaceholder("1. Go to...\n2. Click on...\n3. See error...")
+							.setStyle(TextInputStyle.Paragraph)
+							.setRequired(false)
+							.setMaxLength(1000),
+					),
+			)
+			.addLabelComponents(
+				new LabelBuilder()
+					.setLabel("Expected Behavior (Optional)")
+					.setTextInputComponent(
+						new TextInputBuilder()
+							.setCustomId(EXPECTED_BEHAVIOR_INPUT_ID)
+							.setPlaceholder("What did you expect to happen?")
+							.setStyle(TextInputStyle.Paragraph)
+							.setRequired(false)
+							.setMaxLength(1000),
+					),
+			);
 
 		yield* discord.callClient(() => interaction.showModal(modal));
 	},
