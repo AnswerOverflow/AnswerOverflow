@@ -12,7 +12,7 @@
 	"scripts": {
 		"with-env": "bun run --env-file=../../.env",
 		"with-env:prod": "bun run --env-file=../../.env.production",
-		"deploy:prod": "bun run with-env:prod convex deploy",
+		"deploy": "bun run with-env:prod convex deploy",
 		"codegen": "bunx convex codegen && bun run scripts/generate-function-types.ts",
 		"generate:auth-schema": "cd convex/betterAuth && bunx @better-auth/cli generate -y --output generatedSchema.ts",
 		"generate-function-types": "bun run scripts/generate-function-types.ts",

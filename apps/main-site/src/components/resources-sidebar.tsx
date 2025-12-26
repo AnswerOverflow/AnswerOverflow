@@ -181,7 +181,7 @@ export function MCPServerResource() {
 				<button
 					type="button"
 					className={cn(
-						"flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors w-full",
+						"flex items-center gap-2  py-1.5 rounded text-sm transition-colors w-full",
 						"text-muted-foreground hover:bg-muted/50 hover:text-foreground",
 					)}
 				>
@@ -207,7 +207,7 @@ export function MCPServerResource() {
 export function ResourcesSidebar({ className }: { className?: string }) {
 	return (
 		<div className={cn("text-left", className)}>
-			<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
+			<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide mb-2">
 				Resources
 			</div>
 			<nav className="space-y-0.5">

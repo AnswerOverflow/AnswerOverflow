@@ -1,9 +1,13 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { asyncMap } from "convex-helpers";
+import { Array as Arr, Predicate } from "effect";
+import { CHANNEL_TYPE } from "../shared/channels";
 import {
 	enrichMessagesWithServerAndChannels,
 	searchMessages,
 } from "../shared/dataAccess";
+import { getThreadStartMessage } from "../shared/messages";
 import { findSimilarThreads } from "../shared/similarThreads";
 import { publicQuery } from "./custom_functions";
 
@@ -73,5 +77,34 @@ export const getSimilarThreads = publicQuery({
 
 		// todo: we're doing double lookups here, not great
 		return await enrichMessagesWithServerAndChannels(ctx, similarThreads);
+	},
+});
+
+export const getRecentAnnouncements = publicQuery({
+	args: {
+		serverId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const serverId = BigInt(args.serverId);
+
+		const announcementThreads = await ctx.db
+			.query("channels")
+			.withIndex("by_serverId_and_type", (q) =>
+				q.eq("serverId", serverId).eq("type", CHANNEL_TYPE.AnnouncementThread),
+			)
+			.order("desc")
+			.take(3);
+
+		if (announcementThreads.length === 0) {
+			return [];
+		}
+
+		const firstMessages = await asyncMap(announcementThreads, (thread) =>
+			getThreadStartMessage(ctx, thread.id),
+		);
+
+		const validMessages = Arr.filter(firstMessages, Predicate.isNotNullable);
+
+		return enrichMessagesWithServerAndChannels(ctx, validMessages);
 	},
 });

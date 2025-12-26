@@ -18,6 +18,10 @@ import {
 	generateMessagePageMetadata,
 } from "../../../../components/message-page-loader";
 import {
+	RecentAnnouncements,
+	RecentAnnouncementsSkeleton,
+} from "../../../../components/recent-announcements";
+import {
 	SimilarThreads,
 	SimilarThreadsSkeleton,
 } from "../../../../components/similar-threads";
@@ -165,6 +169,13 @@ export default async function TenantMessagePage(props: Props) {
 							headerData.canonicalId
 						).toString()}
 						currentServerId={headerData.server.discordId.toString()}
+						serverId={headerData.server.discordId.toString()}
+					/>
+				</Suspense>
+			}
+			recentAnnouncementsSlot={
+				<Suspense fallback={<RecentAnnouncementsSkeleton />}>
+					<RecentAnnouncements
 						serverId={headerData.server.discordId.toString()}
 					/>
 				</Suspense>

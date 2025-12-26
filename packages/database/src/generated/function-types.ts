@@ -39,6 +39,7 @@ export const FUNCTION_TYPE_MAP = {
   "messages.updateEmbedStorageId": "mutation",
   "messages.upsertManyMessages": "mutation",
   "messages.upsertMessage": "mutation",
+  "search.getRecentAnnouncements": "query",
   "search.getRecentThreads": "query",
   "search.getSimilarThreads": "query",
   "search.publicSearch": "query",
@@ -76,7 +77,7 @@ export const NAMESPACE_STRUCTURE = {
   "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount","upsertManyDiscordAccounts"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","markMessageAsSolution","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
-  "search": ["getRecentThreads","getSimilarThreads","publicSearch"],
+  "search": ["getRecentAnnouncements","getRecentThreads","getSimilarThreads","publicSearch"],
   "server_preferences": ["getBotCustomizationForServer","getServerPreferencesByServerId","getServersWithBotCustomization","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getCachedBrowsableServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]

@@ -12,6 +12,10 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
 import { MessagePage, RepliesSection, RepliesSkeleton } from "./message-page";
+import {
+	RecentAnnouncements,
+	RecentAnnouncementsSkeleton,
+} from "./recent-announcements";
 import { SimilarThreads, SimilarThreadsSkeleton } from "./similar-threads";
 
 export type MessagePageHeaderData = NonNullable<
@@ -196,6 +200,13 @@ export function MessagePageLoader(props: {
 							headerData.canonicalId
 						).toString()}
 						currentServerId={headerData.server.discordId.toString()}
+					/>
+				</Suspense>
+			}
+			recentAnnouncementsSlot={
+				<Suspense fallback={<RecentAnnouncementsSkeleton />}>
+					<RecentAnnouncements
+						serverId={headerData.server.discordId.toString()}
 					/>
 				</Suspense>
 			}

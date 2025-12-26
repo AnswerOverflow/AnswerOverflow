@@ -540,26 +540,17 @@ function TopPagesTable(props: { serverId: bigint }) {
 	);
 }
 
-export default function DashboardOverviewPage() {
-	const params = useParams();
-	const serverId = params.serverId as string;
-	const parsedServerId = parseSnowflakeId(serverId);
-
+function DashboardContent({ serverId }: { serverId: bigint }) {
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
-		O.isSome(parsedServerId) ? { serverId: parsedServerId.value.id } : "skip",
+		{ serverId },
 	);
-
-	if (O.isNone(parsedServerId)) {
-		return <div className="text-muted-foreground">Invalid server ID</div>;
-	}
 
 	if (!dashboardData) {
 		return <div className="text-muted-foreground">Loading dashboard...</div>;
 	}
 
 	const { server, channels } = dashboardData;
-	const serverIdBigInt = parsedServerId.value.id;
 	const hasIndexingEnabled = channels.some((c) => c.flags.indexingEnabled);
 
 	return (
@@ -587,15 +578,27 @@ export default function DashboardOverviewPage() {
 
 			<div className="grid gap-6 lg:grid-cols-2">
 				<IndexedStatsWidget
-					serverId={serverIdBigInt}
+					serverId={serverId}
 					hasIndexingEnabled={hasIndexingEnabled}
 				/>
-				<PageViewsChart serverId={serverIdBigInt} />
-				<QuestionsAndAnswersChart serverId={serverIdBigInt} />
-				<ServerInvitesChart serverId={serverIdBigInt} />
-				<TopQuestionSolversTable serverId={serverIdBigInt} />
-				<TopPagesTable serverId={serverIdBigInt} />
+				<PageViewsChart serverId={serverId} />
+				<QuestionsAndAnswersChart serverId={serverId} />
+				<ServerInvitesChart serverId={serverId} />
+				<TopQuestionSolversTable serverId={serverId} />
+				<TopPagesTable serverId={serverId} />
 			</div>
 		</div>
 	);
+}
+
+export default function DashboardOverviewPage() {
+	const params = useParams();
+	const serverIdParam = params.serverId as string;
+	const parsedServerId = parseSnowflakeId(serverIdParam);
+
+	if (O.isNone(parsedServerId)) {
+		return <div className="text-muted-foreground">Invalid server ID</div>;
+	}
+
+	return <DashboardContent serverId={parsedServerId.value.id} />;
 }
