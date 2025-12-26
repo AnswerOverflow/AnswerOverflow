@@ -1,12 +1,13 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
-import { getManyFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import { CHANNEL_TYPE } from "../shared/channels";
 import {
+	enrichMessage,
 	enrichMessagesWithServerAndChannels,
 	searchMessages,
+	type SearchResult,
 } from "../shared/dataAccess";
 import { findSimilarThreads } from "../shared/similarThreads";
 import { publicQuery } from "./custom_functions";
@@ -23,7 +24,6 @@ export const publicSearch = publicQuery({
 		const tagIdStrings = args.tagIds;
 		const hasTagFilter = tagIdStrings && tagIdStrings.length > 0;
 
-		let threadIdsWithTags: Set<bigint> | null = null;
 		if (hasTagFilter && args.channelId) {
 			const tagIds = tagIdStrings.map((id) => BigInt(id));
 			const parentChannelId = BigInt(args.channelId);
@@ -41,15 +41,87 @@ export const publicSearch = publicQuery({
 				},
 			);
 
-			threadIdsWithTags = new Set<bigint>();
+			const threadIdsWithTags = new Set<bigint>();
 			for (const set of threadIdSets) {
 				for (const id of set) {
 					threadIdsWithTags.add(id);
 				}
 			}
+
+			if (threadIdsWithTags.size === 0) {
+				return {
+					page: [],
+					isDone: true,
+					continueCursor: "",
+				};
+			}
+
+			const threadSearchResults = await ctx.db
+				.query("channels")
+				.withSearchIndex("search_name", (q) =>
+					q.search("name", args.query).eq("parentId", parentChannelId),
+				)
+				.paginate(args.paginationOpts);
+
+			const matchingThreads = Arr.filter(threadSearchResults.page, (thread) =>
+				threadIdsWithTags.has(thread.id),
+			);
+
+			const parentChannel = await ctx.db
+				.query("channels")
+				.withIndex("by_discordChannelId", (q) => q.eq("id", parentChannelId))
+				.unique();
+
+			const server = parentChannel
+				? await ctx.db
+						.query("servers")
+						.withIndex("by_discordId", (q) =>
+							q.eq("discordId", parentChannel.serverId),
+						)
+						.unique()
+				: null;
+
+			if (!parentChannel || !server) {
+				return {
+					page: [],
+					isDone: true,
+					continueCursor: "",
+				};
+			}
+
+			const resultsWithMessages = await asyncMap(
+				matchingThreads,
+				async (thread) => {
+					const firstMessage = await ctx.db
+						.query("messages")
+						.withIndex("by_channelId_and_id", (q) =>
+							q.eq("channelId", thread.id),
+						)
+						.order("asc")
+						.first();
+
+					if (!firstMessage) return null;
+
+					const enrichedMessage = await enrichMessage(ctx, firstMessage);
+					if (!enrichedMessage) return null;
+
+					return {
+						message: enrichedMessage,
+						channel: parentChannel,
+						server,
+						thread,
+					} satisfies SearchResult;
+				},
+			);
+
+			return {
+				page: Arr.filter(resultsWithMessages, Predicate.isNotNull),
+				isDone: threadSearchResults.isDone,
+				continueCursor: threadSearchResults.continueCursor,
+			};
 		}
 
-		const results = await searchMessages(ctx, {
+		return await searchMessages(ctx, {
 			query: args.query,
 			serverId: args.serverId ? BigInt(args.serverId) : undefined,
 			channelId: args.channelId ? BigInt(args.channelId) : undefined,
@@ -58,26 +130,6 @@ export const publicSearch = publicQuery({
 				cursor: args.paginationOpts.cursor,
 			},
 		});
-
-		if (threadIdsWithTags) {
-			if (threadIdsWithTags.size === 0) {
-				return {
-					page: [],
-					isDone: true,
-					continueCursor: "",
-				};
-			}
-			const filteredPage = Arr.filter(results.page, (result) => {
-				const threadId = result.thread?.id ?? result.message.message.channelId;
-				return threadIdsWithTags.has(threadId);
-			});
-			return {
-				...results,
-				page: filteredPage,
-			};
-		}
-
-		return results;
 	},
 });
 

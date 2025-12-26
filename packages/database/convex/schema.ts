@@ -270,7 +270,7 @@ export default defineSchema({
 		.index("by_parentId_and_id", ["parentId", "id"])
 		.searchIndex("search_name", {
 			searchField: "name",
-			filterFields: ["serverId", "type"],
+			filterFields: ["serverId", "type", "parentId"],
 		}),
 	channelSettings: defineTable(channelSettingsSchema)
 		.index("by_channelId", ["channelId"])
