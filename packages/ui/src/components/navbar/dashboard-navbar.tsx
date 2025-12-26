@@ -49,7 +49,7 @@ export function DashboardNavbar({
 			<div className="relative flex w-full flex-col">
 				{/* Header - Fixed at top */}
 				<header
-					className="fixed left-0 right-0 z-50 flex h-navbar items-center gap-4 border-b bg-background px-4"
+					className="fixed left-0 right-0 z-40 flex h-navbar items-center gap-4 border-b bg-background px-4"
 					style={{ top: isImpersonating ? "40px" : "0" }}
 				>
 					{/* Mobile Menu Button */}

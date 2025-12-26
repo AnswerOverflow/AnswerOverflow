@@ -21,7 +21,7 @@ export function TenantNavbar({ showBorder = true, server }: TenantNavbarProps) {
 	return (
 		<header
 			className={cn(
-				"fixed left-0 z-[1000] h-navbar w-full bg-background/95 backdrop-blur-sm px-4",
+				"fixed left-0 z-40 h-navbar w-full bg-background/95 backdrop-blur-sm px-4",
 				showBorder && "border-b border-border",
 			)}
 			style={{ top: isImpersonating ? "40px" : "0" }}

@@ -31,7 +31,7 @@ export function ImpersonationBanner() {
 	return (
 		<>
 			<div
-				className="fixed top-0 left-0 right-0 z-[1001] bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-center gap-4"
+				className="fixed top-0 left-0 right-0 z-40 bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-center gap-4"
 				style={{ height: BANNER_HEIGHT }}
 			>
 				<span className="font-medium">

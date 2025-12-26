@@ -59,7 +59,7 @@ function UserAvatar({
 					<AvatarFallback>{getInitials(user.name ?? "User")}</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className="z-[100] mr-4 mt-4 w-40">
+			<DropdownMenuContent className="mr-4 mt-4 w-40">
 				{showDashboardLink && (
 					<>
 						<DropdownMenuItem asChild>

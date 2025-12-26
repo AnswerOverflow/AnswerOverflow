@@ -18,7 +18,7 @@ export function NavbarBase({
 
 	return (
 		<header
-			className="fixed left-0 z-[1000] h-navbar w-full bg-background/95 backdrop-blur-sm border-b border-border px-4"
+			className="fixed left-0 z-40 h-navbar w-full bg-background/95 backdrop-blur-sm border-b border-border px-4"
 			style={{ top: isImpersonating ? "40px" : "0" }}
 		>
 			<nav className="relative z-10 flex size-full flex-1 items-center justify-between gap-4">
