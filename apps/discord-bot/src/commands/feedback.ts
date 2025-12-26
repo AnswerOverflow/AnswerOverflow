@@ -1,4 +1,5 @@
 import type {
+	ButtonInteraction,
 	ChatInputCommandInteraction,
 	ModalSubmitInteraction,
 } from "discord.js";
@@ -17,49 +18,63 @@ import { Discord } from "../core/discord-service";
 import { commandExecuted } from "../metrics";
 import { catchAllWithReport } from "../utils/error-reporting";
 
-const FEEDBACK_MODAL_ID = "feedback-modal";
-const FEEDBACK_INPUT_ID = "feedback-input";
+export type FeedbackConfig = {
+	modalId: string;
+	inputId: string;
+	title: string;
+	description: string;
+	placeholder: string;
+	embedTitle: string;
+	embedColor: `#${string}`;
+};
 
-export const handleFeedbackCommand = Effect.fn("feedback_command")(function* (
-	interaction: ChatInputCommandInteraction,
-) {
-	yield* Effect.annotateCurrentSpan({
-		"discord.guild_id": interaction.guildId ?? "unknown",
-		"discord.channel_id": interaction.channelId ?? "unknown",
-		"discord.user_id": interaction.user.id,
-	});
-	yield* Metric.increment(commandExecuted("feedback"));
+export const DEFAULT_FEEDBACK_CONFIG: FeedbackConfig = {
+	modalId: "feedback-modal",
+	inputId: "feedback-input",
+	title: "Feedback",
+	description:
+		"**This is for providing feedback about the Answer Overflow bot or answeroverflow.com website.**\n\nThis is NOT for feedback about the topic of this Discord server.",
+	placeholder: "Share your thoughts about answeroverflow.com or the bot...",
+	embedTitle: "New Feedback Received",
+	embedColor: "#00D26A",
+};
 
-	const discord = yield* Discord;
+export const SIMILAR_THREADS_FEEDBACK_CONFIG: FeedbackConfig = {
+	modalId: "similar-threads-feedback-modal",
+	inputId: "similar-threads-feedback-input",
+	title: "Similar Threads Feedback",
+	description:
+		"**How can we improve the similar threads feature?**\n\nLet us know if the results were helpful or how we can make them better.",
+	placeholder: "Share your thoughts about the similar threads feature...",
+	embedTitle: "Similar Threads Feedback",
+	embedColor: "#8CD1FF",
+};
 
-	const modal = new ModalBuilder()
-		.setCustomId(FEEDBACK_MODAL_ID)
-		.setTitle("Feedback")
+export function createFeedbackModal(config: FeedbackConfig) {
+	return new ModalBuilder()
+		.setCustomId(config.modalId)
+		.setTitle(config.title)
 		.addTextDisplayComponents(
-			new TextDisplayBuilder().setContent(
-				"**This is for providing feedback about the Answer Overflow bot or answeroverflow.com website.**\n\nThis is NOT for feedback about the topic of this Discord server.",
-			),
+			new TextDisplayBuilder().setContent(config.description),
 		)
 		.addLabelComponents(
 			new LabelBuilder()
 				.setLabel("Your feedback")
 				.setTextInputComponent(
 					new TextInputBuilder()
-						.setCustomId(FEEDBACK_INPUT_ID)
-						.setPlaceholder(
-							"Share your thoughts about answeroverflow.com or the bot...",
-						)
+						.setCustomId(config.inputId)
+						.setPlaceholder(config.placeholder)
 						.setStyle(TextInputStyle.Paragraph)
 						.setRequired(true)
 						.setMaxLength(4000),
 				),
 		);
+}
 
-	yield* discord.callClient(() => interaction.showModal(modal));
-});
-
-export const handleFeedbackModalSubmit = Effect.fn("feedback_modal_submit")(
-	function* (interaction: ModalSubmitInteraction) {
+export const handleFeedbackModalSubmit = (config: FeedbackConfig) =>
+	Effect.fn("feedback_modal_submit")(function* (
+		interaction: ModalSubmitInteraction,
+	) {
 		yield* Effect.annotateCurrentSpan({
 			"discord.guild_id": interaction.guildId ?? "unknown",
 			"discord.channel_id": interaction.channelId ?? "unknown",
@@ -69,15 +84,11 @@ export const handleFeedbackModalSubmit = Effect.fn("feedback_modal_submit")(
 
 		const discord = yield* Discord;
 
-		if (interaction.customId !== FEEDBACK_MODAL_ID) {
-			return;
-		}
-
-		const feedback = interaction.fields.getTextInputValue(FEEDBACK_INPUT_ID);
+		const feedback = interaction.fields.getTextInputValue(config.inputId);
 
 		const embed = new EmbedBuilder()
-			.setTitle("New Feedback Received")
-			.setColor("#00D26A")
+			.setTitle(config.embedTitle)
+			.setColor(config.embedColor)
 			.setTimestamp()
 			.addFields(
 				{
@@ -122,8 +133,23 @@ export const handleFeedbackModalSubmit = Effect.fn("feedback_modal_submit")(
 				flags: MessageFlags.Ephemeral,
 			}),
 		);
-	},
-);
+	});
+
+export const showFeedbackModal = (config: FeedbackConfig) =>
+	Effect.fn("show_feedback_modal")(function* (
+		interaction: ChatInputCommandInteraction | ButtonInteraction,
+	) {
+		yield* Effect.annotateCurrentSpan({
+			"discord.guild_id": interaction.guildId ?? "unknown",
+			"discord.channel_id": interaction.channelId ?? "unknown",
+			"discord.user_id": interaction.user.id,
+		});
+		yield* Metric.increment(commandExecuted("feedback"));
+
+		const discord = yield* Discord;
+		const modal = createFeedbackModal(config);
+		yield* discord.callClient(() => interaction.showModal(modal));
+	});
 
 export const FeedbackCommandHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
@@ -135,15 +161,17 @@ export const FeedbackCommandHandlerLayer = Layer.scopedDiscard(
 					interaction.isChatInputCommand() &&
 					interaction.commandName === "feedback"
 				) {
-					yield* handleFeedbackCommand(interaction);
+					yield* showFeedbackModal(DEFAULT_FEEDBACK_CONFIG)(interaction);
 					return;
 				}
 
 				if (
 					interaction.isModalSubmit() &&
-					interaction.customId === FEEDBACK_MODAL_ID
+					interaction.customId === DEFAULT_FEEDBACK_CONFIG.modalId
 				) {
-					yield* handleFeedbackModalSubmit(interaction);
+					yield* handleFeedbackModalSubmit(DEFAULT_FEEDBACK_CONFIG)(
+						interaction,
+					);
 					return;
 				}
 			}),

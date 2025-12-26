@@ -8,6 +8,9 @@ export const DISMISS_BUTTON_LABEL = "Dismiss";
 export const SIMILAR_THREADS_ACTION_PREFIX = "similar-threads";
 export const SIMILAR_THREADS_BUTTON_LABEL = "View Similar Threads";
 
+export const SIMILAR_THREAD_SOLVED_ACTION_PREFIX = "similar-thread-solved";
+export const SIMILAR_THREAD_SOLVED_BUTTON_LABEL = "This Solved It";
+
 export function makeDismissButton(dismisserId: string): ButtonBuilder {
 	return new ButtonBuilder({
 		label: DISMISS_BUTTON_LABEL,

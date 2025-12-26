@@ -232,3 +232,17 @@ export function trackSimilarThreadsButtonClicked(
 		"Results Count": resultsCount,
 	});
 }
+
+export function trackSimilarThreadSolvedClicked(
+	member: GuildMember,
+	sourceThread: ThreadChannel,
+	similarThreadId: string,
+) {
+	return trackEvent("Similar Thread Solved Clicked", {
+		"Answer Overflow Account Id": member.id,
+		members: [{ prefix: "User", member }],
+		thread: sourceThread,
+		guild: sourceThread.guild,
+		"Similar Thread Id": similarThreadId,
+	});
+}
