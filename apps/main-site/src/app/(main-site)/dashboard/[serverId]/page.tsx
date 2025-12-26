@@ -20,8 +20,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@packages/ui/components/table";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
+import { Option as O } from "effect";
 import {
 	ExternalLink,
 	FileText,
@@ -541,20 +543,23 @@ function TopPagesTable(props: { serverId: bigint }) {
 export default function DashboardOverviewPage() {
 	const params = useParams();
 	const serverId = params.serverId as string;
+	const parsedServerId = parseSnowflakeId(serverId);
 
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
-		{
-			serverId: BigInt(serverId),
-		},
+		O.isSome(parsedServerId) ? { serverId: parsedServerId.value.id } : "skip",
 	);
+
+	if (O.isNone(parsedServerId)) {
+		return <div className="text-muted-foreground">Invalid server ID</div>;
+	}
 
 	if (!dashboardData) {
 		return <div className="text-muted-foreground">Loading dashboard...</div>;
 	}
 
 	const { server, channels } = dashboardData;
-	const serverIdBigInt = BigInt(serverId);
+	const serverIdBigInt = parsedServerId.value.id;
 	const hasIndexingEnabled = channels.some((c) => c.flags.indexingEnabled);
 
 	return (
