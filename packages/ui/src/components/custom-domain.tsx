@@ -175,6 +175,7 @@ export const DomainStatusIcon = ({ domain }: DomainStatusIconProps) => {
 export type CustomDomainProps = {
 	defaultDomain?: string;
 	serverId: bigint;
+	className?: string;
 };
 
 export const CustomDomain = (props: CustomDomainProps) => {
@@ -193,7 +194,7 @@ export const CustomDomain = (props: CustomDomainProps) => {
 
 	return (
 		<form
-			className="@container w-full"
+			className={"@container w-full"}
 			onSubmit={async (event) => {
 				event.preventDefault();
 				setSubmitting(true);
@@ -219,7 +220,7 @@ export const CustomDomain = (props: CustomDomainProps) => {
 				setSubmitting(false);
 			}}
 		>
-			<Card className="flex flex-col">
+			<Card className={cn("flex flex-col", props.className)}>
 				<CardHeader className="relative flex flex-col text-left">
 					<div className="flex items-center gap-2 relative w-full">
 						<CardTitle>Custom Domain</CardTitle>

@@ -175,19 +175,25 @@ export default function SettingsPage() {
 				enabledFor={["PRO", "ENTERPRISE", "ADVANCED", "STARTER", "OPEN_SOURCE"]}
 				serverId={serverId}
 			>
-				<CustomDomain
-					defaultDomain={server.customDomain ?? undefined}
-					serverId={BigInt(serverId)}
-				/>
+				{(enabled) => (
+					<CustomDomain
+						className={enabled ? "" : "rounded-b-none border-b-0"}
+						defaultDomain={server.customDomain ?? undefined}
+						serverId={BigInt(serverId)}
+					/>
+				)}
 			</TierAccessOnly>
 			<TierAccessOnly
 				enabledFor={["PRO", "ENTERPRISE", "ADVANCED", "OPEN_SOURCE"]}
 				serverId={serverId}
 			>
-				<BotCustomization
-					serverId={BigInt(serverId)}
-					data={server.botCustomization}
-				/>
+				{(enabled) => (
+					<BotCustomization
+						className={enabled ? "" : "rounded-b-none border-b-0"}
+						serverId={BigInt(serverId)}
+						data={server.botCustomization}
+					/>
+				)}
 			</TierAccessOnly>
 		</div>
 	);

@@ -28,6 +28,7 @@ type BotCustomizationData = {
 };
 
 export type BotCustomizationProps = {
+	className?: string;
 	serverId: bigint;
 	data: BotCustomizationData;
 };
@@ -155,7 +156,11 @@ function ImageUpload({
 	);
 }
 
-export function BotCustomization({ serverId, data }: BotCustomizationProps) {
+export function BotCustomization({
+	serverId,
+	data,
+	className,
+}: BotCustomizationProps) {
 	const [nickname, setNickname] = useState(data.nickname ?? "");
 	const [bio, setBio] = useState(data.bio ?? "");
 	const [avatarUrl, setAvatarUrl] = useState(data.avatarUrl);
@@ -252,7 +257,7 @@ export function BotCustomization({ serverId, data }: BotCustomizationProps) {
 		nickname !== (data.nickname ?? "") || bio !== (data.bio ?? "");
 
 	return (
-		<Card>
+		<Card className={className}>
 			<CardHeader>
 				<CardTitle>Bot Customization</CardTitle>
 				<CardDescription>
