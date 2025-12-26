@@ -36,9 +36,9 @@ import { cn } from "@packages/ui/lib/utils";
 import { encodeCursor } from "@packages/ui/utils/cursor";
 import { ChannelType, getChannelIcon } from "@packages/ui/utils/discord";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
-import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import type { FunctionReturnType } from "convex/server";
 import { FileQuestion, Menu } from "lucide-react";
+import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
 import { JsonLdScript } from "./json-ld-script";
@@ -119,7 +119,7 @@ function ChannelsSidebar({
 	return (
 		<aside className="w-52 shrink-0">
 			<div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
-				<ResourcesSidebar className="mb-4" />
+				<ResourcesSidebar className="mb-4 px-2" />
 				<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
 					Channels
 				</div>
@@ -182,7 +182,7 @@ function MobileChannelSheet({
 					<SheetTitle className="text-left">Navigation</SheetTitle>
 				</SheetHeader>
 				<div className="p-2">
-					<ResourcesSidebar className="mb-4" />
+					<ResourcesSidebar className="mb-4 px-2" />
 					<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
 						Channels
 					</div>
