@@ -7,7 +7,6 @@ import {
 	enrichMessagesWithServerAndChannels,
 	searchMessages,
 } from "../shared/dataAccess";
-import { getThreadStartMessage } from "../shared/messages";
 import { findSimilarThreads } from "../shared/similarThreads";
 import { publicQuery } from "./custom_functions";
 
@@ -87,24 +86,40 @@ export const getRecentAnnouncements = publicQuery({
 	handler: async (ctx, args) => {
 		const serverId = BigInt(args.serverId);
 
-		const announcementThreads = await ctx.db
+		const announcementChannels = await ctx.db
 			.query("channels")
 			.withIndex("by_serverId_and_type", (q) =>
-				q.eq("serverId", serverId).eq("type", CHANNEL_TYPE.AnnouncementThread),
+				q.eq("serverId", serverId).eq("type", CHANNEL_TYPE.GuildAnnouncement),
 			)
-			.order("desc")
-			.take(3);
+			.collect();
 
-		if (announcementThreads.length === 0) {
+		if (announcementChannels.length === 0) {
 			return [];
 		}
 
-		const firstMessages = await asyncMap(announcementThreads, (thread) =>
-			getThreadStartMessage(ctx, thread.id),
+		const recentMessagesPerChannel = await asyncMap(
+			announcementChannels,
+			async (channel) => {
+				const message = await ctx.db
+					.query("messages")
+					.withIndex("by_channelId_and_id", (q) =>
+						q.eq("channelId", channel.id),
+					)
+					.order("desc")
+					.take(4);
+				return message;
+			},
 		);
 
-		const validMessages = Arr.filter(firstMessages, Predicate.isNotNullable);
+		const validMessages = Arr.filter(
+			recentMessagesPerChannel.flat(),
+			Predicate.isNotNullable,
+		);
 
-		return enrichMessagesWithServerAndChannels(ctx, validMessages);
+		const sortedMessages = validMessages
+			.sort((a, b) => (a.id > b.id ? -1 : a.id < b.id ? 1 : 0))
+			.slice(0, 3);
+
+		return enrichMessagesWithServerAndChannels(ctx, sortedMessages);
 	},
 });

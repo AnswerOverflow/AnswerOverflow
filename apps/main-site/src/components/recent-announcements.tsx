@@ -96,22 +96,21 @@ function RecentAnnouncementsList(props: {
 										64,
 									)}
 									alt={author.name}
-									className="size-5 shrink-0 rounded-full mt-0.5"
+									className="size-6 shrink-0 rounded-full mt-0.5"
 								/>
 							)}
 							<div className="min-w-0">
-								<span className="line-clamp-1 text-sm font-medium text-foreground group-hover:underline">
-									{thread?.name ??
-										result.message.message.content?.slice(0, 100)}
-								</span>
-								<div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-									{author && <span>{author.name}</span>}
-									{author && <span>·</span>}
+								<p className="truncate text-sm font-medium text-foreground group-hover:underline m-0 p-0">
+									{(thread?.name ?? result.message.message.content)?.trim()}
+								</p>
+								<p className="text-xs text-muted-foreground m-0 p-0 text-left">
+									{author?.name}
+									{author && " · "}
 									<TimeAgo
 										snowflake={result.message.message.id.toString()}
 										className="text-xs"
 									/>
-								</div>
+								</p>
 							</div>
 						</Link>
 					);
