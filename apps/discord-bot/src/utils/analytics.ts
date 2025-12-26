@@ -1,11 +1,16 @@
 import {
-	registerServerGroup as registerServerGroupBase,
-	trackEvent,
+	registerServerGroup,
+	track,
 } from "@packages/database/analytics/server/tracking";
 import {
+	type AnalyticsChannelWithSettings,
+	type AnalyticsMember,
+	type AnalyticsMessageInfo,
+	type AnalyticsServerWithSettings,
+	type AnalyticsThread,
 	ConsentSource,
 	type MarkSolutionCommandStatus,
-} from "@packages/database/analytics/server/types";
+} from "@packages/database/analytics/types";
 import type {
 	Guild,
 	GuildMember,
@@ -14,7 +19,7 @@ import type {
 	ThreadChannel,
 } from "discord.js";
 
-export { ConsentSource };
+export { ConsentSource, registerServerGroup };
 
 type ChannelWithSettings = {
 	id: string | bigint;
@@ -41,52 +46,116 @@ type ServerWithSettings = {
 	name: string;
 };
 
+function guildToServerWithSettings(
+	guild: Guild,
+	serverPreferences?: { readTheRulesConsentEnabled?: boolean },
+): AnalyticsServerWithSettings {
+	return {
+		id: guild.id,
+		name: guild.name,
+		readTheRulesConsentEnabled:
+			serverPreferences?.readTheRulesConsentEnabled ?? false,
+		botTimeInServerMs: guild.joinedAt
+			? Date.now() - guild.joinedAt.getTime()
+			: 0,
+	};
+}
+
+function memberToAnalytics(
+	member: GuildMember | PartialGuildMember,
+): AnalyticsMember {
+	return {
+		id: member.id,
+		joinedAt: member.joinedAt?.getTime(),
+		timeInServerMs: member.joinedAt
+			? Date.now() - member.joinedAt.getTime()
+			: undefined,
+	};
+}
+
+function threadToAnalytics(thread: ThreadChannel): AnalyticsThread {
+	return {
+		id: thread.id,
+		name: thread.name,
+		type: thread.type,
+		messageCount: thread.messageCount ?? undefined,
+		archivedTimestamp: thread.archivedAt?.getTime(),
+		parentId: thread.parentId ?? undefined,
+		parentName: thread.parent?.name,
+		parentType: thread.parent?.type,
+	};
+}
+
+function messageToInfo(message: Message): AnalyticsMessageInfo {
+	return {
+		id: message.id,
+		createdAt: message.createdTimestamp,
+		contentLength: message.content.length,
+		serverId: message.guild?.id,
+		channelId: message.channel.isThread()
+			? (message.channel.parentId ?? undefined)
+			: message.channel.id,
+		threadId: message.channel.isThread() ? message.channel.id : undefined,
+	};
+}
+
+function channelToAnalyticsWithSettings(
+	channelSettings: ChannelWithSettings,
+): AnalyticsChannelWithSettings {
+	return {
+		id: String(channelSettings.id),
+		name: channelSettings.name,
+		type: channelSettings.type,
+		serverId: String(channelSettings.serverId),
+		inviteCode: channelSettings.flags?.inviteCode ?? undefined,
+		solutionTagId: channelSettings.flags?.solutionTagId
+			? String(channelSettings.flags.solutionTagId)
+			: undefined,
+		indexingEnabled: channelSettings.flags?.indexingEnabled ?? false,
+		markSolutionEnabled: channelSettings.flags?.markSolutionEnabled ?? false,
+		sendMarkSolutionInstructionsInNewThreads:
+			channelSettings.flags?.sendMarkSolutionInstructionsInNewThreads ?? false,
+		autoThreadEnabled: channelSettings.flags?.autoThreadEnabled ?? false,
+		forumGuidelinesConsentEnabled:
+			channelSettings.flags?.forumGuidelinesConsentEnabled ?? false,
+	};
+}
+
 export function trackServerJoin(guild: Guild) {
-	return trackEvent("Server Join", {
-		"Answer Overflow Account Id": guild.ownerId,
-		guild,
+	return track("Server Join", {
+		server: guildToServerWithSettings(guild),
+		accountId: guild.ownerId,
 	});
 }
 
 export function trackServerLeave(guild: Guild) {
-	return trackEvent("Server Leave", {
-		"Answer Overflow Account Id": guild.ownerId,
-		guild,
-	});
-}
-
-export function registerServerGroup(guild: Guild, serverId: string) {
-	return registerServerGroupBase({
-		"Server Id": serverId,
-		"Server Name": guild.name,
+	return track("Server Leave", {
+		server: guildToServerWithSettings(guild),
+		accountId: guild.ownerId,
 	});
 }
 
 export function trackUserJoinedServer(
 	member: GuildMember,
-	server: ServerWithSettings,
+	_server: ServerWithSettings,
 	serverPreferences?: ServerPreferences,
 ) {
-	return trackEvent("User Joined Server", {
-		"Answer Overflow Account Id": member.id,
-		guild: member.guild,
-		serverWithSettings: server,
-		serverPreferences,
-		members: [{ prefix: "User", member }],
+	return track("User Joined Server", {
+		server: guildToServerWithSettings(member.guild, serverPreferences),
+		user: memberToAnalytics(member),
+		accountId: member.id,
 	});
 }
 
 export function trackUserLeftServer(
 	member: GuildMember | PartialGuildMember,
-	server: ServerWithSettings,
+	_server: ServerWithSettings,
 	serverPreferences?: ServerPreferences,
 ) {
-	return trackEvent("User Left Server", {
-		"Answer Overflow Account Id": member.id,
-		guild: member.guild,
-		serverWithSettings: server,
-		serverPreferences,
-		members: [{ prefix: "User", member }],
+	return track("User Left Server", {
+		server: guildToServerWithSettings(member.guild, serverPreferences),
+		user: memberToAnalytics(member),
+		accountId: member.id,
 	});
 }
 
@@ -94,7 +163,7 @@ export function trackAskedQuestion(
 	thread: ThreadChannel,
 	channelSettings: ChannelWithSettings,
 	questionAsker: GuildMember,
-	server: ServerWithSettings,
+	_server: ServerWithSettings,
 	serverPreferences?: ServerPreferences,
 	question?: Message | null,
 ) {
@@ -104,16 +173,15 @@ export function trackAskedQuestion(
 		channelSettings.flags?.indexingEnabled,
 		channelSettings.flags?.markSolutionEnabled,
 	);
-	return trackEvent("Asked Question", {
-		"Answer Overflow Account Id": questionAsker.id,
-		guild: thread.guild,
-		serverWithSettings: server,
-		serverPreferences,
-		channel: thread.parent!,
-		channelWithSettings: channelSettings,
-		thread,
-		members: [{ prefix: "Question Asker", member: questionAsker }],
-		messages: question ? [{ prefix: "Question", message: question }] : [],
+	return track("Asked Question", {
+		server: guildToServerWithSettings(thread.guild, serverPreferences),
+		channel: channelToAnalyticsWithSettings(channelSettings),
+		thread: threadToAnalytics(thread),
+		questionAsker: memberToAnalytics(questionAsker),
+		question: question
+			? messageToInfo(question)
+			: { id: "", createdAt: 0, contentLength: 0 },
+		accountId: questionAsker.id,
 	});
 }
 
@@ -125,28 +193,21 @@ export function trackSolvedQuestion(
 	markAsSolver: GuildMember,
 	question: Message,
 	solution: Message,
-	server: ServerWithSettings,
+	_server: ServerWithSettings,
 	serverPreferences?: ServerPreferences,
 ) {
-	return trackEvent("Solved Question", {
-		"Answer Overflow Account Id": questionSolver.id,
-		guild: thread.guild,
-		serverWithSettings: server,
-		serverPreferences,
-		channel: thread.parent!,
-		channelWithSettings: channelSettings,
-		thread,
-		members: [
-			{ prefix: "Question Asker", member: questionAsker },
-			{ prefix: "Question Solver", member: questionSolver },
-			{ prefix: "Mark As Solver", member: markAsSolver },
-		],
-		messages: [
-			{ prefix: "Question", message: question },
-			{ prefix: "Solution", message: solution },
-		],
+	return track("Solved Question", {
+		server: guildToServerWithSettings(thread.guild, serverPreferences),
+		channel: channelToAnalyticsWithSettings(channelSettings),
+		thread: threadToAnalytics(thread),
+		questionAsker: memberToAnalytics(questionAsker),
+		questionSolver: memberToAnalytics(questionSolver),
+		markAsSolver: memberToAnalytics(markAsSolver),
+		question: messageToInfo(question),
+		solution: messageToInfo(solution),
 		"Time To Solve In Ms":
 			solution.createdTimestamp - question.createdTimestamp,
+		accountId: questionSolver.id,
 	});
 }
 
@@ -154,20 +215,19 @@ export function trackMarkSolutionInstructionsSent(
 	thread: ThreadChannel,
 	channelSettings: ChannelWithSettings,
 	questionAsker: GuildMember,
-	server: ServerWithSettings,
+	_server: ServerWithSettings,
 	serverPreferences?: ServerPreferences,
 	question?: Message | null,
 ) {
-	return trackEvent("Mark Solution Instructions Sent", {
-		"Answer Overflow Account Id": questionAsker.id,
-		guild: thread.guild,
-		serverWithSettings: server,
-		serverPreferences,
-		channel: thread.parent!,
-		channelWithSettings: channelSettings,
-		thread,
-		members: [{ prefix: "Question Asker", member: questionAsker }],
-		messages: question ? [{ prefix: "Question", message: question }] : [],
+	return track("Mark Solution Instructions Sent", {
+		server: guildToServerWithSettings(thread.guild, serverPreferences),
+		channel: channelToAnalyticsWithSettings(channelSettings),
+		thread: threadToAnalytics(thread),
+		questionAsker: memberToAnalytics(questionAsker),
+		question: question
+			? messageToInfo(question)
+			: { id: "", createdAt: 0, contentLength: 0 },
+		accountId: questionAsker.id,
 	});
 }
 
@@ -175,22 +235,21 @@ export function trackMarkSolutionCommandUsed(
 	member: GuildMember,
 	status: MarkSolutionCommandStatus,
 ) {
-	return trackEvent("Mark Solution Application Command Used", {
-		"Answer Overflow Account Id": member.id,
-		members: [{ prefix: "User", member }],
+	return track("Mark Solution Application Command Used", {
+		user: memberToAnalytics(member),
 		Status: status,
+		accountId: member.id,
 	});
 }
 
 export function trackDismissButtonClicked(
 	member: GuildMember,
-	message: Message,
+	_message: Message,
 ) {
-	return trackEvent("Dismiss Button Clicked", {
-		"Answer Overflow Account Id": member.id,
-		members: [{ prefix: "User", member }],
-		messages: [{ prefix: "Message", message }],
-		"Dismissed Message Type": "Mark Solution Instructions" as const,
+	return track("Dismiss Button Clicked", {
+		user: memberToAnalytics(member),
+		"Dismissed Message Type": "Mark Solution Instructions",
+		accountId: member.id,
 	});
 }
 
@@ -198,24 +257,24 @@ export function trackUserGrantConsent(
 	member: GuildMember,
 	consentSource: ConsentSource,
 ) {
-	return trackEvent("User Grant Consent", {
-		"Answer Overflow Account Id": member.id,
-		members: [{ prefix: "User", member }],
+	return track("User Grant Consent", {
+		user: memberToAnalytics(member),
 		"Consent Source": consentSource,
+		accountId: member.id,
 	});
 }
 
 export function trackLeaderboardViewed(member: GuildMember) {
-	return trackEvent("Leaderboard Viewed", {
-		"Answer Overflow Account Id": member.id,
-		members: [{ prefix: "User", member }],
+	return track("Leaderboard Viewed", {
+		user: memberToAnalytics(member),
+		accountId: member.id,
 	});
 }
 
 export function trackQuickActionCommandSent(member: GuildMember) {
-	return trackEvent("Quick Action Command Sent", {
-		"Answer Overflow Account Id": member.id,
-		members: [{ prefix: "User", member }],
+	return track("Quick Action Command Sent", {
+		user: memberToAnalytics(member),
+		accountId: member.id,
 	});
 }
 
@@ -224,12 +283,12 @@ export function trackSimilarThreadsButtonClicked(
 	thread: ThreadChannel,
 	resultsCount: number,
 ) {
-	return trackEvent("Similar Threads Button Clicked", {
-		"Answer Overflow Account Id": member.id,
-		members: [{ prefix: "User", member }],
-		thread,
-		guild: thread.guild,
+	return track("Similar Threads Button Clicked", {
+		server: { id: thread.guild.id, name: thread.guild.name },
+		user: memberToAnalytics(member),
+		thread: threadToAnalytics(thread),
 		"Results Count": resultsCount,
+		accountId: member.id,
 	});
 }
 
@@ -238,11 +297,11 @@ export function trackSimilarThreadSolvedClicked(
 	sourceThread: ThreadChannel,
 	similarThreadId: string,
 ) {
-	return trackEvent("Similar Thread Solved Clicked", {
-		"Answer Overflow Account Id": member.id,
-		members: [{ prefix: "User", member }],
-		thread: sourceThread,
-		guild: sourceThread.guild,
+	return track("Similar Thread Solved Clicked", {
+		server: { id: sourceThread.guild.id, name: sourceThread.guild.name },
+		user: memberToAnalytics(member),
+		thread: threadToAnalytics(sourceThread),
 		"Similar Thread Id": similarThreadId,
+		accountId: member.id,
 	});
 }

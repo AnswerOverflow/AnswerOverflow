@@ -1,188 +1,130 @@
-import type {
-	Channel,
-	Guild,
-	GuildMember,
-	Message,
-	PartialGuildMember,
-	ThreadChannel,
-} from "discord.js";
 import { Effect } from "effect";
-import { PostHogCaptureClient } from "./capture-client";
+import type {
+	BaseServerProps,
+	ServerEventName,
+	ServerEvents,
+} from "../events/server";
 import {
-	channelWithDiscordInfoToAnalyticsData as convertChannel,
-	serverWithDiscordInfoToAnalyticsData as convertServer,
-	threadWithDiscordInfoToAnalyticsData as convertThread,
-} from "./discord-helpers";
-import type { BaseProps } from "./types";
+	flattenChannel,
+	flattenChannelWithSettings,
+	flattenMember,
+	flattenMessageInfo,
+	flattenServer,
+	flattenServerWithSettings,
+	flattenThread,
+} from "../flatten";
+import { PostHogCaptureClient } from "./capture-client";
 
-type ServerWithSettings = {
-	discordId: string;
-	name: string;
-	preferencesId?: string;
-};
+const BASE_KEYS = new Set([
+	"server",
+	"channel",
+	"thread",
+	"user",
+	"questionAsker",
+	"questionSolver",
+	"markAsSolver",
+	"question",
+	"solution",
+	"accountId",
+]);
 
-type ChannelWithSettings = {
-	id: string | bigint;
-	name: string;
-	type: number;
-	serverId: string | bigint;
-	flags: {
-		indexingEnabled: boolean;
-		markSolutionEnabled: boolean;
-		sendMarkSolutionInstructionsInNewThreads: boolean;
-		autoThreadEnabled: boolean;
-		forumGuidelinesConsentEnabled: boolean;
-		solutionTagId?: string | bigint;
-		inviteCode?: string;
-	} | null;
-};
-
-type ServerPreferences = {
-	readTheRulesConsentEnabled?: boolean;
-};
-
-type MemberWithPrefix = {
-	prefix: string;
-	member: GuildMember | PartialGuildMember;
-};
-
-type MessageWithPrefix = {
-	prefix: string;
-	message: Message;
-};
-
-type PropsWithDiscordObjects = BaseProps & {
-	guild?: Guild;
-	serverWithSettings?: ServerWithSettings;
-	serverPreferences?: ServerPreferences;
-	channel?: Channel;
-	channelWithSettings?: ChannelWithSettings;
-	thread?: ThreadChannel;
-	members?: MemberWithPrefix[];
-	messages?: MessageWithPrefix[];
-};
-
-function memberToUserProps(
-	prefix: string,
-	member: GuildMember | PartialGuildMember,
-) {
-	return {
-		[`${prefix} Id`]: member.id,
-		[`${prefix} Joined At`]: member.joinedAt?.getTime(),
-		[`${prefix} Time In Server In Ms`]:
-			member.joinedAt?.getTime() && Date.now() - member.joinedAt.getTime(),
-	};
-}
-
-function messageToProps(prefix: string, message: Message) {
-	return {
-		[`${prefix} Id`]: message.id,
-		[`${prefix} Created At`]: message.createdTimestamp,
-		[`${prefix} Content Length`]: message.content.length,
-		[`${prefix} Server Id`]: message.guild?.id,
-		[`${prefix} Channel Id`]: message.channel.isThread()
-			? message.channel.parentId
-			: message.channel.id,
-		[`${prefix} Thread Id`]: message.channel.isThread()
-			? message.channel.id
-			: undefined,
-	};
-}
-
-function enrichProps(props: PropsWithDiscordObjects): BaseProps {
-	const enriched: BaseProps & Record<string, unknown> = {
-		...props,
-	};
-
-	if (props.guild) {
-		const serverProps = convertServer({
-			guild: props.guild,
-			serverWithSettings: props.serverWithSettings ?? {
-				discordId: props.guild.id,
-				name: props.guild.name,
-			},
-			serverPreferences: props.serverPreferences,
-		});
-		Object.assign(enriched, serverProps);
-	}
-
-	if (props.channel && props.channelWithSettings) {
-		const channelProps = convertChannel({
-			answerOverflowChannel: props.channelWithSettings,
-			discordChannel: props.channel,
-		});
-		Object.assign(enriched, channelProps);
-	}
-
-	if (props.thread) {
-		const threadProps = convertThread({
-			thread: props.thread,
-		});
-		Object.assign(enriched, threadProps);
-	}
-
-	if (props.members) {
-		for (const { prefix, member } of props.members) {
-			Object.assign(enriched, memberToUserProps(prefix, member));
-		}
-	}
-
-	if (props.messages) {
-		for (const { prefix, message } of props.messages) {
-			Object.assign(enriched, messageToProps(prefix, message));
-		}
-	}
-
-	delete enriched.guild;
-	delete enriched.serverWithSettings;
-	delete enriched.serverPreferences;
-	delete enriched.channel;
-	delete enriched.channelWithSettings;
-	delete enriched.thread;
-	delete enriched.members;
-	delete enriched.messages;
-
-	return enriched as BaseProps;
-}
-
-export function trackEvent<K extends BaseProps>(
-	eventName: string,
-	props: K | (() => Promise<K>),
+export function track<K extends ServerEventName>(
+	event: K,
+	props: ServerEvents[K] & Partial<BaseServerProps>,
 ): Effect.Effect<void, never, PostHogCaptureClient> {
 	return Effect.gen(function* () {
 		const posthog = yield* PostHogCaptureClient;
 		if (!posthog) {
 			console.warn(
-				`[Analytics] PostHog client not initialized, skipping event: ${eventName}`,
+				`[Analytics] PostHog client not initialized, skipping event: ${event}`,
 			);
 			return;
 		}
 
-		const resolvedProps =
-			typeof props === "function" ? yield* Effect.promise(props) : props;
+		const flattenedProps: Record<string, unknown> = {};
+		const p = props;
 
-		const enrichedProps = enrichProps(resolvedProps as PropsWithDiscordObjects);
+		if (p.server) {
+			if (p.server.readTheRulesConsentEnabled) {
+				Object.assign(flattenedProps, flattenServerWithSettings(p.server));
+			} else {
+				Object.assign(flattenedProps, flattenServer(p.server));
+			}
+		}
 
-		const { "Answer Overflow Account Id": aoId } = enrichedProps;
+		if (p.channel) {
+			if (p.channel.indexingEnabled) {
+				Object.assign(flattenedProps, flattenChannelWithSettings(p.channel));
+			} else {
+				Object.assign(flattenedProps, flattenChannel(p.channel));
+			}
+		}
+
+		if (p.thread) {
+			Object.assign(flattenedProps, flattenThread(p.thread));
+		}
+
+		if (p.user) {
+			Object.assign(flattenedProps, flattenMember(p.user, "User"));
+		}
+
+		if (p.questionAsker) {
+			Object.assign(
+				flattenedProps,
+				flattenMember(p.questionAsker, "Question Asker"),
+			);
+		}
+
+		if (p.questionSolver) {
+			Object.assign(
+				flattenedProps,
+				flattenMember(p.questionSolver, "Question Solver"),
+			);
+		}
+
+		if (p.markAsSolver) {
+			Object.assign(
+				flattenedProps,
+				flattenMember(p.markAsSolver, "Mark As Solver"),
+			);
+		}
+
+		if (p.question) {
+			Object.assign(flattenedProps, flattenMessageInfo(p.question, "Question"));
+		}
+
+		if (p.solution) {
+			Object.assign(flattenedProps, flattenMessageInfo(p.solution, "Solution"));
+		}
+
+		if (p.accountId && typeof p.accountId === "string") {
+			flattenedProps["Answer Overflow Account Id"] = p.accountId;
+		}
+
+		for (const [key, value] of Object.entries(p)) {
+			if (!BASE_KEYS.has(key) && value !== undefined) {
+				flattenedProps[key] = value;
+			}
+		}
+
+		const aoId = flattenedProps["Answer Overflow Account Id"];
 		if (!aoId) {
 			console.error(
-				`[Analytics] Missing "Answer Overflow Account Id" for event "${eventName}". Props:`,
-				Object.keys(enrichedProps),
+				`[Analytics] Missing "Answer Overflow Account Id" for event "${event}". Props:`,
+				Object.keys(flattenedProps),
 			);
 			return;
 		}
+
 		const captureData: Parameters<typeof posthog.capture>[0] = {
-			event: eventName,
-			distinctId: aoId,
-			properties: enrichedProps,
+			event,
+			distinctId: String(aoId),
+			properties: flattenedProps,
 		};
 
 		const serverId =
-			"Server Id" in enrichedProps ? enrichedProps["Server Id"] : undefined;
-		if (
-			(serverId !== undefined && typeof serverId === "string") ||
-			typeof serverId === "number"
-		) {
+			"Server Id" in flattenedProps ? flattenedProps["Server Id"] : undefined;
+		if (serverId !== undefined) {
 			captureData.groups = {
 				server: String(serverId),
 			};
@@ -194,14 +136,13 @@ export function trackEvent<K extends BaseProps>(
 	}).pipe(
 		Effect.catchAll((error) =>
 			Effect.sync(() => {
-				console.error(
-					`[Analytics] Failed to track event "${eventName}":`,
-					error,
-				);
+				console.error(`[Analytics] Failed to track event "${event}":`, error);
 			}),
 		),
 	);
 }
+
+export const trackEvent = track;
 
 export function registerServerGroup(props: {
 	"Server Id": string;

@@ -118,7 +118,12 @@ export function syncGuild(guild: Guild) {
 			yield* database.private.servers.upsertServer(aoServerData);
 
 		if (isNew) {
-			yield* catchAllSilentWithReport(registerServerGroup(guild, guild.id));
+			yield* catchAllSilentWithReport(
+				registerServerGroup({
+					"Server Id": guild.id,
+					"Server Name": guild.name,
+				}),
+			);
 
 			yield* database.private.server_preferences.updateServerPreferences({
 				serverId: BigInt(guild.id),
