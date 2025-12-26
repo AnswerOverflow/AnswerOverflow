@@ -13,6 +13,7 @@ import {
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	makeDismissButton,
+	makeSimilarThreadsButton,
 } from "../utils/discord-components";
 import { catchAllSilentWithReport } from "../utils/error-reporting";
 
@@ -179,6 +180,12 @@ export function handleSendMarkSolutionInstructions(
 			new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
 				makeDismissButton(threadOwner.id),
 			);
+
+		if (channelSettings.flags.indexingEnabled) {
+			components.addComponents(
+				makeSimilarThreadsButton(thread.id, thread.guildId),
+			);
+		}
 
 		yield* Effect.tryPromise({
 			try: () =>

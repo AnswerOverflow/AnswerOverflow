@@ -46,9 +46,16 @@ export async function findSimilarThreads(
 
 	const threadIdsFromMessages = new Set(
 		Arr.filter(
-			messageResults.map((m) =>
-				m.parentChannelId ? m.channelId.toString() : null,
-			),
+			messageResults.flatMap((m) => {
+				const ids: Array<string | null> = [];
+				if (m.parentChannelId) {
+					ids.push(m.channelId.toString());
+				}
+				if (m.childThreadId) {
+					ids.push(m.childThreadId.toString());
+				}
+				return ids.length > 0 ? ids : [null];
+			}),
 			Predicate.isNotNull,
 		),
 	);
@@ -73,6 +80,9 @@ export async function findSimilarThreads(
 	for (const message of messageResults) {
 		if (message.parentChannelId) {
 			threadServerMap.set(message.channelId.toString(), message.serverId);
+		}
+		if (message.childThreadId) {
+			threadServerMap.set(message.childThreadId.toString(), message.serverId);
 		}
 	}
 

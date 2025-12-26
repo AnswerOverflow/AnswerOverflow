@@ -223,7 +223,7 @@ async function enrichedMessageWithServerAndChannelsInternal(
 	ctx: QueryCtxWithCache,
 	message: Message,
 ) {
-	const { parentChannelId } = message;
+	const { parentChannelId, childThreadId } = message;
 
 	const indexingEnabled = await ctx.cache.isChannelIndexingEnabled(
 		message.channelId,
@@ -231,20 +231,24 @@ async function enrichedMessageWithServerAndChannelsInternal(
 	);
 	if (!indexingEnabled) return null;
 
-	const [enrichedMessage, parentChannel, channel, server] = await Promise.all([
-		enrichMessage(ctx, message),
-		parentChannelId ? ctx.cache.getChannel(parentChannelId) : undefined,
-		ctx.cache.getChannel(message.channelId),
-		ctx.cache.getServer(message.serverId),
-	]);
+	const [enrichedMessage, parentChannel, channel, childThread, server] =
+		await Promise.all([
+			enrichMessage(ctx, message),
+			parentChannelId ? ctx.cache.getChannel(parentChannelId) : undefined,
+			ctx.cache.getChannel(message.channelId),
+			childThreadId ? ctx.cache.getChannel(childThreadId) : undefined,
+			ctx.cache.getServer(message.serverId),
+		]);
 
 	if (!channel || !server || server.kickedTime || !enrichedMessage) return null;
+
+	const thread = parentChannelId ? channel : (childThread ?? null);
 
 	return {
 		channel: parentChannel ?? channel,
 		message: enrichedMessage,
 		server,
-		thread: parentChannel ? channel : null,
+		thread,
 	} satisfies SearchResult;
 }
 

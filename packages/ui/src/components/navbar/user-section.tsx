@@ -62,10 +62,10 @@ function UserAvatar({
 			<DropdownMenuContent className="z-[100] mr-4 mt-4 w-40">
 				{showDashboardLink && (
 					<>
-						<DropdownMenuItem asChild className="md:hidden">
+						<DropdownMenuItem asChild>
 							<Link href="/dashboard">Dashboard</Link>
 						</DropdownMenuItem>
-						<DropdownMenuSeparator className="md:hidden" />
+						<DropdownMenuSeparator />
 					</>
 				)}
 				{isAdmin && (

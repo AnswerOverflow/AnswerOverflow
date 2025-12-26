@@ -419,6 +419,9 @@ export const getMessagePageHeaderData = privateQuery({
 			if (targetMessage?.parentChannelId) {
 				return ctx.cache.getChannel(targetMessage.channelId);
 			}
+			if (targetMessage?.childThreadId) {
+				return ctx.cache.getChannel(targetMessage.childThreadId);
+			}
 			return ctx.cache.getChannel(args.messageId);
 		};
 

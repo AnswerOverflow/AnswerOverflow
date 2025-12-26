@@ -3,7 +3,7 @@
 	"globalDependencies": ["**/.env.*local"],
 	"globalEnv": [
 		"AUTH_BEARER_TOKEN_VERCEL",
-		"AXIOM_API_KEY",
+		"AXIOM_API_TOKEN",
 		"BACKEND_ACCESS_TOKEN",
 		"BETTER_AUTH_SECRET",
 		"BUCKET_NAME",

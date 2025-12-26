@@ -5,6 +5,9 @@ export const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
 export const DISMISS_ACTION_PREFIX = "dismiss";
 export const DISMISS_BUTTON_LABEL = "Dismiss";
 
+export const SIMILAR_THREADS_ACTION_PREFIX = "similar-threads";
+export const SIMILAR_THREADS_BUTTON_LABEL = "View Similar Threads";
+
 export function makeDismissButton(dismisserId: string): ButtonBuilder {
 	return new ButtonBuilder({
 		label: DISMISS_BUTTON_LABEL,
@@ -21,5 +24,16 @@ export function makeDmReplyButton(userId: string): ButtonBuilder {
 		label: DM_REPLY_BUTTON_LABEL,
 		style: ButtonStyle.Primary,
 		customId: `${DM_REPLY_ACTION_PREFIX}:${userId}`,
+	});
+}
+
+export function makeSimilarThreadsButton(
+	threadId: string,
+	serverId: string,
+): ButtonBuilder {
+	return new ButtonBuilder({
+		label: SIMILAR_THREADS_BUTTON_LABEL,
+		style: ButtonStyle.Secondary,
+		customId: `${SIMILAR_THREADS_ACTION_PREFIX}:${threadId}:${serverId}`,
 	});
 }

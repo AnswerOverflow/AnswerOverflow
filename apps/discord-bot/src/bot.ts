@@ -12,6 +12,7 @@ import { Discord } from "./core/discord-service";
 import { ConsentButtonHandlerLayer } from "./interactions/consent-button";
 import { DismissButtonHandlerLayer } from "./interactions/dismiss-button";
 import { DMReplyHandlerLayer } from "./interactions/dm-reply-button";
+import { SimilarThreadsButtonHandlerLayer } from "./interactions/similar-threads-button";
 import { ForumGuidelinesConsentHandlerLayer } from "./interactions/forum-guidelines-consent";
 import { QuickActionCommandHandlerLayer } from "./interactions/quick-action";
 import { ReadTheRulesConsentHandlerLayer } from "./interactions/read-the-rules-consent";
@@ -37,6 +38,7 @@ export const BotLayers = Layer.mergeAll(
 	ConsentButtonHandlerLayer,
 	DismissButtonHandlerLayer,
 	DMReplyHandlerLayer,
+	SimilarThreadsButtonHandlerLayer,
 	ForumGuidelinesConsentHandlerLayer,
 	ReadTheRulesConsentHandlerLayer,
 	LeaderboardCommandHandlerLayer,
