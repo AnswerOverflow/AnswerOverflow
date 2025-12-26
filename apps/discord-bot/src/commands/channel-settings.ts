@@ -1,4 +1,5 @@
 import { Database } from "@packages/database/database";
+import { url } from "@packages/ui/utils/links";
 import type { ChatInputCommandInteraction } from "discord.js";
 import {
 	ActionRowBuilder,
@@ -13,9 +14,7 @@ import { Discord } from "../core/discord-service";
 import { commandExecuted } from "../metrics";
 
 function getDashboardUrl(serverId: string, channelId: string): string {
-	const baseUrl =
-		process.env.NEXT_PUBLIC_BASE_URL ?? "https://app.answeroverflow.com";
-	return `${baseUrl}/dashboard/${serverId}/channels?channels=${channelId}`;
+	return url.mainSite(`/dashboard/${serverId}/channels?channels=${channelId}`);
 }
 
 export const handleChannelSettingsCommand = Effect.fn(

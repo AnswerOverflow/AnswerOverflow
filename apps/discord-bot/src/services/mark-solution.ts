@@ -1,4 +1,5 @@
 import type { ServerPreferences } from "@packages/database/convex/schema";
+import { url } from "@packages/ui/utils/links";
 import type { Message } from "discord.js";
 import {
 	ActionRowBuilder,
@@ -27,13 +28,6 @@ export function makeConsentButtonData(source: ConsentSource) {
 
 export function makeConsentButton(source: ConsentSource) {
 	return new ButtonBuilder(makeConsentButtonData(source));
-}
-
-function makeMainSiteLink(path: string): string {
-	const baseUrl =
-		process.env.NEXT_PUBLIC_BASE_URL || "https://www.answeroverflow.com";
-
-	return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 export function makeMarkSolutionResponse({
@@ -93,14 +87,20 @@ export function makeMarkSolutionResponse({
 	);
 
 	if (channelSettings.flags.indexingEnabled) {
+		const tenant = serverPreferences?.customDomain
+			? {
+					customDomain: serverPreferences.customDomain,
+					subpath: serverPreferences.subpath,
+				}
+			: null;
 		const label = serverPreferences?.customDomain
 			? `View on ${server.name}`
 			: "View on Answer Overflow";
-		const url = makeMainSiteLink(`/m/${solution.id}`);
+		const messageUrl = url.canonical(tenant, `/m/${solution.id}`);
 		components.addComponents(
 			new ButtonBuilder()
 				.setLabel(label)
-				.setURL(url)
+				.setURL(messageUrl)
 				.setStyle(ButtonStyle.Link),
 		);
 	}
