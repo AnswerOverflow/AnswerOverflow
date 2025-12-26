@@ -58,6 +58,10 @@ export type ClientEvents = {
 	"MCP Provider Select": {
 		provider: string;
 	};
+	"Feedback Submitted": {
+		feedback: string;
+		page: string;
+	};
 };
 
 export type ClientEventName = keyof ClientEvents;

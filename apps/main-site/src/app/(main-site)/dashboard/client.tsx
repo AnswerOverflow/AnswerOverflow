@@ -221,7 +221,7 @@ function SignedOutDashboard({
 				<div className="w-full max-w-sm">
 					<div className="flex flex-col items-center mb-8">
 						<Link href="/" className="mb-6">
-							<AnswerOverflowLogo width={180} />
+							<AnswerOverflowLogo width={160} />
 							<span className="sr-only">Answer Overflow</span>
 						</Link>
 						<p className="text-sm text-muted-foreground">Sign in to continue</p>

@@ -5,6 +5,7 @@ import { AnswerOverflowLogo } from "../answer-overflow-logo";
 import { useSession } from "../convex-client-provider";
 import { Link } from "../link";
 import { LinkButton } from "../link-button";
+import { FeedbackButton } from "./feedback-button";
 import { NavbarBase } from "./navbar-base";
 import { UserSection } from "./user-section";
 
@@ -16,7 +17,7 @@ export function MainSiteNavbar() {
 			href="/"
 			className="text-foreground hover:text-foreground no-underline hover:no-underline"
 		>
-			<AnswerOverflowLogo width={180} />
+			<AnswerOverflowLogo width={160} />
 		</Link>
 	);
 
@@ -31,6 +32,7 @@ export function MainSiteNavbar() {
 				<Search className="h-5 w-5" />
 				<span className="sr-only">Search</span>
 			</LinkButton>
+			<FeedbackButton />
 			{!session?.user && (
 				<LinkButton
 					className="hidden md:block"

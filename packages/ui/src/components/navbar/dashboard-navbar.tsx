@@ -65,7 +65,7 @@ export function DashboardNavbar({
 
 					{/* Logo */}
 					<Link href={homeHref} className="hidden lg:flex items-center">
-						<AnswerOverflowLogo width={180} />
+						<AnswerOverflowLogo width={160} />
 						<span className="sr-only">Answer Overflow</span>
 					</Link>
 
