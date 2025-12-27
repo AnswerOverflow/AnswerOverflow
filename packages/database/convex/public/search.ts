@@ -5,13 +5,13 @@ import { asyncMap } from "convex-helpers";
 import { Array as Arr, Predicate } from "effect";
 import { components, internal } from "../_generated/api";
 import { internalAction, internalQuery } from "../client";
-import { createDataAccessCache } from "../shared/dataAccess";
 import { CHANNEL_TYPE } from "../shared/channels";
 import {
+	createDataAccessCache,
 	enrichMessage,
 	enrichMessagesWithServerAndChannels,
-	searchMessages,
 	type SearchResult,
+	searchMessages,
 } from "../shared/dataAccess";
 import { findSimilarThreads } from "../shared/similarThreads";
 import { publicAction, publicQuery } from "./custom_functions";

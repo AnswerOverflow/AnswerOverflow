@@ -2,10 +2,9 @@ import { authenticatedAction, authenticatedQuery } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import {
 	fetchGitHubInstallationRepos,
+	GitHubErrorCodes,
 	getGitHubAccountByUserId,
-	isGitHubTokenExpired,
-	refreshGitHubToken,
-	updateGitHubAccountTokens,
+	getValidAccessToken,
 } from "../shared/github";
 
 export const getGitHubAccount = authenticatedQuery({
@@ -46,46 +45,23 @@ export const getAccessibleRepos = authenticatedAction({
 			return {
 				success: false as const,
 				error: "GitHub account not linked",
-				code: "NOT_LINKED" as const,
+				code: GitHubErrorCodes.NOT_LINKED,
 			};
 		}
 
-		if (!account.accessToken) {
+		const tokenResult = await getValidAccessToken(ctx, account);
+		if (!tokenResult.success) {
 			return {
 				success: false as const,
-				error: "No access token available",
-				code: "NO_TOKEN" as const,
+				error: tokenResult.error,
+				code: tokenResult.code,
 			};
-		}
-
-		let accessToken = account.accessToken;
-
-		if (isGitHubTokenExpired(account.accessTokenExpiresAt)) {
-			if (!account.refreshToken) {
-				return {
-					success: false as const,
-					error: "Token expired and no refresh token available",
-					code: "REFRESH_REQUIRED" as const,
-				};
-			}
-
-			try {
-				const newTokens = await refreshGitHubToken(account.refreshToken);
-				await updateGitHubAccountTokens(ctx, account.accountId, newTokens);
-				accessToken = newTokens.accessToken;
-			} catch (error) {
-				return {
-					success: false as const,
-					error:
-						error instanceof Error ? error.message : "Failed to refresh token",
-					code: "REFRESH_FAILED" as const,
-				};
-			}
 		}
 
 		try {
-			const { repos, hasAllReposAccess } =
-				await fetchGitHubInstallationRepos(accessToken);
+			const { repos, hasAllReposAccess } = await fetchGitHubInstallationRepos(
+				tokenResult.accessToken,
+			);
 
 			return {
 				success: true as const,
@@ -96,7 +72,7 @@ export const getAccessibleRepos = authenticatedAction({
 			return {
 				success: false as const,
 				error: error instanceof Error ? error.message : "Failed to fetch repos",
-				code: "FETCH_FAILED" as const,
+				code: GitHubErrorCodes.FETCH_FAILED,
 			};
 		}
 	},

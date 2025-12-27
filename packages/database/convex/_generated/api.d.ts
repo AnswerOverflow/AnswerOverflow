@@ -27,6 +27,7 @@ import type * as client_guildManager from "../client/guildManager.js";
 import type * as client_index from "../client/index.js";
 import type * as client_private from "../client/private.js";
 import type * as http from "../http.js";
+import type * as internal_rateLimiter from "../internal/rateLimiter.js";
 import type * as migrations_index from "../migrations/index.js";
 import type * as private_attachments from "../private/attachments.js";
 import type * as private_cache from "../private/cache.js";
@@ -63,6 +64,7 @@ import type * as shared_messages from "../shared/messages.js";
 import type * as shared_permissions from "../shared/permissions.js";
 import type * as shared_permissionsShared from "../shared/permissionsShared.js";
 import type * as shared_publicSchemas from "../shared/publicSchemas.js";
+import type * as shared_rateLimiter from "../shared/rateLimiter.js";
 import type * as shared_servers from "../shared/servers.js";
 import type * as shared_shared from "../shared/shared.js";
 import type * as shared_similarThreads from "../shared/similarThreads.js";
@@ -97,6 +99,7 @@ declare const fullApi: ApiFromModules<{
   "client/index": typeof client_index;
   "client/private": typeof client_private;
   http: typeof http;
+  "internal/rateLimiter": typeof internal_rateLimiter;
   "migrations/index": typeof migrations_index;
   "private/attachments": typeof private_attachments;
   "private/cache": typeof private_cache;
@@ -133,6 +136,7 @@ declare const fullApi: ApiFromModules<{
   "shared/permissions": typeof shared_permissions;
   "shared/permissionsShared": typeof shared_permissionsShared;
   "shared/publicSchemas": typeof shared_publicSchemas;
+  "shared/rateLimiter": typeof shared_rateLimiter;
   "shared/servers": typeof shared_servers;
   "shared/shared": typeof shared_shared;
   "shared/similarThreads": typeof shared_similarThreads;
@@ -1578,6 +1582,140 @@ export declare const components: {
           state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
         }
       >;
+    };
+  };
+  rateLimiter: {
+    lib: {
+      checkRateLimit: FunctionReference<
+        "query",
+        "internal",
+        {
+          config:
+            | {
+                capacity?: number;
+                kind: "token bucket";
+                maxReserved?: number;
+                period: number;
+                rate: number;
+                shards?: number;
+                start?: null;
+              }
+            | {
+                capacity?: number;
+                kind: "fixed window";
+                maxReserved?: number;
+                period: number;
+                rate: number;
+                shards?: number;
+                start?: number;
+              };
+          count?: number;
+          key?: string;
+          name: string;
+          reserve?: boolean;
+          throws?: boolean;
+        },
+        { ok: true; retryAfter?: number } | { ok: false; retryAfter: number }
+      >;
+      clearAll: FunctionReference<
+        "mutation",
+        "internal",
+        { before?: number },
+        null
+      >;
+      getServerTime: FunctionReference<"mutation", "internal", {}, number>;
+      getValue: FunctionReference<
+        "query",
+        "internal",
+        {
+          config:
+            | {
+                capacity?: number;
+                kind: "token bucket";
+                maxReserved?: number;
+                period: number;
+                rate: number;
+                shards?: number;
+                start?: null;
+              }
+            | {
+                capacity?: number;
+                kind: "fixed window";
+                maxReserved?: number;
+                period: number;
+                rate: number;
+                shards?: number;
+                start?: number;
+              };
+          key?: string;
+          name: string;
+          sampleShards?: number;
+        },
+        {
+          config:
+            | {
+                capacity?: number;
+                kind: "token bucket";
+                maxReserved?: number;
+                period: number;
+                rate: number;
+                shards?: number;
+                start?: null;
+              }
+            | {
+                capacity?: number;
+                kind: "fixed window";
+                maxReserved?: number;
+                period: number;
+                rate: number;
+                shards?: number;
+                start?: number;
+              };
+          shard: number;
+          ts: number;
+          value: number;
+        }
+      >;
+      rateLimit: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          config:
+            | {
+                capacity?: number;
+                kind: "token bucket";
+                maxReserved?: number;
+                period: number;
+                rate: number;
+                shards?: number;
+                start?: null;
+              }
+            | {
+                capacity?: number;
+                kind: "fixed window";
+                maxReserved?: number;
+                period: number;
+                rate: number;
+                shards?: number;
+                start?: number;
+              };
+          count?: number;
+          key?: string;
+          name: string;
+          reserve?: boolean;
+          throws?: boolean;
+        },
+        { ok: true; retryAfter?: number } | { ok: false; retryAfter: number }
+      >;
+      resetRateLimit: FunctionReference<
+        "mutation",
+        "internal",
+        { key?: string; name: string },
+        null
+      >;
+    };
+    time: {
+      getServerTime: FunctionReference<"mutation", "internal", {}, number>;
     };
   };
   rootChannelMessageCounts: {

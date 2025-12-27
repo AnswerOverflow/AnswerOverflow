@@ -1,6 +1,6 @@
 export type {
-	ClientEvents as EventMap,
 	ClientEventName as EventName,
+	ClientEvents as EventMap,
 } from "@packages/database/analytics/events/client";
 export type {
 	AnalyticsChannel,

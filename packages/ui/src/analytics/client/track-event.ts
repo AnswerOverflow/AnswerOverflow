@@ -1,4 +1,7 @@
-import type { PostHog } from "posthog-js";
+import type {
+	ClientEventName,
+	ClientEvents,
+} from "@packages/database/analytics/events/client";
 
 import {
 	flattenChannel,
@@ -7,15 +10,12 @@ import {
 	flattenThread,
 } from "@packages/database/analytics/flatten";
 import type {
-	ClientEventName,
-	ClientEvents,
-} from "@packages/database/analytics/events/client";
-import type {
 	AnalyticsChannel,
 	AnalyticsMessage,
 	AnalyticsServer,
 	AnalyticsThread,
 } from "@packages/database/analytics/types";
+import type { PostHog } from "posthog-js";
 
 type MaybeBaseProps = {
 	server?: AnalyticsServer | null;

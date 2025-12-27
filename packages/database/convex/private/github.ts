@@ -10,11 +10,11 @@ import { githubIssueStatusValidator } from "../schema";
 import {
 	createGitHubIssue,
 	fetchGitHubInstallationRepos,
+	GitHubErrorCodes,
 	getBetterAuthUserIdByDiscordId,
 	getGitHubAccountByDiscordId,
-	isGitHubTokenExpired,
-	refreshGitHubToken,
-	updateGitHubAccountTokens,
+	getValidAccessToken,
+	validateRepoOwnerAndName,
 } from "../shared/github";
 
 export const getAccessibleReposByDiscordId = privateAction({
@@ -22,52 +22,50 @@ export const getAccessibleReposByDiscordId = privateAction({
 		discordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
+		const userId = await getBetterAuthUserIdByDiscordId(ctx, args.discordId);
+		if (!userId) {
+			return {
+				success: false as const,
+				error: "User not found",
+				code: GitHubErrorCodes.USER_NOT_FOUND,
+			};
+		}
+
+		const rateLimitResult = await ctx.runMutation(
+			internal.internal.rateLimiter.checkGitHubFetchRepos,
+			{ userId },
+		);
+		if (!rateLimitResult.ok) {
+			return {
+				success: false as const,
+				error: `Rate limited. Try again in ${Math.ceil((rateLimitResult.retryAfter ?? 0) / 1000)} seconds.`,
+				code: GitHubErrorCodes.RATE_LIMITED,
+			};
+		}
+
 		const account = await getGitHubAccountByDiscordId(ctx, args.discordId);
 
 		if (!account) {
 			return {
 				success: false as const,
 				error: "GitHub account not linked",
-				code: "NOT_LINKED" as const,
+				code: GitHubErrorCodes.NOT_LINKED,
 			};
 		}
 
-		if (!account.accessToken) {
+		const tokenResult = await getValidAccessToken(ctx, account);
+		if (!tokenResult.success) {
 			return {
 				success: false as const,
-				error: "No access token available",
-				code: "NO_TOKEN" as const,
+				error: tokenResult.error,
+				code: tokenResult.code,
 			};
-		}
-
-		let accessToken = account.accessToken;
-
-		if (isGitHubTokenExpired(account.accessTokenExpiresAt)) {
-			if (!account.refreshToken) {
-				return {
-					success: false as const,
-					error: "Token expired and no refresh token available",
-					code: "REFRESH_REQUIRED" as const,
-				};
-			}
-
-			try {
-				const newTokens = await refreshGitHubToken(account.refreshToken);
-				await updateGitHubAccountTokens(ctx, account.accountId, newTokens);
-				accessToken = newTokens.accessToken;
-			} catch (error) {
-				return {
-					success: false as const,
-					error:
-						error instanceof Error ? error.message : "Failed to refresh token",
-					code: "REFRESH_FAILED" as const,
-				};
-			}
 		}
 
 		try {
-			const { repos, hasAllReposAccess } =
-				await fetchGitHubInstallationRepos(accessToken);
+			const { repos, hasAllReposAccess } = await fetchGitHubInstallationRepos(
+				tokenResult.accessToken,
+			);
 
 			return {
 				success: true as const,
@@ -78,7 +76,7 @@ export const getAccessibleReposByDiscordId = privateAction({
 			return {
 				success: false as const,
 				error: error instanceof Error ? error.message : "Failed to fetch repos",
-				code: "FETCH_FAILED" as const,
+				code: GitHubErrorCodes.FETCH_FAILED,
 			};
 		}
 	},
@@ -97,66 +95,63 @@ export const createGitHubIssueFromDiscord = privateAction({
 		discordThreadId: v.optional(v.int64()),
 	},
 	handler: async (ctx, args) => {
+		const validation = validateRepoOwnerAndName(args.repoOwner, args.repoName);
+		if (!validation.valid) {
+			return {
+				success: false as const,
+				error: validation.error,
+				code: GitHubErrorCodes.INVALID_REPO,
+			};
+		}
+
+		const userId = await getBetterAuthUserIdByDiscordId(ctx, args.discordId);
+		if (!userId) {
+			return {
+				success: false as const,
+				error: "User not found",
+				code: GitHubErrorCodes.USER_NOT_FOUND,
+			};
+		}
+
+		const rateLimitResult = await ctx.runMutation(
+			internal.internal.rateLimiter.checkGitHubCreateIssue,
+			{ userId },
+		);
+		if (!rateLimitResult.ok) {
+			return {
+				success: false as const,
+				error: `Rate limited. Try again in ${Math.ceil((rateLimitResult.retryAfter ?? 0) / 1000)} seconds.`,
+				code: GitHubErrorCodes.RATE_LIMITED,
+			};
+		}
+
 		const account = await getGitHubAccountByDiscordId(ctx, args.discordId);
 
 		if (!account) {
 			return {
 				success: false as const,
 				error: "GitHub account not linked",
-				code: "NOT_LINKED" as const,
+				code: GitHubErrorCodes.NOT_LINKED,
 			};
 		}
 
-		if (!account.accessToken) {
+		const tokenResult = await getValidAccessToken(ctx, account);
+		if (!tokenResult.success) {
 			return {
 				success: false as const,
-				error: "No access token available",
-				code: "NO_TOKEN" as const,
+				error: tokenResult.error,
+				code: tokenResult.code,
 			};
-		}
-
-		let accessToken = account.accessToken;
-
-		if (isGitHubTokenExpired(account.accessTokenExpiresAt)) {
-			if (!account.refreshToken) {
-				return {
-					success: false as const,
-					error: "Token expired and no refresh token available",
-					code: "REFRESH_REQUIRED" as const,
-				};
-			}
-
-			try {
-				const newTokens = await refreshGitHubToken(account.refreshToken);
-				await updateGitHubAccountTokens(ctx, account.accountId, newTokens);
-				accessToken = newTokens.accessToken;
-			} catch (error) {
-				return {
-					success: false as const,
-					error:
-						error instanceof Error ? error.message : "Failed to refresh token",
-					code: "REFRESH_FAILED" as const,
-				};
-			}
 		}
 
 		try {
 			const issue = await createGitHubIssue(
-				accessToken,
+				tokenResult.accessToken,
 				args.repoOwner,
 				args.repoName,
 				args.title,
 				args.body,
 			);
-
-			const userId = await getBetterAuthUserIdByDiscordId(ctx, args.discordId);
-			if (!userId) {
-				return {
-					success: false as const,
-					error: "User not found",
-					code: "USER_NOT_FOUND" as const,
-				};
-			}
 
 			await ctx.runMutation(
 				internal.private.github.createGitHubIssueRecordInternal,
@@ -189,7 +184,7 @@ export const createGitHubIssueFromDiscord = privateAction({
 				success: false as const,
 				error:
 					error instanceof Error ? error.message : "Failed to create issue",
-				code: "CREATE_FAILED" as const,
+				code: GitHubErrorCodes.CREATE_FAILED,
 			};
 		}
 	},
