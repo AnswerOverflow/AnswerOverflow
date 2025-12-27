@@ -50,6 +50,12 @@ export const createAuthOptions = (
 		advanced: {
 			disableCSRFCheck: true,
 		},
+		account: {
+			accountLinking: {
+				enabled: true,
+				allowDifferentEmails: true,
+			},
+		},
 		baseURL: process.env.SITE_URL,
 		database: authComponent.adapter(ctx),
 		secret: (() => {
@@ -134,6 +140,15 @@ export const createAuthOptions = (
 				})(),
 				scope: ["identify", "email", "guilds"],
 			},
+			...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+				? {
+						github: {
+							clientId: process.env.GITHUB_CLIENT_ID,
+							clientSecret: process.env.GITHUB_CLIENT_SECRET,
+							scope: [],
+						},
+					}
+				: {}),
 		},
 		plugins: [
 			convex({ authConfig }),

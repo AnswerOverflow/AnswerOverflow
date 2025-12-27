@@ -2,6 +2,7 @@ import { openapi } from "@elysiajs/openapi";
 import { Elysia, t } from "elysia";
 import { handleAuth } from "../handlers/auth";
 import { handleConvexWebhook } from "../handlers/convex-webhooks";
+import { handleGitHubWebhook } from "../handlers/github-webhooks";
 import { handleMarkSolution } from "../handlers/messages";
 
 type JsonValue =
@@ -110,6 +111,9 @@ const app = new Elysia({ prefix: "/api" })
 		},
 	)
 	.post("/v1/webhooks/convex", handleConvexWebhook, {
+		detail: { hide: true },
+	})
+	.post("/v1/webhooks/github", handleGitHubWebhook, {
 		detail: { hide: true },
 	})
 	.all("/auth/*", handleAuth, {

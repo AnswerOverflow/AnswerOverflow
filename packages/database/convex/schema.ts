@@ -242,6 +242,25 @@ export type Reaction = Infer<typeof reactionSchema>;
 export type Embed = Infer<typeof embedSchema>;
 export type Sticker = Infer<typeof stickerSchema>;
 
+export const githubIssueStatusValidator = literals("open", "closed");
+
+export const githubIssueSchema = v.object({
+	issueId: v.number(),
+	issueNumber: v.number(),
+	repoOwner: v.string(),
+	repoName: v.string(),
+	issueUrl: v.string(),
+	issueTitle: v.string(),
+	discordServerId: v.int64(),
+	discordChannelId: v.int64(),
+	discordMessageId: v.int64(),
+	discordThreadId: v.optional(v.int64()),
+	createdByUserId: v.string(),
+	status: githubIssueStatusValidator,
+});
+
+export type GitHubIssue = Infer<typeof githubIssueSchema>;
+
 export default defineSchema({
 	servers: defineTable(serverSchema).index("by_discordId", ["discordId"]),
 	serverPreferences: defineTable(serverPreferencesSchema)
@@ -302,4 +321,12 @@ export default defineSchema({
 	threadTags: defineTable(threadTagSchema)
 		.index("by_threadId", ["threadId"])
 		.index("by_parentChannelId_and_tagId", ["parentChannelId", "tagId"]),
+	githubIssues: defineTable(githubIssueSchema)
+		.index("by_repoOwner_and_repoName_and_issueNumber", [
+			"repoOwner",
+			"repoName",
+			"issueNumber",
+		])
+		.index("by_discordMessageId", ["discordMessageId"])
+		.index("by_createdByUserId", ["createdByUserId"]),
 });

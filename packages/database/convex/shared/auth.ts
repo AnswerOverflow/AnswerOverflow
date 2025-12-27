@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { components } from "../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
 import { authComponent } from "../shared/betterAuth";
@@ -5,6 +6,27 @@ import {
 	findUserServerSettingsById,
 	getServerByDiscordId,
 } from "../shared/shared";
+
+const discordAccountSchema = z.object({
+	accountId: z.string(),
+	providerId: z.literal("discord"),
+	userId: z.string(),
+	accessToken: z.string().nullish(),
+	refreshToken: z.string().nullish(),
+	accessTokenExpiresAt: z.number().nullish(),
+});
+
+const githubAccountSchema = z.object({
+	accountId: z.string(),
+	providerId: z.literal("github"),
+	userId: z.string(),
+	accessToken: z.string().nullish(),
+	scope: z.string().nullish(),
+});
+
+const accountWithUserIdSchema = z.object({
+	userId: z.string(),
+});
 
 export async function getDiscordAccountIdFromAuth(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
@@ -34,31 +56,16 @@ export async function getDiscordAccountIdFromAuth(
 		},
 	);
 
-	if (
-		!accountResult ||
-		typeof accountResult !== "object" ||
-		!("accountId" in accountResult) ||
-		!("providerId" in accountResult)
-	) {
+	const parsed = discordAccountSchema.safeParse(accountResult);
+	if (!parsed.success) {
 		return null;
 	}
 
-	const accountId = accountResult.accountId;
-	const providerId = accountResult.providerId;
-
-	if (providerId !== "discord") {
-		return null;
-	}
-
-	if (typeof accountId !== "string") {
-		return null;
-	}
-
-	return BigInt(accountId);
+	return BigInt(parsed.data.accountId);
 }
 
 export function isSuperUser(discordAccountId: bigint | null): boolean {
-	const SUPER_USER_IDS = [BigInt("523949187663134754")]; // Rhys's Discord ID
+	const SUPER_USER_IDS = [BigInt("523949187663134754")];
 	return discordAccountId !== null && SUPER_USER_IDS.includes(discordAccountId);
 }
 
@@ -131,37 +138,152 @@ export async function getDiscordAccountWithToken(
 		},
 	);
 
-	if (
-		!accountResult ||
-		typeof accountResult !== "object" ||
-		!("accountId" in accountResult) ||
-		typeof accountResult.accountId !== "string"
-	) {
+	const parsed = discordAccountSchema.safeParse(accountResult);
+	if (!parsed.success) {
 		return null;
 	}
 
-	const accessToken =
-		"accessToken" in accountResult &&
-		typeof accountResult.accessToken === "string"
-			? accountResult.accessToken
-			: null;
+	return {
+		accountId: BigInt(parsed.data.accountId),
+		accessToken: parsed.data.accessToken ?? null,
+		refreshToken: parsed.data.refreshToken ?? null,
+		accessTokenExpiresAt: parsed.data.accessTokenExpiresAt ?? null,
+	};
+}
 
-	const refreshToken =
-		"refreshToken" in accountResult &&
-		typeof accountResult.refreshToken === "string"
-			? accountResult.refreshToken
-			: null;
+export type GitHubAccountToken = {
+	accountId: string;
+	accessToken: string | null;
+	scope: string | null;
+};
 
-	const accessTokenExpiresAt =
-		"accessTokenExpiresAt" in accountResult &&
-		typeof accountResult.accessTokenExpiresAt === "number"
-			? accountResult.accessTokenExpiresAt
-			: null;
+export async function getGitHubAccountWithToken(
+	ctx: QueryCtx | MutationCtx | ActionCtx,
+): Promise<GitHubAccountToken | null> {
+	const user = await authComponent.getAuthUser(ctx);
+	if (!user) {
+		return null;
+	}
+
+	const accountResult = await ctx.runQuery(
+		components.betterAuth.adapter.findOne,
+		{
+			model: "account",
+			where: [
+				{
+					field: "userId",
+					operator: "eq",
+					value: user._id,
+				},
+				{
+					field: "providerId",
+					operator: "eq",
+					value: "github",
+				},
+			],
+		},
+	);
+
+	const parsed = githubAccountSchema.safeParse(accountResult);
+	if (!parsed.success) {
+		return null;
+	}
 
 	return {
-		accountId: BigInt(accountResult.accountId),
-		accessToken,
-		refreshToken,
-		accessTokenExpiresAt,
+		accountId: parsed.data.accountId,
+		accessToken: parsed.data.accessToken ?? null,
+		scope: parsed.data.scope ?? null,
 	};
+}
+
+export async function getGitHubAccountWithTokenByDiscordId(
+	ctx: QueryCtx | MutationCtx | ActionCtx,
+	discordId: bigint,
+): Promise<GitHubAccountToken | null> {
+	const discordAccountResult = await ctx.runQuery(
+		components.betterAuth.adapter.findOne,
+		{
+			model: "account",
+			where: [
+				{
+					field: "accountId",
+					operator: "eq",
+					value: discordId.toString(),
+				},
+				{
+					field: "providerId",
+					operator: "eq",
+					value: "discord",
+				},
+			],
+		},
+	);
+
+	const discordParsed = accountWithUserIdSchema.safeParse(discordAccountResult);
+	if (!discordParsed.success) {
+		return null;
+	}
+
+	const userId = discordParsed.data.userId;
+
+	const githubAccountResult = await ctx.runQuery(
+		components.betterAuth.adapter.findOne,
+		{
+			model: "account",
+			where: [
+				{
+					field: "userId",
+					operator: "eq",
+					value: userId,
+				},
+				{
+					field: "providerId",
+					operator: "eq",
+					value: "github",
+				},
+			],
+		},
+	);
+
+	const githubParsed = githubAccountSchema.safeParse(githubAccountResult);
+	if (!githubParsed.success) {
+		return null;
+	}
+
+	return {
+		accountId: githubParsed.data.accountId,
+		accessToken: githubParsed.data.accessToken ?? null,
+		scope: githubParsed.data.scope ?? null,
+	};
+}
+
+export async function getBetterAuthUserIdByDiscordId(
+	ctx: QueryCtx | MutationCtx | ActionCtx,
+	discordId: bigint,
+): Promise<string | null> {
+	const discordAccountResult = await ctx.runQuery(
+		components.betterAuth.adapter.findOne,
+		{
+			model: "account",
+			where: [
+				{
+					field: "accountId",
+					operator: "eq",
+					value: discordId.toString(),
+				},
+				{
+					field: "providerId",
+					operator: "eq",
+					value: "discord",
+				},
+			],
+		},
+	);
+
+	const parsed = accountWithUserIdSchema.safeParse(discordAccountResult);
+	if (!parsed.success) {
+		return null;
+	}
+
+	return parsed.data.userId;
 }

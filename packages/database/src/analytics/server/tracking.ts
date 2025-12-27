@@ -1,5 +1,6 @@
 import { Effect } from "effect";
 import type {
+	BaseLightServerProps,
 	BaseServerProps,
 	ServerEventName,
 	ServerEvents,
@@ -30,7 +31,8 @@ const BASE_KEYS = new Set([
 
 export function track<K extends ServerEventName>(
 	event: K,
-	props: ServerEvents[K] & Partial<BaseServerProps>,
+	props: ServerEvents[K] &
+		Partial<Omit<BaseServerProps, "server"> & BaseLightServerProps>,
 ): Effect.Effect<void, never, PostHogCaptureClient> {
 	return Effect.gen(function* () {
 		const posthog = yield* PostHogCaptureClient;
@@ -45,7 +47,10 @@ export function track<K extends ServerEventName>(
 		const p = props;
 
 		if (p.server) {
-			if (p.server.readTheRulesConsentEnabled) {
+			if (
+				"readTheRulesConsentEnabled" in p.server &&
+				p.server.readTheRulesConsentEnabled !== undefined
+			) {
 				Object.assign(flattenedProps, flattenServerWithSettings(p.server));
 			} else {
 				Object.assign(flattenedProps, flattenServer(p.server));
