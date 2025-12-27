@@ -18,6 +18,7 @@ export {
 	useAtomValue,
 } from "@effect-atom/atom-react";
 export { ActionRow, type ActionRowProps } from "./components/action-row";
+export { Attachment, type AttachmentProps } from "./components/attachment";
 export { Button, type ButtonProps } from "./components/button";
 export { Container, type ContainerProps } from "./components/container";
 export { File, type FileProps } from "./components/file";
@@ -46,7 +47,14 @@ export {
 	type UserSelectField,
 } from "./components/modal-button";
 export { Option, type OptionProps } from "./components/option";
-export { Section, type SectionProps } from "./components/section";
+export {
+	Section,
+	type SectionAccessory,
+	type SectionButtonAccessory,
+	type SectionLinkAccessory,
+	type SectionProps,
+	type SectionThumbnailAccessory,
+} from "./components/section";
 export { Select, type SelectProps } from "./components/select";
 export { Separator, type SeparatorProps } from "./components/separator";
 export { TextDisplay, type TextDisplayProps } from "./components/text-display";

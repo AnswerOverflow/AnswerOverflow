@@ -150,8 +150,8 @@ type DiscordMessageOptions = {
 	flags: number;
 	components: DiscordV2Component[];
 	files?: Array<{
-		attachment: string;
-		name?: string;
+		attachment: string | Buffer;
+		name: string;
 		spoiler?: boolean;
 	}>;
 };
@@ -367,7 +367,7 @@ export class Renderer {
 			flags: MessageFlags.IsComponentsV2,
 			components: options.components.map((c) => this.toDiscordComponent(c)),
 			files: options.files?.map((f) => ({
-				attachment: f.url,
+				attachment: f.data ?? f.url ?? "",
 				name: f.name,
 				spoiler: f.spoiler,
 			})),

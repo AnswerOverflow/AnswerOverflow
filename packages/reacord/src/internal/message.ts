@@ -4,8 +4,9 @@ export interface MessageOptions {
 }
 
 export interface AttachmentFile {
-	url: string;
-	name?: string;
+	url?: string;
+	name: string;
+	data?: Buffer | string;
 	spoiler?: boolean;
 }
 

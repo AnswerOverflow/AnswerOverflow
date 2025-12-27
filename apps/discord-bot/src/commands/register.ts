@@ -17,10 +17,10 @@ const globalCommands = [
 		.setName("Quick Action")
 		.setType(ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild),
-	// new ContextMenuCommandBuilder()
-	// 	.setName("Create GitHub Issue")
-	// 	.setType(ApplicationCommandType.Message)
-	// 	.setContexts(InteractionContextType.Guild),
+	new ContextMenuCommandBuilder()
+		.setName("Create GitHub Issue")
+		.setType(ApplicationCommandType.Message)
+		.setContexts(InteractionContextType.Guild),
 	new SlashCommandBuilder()
 		.setName("leaderboard")
 		.setDescription("See who has solved the most questions in the server.")
@@ -55,6 +55,10 @@ const guildCommands = [
 		.setDescription(
 			"Debug command for testing latency and API status (Rhys only)",
 		)
+		.setContexts(InteractionContextType.Guild),
+	new SlashCommandBuilder()
+		.setName("reacord-stress-test")
+		.setDescription("Stress test Reacord V2 components (Rhys only)")
 		.setContexts(InteractionContextType.Guild),
 ] as const;
 
