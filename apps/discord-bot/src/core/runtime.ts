@@ -1,10 +1,10 @@
 import { PostHogCaptureClientLayer } from "@packages/database/analytics/server";
-import { DatabaseHttpLayer, type Database } from "@packages/database/database";
+import { type Database, DatabaseHttpLayer } from "@packages/database/database";
 import type { Storage } from "@packages/database/storage";
-import { Atom } from "@packages/reacord";
 import { createAxiomLayer } from "@packages/observability/axiom";
 import { createOtelLayer } from "@packages/observability/effect-otel";
 import { createSentryEffectLayer } from "@packages/observability/sentry-effect";
+import { Atom } from "@packages/reacord";
 import { Effect, Layer, Logger, LogLevel, ManagedRuntime } from "effect";
 import { BotLayers } from "../bot";
 import { DiscordClientLayer } from "./discord-client-service";

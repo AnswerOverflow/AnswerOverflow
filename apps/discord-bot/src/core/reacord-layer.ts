@@ -1,6 +1,6 @@
-import { Reacord, ReacordLive } from "@packages/reacord";
+import { type Reacord, ReacordLive } from "@packages/reacord";
 import type { Client } from "discord.js";
-import { Effect, Layer, ManagedRuntime } from "effect";
+import { Effect, Layer, type ManagedRuntime } from "effect";
 import { DiscordClient } from "./discord-client-service";
 
 export const createReacordLayer = (

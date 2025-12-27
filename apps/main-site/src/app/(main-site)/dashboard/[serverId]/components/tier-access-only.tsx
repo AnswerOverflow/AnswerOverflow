@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import type { ReactNode } from "react";
 import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
 
 type Plan =

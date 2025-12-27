@@ -11,16 +11,16 @@ import {
 	createGitHubIssue,
 	createOctokitClient,
 	fetchGitHubInstallationRepos,
-	getBetterAuthUserIdByDiscordId,
-	getGitHubAccountByDiscordId,
 	type GitHubErrorCode,
 	GitHubErrorCodes,
 	type GitHubRepo,
+	getBetterAuthUserIdByDiscordId,
+	getGitHubAccountByDiscordId,
 	validateIssueTitleAndBody,
 	validateRepoOwnerAndName,
 } from "../shared/github";
 
-const repoValidator = v.object({
+const _repoValidator = v.object({
 	id: v.number(),
 	name: v.string(),
 	fullName: v.string(),
@@ -29,7 +29,7 @@ const repoValidator = v.object({
 	installationId: v.number(),
 });
 
-const errorCodeValidator = v.union(
+const _errorCodeValidator = v.union(
 	v.literal("NOT_LINKED"),
 	v.literal("NO_TOKEN"),
 	v.literal("REFRESH_REQUIRED"),

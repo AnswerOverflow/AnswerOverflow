@@ -1,8 +1,8 @@
+import { type Infer, v } from "convex/values";
 import { Octokit } from "octokit";
 import { z } from "zod";
 import { components } from "../../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../../client";
-import { v, type Infer } from "convex/values";
 
 const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 

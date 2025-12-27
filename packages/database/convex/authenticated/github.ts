@@ -3,8 +3,8 @@ import { authComponent } from "../shared/betterAuth";
 import {
 	createOctokitClient,
 	fetchGitHubInstallationRepos,
-	getGitHubAccountByUserId,
 	GitHubErrorCodes,
+	getGitHubAccountByUserId,
 } from "../shared/github";
 
 export const getGitHubAccount = authenticatedQuery({

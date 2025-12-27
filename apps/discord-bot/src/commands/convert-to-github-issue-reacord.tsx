@@ -18,7 +18,7 @@ import {
 	useInstance,
 } from "@packages/reacord";
 import type { ContextMenuCommandInteraction } from "discord.js";
-import { MessageFlags, ComponentType, ButtonStyle } from "discord.js";
+import { ButtonStyle, ComponentType, MessageFlags } from "discord.js";
 import { Cause, Data, Duration, Effect, Layer, Metric } from "effect";
 import { Suspense, useState } from "react";
 import { Discord } from "../core/discord-service";
@@ -30,11 +30,11 @@ import {
 	catchAllWithReport,
 } from "../utils/error-reporting";
 import {
+	GITHUB_APP_INSTALL_URL,
+	GitHubIssueTimeoutError,
+	type GitHubRepo,
 	generateIssueBody,
 	generateIssueTitle,
-	GITHUB_APP_INSTALL_URL,
-	type GitHubRepo,
-	GitHubIssueTimeoutError,
 	INSTALL_MORE_REPOS_VALUE,
 	makeMainSiteLink,
 } from "./github-issue-utils";

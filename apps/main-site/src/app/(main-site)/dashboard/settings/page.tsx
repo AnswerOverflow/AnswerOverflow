@@ -47,7 +47,7 @@ import {
 	RefreshCw,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useAuthClient } from "../../../../lib/auth-client";
 

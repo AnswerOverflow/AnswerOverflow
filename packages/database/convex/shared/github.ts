@@ -5,18 +5,6 @@
 // 2. Code-generating from GitHub's OpenAPI spec (similar to Discord API)
 // Octokit is probably the better choice for consistency and community support.
 
-export {
-	createGitHubIssue,
-	createOctokitClient,
-	fetchGitHubInstallationRepos,
-	getBetterAuthUserIdByDiscordId,
-	getGitHubAccountByDiscordId,
-	getGitHubAccountByUserId,
-	GitHubErrorCodes,
-	validateIssueTitleAndBody,
-	validateRepoOwnerAndName,
-} from "./auth/github";
-
 export type {
 	CreateOctokitClientResult,
 	GitHubAccountToken,
@@ -24,4 +12,15 @@ export type {
 	GitHubCreateIssueResult,
 	GitHubErrorCode,
 	GitHubRepo,
+} from "./auth/github";
+export {
+	createGitHubIssue,
+	createOctokitClient,
+	fetchGitHubInstallationRepos,
+	GitHubErrorCodes,
+	getBetterAuthUserIdByDiscordId,
+	getGitHubAccountByDiscordId,
+	getGitHubAccountByUserId,
+	validateIssueTitleAndBody,
+	validateRepoOwnerAndName,
 } from "./auth/github";
