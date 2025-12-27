@@ -1,10 +1,10 @@
 import { authenticatedAction, authenticatedQuery } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import {
+	createOctokitClient,
 	fetchGitHubInstallationRepos,
-	GitHubErrorCodes,
 	getGitHubAccountByUserId,
-	getValidAccessToken,
+	GitHubErrorCodes,
 } from "../shared/github";
 
 export const getGitHubAccount = authenticatedQuery({
@@ -49,18 +49,18 @@ export const getAccessibleRepos = authenticatedAction({
 			};
 		}
 
-		const tokenResult = await getValidAccessToken(ctx, account);
-		if (!tokenResult.success) {
+		const octokitResult = createOctokitClient(ctx, account);
+		if (!octokitResult.success) {
 			return {
 				success: false as const,
-				error: tokenResult.error,
-				code: tokenResult.code,
+				error: octokitResult.error,
+				code: octokitResult.code,
 			};
 		}
 
 		try {
 			const { repos, hasAllReposAccess } = await fetchGitHubInstallationRepos(
-				tokenResult.accessToken,
+				octokitResult.octokit,
 			);
 
 			return {

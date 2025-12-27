@@ -51,6 +51,7 @@ import type * as public_threadTags from "../public/threadTags.js";
 import type * as shared_anonymization from "../shared/anonymization.js";
 import type * as shared_attachments from "../shared/attachments.js";
 import type * as shared_auth from "../shared/auth.js";
+import type * as shared_auth_github from "../shared/auth/github.js";
 import type * as shared_authIdentity from "../shared/authIdentity.js";
 import type * as shared_betterAuth from "../shared/betterAuth.js";
 import type * as shared_channels from "../shared/channels.js";
@@ -123,6 +124,7 @@ declare const fullApi: ApiFromModules<{
   "shared/anonymization": typeof shared_anonymization;
   "shared/attachments": typeof shared_attachments;
   "shared/auth": typeof shared_auth;
+  "shared/auth/github": typeof shared_auth_github;
   "shared/authIdentity": typeof shared_authIdentity;
   "shared/betterAuth": typeof shared_betterAuth;
   "shared/channels": typeof shared_channels;

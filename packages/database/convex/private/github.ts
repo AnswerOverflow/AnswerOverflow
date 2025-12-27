@@ -9,13 +9,13 @@ import {
 import { githubIssueStatusValidator } from "../schema";
 import {
 	createGitHubIssue,
+	createOctokitClient,
 	fetchGitHubInstallationRepos,
-	type GitHubErrorCode,
-	GitHubErrorCodes,
 	getBetterAuthUserIdByDiscordId,
 	getGitHubAccountByDiscordId,
+	type GitHubErrorCode,
+	GitHubErrorCodes,
 	type GitHubRepo,
-	getValidAccessToken,
 	validateIssueTitleAndBody,
 	validateRepoOwnerAndName,
 } from "../shared/github";
@@ -96,18 +96,18 @@ export const getAccessibleReposByDiscordId = privateAction({
 			};
 		}
 
-		const tokenResult = await getValidAccessToken(ctx, account);
-		if (!tokenResult.success) {
+		const octokitResult = createOctokitClient(ctx, account);
+		if (!octokitResult.success) {
 			return {
 				success: false as const,
-				error: tokenResult.error,
-				code: tokenResult.code,
+				error: octokitResult.error,
+				code: octokitResult.code,
 			};
 		}
 
 		try {
 			const { repos, hasAllReposAccess } = await fetchGitHubInstallationRepos(
-				tokenResult.accessToken,
+				octokitResult.octokit,
 			);
 
 			return {
@@ -225,18 +225,18 @@ export const createGitHubIssueFromDiscord = privateAction({
 			};
 		}
 
-		const tokenResult = await getValidAccessToken(ctx, account);
-		if (!tokenResult.success) {
+		const octokitResult = createOctokitClient(ctx, account);
+		if (!octokitResult.success) {
 			return {
 				success: false as const,
-				error: tokenResult.error,
-				code: tokenResult.code,
+				error: octokitResult.error,
+				code: octokitResult.code,
 			};
 		}
 
 		try {
 			const issue = await createGitHubIssue(
-				tokenResult.accessToken,
+				octokitResult.octokit,
 				args.repoOwner,
 				args.repoName,
 				args.title,

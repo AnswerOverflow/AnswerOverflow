@@ -393,9 +393,19 @@ export const handleRepoSelectInteraction = Effect.fn(
 	if (!selectedValue) return;
 
 	if (selectedValue === INSTALL_MORE_REPOS_VALUE) {
+		const installButton = new ButtonBuilder()
+			.setLabel("Install Answer Overflow")
+			.setStyle(ButtonStyle.Link)
+			.setURL(GITHUB_APP_INSTALL_URL);
+
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			installButton,
+		);
+
 		yield* discord.callClient(() =>
 			interaction.reply({
-				content: `To add more repositories, install the Answer Overflow app:\n\n👉 ${GITHUB_APP_INSTALL_URL}`,
+				content: "To add more repositories, install the Answer Overflow app:",
+				components: [row],
 				flags: MessageFlags.Ephemeral,
 			}),
 		);
