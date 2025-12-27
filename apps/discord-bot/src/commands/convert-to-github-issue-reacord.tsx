@@ -1,4 +1,4 @@
-import { Database, DatabaseLayer } from "@packages/database/database";
+import { Database } from "@packages/database/database";
 import {
 	ActionRow,
 	Atom,
@@ -22,6 +22,7 @@ import { MessageFlags } from "discord.js";
 import { Cause, Data, Duration, Effect, Layer, Metric } from "effect";
 import { Suspense, useState } from "react";
 import { Discord } from "../core/discord-service";
+import { atomRuntime } from "../core/runtime";
 import { commandExecuted } from "../metrics";
 import {
 	catchAllDefectWithReport,
@@ -38,8 +39,6 @@ import {
 	makeMainSiteLink,
 } from "./github-issue-utils";
 
-const databaseRuntime = Atom.runtime(DatabaseLayer);
-
 const COMMAND_NAME = "Create GitHub Issue";
 const GITHUB_ISSUE_TITLE_INPUT = "github-issue-title";
 const GITHUB_ISSUE_BODY_INPUT = "github-issue-body";
@@ -53,7 +52,7 @@ class GitHubFetchError extends Data.TaggedError("GitHubFetchError")<{
 }> {}
 
 const reposAtomFamily = Atom.family((discordUserId: string) =>
-	databaseRuntime.atom(
+	atomRuntime.atom(
 		Effect.gen(function* () {
 			const database = yield* Database;
 			const reposResult = yield* database.private.github
@@ -205,51 +204,51 @@ type CreateIssueInput = {
 	originalThreadId?: string;
 };
 
-const createIssueAtom = databaseRuntime.fn<CreateIssueInput>()(
-	(input: CreateIssueInput) =>
-		Effect.gen(function* () {
-			const database = yield* Database;
+const createIssueEffect = (input: CreateIssueInput) =>
+	Effect.gen(function* () {
+		const database = yield* Database;
 
-			const result = yield* database.private.github
-				.createGitHubIssueFromDiscord({
-					discordId: BigInt(input.discordUserId),
-					repoOwner: input.repo.owner,
-					repoName: input.repo.name,
-					title: input.title,
-					body: input.body,
-					discordServerId: BigInt(input.originalGuildId),
-					discordChannelId: BigInt(input.originalChannelId),
-					discordMessageId: BigInt(input.originalMessageId),
-					discordThreadId: input.originalThreadId
-						? BigInt(input.originalThreadId)
-						: undefined,
-				})
-				.pipe(Effect.withSpan("create_github_issue_api_call"));
+		const result = yield* database.private.github
+			.createGitHubIssueFromDiscord({
+				discordId: BigInt(input.discordUserId),
+				repoOwner: input.repo.owner,
+				repoName: input.repo.name,
+				title: input.title,
+				body: input.body,
+				discordServerId: BigInt(input.originalGuildId),
+				discordChannelId: BigInt(input.originalChannelId),
+				discordMessageId: BigInt(input.originalMessageId),
+				discordThreadId: input.originalThreadId
+					? BigInt(input.originalThreadId)
+					: undefined,
+			})
+			.pipe(Effect.withSpan("create_github_issue_api_call"));
 
-			if (!result.success) {
-				if (
-					result.code === "NOT_LINKED" ||
-					result.code === "REFRESH_REQUIRED" ||
-					result.code === "REFRESH_FAILED"
-				) {
-					return {
-						status: "error" as const,
-						errorMessage: `Your GitHub session has expired. Please re-link your account at ${makeMainSiteLink("/dashboard/settings")}`,
-					};
-				}
+		if (!result.success) {
+			if (
+				result.code === "NOT_LINKED" ||
+				result.code === "REFRESH_REQUIRED" ||
+				result.code === "REFRESH_FAILED"
+			) {
 				return {
 					status: "error" as const,
-					errorMessage: result.error,
+					errorMessage: `Your GitHub session has expired. Please re-link your account at ${makeMainSiteLink("/dashboard/settings")}`,
 				};
 			}
-
 			return {
-				status: "success" as const,
-				issueUrl: result.issue.url,
-				issueNumber: result.issue.number,
+				status: "error" as const,
+				errorMessage: result.error,
 			};
-		}),
-);
+		}
+
+		return {
+			status: "success" as const,
+			issueUrl: result.issue.url,
+			issueNumber: result.issue.number,
+		};
+	});
+
+const createIssueAtom = atomRuntime.fn<CreateIssueInput>()(createIssueEffect);
 
 function GitHubIssueCreator({
 	initialTitle,
