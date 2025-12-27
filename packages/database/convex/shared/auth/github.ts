@@ -2,6 +2,7 @@ import { Octokit } from "octokit";
 import { z } from "zod";
 import { components } from "../../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../../client";
+import { v, type Infer } from "convex/values";
 
 const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 
@@ -41,21 +42,42 @@ const accountWithUserIdSchema = z.object({
 	userId: z.string(),
 });
 
-export type GitHubAccountWithRefresh = {
-	_id: string;
-	accountId: string;
-	userId: string;
+const betterAuthAccountSchema = v.object({
+	_id: v.string(),
+	accountId: v.string(),
+	providerId: v.string(),
+	userId: v.string(),
+	accessToken: v.optional(v.union(v.null(), v.string())),
+	refreshToken: v.optional(v.union(v.null(), v.string())),
+	idToken: v.optional(v.union(v.null(), v.string())),
+	accessTokenExpiresAt: v.optional(v.union(v.null(), v.number())),
+	refreshTokenExpiresAt: v.optional(v.union(v.null(), v.number())),
+	scope: v.optional(v.union(v.null(), v.string())),
+	password: v.optional(v.union(v.null(), v.string())),
+	createdAt: v.number(),
+	updatedAt: v.number(),
+});
+
+export type GitHubAccountWithRefresh = Pick<
+	Infer<typeof betterAuthAccountSchema>,
+	| "_id"
+	| "accountId"
+	| "userId"
+	| "accessToken"
+	| "refreshToken"
+	| "accessTokenExpiresAt"
+	| "scope"
+> & {
 	accessToken: string | null;
 	refreshToken: string | null;
 	accessTokenExpiresAt: number | null;
 	scope: string | null;
 };
 
-export type GitHubAccountToken = {
-	accountId: string;
-	accessToken: string | null;
-	scope: string | null;
-};
+export type GitHubAccountToken = Pick<
+	GitHubAccountWithRefresh,
+	"accountId" | "accessToken" | "scope"
+>;
 
 export type GitHubRepo = {
 	id: number;
@@ -229,6 +251,15 @@ async function updateGitHubAccountTokens(
 	});
 }
 
+const githubTokenRefreshResponseSchema = z.object({
+	access_token: z.string(),
+	refresh_token: z.string(),
+	expires_in: z.number(),
+	refresh_token_expires_in: z.number(),
+	error: z.string().optional(),
+	error_description: z.string().optional(),
+});
+
 function isTokenExpired(expiresAt: number | null): boolean {
 	if (expiresAt === null) return false;
 	return Date.now() >= expiresAt - TOKEN_EXPIRY_BUFFER_MS;
@@ -252,6 +283,9 @@ async function refreshGitHubToken(
 	}
 
 	try {
+		// TODO: Replace manual fetch with Octokit's OAuth handling
+		// Consider using @octokit/oauth-app or Octokit's built-in token refresh methods
+		// instead of manual GitHub API calls for better error handling and type safety
 		const response = await fetch(
 			"https://github.com/login/oauth/access_token",
 			{
@@ -269,32 +303,23 @@ async function refreshGitHubToken(
 			},
 		);
 
-		const data = (await response.json()) as {
-			access_token?: string;
-			refresh_token?: string;
-			expires_in?: number;
-			refresh_token_expires_in?: number;
-			error?: string;
-			error_description?: string;
-		};
+		const rawData = await response.json();
+		const parseResult = githubTokenRefreshResponseSchema.safeParse(rawData);
+
+		if (!parseResult.success) {
+			return {
+				success: false,
+				error: `Invalid token response from GitHub: ${parseResult.error.message}`,
+				code: GitHubErrorCodes.REFRESH_FAILED,
+			};
+		}
+
+		const data = parseResult.data;
 
 		if (data.error) {
 			return {
 				success: false,
 				error: `${data.error_description ?? data.error}`,
-				code: GitHubErrorCodes.REFRESH_FAILED,
-			};
-		}
-
-		if (
-			!data.access_token ||
-			!data.refresh_token ||
-			!data.expires_in ||
-			!data.refresh_token_expires_in
-		) {
-			return {
-				success: false,
-				error: "Invalid token response from GitHub",
 				code: GitHubErrorCodes.REFRESH_FAILED,
 			};
 		}
@@ -388,6 +413,12 @@ export async function fetchGitHubInstallationRepos(
 		const allRepos: Array<GitHubRepo> = [];
 		let page = 1;
 
+		// TODO: GitHub's search API exists but is not suitable for this use case.
+		// The search API is for finding repositories by name/content across GitHub,
+		// but here we need to list all repositories accessible to a specific GitHub App installation.
+		// The current pagination approach using listInstallationReposForAuthenticatedUser
+		// is the correct and only way to get installation-specific repository access.
+		// GitHub's search API cannot filter by installation access permissions.
 		while (allRepos.length < MAX_REPOS_PER_INSTALLATION) {
 			const { data: reposData } =
 				await octokit.rest.apps.listInstallationReposForAuthenticatedUser({

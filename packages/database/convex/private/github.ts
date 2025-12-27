@@ -46,18 +46,6 @@ export const getAccessibleReposByDiscordId = privateAction({
 	args: {
 		discordId: v.int64(),
 	},
-	returns: v.union(
-		v.object({
-			success: v.literal(false),
-			error: v.string(),
-			code: errorCodeValidator,
-		}),
-		v.object({
-			success: v.literal(true),
-			repos: v.array(repoValidator),
-			hasAllReposAccess: v.boolean(),
-		}),
-	),
 	handler: async (
 		ctx,
 		args,
@@ -153,22 +141,6 @@ export const createGitHubIssueFromDiscord = privateAction({
 		discordMessageId: v.int64(),
 		discordThreadId: v.optional(v.int64()),
 	},
-	returns: v.union(
-		v.object({
-			success: v.literal(false),
-			error: v.string(),
-			code: errorCodeValidator,
-		}),
-		v.object({
-			success: v.literal(true),
-			issue: v.object({
-				id: v.number(),
-				number: v.number(),
-				url: v.string(),
-				title: v.string(),
-			}),
-		}),
-	),
 	handler: async (
 		ctx,
 		args,

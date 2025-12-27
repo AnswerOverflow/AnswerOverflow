@@ -1,3 +1,8 @@
+// This file has been commented out as per PR review comment.
+// Will be replaced with a typesafe client to call into the Discord bot.
+// Keeping the code for reference during the migration.
+
+/*
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { Database } from "@packages/database/database";
 import type { ConvexError } from "@packages/database/database";
@@ -449,3 +454,4 @@ export async function handleGitHubWebhook(c: Context) {
 		runtime.runPromise,
 	);
 }
+*/

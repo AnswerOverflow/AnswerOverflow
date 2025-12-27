@@ -1,3 +1,10 @@
+// TODO: Migrate GitHub API implementation to use Octokit instead of manual fetch calls
+// This file currently contains manual GitHub API calls that should be replaced with Octokit
+// for better type safety, error handling, and maintainability. Consider either:
+// 1. Using Octokit's built-in methods for all GitHub API interactions
+// 2. Code-generating from GitHub's OpenAPI spec (similar to Discord API)
+// Octokit is probably the better choice for consistency and community support.
+
 export {
 	createGitHubIssue,
 	createOctokitClient,

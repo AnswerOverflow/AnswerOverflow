@@ -68,10 +68,6 @@ type GitHubRepo = {
 
 function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 	const [isLinking, setIsLinking] = useState(false);
-	const [repos, setRepos] = useState<Array<GitHubRepo>>([]);
-	const [hasAllReposAccess, setHasAllReposAccess] = useState(false);
-	const [isLoadingRepos, setIsLoadingRepos] = useState(false);
-	const [reposError, setReposError] = useState<string | null>(null);
 	const [open, setOpen] = useState(false);
 
 	const githubAccount = useConvexQuery(
@@ -83,29 +79,28 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 		api.authenticated.github.getAccessibleRepos,
 	);
 
-	useEffect(() => {
-		if (githubAccount?.isConnected) {
-			setIsLoadingRepos(true);
-			setReposError(null);
-			getAccessibleRepos({})
-				.then((result) => {
-					if (result.success) {
-						setRepos(result.repos);
-						setHasAllReposAccess(result.hasAllReposAccess);
-					} else {
-						setReposError(result.error);
-					}
-				})
-				.catch((error) => {
-					setReposError(
-						error instanceof Error ? error.message : "Failed to load repos",
-					);
-				})
-				.finally(() => {
-					setIsLoadingRepos(false);
-				});
-		}
-	}, [githubAccount?.isConnected, getAccessibleRepos]);
+	const {
+		data: reposData,
+		isLoading: isLoadingRepos,
+		error: reposError,
+	} = useQuery({
+		queryKey: ["accessibleRepos", githubAccount?.isConnected],
+		queryFn: async () => {
+			const result = await getAccessibleRepos({});
+			if (result.success) {
+				return {
+					repos: result.repos,
+					hasAllReposAccess: result.hasAllReposAccess,
+				};
+			} else {
+				throw new Error(result.error);
+			}
+		},
+		enabled: !!githubAccount?.isConnected,
+	});
+
+	const repos = reposData?.repos ?? [];
+	const hasAllReposAccess = reposData?.hasAllReposAccess ?? false;
 
 	const handleLinkGitHub = async () => {
 		setIsLinking(true);
@@ -169,7 +164,11 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 								</div>
 							) : reposError ? (
 								<div className="space-y-2">
-									<div className="text-sm text-destructive">{reposError}</div>
+									<div className="text-sm text-destructive">
+										{reposError instanceof Error
+											? reposError.message
+											: "Failed to load repos"}
+									</div>
 									<Button
 										variant="outline"
 										size="sm"
@@ -264,8 +263,8 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 						</div>
 
 						<p className="text-xs text-muted-foreground">
-							Use the "🐛 Create GitHub Issue" command in Discord to create
-							issues from messages.
+							Use the "Create GitHub Issue" command in Discord to create issues
+							from messages.
 						</p>
 					</div>
 				)}

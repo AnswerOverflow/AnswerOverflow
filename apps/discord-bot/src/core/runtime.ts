@@ -49,55 +49,61 @@ const LoggerLayer =
 		? Logger.minimumLogLevel(LogLevel.Debug)
 		: Logger.minimumLogLevel(LogLevel.Info);
 
-export const ObservabilityLayer = Layer.mergeAll(
+const ObservabilityLayer = Layer.mergeAll(
 	SentryLayer,
 	LocalOtelLayer,
 	AxiomLayer,
 	LoggerLayer,
 );
 
-export const BaseRuntimeLayer = Layer.mergeAll(
-	DatabaseHttpLayer,
-	ObservabilityLayer,
+const PlatformLayer = Layer.mergeAll(ObservabilityLayer, DatabaseHttpLayer);
+
+const sharedMemoMap = Effect.runSync(Layer.makeMemoMap);
+
+export const atomRuntime = Atom.context({ memoMap: sharedMemoMap })(
+	PlatformLayer,
 );
 
-export const runtime = ManagedRuntime.make(BaseRuntimeLayer);
-
-export const atomRuntime = Atom.context({ memoMap: runtime.memoMap })(
-	BaseRuntimeLayer,
-);
-
-const DiscordWithReacord = Layer.mergeAll(
-	DiscordLayerInternal,
-	createReacordLayer(runtime),
-).pipe(Layer.provide(DiscordClientLayer), Layer.provide(ObservabilityLayer));
+const platformRuntime = ManagedRuntime.make(PlatformLayer, sharedMemoMap);
 
 export const createAppLayer = (
 	storageLayer: Layer.Layer<Storage, never, Database>,
 ) => {
-	const BaseLayer = Layer.mergeAll(
-		DiscordWithReacord,
-		storageLayer,
-		PostHogCaptureClientLayer,
-		ObservabilityLayer,
-	).pipe(Layer.provideMerge(DatabaseHttpLayer));
+	const DiscordWithClient = DiscordLayerInternal.pipe(
+		Layer.provide(DiscordClientLayer),
+	);
 
-	return Layer.mergeAll(BaseLayer, BotLayers.pipe(Layer.provide(BaseLayer)));
+	const ReacordWithDiscord = createReacordLayer(platformRuntime).pipe(
+		Layer.provide(DiscordClientLayer),
+	);
+
+	const StorageWithDatabase = storageLayer.pipe(Layer.provide(PlatformLayer));
+
+	const InfraLayer = Layer.mergeAll(
+		PlatformLayer,
+		DiscordWithClient,
+		ReacordWithDiscord,
+		StorageWithDatabase,
+		PostHogCaptureClientLayer,
+	);
+
+	const AppLayer = BotLayers.pipe(Layer.provide(InfraLayer));
+
+	return Layer.merge(AppLayer, InfraLayer);
 };
 
 export const runMain = <A, E, R, EL>(
 	effect: Effect.Effect<A, E, R>,
 	appLayer: Layer.Layer<R, EL, never>,
 ) => {
-	const controller = new AbortController();
+	const runtime = ManagedRuntime.make(appLayer, sharedMemoMap);
 
+	const controller = new AbortController();
 	process.on("SIGINT", () => controller.abort());
 	process.on("SIGTERM", () => controller.abort());
 
 	return runtime
-		.runPromise(effect.pipe(Effect.provide(appLayer)), {
-			signal: controller.signal,
-		})
+		.runPromise(effect, { signal: controller.signal })
 		.catch((error) => {
 			console.error("Fatal error:", error);
 			process.exit(1);

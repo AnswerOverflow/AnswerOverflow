@@ -49,7 +49,10 @@ export function generateIssueBody({
 
 	const attribution = hasPaidPlan
 		? ""
-		: `\n\n---\n*Created by [Answer Overflow](https://answeroverflow.com/about)*`;
+		: `
+
+---
+*Created by [Answer Overflow](https://answeroverflow.com/about)*`;
 
 	const footer = `
 ---
@@ -62,12 +65,10 @@ export function generateIssueBody({
 
 **Original Discord Message:**
 
-${quotedContent}
-${footer}`;
+${quotedContent}${footer}`;
 	}
 
-	return `${quotedContent}
-${footer}`;
+	return `${quotedContent}${footer}`;
 }
 
 export function generateIssueTitle(message: Message): string {

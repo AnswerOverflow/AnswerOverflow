@@ -1,7 +1,6 @@
 {
-	"extends": "../typescript-config/base.json",
+	"extends": "../typescript-config/react-library.json",
 	"compilerOptions": {
-		"jsx": "react-jsx",
 		"outDir": "dist",
 		"rootDir": "src"
 	},

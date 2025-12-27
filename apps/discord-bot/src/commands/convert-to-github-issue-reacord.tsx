@@ -18,7 +18,7 @@ import {
 	useInstance,
 } from "@packages/reacord";
 import type { ContextMenuCommandInteraction } from "discord.js";
-import { MessageFlags } from "discord.js";
+import { MessageFlags, ComponentType, ButtonStyle } from "discord.js";
 import { Cause, Data, Duration, Effect, Layer, Metric } from "effect";
 import { Suspense, useState } from "react";
 import { Discord } from "../core/discord-service";
@@ -50,6 +50,16 @@ class GitHubTokenExpiredError extends Data.TaggedError(
 class GitHubFetchError extends Data.TaggedError("GitHubFetchError")<{
 	message: string;
 }> {}
+class GitHubSessionExpiredError extends Data.TaggedError(
+	"GitHubSessionExpiredError",
+)<{
+	message: string;
+}> {}
+class GitHubCreateIssueError extends Data.TaggedError(
+	"GitHubCreateIssueError",
+)<{
+	message: string;
+}> {}
 
 const reposAtomFamily = Atom.family((discordUserId: string) =>
 	atomRuntime.atom(
@@ -59,7 +69,7 @@ const reposAtomFamily = Atom.family((discordUserId: string) =>
 				.getAccessibleReposByDiscordId({
 					discordId: BigInt(discordUserId),
 				})
-				.pipe(Effect.withSpan("get_accessible_repos_suspense"));
+				.pipe(Effect.withSpan("get_accessible_repos"));
 
 			if (!reposResult.success) {
 				if (reposResult.code === "NOT_LINKED") {
@@ -145,11 +155,11 @@ function RepoSelector({
 							"To add more repositories, install the Answer Overflow app:",
 						components: [
 							{
-								type: 1,
+								type: ComponentType.ActionRow,
 								components: [
 									{
-										type: 2,
-										style: 5,
+										type: ComponentType.Button,
+										style: ButtonStyle.Link,
 										label: "Install Answer Overflow",
 										url: GITHUB_APP_INSTALL_URL,
 									},
@@ -166,7 +176,8 @@ function RepoSelector({
 				}
 			}}
 		>
-			{repos.slice(0, 24).map((repo: GitHubRepo) => (
+			{/* TODO: Add search and pagination support for repositories */}
+			{repos.slice(0, 23).map((repo: GitHubRepo) => (
 				<Option
 					key={repo.fullName}
 					value={repo.fullName}
@@ -230,15 +241,13 @@ const createIssueEffect = (input: CreateIssueInput) =>
 				result.code === "REFRESH_REQUIRED" ||
 				result.code === "REFRESH_FAILED"
 			) {
-				return {
-					status: "error" as const,
-					errorMessage: `Your GitHub session has expired. Please re-link your account at ${makeMainSiteLink("/dashboard/settings")}`,
-				};
+				return yield* new GitHubSessionExpiredError({
+					message: `Your GitHub session has expired. Please re-link your account at ${makeMainSiteLink("/dashboard/settings")}`,
+				});
 			}
-			return {
-				status: "error" as const,
-				errorMessage: result.error,
-			};
+			return yield* new GitHubCreateIssueError({
+				message: result.error,
+			});
 		}
 
 		return {
@@ -286,21 +295,28 @@ function GitHubIssueCreator({
 
 	const isCreating =
 		Result.isInitial(createIssueResult) && createIssueResult.waiting;
-	const isSuccess =
-		Result.isSuccess(createIssueResult) &&
-		createIssueResult.value.status === "success";
-	const isError =
-		Result.isSuccess(createIssueResult) &&
-		createIssueResult.value.status === "error";
-	const successResult = isSuccess ? createIssueResult.value : null;
-	const errorMessage = isError ? createIssueResult.value.errorMessage : null;
+	const isSuccess = Result.isSuccess(createIssueResult);
+	const isError = Result.isFailure(createIssueResult);
 
-	if (
-		isSuccess &&
-		successResult &&
-		successResult.status === "success" &&
-		selectedRepo
-	) {
+	const successResult = isSuccess ? createIssueResult.value : null;
+
+	let errorMessage: string | null = null;
+	if (Result.isFailure(createIssueResult)) {
+		const failure = Cause.failureOption(createIssueResult.cause);
+		if (failure._tag === "Some") {
+			const error = failure.value;
+			if (
+				error._tag === "GitHubSessionExpiredError" ||
+				error._tag === "GitHubCreateIssueError"
+			) {
+				errorMessage = error.message;
+			} else {
+				errorMessage = "An unexpected error occurred";
+			}
+		}
+	}
+
+	if (isSuccess && successResult && selectedRepo) {
 		return (
 			<Embed
 				title="GitHub Issue Created"
@@ -470,7 +486,7 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 			: null;
 
 	const indexingEnabled = channelSettings?.flags?.indexingEnabled ?? false;
-	const hasPaidPlan = Boolean(serverPreferences?.customDomain);
+	const hasPaidPlan = serverPreferences?.plan !== "FREE";
 
 	yield* reacord.reply(
 		interaction,
@@ -517,31 +533,33 @@ export const ConvertToGitHubIssueReacordLayer = Layer.scopedDiscard(
 						}),
 					);
 
+					const handleInteractionError = (message: string) =>
+						Effect.gen(function* () {
+							if (interaction.deferred || interaction.replied) {
+								yield* catchAllSilentWithReport(
+									discord.callClient(() =>
+										interaction.editReply({ content: message }),
+									),
+								);
+							} else {
+								yield* catchAllSilentWithReport(
+									discord.callClient(() =>
+										interaction.reply({
+											content: message,
+											flags: MessageFlags.Ephemeral,
+										}),
+									),
+								);
+							}
+						});
+
 					yield* commandWithTimeout.pipe(
 						catchAllWithReport((error) =>
 							Effect.gen(function* () {
 								console.error("Convert to GitHub issue command failed:", error);
-
-								if (interaction.deferred || interaction.replied) {
-									yield* catchAllSilentWithReport(
-										discord.callClient(() =>
-											interaction.editReply({
-												content:
-													"An error occurred while processing your request.",
-											}),
-										),
-									);
-								} else {
-									yield* catchAllSilentWithReport(
-										discord.callClient(() =>
-											interaction.reply({
-												content:
-													"An error occurred while processing your request.",
-												flags: MessageFlags.Ephemeral,
-											}),
-										),
-									);
-								}
+								yield* handleInteractionError(
+									"An error occurred while processing your request.",
+								);
 							}),
 						),
 						catchAllDefectWithReport((defect) =>
@@ -550,27 +568,9 @@ export const ConvertToGitHubIssueReacordLayer = Layer.scopedDiscard(
 									"Convert to GitHub issue command defect:",
 									defect,
 								);
-
-								if (interaction.deferred || interaction.replied) {
-									yield* catchAllSilentWithReport(
-										discord.callClient(() =>
-											interaction.editReply({
-												content:
-													"An unexpected error occurred. Please try again.",
-											}),
-										),
-									);
-								} else {
-									yield* catchAllSilentWithReport(
-										discord.callClient(() =>
-											interaction.reply({
-												content:
-													"An unexpected error occurred. Please try again.",
-												flags: MessageFlags.Ephemeral,
-											}),
-										),
-									);
-								}
+								yield* handleInteractionError(
+									"An unexpected error occurred. Please try again.",
+								);
 							}),
 						),
 					);
