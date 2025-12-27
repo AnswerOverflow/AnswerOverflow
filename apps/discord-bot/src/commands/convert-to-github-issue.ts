@@ -349,7 +349,7 @@ export const handleEditButtonInteraction = Effect.fn(
 )(function* (interaction: ButtonInteraction) {
 	const discord = yield* Discord;
 
-	const [, , messageId] = interaction.customId.split(":");
+	const [, messageId] = interaction.customId.split(":");
 	if (!messageId) return;
 
 	const cacheKey = `${interaction.user.id}:${messageId}`;
@@ -432,16 +432,31 @@ export const handleEditModalSubmit = Effect.fn(
 export const handleCreateButtonInteraction = Effect.fn(
 	"github_issue_create_button",
 )(function* (interaction: ButtonInteraction) {
+	yield* Effect.annotateCurrentSpan({
+		"discord.user_id": interaction.user.id,
+		"discord.guild_id": interaction.guildId ?? "unknown",
+		"discord.channel_id": interaction.channelId ?? "unknown",
+		"discord.custom_id": interaction.customId,
+	});
+
 	const database = yield* Database;
 	const discord = yield* Discord;
 
-	const [, , messageId] = interaction.customId.split(":");
-	if (!messageId) return;
+	const [, messageId] = interaction.customId.split(":");
+	if (!messageId) {
+		yield* Effect.annotateCurrentSpan({ "error.reason": "no_message_id" });
+		yield* Effect.logWarning("No message ID in custom ID");
+		return;
+	}
+
+	yield* Effect.annotateCurrentSpan({ "github.target_message_id": messageId });
 
 	const cacheKey = `${interaction.user.id}:${messageId}`;
 	const state = issueStateCache.get(cacheKey);
 
 	if (!state) {
+		yield* Effect.annotateCurrentSpan({ "error.reason": "state_not_found" });
+		yield* Effect.logWarning("Issue state not found in cache");
 		yield* discord.callClient(() =>
 			interaction.reply({
 				content: "This interaction has expired. Please start over.",
@@ -451,7 +466,17 @@ export const handleCreateButtonInteraction = Effect.fn(
 		return;
 	}
 
+	yield* Effect.annotateCurrentSpan({
+		"github.selected_repo": state.selectedRepo
+			? `${state.selectedRepo.owner}/${state.selectedRepo.name}`
+			: "none",
+		"github.original_message_id": state.originalMessageId,
+		"github.original_channel_id": state.originalChannelId,
+		"github.original_guild_id": state.originalGuildId,
+	});
+
 	if (!state.selectedRepo) {
+		yield* Effect.annotateCurrentSpan({ "error.reason": "no_repo_selected" });
 		yield* discord.callClient(() =>
 			interaction.reply({
 				content: "Please select a repository first.",
@@ -461,7 +486,14 @@ export const handleCreateButtonInteraction = Effect.fn(
 		return;
 	}
 
-	yield* discord.callClient(() => interaction.deferUpdate());
+	yield* discord
+		.callClient(() => interaction.deferUpdate())
+		.pipe(Effect.withSpan("defer_update"));
+
+	yield* Effect.logInfo("Creating GitHub issue", {
+		repo: `${state.selectedRepo.owner}/${state.selectedRepo.name}`,
+		title: state.title,
+	});
 
 	const result = yield* database.private.github
 		.createGitHubIssueFromDiscord({
@@ -477,9 +509,19 @@ export const handleCreateButtonInteraction = Effect.fn(
 				? BigInt(state.originalThreadId)
 				: undefined,
 		})
-		.pipe(Effect.withSpan("create_github_issue"));
+		.pipe(Effect.withSpan("create_github_issue_api_call"));
 
 	if (!result.success) {
+		yield* Effect.annotateCurrentSpan({
+			"error.reason": "api_call_failed",
+			"error.code": result.code,
+			"error.message": result.error,
+		});
+		yield* Effect.logError("Failed to create GitHub issue", {
+			code: result.code,
+			error: result.error,
+		});
+
 		const siteUrl = process.env.SITE_URL ?? "https://www.answeroverflow.com";
 
 		if (
@@ -507,6 +549,15 @@ export const handleCreateButtonInteraction = Effect.fn(
 		return;
 	}
 
+	yield* Effect.annotateCurrentSpan({
+		"github.issue_number": result.issue.number,
+		"github.issue_url": result.issue.url,
+	});
+	yield* Effect.logInfo("GitHub issue created successfully", {
+		issueNumber: result.issue.number,
+		issueUrl: result.issue.url,
+	});
+
 	issueStateCache.delete(cacheKey);
 
 	const successEmbed = new EmbedBuilder()
@@ -531,7 +582,7 @@ export const handleDismissButtonInteraction = Effect.fn(
 )(function* (interaction: ButtonInteraction) {
 	const discord = yield* Discord;
 
-	const [, , messageId] = interaction.customId.split(":");
+	const [, messageId] = interaction.customId.split(":");
 	if (!messageId) return;
 
 	const cacheKey = `${interaction.user.id}:${messageId}`;
