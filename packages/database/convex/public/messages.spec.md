@@ -18,7 +18,7 @@ Regular text channel:
 
 Other:
 
-- If the server has 'considerAllMessagesPublic' enabled and users have no explicit consent to display their messages the messages are shown.
+- If the server has 'considerAllMessagesPublic' enabled and users have no explicit consent to display their messages, the messages in indexed channels are shown.
 - If an author is in ignored all author ids the messages are not shown.
-- If the server does not have consider all messages public disabled and the user has no explicit consent to display their messages the messages are not shown.
-- If the server has consider all messages public disabled and the user has explicit consent to display their messages the messages are shown.
+- If the server does not have consider all messages in indexed channels public disabled and the user has no explicit consent to display their messages the messages are not shown.
+- If the server has consider all messages in indexed channels public disabled and the user has explicit consent to display their messages the messages are shown.

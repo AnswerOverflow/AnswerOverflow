@@ -122,11 +122,11 @@ export default function SettingsPage() {
 		<div className="flex max-w-[800px] w-full mx-auto flex-col gap-4">
 			<CurrentPlanCard serverId={serverId} />
 			<ToggleServerFlag
-				title="Consider All Messages Public"
+				title="Consider All Messages In Indexed Channels Public"
 				description={
 					<>
-						All messages in the server will be considered public and displayed
-						on the web. Learn more about{" "}
+						All messages in indexed channels will be considered public and
+						displayed on the web. Learn more about{" "}
 						<BlueLink
 							href="/docs/user-settings/displaying-messages"
 							target="_blank"
