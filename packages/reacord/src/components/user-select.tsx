@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { UserSelectMenuInteraction } from "discord.js";
 import { ReacordElement } from "../internal/element";
 import type { ComponentInteraction } from "../internal/interaction";
-import type { MessageOptions } from "../internal/message";
+import type { ActionRowComponent, MessageOptions } from "../internal/message";
 import { Node } from "../internal/node";
 
 export interface UserSelectProps {
@@ -37,17 +37,21 @@ class UserSelectNode extends Node<UserSelectProps> {
 	protected override modifyMessageOptionsInternal(
 		options: MessageOptions,
 	): void {
-		options.actionRows.push([
-			{
-				type: "userSelect",
-				customId: this.customId,
-				placeholder: this.props.placeholder,
-				disabled: this.props.disabled,
-				minValues: this.props.minValues,
-				maxValues: this.props.maxValues,
-				defaultUserIds: this.props.defaultUserIds,
-			},
-		]);
+		const actionRow: ActionRowComponent = {
+			type: "actionRow",
+			components: [
+				{
+					type: "userSelect",
+					customId: this.customId,
+					placeholder: this.props.placeholder,
+					disabled: this.props.disabled,
+					minValues: this.props.minValues,
+					maxValues: this.props.maxValues,
+					defaultUserIds: this.props.defaultUserIds,
+				},
+			],
+		};
+		options.components.push(actionRow);
 	}
 
 	override handleComponentInteraction(interaction: ComponentInteraction) {

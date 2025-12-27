@@ -1,6 +1,6 @@
 import { ReacordElement } from "../internal/element";
 import type { MessageOptions } from "../internal/message";
-import { getNextActionRow } from "../internal/message";
+import { getOrCreateActionRow } from "../internal/message";
 import { Node } from "../internal/node";
 
 export interface LinkProps {
@@ -28,7 +28,7 @@ class LinkNode extends Node<LinkProps> {
 	protected override modifyMessageOptionsInternal(
 		options: MessageOptions,
 	): void {
-		getNextActionRow(options).push({
+		getOrCreateActionRow(options).components.push({
 			type: "link",
 			url: this.props.url,
 			label: this.children.findType(LinkLabelNode)?.text,

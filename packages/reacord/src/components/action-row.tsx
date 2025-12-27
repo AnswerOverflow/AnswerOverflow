@@ -1,5 +1,5 @@
 import { ReacordElement } from "../internal/element";
-import type { MessageOptions } from "../internal/message";
+import type { ActionRowComponent, MessageOptions } from "../internal/message";
 import { Node } from "../internal/node";
 
 export interface ActionRowProps {
@@ -22,9 +22,18 @@ class ActionRowNode extends Node<ActionRowProps> {
 	protected override modifyMessageOptionsInternal(
 		options: MessageOptions,
 	): void {
-		options.actionRows.push([]);
+		const actionRow: ActionRowComponent = {
+			type: "actionRow",
+			components: [],
+		};
+		options.components.push(actionRow);
+
+		const actionRowOptions: MessageOptions = {
+			components: [actionRow],
+		};
+
 		for (const child of this.children) {
-			child.modifyMessageOptions(options);
+			child.modifyMessageOptions(actionRowOptions);
 		}
 	}
 }

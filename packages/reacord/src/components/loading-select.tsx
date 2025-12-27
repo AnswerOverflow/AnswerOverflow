@@ -1,5 +1,9 @@
 import { ReacordElement } from "../internal/element";
-import type { MessageOptions, MessageSelectOptions } from "../internal/message";
+import type {
+	ActionRowComponent,
+	MessageOptions,
+	MessageSelectOptions,
+} from "../internal/message";
 import { Node } from "../internal/node";
 
 export interface LoadingSelectProps {
@@ -42,6 +46,10 @@ class LoadingSelectNode extends Node<LoadingSelectNodeProps> {
 			],
 		};
 
-		options.actionRows.push([selectOptions]);
+		const actionRow: ActionRowComponent = {
+			type: "actionRow",
+			components: [selectOptions],
+		};
+		options.components.push(actionRow);
 	}
 }

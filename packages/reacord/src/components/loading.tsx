@@ -1,5 +1,5 @@
 import { ReacordElement } from "../internal/element";
-import type { MessageOptions } from "../internal/message";
+import type { MessageOptions, TextDisplayComponent } from "../internal/message";
 import { Node } from "../internal/node";
 
 export interface LoadingProps {
@@ -23,6 +23,10 @@ class LoadingNode extends Node<LoadingNodeProps> {
 	protected override modifyMessageOptionsInternal(
 		options: MessageOptions,
 	): void {
-		options.content = this.props.message;
+		const textDisplay: TextDisplayComponent = {
+			type: "textDisplay",
+			content: this.props.message,
+		};
+		options.components.push(textDisplay);
 	}
 }

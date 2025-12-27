@@ -3,7 +3,7 @@ import type { ButtonInteraction } from "discord.js";
 import { ReacordElement } from "../internal/element";
 import type { ComponentInteraction } from "../internal/interaction";
 import type { MessageOptions } from "../internal/message";
-import { getNextActionRow } from "../internal/message";
+import { getOrCreateActionRow } from "../internal/message";
 import { Node } from "../internal/node";
 
 export interface ButtonProps {
@@ -34,7 +34,7 @@ class ButtonNode extends Node<ButtonProps> {
 	protected override modifyMessageOptionsInternal(
 		options: MessageOptions,
 	): void {
-		getNextActionRow(options).push({
+		getOrCreateActionRow(options).components.push({
 			type: "button",
 			customId: this.customId,
 			style: this.props.style ?? "secondary",

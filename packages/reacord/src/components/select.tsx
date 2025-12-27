@@ -2,7 +2,11 @@ import { randomUUID } from "node:crypto";
 import type { StringSelectMenuInteraction } from "discord.js";
 import { ReacordElement } from "../internal/element";
 import type { ComponentInteraction } from "../internal/interaction";
-import type { MessageOptions, MessageSelectOptions } from "../internal/message";
+import type {
+	ActionRowComponent,
+	MessageOptions,
+	MessageSelectOptions,
+} from "../internal/message";
 import { Node } from "../internal/node";
 import { OptionNode } from "./option";
 
@@ -60,7 +64,11 @@ class SelectNode extends Node<SelectProps> {
 			values: selectedValues,
 		};
 
-		options.actionRows.push([selectOptions]);
+		const actionRow: ActionRowComponent = {
+			type: "actionRow",
+			components: [selectOptions],
+		};
+		options.components.push(actionRow);
 	}
 
 	override handleComponentInteraction(interaction: ComponentInteraction) {

@@ -323,6 +323,11 @@
 			"type": "remote",
 			"url": "https://www.answeroverflow.com/mcp",
 			"enabled": false
+		},
+		"discord-docs": {
+			"type": "remote",
+			"url": "https://discord.mintlify.app/mcp",
+			"enabled": false
 		}
 	},
 	"tools": {

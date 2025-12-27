@@ -18,7 +18,7 @@ import {
 import { ReacordElement } from "../internal/element";
 import type { ComponentInteraction } from "../internal/interaction";
 import type { MessageOptions } from "../internal/message";
-import { getNextActionRow } from "../internal/message";
+import { getOrCreateActionRow } from "../internal/message";
 import { Node } from "../internal/node";
 
 export interface TextInputField {
@@ -132,7 +132,7 @@ class ModalButtonNode extends Node<ModalButtonProps> {
 	protected override modifyMessageOptionsInternal(
 		options: MessageOptions,
 	): void {
-		getNextActionRow(options).push({
+		getOrCreateActionRow(options).components.push({
 			type: "button",
 			customId: this.buttonCustomId,
 			style: this.props.style ?? "secondary",

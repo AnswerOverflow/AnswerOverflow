@@ -4,7 +4,9 @@ import {
 	type CommandInteraction,
 	ComponentType,
 	type Message,
+	MessageFlags,
 	type ModalSubmitInteraction,
+	SeparatorSpacingSize,
 	StringSelectMenuInteraction,
 	type UserSelectMenuInteraction,
 } from "discord.js";
@@ -13,9 +15,20 @@ import { Container } from "./container";
 import { DiscordApiError } from "./errors";
 import type { ComponentInteraction } from "./interaction";
 import type {
+	ActionRowComponent,
+	ActionRowItemOptions,
+	ContainerChildComponent,
+	ContainerComponent,
+	FileComponentData,
+	MediaGalleryComponent,
 	MessageButtonOptions,
 	MessageOptions,
 	MessageSelectOptions,
+	SectionComponent,
+	SeparatorComponent,
+	TextDisplayComponent,
+	ThumbnailComponent,
+	V2Component,
 } from "./message";
 import type { Node } from "./node";
 
@@ -29,35 +42,113 @@ let rendererId = 0;
 
 const DEFER_UPDATE_DELAY_MS = 500;
 
-type DiscordMessageOptions = {
-	content?: string;
-	embeds?: MessageOptions["embeds"];
-	components?: Array<{
-		type: ComponentType.ActionRow;
-		components: Array<{
-			type:
-				| ComponentType.Button
-				| ComponentType.StringSelect
-				| ComponentType.UserSelect;
-			customId?: string;
-			url?: string;
-			label?: string;
-			style?: ButtonStyle;
-			disabled?: boolean;
-			emoji?: string;
-			placeholder?: string;
-			minValues?: number;
-			maxValues?: number;
-			options?: Array<{
-				label: string;
-				value: string;
+type DiscordV2Component =
+	| {
+			type: ComponentType.TextDisplay;
+			content: string;
+			id?: number;
+	  }
+	| {
+			type: ComponentType.Container;
+			accent_color?: number;
+			spoiler?: boolean;
+			components: DiscordContainerChild[];
+	  }
+	| {
+			type: ComponentType.Section;
+			components: Array<{ type: ComponentType.TextDisplay; content: string }>;
+			accessory?: DiscordThumbnail | DiscordButton;
+	  }
+	| {
+			type: ComponentType.Separator;
+			divider?: boolean;
+			spacing?: SeparatorSpacingSize;
+	  }
+	| {
+			type: ComponentType.MediaGallery;
+			items: Array<{
+				media: { url: string };
 				description?: string;
-				emoji?: string;
-				default?: boolean;
+				spoiler?: boolean;
 			}>;
-			defaultValues?: Array<{ id: string; type: "user" }>;
+	  }
+	| {
+			type: ComponentType.File;
+			file: { url: string };
+			spoiler?: boolean;
+	  }
+	| DiscordActionRow;
+
+type DiscordContainerChild =
+	| { type: ComponentType.TextDisplay; content: string; id?: number }
+	| {
+			type: ComponentType.Section;
+			components: Array<{ type: ComponentType.TextDisplay; content: string }>;
+			accessory?: DiscordThumbnail | DiscordButton;
+	  }
+	| {
+			type: ComponentType.Separator;
+			divider?: boolean;
+			spacing?: SeparatorSpacingSize;
+	  }
+	| {
+			type: ComponentType.MediaGallery;
+			items: Array<{
+				media: { url: string };
+				description?: string;
+				spoiler?: boolean;
+			}>;
+	  }
+	| { type: ComponentType.File; file: { url: string }; spoiler?: boolean }
+	| DiscordActionRow;
+
+type DiscordThumbnail = {
+	type: ComponentType.Thumbnail;
+	media: { url: string };
+	description?: string;
+	spoiler?: boolean;
+};
+
+type DiscordButton = {
+	type: ComponentType.Button;
+	custom_id?: string;
+	url?: string;
+	style: ButtonStyle;
+	label?: string;
+	emoji?: string;
+	disabled?: boolean;
+};
+
+type DiscordActionRow = {
+	type: ComponentType.ActionRow;
+	components: Array<{
+		type:
+			| ComponentType.Button
+			| ComponentType.StringSelect
+			| ComponentType.UserSelect;
+		custom_id?: string;
+		url?: string;
+		label?: string;
+		style?: ButtonStyle;
+		disabled?: boolean;
+		emoji?: string;
+		placeholder?: string;
+		min_values?: number;
+		max_values?: number;
+		options?: Array<{
+			label: string;
+			value: string;
+			description?: string;
+			emoji?: string;
+			default?: boolean;
 		}>;
+		default_values?: Array<{ id: string; type: "user" }>;
 	}>;
+};
+
+type DiscordMessageOptions = {
+	flags: number;
+	components: DiscordV2Component[];
 	files?: Array<{
 		attachment: string;
 		name?: string;
@@ -121,9 +212,8 @@ export class Renderer {
 
 	private hashMessageOptions(options: MessageOptions): string {
 		return JSON.stringify({
-			content: options.content,
-			embeds: options.embeds,
-			actionRows: options.actionRows,
+			components: options.components,
+			files: options.files,
 		});
 	}
 
@@ -264,9 +354,7 @@ export class Renderer {
 
 	private getMessageOptions(): MessageOptions {
 		const options: MessageOptions = {
-			content: "",
-			embeds: [],
-			actionRows: [],
+			components: [],
 		};
 		for (const node of this.nodes) {
 			node.modifyMessageOptions(options);
@@ -276,77 +364,288 @@ export class Renderer {
 
 	private toDiscordOptions(options: MessageOptions): DiscordMessageOptions {
 		return {
-			content: options.content || undefined,
-			embeds: options.embeds,
-			components: options.actionRows.map((row) => ({
-				type: ComponentType.ActionRow,
-				components: row.map((component) => {
-					if (component.type === "button") {
-						return {
-							type: ComponentType.Button,
-							customId: component.customId,
-							label: component.label ?? "",
-							style: this.convertButtonStyle(component.style),
-							disabled: component.disabled,
-							emoji: component.emoji,
-						};
-					}
-
-					if (component.type === "link") {
-						return {
-							type: ComponentType.Button,
-							url: component.url,
-							label: component.label ?? "",
-							style: ButtonStyle.Link,
-							disabled: component.disabled,
-							emoji: component.emoji,
-						};
-					}
-
-					if (component.type === "userSelect") {
-						return {
-							type: ComponentType.UserSelect,
-							customId: component.customId,
-							placeholder: component.placeholder,
-							disabled: component.disabled,
-							minValues: component.minValues,
-							maxValues: component.maxValues,
-							defaultValues: component.defaultUserIds?.map((id) => ({
-								id,
-								type: "user" as const,
-							})),
-						};
-					}
-
-					return {
-						type: ComponentType.StringSelect,
-						customId: component.customId,
-						placeholder: component.placeholder,
-						disabled: component.disabled,
-						minValues: component.minValues,
-						maxValues: component.maxValues,
-						options: component.options.map((opt) => ({
-							...opt,
-							default: component.values?.includes(opt.value),
-						})),
-					};
-				}),
+			flags: MessageFlags.IsComponentsV2,
+			components: options.components.map((c) => this.toDiscordComponent(c)),
+			files: options.files?.map((f) => ({
+				attachment: f.url,
+				name: f.name,
+				spoiler: f.spoiler,
 			})),
-			files: options.files?.map((file) => ({
-				attachment: file.url,
-				spoiler: file.spoiler,
+		};
+	}
+
+	private toDiscordComponent(component: V2Component): DiscordV2Component {
+		switch (component.type) {
+			case "textDisplay":
+				return this.toDiscordTextDisplay(component);
+			case "container":
+				return this.toDiscordContainer(component);
+			case "section":
+				return this.toDiscordSection(component);
+			case "separator":
+				return this.toDiscordSeparator(component);
+			case "mediaGallery":
+				return this.toDiscordMediaGallery(component);
+			case "thumbnail":
+				return this.toDiscordThumbnailTopLevel(component);
+			case "file":
+				return this.toDiscordFile(component);
+			case "actionRow":
+				return this.toDiscordActionRow(component);
+		}
+	}
+
+	private toDiscordThumbnailTopLevel(component: ThumbnailComponent): {
+		type: ComponentType.Section;
+		components: Array<{ type: ComponentType.TextDisplay; content: string }>;
+		accessory: DiscordThumbnail;
+	} {
+		return {
+			type: ComponentType.Section,
+			components: [],
+			accessory: {
+				type: ComponentType.Thumbnail,
+				media: { url: component.url },
+				description: component.description,
+				spoiler: component.spoiler,
+			},
+		};
+	}
+
+	private toDiscordTextDisplay(component: TextDisplayComponent): {
+		type: ComponentType.TextDisplay;
+		content: string;
+		id?: number;
+	} {
+		return {
+			type: ComponentType.TextDisplay,
+			content: component.content,
+			id: component.id,
+		};
+	}
+
+	private toDiscordContainer(component: ContainerComponent): {
+		type: ComponentType.Container;
+		accent_color?: number;
+		spoiler?: boolean;
+		components: DiscordContainerChild[];
+	} {
+		return {
+			type: ComponentType.Container,
+			accent_color: component.accentColor,
+			spoiler: component.spoiler,
+			components: component.components.map((c) =>
+				this.toDiscordContainerChild(c),
+			),
+		};
+	}
+
+	private toDiscordContainerChild(
+		component: ContainerChildComponent,
+	): DiscordContainerChild {
+		switch (component.type) {
+			case "textDisplay":
+				return this.toDiscordTextDisplay(component);
+			case "section":
+				return this.toDiscordSection(component);
+			case "separator":
+				return this.toDiscordSeparator(component);
+			case "mediaGallery":
+				return this.toDiscordMediaGallery(component);
+			case "file":
+				return this.toDiscordFile(component);
+			case "actionRow":
+				return this.toDiscordActionRow(component);
+		}
+	}
+
+	private toDiscordSection(component: SectionComponent): {
+		type: ComponentType.Section;
+		components: Array<{ type: ComponentType.TextDisplay; content: string }>;
+		accessory?: DiscordThumbnail | DiscordButton;
+	} {
+		return {
+			type: ComponentType.Section,
+			components: component.components.map((c) => ({
+				type: ComponentType.TextDisplay,
+				content: c.content,
+			})),
+			accessory: component.accessory
+				? this.toDiscordAccessory(component.accessory)
+				: undefined,
+		};
+	}
+
+	private toDiscordAccessory(
+		accessory:
+			| ThumbnailComponent
+			| {
+					type: "button";
+					customId?: string;
+					url?: string;
+					style: "primary" | "secondary" | "success" | "danger" | "link";
+					label?: string;
+					emoji?: string;
+					disabled?: boolean;
+			  },
+	): DiscordThumbnail | DiscordButton {
+		if (accessory.type === "thumbnail") {
+			return {
+				type: ComponentType.Thumbnail,
+				media: { url: accessory.url },
+				description: accessory.description,
+				spoiler: accessory.spoiler,
+			};
+		}
+		return {
+			type: ComponentType.Button,
+			custom_id: accessory.customId,
+			url: accessory.url,
+			style: this.convertButtonStyle(accessory.style),
+			label: accessory.label,
+			emoji: accessory.emoji,
+			disabled: accessory.disabled,
+		};
+	}
+
+	private toDiscordSeparator(component: SeparatorComponent): {
+		type: ComponentType.Separator;
+		divider?: boolean;
+		spacing?: SeparatorSpacingSize;
+	} {
+		return {
+			type: ComponentType.Separator,
+			divider: component.divider,
+			spacing: component.spacing
+				? component.spacing === "small"
+					? SeparatorSpacingSize.Small
+					: SeparatorSpacingSize.Large
+				: undefined,
+		};
+	}
+
+	private toDiscordMediaGallery(component: MediaGalleryComponent): {
+		type: ComponentType.MediaGallery;
+		items: Array<{
+			media: { url: string };
+			description?: string;
+			spoiler?: boolean;
+		}>;
+	} {
+		return {
+			type: ComponentType.MediaGallery,
+			items: component.items.map((item) => ({
+				media: { url: item.url },
+				description: item.description,
+				spoiler: item.spoiler,
+			})),
+		};
+	}
+
+	private toDiscordFile(component: FileComponentData): {
+		type: ComponentType.File;
+		file: { url: string };
+		spoiler?: boolean;
+	} {
+		return {
+			type: ComponentType.File,
+			file: { url: component.url },
+			spoiler: component.spoiler,
+		};
+	}
+
+	private toDiscordActionRow(component: ActionRowComponent): DiscordActionRow {
+		return {
+			type: ComponentType.ActionRow,
+			components: component.components.map((c) =>
+				this.toDiscordActionRowItem(c),
+			),
+		};
+	}
+
+	private toDiscordActionRowItem(component: ActionRowItemOptions): {
+		type:
+			| ComponentType.Button
+			| ComponentType.StringSelect
+			| ComponentType.UserSelect;
+		custom_id?: string;
+		url?: string;
+		label?: string;
+		style?: ButtonStyle;
+		disabled?: boolean;
+		emoji?: string;
+		placeholder?: string;
+		min_values?: number;
+		max_values?: number;
+		options?: Array<{
+			label: string;
+			value: string;
+			description?: string;
+			emoji?: string;
+			default?: boolean;
+		}>;
+		default_values?: Array<{ id: string; type: "user" }>;
+	} {
+		if (component.type === "button") {
+			return {
+				type: ComponentType.Button,
+				custom_id: component.customId,
+				label: component.label ?? "",
+				style: this.convertButtonStyle(component.style),
+				disabled: component.disabled,
+				emoji: component.emoji,
+			};
+		}
+
+		if (component.type === "link") {
+			return {
+				type: ComponentType.Button,
+				url: component.url,
+				label: component.label ?? "",
+				style: ButtonStyle.Link,
+				disabled: component.disabled,
+				emoji: component.emoji,
+			};
+		}
+
+		if (component.type === "userSelect") {
+			return {
+				type: ComponentType.UserSelect,
+				custom_id: component.customId,
+				placeholder: component.placeholder,
+				disabled: component.disabled,
+				min_values: component.minValues,
+				max_values: component.maxValues,
+				default_values: component.defaultUserIds?.map((id) => ({
+					id,
+					type: "user" as const,
+				})),
+			};
+		}
+
+		return {
+			type: ComponentType.StringSelect,
+			custom_id: component.customId,
+			placeholder: component.placeholder,
+			disabled: component.disabled,
+			min_values: component.minValues,
+			max_values: component.maxValues,
+			options: component.options.map((opt) => ({
+				...opt,
+				default: component.values?.includes(opt.value),
 			})),
 		};
 	}
 
 	private convertButtonStyle(
-		style: MessageButtonOptions["style"],
+		style: MessageButtonOptions["style"] | "link",
 	): ButtonStyle {
 		const styleMap = {
 			primary: ButtonStyle.Primary,
 			secondary: ButtonStyle.Secondary,
 			success: ButtonStyle.Success,
 			danger: ButtonStyle.Danger,
+			link: ButtonStyle.Link,
 		} as const;
 		return styleMap[style ?? "secondary"];
 	}
@@ -372,39 +671,34 @@ export class Renderer {
 			const options = this.getMessageOptions();
 			const discordOptions = this.toDiscordOptions(options);
 
-			const rawSelectOptions = options.actionRows
-				.flat()
-				.filter(
-					(c): c is MessageSelectOptions => "type" in c && c.type === "select",
+			const selectComponents = options.components
+				.filter((c): c is ActionRowComponent => c.type === "actionRow")
+				.flatMap((row) =>
+					row.components.filter(
+						(c): c is MessageSelectOptions => c.type === "select",
+					),
 				);
-			const rawSelectValues = rawSelectOptions.map((s) => ({
+
+			const selectValues = selectComponents.map((s) => ({
 				customId: s.customId,
 				rawValues: s.values,
 			}));
 
-			const selectComponents = discordOptions.components?.flatMap((row) =>
-				row.components.filter((c) => c.type === ComponentType.StringSelect),
-			);
-			const selectValues = selectComponents?.map((s) => {
-				const defaultOptions = s.options?.filter((o) => o.default);
-				return {
-					customId: s.customId,
-					defaultValues: defaultOptions?.map((o) => o.value),
-				};
-			});
+			const buttonComponents = options.components
+				.filter((c): c is ActionRowComponent => c.type === "actionRow")
+				.flatMap((row) =>
+					row.components.filter(
+						(c): c is MessageButtonOptions => c.type === "button",
+					),
+				);
 
-			const buttonComponents = discordOptions.components?.flatMap((row) =>
-				row.components.filter((c) => c.type === ComponentType.Button),
-			);
-			const buttonStates = buttonComponents?.map((b) => ({
+			const buttonStates = buttonComponents.map((b) => ({
 				label: b.label,
 				disabled: b.disabled,
 			}));
 
 			yield* Effect.annotateCurrentSpan({
-				"reacord.embed_count": discordOptions.embeds?.length ?? 0,
 				"reacord.component_count": discordOptions.components?.length ?? 0,
-				"reacord.select_raw_values": JSON.stringify(rawSelectValues),
 				"reacord.select_values": JSON.stringify(selectValues),
 				"reacord.button_states": JSON.stringify(buttonStates),
 			});
@@ -491,10 +785,9 @@ export class Renderer {
 			const options = this.getMessageOptions();
 			const discordOptions = this.toDiscordOptions(options);
 
-			discordOptions.components = discordOptions.components?.map((row) => ({
-				...row,
-				components: row.components.map((c) => ({ ...c, disabled: true })),
-			}));
+			discordOptions.components = this.disableAllComponents(
+				discordOptions.components,
+			);
 
 			if (rendererOptions.type === "interaction") {
 				yield* Effect.tryPromise({
@@ -512,6 +805,48 @@ export class Renderer {
 				}).pipe(Effect.withSpan("reacord.discord_deactivate_message_edit"));
 			}
 		}).pipe(Effect.withSpan("reacord.do_deactivate"));
+	}
+
+	private disableAllComponents(
+		components: DiscordV2Component[],
+	): DiscordV2Component[] {
+		return components.map((c) => {
+			if (c.type === ComponentType.ActionRow) {
+				return {
+					...c,
+					components: c.components.map((item) => ({ ...item, disabled: true })),
+				};
+			}
+			if (c.type === ComponentType.Container) {
+				return {
+					...c,
+					components: this.disableContainerChildren(c.components),
+				};
+			}
+			return c;
+		});
+	}
+
+	private disableContainerChildren(
+		components: DiscordContainerChild[],
+	): DiscordContainerChild[] {
+		return components.map((c) => {
+			if (c.type === ComponentType.ActionRow) {
+				return {
+					...c,
+					components: c.components.map((item) => ({ ...item, disabled: true })),
+				};
+			}
+			if (c.type === ComponentType.Section && c.accessory) {
+				if (c.accessory.type === ComponentType.Button) {
+					return {
+						...c,
+						accessory: { ...c.accessory, disabled: true },
+					};
+				}
+			}
+			return c;
+		});
 	}
 
 	private doDestroy(): Effect.Effect<void, DiscordApiError> {

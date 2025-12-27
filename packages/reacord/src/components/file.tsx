@@ -1,5 +1,5 @@
 import { ReacordElement } from "../internal/element";
-import type { MessageOptions } from "../internal/message";
+import type { FileComponentData, MessageOptions } from "../internal/message";
 import { Node } from "../internal/node";
 
 export interface FileProps {
@@ -19,12 +19,11 @@ class FileNode extends Node<FileProps> {
 	protected override modifyMessageOptionsInternal(
 		options: MessageOptions,
 	): void {
-		if (!options.files) {
-			options.files = [];
-		}
-		options.files.push({
+		const file: FileComponentData = {
+			type: "file",
 			url: this.props.url,
 			spoiler: this.props.spoiler,
-		});
+		};
+		options.components.push(file);
 	}
 }

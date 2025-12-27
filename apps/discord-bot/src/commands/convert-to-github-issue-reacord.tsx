@@ -3,8 +3,7 @@ import {
 	ActionRow,
 	Atom,
 	Button,
-	Embed,
-	EmbedField,
+	Container,
 	Link,
 	LoadingSelect,
 	ModalButton,
@@ -12,6 +11,7 @@ import {
 	Reacord,
 	Result,
 	Select,
+	TextDisplay,
 	useAtomSet,
 	useAtomSuspense,
 	useAtomValue,
@@ -176,7 +176,6 @@ function RepoSelector({
 				}
 			}}
 		>
-			{/* TODO: Add search and pagination support for repositories */}
 			{repos.slice(0, 23).map((repo: GitHubRepo) => (
 				<Option
 					key={repo.fullName}
@@ -318,26 +317,26 @@ function GitHubIssueCreator({
 
 	if (isSuccess && successResult && selectedRepo) {
 		return (
-			<Embed
-				title="GitHub Issue Created"
-				color={0x238636}
-				url={successResult.issueUrl}
-			>
-				<EmbedField name="Repository">
-					{selectedRepo.owner}/{selectedRepo.name}
-				</EmbedField>
-				<EmbedField name="Issue">#{successResult.issueNumber}</EmbedField>
-				<EmbedField name="Title">{title}</EmbedField>
-			</Embed>
+			<Container accentColor={0x238636}>
+				<TextDisplay>
+					## [GitHub Issue Created]({successResult.issueUrl})
+				</TextDisplay>
+				<TextDisplay>
+					**Repository:** {selectedRepo.owner}/{selectedRepo.name}
+				</TextDisplay>
+				<TextDisplay>**Issue:** #{successResult.issueNumber}</TextDisplay>
+				<TextDisplay>**Title:** {title}</TextDisplay>
+			</Container>
 		);
 	}
 
 	if (isError && errorMessage) {
 		return (
 			<>
-				<Embed title="Failed to Create Issue" color={0xff0000}>
-					{errorMessage}
-				</Embed>
+				<Container accentColor={0xff0000}>
+					<TextDisplay>## Failed to Create Issue</TextDisplay>
+					<TextDisplay>{errorMessage}</TextDisplay>
+				</Container>
 				<ActionRow>
 					<Button
 						label="Try Again"
@@ -360,12 +359,14 @@ function GitHubIssueCreator({
 
 	return (
 		<>
-			<Embed title="New GitHub Issue" color={0x238636}>
-				<EmbedField name="Title">{title || "_No title_"}</EmbedField>
-				<EmbedField name="Description Preview">
+			<Container accentColor={0x238636}>
+				<TextDisplay>## New GitHub Issue</TextDisplay>
+				<TextDisplay>**Title:** {title || "_No title_"}</TextDisplay>
+				<TextDisplay>
+					**Description Preview:**{" "}
 					{body.length > 200 ? `${body.slice(0, 197)}...` : body}
-				</EmbedField>
-			</Embed>
+				</TextDisplay>
+			</Container>
 
 			<Suspense
 				fallback={<LoadingSelect placeholder="Loading repositories..." />}
