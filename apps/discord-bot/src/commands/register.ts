@@ -64,6 +64,7 @@ const REACORD_STRESS_TEST_SCENARIOS = [
 	"react19-action-state",
 	"react19-use-hook",
 	"react19-cart",
+	"react-kitchen-sink",
 ] as const;
 
 const guildCommands = [

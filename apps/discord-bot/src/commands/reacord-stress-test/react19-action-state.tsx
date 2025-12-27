@@ -7,7 +7,7 @@ import {
 	TextDisplay,
 	useInstance,
 } from "@packages/reacord";
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 
 interface FormState {
 	success: boolean;
@@ -88,6 +88,17 @@ export function React19ActionStateScenario() {
 		},
 		initialState,
 	);
+	const [, startFormTransition] = useTransition();
+
+	const submitForm = (data: {
+		username: string;
+		email: string;
+		bio: string;
+	}) => {
+		startFormTransition(() => {
+			formAction(data);
+		});
+	};
 
 	const submitCount = useState(0)[0];
 
@@ -190,7 +201,7 @@ export function React19ActionStateScenario() {
 						const username = values.getTextInput("username") ?? "";
 						const email = values.getTextInput("email") ?? "";
 						const bio = values.getTextInput("bio") ?? "";
-						formAction({ username, email, bio });
+						submitForm({ username, email, bio });
 					}}
 				/>
 			</ActionRow>
@@ -201,7 +212,7 @@ export function React19ActionStateScenario() {
 					style="success"
 					disabled={isPending}
 					onClick={() => {
-						formAction({
+						submitForm({
 							username: `User${Math.floor(Math.random() * 1000)}`,
 							email: `test${Math.floor(Math.random() * 1000)}@example.com`,
 							bio: "Auto-generated profile",
@@ -213,7 +224,7 @@ export function React19ActionStateScenario() {
 					style="secondary"
 					disabled={isPending}
 					onClick={() => {
-						formAction({
+						submitForm({
 							username: "ab",
 							email: "invalid",
 							bio: "",

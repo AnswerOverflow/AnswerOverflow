@@ -12,6 +12,7 @@ import { ImageGalleryScenario } from "./image-gallery";
 import { ModalShowcaseScenario } from "./modal-showcase";
 import { PollScenario } from "./poll";
 import { ProductCardScenario } from "./product-card";
+import { ReactKitchenSinkScenario } from "./react-kitchen-sink";
 import { React19ActionStateScenario } from "./react19-action-state";
 import { React19CartScenario } from "./react19-cart";
 import { React19OptimisticScenario } from "./react19-optimistic";
@@ -37,7 +38,8 @@ type Scenario =
 	| "react19-optimistic"
 	| "react19-action-state"
 	| "react19-use-hook"
-	| "react19-cart";
+	| "react19-cart"
+	| "react-kitchen-sink";
 
 const scenarios: Scenario[] = [
 	"product-card",
@@ -54,6 +56,7 @@ const scenarios: Scenario[] = [
 	"react19-action-state",
 	"react19-use-hook",
 	"react19-cart",
+	"react-kitchen-sink",
 ];
 
 type StressTestProps = {
@@ -90,6 +93,8 @@ function StressTest({ scenario }: StressTestProps) {
 			return <React19UseHookScenario />;
 		case "react19-cart":
 			return <React19CartScenario />;
+		case "react-kitchen-sink":
+			return <ReactKitchenSinkScenario />;
 	}
 }
 
