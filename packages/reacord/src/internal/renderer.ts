@@ -20,6 +20,8 @@ import type { Node } from "./node";
 
 let rendererId = 0;
 
+const DEFER_UPDATE_DELAY_MS = 500;
+
 type DiscordMessageOptions = {
 	content?: string;
 	embeds?: MessageOptions["embeds"];
@@ -103,26 +105,21 @@ export class Renderer {
 		for (const node of this.nodes) {
 			this.componentInteraction = reacordInteraction;
 
-			const wrappedRunEffect: typeof this.runEffect = (effect) => {
-				const promise = this.runEffect(effect);
-				this.pendingEffectPromise = promise.then(() => {
-					this.pendingEffectPromise = undefined;
-					queueMicrotask(() => {
-						this.render();
-					});
-				});
-				return promise;
-			};
-
-			if (
-				node.handleComponentInteraction(reacordInteraction, wrappedRunEffect)
-			) {
-				setTimeout(() => {
-					this.enqueue(() => this.doDeferUpdate(interaction));
-				}, 500);
-				return true;
+			try {
+				if (
+					node.handleComponentInteraction(
+						reacordInteraction,
+						this.createWrappedRunEffect(),
+					)
+				) {
+					setTimeout(() => {
+						this.enqueue(() => this.doDeferUpdate(interaction));
+					}, DEFER_UPDATE_DELAY_MS);
+					return true;
+				}
+			} finally {
+				this.componentInteraction = undefined;
 			}
-			this.componentInteraction = undefined;
 		}
 		return false;
 	}
@@ -145,26 +142,21 @@ export class Renderer {
 		for (const node of this.nodes) {
 			this.componentInteraction = reacordInteraction;
 
-			const wrappedRunEffect: typeof this.runEffect = (effect) => {
-				const promise = this.runEffect(effect);
-				this.pendingEffectPromise = promise.then(() => {
-					this.pendingEffectPromise = undefined;
-					queueMicrotask(() => {
-						this.render();
-					});
-				});
-				return promise;
-			};
-
-			if (
-				node.handleComponentInteraction(reacordInteraction, wrappedRunEffect)
-			) {
-				setTimeout(() => {
-					this.enqueue(() => this.doDeferModalUpdate(interaction));
-				}, 500);
-				return true;
+			try {
+				if (
+					node.handleComponentInteraction(
+						reacordInteraction,
+						this.createWrappedRunEffect(),
+					)
+				) {
+					setTimeout(() => {
+						this.enqueue(() => this.doDeferModalUpdate(interaction));
+					}, DEFER_UPDATE_DELAY_MS);
+					return true;
+				}
+			} finally {
+				this.componentInteraction = undefined;
 			}
-			this.componentInteraction = undefined;
 		}
 		return false;
 	}
@@ -196,6 +188,24 @@ export class Renderer {
 		return this.options.runEffect;
 	}
 
+	private createWrappedRunEffect(): typeof this.runEffect {
+		return (effect) => {
+			const promise = this.runEffect(effect);
+			this.pendingEffectPromise = promise
+				.then(() => {
+					this.pendingEffectPromise = undefined;
+					queueMicrotask(() => {
+						this.render();
+					});
+				})
+				.catch((error) => {
+					this.pendingEffectPromise = undefined;
+					console.error("Reacord effect error:", error);
+				});
+			return promise;
+		};
+	}
+
 	private processQueue() {
 		if (this.processing) return;
 		this.processing = true;
@@ -215,7 +225,12 @@ export class Renderer {
 						}),
 					),
 				),
-			).then(processNext);
+			)
+				.then(processNext)
+				.catch((error) => {
+					console.error("Reacord queue processing error:", error);
+					processNext();
+				});
 		};
 
 		processNext();

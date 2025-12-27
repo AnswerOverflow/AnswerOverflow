@@ -128,6 +128,9 @@ const config: HostConfig<
 		return oldProps.props !== newProps.props ? true : null;
 	},
 	commitUpdate: (node, _payload, _type, oldProps, newProps) => {
+		// react-reconciler may pass newProps without a props field in some update scenarios,
+		// particularly during batched updates. Fall back to oldProps to ensure we don't lose
+		// the current prop values when this occurs.
 		const propsToUse =
 			(newProps as Record<string, unknown>).props !== undefined
 				? (newProps as Record<string, unknown>).props
