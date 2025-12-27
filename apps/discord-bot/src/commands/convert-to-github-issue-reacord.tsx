@@ -1,6 +1,7 @@
-import { Database } from "@packages/database/database";
+import { Database, DatabaseLayer } from "@packages/database/database";
 import {
 	ActionRow,
+	Atom,
 	Button,
 	Embed,
 	EmbedField,
@@ -8,9 +9,10 @@ import {
 	ModalButton,
 	Option,
 	Reacord,
+	Result,
 	Select,
-	useEffectAsync,
-	useEffectCallback,
+	useAtomSet,
+	useAtomValue,
 	useInstance,
 } from "@packages/reacord";
 import type { ContextMenuCommandInteraction, Message } from "discord.js";
@@ -24,6 +26,8 @@ import {
 	catchAllSilentWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
+
+const databaseRuntime = Atom.runtime(DatabaseLayer);
 
 const COMMAND_NAME = "Create GitHub Issue";
 const GITHUB_ISSUE_TITLE_INPUT = "github-issue-title";
@@ -121,18 +125,8 @@ function generateIssueTitle(message: Message): string {
 
 const INSTALL_MORE_REPOS_VALUE = "__install_more_repos__";
 
-type RepoSelectorProps = {
-	discordUserId: string;
-	selectedRepo: { owner: string; name: string } | null;
-	setSelectedRepo: (repo: { owner: string; name: string } | null) => void;
-};
-
-function RepoSelector({
-	discordUserId,
-	selectedRepo,
-	setSelectedRepo,
-}: RepoSelectorProps) {
-	const state = useEffectAsync(() =>
+const reposAtomFamily = Atom.family((discordUserId: string) =>
+	databaseRuntime.atom(
 		Effect.gen(function* () {
 			const database = yield* Database;
 			const reposResult = yield* database.private.github
@@ -150,13 +144,27 @@ function RepoSelector({
 				hasAllReposAccess: reposResult.hasAllReposAccess,
 			};
 		}),
-	);
+	),
+);
 
-	if (state.status === "loading") {
+type RepoSelectorProps = {
+	discordUserId: string;
+	selectedRepo: { owner: string; name: string } | null;
+	setSelectedRepo: (repo: { owner: string; name: string } | null) => void;
+};
+
+function RepoSelector({
+	discordUserId,
+	selectedRepo,
+	setSelectedRepo,
+}: RepoSelectorProps) {
+	const state = useAtomValue(reposAtomFamily(discordUserId));
+
+	if (Result.isInitial(state) || state.waiting) {
 		return <LoadingSelect placeholder="Loading repositories..." />;
 	}
 
-	if (state.status === "error") {
+	if (Result.isFailure(state)) {
 		return null;
 	}
 
@@ -227,7 +235,66 @@ type GitHubIssueCreatorProps = {
 	discordUserId: string;
 };
 
-type Status = "editing" | "creating" | "success" | "error";
+type CreateIssueInput = {
+	repo: { owner: string; name: string };
+	title: string;
+	body: string;
+	discordUserId: string;
+	originalGuildId: string;
+	originalChannelId: string;
+	originalMessageId: string;
+	originalThreadId?: string;
+};
+
+type CreateIssueResult =
+	| { status: "success"; issueUrl: string; issueNumber: number }
+	| { status: "error"; errorMessage: string };
+
+const createIssueAtom = databaseRuntime.fn<CreateIssueInput>()(
+	(input: CreateIssueInput) =>
+		Effect.gen(function* () {
+			const database = yield* Database;
+
+			const result = yield* database.private.github
+				.createGitHubIssueFromDiscord({
+					discordId: BigInt(input.discordUserId),
+					repoOwner: input.repo.owner,
+					repoName: input.repo.name,
+					title: input.title,
+					body: input.body,
+					discordServerId: BigInt(input.originalGuildId),
+					discordChannelId: BigInt(input.originalChannelId),
+					discordMessageId: BigInt(input.originalMessageId),
+					discordThreadId: input.originalThreadId
+						? BigInt(input.originalThreadId)
+						: undefined,
+				})
+				.pipe(Effect.withSpan("create_github_issue_api_call"));
+
+			if (!result.success) {
+				if (
+					result.code === "NOT_LINKED" ||
+					result.code === "REFRESH_REQUIRED" ||
+					result.code === "REFRESH_FAILED"
+				) {
+					return {
+						status: "error" as const,
+						errorMessage: `Your GitHub session has expired. Please re-link your account at ${makeMainSiteLink("/dashboard/settings")}`,
+					};
+				}
+				return {
+					status: "error" as const,
+					errorMessage: result.error,
+				};
+			}
+
+			return {
+				status: "success" as const,
+				issueUrl: result.issue.url,
+				issueNumber: result.issue.number,
+			};
+		}),
+);
 
 function GitHubIssueCreator({
 	initialTitle,
@@ -242,85 +309,71 @@ function GitHubIssueCreator({
 		owner: string;
 		name: string;
 	} | null>(null);
-
 	const [title, setTitle] = useState(initialTitle);
 	const [body, setBody] = useState(initialBody);
-	const [status, setStatus] = useState<Status>("editing");
-	const [issueUrl, setIssueUrl] = useState<string | null>(null);
-	const [issueNumber, setIssueNumber] = useState<number | null>(null);
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+	const createIssueResult = useAtomValue(createIssueAtom);
+	const triggerCreateIssue = useAtomSet(createIssueAtom);
+
 	const instance = useInstance();
 
-	const handleCreateIssue = useEffectCallback(
-		(repo: { owner: string; name: string }) =>
-			Effect.gen(function* () {
-				setStatus("creating");
+	const handleCreateIssue = (repo: { owner: string; name: string }) => {
+		triggerCreateIssue({
+			repo,
+			title,
+			body,
+			discordUserId,
+			originalGuildId,
+			originalChannelId,
+			originalMessageId,
+			originalThreadId,
+		});
+	};
 
-				const database = yield* Database;
+	const isCreating =
+		Result.isInitial(createIssueResult) && createIssueResult.waiting;
+	const isSuccess =
+		Result.isSuccess(createIssueResult) &&
+		createIssueResult.value.status === "success";
+	const isError =
+		Result.isSuccess(createIssueResult) &&
+		createIssueResult.value.status === "error";
+	const successResult = isSuccess ? createIssueResult.value : null;
+	const errorMessage = isError ? createIssueResult.value.errorMessage : null;
 
-				const result = yield* database.private.github
-					.createGitHubIssueFromDiscord({
-						discordId: BigInt(discordUserId),
-						repoOwner: repo.owner,
-						repoName: repo.name,
-						title,
-						body,
-						discordServerId: BigInt(originalGuildId),
-						discordChannelId: BigInt(originalChannelId),
-						discordMessageId: BigInt(originalMessageId),
-						discordThreadId: originalThreadId
-							? BigInt(originalThreadId)
-							: undefined,
-					})
-					.pipe(Effect.withSpan("create_github_issue_api_call"));
-
-				if (!result.success) {
-					if (
-						result.code === "NOT_LINKED" ||
-						result.code === "REFRESH_REQUIRED" ||
-						result.code === "REFRESH_FAILED"
-					) {
-						setErrorMessage(
-							`Your GitHub session has expired. Please re-link your account at ${makeMainSiteLink("/dashboard/settings")}`,
-						);
-					} else {
-						setErrorMessage(result.error);
-					}
-					setStatus("error");
-					return;
-				}
-
-				setIssueUrl(result.issue.url);
-				setIssueNumber(result.issue.number);
-				setStatus("success");
-			}),
-	);
-
-	if (status === "success" && issueUrl && issueNumber && selectedRepo) {
+	if (
+		isSuccess &&
+		successResult &&
+		successResult.status === "success" &&
+		selectedRepo
+	) {
 		return (
-			<Embed title="GitHub Issue Created" color={0x238636} url={issueUrl}>
+			<Embed
+				title="GitHub Issue Created"
+				color={0x238636}
+				url={successResult.issueUrl}
+			>
 				<EmbedField name="Repository">
 					{selectedRepo.owner}/{selectedRepo.name}
 				</EmbedField>
-				<EmbedField name="Issue">#{issueNumber}</EmbedField>
+				<EmbedField name="Issue">#{successResult.issueNumber}</EmbedField>
 				<EmbedField name="Title">{title}</EmbedField>
 			</Embed>
 		);
 	}
 
-	if (status === "error") {
+	if (isError && errorMessage) {
 		return (
 			<>
 				<Embed title="Failed to Create Issue" color={0xff0000}>
-					{errorMessage ?? "An unknown error occurred"}
+					{errorMessage}
 				</Embed>
 				<ActionRow>
 					<Button
 						label="Try Again"
 						style="primary"
 						onClick={() => {
-							setStatus("editing");
-							setErrorMessage(null);
+							triggerCreateIssue(Atom.Reset);
 						}}
 					/>
 					<Button
@@ -380,9 +433,9 @@ function GitHubIssueCreator({
 					}}
 				/>
 				<Button
-					label={status === "creating" ? "Creating..." : "Create Issue"}
+					label={isCreating ? "Creating..." : "Create Issue"}
 					style="success"
-					disabled={!selectedRepo || status === "creating"}
+					disabled={!selectedRepo || isCreating}
 					onClick={() => {
 						if (selectedRepo) {
 							handleCreateIssue(selectedRepo);

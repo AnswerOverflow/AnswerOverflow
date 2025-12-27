@@ -1,3 +1,4 @@
+import { RegistryProvider } from "@effect-atom/atom-react";
 import type {
 	ButtonInteraction,
 	Client,
@@ -149,9 +150,11 @@ export function makeReacord(
 		const instance: ReacordInstance = {
 			render: (content: ReactNode) => {
 				reconciler.updateContainer(
-					<EffectRuntimeProvider runEffect={runEffect}>
-						<InstanceProvider value={instance}>{content}</InstanceProvider>
-					</EffectRuntimeProvider>,
+					<RegistryProvider>
+						<EffectRuntimeProvider runEffect={runEffect}>
+							<InstanceProvider value={instance}>{content}</InstanceProvider>
+						</EffectRuntimeProvider>
+					</RegistryProvider>,
 					container,
 				);
 				return instance;

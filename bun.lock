@@ -225,6 +225,8 @@
       "name": "@packages/reacord",
       "version": "0.0.1",
       "dependencies": {
+        "@effect-atom/atom": "^0.4.11",
+        "@effect-atom/atom-react": "^0.4.4",
         "react": "^19.1.0",
         "react-reconciler": "^0.31.0",
       },
@@ -233,6 +235,8 @@
         "@types/react-reconciler": "^0.31.0",
       },
       "peerDependencies": {
+        "@effect/experimental": "^0.57.0",
+        "@effect/platform": "^0.93.0",
         "discord.js": "^14",
         "effect": "^3",
       },
@@ -645,6 +649,10 @@
     "@edge-runtime/primitives": ["@edge-runtime/primitives@6.0.0", "", {}, "sha512-FqoxaBT+prPBHBwE1WXS1ocnu/VLTQyZ6NMUBAdbP7N2hsFTTxMC/jMu2D/8GAlMQfxeuppcPuCUk/HO3fpIvA=="],
 
     "@edge-runtime/vm": ["@edge-runtime/vm@5.0.0", "", { "dependencies": { "@edge-runtime/primitives": "6.0.0" } }, "sha512-NKBGBSIKUG584qrS1tyxVpX/AKJKQw5HgjYEnPLC0QsTw79JrGn+qUr8CXFb955Iy7GUdiiUv1rJ6JBGvaKb6w=="],
+
+    "@effect-atom/atom": ["@effect-atom/atom@0.4.11", "", { "peerDependencies": { "@effect/experimental": "^0.57.0", "@effect/platform": "^0.93.0", "@effect/rpc": "^0.72.1", "effect": "^3.19.0" } }, "sha512-bahWNw2xQ349HXkqshpls/t4wUu5fbMfjT6/7FhDj1uPjP9BArUAwL1Js5b7EG0ZPonS+G1O9LftpxVWAxr86g=="],
+
+    "@effect-atom/atom-react": ["@effect-atom/atom-react@0.4.4", "", { "dependencies": { "@effect-atom/atom": "^0.4.10" }, "peerDependencies": { "effect": "^3.19", "react": ">=18 <20", "scheduler": "*" } }, "sha512-EWT9WpB67GNCecxQXJdAZNVMhuk3VxpdDfojxg1wOgWmR5TPaGiXA74Jqa2Y9AEjSB0hMMAk7RNve2CoIikg2w=="],
 
     "@effect-aws/client-s3": ["@effect-aws/client-s3@1.10.7", "", { "dependencies": { "@aws-sdk/client-s3": "^3", "@aws-sdk/s3-request-presigner": "^3", "@aws-sdk/types": "^3", "@effect-aws/commons": "^0.3.0" }, "peerDependencies": { "effect": ">=3.0.4 <4.0.0" } }, "sha512-polx0ZzwM3MTnKhv+hcu5dF65EEf8Yhq1ip0iAPAygYe4sGvyBEGfyf8bBsryTsBTUtyjC3S8BupBx5HMp/COw=="],
 
