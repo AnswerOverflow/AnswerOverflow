@@ -7,7 +7,7 @@
 		".": "./src/index.ts"
 	},
 	"scripts": {
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsgo --noEmit"
 	},
 	"dependencies": {
 		"@effect-atom/atom": "^0.4.11",
