@@ -9,6 +9,7 @@ import { catchAllWithReport } from "../../utils/error-reporting";
 import { DashboardScenario } from "./dashboard";
 import { FileComponentScenario } from "./file-component";
 import { ImageGalleryScenario } from "./image-gallery";
+import { LLMStreamingScenario } from "./llm-streaming";
 import { ModalShowcaseScenario } from "./modal-showcase";
 import { PollScenario } from "./poll";
 import { ProductCardScenario } from "./product-card";
@@ -17,6 +18,9 @@ import { React19ActionStateScenario } from "./react19-action-state";
 import { React19CartScenario } from "./react19-cart";
 import { React19OptimisticScenario } from "./react19-optimistic";
 import { React19UseHookScenario } from "./react19-use-hook";
+import { React19ContextScenario } from "./react19-context";
+import { React19DeferredScenario } from "./react19-deferred";
+import { React19RefScenario } from "./react19-ref";
 import { TicketTriageScenario } from "./ticket-triage";
 import { UserProfileScenario } from "./user-profile";
 import { UserSelectScenario } from "./user-select";
@@ -39,7 +43,11 @@ type Scenario =
 	| "react19-action-state"
 	| "react19-use-hook"
 	| "react19-cart"
-	| "react-kitchen-sink";
+	| "react19-context"
+	| "react19-deferred"
+	| "react19-ref"
+	| "react-kitchen-sink"
+	| "llm-streaming";
 
 const scenarios: Scenario[] = [
 	"product-card",
@@ -56,7 +64,11 @@ const scenarios: Scenario[] = [
 	"react19-action-state",
 	"react19-use-hook",
 	"react19-cart",
+	"react19-context",
+	"react19-deferred",
+	"react19-ref",
 	"react-kitchen-sink",
+	"llm-streaming",
 ];
 
 type StressTestProps = {
@@ -93,8 +105,16 @@ function StressTest({ scenario }: StressTestProps) {
 			return <React19UseHookScenario />;
 		case "react19-cart":
 			return <React19CartScenario />;
+		case "react19-context":
+			return <React19ContextScenario />;
+		case "react19-deferred":
+			return <React19DeferredScenario />;
+		case "react19-ref":
+			return <React19RefScenario />;
 		case "react-kitchen-sink":
 			return <ReactKitchenSinkScenario />;
+		case "llm-streaming":
+			return <LLMStreamingScenario />;
 	}
 }
 

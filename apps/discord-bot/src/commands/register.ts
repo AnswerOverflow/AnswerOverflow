@@ -7,6 +7,7 @@ import {
 } from "discord.js";
 import { Effect } from "effect";
 import { Discord } from "../core/discord-service";
+import { REACORD_STRESS_TEST_SCENARIOS } from "./reacord-stress-test/index";
 
 const globalCommands = [
 	new ContextMenuCommandBuilder()
@@ -47,24 +48,6 @@ const globalCommands = [
 		.setName("bug-report")
 		.setDescription("Report a bug with Answer Overflow")
 		.setContexts(InteractionContextType.Guild, InteractionContextType.BotDM),
-] as const;
-
-const REACORD_STRESS_TEST_SCENARIOS = [
-	"product-card",
-	"user-profile",
-	"image-gallery",
-	"dashboard",
-	"wizard",
-	"poll",
-	"user-select",
-	"file-component",
-	"modal-showcase",
-	"ticket-triage",
-	"react19-optimistic",
-	"react19-action-state",
-	"react19-use-hook",
-	"react19-cart",
-	"react-kitchen-sink",
 ] as const;
 
 const guildCommands = [
