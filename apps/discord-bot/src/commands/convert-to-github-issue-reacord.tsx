@@ -214,7 +214,7 @@ function GitHubIssueCreator({
 			{repos.length > 0 && (
 				<Select
 					placeholder="Select a repository"
-					defaultValue={
+					value={
 						selectedRepo
 							? `${selectedRepo.owner}/${selectedRepo.name}`
 							: undefined

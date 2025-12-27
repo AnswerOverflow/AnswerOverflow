@@ -12,8 +12,8 @@ export interface SelectProps {
 	disabled?: boolean;
 	minValues?: number;
 	maxValues?: number;
-	defaultValue?: string;
-	defaultValues?: string[];
+	value?: string;
+	values?: string[];
 	onSelect?: (
 		value: string,
 		interaction: StringSelectMenuInteraction,
@@ -35,8 +35,6 @@ export function Select(props: SelectProps) {
 
 class SelectNode extends Node<SelectProps> {
 	private customId = randomUUID();
-	private selectedValues: string[] | undefined;
-	private initialized = false;
 
 	override get text() {
 		return "";
@@ -47,12 +45,8 @@ class SelectNode extends Node<SelectProps> {
 			(child): child is OptionNode => child instanceof OptionNode,
 		);
 
-		if (!this.initialized) {
-			this.selectedValues =
-				this.props.defaultValues ??
-				(this.props.defaultValue ? [this.props.defaultValue] : undefined);
-			this.initialized = true;
-		}
+		const selectedValues =
+			this.props.values ?? (this.props.value ? [this.props.value] : undefined);
 
 		const selectOptions: MessageSelectOptions = {
 			type: "select",
@@ -62,7 +56,7 @@ class SelectNode extends Node<SelectProps> {
 			minValues: this.props.minValues,
 			maxValues: this.props.maxValues,
 			options: optionNodes.map((node) => node.getOptionData()),
-			values: this.selectedValues,
+			values: selectedValues,
 		};
 
 		options.actionRows.push([selectOptions]);
@@ -76,8 +70,6 @@ class SelectNode extends Node<SelectProps> {
 			interaction.type === "select" &&
 			interaction.customId === this.customId
 		) {
-			this.selectedValues = interaction.values;
-
 			const selectedValue = interaction.values[0];
 			if (this.props.onSelectMultiple) {
 				runEffect(
