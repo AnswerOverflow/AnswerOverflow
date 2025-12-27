@@ -18,17 +18,21 @@
 		"@packages/database": "workspace:*",
 		"@packages/database-utils": "workspace:*",
 		"@packages/observability": "workspace:*",
+		"@packages/reacord": "workspace:*",
+		"@packages/ui": "workspace:*",
 		"@sentry/node": "^10.30.0",
 		"@sentry/profiling-node": "^10.30.0",
-		"discord.js": "^14.22.1",
+		"discord.js": "^14.25.1",
 		"effect": "catalog:",
-		"posthog-node": "^4.2.0"
+		"posthog-node": "^4.2.0",
+		"react": "^19.1.0"
 	},
 	"devDependencies": {
 		"@effect/language-service": "catalog:",
 		"@effect/vitest": "catalog:",
 		"@packages/typescript-config": "workspace:*",
 		"@types/bun": "latest",
+		"@types/react": "catalog:",
 		"vitest": "catalog:"
 	}
 }

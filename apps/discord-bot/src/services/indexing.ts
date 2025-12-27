@@ -1159,10 +1159,6 @@ export function startIndexingLoop() {
 			),
 		);
 
-		if (process.env.NODE_ENV === "development") {
-			yield* runIndexing();
-		}
-
 		yield* Console.log("Indexing loop started successfully");
 	});
 }

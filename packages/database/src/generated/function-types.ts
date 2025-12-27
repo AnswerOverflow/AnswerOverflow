@@ -25,6 +25,10 @@ export const FUNCTION_TYPE_MAP = {
   "discord_accounts.getUserPosts": "query",
   "discord_accounts.upsertDiscordAccount": "mutation",
   "discord_accounts.upsertManyDiscordAccounts": "mutation",
+  "github.createGitHubIssueFromDiscord": "action",
+  "github.getAccessibleReposByDiscordId": "action",
+  "github.getGitHubIssueByRepoAndNumber": "query",
+  "github.updateGitHubIssueStatus": "mutation",
   "ignored_discord_accounts.deleteIgnoredDiscordAccount": "mutation",
   "ignored_discord_accounts.findIgnoredDiscordAccountById": "query",
   "messages.deleteManyMessages": "mutation",
@@ -39,6 +43,7 @@ export const FUNCTION_TYPE_MAP = {
   "messages.updateEmbedStorageId": "mutation",
   "messages.upsertManyMessages": "mutation",
   "messages.upsertMessage": "mutation",
+  "search.getCachedSimilarThreads": "action",
   "search.getRecentAnnouncements": "query",
   "search.getRecentThreads": "query",
   "search.getSimilarThreads": "query",
@@ -71,7 +76,7 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
-export const NAMESPACES = ["attachments","cache","channels","counts","discord_accounts","ignored_discord_accounts","messages","search","server_preferences","servers","threadTags","user_server_settings"] as const;
+export const NAMESPACES = ["attachments","cache","channels","counts","discord_accounts","github","ignored_discord_accounts","messages","search","server_preferences","servers","threadTags","user_server_settings"] as const;
 
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
@@ -79,9 +84,10 @@ export const NAMESPACE_STRUCTURE = {
   "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelSettingsWithIndexingEnabled","findChannelsByDiscordIds","findManyChannelsByDiscordIds","getChannelPageMessages","getChannelPageThreads","getCommunityPageHeaderData","getServerPageThreads","updateChannelSettings","upsertChannel"],
   "counts": [],
   "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount","upsertManyDiscordAccounts"],
+  "github": ["createGitHubIssueFromDiscord","getAccessibleReposByDiscordId","getGitHubIssueByRepoAndNumber","updateGitHubIssueStatus"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","markMessageAsSolution","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
-  "search": ["getRecentAnnouncements","getRecentThreads","getSimilarThreads","publicSearch"],
+  "search": ["getCachedSimilarThreads","getRecentAnnouncements","getRecentThreads","getSimilarThreads","publicSearch"],
   "server_preferences": ["getBotCustomizationForServer","getServerPreferencesByServerId","getServersWithBotCustomization","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getCachedBrowsableServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
   "threadTags": ["getTagsForThread","getTagsForThreads","getThreadIdsByTags","syncThreadTags"],

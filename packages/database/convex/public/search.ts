@@ -1,16 +1,20 @@
+import { ActionCache } from "@convex-dev/action-cache";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { Array as Arr, Predicate } from "effect";
+import { components, internal } from "../_generated/api";
+import { internalAction, internalQuery } from "../client";
 import { CHANNEL_TYPE } from "../shared/channels";
 import {
+	createDataAccessCache,
 	enrichMessage,
 	enrichMessagesWithServerAndChannels,
-	searchMessages,
 	type SearchResult,
+	searchMessages,
 } from "../shared/dataAccess";
 import { findSimilarThreads } from "../shared/similarThreads";
-import { publicQuery } from "./custom_functions";
+import { publicAction, publicQuery } from "./custom_functions";
 
 export const publicSearch = publicQuery({
 	args: {
@@ -175,8 +179,76 @@ export const getSimilarThreads = publicQuery({
 			limit,
 		});
 
-		// todo: we're doing double lookups here, not great
 		return await enrichMessagesWithServerAndChannels(ctx, similarThreads);
+	},
+});
+
+export const getSimilarThreadsInternal = internalQuery({
+	args: {
+		searchQuery: v.string(),
+		currentThreadId: v.string(),
+		currentServerId: v.string(),
+		serverId: v.optional(v.string()),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const cache = createDataAccessCache(ctx);
+		const ctxWithCache = { ...ctx, cache };
+		const limit = Math.min(args.limit ?? 4, 10);
+		const similarThreads = await findSimilarThreads(ctxWithCache, {
+			searchQuery: args.searchQuery,
+			currentThreadId: BigInt(args.currentThreadId),
+			currentServerId: BigInt(args.currentServerId),
+			serverId: args.serverId ? BigInt(args.serverId) : undefined,
+			limit,
+		});
+
+		return await enrichMessagesWithServerAndChannels(
+			ctxWithCache,
+			similarThreads,
+		);
+	},
+});
+
+export const fetchSimilarThreadsInternal = internalAction({
+	args: {
+		searchQuery: v.string(),
+		currentThreadId: v.string(),
+		currentServerId: v.string(),
+		serverId: v.optional(v.string()),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args): Promise<SearchResult[]> => {
+		return await ctx.runQuery(
+			internal.public.search.getSimilarThreadsInternal,
+			args,
+		);
+	},
+});
+
+const getSimilarThreadsCache = () =>
+	new ActionCache(components.actionCache, {
+		action: internal.public.search.fetchSimilarThreadsInternal,
+		name: "similarThreads",
+		ttl: 5 * 60 * 1000, // 5 minutes
+	});
+
+export const getCachedSimilarThreads = publicAction({
+	args: {
+		searchQuery: v.string(),
+		currentThreadId: v.string(),
+		currentServerId: v.string(),
+		serverId: v.optional(v.string()),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args): Promise<SearchResult[]> => {
+		return await getSimilarThreadsCache().fetch(ctx, {
+			searchQuery: args.searchQuery,
+			currentThreadId: args.currentThreadId,
+			currentServerId: args.currentServerId,
+			serverId: args.serverId,
+			limit: args.limit,
+		});
 	},
 });
 

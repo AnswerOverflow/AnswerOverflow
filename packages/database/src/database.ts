@@ -25,6 +25,9 @@ import type { DatabaseAttachment } from "../convex/shared/shared";
 import { ConvexClientHttpUnifiedLayer } from "./convex-client-http";
 import { ConvexClientLiveUnifiedLayer } from "./convex-client-live";
 import { ConvexClientUnified, ConvexError } from "./convex-unified-client";
+
+export { ConvexError } from "./convex-unified-client";
+
 import { FUNCTION_TYPE_MAP, isNamespace } from "./generated/function-types";
 import type { LiveData } from "./live-data";
 import { createWatchQueryToLiveData } from "./watch-query-cached";

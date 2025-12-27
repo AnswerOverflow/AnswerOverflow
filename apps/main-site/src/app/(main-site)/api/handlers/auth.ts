@@ -8,6 +8,16 @@ const { handler } = convexBetterAuthNextJs({
 
 export async function handleAuth(c: Context) {
 	const method = c.request.method;
+	const url = new URL(c.request.url);
+
+	if (
+		url.pathname === "/api/auth/callback/github" &&
+		(url.searchParams.has("setup_action") ||
+			(url.searchParams.has("installation_id") &&
+				!url.searchParams.has("state")))
+	) {
+		return Response.redirect(new URL("/dashboard/settings", url.origin));
+	}
 
 	if (method === "GET") {
 		return handler.GET(c.request);

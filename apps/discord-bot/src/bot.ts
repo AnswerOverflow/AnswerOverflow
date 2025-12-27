@@ -1,6 +1,7 @@
 import { Console, Effect, Layer } from "effect";
 import { BugReportCommandHandlerLayer } from "./commands/bug-report";
 import { ChannelSettingsCommandHandlerLayer } from "./commands/channel-settings";
+import { ConvertToGitHubIssueReacordLayer } from "./commands/convert-to-github-issue-reacord";
 import { DebugCommandHandlerLayer } from "./commands/debug";
 import { FeedbackCommandHandlerLayer } from "./commands/feedback";
 import { IndexCommandHandlerLayer } from "./commands/index-command";
@@ -12,10 +13,10 @@ import { Discord } from "./core/discord-service";
 import { ConsentButtonHandlerLayer } from "./interactions/consent-button";
 import { DismissButtonHandlerLayer } from "./interactions/dismiss-button";
 import { DMReplyHandlerLayer } from "./interactions/dm-reply-button";
-import { SimilarThreadsButtonHandlerLayer } from "./interactions/similar-threads-button";
 import { ForumGuidelinesConsentHandlerLayer } from "./interactions/forum-guidelines-consent";
 import { QuickActionCommandHandlerLayer } from "./interactions/quick-action";
 import { ReadTheRulesConsentHandlerLayer } from "./interactions/read-the-rules-consent";
+import { SimilarThreadsButtonHandlerLayer } from "./interactions/similar-threads-button";
 import { AutoThreadHandlerLayer } from "./services/auto-thread";
 import { BotIdentitySyncHandlerLayer } from "./services/bot-identity-sync";
 import { DMForwardingHandlerLayer } from "./services/dm-forwarding";
@@ -56,6 +57,7 @@ export const BotLayers = Layer.mergeAll(
 	FeedbackCommandHandlerLayer,
 	BugReportCommandHandlerLayer,
 	BotIdentitySyncHandlerLayer,
+	ConvertToGitHubIssueReacordLayer,
 );
 
 export const program = Effect.gen(function* () {

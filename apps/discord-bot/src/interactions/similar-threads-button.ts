@@ -4,24 +4,24 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	MessageFlags,
 	type MessageActionRowComponentBuilder,
+	MessageFlags,
 } from "discord.js";
 import { Console, Data, Effect, Layer, Metric } from "effect";
 import {
 	handleFeedbackModalSubmit,
-	showFeedbackModal,
 	SIMILAR_THREADS_FEEDBACK_CONFIG,
+	showFeedbackModal,
 } from "../commands/feedback";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed } from "../metrics";
 import {
-	trackSimilarThreadsButtonClicked,
 	trackSimilarThreadSolvedClicked,
+	trackSimilarThreadsButtonClicked,
 } from "../utils/analytics";
 import {
-	SIMILAR_THREADS_ACTION_PREFIX,
 	SIMILAR_THREAD_SOLVED_ACTION_PREFIX,
+	SIMILAR_THREADS_ACTION_PREFIX,
 } from "../utils/discord-components";
 import { catchAllWithReport } from "../utils/error-reporting";
 

@@ -14,3 +14,20 @@ index ea276eac573ab935faf76e9af4e98a9f9192acc0..ff670af43d1e6d4755b3361596de7c4a
                          }
                          if (context.request.url.toString().includes("/get-session") &&
                              !opts?.disableCache) {
+diff --git a/dist/plugins/cross-domain/index.js b/dist/plugins/cross-domain/index.js
+index 19d1f47a00000000..19d1f47a00000001 100644
+--- a/dist/plugins/cross-domain/index.js
++++ b/dist/plugins/cross-domain/index.js
+@@ -130,6 +130,12 @@ export const crossDomain = ({ siteUrl }) => {
+                         // Mostly copied from the one-time-token plugin
+                         const session = ctx.context.newSession;
+                         if (!session) {
++                            // For linkSocial, there is no newSession since user already has one
++                            // Just do the redirect without the one-time-token flow
++                            const redirectTo = ctx.context.responseHeaders?.get("location");
++                            if (redirectTo) {
++                                throw ctx.redirect(redirectTo);
++                            }
+                             ctx.context.logger.error("No session found");
+                             return;
+                         }

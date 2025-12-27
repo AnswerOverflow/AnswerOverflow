@@ -156,6 +156,9 @@ export const BotIdentitySyncHandlerLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("clientReady", () =>
 			Effect.gen(function* () {
+				if (process.env.NODE_ENV === "development") {
+					return;
+				}
 				yield* Console.log(
 					"Bot ready, syncing all servers with customization...",
 				);
