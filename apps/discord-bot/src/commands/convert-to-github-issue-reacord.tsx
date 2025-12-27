@@ -17,7 +17,7 @@ import {
 	useAtomValue,
 	useInstance,
 } from "@packages/reacord";
-import type { ContextMenuCommandInteraction, Message } from "discord.js";
+import type { ContextMenuCommandInteraction } from "discord.js";
 import { MessageFlags } from "discord.js";
 import { Cause, Data, Duration, Effect, Layer, Metric } from "effect";
 import { Suspense, useState } from "react";
@@ -28,104 +28,21 @@ import {
 	catchAllSilentWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
+import {
+	generateIssueBody,
+	generateIssueTitle,
+	GITHUB_APP_INSTALL_URL,
+	type GitHubRepo,
+	GitHubIssueTimeoutError,
+	INSTALL_MORE_REPOS_VALUE,
+	makeMainSiteLink,
+} from "./github-issue-utils";
 
 const databaseRuntime = Atom.runtime(DatabaseLayer);
 
 const COMMAND_NAME = "Create GitHub Issue";
 const GITHUB_ISSUE_TITLE_INPUT = "github-issue-title";
 const GITHUB_ISSUE_BODY_INPUT = "github-issue-body";
-
-const GITHUB_APP_INSTALL_URL =
-	process.env.NEXT_PUBLIC_GITHUB_APP_INSTALL_URL ??
-	"https://github.com/apps/answer-overflow/installations/new";
-
-class GitHubIssueTimeoutError extends Data.TaggedError(
-	"GitHubIssueTimeoutError",
-)<{
-	readonly message: string;
-	readonly guildId?: string;
-	readonly channelId?: string;
-	readonly userId?: string;
-	readonly targetMessageId?: string;
-}> {}
-
-type GitHubRepo = {
-	id: number;
-	name: string;
-	fullName: string;
-	owner: string;
-	private: boolean;
-	installationId: number;
-};
-
-function makeMainSiteLink(path: string): string {
-	const baseUrl =
-		process.env.NEXT_PUBLIC_BASE_URL || "https://www.answeroverflow.com";
-	return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
-}
-
-type IssueBodyOptions = {
-	message: Message;
-	additionalContext?: string;
-	indexingEnabled?: boolean;
-	hasPaidPlan?: boolean;
-};
-
-function generateIssueBody({
-	message,
-	additionalContext,
-	indexingEnabled,
-	hasPaidPlan,
-}: IssueBodyOptions): string {
-	const authorMention = message.author.username;
-	const discordLink = `https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id}`;
-
-	const quotedContent = message.content
-		.split("\n")
-		.map((line) => `> ${line}`)
-		.join("\n");
-
-	const viewLink = indexingEnabled
-		? `[View on Answer Overflow](${makeMainSiteLink(`/m/${message.id}`)})`
-		: `[View on Discord](${discordLink})`;
-
-	const attribution = hasPaidPlan
-		? ""
-		: `\n\n---\n*Created by [Answer Overflow](https://answeroverflow.com/about)*`;
-
-	const footer = `
----
-📎 ${viewLink} | 👤 Posted by @${authorMention}${attribution}`;
-
-	if (additionalContext) {
-		return `${additionalContext}
-
----
-
-**Original Discord Message:**
-
-${quotedContent}
-${footer}`;
-	}
-
-	return `${quotedContent}
-${footer}`;
-}
-
-function generateIssueTitle(message: Message): string {
-	const channel = message.channel;
-	if (channel.isThread() && channel.name) {
-		return channel.name.slice(0, 80);
-	}
-
-	const firstLine = message.content.split("\n")[0] ?? "";
-	if (firstLine.length > 80) {
-		return `${firstLine.slice(0, 77)}...`;
-	}
-	return firstLine || "Issue from Discord";
-}
-
-const INSTALL_MORE_REPOS_VALUE = "__install_more_repos__";
 
 class GitHubNotLinkedError extends Data.TaggedError("GitHubNotLinkedError") {}
 class GitHubTokenExpiredError extends Data.TaggedError(
