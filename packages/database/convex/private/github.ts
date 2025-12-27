@@ -96,7 +96,7 @@ export const getAccessibleReposByDiscordId = privateAction({
 			};
 		}
 
-		const octokitResult = createOctokitClient(ctx, account);
+		const octokitResult = await createOctokitClient(ctx, account);
 		if (!octokitResult.success) {
 			return {
 				success: false as const,
@@ -225,7 +225,7 @@ export const createGitHubIssueFromDiscord = privateAction({
 			};
 		}
 
-		const octokitResult = createOctokitClient(ctx, account);
+		const octokitResult = await createOctokitClient(ctx, account);
 		if (!octokitResult.success) {
 			return {
 				success: false as const,

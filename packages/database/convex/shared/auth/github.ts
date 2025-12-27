@@ -1,11 +1,9 @@
 import { Octokit } from "octokit";
-import {
-	createOAuthUserAuth,
-	type GitHubAppAuthenticationWithExpiration,
-} from "@octokit/auth-oauth-user";
 import { z } from "zod";
 import { components } from "../../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../../client";
+
+const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 
 const GITHUB_REPO_NAME_REGEX = /^[\w.-]+$/;
 const GITHUB_ISSUE_TITLE_MAX_LENGTH = 256;
@@ -195,10 +193,16 @@ export async function getGitHubAccountByDiscordId(
 	return getGitHubAccountByUserId(ctx, userId);
 }
 
+type RefreshedTokens = {
+	accessToken: string;
+	refreshToken: string;
+	accessTokenExpiresAt: number;
+};
+
 async function updateGitHubAccountTokens(
 	ctx: ActionCtx,
 	githubAccountId: string,
-	tokens: GitHubAppAuthenticationWithExpiration,
+	tokens: RefreshedTokens,
 ): Promise<void> {
 	await ctx.runMutation(components.betterAuth.adapter.updateOne, {
 		input: {
@@ -216,19 +220,108 @@ async function updateGitHubAccountTokens(
 				},
 			],
 			update: {
-				accessToken: tokens.token,
+				accessToken: tokens.accessToken,
 				refreshToken: tokens.refreshToken,
-				accessTokenExpiresAt: new Date(tokens.expiresAt).getTime(),
+				accessTokenExpiresAt: tokens.accessTokenExpiresAt,
 				updatedAt: Date.now(),
 			},
 		},
 	});
 }
 
-export function createOctokitClient(
+function isTokenExpired(expiresAt: number | null): boolean {
+	if (expiresAt === null) return false;
+	return Date.now() >= expiresAt - TOKEN_EXPIRY_BUFFER_MS;
+}
+
+async function refreshGitHubToken(
 	ctx: ActionCtx,
 	account: GitHubAccountWithRefresh,
-): CreateOctokitClientResult {
+	clientId: string,
+	clientSecret: string,
+): Promise<
+	| { success: true; accessToken: string }
+	| { success: false; error: string; code: GitHubErrorCode }
+> {
+	if (!account.refreshToken) {
+		return {
+			success: false,
+			error: "No refresh token available",
+			code: GitHubErrorCodes.NO_TOKEN,
+		};
+	}
+
+	try {
+		const response = await fetch(
+			"https://github.com/login/oauth/access_token",
+			{
+				method: "POST",
+				headers: {
+					Accept: "application/json",
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					client_id: clientId,
+					client_secret: clientSecret,
+					grant_type: "refresh_token",
+					refresh_token: account.refreshToken,
+				}),
+			},
+		);
+
+		const data = (await response.json()) as {
+			access_token?: string;
+			refresh_token?: string;
+			expires_in?: number;
+			refresh_token_expires_in?: number;
+			error?: string;
+			error_description?: string;
+		};
+
+		if (data.error) {
+			return {
+				success: false,
+				error: `${data.error_description ?? data.error}`,
+				code: GitHubErrorCodes.REFRESH_FAILED,
+			};
+		}
+
+		if (
+			!data.access_token ||
+			!data.refresh_token ||
+			!data.expires_in ||
+			!data.refresh_token_expires_in
+		) {
+			return {
+				success: false,
+				error: "Invalid token response from GitHub",
+				code: GitHubErrorCodes.REFRESH_FAILED,
+			};
+		}
+
+		const now = Date.now();
+		const accessTokenExpiresAt = now + data.expires_in * 1000;
+
+		await updateGitHubAccountTokens(ctx, account.accountId, {
+			accessToken: data.access_token,
+			refreshToken: data.refresh_token,
+			accessTokenExpiresAt,
+		});
+
+		return { success: true, accessToken: data.access_token };
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Failed to refresh token",
+			code: GitHubErrorCodes.REFRESH_FAILED,
+		};
+	}
+}
+
+export async function createOctokitClient(
+	ctx: ActionCtx,
+	account: GitHubAccountWithRefresh,
+): Promise<CreateOctokitClientResult> {
 	const clientId = process.env.GITHUB_CLIENT_ID;
 	const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
@@ -256,29 +349,24 @@ export function createOctokitClient(
 		};
 	}
 
-	const octokit = new Octokit({
-		authStrategy: createOAuthUserAuth,
-		auth: {
+	let accessToken = account.accessToken;
+
+	if (isTokenExpired(account.accessTokenExpiresAt)) {
+		const refreshResult = await refreshGitHubToken(
+			ctx,
+			account,
 			clientId,
 			clientSecret,
-			clientType: "github-app",
-			token: account.accessToken,
-			refreshToken: account.refreshToken,
-			expiresAt: account.accessTokenExpiresAt
-				? new Date(account.accessTokenExpiresAt).toISOString()
-				: undefined,
-			onTokenCreated: (
-				newTokens: GitHubAppAuthenticationWithExpiration | undefined,
-			) => {
-				if (!newTokens) return;
-				updateGitHubAccountTokens(ctx, account.accountId, newTokens).catch(
-					(error) => {
-						console.error("Failed to persist refreshed GitHub tokens:", error);
-					},
-				);
-			},
-		},
-	});
+		);
+
+		if (!refreshResult.success) {
+			return refreshResult;
+		}
+
+		accessToken = refreshResult.accessToken;
+	}
+
+	const octokit = new Octokit({ auth: accessToken });
 
 	return { success: true, octokit };
 }

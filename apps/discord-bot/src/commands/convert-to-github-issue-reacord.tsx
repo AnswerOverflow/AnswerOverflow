@@ -36,7 +36,7 @@ const GITHUB_ISSUE_TITLE_INPUT = "github-issue-title";
 const GITHUB_ISSUE_BODY_INPUT = "github-issue-body";
 
 const GITHUB_APP_INSTALL_URL =
-	process.env.GITHUB_APP_INSTALL_URL ??
+	process.env.NEXT_PUBLIC_GITHUB_APP_INSTALL_URL ??
 	"https://github.com/apps/answer-overflow/installations/new";
 
 class GitHubIssueTimeoutError extends Data.TaggedError(

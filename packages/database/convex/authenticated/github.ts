@@ -49,7 +49,7 @@ export const getAccessibleRepos = authenticatedAction({
 			};
 		}
 
-		const octokitResult = createOctokitClient(ctx, account);
+		const octokitResult = await createOctokitClient(ctx, account);
 		if (!octokitResult.success) {
 			return {
 				success: false as const,

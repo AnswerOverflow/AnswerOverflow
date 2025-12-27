@@ -168,7 +168,18 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 									Loading repositories...
 								</div>
 							) : reposError ? (
-								<div className="text-sm text-destructive">{reposError}</div>
+								<div className="space-y-2">
+									<div className="text-sm text-destructive">{reposError}</div>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={handleLinkGitHub}
+										disabled={isLinking}
+									>
+										<RefreshCw className="h-4 w-4 mr-2" />
+										{isLinking ? "Reconnecting..." : "Reconnect GitHub"}
+									</Button>
+								</div>
 							) : repos.length === 0 ? (
 								<div className="space-y-2">
 									<p className="text-sm text-muted-foreground">
