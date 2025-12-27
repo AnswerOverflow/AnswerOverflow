@@ -18,7 +18,7 @@ const globalCommands = [
 		.setType(ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild),
 	new ContextMenuCommandBuilder()
-		.setName("🐛 Create GitHub Issue")
+		.setName("Create GitHub Issue")
 		.setType(ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild),
 	new SlashCommandBuilder()

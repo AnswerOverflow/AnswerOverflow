@@ -26,7 +26,7 @@ import {
 	catchAllWithReport,
 } from "../utils/error-reporting";
 
-const COMMAND_NAME = "🐛 Create GitHub Issue";
+const COMMAND_NAME = "Create GitHub Issue";
 const GITHUB_ISSUE_BUTTON_PREFIX = "github-issue-";
 const GITHUB_ISSUE_REPO_SELECT = "github-issue-repo-select";
 const GITHUB_ISSUE_EDIT_MODAL = "github-issue-edit-modal";
@@ -71,22 +71,58 @@ type IssueState = {
 
 const issueStateCache = new Map<string, IssueState>();
 
-function generateIssueBody(
-	message: Message,
-	additionalContext?: string,
-): string {
-	const authorMention = message.author.username;
-	const messageLink = `https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id}`;
+function makeMainSiteLink(path: string): string {
+	const baseUrl =
+		process.env.NEXT_PUBLIC_BASE_URL || "https://www.answeroverflow.com";
+	return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
-	let body = `> ${message.content.split("\n").join("\n> ")}\n\n`;
-	body += `---\n`;
-	body += `📎 [View on Discord](${messageLink}) | 👤 Posted by @${authorMention}`;
+type IssueBodyOptions = {
+	message: Message;
+	additionalContext?: string;
+	indexingEnabled?: boolean;
+	hasPaidPlan?: boolean;
+};
+
+function generateIssueBody({
+	message,
+	additionalContext,
+	indexingEnabled,
+	hasPaidPlan,
+}: IssueBodyOptions): string {
+	const authorMention = message.author.username;
+	const discordLink = `https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id}`;
+
+	const quotedContent = message.content
+		.split("\n")
+		.map((line) => `> ${line}`)
+		.join("\n");
+
+	const viewLink = indexingEnabled
+		? `[View on Answer Overflow](${makeMainSiteLink(`/m/${message.id}`)})`
+		: `[View on Discord](${discordLink})`;
+
+	const attribution = hasPaidPlan
+		? ""
+		: `\n\n---\n*Created by [Answer Overflow](https://answeroverflow.com/about)*`;
+
+	const footer = `
+---
+📎 ${viewLink} | 👤 Posted by @${authorMention}${attribution}`;
 
 	if (additionalContext) {
-		body = `${additionalContext}\n\n---\n\n**Original Discord Message:**\n\n${body}`;
+		return `${additionalContext}
+
+---
+
+**Original Discord Message:**
+
+${quotedContent}
+${footer}`;
 	}
 
-	return body;
+	return `${quotedContent}
+${footer}`;
 }
 
 function generateIssueTitle(message: Message): string {
@@ -128,6 +164,8 @@ function buildIssueEmbed(state: IssueState): EmbedBuilder {
 	return embed;
 }
 
+const INSTALL_MORE_REPOS_VALUE = "__install_more_repos__";
+
 function buildIssueComponents(
 	state: IssueState,
 	messageId: string,
@@ -135,18 +173,26 @@ function buildIssueComponents(
 	const rows: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] = [];
 
 	if (state.repos.length > 0) {
+		const repoOptions = state.repos.slice(0, 24).map((repo) => ({
+			label: repo.fullName,
+			value: repo.fullName,
+			default:
+				state.selectedRepo?.owner === repo.owner &&
+				state.selectedRepo?.name === repo.name,
+		}));
+
+		if (!state.hasAllReposAccess) {
+			repoOptions.push({
+				label: "➕ Install on more repos...",
+				value: INSTALL_MORE_REPOS_VALUE,
+				default: false,
+			});
+		}
+
 		const selectMenu = new StringSelectMenuBuilder()
 			.setCustomId(`${GITHUB_ISSUE_REPO_SELECT}:${messageId}`)
 			.setPlaceholder("Select a repository")
-			.addOptions(
-				state.repos.slice(0, 25).map((repo) => ({
-					label: repo.fullName,
-					value: repo.fullName,
-					default:
-						state.selectedRepo?.owner === repo.owner &&
-						state.selectedRepo?.name === repo.name,
-				})),
-			);
+			.addOptions(repoOptions);
 
 		rows.push(
 			new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu),
@@ -170,16 +216,6 @@ function buildIssueComponents(
 	);
 
 	rows.push(buttonRow);
-
-	if (!state.hasAllReposAccess) {
-		const installRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-			new ButtonBuilder()
-				.setLabel("➕ Install on more repos")
-				.setStyle(ButtonStyle.Link)
-				.setURL(GITHUB_APP_INSTALL_URL),
-		);
-		rows.push(installRow);
-	}
 
 	return rows;
 }
@@ -209,12 +245,12 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 		.pipe(Effect.withSpan("get_accessible_repos"));
 
 	if (!reposResult.success) {
-		const siteUrl = process.env.SITE_URL ?? "https://www.answeroverflow.com";
+		const settingsUrl = makeMainSiteLink("/dashboard/settings");
 
 		if (reposResult.code === "NOT_LINKED") {
 			yield* discord.callClient(() =>
 				interaction.editReply({
-					content: `You need to link your GitHub account first.\n\n👉 [Link GitHub Account](${siteUrl}/dashboard/settings)`,
+					content: `You need to link your GitHub account first.\n\n👉 [Link GitHub Account](${settingsUrl})`,
 				}),
 			);
 			return;
@@ -226,7 +262,7 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 		) {
 			yield* discord.callClient(() =>
 				interaction.editReply({
-					content: `Your GitHub session has expired. Please re-link your account.\n\n👉 [Re-link GitHub Account](${siteUrl}/dashboard/settings)`,
+					content: `Your GitHub session has expired. Please re-link your account.\n\n👉 [Re-link GitHub Account](${settingsUrl})`,
 				}),
 			);
 			return;
@@ -264,10 +300,37 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 
 	const channel = targetMessage.channel;
 	const threadId = channel.isThread() ? channel.id : undefined;
+	const parentChannelId = channel.isThread()
+		? channel.parentId
+		: targetMessage.channelId;
+
+	const channelSettings = parentChannelId
+		? yield* database.private.channels
+				.findChannelByDiscordId({
+					discordId: BigInt(parentChannelId),
+				})
+				.pipe(Effect.withSpan("get_channel_settings"))
+		: null;
+
+	const serverPreferences =
+		targetMessage.guildId && channelSettings
+			? yield* database.private.server_preferences
+					.getServerPreferencesByServerId({
+						serverId: BigInt(targetMessage.guildId),
+					})
+					.pipe(Effect.withSpan("get_server_preferences"))
+			: null;
+
+	const indexingEnabled = channelSettings?.flags?.indexingEnabled ?? false;
+	const hasPaidPlan = Boolean(serverPreferences?.customDomain);
 
 	const state: IssueState = {
 		title: generateIssueTitle(targetMessage),
-		body: generateIssueBody(targetMessage),
+		body: generateIssueBody({
+			message: targetMessage,
+			indexingEnabled,
+			hasPaidPlan,
+		}),
 		selectedRepo:
 			reposResult.repos.length === 1
 				? {
@@ -328,6 +391,16 @@ export const handleRepoSelectInteraction = Effect.fn(
 
 	const selectedValue = interaction.values[0];
 	if (!selectedValue) return;
+
+	if (selectedValue === INSTALL_MORE_REPOS_VALUE) {
+		yield* discord.callClient(() =>
+			interaction.reply({
+				content: `To add more repositories, install the Answer Overflow app:\n\n👉 ${GITHUB_APP_INSTALL_URL}`,
+				flags: MessageFlags.Ephemeral,
+			}),
+		);
+		return;
+	}
 
 	const [owner, name] = selectedValue.split("/");
 	if (!owner || !name) return;
@@ -523,16 +596,15 @@ export const handleCreateButtonInteraction = Effect.fn(
 			error: result.error,
 		});
 
-		const siteUrl = process.env.SITE_URL ?? "https://www.answeroverflow.com";
-
 		if (
 			result.code === "NOT_LINKED" ||
 			result.code === "REFRESH_REQUIRED" ||
 			result.code === "REFRESH_FAILED"
 		) {
+			const settingsUrl = makeMainSiteLink("/dashboard/settings");
 			yield* discord.callClient(() =>
 				interaction.editReply({
-					content: `Your GitHub session has expired. Please re-link your account.\n\n👉 [Re-link GitHub Account](${siteUrl}/dashboard/settings)`,
+					content: `Your GitHub session has expired. Please re-link your account.\n\n👉 [Re-link GitHub Account](${settingsUrl})`,
 					embeds: [],
 					components: [],
 				}),
