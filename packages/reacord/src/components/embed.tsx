@@ -25,7 +25,7 @@ export interface EmbedProps {
 
 export function Embed(props: EmbedProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new EmbedNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new EmbedNode(p)}>
 			{props.children}
 		</ReacordElement>
 	);
@@ -61,7 +61,7 @@ export interface EmbedFieldProps {
 
 export function EmbedField(props: EmbedFieldProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new EmbedFieldNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new EmbedFieldNode(p)}>
 			{props.children}
 		</ReacordElement>
 	);
@@ -84,7 +84,7 @@ export interface EmbedTitleProps {
 
 export function EmbedTitle(props: EmbedTitleProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new EmbedTitleNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new EmbedTitleNode(p)}>
 			{props.children}
 		</ReacordElement>
 	);
@@ -105,7 +105,7 @@ export interface EmbedAuthorProps {
 
 export function EmbedAuthor(props: EmbedAuthorProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new EmbedAuthorNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new EmbedAuthorNode(p)}>
 			{props.children}
 		</ReacordElement>
 	);
@@ -129,7 +129,7 @@ export interface EmbedFooterProps {
 
 export function EmbedFooter(props: EmbedFooterProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new EmbedFooterNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new EmbedFooterNode(p)}>
 			{props.children}
 		</ReacordElement>
 	);
@@ -150,10 +150,7 @@ export interface EmbedImageProps {
 
 export function EmbedImage(props: EmbedImageProps) {
 	return (
-		<ReacordElement
-			props={props}
-			createNode={() => new EmbedImageNode(props)}
-		/>
+		<ReacordElement props={props} createNode={(p) => new EmbedImageNode(p)} />
 	);
 }
 
@@ -171,7 +168,7 @@ export function EmbedThumbnail(props: EmbedThumbnailProps) {
 	return (
 		<ReacordElement
 			props={props}
-			createNode={() => new EmbedThumbnailNode(props)}
+			createNode={(p) => new EmbedThumbnailNode(p)}
 		/>
 	);
 }

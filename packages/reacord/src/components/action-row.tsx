@@ -8,7 +8,7 @@ export interface ActionRowProps {
 
 export function ActionRow(props: ActionRowProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new ActionRowNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new ActionRowNode(p)}>
 			{props.children}
 		</ReacordElement>
 	);

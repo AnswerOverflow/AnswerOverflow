@@ -3,7 +3,7 @@ import type { Node } from "./node";
 
 export function ReacordElement<Props>(props: {
 	props: Props;
-	createNode: () => Node<Props>;
+	createNode: (props: Props) => Node<Props>;
 	children?: ReactNode;
 }) {
 	return React.createElement("reacord-element", props);

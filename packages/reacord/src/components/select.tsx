@@ -12,8 +12,8 @@ export interface SelectProps {
 	disabled?: boolean;
 	minValues?: number;
 	maxValues?: number;
-	value?: string;
-	values?: string[];
+	defaultValue?: string;
+	defaultValues?: string[];
 	onSelect?: (
 		value: string,
 		interaction: StringSelectMenuInteraction,
@@ -27,7 +27,7 @@ export interface SelectProps {
 
 export function Select(props: SelectProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new SelectNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new SelectNode(p)}>
 			{props.children}
 		</ReacordElement>
 	);
@@ -35,7 +35,8 @@ export function Select(props: SelectProps) {
 
 class SelectNode extends Node<SelectProps> {
 	private customId = randomUUID();
-	private interactionSelectedValues: string[] | undefined;
+	private selectedValues: string[] | undefined;
+	private initialized = false;
 
 	override get text() {
 		return "";
@@ -46,10 +47,12 @@ class SelectNode extends Node<SelectProps> {
 			(child): child is OptionNode => child instanceof OptionNode,
 		);
 
-		const values =
-			this.interactionSelectedValues ??
-			this.props.values ??
-			(this.props.value ? [this.props.value] : undefined);
+		if (!this.initialized) {
+			this.selectedValues =
+				this.props.defaultValues ??
+				(this.props.defaultValue ? [this.props.defaultValue] : undefined);
+			this.initialized = true;
+		}
 
 		const selectOptions: MessageSelectOptions = {
 			type: "select",
@@ -59,7 +62,7 @@ class SelectNode extends Node<SelectProps> {
 			minValues: this.props.minValues,
 			maxValues: this.props.maxValues,
 			options: optionNodes.map((node) => node.getOptionData()),
-			values,
+			values: this.selectedValues,
 		};
 
 		options.actionRows.push([selectOptions]);
@@ -73,7 +76,7 @@ class SelectNode extends Node<SelectProps> {
 			interaction.type === "select" &&
 			interaction.customId === this.customId
 		) {
-			this.interactionSelectedValues = interaction.values;
+			this.selectedValues = interaction.values;
 
 			const selectedValue = interaction.values[0];
 			if (this.props.onSelectMultiple) {

@@ -39,7 +39,12 @@ const ObservabilityLayer = Layer.mergeAll(
 	LoggerLayer,
 );
 
-const reacordRuntime = ManagedRuntime.make(ObservabilityLayer);
+const ReacordRuntimeLayer = Layer.mergeAll(
+	ObservabilityLayer,
+	DatabaseHttpLayer,
+);
+
+const reacordRuntime = ManagedRuntime.make(ReacordRuntimeLayer);
 
 const DiscordWithReacord = Layer.mergeAll(
 	DiscordLayerInternal,

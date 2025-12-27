@@ -19,7 +19,7 @@ export interface ButtonProps {
 
 export function Button(props: ButtonProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new ButtonNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new ButtonNode(p)}>
 			<ReacordElement props={{}} createNode={() => new ButtonLabelNode({})}>
 				{props.label}
 			</ReacordElement>

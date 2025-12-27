@@ -12,7 +12,7 @@ export interface LinkProps {
 
 export function Link(props: LinkProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new LinkNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new LinkNode(p)}>
 			<ReacordElement props={{}} createNode={() => new LinkLabelNode({})}>
 				{props.label}
 			</ReacordElement>

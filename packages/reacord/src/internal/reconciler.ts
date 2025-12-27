@@ -82,7 +82,7 @@ const config: HostConfig<
 			raise("Missing createNode function");
 		}
 
-		const node: unknown = props.createNode(props.props);
+		const node: unknown = props.createNode(props.props as never);
 		if (!(node instanceof Node)) {
 			raise("createNode function did not return a Node");
 		}
@@ -125,12 +125,15 @@ const config: HostConfig<
 	},
 
 	prepareUpdate: (_instance, _type, oldProps, newProps) => {
-		const shouldUpdate = oldProps.props !== newProps.props;
-		return shouldUpdate ? true : null;
+		return oldProps.props !== newProps.props ? true : null;
 	},
-	commitUpdate: (node, _payload, _type, _oldProps, newProps) => {
-		if (newProps.props !== undefined) {
-			node.props = newProps.props;
+	commitUpdate: (node, _payload, _type, oldProps, newProps) => {
+		const propsToUse =
+			(newProps as Record<string, unknown>).props !== undefined
+				? (newProps as Record<string, unknown>).props
+				: (oldProps as Record<string, unknown>).props;
+		if (propsToUse !== undefined) {
+			node.props = propsToUse;
 		}
 	},
 	commitTextUpdate: (node, _oldText, newText) => {

@@ -10,7 +10,7 @@ export interface OptionProps {
 
 export function Option(props: OptionProps) {
 	return (
-		<ReacordElement props={props} createNode={() => new OptionNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new OptionNode(p)}>
 			<ReacordElement props={{}} createNode={() => new OptionLabelNode({})}>
 				{props.label}
 			</ReacordElement>

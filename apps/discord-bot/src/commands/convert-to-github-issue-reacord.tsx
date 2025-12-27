@@ -209,17 +209,12 @@ function GitHubIssueCreator({
 				<EmbedField name="Description Preview">
 					{body.length > 200 ? `${body.slice(0, 197)}...` : body}
 				</EmbedField>
-				<EmbedField name="Repository" inline>
-					{selectedRepo
-						? `${selectedRepo.owner}/${selectedRepo.name}`
-						: "_Select a repository_"}
-				</EmbedField>
 			</Embed>
 
 			{repos.length > 0 && (
 				<Select
 					placeholder="Select a repository"
-					value={
+					defaultValue={
 						selectedRepo
 							? `${selectedRepo.owner}/${selectedRepo.name}`
 							: undefined

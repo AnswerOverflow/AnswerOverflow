@@ -333,11 +333,20 @@ export class Renderer {
 				};
 			});
 
+			const buttonComponents = discordOptions.components?.flatMap((row) =>
+				row.components.filter((c) => c.type === ComponentType.Button),
+			);
+			const buttonStates = buttonComponents?.map((b) => ({
+				label: b.label,
+				disabled: b.disabled,
+			}));
+
 			yield* Effect.annotateCurrentSpan({
 				"reacord.embed_count": discordOptions.embeds?.length ?? 0,
 				"reacord.component_count": discordOptions.components?.length ?? 0,
 				"reacord.select_raw_values": JSON.stringify(rawSelectValues),
 				"reacord.select_values": JSON.stringify(selectValues),
+				"reacord.button_states": JSON.stringify(buttonStates),
 			});
 
 			if (this.componentInteraction) {

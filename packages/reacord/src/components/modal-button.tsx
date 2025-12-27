@@ -50,7 +50,7 @@ export function ModalButton<const T extends readonly TextInputField[]>(
 	props: ModalButtonProps<T>,
 ) {
 	return (
-		<ReacordElement props={props} createNode={() => new ModalButtonNode(props)}>
+		<ReacordElement props={props} createNode={(p) => new ModalButtonNode(p)}>
 			<ReacordElement
 				props={{}}
 				createNode={() => new ModalButtonLabelNode({})}
