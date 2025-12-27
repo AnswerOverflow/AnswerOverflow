@@ -76,23 +76,6 @@ function generateInitialTickets(): Ticket[] {
 			status: "open",
 			assigneeId: null,
 			createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-			attachmentName: "error_log.txt",
-			attachmentContent: `[ERROR] 2024-01-15 10:23:45 - InteractionCreate handler failed
-[ERROR] Timeout waiting for response from Discord API
-[WARN] Rate limit hit on route /interactions
-[INFO] Attempting reconnection...
-[ERROR] Gateway connection lost`,
-			resolutionNotes: null,
-		},
-		{
-			id: generateTicketId(),
-			title: "Feature request: Multi-language support",
-			description:
-				"Would be great to have the bot respond in different languages based on user preferences.",
-			priority: "low",
-			status: "open",
-			assigneeId: null,
-			createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
 			attachmentName: null,
 			attachmentContent: null,
 			resolutionNotes: null,
@@ -106,18 +89,8 @@ function generateInitialTickets(): Ticket[] {
 			status: "in_progress",
 			assigneeId: null,
 			createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
-			attachmentName: "metrics.json",
-			attachmentContent: JSON.stringify(
-				{
-					avg_query_time_ms: 2340,
-					timeout_count: 47,
-					connection_pool_exhausted: true,
-					peak_connections: 150,
-					max_connections: 100,
-				},
-				null,
-				2,
-			),
+			attachmentName: null,
+			attachmentContent: null,
 			resolutionNotes: null,
 		},
 	];
@@ -204,51 +177,47 @@ function TicketCard({
 
 			{expanded && !isClosed && (
 				<>
-					<ActionRow>
-						<UserSelect
-							placeholder="Assign to..."
-							onSelect={(userId) => {
-								onUpdate({ assigneeId: userId });
-							}}
-						/>
-					</ActionRow>
+					<UserSelect
+						placeholder="Assign to..."
+						onSelect={(userId) => {
+							onUpdate({ assigneeId: userId });
+						}}
+					/>
 
-					<ActionRow>
-						<Select
-							placeholder="Set Priority"
-							value={ticket.priority}
-							onSelect={(value) => {
-								onUpdate({ priority: value as Priority });
-							}}
-						>
-							<Option value="low" label={PRIORITY_LABELS.low} />
-							<Option value="medium" label={PRIORITY_LABELS.medium} />
-							<Option value="high" label={PRIORITY_LABELS.high} />
-							<Option value="critical" label={PRIORITY_LABELS.critical} />
-						</Select>
-						<Select
-							placeholder="Set Status"
-							value={ticket.status}
-							onSelect={(value) => {
-								if (value !== "closed" && value !== "resolved") {
-									onUpdate({ status: value as Status });
-								}
-							}}
-						>
-							<Option
-								value="open"
-								label={`${STATUS_EMOJI.open} ${STATUS_LABELS.open}`}
-							/>
-							<Option
-								value="in_progress"
-								label={`${STATUS_EMOJI.in_progress} ${STATUS_LABELS.in_progress}`}
-							/>
-							<Option
-								value="awaiting_info"
-								label={`${STATUS_EMOJI.awaiting_info} ${STATUS_LABELS.awaiting_info}`}
-							/>
-						</Select>
-					</ActionRow>
+					<Select
+						placeholder="Set Priority"
+						value={ticket.priority}
+						onSelect={(value) => {
+							onUpdate({ priority: value as Priority });
+						}}
+					>
+						<Option value="low" label={PRIORITY_LABELS.low} />
+						<Option value="medium" label={PRIORITY_LABELS.medium} />
+						<Option value="high" label={PRIORITY_LABELS.high} />
+						<Option value="critical" label={PRIORITY_LABELS.critical} />
+					</Select>
+					<Select
+						placeholder="Set Status"
+						value={ticket.status}
+						onSelect={(value) => {
+							if (value !== "closed" && value !== "resolved") {
+								onUpdate({ status: value as Status });
+							}
+						}}
+					>
+						<Option
+							value="open"
+							label={`${STATUS_EMOJI.open} ${STATUS_LABELS.open}`}
+						/>
+						<Option
+							value="in_progress"
+							label={`${STATUS_EMOJI.in_progress} ${STATUS_LABELS.in_progress}`}
+						/>
+						<Option
+							value="awaiting_info"
+							label={`${STATUS_EMOJI.awaiting_info} ${STATUS_LABELS.awaiting_info}`}
+						/>
+					</Select>
 
 					<ActionRow>
 						<ModalButton

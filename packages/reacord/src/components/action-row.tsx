@@ -29,7 +29,9 @@ class ActionRowNode extends Node<ActionRowProps> {
 		options.components.push(actionRow);
 
 		const actionRowOptions: MessageOptions = {
-			components: [actionRow],
+			components: options.components,
+			files: options.files,
+			currentActionRow: actionRow,
 		};
 
 		for (const child of this.children) {

@@ -1,7 +1,4 @@
-import { ReacordElement } from "../internal/element";
-import type { MessageOptions } from "../internal/message";
-import { getOrCreateActionRow } from "../internal/message";
-import { Node } from "../internal/node";
+import { createComponent } from "../create-component";
 
 export interface LinkProps {
 	url: string;
@@ -10,32 +7,15 @@ export interface LinkProps {
 	disabled?: boolean;
 }
 
-export function Link(props: LinkProps) {
-	return (
-		<ReacordElement props={props} createNode={(p) => new LinkNode(p)}>
-			<ReacordElement props={{}} createNode={() => new LinkLabelNode({})}>
-				{props.label}
-			</ReacordElement>
-		</ReacordElement>
-	);
-}
-
-class LinkNode extends Node<LinkProps> {
-	override get text() {
-		return "";
-	}
-
-	protected override modifyMessageOptionsInternal(
-		options: MessageOptions,
-	): void {
-		getOrCreateActionRow(options).components.push({
+export const Link = createComponent<LinkProps>({
+	output: (props) => ({
+		type: "actionRowItem",
+		data: {
 			type: "link",
-			url: this.props.url,
-			label: this.children.findType(LinkLabelNode)?.text,
-			emoji: this.props.emoji,
-			disabled: this.props.disabled,
-		});
-	}
-}
-
-class LinkLabelNode extends Node<Record<string, never>> {}
+			url: props.url,
+			label: props.label,
+			emoji: props.emoji,
+			disabled: props.disabled,
+		},
+	}),
+});

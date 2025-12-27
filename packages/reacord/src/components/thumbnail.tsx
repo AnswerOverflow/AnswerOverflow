@@ -1,6 +1,4 @@
-import { ReacordElement } from "../internal/element";
-import type { MessageOptions, ThumbnailComponent } from "../internal/message";
-import { Node } from "../internal/node";
+import { createComponent } from "../create-component";
 
 export interface ThumbnailProps {
 	url: string;
@@ -8,26 +6,14 @@ export interface ThumbnailProps {
 	spoiler?: boolean;
 }
 
-export function Thumbnail(props: ThumbnailProps) {
-	return (
-		<ReacordElement props={props} createNode={(p) => new ThumbnailNode(p)} />
-	);
-}
-
-class ThumbnailNode extends Node<ThumbnailProps> {
-	override get text() {
-		return "";
-	}
-
-	protected override modifyMessageOptionsInternal(
-		options: MessageOptions,
-	): void {
-		const thumbnail: ThumbnailComponent = {
+export const Thumbnail = createComponent<ThumbnailProps>({
+	output: (props) => ({
+		type: "component",
+		data: {
 			type: "thumbnail",
-			url: this.props.url,
-			description: this.props.description,
-			spoiler: this.props.spoiler,
-		};
-		options.components.push(thumbnail);
-	}
-}
+			url: props.url,
+			description: props.description,
+			spoiler: props.spoiler,
+		},
+	}),
+});

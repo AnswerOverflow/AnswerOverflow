@@ -49,6 +49,23 @@ const globalCommands = [
 		.setContexts(InteractionContextType.Guild, InteractionContextType.BotDM),
 ] as const;
 
+const REACORD_STRESS_TEST_SCENARIOS = [
+	"product-card",
+	"user-profile",
+	"image-gallery",
+	"dashboard",
+	"wizard",
+	"poll",
+	"user-select",
+	"file-component",
+	"modal-showcase",
+	"ticket-triage",
+	"react19-optimistic",
+	"react19-action-state",
+	"react19-use-hook",
+	"react19-cart",
+] as const;
+
 const guildCommands = [
 	new SlashCommandBuilder()
 		.setName("debug")
@@ -59,7 +76,16 @@ const guildCommands = [
 	new SlashCommandBuilder()
 		.setName("reacord-stress-test")
 		.setDescription("Stress test Reacord V2 components (Rhys only)")
-		.setContexts(InteractionContextType.Guild),
+		.setContexts(InteractionContextType.Guild)
+		.addStringOption((option) =>
+			option
+				.setName("scenario")
+				.setDescription("The stress test scenario to run")
+				.setRequired(true)
+				.addChoices(
+					...REACORD_STRESS_TEST_SCENARIOS.map((s) => ({ name: s, value: s })),
+				),
+		),
 ] as const;
 
 const registerCommandsEffect = Effect.fn("register_commands")(function* () {

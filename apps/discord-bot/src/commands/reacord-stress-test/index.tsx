@@ -1,18 +1,7 @@
-import {
-	ActionRow,
-	Button,
-	Container,
-	Option,
-	Reacord,
-	Select,
-	Separator,
-	TextDisplay,
-	useInstance,
-} from "@packages/reacord";
+import { Reacord } from "@packages/reacord";
 import type { ChatInputCommandInteraction } from "discord.js";
 import { MessageFlags } from "discord.js";
 import { Effect, Layer, Metric } from "effect";
-import { useState } from "react";
 import { SUPER_USER_ID } from "../../constants/super-user";
 import { Discord } from "../../core/discord-service";
 import { commandExecuted } from "../../metrics";
@@ -50,60 +39,28 @@ type Scenario =
 	| "react19-use-hook"
 	| "react19-cart";
 
-const SCENARIO_INFO: Record<Scenario, { label: string; description: string }> =
-	{
-		"product-card": {
-			label: "Product Card",
-			description: "E-commerce product display",
-		},
-		"user-profile": {
-			label: "User Profile",
-			description: "User profile with stats",
-		},
-		"image-gallery": {
-			label: "Image Gallery",
-			description: "Image gallery with navigation",
-		},
-		dashboard: { label: "Dashboard", description: "Server stats dashboard" },
-		wizard: { label: "Wizard", description: "Multi-step setup wizard" },
-		poll: { label: "Poll", description: "Interactive voting poll" },
-		"user-select": {
-			label: "User Select",
-			description: "User selection component",
-		},
-		"file-component": {
-			label: "File Component",
-			description: "File upload/display",
-		},
-		"modal-showcase": {
-			label: "Modal Showcase",
-			description: "Modal interactions demo",
-		},
-		"ticket-triage": {
-			label: "Ticket Triage",
-			description: "Ticket management system",
-		},
-		"react19-optimistic": {
-			label: "React 19: Optimistic",
-			description: "useOptimistic hook demo",
-		},
-		"react19-action-state": {
-			label: "React 19: Action State",
-			description: "useActionState hook demo",
-		},
-		"react19-use-hook": {
-			label: "React 19: use() Hook",
-			description: "use() hook with Suspense",
-		},
-		"react19-cart": {
-			label: "React 19: Cart",
-			description: "Combined React 19 features",
-		},
-	};
+const scenarios: Scenario[] = [
+	"product-card",
+	"user-profile",
+	"image-gallery",
+	"dashboard",
+	"wizard",
+	"poll",
+	"user-select",
+	"file-component",
+	"modal-showcase",
+	"ticket-triage",
+	"react19-optimistic",
+	"react19-action-state",
+	"react19-use-hook",
+	"react19-cart",
+];
 
-const scenarios = Object.keys(SCENARIO_INFO) as Scenario[];
+type StressTestProps = {
+	scenario: Scenario;
+};
 
-function ScenarioContent({ scenario }: { scenario: Scenario }) {
+function StressTest({ scenario }: StressTestProps) {
 	switch (scenario) {
 		case "product-card":
 			return <ProductCardScenario />;
@@ -136,64 +93,6 @@ function ScenarioContent({ scenario }: { scenario: Scenario }) {
 	}
 }
 
-function ScenarioSelector() {
-	const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(
-		null,
-	);
-	const instance = useInstance();
-
-	if (selectedScenario) {
-		return <ScenarioContent scenario={selectedScenario} />;
-	}
-
-	return (
-		<>
-			<Container accentColor={0x5865f2}>
-				<TextDisplay>## Reacord Stress Test</TextDisplay>
-				<TextDisplay>
-					Select a scenario to test Reacord components and React 19 features.
-				</TextDisplay>
-			</Container>
-
-			<Separator />
-
-			<Container accentColor={0x2f3136}>
-				<TextDisplay>### Available Scenarios</TextDisplay>
-				<TextDisplay>
-					**Classic Components:**{" "}
-					{scenarios.filter((s) => !s.startsWith("react19")).length} scenarios
-				</TextDisplay>
-				<TextDisplay>
-					**React 19 Features:**{" "}
-					{scenarios.filter((s) => s.startsWith("react19")).length} scenarios
-				</TextDisplay>
-			</Container>
-
-			<Select
-				placeholder="Select a scenario..."
-				onSelect={(value) => setSelectedScenario(value as Scenario)}
-			>
-				{scenarios.map((scenario) => (
-					<Option
-						key={scenario}
-						value={scenario}
-						label={SCENARIO_INFO[scenario].label}
-						description={SCENARIO_INFO[scenario].description}
-					/>
-				))}
-			</Select>
-
-			<ActionRow>
-				<Button
-					label="Close"
-					style="danger"
-					onClick={() => instance.destroy()}
-				/>
-			</ActionRow>
-		</>
-	);
-}
-
 export const handleReacordStressTestCommand = Effect.fn(
 	"reacord_stress_test_command",
 )(function* (interaction: ChatInputCommandInteraction) {
@@ -217,11 +116,24 @@ export const handleReacordStressTestCommand = Effect.fn(
 		return;
 	}
 
+	const scenarioOption = interaction.options.getString("scenario", true);
+	const scenario = scenarioOption as Scenario;
+
+	if (!scenarios.includes(scenario)) {
+		yield* discord.callClient(() =>
+			interaction.reply({
+				content: `Invalid scenario. Available: ${scenarios.join(", ")}`,
+				flags: MessageFlags.Ephemeral,
+			}),
+		);
+		return;
+	}
+
 	yield* discord.callClient(() =>
 		interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 	);
 
-	yield* reacord.reply(interaction, <ScenarioSelector />);
+	yield* reacord.reply(interaction, <StressTest scenario={scenario} />);
 });
 
 export const ReacordStressTestLayer = Layer.scopedDiscard(

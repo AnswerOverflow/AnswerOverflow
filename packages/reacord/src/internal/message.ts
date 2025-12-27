@@ -1,6 +1,7 @@
 export interface MessageOptions {
 	components: V2Component[];
 	files?: AttachmentFile[];
+	currentActionRow?: ActionRowComponent;
 }
 
 export interface AttachmentFile {
@@ -141,14 +142,49 @@ export interface MessageUserSelectOptions {
 	defaultUserIds?: string[];
 }
 
+function isFullWidthComponent(component: ActionRowItemOptions): boolean {
+	return component.type === "select" || component.type === "userSelect";
+}
+
+function canAddToActionRow(
+	row: ActionRowComponent,
+	newComponent: ActionRowItemOptions,
+): boolean {
+	if (row.components.length >= 5) return false;
+	if (isFullWidthComponent(newComponent) && row.components.length > 0)
+		return false;
+	if (row.components.some(isFullWidthComponent)) return false;
+	return true;
+}
+
 export function getOrCreateActionRow(
 	options: MessageOptions,
+	forComponent?: ActionRowItemOptions,
 ): ActionRowComponent {
+	if (options.currentActionRow) {
+		if (
+			forComponent &&
+			!canAddToActionRow(options.currentActionRow, forComponent)
+		) {
+			const componentType = forComponent.type;
+			const existingTypes = options.currentActionRow.components
+				.map((c) => c.type)
+				.join(", ");
+			throw new Error(
+				`Cannot add ${componentType} to ActionRow. ` +
+					(isFullWidthComponent(forComponent)
+						? `${componentType} requires its own ActionRow but the current row already contains: [${existingTypes}]`
+						: `The ActionRow already contains a full-width component: [${existingTypes}]`) +
+					`. Remove the explicit <ActionRow> wrapper or separate these components.`,
+			);
+		}
+		return options.currentActionRow;
+	}
 	const lastComponent = options.components[options.components.length - 1];
 	if (
 		lastComponent &&
 		lastComponent.type === "actionRow" &&
-		lastComponent.components.length < 5
+		(!forComponent || canAddToActionRow(lastComponent, forComponent))
 	) {
 		return lastComponent;
 	}
@@ -159,12 +195,13 @@ export function getOrCreateActionRow(
 
 export function getOrCreateContainerActionRow(
 	container: ContainerComponent,
+	forComponent?: ActionRowItemOptions,
 ): ActionRowComponent {
 	const lastComponent = container.components[container.components.length - 1];
 	if (
 		lastComponent &&
 		lastComponent.type === "actionRow" &&
-		lastComponent.components.length < 5
+		(!forComponent || canAddToActionRow(lastComponent, forComponent))
 	) {
 		return lastComponent;
 	}

@@ -6,7 +6,7 @@ import {
 	TextDisplay,
 	useInstance,
 } from "@packages/reacord";
-import { Suspense, use, useState } from "react";
+import { Fragment, Suspense, use, useState } from "react";
 
 interface UserData {
 	id: string;
@@ -175,7 +175,7 @@ export function React19UseHookScenario() {
 				</Container>
 			) : (
 				Array.from(userPromises.entries()).map(([userId, promise]) => (
-					<div key={userId}>
+					<Fragment key={userId}>
 						{erroredUsers.has(userId) ? (
 							<ErrorBoundaryFallback
 								error="Failed to fetch user data"
@@ -186,7 +186,7 @@ export function React19UseHookScenario() {
 								<UserCard userPromise={promise} />
 							</Suspense>
 						)}
-					</div>
+					</Fragment>
 				))
 			)}
 
