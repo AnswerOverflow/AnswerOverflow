@@ -17,6 +17,11 @@ export {
 	type EmbedTitleProps,
 } from "./components/embed";
 export { Link, type LinkProps } from "./components/link";
+export {
+	ModalButton,
+	type ModalButtonProps,
+	type TextInputField,
+} from "./components/modal-button";
 export { Option, type OptionProps } from "./components/option";
 export { Select, type SelectProps } from "./components/select";
 export type { ReacordInstance } from "./instance";

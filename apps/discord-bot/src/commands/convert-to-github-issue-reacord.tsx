@@ -5,19 +5,14 @@ import {
 	Embed,
 	EmbedField,
 	Link,
+	ModalButton,
 	Option,
 	Reacord,
 	Select,
 	useInstance,
 } from "@packages/reacord";
 import type { ContextMenuCommandInteraction, Message } from "discord.js";
-import {
-	ActionRowBuilder,
-	MessageFlags,
-	ModalBuilder,
-	TextInputBuilder,
-	TextInputStyle,
-} from "discord.js";
+import { MessageFlags } from "discord.js";
 import { Data, Duration, Effect, Layer, Metric } from "effect";
 import { useState } from "react";
 import { Discord } from "../core/discord-service";
@@ -29,7 +24,6 @@ import {
 } from "../utils/error-reporting";
 
 const COMMAND_NAME = "Create GitHub Issue";
-const GITHUB_ISSUE_EDIT_MODAL = "github-issue-edit-modal";
 const GITHUB_ISSUE_TITLE_INPUT = "github-issue-title";
 const GITHUB_ISSUE_BODY_INPUT = "github-issue-body";
 
@@ -276,60 +270,34 @@ function GitHubIssueCreator({
 			)}
 
 			<ActionRow>
-				<Button
+				<ModalButton
 					label="Edit"
-					onClick={(interaction) =>
-						Effect.gen(function* () {
-							const modal = new ModalBuilder()
-								.setCustomId(
-									`${GITHUB_ISSUE_EDIT_MODAL}:${originalMessageId}:${discordUserId}`,
-								)
-								.setTitle("Edit GitHub Issue")
-								.addComponents(
-									new ActionRowBuilder<TextInputBuilder>().addComponents(
-										new TextInputBuilder()
-											.setCustomId(GITHUB_ISSUE_TITLE_INPUT)
-											.setLabel("Issue Title")
-											.setStyle(TextInputStyle.Short)
-											.setValue(title)
-											.setMaxLength(256)
-											.setRequired(true),
-									),
-									new ActionRowBuilder<TextInputBuilder>().addComponents(
-										new TextInputBuilder()
-											.setCustomId(GITHUB_ISSUE_BODY_INPUT)
-											.setLabel("Issue Body")
-											.setStyle(TextInputStyle.Paragraph)
-											.setValue(body)
-											.setMaxLength(4000)
-											.setRequired(true),
-									),
-								);
-
-							yield* Effect.tryPromise(() => interaction.showModal(modal));
-
-							const submitted = yield* Effect.tryPromise(() =>
-								interaction.awaitModalSubmit({
-									time: 5 * 60 * 1000,
-									filter: (i) =>
-										i.customId ===
-										`${GITHUB_ISSUE_EDIT_MODAL}:${originalMessageId}:${discordUserId}`,
-								}),
-							);
-
-							const newTitle = submitted.fields.getTextInputValue(
-								GITHUB_ISSUE_TITLE_INPUT,
-							);
-							const newBody = submitted.fields.getTextInputValue(
-								GITHUB_ISSUE_BODY_INPUT,
-							);
-
-							setTitle(newTitle);
-							setBody(newBody);
-
-							yield* Effect.tryPromise(() => submitted.deferUpdate());
-						})
-					}
+					modalTitle="Edit GitHub Issue"
+					fields={[
+						{
+							id: GITHUB_ISSUE_TITLE_INPUT,
+							label: "Issue Title",
+							style: "short",
+							defaultValue: title,
+							maxLength: 256,
+							required: true,
+						},
+						{
+							id: GITHUB_ISSUE_BODY_INPUT,
+							label: "Issue Body",
+							style: "paragraph",
+							defaultValue: body,
+							maxLength: 4000,
+							required: true,
+						},
+					]}
+					onSubmit={(fields) => {
+						const newTitle = fields.get(GITHUB_ISSUE_TITLE_INPUT);
+						const newBody = fields.get(GITHUB_ISSUE_BODY_INPUT);
+						if (newTitle) setTitle(newTitle);
+						if (newBody) setBody(newBody);
+						return Effect.void;
+					}}
 				/>
 				<Button
 					label={status === "creating" ? "Creating..." : "Create Issue"}

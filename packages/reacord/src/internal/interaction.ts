@@ -1,11 +1,13 @@
 import type {
 	ButtonInteraction,
+	ModalSubmitInteraction,
 	StringSelectMenuInteraction,
 } from "discord.js";
 
 export type ComponentInteraction =
 	| ReacordButtonInteraction
-	| ReacordSelectInteraction;
+	| ReacordSelectInteraction
+	| ReacordModalInteraction;
 
 export interface ReacordButtonInteraction {
 	type: "button";
@@ -18,4 +20,11 @@ export interface ReacordSelectInteraction {
 	customId: string;
 	values: string[];
 	interaction: StringSelectMenuInteraction;
+}
+
+export interface ReacordModalInteraction {
+	type: "modal";
+	customId: string;
+	fields: Map<string, string>;
+	interaction: ModalSubmitInteraction;
 }

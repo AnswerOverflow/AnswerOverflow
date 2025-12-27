@@ -2,6 +2,8 @@ import type {
 	ButtonInteraction,
 	Client,
 	CommandInteraction,
+	Interaction,
+	ModalSubmitInteraction,
 	StringSelectMenuInteraction,
 } from "discord.js";
 import { Context, Effect, Layer } from "effect";
@@ -25,8 +27,27 @@ export class Reacord extends Context.Tag("Reacord")<
 			interaction: CommandInteraction,
 			content: ReactNode,
 		) => Effect.Effect<ReacordInstance>;
+		cleanup: () => void;
 	}
 >() {}
+
+function isButtonInteraction(
+	interaction: Interaction,
+): interaction is ButtonInteraction {
+	return interaction.isButton();
+}
+
+function isStringSelectMenuInteraction(
+	interaction: Interaction,
+): interaction is StringSelectMenuInteraction {
+	return interaction.isStringSelectMenu();
+}
+
+function isModalSubmitInteraction(
+	interaction: Interaction,
+): interaction is ModalSubmitInteraction {
+	return interaction.isModalSubmit();
+}
 
 export function makeReacord(
 	client: Client,
@@ -36,19 +57,31 @@ export function makeReacord(
 	const renderers: Renderer[] = [];
 	const maxInstances = config.maxInstances ?? 50;
 
-	client.on("interactionCreate", (interaction) => {
-		if (interaction.isButton() || interaction.isStringSelectMenu()) {
-			handleComponentInteraction(
-				interaction as ButtonInteraction | StringSelectMenuInteraction,
-			);
+	function onInteractionCreate(interaction: Interaction) {
+		if (isButtonInteraction(interaction)) {
+			handleComponentInteraction(interaction);
+		} else if (isStringSelectMenuInteraction(interaction)) {
+			handleComponentInteraction(interaction);
+		} else if (isModalSubmitInteraction(interaction)) {
+			handleModalInteraction(interaction);
 		}
-	});
+	}
+
+	client.on("interactionCreate", onInteractionCreate);
 
 	function handleComponentInteraction(
 		interaction: ButtonInteraction | StringSelectMenuInteraction,
 	) {
 		for (const renderer of renderers) {
 			if (renderer.handleComponentInteraction(interaction)) {
+				return;
+			}
+		}
+	}
+
+	function handleModalInteraction(interaction: ModalSubmitInteraction) {
+		for (const renderer of renderers) {
+			if (renderer.handleModalInteraction(interaction)) {
 				return;
 			}
 		}
@@ -77,12 +110,10 @@ export function makeReacord(
 
 		const instance: ReacordInstance = {
 			render: (content: ReactNode) => {
-				console.log("[Reacord] render called with content:", content);
 				reconciler.updateContainer(
 					<InstanceProvider value={instance}>{content}</InstanceProvider>,
 					container,
 				);
-				console.log("[Reacord] updateContainer finished");
 				return instance;
 			},
 			deactivate: () => {
@@ -118,6 +149,13 @@ export function makeReacord(
 				const renderer = createInteractionReplyRenderer(interaction, runEffect);
 				return createInstance(renderer, content);
 			}),
+		cleanup: () => {
+			client.off("interactionCreate", onInteractionCreate);
+			for (const renderer of renderers) {
+				renderer.deactivate();
+			}
+			renderers.length = 0;
+		},
 	};
 }
 

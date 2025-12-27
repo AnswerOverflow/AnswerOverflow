@@ -124,19 +124,12 @@ const config: HostConfig<
 		parent.children.addBefore(child, before);
 	},
 
-	prepareUpdate: () => true,
+	prepareUpdate: (_instance, _type, oldProps, newProps) => {
+		return oldProps.props !== newProps.props ? true : null;
+	},
 	commitUpdate: (node, _payload, _type, _oldProps, newProps) => {
-		const fiberNode = newProps as {
-			pendingProps?: { props?: unknown };
-			memoizedProps?: { props?: unknown };
-			props?: unknown;
-		};
-		const actualProps =
-			fiberNode.pendingProps?.props ??
-			fiberNode.memoizedProps?.props ??
-			fiberNode.props;
-		if (actualProps !== undefined) {
-			node.props = actualProps;
+		if (newProps.props !== undefined) {
+			node.props = newProps.props;
 		}
 	},
 	commitTextUpdate: (node, _oldText, newText) => {

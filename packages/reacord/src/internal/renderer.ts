@@ -4,10 +4,12 @@ import {
 	type CommandInteraction,
 	ComponentType,
 	type Message,
+	type ModalSubmitInteraction,
 	type StringSelectMenuInteraction,
 } from "discord.js";
 import { Effect } from "effect";
 import { Container } from "./container";
+import { DiscordApiError } from "./errors";
 import type { ComponentInteraction } from "./interaction";
 import type { MessageButtonOptions, MessageOptions } from "./message";
 import type { Node } from "./node";
@@ -49,7 +51,7 @@ type RendererOptions =
 			type: "message";
 			createMessage: (
 				options: DiscordMessageOptions,
-			) => Effect.Effect<Message, unknown>;
+			) => Effect.Effect<Message, DiscordApiError>;
 			runEffect: <A, E, R>(effect: Effect.Effect<A, E, R>) => Promise<A>;
 	  };
 
@@ -58,14 +60,13 @@ export class Renderer {
 	private componentInteraction?: ComponentInteraction;
 	private message?: Message;
 	private active = true;
-	private updateQueue: Array<() => Effect.Effect<void, unknown>> = [];
+	private updateQueue: Array<() => Effect.Effect<void, DiscordApiError>> = [];
 	private processing = false;
 
 	constructor(private readonly options: RendererOptions) {}
 
 	render() {
 		if (!this.active) {
-			console.warn("Attempted to update a deactivated message");
 			return;
 		}
 
@@ -99,6 +100,33 @@ export class Renderer {
 		return false;
 	}
 
+	handleModalInteraction(interaction: ModalSubmitInteraction): boolean {
+		const fields = new Map<string, string>();
+		for (const [key, field] of interaction.fields.fields) {
+			if ("value" in field && typeof field.value === "string") {
+				fields.set(key, field.value);
+			}
+		}
+
+		const reacordInteraction: ComponentInteraction = {
+			type: "modal",
+			customId: interaction.customId,
+			fields,
+			interaction,
+		};
+
+		for (const node of this.nodes) {
+			if (node.handleComponentInteraction(reacordInteraction, this.runEffect)) {
+				this.componentInteraction = reacordInteraction;
+				setTimeout(() => {
+					this.enqueue(() => this.doDeferModalUpdate(interaction));
+				}, 500);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private toReacordInteraction(
 		interaction: ButtonInteraction | StringSelectMenuInteraction,
 	): ComponentInteraction {
@@ -117,7 +145,7 @@ export class Renderer {
 		};
 	}
 
-	private enqueue(task: () => Effect.Effect<void, unknown>) {
+	private enqueue(task: () => Effect.Effect<void, DiscordApiError>) {
 		this.updateQueue.push(task);
 		this.processQueue();
 	}
@@ -126,22 +154,29 @@ export class Renderer {
 		return this.options.runEffect;
 	}
 
-	private async processQueue() {
+	private processQueue() {
 		if (this.processing) return;
 		this.processing = true;
 
-		while (this.updateQueue.length > 0) {
+		const processNext = () => {
 			const task = this.updateQueue.shift();
-			if (task) {
-				try {
-					await this.runEffect(task());
-				} catch (error) {
-					console.error("Reacord update error:", error);
-				}
+			if (!task) {
+				this.processing = false;
+				return;
 			}
-		}
 
-		this.processing = false;
+			this.runEffect(
+				task().pipe(
+					Effect.catchAll((error) =>
+						Effect.sync(() => {
+							console.error("Reacord update error:", error);
+						}),
+					),
+				),
+			).then(processNext);
+		};
+
+		processNext();
 	}
 
 	private getMessageOptions(): MessageOptions {
@@ -214,37 +249,50 @@ export class Renderer {
 		return styleMap[style ?? "secondary"];
 	}
 
-	private doUpdate(): Effect.Effect<void, unknown> {
+	private doUpdate(): Effect.Effect<void, DiscordApiError> {
 		return Effect.gen(this, function* () {
 			const options = this.getMessageOptions();
 			const discordOptions = this.toDiscordOptions(options);
 
 			if (this.componentInteraction) {
-				const interaction = this.componentInteraction.interaction;
+				const componentInteraction = this.componentInteraction;
 				this.componentInteraction = undefined;
-				yield* Effect.tryPromise(() => interaction.update(discordOptions));
+				if (componentInteraction.type === "modal") {
+					return;
+				}
+				yield* Effect.tryPromise({
+					try: () => componentInteraction.interaction.update(discordOptions),
+					catch: (cause) => new DiscordApiError({ operation: "update", cause }),
+				});
 				return;
 			}
 
 			if (this.options.type === "interaction") {
 				const interaction = this.options.interaction;
 				if (interaction.deferred || interaction.replied) {
-					const message = yield* Effect.tryPromise(() =>
-						interaction.editReply(discordOptions),
-					);
+					const message = yield* Effect.tryPromise({
+						try: () => interaction.editReply(discordOptions),
+						catch: (cause) =>
+							new DiscordApiError({ operation: "editReply", cause }),
+					});
 					if (!this.message && message) {
 						this.message = message;
 					}
 					return;
 				}
-				this.message = yield* Effect.tryPromise(() =>
-					interaction.reply({ ...discordOptions, fetchReply: true }),
-				);
+				this.message = yield* Effect.tryPromise({
+					try: () => interaction.reply({ ...discordOptions, fetchReply: true }),
+					catch: (cause) => new DiscordApiError({ operation: "reply", cause }),
+				});
 				return;
 			}
 
-			if (this.message) {
-				yield* Effect.tryPromise(() => this.message!.edit(discordOptions));
+			const message = this.message;
+			if (message) {
+				yield* Effect.tryPromise({
+					try: () => message.edit(discordOptions),
+					catch: (cause) => new DiscordApiError({ operation: "edit", cause }),
+				});
 				return;
 			}
 
@@ -252,8 +300,9 @@ export class Renderer {
 		});
 	}
 
-	private doDeactivate(): Effect.Effect<void, unknown> {
+	private doDeactivate(): Effect.Effect<void, DiscordApiError> {
 		const rendererOptions = this.options;
+		const message = this.message;
 		return Effect.gen(this, function* () {
 			const options = this.getMessageOptions();
 			const discordOptions = this.toDiscordOptions(options);
@@ -264,40 +313,81 @@ export class Renderer {
 			}));
 
 			if (rendererOptions.type === "interaction") {
-				yield* Effect.tryPromise(() =>
-					rendererOptions.interaction.editReply(discordOptions),
-				);
+				yield* Effect.tryPromise({
+					try: () => rendererOptions.interaction.editReply(discordOptions),
+					catch: (cause) =>
+						new DiscordApiError({ operation: "editReply", cause }),
+				});
 				return;
 			}
 
-			if (this.message) {
-				yield* Effect.tryPromise(() => this.message!.edit(discordOptions));
+			if (message) {
+				yield* Effect.tryPromise({
+					try: () => message.edit(discordOptions),
+					catch: (cause) => new DiscordApiError({ operation: "edit", cause }),
+				});
 			}
 		});
 	}
 
-	private doDestroy(): Effect.Effect<void, unknown> {
+	private doDestroy(): Effect.Effect<void, DiscordApiError> {
 		const rendererOptions = this.options;
-		return Effect.gen(this, function* () {
+		const message = this.message;
+		return Effect.gen(function* () {
 			if (rendererOptions.type === "interaction") {
-				yield* Effect.tryPromise(() =>
-					rendererOptions.interaction.deleteReply(),
-				);
+				yield* Effect.tryPromise({
+					try: () => rendererOptions.interaction.deleteReply(),
+					catch: (cause) =>
+						new DiscordApiError({ operation: "deleteReply", cause }),
+				});
 				return;
 			}
 
-			if (this.message) {
-				yield* Effect.tryPromise(() => this.message!.delete());
+			if (message) {
+				yield* Effect.tryPromise({
+					try: () => message.delete(),
+					catch: (cause) => new DiscordApiError({ operation: "delete", cause }),
+				});
 			}
 		});
 	}
 
 	private doDeferUpdate(
 		interaction: ButtonInteraction | StringSelectMenuInteraction,
-	): Effect.Effect<void, unknown> {
+	): Effect.Effect<void, DiscordApiError> {
 		return Effect.gen(function* () {
 			if (!interaction.deferred && !interaction.replied) {
-				yield* Effect.tryPromise(() => interaction.deferUpdate());
+				yield* Effect.tryPromise({
+					try: () => interaction.deferUpdate(),
+					catch: (cause) =>
+						new DiscordApiError({ operation: "deferUpdate", cause }),
+				});
+			}
+		});
+	}
+
+	private doDeferModalUpdate(
+		interaction: ModalSubmitInteraction,
+	): Effect.Effect<void, DiscordApiError> {
+		const rendererOptions = this.options;
+		return Effect.gen(this, function* () {
+			if (!interaction.deferred && !interaction.replied) {
+				yield* Effect.tryPromise({
+					try: () => interaction.deferUpdate(),
+					catch: (cause) =>
+						new DiscordApiError({ operation: "deferUpdate", cause }),
+				});
+
+				const options = this.getMessageOptions();
+				const discordOptions = this.toDiscordOptions(options);
+
+				if (rendererOptions.type === "interaction") {
+					yield* Effect.tryPromise({
+						try: () => rendererOptions.interaction.editReply(discordOptions),
+						catch: (cause) =>
+							new DiscordApiError({ operation: "editReply", cause }),
+					});
+				}
 			}
 		});
 	}

@@ -10,10 +10,12 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@types/react": "^19.1.6",
-		"@types/react-reconciler": "^0.31.0",
 		"react": "^19.1.0",
 		"react-reconciler": "^0.31.0"
+	},
+	"devDependencies": {
+		"@types/react": "^19.1.6",
+		"@types/react-reconciler": "^0.31.0"
 	},
 	"peerDependencies": {
 		"discord.js": "^14",
