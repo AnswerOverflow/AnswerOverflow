@@ -21,6 +21,7 @@ import { React19UseHookScenario } from "./react19-use-hook";
 import { React19ContextScenario } from "./react19-context";
 import { React19DeferredScenario } from "./react19-deferred";
 import { React19RefScenario } from "./react19-ref";
+import { ReactHooksScenario } from "./react-hooks";
 import { TicketTriageScenario } from "./ticket-triage";
 import { UserProfileScenario } from "./user-profile";
 import { UserSelectScenario } from "./user-select";
@@ -46,6 +47,7 @@ type Scenario =
 	| "react19-context"
 	| "react19-deferred"
 	| "react19-ref"
+	| "react-hooks"
 	| "react-kitchen-sink"
 	| "llm-streaming";
 
@@ -67,6 +69,7 @@ const scenarios: Scenario[] = [
 	"react19-context",
 	"react19-deferred",
 	"react19-ref",
+	"react-hooks",
 	"react-kitchen-sink",
 	"llm-streaming",
 ];
@@ -111,6 +114,8 @@ function StressTest({ scenario }: StressTestProps) {
 			return <React19DeferredScenario />;
 		case "react19-ref":
 			return <React19RefScenario />;
+		case "react-hooks":
+			return <ReactHooksScenario />;
 		case "react-kitchen-sink":
 			return <ReactKitchenSinkScenario />;
 		case "llm-streaming":
