@@ -71,16 +71,11 @@ export class Renderer {
 	private updateQueue: Array<() => Effect.Effect<void, DiscordApiError>> = [];
 	private processing = false;
 	private readonly id = ++rendererId;
-	private pendingEffectPromise?: Promise<void>;
 
 	constructor(private readonly options: RendererOptions) {}
 
 	render() {
 		if (!this.active) {
-			return;
-		}
-
-		if (this.pendingEffectPromise) {
 			return;
 		}
 
@@ -106,12 +101,7 @@ export class Renderer {
 			this.componentInteraction = reacordInteraction;
 
 			try {
-				if (
-					node.handleComponentInteraction(
-						reacordInteraction,
-						this.createWrappedRunEffect(),
-					)
-				) {
+				if (node.handleComponentInteraction(reacordInteraction)) {
 					setTimeout(() => {
 						this.enqueue(() => this.doDeferUpdate(interaction));
 					}, DEFER_UPDATE_DELAY_MS);
@@ -143,12 +133,7 @@ export class Renderer {
 			this.componentInteraction = reacordInteraction;
 
 			try {
-				if (
-					node.handleComponentInteraction(
-						reacordInteraction,
-						this.createWrappedRunEffect(),
-					)
-				) {
+				if (node.handleComponentInteraction(reacordInteraction)) {
 					setTimeout(() => {
 						this.enqueue(() => this.doDeferModalUpdate(interaction));
 					}, DEFER_UPDATE_DELAY_MS);
@@ -186,24 +171,6 @@ export class Renderer {
 
 	private get runEffect() {
 		return this.options.runEffect;
-	}
-
-	private createWrappedRunEffect(): typeof this.runEffect {
-		return (effect) => {
-			const promise = this.runEffect(effect);
-			this.pendingEffectPromise = promise
-				.then(() => {
-					this.pendingEffectPromise = undefined;
-					queueMicrotask(() => {
-						this.render();
-					});
-				})
-				.catch((error) => {
-					this.pendingEffectPromise = undefined;
-					console.error("Reacord effect error:", error);
-				});
-			return promise;
-		};
 	}
 
 	private processQueue() {

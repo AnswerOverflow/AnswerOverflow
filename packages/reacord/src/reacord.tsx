@@ -8,6 +8,7 @@ import type {
 } from "discord.js";
 import { Context, Effect, Layer } from "effect";
 import type { ReactNode } from "react";
+import { EffectRuntimeProvider } from "./effect-context";
 import type { ReacordInstance } from "./instance";
 import { InstanceProvider } from "./instance-context";
 import { reconciler } from "./internal/reconciler";
@@ -148,7 +149,9 @@ export function makeReacord(
 		const instance: ReacordInstance = {
 			render: (content: ReactNode) => {
 				reconciler.updateContainer(
-					<InstanceProvider value={instance}>{content}</InstanceProvider>,
+					<EffectRuntimeProvider runEffect={runEffect}>
+						<InstanceProvider value={instance}>{content}</InstanceProvider>
+					</EffectRuntimeProvider>,
 					container,
 				);
 				return instance;

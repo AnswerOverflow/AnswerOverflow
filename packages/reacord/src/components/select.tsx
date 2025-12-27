@@ -1,10 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type { StringSelectMenuInteraction } from "discord.js";
-import { Effect } from "effect";
 import { ReacordElement } from "../internal/element";
 import type { ComponentInteraction } from "../internal/interaction";
 import type { MessageOptions, MessageSelectOptions } from "../internal/message";
-import { Node, type RunEffect } from "../internal/node";
+import { Node } from "../internal/node";
 import { OptionNode } from "./option";
 
 export interface SelectProps {
@@ -17,11 +16,11 @@ export interface SelectProps {
 	onSelect?: (
 		value: string,
 		interaction: StringSelectMenuInteraction,
-	) => Effect.Effect<void, unknown, unknown>;
+	) => void | Promise<void>;
 	onSelectMultiple?: (
 		values: string[],
 		interaction: StringSelectMenuInteraction,
-	) => Effect.Effect<void, unknown, unknown>;
+	) => void | Promise<void>;
 	children?: React.ReactNode;
 }
 
@@ -40,7 +39,9 @@ class SelectNode extends Node<SelectProps> {
 		return "";
 	}
 
-	override modifyMessageOptions(options: MessageOptions): void {
+	protected override modifyMessageOptionsInternal(
+		options: MessageOptions,
+	): void {
 		const optionNodes = [...this.children].filter(
 			(child): child is OptionNode => child instanceof OptionNode,
 		);
@@ -62,38 +63,22 @@ class SelectNode extends Node<SelectProps> {
 		options.actionRows.push([selectOptions]);
 	}
 
-	override handleComponentInteraction(
-		interaction: ComponentInteraction,
-		runEffect: RunEffect,
-	) {
+	override handleComponentInteraction(interaction: ComponentInteraction) {
 		if (
 			interaction.type === "select" &&
 			interaction.customId === this.customId
 		) {
 			const selectedValue = interaction.values[0];
 			if (this.props.onSelectMultiple) {
-				runEffect(
-					this.props
-						.onSelectMultiple(interaction.values, interaction.interaction)
-						.pipe(
-							Effect.withSpan("reacord.select.on_select_multiple", {
-								attributes: {
-									"reacord.select.custom_id": this.customId,
-									"reacord.select.values": interaction.values.join(","),
-								},
-							}),
-						),
+				Promise.resolve(
+					this.props.onSelectMultiple(
+						interaction.values,
+						interaction.interaction,
+					),
 				);
 			} else if (this.props.onSelect && selectedValue) {
-				runEffect(
-					this.props.onSelect(selectedValue, interaction.interaction).pipe(
-						Effect.withSpan("reacord.select.on_select", {
-							attributes: {
-								"reacord.select.custom_id": this.customId,
-								"reacord.select.value": selectedValue,
-							},
-						}),
-					),
+				Promise.resolve(
+					this.props.onSelect(selectedValue, interaction.interaction),
 				);
 			}
 			return true;

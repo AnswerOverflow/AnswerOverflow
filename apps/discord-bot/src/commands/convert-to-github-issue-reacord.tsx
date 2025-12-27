@@ -4,11 +4,13 @@ import {
 	Button,
 	Embed,
 	EmbedField,
-	Link,
+	LoadingSelect,
 	ModalButton,
 	Option,
 	Reacord,
 	Select,
+	useEffectAsync,
+	useEffectCallback,
 	useInstance,
 } from "@packages/reacord";
 import type { ContextMenuCommandInteraction, Message } from "discord.js";
@@ -117,9 +119,105 @@ function generateIssueTitle(message: Message): string {
 	return firstLine || "Issue from Discord";
 }
 
+const INSTALL_MORE_REPOS_VALUE = "__install_more_repos__";
+
+type RepoSelectorProps = {
+	discordUserId: string;
+	selectedRepo: { owner: string; name: string } | null;
+	setSelectedRepo: (repo: { owner: string; name: string } | null) => void;
+};
+
+function RepoSelector({
+	discordUserId,
+	selectedRepo,
+	setSelectedRepo,
+}: RepoSelectorProps) {
+	const state = useEffectAsync(() =>
+		Effect.gen(function* () {
+			const database = yield* Database;
+			const reposResult = yield* database.private.github
+				.getAccessibleReposByDiscordId({
+					discordId: BigInt(discordUserId),
+				})
+				.pipe(Effect.withSpan("get_accessible_repos_suspense"));
+
+			if (!reposResult.success) {
+				return { repos: [] as GitHubRepo[], hasAllReposAccess: false };
+			}
+
+			return {
+				repos: reposResult.repos,
+				hasAllReposAccess: reposResult.hasAllReposAccess,
+			};
+		}),
+	);
+
+	if (state.status === "loading") {
+		return <LoadingSelect placeholder="Loading repositories..." />;
+	}
+
+	if (state.status === "error") {
+		return null;
+	}
+
+	const { repos, hasAllReposAccess } = state.value;
+
+	if (repos.length === 0) {
+		return null;
+	}
+
+	return (
+		<Select
+			placeholder="Select a repository"
+			value={
+				selectedRepo ? `${selectedRepo.owner}/${selectedRepo.name}` : undefined
+			}
+			onSelect={async (value, interaction) => {
+				if (value === INSTALL_MORE_REPOS_VALUE) {
+					await interaction.reply({
+						content:
+							"To add more repositories, install the Answer Overflow app:",
+						components: [
+							{
+								type: 1,
+								components: [
+									{
+										type: 2,
+										style: 5,
+										label: "Install Answer Overflow",
+										url: GITHUB_APP_INSTALL_URL,
+									},
+								],
+							},
+						],
+						flags: MessageFlags.Ephemeral,
+					});
+					return;
+				}
+				const [owner, name] = value.split("/");
+				if (owner && name) {
+					setSelectedRepo({ owner, name });
+				}
+			}}
+		>
+			{repos.slice(0, 24).map((repo: GitHubRepo) => (
+				<Option
+					key={repo.fullName}
+					value={repo.fullName}
+					label={repo.fullName}
+				/>
+			))}
+			{!hasAllReposAccess && (
+				<Option
+					value={INSTALL_MORE_REPOS_VALUE}
+					label="+ Install on more repos..."
+				/>
+			)}
+		</Select>
+	);
+}
+
 type GitHubIssueCreatorProps = {
-	repos: GitHubRepo[];
-	hasAllReposAccess: boolean;
 	initialTitle: string;
 	initialBody: string;
 	originalMessageId: string;
@@ -132,8 +230,6 @@ type GitHubIssueCreatorProps = {
 type Status = "editing" | "creating" | "success" | "error";
 
 function GitHubIssueCreator({
-	repos,
-	hasAllReposAccess,
 	initialTitle,
 	initialBody,
 	originalMessageId,
@@ -145,11 +241,7 @@ function GitHubIssueCreator({
 	const [selectedRepo, setSelectedRepo] = useState<{
 		owner: string;
 		name: string;
-	} | null>(
-		repos.length === 1
-			? { owner: repos[0]!.owner, name: repos[0]!.name }
-			: null,
-	);
+	} | null>(null);
 
 	const [title, setTitle] = useState(initialTitle);
 	const [body, setBody] = useState(initialBody);
@@ -159,9 +251,54 @@ function GitHubIssueCreator({
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const instance = useInstance();
 
+	const handleCreateIssue = useEffectCallback(
+		(repo: { owner: string; name: string }) =>
+			Effect.gen(function* () {
+				setStatus("creating");
+
+				const database = yield* Database;
+
+				const result = yield* database.private.github
+					.createGitHubIssueFromDiscord({
+						discordId: BigInt(discordUserId),
+						repoOwner: repo.owner,
+						repoName: repo.name,
+						title,
+						body,
+						discordServerId: BigInt(originalGuildId),
+						discordChannelId: BigInt(originalChannelId),
+						discordMessageId: BigInt(originalMessageId),
+						discordThreadId: originalThreadId
+							? BigInt(originalThreadId)
+							: undefined,
+					})
+					.pipe(Effect.withSpan("create_github_issue_api_call"));
+
+				if (!result.success) {
+					if (
+						result.code === "NOT_LINKED" ||
+						result.code === "REFRESH_REQUIRED" ||
+						result.code === "REFRESH_FAILED"
+					) {
+						setErrorMessage(
+							`Your GitHub session has expired. Please re-link your account at ${makeMainSiteLink("/dashboard/settings")}`,
+						);
+					} else {
+						setErrorMessage(result.error);
+					}
+					setStatus("error");
+					return;
+				}
+
+				setIssueUrl(result.issue.url);
+				setIssueNumber(result.issue.number);
+				setStatus("success");
+			}),
+	);
+
 	if (status === "success" && issueUrl && issueNumber && selectedRepo) {
 		return (
-			<Embed title="✅ GitHub Issue Created" color={0x238636} url={issueUrl}>
+			<Embed title="GitHub Issue Created" color={0x238636} url={issueUrl}>
 				<EmbedField name="Repository">
 					{selectedRepo.owner}/{selectedRepo.name}
 				</EmbedField>
@@ -174,7 +311,7 @@ function GitHubIssueCreator({
 	if (status === "error") {
 		return (
 			<>
-				<Embed title="❌ Failed to Create Issue" color={0xff0000}>
+				<Embed title="Failed to Create Issue" color={0xff0000}>
 					{errorMessage ?? "An unknown error occurred"}
 				</Embed>
 				<ActionRow>
@@ -184,7 +321,6 @@ function GitHubIssueCreator({
 						onClick={() => {
 							setStatus("editing");
 							setErrorMessage(null);
-							return Effect.void;
 						}}
 					/>
 					<Button
@@ -192,7 +328,6 @@ function GitHubIssueCreator({
 						style="danger"
 						onClick={() => {
 							instance.destroy();
-							return Effect.void;
 						}}
 					/>
 				</ActionRow>
@@ -200,70 +335,20 @@ function GitHubIssueCreator({
 		);
 	}
 
-	const INSTALL_MORE_REPOS_VALUE = "__install_more_repos__";
-
 	return (
 		<>
-			<Embed title="📝 New GitHub Issue" color={0x238636}>
+			<Embed title="New GitHub Issue" color={0x238636}>
 				<EmbedField name="Title">{title || "_No title_"}</EmbedField>
 				<EmbedField name="Description Preview">
 					{body.length > 200 ? `${body.slice(0, 197)}...` : body}
 				</EmbedField>
 			</Embed>
 
-			{repos.length > 0 && (
-				<Select
-					placeholder="Select a repository"
-					value={
-						selectedRepo
-							? `${selectedRepo.owner}/${selectedRepo.name}`
-							: undefined
-					}
-					onSelect={(value, interaction) => {
-						if (value === INSTALL_MORE_REPOS_VALUE) {
-							return Effect.tryPromise(() =>
-								interaction.reply({
-									content:
-										"To add more repositories, install the Answer Overflow app:",
-									components: [
-										{
-											type: 1,
-											components: [
-												{
-													type: 2,
-													style: 5,
-													label: "Install Answer Overflow",
-													url: GITHUB_APP_INSTALL_URL,
-												},
-											],
-										},
-									],
-									flags: MessageFlags.Ephemeral,
-								}),
-							);
-						}
-						const [owner, name] = value.split("/");
-						if (owner && name) {
-							setSelectedRepo({ owner, name });
-						}
-						return Effect.void;
-					}}
-				>
-					{repos.slice(0, 24).map((repo) => (
-						<Option
-							key={repo.fullName}
-							value={repo.fullName}
-							label={repo.fullName}
-						/>
-					))}
-					{!hasAllReposAccess && (
-						<Option
-							value={INSTALL_MORE_REPOS_VALUE}
-							label="➕ Install on more repos..."
-						/>
-					)}
-				</Select>
-			)}
+			<RepoSelector
+				discordUserId={discordUserId}
+				selectedRepo={selectedRepo}
+				setSelectedRepo={setSelectedRepo}
+			/>
 
 			<ActionRow>
 				<ModalButton
@@ -292,65 +377,23 @@ function GitHubIssueCreator({
 						const newBody = fields.get(GITHUB_ISSUE_BODY_INPUT);
 						if (newTitle) setTitle(newTitle);
 						if (newBody) setBody(newBody);
-						return Effect.void;
 					}}
 				/>
 				<Button
 					label={status === "creating" ? "Creating..." : "Create Issue"}
 					style="success"
 					disabled={!selectedRepo || status === "creating"}
-					onClick={() =>
-						Effect.gen(function* () {
-							if (!selectedRepo) return;
-
-							setStatus("creating");
-
-							const database = yield* Database;
-
-							const result = yield* database.private.github
-								.createGitHubIssueFromDiscord({
-									discordId: BigInt(discordUserId),
-									repoOwner: selectedRepo.owner,
-									repoName: selectedRepo.name,
-									title,
-									body,
-									discordServerId: BigInt(originalGuildId),
-									discordChannelId: BigInt(originalChannelId),
-									discordMessageId: BigInt(originalMessageId),
-									discordThreadId: originalThreadId
-										? BigInt(originalThreadId)
-										: undefined,
-								})
-								.pipe(Effect.withSpan("create_github_issue_api_call"));
-
-							if (!result.success) {
-								if (
-									result.code === "NOT_LINKED" ||
-									result.code === "REFRESH_REQUIRED" ||
-									result.code === "REFRESH_FAILED"
-								) {
-									setErrorMessage(
-										`Your GitHub session has expired. Please re-link your account at ${makeMainSiteLink("/dashboard/settings")}`,
-									);
-								} else {
-									setErrorMessage(result.error);
-								}
-								setStatus("error");
-								return;
-							}
-
-							setIssueUrl(result.issue.url);
-							setIssueNumber(result.issue.number);
-							setStatus("success");
-						})
-					}
+					onClick={() => {
+						if (selectedRepo) {
+							handleCreateIssue(selectedRepo);
+						}
+					}}
 				/>
 				<Button
 					label="Dismiss"
 					style="danger"
 					onClick={() => {
 						instance.destroy();
-						return Effect.void;
 					}}
 				/>
 			</ActionRow>
@@ -376,53 +419,6 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 
 	const database = yield* Database;
 	const reacord = yield* Reacord;
-
-	const reposResult = yield* database.private.github
-		.getAccessibleReposByDiscordId({
-			discordId: BigInt(interaction.user.id),
-		})
-		.pipe(Effect.withSpan("get_accessible_repos"));
-
-	if (!reposResult.success) {
-		const settingsUrl = makeMainSiteLink("/dashboard/settings");
-
-		if (reposResult.code === "NOT_LINKED") {
-			yield* discord.callClient(() =>
-				interaction.editReply({
-					content: `You need to link your GitHub account first.\n\n👉 [Link GitHub Account](${settingsUrl})`,
-				}),
-			);
-			return;
-		}
-
-		if (
-			reposResult.code === "REFRESH_REQUIRED" ||
-			reposResult.code === "REFRESH_FAILED"
-		) {
-			yield* discord.callClient(() =>
-				interaction.editReply({
-					content: `Your GitHub session has expired. Please re-link your account.\n\n👉 [Re-link GitHub Account](${settingsUrl})`,
-				}),
-			);
-			return;
-		}
-
-		yield* discord.callClient(() =>
-			interaction.editReply({
-				content: `Failed to fetch your GitHub repositories: ${reposResult.error}`,
-			}),
-		);
-		return;
-	}
-
-	if (reposResult.repos.length === 0) {
-		yield* discord.callClient(() =>
-			interaction.editReply({
-				content: `The Answer Overflow app is not installed on any of your repositories.\n\n👉 [Install Answer Overflow](${GITHUB_APP_INSTALL_URL})`,
-			}),
-		);
-		return;
-	}
 
 	const targetMessage = yield* discord
 		.callClient(() => interaction.channel?.messages.fetch(interaction.targetId))
@@ -466,8 +462,6 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 	yield* reacord.reply(
 		interaction,
 		<GitHubIssueCreator
-			repos={reposResult.repos}
-			hasAllReposAccess={reposResult.hasAllReposAccess}
 			initialTitle={generateIssueTitle(targetMessage)}
 			initialBody={generateIssueBody({
 				message: targetMessage,

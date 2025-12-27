@@ -25,7 +25,9 @@ class LinkNode extends Node<LinkProps> {
 		return "";
 	}
 
-	override modifyMessageOptions(options: MessageOptions): void {
+	protected override modifyMessageOptionsInternal(
+		options: MessageOptions,
+	): void {
 		getNextActionRow(options).push({
 			type: "link",
 			url: this.props.url,

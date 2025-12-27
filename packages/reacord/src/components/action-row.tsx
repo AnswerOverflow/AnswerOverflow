@@ -19,7 +19,9 @@ class ActionRowNode extends Node<ActionRowProps> {
 		return "";
 	}
 
-	override modifyMessageOptions(options: MessageOptions): void {
+	protected override modifyMessageOptionsInternal(
+		options: MessageOptions,
+	): void {
 		options.actionRows.push([]);
 		for (const child of this.children) {
 			child.modifyMessageOptions(options);

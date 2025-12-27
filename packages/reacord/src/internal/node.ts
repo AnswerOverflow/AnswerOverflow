@@ -1,27 +1,29 @@
-import type { Effect } from "effect";
 import { Container } from "./container";
 import type { ComponentInteraction } from "./interaction";
 import type { MessageOptions } from "./message";
 
-export type RunEffect = <A, E, R>(effect: Effect.Effect<A, E, R>) => Promise<A>;
-
 export abstract class Node<Props> {
 	readonly children = new Container<Node<unknown>>();
+	hidden = false;
 
 	constructor(public props: Props) {}
 
 	get text(): string {
+		if (this.hidden) return "";
 		return this.children.map((child) => child.text).join("");
 	}
 
-	modifyMessageOptions(_options: MessageOptions): void {}
+	modifyMessageOptions(options: MessageOptions): void {
+		if (this.hidden) return;
+		this.modifyMessageOptionsInternal(options);
+	}
 
-	handleComponentInteraction(
-		_interaction: ComponentInteraction,
-		_runEffect: RunEffect,
-	): boolean {
+	protected modifyMessageOptionsInternal(_options: MessageOptions): void {}
+
+	handleComponentInteraction(_interaction: ComponentInteraction): boolean {
+		if (this.hidden) return false;
 		for (const child of this.children) {
-			if (child.handleComponentInteraction(_interaction, _runEffect)) {
+			if (child.handleComponentInteraction(_interaction)) {
 				return true;
 			}
 		}

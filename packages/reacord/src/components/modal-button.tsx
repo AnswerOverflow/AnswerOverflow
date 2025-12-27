@@ -6,12 +6,11 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js";
-import { Effect } from "effect";
 import { ReacordElement } from "../internal/element";
 import type { ComponentInteraction } from "../internal/interaction";
 import type { MessageOptions } from "../internal/message";
 import { getNextActionRow } from "../internal/message";
-import { Node, type RunEffect } from "../internal/node";
+import { Node } from "../internal/node";
 
 export interface TextInputField<Id extends string = string> {
 	id: Id;
@@ -43,7 +42,7 @@ export interface ModalButtonProps<
 	onSubmit: (
 		fields: TypedFieldMap<T>,
 		interaction: ModalSubmitInteraction,
-	) => Effect.Effect<void, unknown, unknown>;
+	) => void | Promise<void>;
 }
 
 export function ModalButton<const T extends readonly TextInputField[]>(
@@ -71,7 +70,9 @@ class ModalButtonNode<T extends readonly TextInputField[]> extends Node<
 		return "";
 	}
 
-	override modifyMessageOptions(options: MessageOptions): void {
+	protected override modifyMessageOptionsInternal(
+		options: MessageOptions,
+	): void {
 		getNextActionRow(options).push({
 			type: "button",
 			customId: this.buttonCustomId,
@@ -82,15 +83,12 @@ class ModalButtonNode<T extends readonly TextInputField[]> extends Node<
 		});
 	}
 
-	override handleComponentInteraction(
-		interaction: ComponentInteraction,
-		runEffect: RunEffect,
-	) {
+	override handleComponentInteraction(interaction: ComponentInteraction) {
 		if (
 			interaction.type === "button" &&
 			interaction.customId === this.buttonCustomId
 		) {
-			runEffect(this.showModal(interaction.interaction));
+			this.showModal(interaction.interaction);
 			return true;
 		}
 
@@ -98,7 +96,7 @@ class ModalButtonNode<T extends readonly TextInputField[]> extends Node<
 			interaction.type === "modal" &&
 			interaction.customId === this.modalCustomId
 		) {
-			runEffect(
+			Promise.resolve(
 				this.props.onSubmit(
 					interaction.fields as TypedFieldMap<T>,
 					interaction.interaction,
@@ -110,45 +108,41 @@ class ModalButtonNode<T extends readonly TextInputField[]> extends Node<
 		return false;
 	}
 
-	private showModal(
-		interaction: ButtonInteraction,
-	): Effect.Effect<void, unknown> {
-		return Effect.tryPromise(() => {
-			const modal = new ModalBuilder()
-				.setCustomId(this.modalCustomId)
-				.setTitle(this.props.modalTitle);
+	private showModal(interaction: ButtonInteraction): void {
+		const modal = new ModalBuilder()
+			.setCustomId(this.modalCustomId)
+			.setTitle(this.props.modalTitle);
 
-			for (const field of this.props.fields) {
-				const textInput = new TextInputBuilder()
-					.setCustomId(field.id)
-					.setLabel(field.label)
-					.setStyle(
-						field.style === "paragraph"
-							? TextInputStyle.Paragraph
-							: TextInputStyle.Short,
-					)
-					.setRequired(field.required ?? true);
+		for (const field of this.props.fields) {
+			const textInput = new TextInputBuilder()
+				.setCustomId(field.id)
+				.setLabel(field.label)
+				.setStyle(
+					field.style === "paragraph"
+						? TextInputStyle.Paragraph
+						: TextInputStyle.Short,
+				)
+				.setRequired(field.required ?? true);
 
-				if (field.placeholder) {
-					textInput.setPlaceholder(field.placeholder);
-				}
-				if (field.defaultValue) {
-					textInput.setValue(field.defaultValue);
-				}
-				if (field.minLength !== undefined) {
-					textInput.setMinLength(field.minLength);
-				}
-				if (field.maxLength !== undefined) {
-					textInput.setMaxLength(field.maxLength);
-				}
-
-				modal.addComponents(
-					new ActionRowBuilder<TextInputBuilder>().addComponents(textInput),
-				);
+			if (field.placeholder) {
+				textInput.setPlaceholder(field.placeholder);
+			}
+			if (field.defaultValue) {
+				textInput.setValue(field.defaultValue);
+			}
+			if (field.minLength !== undefined) {
+				textInput.setMinLength(field.minLength);
+			}
+			if (field.maxLength !== undefined) {
+				textInput.setMaxLength(field.maxLength);
 			}
 
-			return interaction.showModal(modal);
-		});
+			modal.addComponents(
+				new ActionRowBuilder<TextInputBuilder>().addComponents(textInput),
+			);
+		}
+
+		interaction.showModal(modal);
 	}
 }
 

@@ -1,20 +1,17 @@
 import { randomUUID } from "node:crypto";
 import type { ButtonInteraction } from "discord.js";
-import { Effect } from "effect";
 import { ReacordElement } from "../internal/element";
 import type { ComponentInteraction } from "../internal/interaction";
 import type { MessageOptions } from "../internal/message";
 import { getNextActionRow } from "../internal/message";
-import { Node, type RunEffect } from "../internal/node";
+import { Node } from "../internal/node";
 
 export interface ButtonProps {
 	style?: "primary" | "secondary" | "success" | "danger";
 	label?: string;
 	emoji?: string;
 	disabled?: boolean;
-	onClick: (
-		interaction: ButtonInteraction,
-	) => Effect.Effect<void, unknown, unknown>;
+	onClick: (interaction: ButtonInteraction) => void | Promise<void>;
 }
 
 export function Button(props: ButtonProps) {
@@ -34,7 +31,9 @@ class ButtonNode extends Node<ButtonProps> {
 		return "";
 	}
 
-	override modifyMessageOptions(options: MessageOptions): void {
+	protected override modifyMessageOptionsInternal(
+		options: MessageOptions,
+	): void {
 		getNextActionRow(options).push({
 			type: "button",
 			customId: this.customId,
@@ -45,25 +44,12 @@ class ButtonNode extends Node<ButtonProps> {
 		});
 	}
 
-	override handleComponentInteraction(
-		interaction: ComponentInteraction,
-		runEffect: RunEffect,
-	) {
+	override handleComponentInteraction(interaction: ComponentInteraction) {
 		if (
 			interaction.type === "button" &&
 			interaction.customId === this.customId
 		) {
-			runEffect(
-				this.props.onClick(interaction.interaction).pipe(
-					Effect.withSpan("reacord.button.on_click", {
-						attributes: {
-							"reacord.button.custom_id": this.customId,
-							"reacord.button.label":
-								this.children.findType(ButtonLabelNode)?.text ?? "unknown",
-						},
-					}),
-				),
-			);
+			Promise.resolve(this.props.onClick(interaction.interaction));
 			return true;
 		}
 		return false;

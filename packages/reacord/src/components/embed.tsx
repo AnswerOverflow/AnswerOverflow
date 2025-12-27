@@ -32,7 +32,9 @@ export function Embed(props: EmbedProps) {
 }
 
 class EmbedNode extends Node<EmbedProps> {
-	override modifyMessageOptions(options: MessageOptions): void {
+	protected override modifyMessageOptionsInternal(
+		options: MessageOptions,
+	): void {
 		const embed: EmbedOptions = {
 			...snakeCaseDeep(omit(this.props ?? {}, ["children", "timestamp"])),
 			timestamp: this.props.timestamp

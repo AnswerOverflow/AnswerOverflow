@@ -10,6 +10,10 @@ let currentUpdatePriority: number = DefaultEventPriority;
 
 type HostContext = Record<string, never>;
 
+type Thenable = {
+	then: (resolve: () => void) => void;
+};
+
 const config: HostConfig<
 	string,
 	Record<string, unknown>,
@@ -25,6 +29,8 @@ const config: HostConfig<
 	number,
 	number
 > & {
+	supportsMicrotasks: boolean;
+	scheduleMicrotask: (fn: () => void) => void;
 	getCurrentUpdatePriority: () => number;
 	setCurrentUpdatePriority: (priority: number) => void;
 	resolveUpdatePriority: () => number;
@@ -32,16 +38,27 @@ const config: HostConfig<
 	preloadInstance: (type: string, props: Record<string, unknown>) => boolean;
 	startSuspendingCommit: () => void;
 	suspendInstance: (type: string, props: Record<string, unknown>) => void;
-	waitForCommitToBeReady: () => null;
+	waitForCommitToBeReady: () => Thenable | null;
 	NotPendingTransition: null;
 	HostTransitionContext: { _currentValue: null; _currentValue2: null };
 	resetFormInstance: (instance: Node<unknown>) => void;
 	shouldAttemptEagerTransition: () => boolean;
+	hideInstance: (instance: Node<unknown>) => void;
+	unhideInstance: (
+		instance: Node<unknown>,
+		props: Record<string, unknown>,
+	) => void;
+	hideTextInstance: (textInstance: TextNode) => void;
+	unhideTextInstance: (textInstance: TextNode, text: string) => void;
 } = {
 	supportsMutation: true,
 	supportsPersistence: false,
 	supportsHydration: false,
 	isPrimaryRenderer: true,
+
+	supportsMicrotasks: true,
+	scheduleMicrotask: queueMicrotask,
+
 	scheduleTimeout: (fn: () => void, delay?: number) =>
 		globalThis.setTimeout(fn, delay) as unknown as number,
 	cancelTimeout: (id: number) =>
@@ -54,7 +71,7 @@ const config: HostConfig<
 	},
 	resolveUpdatePriority: () => currentUpdatePriority || DefaultEventPriority,
 
-	maySuspendCommit: () => false,
+	maySuspendCommit: () => true,
 	preloadInstance: () => true,
 	startSuspendingCommit: () => {},
 	suspendInstance: () => {},
@@ -97,6 +114,19 @@ const config: HostConfig<
 	afterActiveInstanceBlur: () => {},
 	getInstanceFromNode: () => null,
 	getInstanceFromScope: () => null,
+
+	hideInstance: (instance) => {
+		instance.hidden = true;
+	},
+	unhideInstance: (instance) => {
+		instance.hidden = false;
+	},
+	hideTextInstance: (textInstance) => {
+		textInstance.hidden = true;
+	},
+	unhideTextInstance: (textInstance) => {
+		textInstance.hidden = false;
+	},
 
 	clearContainer: (renderer) => {
 		renderer.nodes.clear();
@@ -145,7 +175,9 @@ const config: HostConfig<
 
 	prepareForCommit: () => null,
 	resetAfterCommit: (renderer) => {
-		renderer.render();
+		queueMicrotask(() => {
+			renderer.render();
+		});
 	},
 	prepareScopeUpdate: () => {},
 
