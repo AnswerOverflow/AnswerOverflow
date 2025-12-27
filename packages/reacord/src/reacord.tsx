@@ -8,7 +8,7 @@ import type {
 	StringSelectMenuInteraction,
 	UserSelectMenuInteraction,
 } from "discord.js";
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer, Runtime } from "effect";
 import type { ReactNode } from "react";
 import type { ReacordInstance } from "./instance";
 import { InstanceProvider } from "./instance-context";
@@ -17,6 +17,14 @@ import {
 	createInteractionReplyRenderer,
 	type Renderer,
 } from "./internal/renderer";
+
+export type RunEffect = <A, E>(
+	effect: Effect.Effect<A, E, never>,
+) => Promise<A>;
+
+const defaultRunEffect: RunEffect = <A, E>(
+	effect: Effect.Effect<A, E, never>,
+) => Runtime.runPromise(Runtime.defaultRuntime)(effect);
 
 export interface ReacordConfig {
 	maxInstances?: number;
@@ -60,7 +68,7 @@ function isUserSelectMenuInteraction(
 export function makeReacord(
 	client: Client,
 	config: ReacordConfig = {},
-	runEffect: <A, E, R>(effect: Effect.Effect<A, E, R>) => Promise<A>,
+	runEffect: RunEffect = defaultRunEffect,
 ) {
 	const renderers: Renderer[] = [];
 	const maxInstances = config.maxInstances ?? 50;
@@ -222,10 +230,13 @@ export function makeReacord(
 	};
 }
 
-export function ReacordLive(
-	client: Client,
-	config: ReacordConfig = {},
-	runEffect: <A, E, R>(effect: Effect.Effect<A, E, R>) => Promise<A>,
-) {
-	return Layer.succeed(Reacord, makeReacord(client, config, runEffect));
+export function ReacordLive(client: Client, config: ReacordConfig = {}) {
+	return Layer.effect(
+		Reacord,
+		Effect.gen(function* () {
+			const runtime = yield* Effect.runtime<never>();
+			const runEffect: RunEffect = (eff) => Runtime.runPromise(runtime)(eff);
+			return makeReacord(client, config, runEffect);
+		}),
+	);
 }

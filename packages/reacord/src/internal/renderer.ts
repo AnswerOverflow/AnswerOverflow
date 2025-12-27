@@ -5,10 +5,10 @@ import {
 	ComponentType,
 	type Message,
 	type ModalSubmitInteraction,
-	type StringSelectMenuInteraction,
+	StringSelectMenuInteraction,
 	type UserSelectMenuInteraction,
 } from "discord.js";
-import { Effect } from "effect";
+import { Effect, Runtime } from "effect";
 import { Container } from "./container";
 import { DiscordApiError } from "./errors";
 import type { ComponentInteraction } from "./interaction";
@@ -18,6 +18,12 @@ import type {
 	MessageSelectOptions,
 } from "./message";
 import type { Node } from "./node";
+
+type RunEffect = <A, E>(effect: Effect.Effect<A, E, never>) => Promise<A>;
+
+const defaultRunEffect: RunEffect = <A, E>(
+	effect: Effect.Effect<A, E, never>,
+) => Runtime.runPromise(Runtime.defaultRuntime)(effect);
 
 let rendererId = 0;
 
@@ -63,14 +69,14 @@ type RendererOptions =
 	| {
 			type: "interaction";
 			interaction: CommandInteraction;
-			runEffect: <A, E, R>(effect: Effect.Effect<A, E, R>) => Promise<A>;
+			runEffect?: RunEffect;
 	  }
 	| {
 			type: "message";
 			createMessage: (
 				options: DiscordMessageOptions,
 			) => Effect.Effect<Message, DiscordApiError>;
-			runEffect: <A, E, R>(effect: Effect.Effect<A, E, R>) => Promise<A>;
+			runEffect?: RunEffect;
 	  };
 
 export class Renderer {
@@ -222,8 +228,8 @@ export class Renderer {
 		this.processQueue();
 	}
 
-	private get runEffect() {
-		return this.options.runEffect;
+	private get runEffect(): RunEffect {
+		return this.options.runEffect ?? defaultRunEffect;
 	}
 
 	private processQueue() {
@@ -584,7 +590,7 @@ export class Renderer {
 
 export function createInteractionReplyRenderer(
 	interaction: CommandInteraction,
-	runEffect: <A, E, R>(effect: Effect.Effect<A, E, R>) => Promise<A>,
+	runEffect?: RunEffect,
 ) {
 	return new Renderer({
 		type: "interaction",

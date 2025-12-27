@@ -64,4 +64,5 @@ export {
 	Reacord,
 	type ReacordConfig,
 	ReacordLive,
+	type RunEffect,
 } from "./reacord";
