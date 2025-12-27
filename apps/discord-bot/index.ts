@@ -7,7 +7,9 @@ import { createSentryEffectLayer } from "@packages/observability/sentry-effect";
 import { Effect, Layer, Logger, LogLevel } from "effect";
 
 import { BotLayers, program } from "./src/bot";
-import { DiscordLayer } from "./src/core/discord-service";
+import { DiscordClientLayer } from "./src/core/discord-client-service";
+import { DiscordLayerInternal } from "./src/core/discord-service";
+import { ReacordLayer } from "./src/core/reacord-layer";
 
 const SentryLayer = process.env.SENTRY_DSN
 	? createSentryEffectLayer({
@@ -35,8 +37,13 @@ const AxiomLayer = process.env.AXIOM_API_TOKEN
 
 const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
 
+const DiscordWithReacord = Layer.mergeAll(
+	DiscordLayerInternal,
+	ReacordLayer,
+).pipe(Layer.provide(DiscordClientLayer));
+
 const BaseLayer = Layer.mergeAll(
-	DiscordLayer,
+	DiscordWithReacord,
 	S3StorageLayer,
 	PostHogCaptureClientLayer,
 	SentryLayer,

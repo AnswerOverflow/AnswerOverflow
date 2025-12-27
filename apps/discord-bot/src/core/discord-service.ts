@@ -363,6 +363,8 @@ export class Discord extends Context.Tag("Discord")<
 	Effect.Effect.Success<typeof createDiscordService>
 >() {}
 
-export const DiscordLayer = Layer.effect(Discord, createDiscordService).pipe(
+export const DiscordLayerInternal = Layer.effect(Discord, createDiscordService);
+
+export const DiscordLayer = DiscordLayerInternal.pipe(
 	Layer.provide(DiscordClientLayer),
 );

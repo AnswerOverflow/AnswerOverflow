@@ -1,7 +1,7 @@
 import { Console, Effect, Layer } from "effect";
 import { BugReportCommandHandlerLayer } from "./commands/bug-report";
 import { ChannelSettingsCommandHandlerLayer } from "./commands/channel-settings";
-import { ConvertToGitHubIssueCommandHandlerLayer } from "./commands/convert-to-github-issue";
+import { ConvertToGitHubIssueReacordLayer } from "./commands/convert-to-github-issue-reacord";
 import { DebugCommandHandlerLayer } from "./commands/debug";
 import { FeedbackCommandHandlerLayer } from "./commands/feedback";
 import { IndexCommandHandlerLayer } from "./commands/index-command";
@@ -57,7 +57,7 @@ export const BotLayers = Layer.mergeAll(
 	FeedbackCommandHandlerLayer,
 	BugReportCommandHandlerLayer,
 	BotIdentitySyncHandlerLayer,
-	ConvertToGitHubIssueCommandHandlerLayer,
+	ConvertToGitHubIssueReacordLayer,
 );
 
 export const program = Effect.gen(function* () {
