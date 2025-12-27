@@ -237,26 +237,24 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 												</CommandGroup>
 											</CommandList>
 										</Command>
-										{!hasAllReposAccess && (
-											<div className="border-t p-2">
-												<Button
-													variant="ghost"
-													size="sm"
-													className="w-full justify-start"
-													asChild
+										<div className="border-t p-2">
+											<Button
+												variant="ghost"
+												size="sm"
+												className="w-full justify-start"
+												asChild
+											>
+												<a
+													href={GITHUB_APP_INSTALL_URL}
+													target="_blank"
+													rel="noopener noreferrer"
 												>
-													<a
-														href={GITHUB_APP_INSTALL_URL}
-														target="_blank"
-														rel="noopener noreferrer"
-													>
-														<Plus className="h-4 w-4 mr-2" />
-														Install on more repositories
-														<ExternalLink className="h-3 w-3 ml-2" />
-													</a>
-												</Button>
-											</div>
-										)}
+													<Plus className="h-4 w-4 mr-2" />
+													Install on more repositories
+													<ExternalLink className="h-3 w-3 ml-2" />
+												</a>
+											</Button>
+										</div>
 									</PopoverContent>
 								</Popover>
 							)}

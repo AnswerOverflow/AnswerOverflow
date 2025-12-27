@@ -4,7 +4,7 @@ import type { Message } from "discord.js";
 import { Data } from "effect";
 
 export const GITHUB_APP_INSTALL_URL =
-	process.env.GITHUB_APP_INSTALL_URL ??
+	process.env.NEXT_PUBLIC_GITHUB_APP_INSTALL_URL ??
 	"https://github.com/apps/answer-overflow/installations/new";
 
 export const INSTALL_MORE_REPOS_VALUE = "__install_more_repos__";
