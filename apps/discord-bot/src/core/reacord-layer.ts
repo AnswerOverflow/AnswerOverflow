@@ -1,17 +1,16 @@
 import { type Reacord, ReacordLive } from "@packages/reacord";
 import type { Client } from "discord.js";
-import { Effect, Layer, type ManagedRuntime } from "effect";
+import { Effect, Layer, Runtime } from "effect";
 import { DiscordClient } from "./discord-client-service";
 
-export const createReacordLayer = (
-	runtime: ManagedRuntime.ManagedRuntime<never, never>,
-): Layer.Layer<Reacord, never, DiscordClient> =>
+export const ReacordLayer: Layer.Layer<Reacord, never, DiscordClient> =
 	Layer.unwrapEffect(
 		Effect.gen(function* () {
 			const client = yield* DiscordClient;
+			const runtime = yield* Effect.runtime<never>();
 
 			const runEffect = <A, E, R>(effect: Effect.Effect<A, E, R>) => {
-				return runtime.runPromise(
+				return Runtime.runPromise(runtime)(
 					effect as unknown as Effect.Effect<A, never, never>,
 				);
 			};
@@ -22,13 +21,17 @@ export const createReacordLayer = (
 
 export const createReacordLayerFromClient = (
 	client: Client,
-	runtime: ManagedRuntime.ManagedRuntime<never, never>,
-): Layer.Layer<Reacord> => {
-	const runEffect = <A, E, R>(effect: Effect.Effect<A, E, R>) => {
-		return runtime.runPromise(
-			effect as unknown as Effect.Effect<A, never, never>,
-		);
-	};
+): Layer.Layer<Reacord> =>
+	Layer.unwrapEffect(
+		Effect.gen(function* () {
+			const runtime = yield* Effect.runtime<never>();
 
-	return ReacordLive(client, {}, runEffect);
-};
+			const runEffect = <A, E, R>(effect: Effect.Effect<A, E, R>) => {
+				return Runtime.runPromise(runtime)(
+					effect as unknown as Effect.Effect<A, never, never>,
+				);
+			};
+
+			return ReacordLive(client, {}, runEffect);
+		}),
+	);

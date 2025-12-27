@@ -9,8 +9,9 @@ import { Effect, Layer, Logger, LogLevel, ManagedRuntime } from "effect";
 import { BotLayers } from "../bot";
 import { DiscordClientLayer } from "./discord-client-service";
 import { DiscordLayerInternal } from "./discord-service";
-import { createReacordLayer } from "./reacord-layer";
+import { ReacordLayer } from "./reacord-layer";
 
+// todo: theres probably a better way to do this
 const SentryLayer = process.env.SENTRY_DSN
 	? createSentryEffectLayer({
 			dsn: process.env.SENTRY_DSN,
@@ -64,32 +65,27 @@ export const atomRuntime = Atom.context({ memoMap: sharedMemoMap })(
 	PlatformLayer,
 );
 
-const platformRuntime = ManagedRuntime.make(PlatformLayer, sharedMemoMap);
-
 export const createAppLayer = (
 	storageLayer: Layer.Layer<Storage, never, Database>,
 ) => {
-	const DiscordWithClient = DiscordLayerInternal.pipe(
-		Layer.provide(DiscordClientLayer),
+	const StorageWithDatabase = storageLayer.pipe(
+		Layer.provide(DatabaseHttpLayer),
 	);
 
-	const ReacordWithDiscord = createReacordLayer(platformRuntime).pipe(
-		Layer.provide(DiscordClientLayer),
-	);
-
-	const StorageWithDatabase = storageLayer.pipe(Layer.provide(PlatformLayer));
+	const DiscordLayers = Layer.mergeAll(
+		DiscordClientLayer,
+		DiscordLayerInternal,
+		ReacordLayer,
+	).pipe(Layer.provide(DiscordClientLayer));
 
 	const InfraLayer = Layer.mergeAll(
 		PlatformLayer,
-		DiscordWithClient,
-		ReacordWithDiscord,
+		DiscordLayers,
 		StorageWithDatabase,
 		PostHogCaptureClientLayer,
 	);
 
-	const AppLayer = BotLayers.pipe(Layer.provide(InfraLayer));
-
-	return Layer.merge(AppLayer, InfraLayer);
+	return BotLayers.pipe(Layer.provideMerge(InfraLayer));
 };
 
 export const runMain = <A, E, R, EL>(
@@ -99,8 +95,26 @@ export const runMain = <A, E, R, EL>(
 	const runtime = ManagedRuntime.make(appLayer, sharedMemoMap);
 
 	const controller = new AbortController();
-	process.on("SIGINT", () => controller.abort());
-	process.on("SIGTERM", () => controller.abort());
+
+	const shutdown = async () => {
+		console.log("Shutting down gracefully...");
+		try {
+			await runtime.dispose();
+			console.log("Runtime disposed successfully");
+		} catch (error) {
+			console.error("Error during runtime disposal:", error);
+		}
+		process.exit(0);
+	};
+
+	process.on("SIGINT", () => {
+		controller.abort();
+		shutdown();
+	});
+	process.on("SIGTERM", () => {
+		controller.abort();
+		shutdown();
+	});
 
 	return runtime
 		.runPromise(effect, { signal: controller.signal })

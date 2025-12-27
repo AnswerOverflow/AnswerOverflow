@@ -1,3 +1,12 @@
+import type { Context } from "elysia";
+
+export async function handleGitHubWebhook(_c: Context) {
+	return Response.json(
+		{ error: "GitHub webhook handler not yet implemented" },
+		{ status: 200 },
+	);
+}
+
 // This file has been commented out as per PR review comment.
 // Will be replaced with a typesafe client to call into the Discord bot.
 // Keeping the code for reference during the migration.
