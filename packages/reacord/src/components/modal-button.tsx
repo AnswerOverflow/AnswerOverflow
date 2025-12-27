@@ -1,10 +1,19 @@
 import { randomUUID } from "node:crypto";
-import type { ButtonInteraction, ModalSubmitInteraction } from "discord.js";
+import type {
+	Attachment,
+	ButtonInteraction,
+	ModalSubmitInteraction,
+} from "discord.js";
 import {
-	ActionRowBuilder,
+	FileUploadBuilder,
+	LabelBuilder,
 	ModalBuilder,
+	StringSelectMenuBuilder,
+	StringSelectMenuOptionBuilder,
+	TextDisplayBuilder,
 	TextInputBuilder,
 	TextInputStyle,
+	UserSelectMenuBuilder,
 } from "discord.js";
 import { ReacordElement } from "../internal/element";
 import type { ComponentInteraction } from "../internal/interaction";
@@ -12,9 +21,11 @@ import type { MessageOptions } from "../internal/message";
 import { getNextActionRow } from "../internal/message";
 import { Node } from "../internal/node";
 
-export interface TextInputField<Id extends string = string> {
-	id: Id;
+export interface TextInputField {
+	type: "textInput";
+	id: string;
 	label: string;
+	description?: string;
 	style?: "short" | "paragraph";
 	placeholder?: string;
 	defaultValue?: string;
@@ -23,31 +34,81 @@ export interface TextInputField<Id extends string = string> {
 	maxLength?: number;
 }
 
-type ExtractFieldIds<T extends readonly TextInputField[]> = T[number]["id"];
+export interface StringSelectOption {
+	label: string;
+	value: string;
+	description?: string;
+	emoji?: string;
+	default?: boolean;
+}
 
-type TypedFieldMap<T extends readonly TextInputField[]> = {
-	get<K extends ExtractFieldIds<T>>(key: K): string | undefined;
-	get(key: string): string | undefined;
-} & Map<ExtractFieldIds<T>, string>;
+export interface StringSelectField {
+	type: "stringSelect";
+	id: string;
+	label: string;
+	description?: string;
+	placeholder?: string;
+	options: StringSelectOption[];
+	required?: boolean;
+	minValues?: number;
+	maxValues?: number;
+}
 
-export interface ModalButtonProps<
-	T extends readonly TextInputField[] = readonly TextInputField[],
-> {
+export interface UserSelectField {
+	type: "userSelect";
+	id: string;
+	label: string;
+	description?: string;
+	placeholder?: string;
+	required?: boolean;
+	minValues?: number;
+	maxValues?: number;
+	defaultUserIds?: string[];
+}
+
+export interface FileUploadField {
+	type: "fileUpload";
+	id: string;
+	label: string;
+	description?: string;
+	required?: boolean;
+	minValues?: number;
+	maxValues?: number;
+}
+
+export interface TextDisplayField {
+	type: "textDisplay";
+	content: string;
+}
+
+export type ModalField =
+	| TextInputField
+	| StringSelectField
+	| UserSelectField
+	| FileUploadField
+	| TextDisplayField;
+
+export interface ModalFieldValues {
+	getTextInput(id: string): string | undefined;
+	getStringSelect(id: string): readonly string[] | undefined;
+	getUserSelect(id: string): readonly string[] | undefined;
+	getFileUpload(id: string): Attachment[] | undefined;
+}
+
+export interface ModalButtonProps {
 	style?: "primary" | "secondary" | "success" | "danger";
 	label?: string;
 	emoji?: string;
 	disabled?: boolean;
 	modalTitle: string;
-	fields: T;
+	fields: ModalField[];
 	onSubmit: (
-		fields: TypedFieldMap<T>,
+		values: ModalFieldValues,
 		interaction: ModalSubmitInteraction,
 	) => void | Promise<void>;
 }
 
-export function ModalButton<const T extends readonly TextInputField[]>(
-	props: ModalButtonProps<T>,
-) {
+export function ModalButton(props: ModalButtonProps) {
 	return (
 		<ReacordElement props={props} createNode={(p) => new ModalButtonNode(p)}>
 			<ReacordElement
@@ -60,9 +121,7 @@ export function ModalButton<const T extends readonly TextInputField[]>(
 	);
 }
 
-class ModalButtonNode<T extends readonly TextInputField[]> extends Node<
-	ModalButtonProps<T>
-> {
+class ModalButtonNode extends Node<ModalButtonProps> {
 	private buttonCustomId = randomUUID();
 	private modalCustomId = randomUUID();
 
@@ -96,16 +155,47 @@ class ModalButtonNode<T extends readonly TextInputField[]> extends Node<
 			interaction.type === "modal" &&
 			interaction.customId === this.modalCustomId
 		) {
-			Promise.resolve(
-				this.props.onSubmit(
-					interaction.fields as TypedFieldMap<T>,
-					interaction.interaction,
-				),
-			);
+			const values = this.extractModalValues(interaction.interaction);
+			Promise.resolve(this.props.onSubmit(values, interaction.interaction));
 			return true;
 		}
 
 		return false;
+	}
+
+	private extractModalValues(
+		interaction: ModalSubmitInteraction,
+	): ModalFieldValues {
+		return {
+			getTextInput: (id: string) => {
+				try {
+					return interaction.fields.getTextInputValue(id);
+				} catch {
+					return undefined;
+				}
+			},
+			getStringSelect: (id: string) => {
+				const field = interaction.fields.fields.get(id);
+				if (field && "values" in field) {
+					return field.values;
+				}
+				return undefined;
+			},
+			getUserSelect: (id: string) => {
+				const field = interaction.fields.fields.get(id);
+				if (field && "values" in field) {
+					return field.values;
+				}
+				return undefined;
+			},
+			getFileUpload: (id: string) => {
+				const field = interaction.fields.fields.get(id);
+				if (field && "attachments" in field) {
+					return [...field.attachments.values()];
+				}
+				return undefined;
+			},
+		};
 	}
 
 	private showModal(interaction: ButtonInteraction): void {
@@ -114,32 +204,145 @@ class ModalButtonNode<T extends readonly TextInputField[]> extends Node<
 			.setTitle(this.props.modalTitle);
 
 		for (const field of this.props.fields) {
-			const textInput = new TextInputBuilder()
-				.setCustomId(field.id)
-				.setLabel(field.label)
-				.setStyle(
-					field.style === "paragraph"
-						? TextInputStyle.Paragraph
-						: TextInputStyle.Short,
-				)
-				.setRequired(field.required ?? true);
-
-			if (field.placeholder) {
-				textInput.setPlaceholder(field.placeholder);
-			}
-			if (field.defaultValue) {
-				textInput.setValue(field.defaultValue);
-			}
-			if (field.minLength !== undefined) {
-				textInput.setMinLength(field.minLength);
-			}
-			if (field.maxLength !== undefined) {
-				textInput.setMaxLength(field.maxLength);
+			if (field.type === "textDisplay") {
+				modal.addTextDisplayComponents(
+					new TextDisplayBuilder().setContent(field.content),
+				);
+				continue;
 			}
 
-			modal.addComponents(
-				new ActionRowBuilder<TextInputBuilder>().addComponents(textInput),
-			);
+			if (field.type === "textInput") {
+				const textInput = new TextInputBuilder()
+					.setCustomId(field.id)
+					.setStyle(
+						field.style === "paragraph"
+							? TextInputStyle.Paragraph
+							: TextInputStyle.Short,
+					)
+					.setRequired(field.required ?? true);
+
+				if (field.placeholder) {
+					textInput.setPlaceholder(field.placeholder);
+				}
+				if (field.defaultValue) {
+					textInput.setValue(field.defaultValue);
+				}
+				if (field.minLength !== undefined) {
+					textInput.setMinLength(field.minLength);
+				}
+				if (field.maxLength !== undefined) {
+					textInput.setMaxLength(field.maxLength);
+				}
+
+				const label = new LabelBuilder()
+					.setLabel(field.label)
+					.setTextInputComponent(textInput);
+
+				if (field.description) {
+					label.setDescription(field.description);
+				}
+
+				modal.addLabelComponents(label);
+				continue;
+			}
+
+			if (field.type === "stringSelect") {
+				const select = new StringSelectMenuBuilder()
+					.setCustomId(field.id)
+					.setRequired(field.required ?? false);
+
+				if (field.placeholder) {
+					select.setPlaceholder(field.placeholder);
+				}
+				if (field.minValues !== undefined) {
+					select.setMinValues(field.minValues);
+				}
+				if (field.maxValues !== undefined) {
+					select.setMaxValues(field.maxValues);
+				}
+
+				for (const option of field.options) {
+					const optionBuilder = new StringSelectMenuOptionBuilder()
+						.setLabel(option.label)
+						.setValue(option.value);
+
+					if (option.description) {
+						optionBuilder.setDescription(option.description);
+					}
+					if (option.emoji) {
+						optionBuilder.setEmoji({ name: option.emoji });
+					}
+					if (option.default) {
+						optionBuilder.setDefault(true);
+					}
+
+					select.addOptions(optionBuilder);
+				}
+
+				const label = new LabelBuilder()
+					.setLabel(field.label)
+					.setStringSelectMenuComponent(select);
+
+				if (field.description) {
+					label.setDescription(field.description);
+				}
+
+				modal.addLabelComponents(label);
+				continue;
+			}
+
+			if (field.type === "userSelect") {
+				const userSelect = new UserSelectMenuBuilder()
+					.setCustomId(field.id)
+					.setRequired(field.required ?? false);
+
+				if (field.placeholder) {
+					userSelect.setPlaceholder(field.placeholder);
+				}
+				if (field.minValues !== undefined) {
+					userSelect.setMinValues(field.minValues);
+				}
+				if (field.maxValues !== undefined) {
+					userSelect.setMaxValues(field.maxValues);
+				}
+				if (field.defaultUserIds && field.defaultUserIds.length > 0) {
+					userSelect.setDefaultUsers(field.defaultUserIds);
+				}
+
+				const label = new LabelBuilder()
+					.setLabel(field.label)
+					.setUserSelectMenuComponent(userSelect);
+
+				if (field.description) {
+					label.setDescription(field.description);
+				}
+
+				modal.addLabelComponents(label);
+				continue;
+			}
+
+			if (field.type === "fileUpload") {
+				const fileUpload = new FileUploadBuilder()
+					.setCustomId(field.id)
+					.setRequired(field.required ?? false);
+
+				if (field.minValues !== undefined) {
+					fileUpload.setMinValues(field.minValues);
+				}
+				if (field.maxValues !== undefined) {
+					fileUpload.setMaxValues(field.maxValues);
+				}
+
+				const label = new LabelBuilder()
+					.setLabel(field.label)
+					.setFileUploadComponent(fileUpload);
+
+				if (field.description) {
+					label.setDescription(field.description);
+				}
+
+				modal.addLabelComponents(label);
+			}
 		}
 
 		interaction.showModal(modal);

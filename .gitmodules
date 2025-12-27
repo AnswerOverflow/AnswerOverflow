@@ -22,3 +22,6 @@
 [submodule ".context/tweakcn"]
 	path = .context/tweakcn
 	url = https://github.com/jnsahaj/tweakcn.git
+[submodule ".context/effect-atom"]
+	path = .context/effect-atom
+	url = https://github.com/tim-smart/effect-atom.git

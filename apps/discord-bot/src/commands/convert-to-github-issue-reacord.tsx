@@ -12,13 +12,14 @@ import {
 	Result,
 	Select,
 	useAtomSet,
+	useAtomSuspense,
 	useAtomValue,
 	useInstance,
 } from "@packages/reacord";
 import type { ContextMenuCommandInteraction, Message } from "discord.js";
 import { MessageFlags } from "discord.js";
 import { Data, Duration, Effect, Layer, Metric } from "effect";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Discord } from "../core/discord-service";
 import { commandExecuted } from "../metrics";
 import {
@@ -158,15 +159,7 @@ function RepoSelector({
 	selectedRepo,
 	setSelectedRepo,
 }: RepoSelectorProps) {
-	const state = useAtomValue(reposAtomFamily(discordUserId));
-
-	if (Result.isInitial(state) || state.waiting) {
-		return <LoadingSelect placeholder="Loading repositories..." />;
-	}
-
-	if (Result.isFailure(state)) {
-		return null;
-	}
+	const state = useAtomSuspense(reposAtomFamily(discordUserId));
 
 	const { repos, hasAllReposAccess } = state.value;
 
@@ -245,10 +238,6 @@ type CreateIssueInput = {
 	originalMessageId: string;
 	originalThreadId?: string;
 };
-
-type CreateIssueResult =
-	| { status: "success"; issueUrl: string; issueNumber: number }
-	| { status: "error"; errorMessage: string };
 
 const createIssueAtom = databaseRuntime.fn<CreateIssueInput>()(
 	(input: CreateIssueInput) =>
@@ -397,11 +386,15 @@ function GitHubIssueCreator({
 				</EmbedField>
 			</Embed>
 
-			<RepoSelector
-				discordUserId={discordUserId}
-				selectedRepo={selectedRepo}
-				setSelectedRepo={setSelectedRepo}
-			/>
+			<Suspense
+				fallback={<LoadingSelect placeholder="Loading repositories..." />}
+			>
+				<RepoSelector
+					discordUserId={discordUserId}
+					selectedRepo={selectedRepo}
+					setSelectedRepo={setSelectedRepo}
+				/>
+			</Suspense>
 
 			<ActionRow>
 				<ModalButton
@@ -409,6 +402,7 @@ function GitHubIssueCreator({
 					modalTitle="Edit GitHub Issue"
 					fields={[
 						{
+							type: "textInput",
 							id: GITHUB_ISSUE_TITLE_INPUT,
 							label: "Issue Title",
 							style: "short",
@@ -417,6 +411,7 @@ function GitHubIssueCreator({
 							required: true,
 						},
 						{
+							type: "textInput",
 							id: GITHUB_ISSUE_BODY_INPUT,
 							label: "Issue Body",
 							style: "paragraph",
@@ -425,9 +420,9 @@ function GitHubIssueCreator({
 							required: true,
 						},
 					]}
-					onSubmit={(fields) => {
-						const newTitle = fields.get(GITHUB_ISSUE_TITLE_INPUT);
-						const newBody = fields.get(GITHUB_ISSUE_BODY_INPUT);
+					onSubmit={(values) => {
+						const newTitle = values.getTextInput(GITHUB_ISSUE_TITLE_INPUT);
+						const newBody = values.getTextInput(GITHUB_ISSUE_BODY_INPUT);
 						if (newTitle) setTitle(newTitle);
 						if (newBody) setBody(newBody);
 					}}

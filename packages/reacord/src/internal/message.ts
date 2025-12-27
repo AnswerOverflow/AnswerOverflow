@@ -9,6 +9,12 @@ export interface MessageOptions {
 	content: string;
 	embeds: EmbedOptions[];
 	actionRows: ActionRowOptions[];
+	files?: MessageFileOptions[];
+}
+
+export interface MessageFileOptions {
+	url: string;
+	spoiler?: boolean;
 }
 
 export interface EmbedOptions {
@@ -29,7 +35,8 @@ export type ActionRowOptions = ActionRowItemOptions[];
 export type ActionRowItemOptions =
 	| MessageButtonOptions
 	| MessageLinkOptions
-	| MessageSelectOptions;
+	| MessageSelectOptions
+	| MessageUserSelectOptions;
 
 export interface MessageButtonOptions {
 	type: "button";
@@ -62,6 +69,16 @@ export interface MessageSelectOptions {
 		emoji?: string;
 	}>;
 	values?: string[];
+}
+
+export interface MessageUserSelectOptions {
+	type: "userSelect";
+	customId: string;
+	placeholder?: string;
+	disabled?: boolean;
+	minValues?: number;
+	maxValues?: number;
+	defaultUserIds?: string[];
 }
 
 export function getNextActionRow(options: MessageOptions): ActionRowOptions {

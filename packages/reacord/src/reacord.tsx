@@ -6,10 +6,10 @@ import type {
 	Interaction,
 	ModalSubmitInteraction,
 	StringSelectMenuInteraction,
+	UserSelectMenuInteraction,
 } from "discord.js";
 import { Context, Effect, Layer } from "effect";
 import type { ReactNode } from "react";
-import { EffectRuntimeProvider } from "./effect-context";
 import type { ReacordInstance } from "./instance";
 import { InstanceProvider } from "./instance-context";
 import { reconciler } from "./internal/reconciler";
@@ -51,6 +51,12 @@ function isModalSubmitInteraction(
 	return interaction.isModalSubmit();
 }
 
+function isUserSelectMenuInteraction(
+	interaction: Interaction,
+): interaction is UserSelectMenuInteraction {
+	return interaction.isUserSelectMenu();
+}
+
 export function makeReacord(
 	client: Client,
 	config: ReacordConfig = {},
@@ -85,6 +91,19 @@ export function makeReacord(
 					}),
 				),
 			);
+		} else if (isUserSelectMenuInteraction(interaction)) {
+			runEffect(
+				handleComponentInteraction(interaction).pipe(
+					Effect.withSpan("reacord.handle_user_select_interaction", {
+						attributes: {
+							"reacord.interaction_type": "userSelect",
+							"reacord.custom_id": interaction.customId,
+							"reacord.selected_user_ids": interaction.values.join(","),
+							"reacord.renderer_count": renderers.length,
+						},
+					}),
+				),
+			);
 		} else if (isModalSubmitInteraction(interaction)) {
 			runEffect(
 				handleModalInteraction(interaction).pipe(
@@ -103,7 +122,10 @@ export function makeReacord(
 	client.on("interactionCreate", onInteractionCreate);
 
 	function handleComponentInteraction(
-		interaction: ButtonInteraction | StringSelectMenuInteraction,
+		interaction:
+			| ButtonInteraction
+			| StringSelectMenuInteraction
+			| UserSelectMenuInteraction,
 	): Effect.Effect<void> {
 		return Effect.sync(() => {
 			for (const renderer of renderers) {
@@ -151,9 +173,7 @@ export function makeReacord(
 			render: (content: ReactNode) => {
 				reconciler.updateContainer(
 					<RegistryProvider>
-						<EffectRuntimeProvider runEffect={runEffect}>
-							<InstanceProvider value={instance}>{content}</InstanceProvider>
-						</EffectRuntimeProvider>
+						<InstanceProvider value={instance}>{content}</InstanceProvider>
 					</RegistryProvider>,
 					container,
 				);

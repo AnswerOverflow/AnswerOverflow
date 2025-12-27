@@ -46,3 +46,20 @@ We include the Convex JS client library repository as a git submodule under `.co
 - **Updating the submodule**:
   - `git submodule update --remote .context/convex-js`
   - Or navigate to `.context/convex-js` and pull changes: `cd .context/convex-js && git pull`
+
+## Effect Atom
+
+We include the Effect Atom repository as a git submodule under `.context/effect-atom/`.
+
+- **Context**: This is the reactive state management library for Effect. Use it for state management in React components that need to run Effects with service dependencies.
+- **Key patterns**:
+  - `Atom.runtime(Layer)` - Create a runtime with service layer for atoms that need service access
+  - `Atom.family((param) => atom)` - Create parameterized atoms
+  - `runtime.atom(Effect)` - Create an atom that runs an Effect with the runtime's services
+  - `runtime.fn<Input>()(fn)` - Create a function atom for triggering Effects
+  - `useAtomValue(atom)` - Read atom value in React
+  - `useAtomSet(atom)` - Get setter for writable/function atoms
+  - `Result.isInitial/isSuccess/isFailure` - Check atom result state
+- **Updating the submodule**:
+  - `git submodule update --remote .context/effect-atom`
+  - Or navigate to `.context/effect-atom` and pull changes: `cd .context/effect-atom && git pull`

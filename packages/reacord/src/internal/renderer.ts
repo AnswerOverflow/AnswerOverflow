@@ -6,6 +6,7 @@ import {
 	type Message,
 	type ModalSubmitInteraction,
 	type StringSelectMenuInteraction,
+	type UserSelectMenuInteraction,
 } from "discord.js";
 import { Effect } from "effect";
 import { Container } from "./container";
@@ -28,7 +29,10 @@ type DiscordMessageOptions = {
 	components?: Array<{
 		type: ComponentType.ActionRow;
 		components: Array<{
-			type: ComponentType.Button | ComponentType.StringSelect;
+			type:
+				| ComponentType.Button
+				| ComponentType.StringSelect
+				| ComponentType.UserSelect;
 			customId?: string;
 			url?: string;
 			label?: string;
@@ -45,7 +49,13 @@ type DiscordMessageOptions = {
 				emoji?: string;
 				default?: boolean;
 			}>;
+			defaultValues?: Array<{ id: string; type: "user" }>;
 		}>;
+	}>;
+	files?: Array<{
+		attachment: string;
+		name?: string;
+		spoiler?: boolean;
 	}>;
 };
 
@@ -71,6 +81,8 @@ export class Renderer {
 	private updateQueue: Array<() => Effect.Effect<void, DiscordApiError>> = [];
 	private processing = false;
 	private readonly id = ++rendererId;
+	private pendingRender = false;
+	private lastMessageOptionsHash: string | null = null;
 
 	constructor(private readonly options: RendererOptions) {}
 
@@ -79,7 +91,34 @@ export class Renderer {
 			return;
 		}
 
-		this.enqueue(() => this.doUpdate());
+		if (this.pendingRender) {
+			return;
+		}
+		this.pendingRender = true;
+		this.enqueue(() => {
+			this.pendingRender = false;
+			return this.doUpdateIfChanged();
+		});
+	}
+
+	private doUpdateIfChanged(): Effect.Effect<void, DiscordApiError> {
+		const options = this.getMessageOptions();
+		const hash = this.hashMessageOptions(options);
+
+		if (hash === this.lastMessageOptionsHash && !this.componentInteraction) {
+			return Effect.void;
+		}
+
+		this.lastMessageOptionsHash = hash;
+		return this.doUpdate();
+	}
+
+	private hashMessageOptions(options: MessageOptions): string {
+		return JSON.stringify({
+			content: options.content,
+			embeds: options.embeds,
+			actionRows: options.actionRows,
+		});
 	}
 
 	deactivate() {
@@ -93,7 +132,10 @@ export class Renderer {
 	}
 
 	handleComponentInteraction(
-		interaction: ButtonInteraction | StringSelectMenuInteraction,
+		interaction:
+			| ButtonInteraction
+			| StringSelectMenuInteraction
+			| UserSelectMenuInteraction,
 	): boolean {
 		const reacordInteraction = this.toReacordInteraction(interaction);
 
@@ -147,12 +189,23 @@ export class Renderer {
 	}
 
 	private toReacordInteraction(
-		interaction: ButtonInteraction | StringSelectMenuInteraction,
+		interaction:
+			| ButtonInteraction
+			| StringSelectMenuInteraction
+			| UserSelectMenuInteraction,
 	): ComponentInteraction {
 		if (interaction.isButton()) {
 			return {
 				type: "button",
 				customId: interaction.customId,
+				interaction,
+			};
+		}
+		if (interaction.isUserSelectMenu()) {
+			return {
+				type: "userSelect",
+				customId: interaction.customId,
+				userIds: interaction.values,
 				interaction,
 			};
 		}
@@ -244,6 +297,21 @@ export class Renderer {
 						};
 					}
 
+					if (component.type === "userSelect") {
+						return {
+							type: ComponentType.UserSelect,
+							customId: component.customId,
+							placeholder: component.placeholder,
+							disabled: component.disabled,
+							minValues: component.minValues,
+							maxValues: component.maxValues,
+							defaultValues: component.defaultUserIds?.map((id) => ({
+								id,
+								type: "user" as const,
+							})),
+						};
+					}
+
 					return {
 						type: ComponentType.StringSelect,
 						customId: component.customId,
@@ -257,6 +325,10 @@ export class Renderer {
 						})),
 					};
 				}),
+			})),
+			files: options.files?.map((file) => ({
+				attachment: file.url,
+				spoiler: file.spoiler,
 			})),
 		};
 	}
@@ -459,7 +531,10 @@ export class Renderer {
 	}
 
 	private doDeferUpdate(
-		interaction: ButtonInteraction | StringSelectMenuInteraction,
+		interaction:
+			| ButtonInteraction
+			| StringSelectMenuInteraction
+			| UserSelectMenuInteraction,
 	): Effect.Effect<void, DiscordApiError> {
 		return Effect.gen(function* () {
 			yield* Effect.annotateCurrentSpan({
