@@ -44,6 +44,7 @@
         "@effect/vitest": "catalog:",
         "@packages/typescript-config": "workspace:*",
         "@types/bun": "latest",
+        "@types/react": "catalog:",
         "vitest": "catalog:",
       },
     },
