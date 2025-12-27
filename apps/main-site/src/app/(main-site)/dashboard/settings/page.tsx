@@ -90,7 +90,6 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 			if (result.success) {
 				return {
 					repos: result.repos,
-					hasAllReposAccess: result.hasAllReposAccess,
 				};
 			} else {
 				throw new Error(result.error);
@@ -100,7 +99,6 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 	});
 
 	const repos = reposData?.repos ?? [];
-	const hasAllReposAccess = reposData?.hasAllReposAccess ?? false;
 
 	const handleLinkGitHub = async () => {
 		setIsLinking(true);
