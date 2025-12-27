@@ -1,4 +1,5 @@
 import type { ServerPreferences } from "@packages/database/convex/schema";
+import { makeMainSiteLink } from "@packages/ui/utils/links";
 import type { Message } from "discord.js";
 import {
 	ActionRowBuilder,
@@ -10,8 +11,8 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { ConsentSource } from "../utils/analytics";
+import { ANSWER_OVERFLOW_BLUE_HEX } from "../utils/discord-components";
 
-const ANSWER_OVERFLOW_BLUE_HEX = "#8CD1FF";
 const CONSENT_BUTTON_LABEL = "Publicly Display My Messages";
 
 export const CONSENT_ACTION_PREFIX = "consent";
@@ -27,13 +28,6 @@ export function makeConsentButtonData(source: ConsentSource) {
 
 export function makeConsentButton(source: ConsentSource) {
 	return new ButtonBuilder(makeConsentButtonData(source));
-}
-
-function makeMainSiteLink(path: string): string {
-	const baseUrl =
-		process.env.NEXT_PUBLIC_BASE_URL || "https://www.answeroverflow.com";
-
-	return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 export function makeMarkSolutionResponse({

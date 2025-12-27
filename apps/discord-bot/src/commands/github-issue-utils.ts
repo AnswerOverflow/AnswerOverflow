@@ -1,3 +1,5 @@
+import type { GitHubRepo } from "@packages/database/convex/shared/auth/github";
+import { makeMainSiteLink } from "@packages/ui/utils/links";
 import type { Message } from "discord.js";
 import { Data } from "effect";
 
@@ -17,20 +19,8 @@ export class GitHubIssueTimeoutError extends Data.TaggedError(
 	readonly targetMessageId?: string;
 }> {}
 
-export type GitHubRepo = {
-	id: number;
-	name: string;
-	fullName: string;
-	owner: string;
-	private: boolean;
-	installationId: number;
-};
-
-export function makeMainSiteLink(path: string): string {
-	const baseUrl =
-		process.env.NEXT_PUBLIC_BASE_URL || "https://www.answeroverflow.com";
-	return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
-}
+export type { GitHubRepo };
+export { makeMainSiteLink };
 
 export type IssueBodyOptions = {
 	message: Message;
