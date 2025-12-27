@@ -4,12 +4,12 @@ import { DatabaseHttpLayer } from "@packages/database/database";
 import { S3StorageLayer } from "@packages/database/storage";
 import { createAxiomLayer } from "@packages/observability/axiom";
 import { createSentryEffectLayer } from "@packages/observability/sentry-effect";
-import { Effect, Layer, Logger, LogLevel } from "effect";
+import { Effect, Layer, Logger, LogLevel, ManagedRuntime } from "effect";
 
 import { BotLayers, program } from "./src/bot";
 import { DiscordClientLayer } from "./src/core/discord-client-service";
 import { DiscordLayerInternal } from "./src/core/discord-service";
-import { ReacordLayer } from "./src/core/reacord-layer";
+import { createReacordLayer } from "./src/core/reacord-layer";
 
 const SentryLayer = process.env.SENTRY_DSN
 	? createSentryEffectLayer({
@@ -37,18 +37,20 @@ const AxiomLayer = process.env.AXIOM_API_TOKEN
 
 const LoggerLayer = Logger.minimumLogLevel(LogLevel.Info);
 
+const ObservabilityLayer = Layer.mergeAll(SentryLayer, AxiomLayer, LoggerLayer);
+
+const reacordRuntime = ManagedRuntime.make(ObservabilityLayer);
+
 const DiscordWithReacord = Layer.mergeAll(
 	DiscordLayerInternal,
-	ReacordLayer,
-).pipe(Layer.provide(DiscordClientLayer));
+	createReacordLayer(reacordRuntime),
+).pipe(Layer.provide(DiscordClientLayer), Layer.provide(ObservabilityLayer));
 
 const BaseLayer = Layer.mergeAll(
 	DiscordWithReacord,
 	S3StorageLayer,
 	PostHogCaptureClientLayer,
-	SentryLayer,
-	AxiomLayer,
-	LoggerLayer,
+	ObservabilityLayer,
 ).pipe(Layer.provideMerge(DatabaseHttpLayer));
 
 export const AppLayer = Layer.mergeAll(

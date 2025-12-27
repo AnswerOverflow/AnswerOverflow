@@ -59,11 +59,42 @@ export function makeReacord(
 
 	function onInteractionCreate(interaction: Interaction) {
 		if (isButtonInteraction(interaction)) {
-			handleComponentInteraction(interaction);
+			runEffect(
+				handleComponentInteraction(interaction).pipe(
+					Effect.withSpan("reacord.handle_button_interaction", {
+						attributes: {
+							"reacord.interaction_type": "button",
+							"reacord.custom_id": interaction.customId,
+							"reacord.renderer_count": renderers.length,
+						},
+					}),
+				),
+			);
 		} else if (isStringSelectMenuInteraction(interaction)) {
-			handleComponentInteraction(interaction);
+			runEffect(
+				handleComponentInteraction(interaction).pipe(
+					Effect.withSpan("reacord.handle_select_interaction", {
+						attributes: {
+							"reacord.interaction_type": "select",
+							"reacord.custom_id": interaction.customId,
+							"reacord.selected_values": interaction.values.join(","),
+							"reacord.renderer_count": renderers.length,
+						},
+					}),
+				),
+			);
 		} else if (isModalSubmitInteraction(interaction)) {
-			handleModalInteraction(interaction);
+			runEffect(
+				handleModalInteraction(interaction).pipe(
+					Effect.withSpan("reacord.handle_modal_interaction", {
+						attributes: {
+							"reacord.interaction_type": "modal",
+							"reacord.custom_id": interaction.customId,
+							"reacord.renderer_count": renderers.length,
+						},
+					}),
+				),
+			);
 		}
 	}
 
@@ -71,20 +102,26 @@ export function makeReacord(
 
 	function handleComponentInteraction(
 		interaction: ButtonInteraction | StringSelectMenuInteraction,
-	) {
-		for (const renderer of renderers) {
-			if (renderer.handleComponentInteraction(interaction)) {
-				return;
+	): Effect.Effect<void> {
+		return Effect.sync(() => {
+			for (const renderer of renderers) {
+				if (renderer.handleComponentInteraction(interaction)) {
+					return;
+				}
 			}
-		}
+		});
 	}
 
-	function handleModalInteraction(interaction: ModalSubmitInteraction) {
-		for (const renderer of renderers) {
-			if (renderer.handleModalInteraction(interaction)) {
-				return;
+	function handleModalInteraction(
+		interaction: ModalSubmitInteraction,
+	): Effect.Effect<void> {
+		return Effect.sync(() => {
+			for (const renderer of renderers) {
+				if (renderer.handleModalInteraction(interaction)) {
+					return;
+				}
 			}
-		}
+		});
 	}
 
 	function createInstance(

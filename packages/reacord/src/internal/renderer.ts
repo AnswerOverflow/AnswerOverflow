@@ -11,8 +11,14 @@ import { Effect } from "effect";
 import { Container } from "./container";
 import { DiscordApiError } from "./errors";
 import type { ComponentInteraction } from "./interaction";
-import type { MessageButtonOptions, MessageOptions } from "./message";
+import type {
+	MessageButtonOptions,
+	MessageOptions,
+	MessageSelectOptions,
+} from "./message";
 import type { Node } from "./node";
+
+let rendererId = 0;
 
 type DiscordMessageOptions = {
 	content?: string;
@@ -62,11 +68,17 @@ export class Renderer {
 	private active = true;
 	private updateQueue: Array<() => Effect.Effect<void, DiscordApiError>> = [];
 	private processing = false;
+	private readonly id = ++rendererId;
+	private pendingEffectPromise?: Promise<void>;
 
 	constructor(private readonly options: RendererOptions) {}
 
 	render() {
 		if (!this.active) {
+			return;
+		}
+
+		if (this.pendingEffectPromise) {
 			return;
 		}
 
@@ -89,13 +101,28 @@ export class Renderer {
 		const reacordInteraction = this.toReacordInteraction(interaction);
 
 		for (const node of this.nodes) {
-			if (node.handleComponentInteraction(reacordInteraction, this.runEffect)) {
-				this.componentInteraction = reacordInteraction;
+			this.componentInteraction = reacordInteraction;
+
+			const wrappedRunEffect: typeof this.runEffect = (effect) => {
+				const promise = this.runEffect(effect);
+				this.pendingEffectPromise = promise.then(() => {
+					this.pendingEffectPromise = undefined;
+					queueMicrotask(() => {
+						this.render();
+					});
+				});
+				return promise;
+			};
+
+			if (
+				node.handleComponentInteraction(reacordInteraction, wrappedRunEffect)
+			) {
 				setTimeout(() => {
 					this.enqueue(() => this.doDeferUpdate(interaction));
 				}, 500);
 				return true;
 			}
+			this.componentInteraction = undefined;
 		}
 		return false;
 	}
@@ -116,13 +143,28 @@ export class Renderer {
 		};
 
 		for (const node of this.nodes) {
-			if (node.handleComponentInteraction(reacordInteraction, this.runEffect)) {
-				this.componentInteraction = reacordInteraction;
+			this.componentInteraction = reacordInteraction;
+
+			const wrappedRunEffect: typeof this.runEffect = (effect) => {
+				const promise = this.runEffect(effect);
+				this.pendingEffectPromise = promise.then(() => {
+					this.pendingEffectPromise = undefined;
+					queueMicrotask(() => {
+						this.render();
+					});
+				});
+				return promise;
+			};
+
+			if (
+				node.handleComponentInteraction(reacordInteraction, wrappedRunEffect)
+			) {
 				setTimeout(() => {
 					this.enqueue(() => this.doDeferModalUpdate(interaction));
 				}, 500);
 				return true;
 			}
+			this.componentInteraction = undefined;
 		}
 		return false;
 	}
@@ -250,60 +292,133 @@ export class Renderer {
 	}
 
 	private doUpdate(): Effect.Effect<void, DiscordApiError> {
+		const hasComponentInteraction = !!this.componentInteraction;
+		const componentInteractionType = this.componentInteraction?.type;
+		const componentInteractionCustomId = this.componentInteraction?.customId;
+
 		return Effect.gen(this, function* () {
+			yield* Effect.annotateCurrentSpan({
+				"reacord.renderer_id": this.id,
+				"reacord.has_component_interaction": hasComponentInteraction,
+				"reacord.component_interaction_type":
+					componentInteractionType ?? "none",
+				"reacord.component_interaction_custom_id":
+					componentInteractionCustomId ?? "none",
+				"reacord.options_type": this.options.type,
+				"reacord.has_message": !!this.message,
+				"reacord.active": this.active,
+			});
+
 			const options = this.getMessageOptions();
 			const discordOptions = this.toDiscordOptions(options);
+
+			const rawSelectOptions = options.actionRows
+				.flat()
+				.filter(
+					(c): c is MessageSelectOptions => "type" in c && c.type === "select",
+				);
+			const rawSelectValues = rawSelectOptions.map((s) => ({
+				customId: s.customId,
+				rawValues: s.values,
+			}));
+
+			const selectComponents = discordOptions.components?.flatMap((row) =>
+				row.components.filter((c) => c.type === ComponentType.StringSelect),
+			);
+			const selectValues = selectComponents?.map((s) => {
+				const defaultOptions = s.options?.filter((o) => o.default);
+				return {
+					customId: s.customId,
+					defaultValues: defaultOptions?.map((o) => o.value),
+				};
+			});
+
+			yield* Effect.annotateCurrentSpan({
+				"reacord.embed_count": discordOptions.embeds?.length ?? 0,
+				"reacord.component_count": discordOptions.components?.length ?? 0,
+				"reacord.select_raw_values": JSON.stringify(rawSelectValues),
+				"reacord.select_values": JSON.stringify(selectValues),
+			});
 
 			if (this.componentInteraction) {
 				const componentInteraction = this.componentInteraction;
 				this.componentInteraction = undefined;
 				if (componentInteraction.type === "modal") {
+					yield* Effect.annotateCurrentSpan({
+						"reacord.update_path": "modal_skip",
+					});
 					return;
 				}
+				yield* Effect.annotateCurrentSpan({
+					"reacord.update_path": "component_interaction_update",
+				});
 				yield* Effect.tryPromise({
 					try: () => componentInteraction.interaction.update(discordOptions),
 					catch: (cause) => new DiscordApiError({ operation: "update", cause }),
-				});
+				}).pipe(Effect.withSpan("reacord.discord_update"));
 				return;
 			}
 
 			if (this.options.type === "interaction") {
 				const interaction = this.options.interaction;
+				yield* Effect.annotateCurrentSpan({
+					"reacord.interaction_deferred": interaction.deferred,
+					"reacord.interaction_replied": interaction.replied,
+				});
 				if (interaction.deferred || interaction.replied) {
+					yield* Effect.annotateCurrentSpan({
+						"reacord.update_path": "edit_reply",
+					});
 					const message = yield* Effect.tryPromise({
 						try: () => interaction.editReply(discordOptions),
 						catch: (cause) =>
 							new DiscordApiError({ operation: "editReply", cause }),
-					});
+					}).pipe(Effect.withSpan("reacord.discord_edit_reply"));
 					if (!this.message && message) {
 						this.message = message;
 					}
 					return;
 				}
+				yield* Effect.annotateCurrentSpan({
+					"reacord.update_path": "initial_reply",
+				});
 				this.message = yield* Effect.tryPromise({
 					try: () => interaction.reply({ ...discordOptions, fetchReply: true }),
 					catch: (cause) => new DiscordApiError({ operation: "reply", cause }),
-				});
+				}).pipe(Effect.withSpan("reacord.discord_reply"));
 				return;
 			}
 
 			const message = this.message;
 			if (message) {
+				yield* Effect.annotateCurrentSpan({
+					"reacord.update_path": "message_edit",
+				});
 				yield* Effect.tryPromise({
 					try: () => message.edit(discordOptions),
 					catch: (cause) => new DiscordApiError({ operation: "edit", cause }),
-				});
+				}).pipe(Effect.withSpan("reacord.discord_message_edit"));
 				return;
 			}
 
-			this.message = yield* this.options.createMessage(discordOptions);
-		});
+			yield* Effect.annotateCurrentSpan({
+				"reacord.update_path": "create_message",
+			});
+			this.message = yield* this.options
+				.createMessage(discordOptions)
+				.pipe(Effect.withSpan("reacord.discord_create_message"));
+		}).pipe(Effect.withSpan("reacord.do_update"));
 	}
 
 	private doDeactivate(): Effect.Effect<void, DiscordApiError> {
 		const rendererOptions = this.options;
 		const message = this.message;
 		return Effect.gen(this, function* () {
+			yield* Effect.annotateCurrentSpan({
+				"reacord.renderer_id": this.id,
+				"reacord.options_type": rendererOptions.type,
+			});
+
 			const options = this.getMessageOptions();
 			const discordOptions = this.toDiscordOptions(options);
 
@@ -317,7 +432,7 @@ export class Renderer {
 					try: () => rendererOptions.interaction.editReply(discordOptions),
 					catch: (cause) =>
 						new DiscordApiError({ operation: "editReply", cause }),
-				});
+				}).pipe(Effect.withSpan("reacord.discord_deactivate_edit_reply"));
 				return;
 			}
 
@@ -325,9 +440,9 @@ export class Renderer {
 				yield* Effect.tryPromise({
 					try: () => message.edit(discordOptions),
 					catch: (cause) => new DiscordApiError({ operation: "edit", cause }),
-				});
+				}).pipe(Effect.withSpan("reacord.discord_deactivate_message_edit"));
 			}
-		});
+		}).pipe(Effect.withSpan("reacord.do_deactivate"));
 	}
 
 	private doDestroy(): Effect.Effect<void, DiscordApiError> {
@@ -339,7 +454,7 @@ export class Renderer {
 					try: () => rendererOptions.interaction.deleteReply(),
 					catch: (cause) =>
 						new DiscordApiError({ operation: "deleteReply", cause }),
-				});
+				}).pipe(Effect.withSpan("reacord.discord_delete_reply"));
 				return;
 			}
 
@@ -347,23 +462,27 @@ export class Renderer {
 				yield* Effect.tryPromise({
 					try: () => message.delete(),
 					catch: (cause) => new DiscordApiError({ operation: "delete", cause }),
-				});
+				}).pipe(Effect.withSpan("reacord.discord_delete_message"));
 			}
-		});
+		}).pipe(Effect.withSpan("reacord.do_destroy"));
 	}
 
 	private doDeferUpdate(
 		interaction: ButtonInteraction | StringSelectMenuInteraction,
 	): Effect.Effect<void, DiscordApiError> {
 		return Effect.gen(function* () {
+			yield* Effect.annotateCurrentSpan({
+				"reacord.interaction_deferred": interaction.deferred,
+				"reacord.interaction_replied": interaction.replied,
+			});
 			if (!interaction.deferred && !interaction.replied) {
 				yield* Effect.tryPromise({
 					try: () => interaction.deferUpdate(),
 					catch: (cause) =>
 						new DiscordApiError({ operation: "deferUpdate", cause }),
-				});
+				}).pipe(Effect.withSpan("reacord.discord_defer_update"));
 			}
-		});
+		}).pipe(Effect.withSpan("reacord.do_defer_update"));
 	}
 
 	private doDeferModalUpdate(
@@ -371,12 +490,16 @@ export class Renderer {
 	): Effect.Effect<void, DiscordApiError> {
 		const rendererOptions = this.options;
 		return Effect.gen(this, function* () {
+			yield* Effect.annotateCurrentSpan({
+				"reacord.interaction_deferred": interaction.deferred,
+				"reacord.interaction_replied": interaction.replied,
+			});
 			if (!interaction.deferred && !interaction.replied) {
 				yield* Effect.tryPromise({
 					try: () => interaction.deferUpdate(),
 					catch: (cause) =>
 						new DiscordApiError({ operation: "deferUpdate", cause }),
-				});
+				}).pipe(Effect.withSpan("reacord.discord_defer_modal_update"));
 
 				const options = this.getMessageOptions();
 				const discordOptions = this.toDiscordOptions(options);
@@ -386,10 +509,10 @@ export class Renderer {
 						try: () => rendererOptions.interaction.editReply(discordOptions),
 						catch: (cause) =>
 							new DiscordApiError({ operation: "editReply", cause }),
-					});
+					}).pipe(Effect.withSpan("reacord.discord_modal_edit_reply"));
 				}
 			}
-		});
+		}).pipe(Effect.withSpan("reacord.do_defer_modal_update"));
 	}
 }
 

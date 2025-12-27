@@ -150,6 +150,7 @@ function GitHubIssueCreator({
 			? { owner: repos[0]!.owner, name: repos[0]!.name }
 			: null,
 	);
+
 	const [title, setTitle] = useState(initialTitle);
 	const [body, setBody] = useState(initialBody);
 	const [status, setStatus] = useState<Status>("editing");
@@ -358,12 +359,6 @@ function GitHubIssueCreator({
 					}}
 				/>
 			</ActionRow>
-
-			{!hasAllReposAccess && repos.length > 0 && (
-				<ActionRow>
-					<Link label="➕ Install on more repos" url={GITHUB_APP_INSTALL_URL} />
-				</ActionRow>
-			)}
 		</>
 	);
 }

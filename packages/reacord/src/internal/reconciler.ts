@@ -125,7 +125,8 @@ const config: HostConfig<
 	},
 
 	prepareUpdate: (_instance, _type, oldProps, newProps) => {
-		return oldProps.props !== newProps.props ? true : null;
+		const shouldUpdate = oldProps.props !== newProps.props;
+		return shouldUpdate ? true : null;
 	},
 	commitUpdate: (node, _payload, _type, _oldProps, newProps) => {
 		if (newProps.props !== undefined) {

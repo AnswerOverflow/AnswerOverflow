@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { StringSelectMenuInteraction } from "discord.js";
-import type { Effect } from "effect";
+import { Effect } from "effect";
 import { ReacordElement } from "../internal/element";
 import type { ComponentInteraction } from "../internal/interaction";
 import type { MessageOptions, MessageSelectOptions } from "../internal/message";
@@ -35,6 +35,7 @@ export function Select(props: SelectProps) {
 
 class SelectNode extends Node<SelectProps> {
 	private customId = randomUUID();
+	private interactionSelectedValues: string[] | undefined;
 
 	override get text() {
 		return "";
@@ -46,7 +47,9 @@ class SelectNode extends Node<SelectProps> {
 		);
 
 		const values =
-			this.props.values ?? (this.props.value ? [this.props.value] : undefined);
+			this.interactionSelectedValues ??
+			this.props.values ??
+			(this.props.value ? [this.props.value] : undefined);
 
 		const selectOptions: MessageSelectOptions = {
 			type: "select",
@@ -70,16 +73,32 @@ class SelectNode extends Node<SelectProps> {
 			interaction.type === "select" &&
 			interaction.customId === this.customId
 		) {
+			this.interactionSelectedValues = interaction.values;
+
+			const selectedValue = interaction.values[0];
 			if (this.props.onSelectMultiple) {
 				runEffect(
-					this.props.onSelectMultiple(
-						interaction.values,
-						interaction.interaction,
-					),
+					this.props
+						.onSelectMultiple(interaction.values, interaction.interaction)
+						.pipe(
+							Effect.withSpan("reacord.select.on_select_multiple", {
+								attributes: {
+									"reacord.select.custom_id": this.customId,
+									"reacord.select.values": interaction.values.join(","),
+								},
+							}),
+						),
 				);
-			} else if (this.props.onSelect && interaction.values[0]) {
+			} else if (this.props.onSelect && selectedValue) {
 				runEffect(
-					this.props.onSelect(interaction.values[0], interaction.interaction),
+					this.props.onSelect(selectedValue, interaction.interaction).pipe(
+						Effect.withSpan("reacord.select.on_select", {
+							attributes: {
+								"reacord.select.custom_id": this.customId,
+								"reacord.select.value": selectedValue,
+							},
+						}),
+					),
 				);
 			}
 			return true;
