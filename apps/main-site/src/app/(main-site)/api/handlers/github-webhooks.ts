@@ -1,10 +1,59 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { api } from "@packages/database/convex/_generated/api";
-import { ConvexHttpClient } from "convex/browser";
+import { Database } from "@packages/database/database";
+import type { ConvexError } from "@packages/database/database";
+import { Data, Effect } from "effect";
 import type { Context } from "elysia";
 import { z } from "zod";
+import { runtime } from "../../../../lib/runtime";
 
 const MAX_WEBHOOK_BODY_SIZE = 1024 * 1024;
+
+class PayloadTooLargeError extends Data.TaggedError("PayloadTooLargeError")<{
+	readonly contentLength: number;
+	readonly maxSize: number;
+}> {}
+
+class InvalidSignatureError extends Data.TaggedError("InvalidSignatureError")<{
+	readonly deliveryId: string | null;
+}> {}
+
+class InvalidJsonError extends Data.TaggedError("InvalidJsonError")<{
+	readonly message: string;
+}> {}
+
+class InvalidPayloadError extends Data.TaggedError("InvalidPayloadError")<{
+	readonly errors: z.ZodIssue[];
+}> {}
+
+class MissingConfigError extends Data.TaggedError("MissingConfigError")<{
+	readonly configName: string;
+}> {}
+
+class DiscordNotificationError extends Data.TaggedError(
+	"DiscordNotificationError",
+)<{
+	readonly status: number;
+	readonly error: string;
+}> {}
+
+type WebhookError =
+	| PayloadTooLargeError
+	| InvalidSignatureError
+	| InvalidJsonError
+	| InvalidPayloadError
+	| MissingConfigError
+	| ConvexError
+	| DiscordNotificationError;
+
+type WebhookResult =
+	| { type: "ignored"; event?: string; action?: string }
+	| { type: "not_tracked"; repo: string; issueNumber: number }
+	| {
+			type: "processed";
+			action: string;
+			issueNumber: number;
+			repo: string;
+	  };
 
 function log(
 	level: "info" | "warn" | "error",
@@ -27,14 +76,6 @@ function log(
 	}
 }
 
-function getGitHubWebhookSecret(): string {
-	const secret = process.env.GITHUB_WEBHOOK_SECRET;
-	if (!secret) {
-		throw new Error("GITHUB_WEBHOOK_SECRET environment variable is required");
-	}
-	return secret;
-}
-
 const githubIssueEventSchema = z.object({
 	action: z.enum(["opened", "closed", "reopened", "edited", "deleted"]),
 	issue: z.object({
@@ -54,11 +95,13 @@ const githubIssueEventSchema = z.object({
 	}),
 });
 
-function verifyGitHubSignature(
+type GitHubIssueEvent = z.infer<typeof githubIssueEventSchema>;
+
+const verifyGitHubSignature = (
 	payload: string,
 	signature: string | null,
 	secret: string,
-): boolean {
+): boolean => {
 	if (!signature) return false;
 
 	const [algorithm, hash] = signature.split("=");
@@ -76,102 +119,121 @@ function verifyGitHubSignature(
 	} catch {
 		return false;
 	}
-}
+};
 
-async function sendDiscordNotification(
+const getRequiredEnv = (
+	name: string,
+): Effect.Effect<string, MissingConfigError> =>
+	Effect.gen(function* () {
+		const value = process.env[name];
+		if (!value) {
+			return yield* new MissingConfigError({ configName: name });
+		}
+		return value;
+	});
+
+const parseJsonBody = (
+	rawBody: string,
+): Effect.Effect<unknown, InvalidJsonError> =>
+	Effect.try({
+		try: () => JSON.parse(rawBody),
+		catch: (error) =>
+			new InvalidJsonError({
+				message: error instanceof Error ? error.message : "Invalid JSON",
+			}),
+	});
+
+const validatePayload = (
+	data: unknown,
+): Effect.Effect<GitHubIssueEvent, InvalidPayloadError> =>
+	Effect.gen(function* () {
+		const result = githubIssueEventSchema.safeParse(data);
+		if (!result.success) {
+			return yield* new InvalidPayloadError({ errors: result.error.errors });
+		}
+		return result.data;
+	});
+
+const sendDiscordNotification = (
 	channelId: string,
 	threadId: string | undefined,
 	message: string,
-): Promise<void> {
-	const botToken = process.env.DISCORD_BOT_TOKEN;
-	if (!botToken) {
-		console.error("DISCORD_BOT_TOKEN not set, cannot send notification");
-		return;
-	}
+): Effect.Effect<void, DiscordNotificationError | MissingConfigError> =>
+	Effect.gen(function* () {
+		const botToken = process.env.DISCORD_BOT_TOKEN;
 
-	const targetId = threadId ?? channelId;
-
-	const response = await fetch(
-		`https://discord.com/api/v10/channels/${targetId}/messages`,
-		{
-			method: "POST",
-			headers: {
-				Authorization: `Bot ${botToken}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				content: message,
-			}),
-		},
-	);
-
-	if (!response.ok) {
-		const errorText = await response.text().catch(() => "");
-		console.error("Failed to send Discord notification:", {
-			status: response.status,
-			error: errorText,
-		});
-	}
-}
-
-export async function handleGitHubWebhook(c: Context) {
-	const requestId = crypto.randomUUID();
-
-	try {
-		const contentLength = c.request.headers.get("content-length");
-		if (
-			contentLength &&
-			Number.parseInt(contentLength, 10) > MAX_WEBHOOK_BODY_SIZE
-		) {
-			log("warn", "Webhook body too large", {
-				requestId,
-				contentLength,
-				maxSize: MAX_WEBHOOK_BODY_SIZE,
-			});
-			return Response.json({ error: "Payload too large" }, { status: 413 });
+		if (!botToken) {
+			log("warn", "DISCORD_BOT_TOKEN not set, skipping notification");
+			return;
 		}
 
-		const signature = c.request.headers.get("x-hub-signature-256");
-		const eventType = c.request.headers.get("x-github-event");
-		const deliveryId = c.request.headers.get("x-github-delivery");
+		const targetId = threadId ?? channelId;
 
+		const response = yield* Effect.tryPromise({
+			try: () =>
+				fetch(`https://discord.com/api/v10/channels/${targetId}/messages`, {
+					method: "POST",
+					headers: {
+						Authorization: `Bot ${botToken}`,
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ content: message }),
+				}),
+			catch: (error) =>
+				new DiscordNotificationError({
+					status: 0,
+					error: error instanceof Error ? error.message : "Network error",
+				}),
+		});
+
+		if (!response.ok) {
+			const errorText = yield* Effect.tryPromise({
+				try: () => response.text(),
+				catch: () =>
+					new DiscordNotificationError({ status: response.status, error: "" }),
+			});
+			log("warn", "Failed to send Discord notification", {
+				status: response.status,
+				error: errorText,
+			});
+		}
+	});
+
+const processWebhook = (
+	requestId: string,
+	rawBody: string,
+	signature: string | null,
+	eventType: string | null,
+	deliveryId: string | null,
+): Effect.Effect<WebhookResult, WebhookError, Database> =>
+	Effect.gen(function* () {
 		log("info", "Received GitHub webhook", {
 			requestId,
 			deliveryId,
 			eventType,
 		});
 
-		const rawBody = await c.request.text();
-
 		if (rawBody.length > MAX_WEBHOOK_BODY_SIZE) {
-			log("warn", "Webhook body exceeds size limit", {
-				requestId,
-				bodySize: rawBody.length,
+			return yield* new PayloadTooLargeError({
+				contentLength: rawBody.length,
 				maxSize: MAX_WEBHOOK_BODY_SIZE,
 			});
-			return Response.json({ error: "Payload too large" }, { status: 413 });
 		}
 
-		if (!verifyGitHubSignature(rawBody, signature, getGitHubWebhookSecret())) {
-			log("warn", "Signature verification failed", { requestId, deliveryId });
-			return Response.json({ error: "Invalid signature" }, { status: 401 });
+		const secret = yield* getRequiredEnv("GITHUB_WEBHOOK_SECRET");
+
+		if (!verifyGitHubSignature(rawBody, signature, secret)) {
+			return yield* new InvalidSignatureError({ deliveryId });
 		}
 
 		if (eventType !== "issues") {
 			log("info", "Ignoring non-issues event", { requestId, eventType });
-			return Response.json({ message: "Event ignored", event: eventType });
+			return { type: "ignored" as const, event: eventType ?? undefined };
 		}
 
-		const parseResult = githubIssueEventSchema.safeParse(JSON.parse(rawBody));
-		if (!parseResult.success) {
-			log("error", "Invalid webhook payload", {
-				requestId,
-				errors: parseResult.error.errors,
-			});
-			return Response.json({ error: "Invalid payload" }, { status: 400 });
-		}
+		const jsonData = yield* parseJsonBody(rawBody);
+		const payload = yield* validatePayload(jsonData);
 
-		const payload = parseResult.data;
 		const repoOwner = payload.repository.owner.login;
 		const repoName = payload.repository.name;
 		const issueNumber = payload.issue.number;
@@ -185,37 +247,14 @@ export async function handleGitHubWebhook(c: Context) {
 
 		if (payload.action !== "closed" && payload.action !== "reopened") {
 			log("info", "Ignoring action", { requestId, action: payload.action });
-			return Response.json({
-				message: "Action ignored",
-				action: payload.action,
-			});
+			return { type: "ignored" as const, action: payload.action };
 		}
 
-		const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-		if (!convexUrl) {
-			log("error", "NEXT_PUBLIC_CONVEX_URL not set", { requestId });
-			return Response.json({ error: "Convex not configured" }, { status: 500 });
-		}
+		const database = yield* Database;
 
-		const client = new ConvexHttpClient(convexUrl);
-
-		const backendAccessToken = process.env.BACKEND_ACCESS_TOKEN;
-		if (!backendAccessToken) {
-			log("error", "BACKEND_ACCESS_TOKEN not set", { requestId });
-			return Response.json(
-				{ error: "Backend token not configured" },
-				{ status: 500 },
-			);
-		}
-
-		const issue = await client.query(
-			api.private.github.getGitHubIssueByRepoAndNumber,
-			{
-				backendAccessToken,
-				repoOwner,
-				repoName,
-				issueNumber,
-			},
+		const issue = yield* database.private.github.getGitHubIssueByRepoAndNumber(
+			{ repoOwner, repoName, issueNumber },
+			{ subscribe: false },
 		);
 
 		if (!issue) {
@@ -224,36 +263,39 @@ export async function handleGitHubWebhook(c: Context) {
 				repo: `${repoOwner}/${repoName}`,
 				issueNumber,
 			});
-			return Response.json({
-				message: "Issue not tracked by AnswerOverflow",
+			return {
+				type: "not_tracked" as const,
 				repo: `${repoOwner}/${repoName}`,
 				issueNumber,
-			});
+			};
 		}
 
 		const newStatus = payload.action === "closed" ? "closed" : "open";
 
-		await client.mutation(api.private.github.updateGitHubIssueStatus, {
-			backendAccessToken,
+		yield* database.private.github.updateGitHubIssueStatus({
 			repoOwner,
 			repoName,
 			issueNumber,
 			status: newStatus,
 		});
 
-		log("info", "Updated issue status", {
-			requestId,
-			issueNumber,
-			newStatus,
-		});
+		log("info", "Updated issue status", { requestId, issueNumber, newStatus });
 
 		if (payload.action === "closed") {
 			const message = `✅ Issue [#${issueNumber}](${payload.issue.html_url}) was closed: **${payload.issue.title}**`;
 
-			await sendDiscordNotification(
+			yield* sendDiscordNotification(
 				issue.discordChannelId.toString(),
 				issue.discordThreadId?.toString(),
 				message,
+			).pipe(
+				Effect.catchAll((error) => {
+					log("warn", "Discord notification failed", {
+						requestId,
+						error: error._tag,
+					});
+					return Effect.void;
+				}),
 			);
 
 			log("info", "Sent Discord notification", {
@@ -270,21 +312,140 @@ export async function handleGitHubWebhook(c: Context) {
 			repo: `${repoOwner}/${repoName}`,
 		});
 
-		return Response.json({
-			message: "Webhook processed",
+		return {
+			type: "processed" as const,
 			action: payload.action,
 			issueNumber,
 			repo: `${repoOwner}/${repoName}`,
-		});
-	} catch (error: unknown) {
-		log("error", "Error handling webhook", {
-			requestId,
-			error: error instanceof Error ? error.message : "Unknown error",
-			stack: error instanceof Error ? error.stack : undefined,
-		});
-		return Response.json(
-			{ error: error instanceof Error ? error.message : "Unknown error" },
-			{ status: 500 },
-		);
+		};
+	});
+
+const errorToResponse = (error: WebhookError, requestId: string): Response => {
+	switch (error._tag) {
+		case "PayloadTooLargeError":
+			log("warn", "Webhook body too large", {
+				requestId,
+				contentLength: error.contentLength,
+				maxSize: error.maxSize,
+			});
+			return Response.json({ error: "Payload too large" }, { status: 413 });
+
+		case "InvalidSignatureError":
+			log("warn", "Signature verification failed", {
+				requestId,
+				deliveryId: error.deliveryId,
+			});
+			return Response.json({ error: "Invalid signature" }, { status: 401 });
+
+		case "InvalidJsonError":
+			log("warn", "Invalid JSON in webhook body", {
+				requestId,
+				message: error.message,
+			});
+			return Response.json({ error: "Invalid JSON" }, { status: 400 });
+
+		case "InvalidPayloadError":
+			log("error", "Invalid webhook payload", {
+				requestId,
+				errors: error.errors,
+			});
+			return Response.json({ error: "Invalid payload" }, { status: 400 });
+
+		case "MissingConfigError":
+			log("error", `${error.configName} not set`, { requestId });
+			return Response.json(
+				{ error: `${error.configName} not configured` },
+				{ status: 500 },
+			);
+
+		case "ConvexError":
+			log("error", "Convex query failed", {
+				requestId,
+				cause: String(error.cause),
+			});
+			return Response.json({ error: "Database error" }, { status: 500 });
+
+		case "DiscordNotificationError":
+			log("error", "Discord notification failed", {
+				requestId,
+				status: error.status,
+				error: error.error,
+			});
+			return Response.json(
+				{ error: "Discord notification failed" },
+				{ status: 500 },
+			);
+
+		default: {
+			const _exhaustiveCheck: never = error;
+			log("error", "Unknown error type", {
+				requestId,
+				error: String(_exhaustiveCheck),
+			});
+			return Response.json({ error: "Internal server error" }, { status: 500 });
+		}
 	}
+};
+
+const resultToResponse = (result: WebhookResult): Response => {
+	switch (result.type) {
+		case "ignored":
+			return Response.json({
+				message: result.action ? "Action ignored" : "Event ignored",
+				...(result.event && { event: result.event }),
+				...(result.action && { action: result.action }),
+			});
+
+		case "not_tracked":
+			return Response.json({
+				message: "Issue not tracked by AnswerOverflow",
+				repo: result.repo,
+				issueNumber: result.issueNumber,
+			});
+
+		case "processed":
+			return Response.json({
+				message: "Webhook processed",
+				action: result.action,
+				issueNumber: result.issueNumber,
+				repo: result.repo,
+			});
+	}
+};
+
+export async function handleGitHubWebhook(c: Context) {
+	const requestId = crypto.randomUUID();
+
+	const contentLength = c.request.headers.get("content-length");
+	if (
+		contentLength &&
+		Number.parseInt(contentLength, 10) > MAX_WEBHOOK_BODY_SIZE
+	) {
+		log("warn", "Webhook body too large (from header)", {
+			requestId,
+			contentLength,
+			maxSize: MAX_WEBHOOK_BODY_SIZE,
+		});
+		return Response.json({ error: "Payload too large" }, { status: 413 });
+	}
+
+	const signature = c.request.headers.get("x-hub-signature-256");
+	const eventType = c.request.headers.get("x-github-event");
+	const deliveryId = c.request.headers.get("x-github-delivery");
+
+	const rawBody = await c.request.text();
+
+	return processWebhook(
+		requestId,
+		rawBody,
+		signature,
+		eventType,
+		deliveryId,
+	).pipe(
+		Effect.map(resultToResponse),
+		Effect.catchAll((error) =>
+			Effect.succeed(errorToResponse(error, requestId)),
+		),
+		runtime.runPromise,
+	);
 }

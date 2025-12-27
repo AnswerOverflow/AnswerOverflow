@@ -5,6 +5,8 @@ import type { ActionCtx, MutationCtx, QueryCtx } from "../client";
 
 const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 const GITHUB_REPO_NAME_REGEX = /^[\w.-]+$/;
+const GITHUB_ISSUE_TITLE_MAX_LENGTH = 256;
+const GITHUB_ISSUE_BODY_MAX_LENGTH = 65536;
 
 export const GitHubErrorCodes = {
 	NOT_LINKED: "NOT_LINKED",
@@ -15,6 +17,7 @@ export const GitHubErrorCodes = {
 	CREATE_FAILED: "CREATE_FAILED",
 	USER_NOT_FOUND: "USER_NOT_FOUND",
 	INVALID_REPO: "INVALID_REPO",
+	INVALID_INPUT: "INVALID_INPUT",
 	RATE_LIMITED: "RATE_LIMITED",
 } as const;
 
@@ -94,6 +97,28 @@ export function validateRepoOwnerAndName(
 	}
 	if (!GITHUB_REPO_NAME_REGEX.test(repo)) {
 		return { valid: false, error: "Invalid repository name" };
+	}
+	return { valid: true };
+}
+
+export function validateIssueTitleAndBody(
+	title: string,
+	body: string,
+): { valid: true } | { valid: false; error: string } {
+	if (title.length === 0) {
+		return { valid: false, error: "Issue title cannot be empty" };
+	}
+	if (title.length > GITHUB_ISSUE_TITLE_MAX_LENGTH) {
+		return {
+			valid: false,
+			error: `Issue title cannot exceed ${GITHUB_ISSUE_TITLE_MAX_LENGTH} characters (got ${title.length})`,
+		};
+	}
+	if (body.length > GITHUB_ISSUE_BODY_MAX_LENGTH) {
+		return {
+			valid: false,
+			error: `Issue body cannot exceed ${GITHUB_ISSUE_BODY_MAX_LENGTH} characters (got ${body.length})`,
+		};
 	}
 	return { valid: true };
 }

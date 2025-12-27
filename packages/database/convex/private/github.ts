@@ -10,18 +10,61 @@ import { githubIssueStatusValidator } from "../schema";
 import {
 	createGitHubIssue,
 	fetchGitHubInstallationRepos,
+	type GitHubErrorCode,
 	GitHubErrorCodes,
 	getBetterAuthUserIdByDiscordId,
 	getGitHubAccountByDiscordId,
+	type GitHubRepo,
 	getValidAccessToken,
+	validateIssueTitleAndBody,
 	validateRepoOwnerAndName,
 } from "../shared/github";
+
+const repoValidator = v.object({
+	id: v.number(),
+	name: v.string(),
+	fullName: v.string(),
+	owner: v.string(),
+	private: v.boolean(),
+	installationId: v.number(),
+});
+
+const errorCodeValidator = v.union(
+	v.literal("NOT_LINKED"),
+	v.literal("NO_TOKEN"),
+	v.literal("REFRESH_REQUIRED"),
+	v.literal("REFRESH_FAILED"),
+	v.literal("FETCH_FAILED"),
+	v.literal("CREATE_FAILED"),
+	v.literal("USER_NOT_FOUND"),
+	v.literal("INVALID_REPO"),
+	v.literal("INVALID_INPUT"),
+	v.literal("RATE_LIMITED"),
+);
 
 export const getAccessibleReposByDiscordId = privateAction({
 	args: {
 		discordId: v.int64(),
 	},
-	handler: async (ctx, args) => {
+	returns: v.union(
+		v.object({
+			success: v.literal(false),
+			error: v.string(),
+			code: errorCodeValidator,
+		}),
+		v.object({
+			success: v.literal(true),
+			repos: v.array(repoValidator),
+			hasAllReposAccess: v.boolean(),
+		}),
+	),
+	handler: async (
+		ctx,
+		args,
+	): Promise<
+		| { success: false; error: string; code: GitHubErrorCode }
+		| { success: true; repos: Array<GitHubRepo>; hasAllReposAccess: boolean }
+	> => {
 		const userId = await getBetterAuthUserIdByDiscordId(ctx, args.discordId);
 		if (!userId) {
 			return {
@@ -82,6 +125,22 @@ export const getAccessibleReposByDiscordId = privateAction({
 	},
 });
 
+type CreateIssueSuccess = {
+	success: true;
+	issue: {
+		id: number;
+		number: number;
+		url: string;
+		title: string;
+	};
+};
+
+type CreateIssueError = {
+	success: false;
+	error: string;
+	code: GitHubErrorCode;
+};
+
 export const createGitHubIssueFromDiscord = privateAction({
 	args: {
 		discordId: v.int64(),
@@ -94,13 +153,44 @@ export const createGitHubIssueFromDiscord = privateAction({
 		discordMessageId: v.int64(),
 		discordThreadId: v.optional(v.int64()),
 	},
-	handler: async (ctx, args) => {
-		const validation = validateRepoOwnerAndName(args.repoOwner, args.repoName);
-		if (!validation.valid) {
+	returns: v.union(
+		v.object({
+			success: v.literal(false),
+			error: v.string(),
+			code: errorCodeValidator,
+		}),
+		v.object({
+			success: v.literal(true),
+			issue: v.object({
+				id: v.number(),
+				number: v.number(),
+				url: v.string(),
+				title: v.string(),
+			}),
+		}),
+	),
+	handler: async (
+		ctx,
+		args,
+	): Promise<CreateIssueSuccess | CreateIssueError> => {
+		const repoValidation = validateRepoOwnerAndName(
+			args.repoOwner,
+			args.repoName,
+		);
+		if (!repoValidation.valid) {
 			return {
 				success: false as const,
-				error: validation.error,
+				error: repoValidation.error,
 				code: GitHubErrorCodes.INVALID_REPO,
+			};
+		}
+
+		const inputValidation = validateIssueTitleAndBody(args.title, args.body);
+		if (!inputValidation.valid) {
+			return {
+				success: false as const,
+				error: inputValidation.error,
+				code: GitHubErrorCodes.INVALID_INPUT,
 			};
 		}
 
