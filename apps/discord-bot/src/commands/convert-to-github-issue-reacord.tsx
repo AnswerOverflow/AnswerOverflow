@@ -5,6 +5,7 @@ import {
 	Button,
 	Embed,
 	EmbedField,
+	Link,
 	LoadingSelect,
 	ModalButton,
 	Option,
@@ -18,7 +19,7 @@ import {
 } from "@packages/reacord";
 import type { ContextMenuCommandInteraction, Message } from "discord.js";
 import { MessageFlags } from "discord.js";
-import { Data, Duration, Effect, Layer, Metric } from "effect";
+import { Cause, Data, Duration, Effect, Layer, Metric } from "effect";
 import { Suspense, useState } from "react";
 import { Discord } from "../core/discord-service";
 import { commandExecuted } from "../metrics";
@@ -126,6 +127,14 @@ function generateIssueTitle(message: Message): string {
 
 const INSTALL_MORE_REPOS_VALUE = "__install_more_repos__";
 
+class GitHubNotLinkedError extends Data.TaggedError("GitHubNotLinkedError") {}
+class GitHubTokenExpiredError extends Data.TaggedError(
+	"GitHubTokenExpiredError",
+) {}
+class GitHubFetchError extends Data.TaggedError("GitHubFetchError")<{
+	message: string;
+}> {}
+
 const reposAtomFamily = Atom.family((discordUserId: string) =>
 	databaseRuntime.atom(
 		Effect.gen(function* () {
@@ -137,7 +146,17 @@ const reposAtomFamily = Atom.family((discordUserId: string) =>
 				.pipe(Effect.withSpan("get_accessible_repos_suspense"));
 
 			if (!reposResult.success) {
-				return { repos: [] as GitHubRepo[], hasAllReposAccess: false };
+				if (reposResult.code === "NOT_LINKED") {
+					return yield* new GitHubNotLinkedError();
+				}
+				if (
+					reposResult.code === "REFRESH_REQUIRED" ||
+					reposResult.code === "REFRESH_FAILED" ||
+					reposResult.code === "NO_TOKEN"
+				) {
+					return yield* new GitHubTokenExpiredError();
+				}
+				return yield* new GitHubFetchError({ message: reposResult.error });
 			}
 
 			return {
@@ -159,12 +178,42 @@ function RepoSelector({
 	selectedRepo,
 	setSelectedRepo,
 }: RepoSelectorProps) {
-	const state = useAtomSuspense(reposAtomFamily(discordUserId));
+	const state = useAtomSuspense(reposAtomFamily(discordUserId), {
+		includeFailure: true,
+	});
+
+	if (Result.isFailure(state)) {
+		const failure = Cause.failureOption(state.cause);
+		if (failure._tag === "Some") {
+			const error = failure.value;
+			if (error._tag === "GitHubNotLinkedError") {
+				return (
+					<Link
+						url={GITHUB_APP_INSTALL_URL}
+						label="Connect GitHub to continue"
+					/>
+				);
+			}
+			if (error._tag === "GitHubTokenExpiredError") {
+				return (
+					<Link
+						url={GITHUB_APP_INSTALL_URL}
+						label="Reconnect GitHub (session expired)"
+					/>
+				);
+			}
+		}
+		return (
+			<Link url={GITHUB_APP_INSTALL_URL} label="Failed to load repositories" />
+		);
+	}
 
 	const { repos, hasAllReposAccess } = state.value;
 
 	if (repos.length === 0) {
-		return null;
+		return (
+			<Link url={GITHUB_APP_INSTALL_URL} label="Install on a repository" />
+		);
 	}
 
 	return (
