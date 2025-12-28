@@ -47,6 +47,7 @@ export const handleStripeWebhook = internalAction({
 		payload: v.string(),
 		signature: v.string(),
 	},
+	returns: v.object({ success: v.boolean() }),
 	handler: async (ctx, args) => {
 		const event = verifyWebhookSignature(args.payload, args.signature);
 
