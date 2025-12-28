@@ -161,48 +161,63 @@ export const makeFunctions = <ConfectSchema extends GenericConfectSchema>(
 	const action = <
 		ConvexValue extends DefaultFunctionArgs,
 		ConfectValue,
-		ConvexReturns,
-		ConfectReturns,
-		E,
+		ConvexSuccess,
+		ConfectSuccess,
+		ConvexError,
+		ConfectError extends { readonly _tag: string },
 	>({
 		args,
-		returns,
+		success,
+		error,
 		handler,
 	}: {
 		args: Schema.Schema<ConfectValue, ConvexValue>;
-		returns: Schema.Schema<ConfectReturns, ConvexReturns>;
+		success: Schema.Schema<ConfectSuccess, ConvexSuccess>;
+		error: Schema.Schema<ConfectError, ConvexError>;
 		handler: (
 			a: ConfectValue,
 		) => Effect.Effect<
-			ConfectReturns,
-			E,
+			ConfectSuccess,
+			ConfectError,
 			ConfectActionCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
 		>;
-	}): RegisteredAction<"public", ConvexValue, Promise<ConvexReturns>> =>
-		actionGeneric(confectActionFunction({ args, returns, handler }));
+	}): RegisteredAction<
+		"public",
+		ConvexValue,
+		Promise<{ _tag: "Success"; data: ConvexSuccess } | ConvexError>
+	> => actionGeneric(confectActionFunction({ args, success, error, handler }));
 
 	const internalAction = <
 		ConvexValue extends DefaultFunctionArgs,
 		ConfectValue,
-		ConvexReturns,
-		ConfectReturns,
-		E,
+		ConvexSuccess,
+		ConfectSuccess,
+		ConvexError,
+		ConfectError extends { readonly _tag: string },
 	>({
 		args,
-		returns,
+		success,
+		error,
 		handler,
 	}: {
 		args: Schema.Schema<ConfectValue, ConvexValue>;
-		returns: Schema.Schema<ConfectReturns, ConvexReturns>;
+		success: Schema.Schema<ConfectSuccess, ConvexSuccess>;
+		error: Schema.Schema<ConfectError, ConvexError>;
 		handler: (
 			a: ConfectValue,
 		) => Effect.Effect<
-			ConfectReturns,
-			E,
+			ConfectSuccess,
+			ConfectError,
 			ConfectActionCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
 		>;
-	}): RegisteredAction<"internal", ConvexValue, Promise<ConvexReturns>> =>
-		internalActionGeneric(confectActionFunction({ args, returns, handler }));
+	}): RegisteredAction<
+		"internal",
+		ConvexValue,
+		Promise<{ _tag: "Success"; data: ConvexSuccess } | ConvexError>
+	> =>
+		internalActionGeneric(
+			confectActionFunction({ args, success, error, handler }),
+		);
 
 	return {
 		query,
@@ -308,41 +323,61 @@ const confectActionFunction = <
 	ConfectDataModel extends GenericConfectDataModel,
 	ConvexValue extends DefaultFunctionArgs,
 	ConfectValue,
-	ConvexReturns,
-	ConfectReturns,
-	E,
+	ConvexSuccess,
+	ConfectSuccess,
+	ConvexError,
+	ConfectError extends { readonly _tag: string },
 >({
 	args,
-	returns,
+	success,
+	error,
 	handler,
 }: {
 	args: Schema.Schema<ConfectValue, ConvexValue>;
-	returns: Schema.Schema<ConfectReturns, ConvexReturns>;
+	success: Schema.Schema<ConfectSuccess, ConvexSuccess>;
+	error: Schema.Schema<ConfectError, ConvexError>;
 	handler: (
 		a: ConfectValue,
-	) => Effect.Effect<ConfectReturns, E, ConfectActionCtx<ConfectDataModel>>;
-}) => ({
-	args: compileArgsSchema(args),
-	returns: compileReturnsSchema(returns),
-	handler: (
-		ctx: GenericActionCtx<DataModelFromConfectDataModel<ConfectDataModel>>,
-		actualArgs: ConvexValue,
-	): Promise<ConvexReturns> =>
-		pipe(
-			actualArgs,
-			Schema.decode(args),
-			Effect.orDie,
-			Effect.andThen((decodedArgs) =>
-				handler(decodedArgs).pipe(
-					Effect.provideService(
-						ConfectActionCtx<ConfectDataModel>(),
-						makeConfectActionCtx(ctx),
+	) => Effect.Effect<
+		ConfectSuccess,
+		ConfectError,
+		ConfectActionCtx<ConfectDataModel>
+	>;
+}) => {
+	const successSchema = Schema.Struct({
+		_tag: Schema.Literal("Success"),
+		data: success,
+	});
+	const resultSchema = Schema.Union(successSchema, error);
+
+	return {
+		args: compileArgsSchema(args),
+		returns: compileReturnsSchema(resultSchema),
+		handler: (
+			ctx: GenericActionCtx<DataModelFromConfectDataModel<ConfectDataModel>>,
+			actualArgs: ConvexValue,
+		): Promise<{ _tag: "Success"; data: ConvexSuccess } | ConvexError> =>
+			pipe(
+				actualArgs,
+				Schema.decode(args),
+				Effect.orDie,
+				Effect.andThen((decodedArgs) =>
+					handler(decodedArgs).pipe(
+						Effect.provideService(
+							ConfectActionCtx<ConfectDataModel>(),
+							makeConfectActionCtx(ctx),
+						),
 					),
 				),
+				Effect.map(
+					(data): { _tag: "Success"; data: ConfectSuccess } | ConfectError => ({
+						_tag: "Success",
+						data,
+					}),
+				),
+				Effect.catchAll((e: ConfectError) => Effect.succeed(e)),
+				Effect.andThen((result) => Schema.encodeUnknown(resultSchema)(result)),
+				Effect.runPromise,
 			),
-			Effect.andThen((convexReturns) =>
-				Schema.encodeUnknown(returns)(convexReturns),
-			),
-			Effect.runPromise,
-		),
-});
+	};
+};

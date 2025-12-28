@@ -1,4 +1,4 @@
-import { Effect, Schema } from "effect";
+import { Effect, Either, Option, Schema } from "effect";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import {
@@ -15,123 +15,120 @@ import {
 	createGitHubIssue,
 	createOctokitClient,
 	fetchGitHubInstallationRepos,
-	type GitHubErrorCode,
-	GitHubErrorCodes,
 	type GitHubRepo,
 	getBetterAuthUserIdByDiscordId,
 	getGitHubAccountByDiscordId,
 	validateIssueTitleAndBody,
 	validateRepoOwnerAndName,
+	serializeError,
+	GitHubUserNotFoundError,
+	GitHubNotLinkedError,
+	GitHubRateLimitedError,
+	GetAccessibleReposErrorSchema,
+	CreateGitHubIssueErrorSchema,
+	GitHubRepoSchema,
 } from "../shared/github";
 
-const _repoValidator = v.object({
-	id: v.number(),
-	name: v.string(),
-	fullName: v.string(),
-	owner: v.string(),
-	private: v.boolean(),
-	installationId: v.number(),
+const GetAccessibleReposSuccessSchema = Schema.Struct({
+	_tag: Schema.Literal("Success"),
+	repos: Schema.Array(GitHubRepoSchema),
+	hasAllReposAccess: Schema.Boolean,
 });
 
-const _errorCodeValidator = v.union(
-	v.literal("NOT_LINKED"),
-	v.literal("NO_TOKEN"),
-	v.literal("REFRESH_REQUIRED"),
-	v.literal("REFRESH_FAILED"),
-	v.literal("FETCH_FAILED"),
-	v.literal("CREATE_FAILED"),
-	v.literal("USER_NOT_FOUND"),
-	v.literal("INVALID_REPO"),
-	v.literal("INVALID_INPUT"),
-	v.literal("RATE_LIMITED"),
+const GetAccessibleReposResultSchema = Schema.Union(
+	GetAccessibleReposSuccessSchema,
+	GetAccessibleReposErrorSchema,
 );
+
+type GetAccessibleReposResult = Schema.Schema.Type<
+	typeof GetAccessibleReposResultSchema
+>;
 
 export const getAccessibleReposByDiscordId = privateAction({
 	args: {
 		discordId: v.int64(),
 	},
-	handler: async (
-		ctx,
-		args,
-	): Promise<
-		| { success: false; error: string; code: GitHubErrorCode }
-		| { success: true; repos: Array<GitHubRepo>; hasAllReposAccess: boolean }
-	> => {
-		const userId = await getBetterAuthUserIdByDiscordId(ctx, args.discordId);
-		if (!userId) {
-			return {
-				success: false as const,
-				error: "User not found",
-				code: GitHubErrorCodes.USER_NOT_FOUND,
-			};
-		}
+	handler: async (ctx, args): Promise<GetAccessibleReposResult> => {
+		const fetchRepos = Effect.gen(function* () {
+			const userIdOption = yield* getBetterAuthUserIdByDiscordId(
+				ctx,
+				args.discordId,
+			);
+			if (Option.isNone(userIdOption)) {
+				return yield* Effect.fail(
+					new GitHubUserNotFoundError({ message: "User not found" }),
+				);
+			}
+			const userId = userIdOption.value;
 
-		const rateLimitResult = await ctx.runMutation(
-			internal.internal.rateLimiter.checkGitHubFetchRepos,
-			{ userId },
-		);
-		if (!rateLimitResult.ok) {
-			return {
-				success: false as const,
-				error: `Rate limited. Try again in ${Math.ceil((rateLimitResult.retryAfter ?? 0) / 1000)} seconds.`,
-				code: GitHubErrorCodes.RATE_LIMITED,
-			};
-		}
+			const rateLimitResult = yield* Effect.promise(() =>
+				ctx.runMutation(internal.internal.rateLimiter.checkGitHubFetchRepos, {
+					userId,
+				}),
+			);
+			if (!rateLimitResult.ok) {
+				const retryAfterSeconds = Math.ceil(
+					(rateLimitResult.retryAfter ?? 0) / 1000,
+				);
+				return yield* Effect.fail(
+					new GitHubRateLimitedError({
+						message: `Rate limited. Try again in ${retryAfterSeconds} seconds.`,
+						retryAfterSeconds,
+					}),
+				);
+			}
 
-		const account = await getGitHubAccountByDiscordId(ctx, args.discordId);
-
-		if (!account) {
-			return {
-				success: false as const,
-				error: "GitHub account not linked",
-				code: GitHubErrorCodes.NOT_LINKED,
-			};
-		}
-
-		const octokitResult = await createOctokitClient(ctx, account);
-		if (!octokitResult.success) {
-			return {
-				success: false as const,
-				error: octokitResult.error,
-				code: octokitResult.code,
-			};
-		}
-
-		try {
-			const { repos, hasAllReposAccess } = await fetchGitHubInstallationRepos(
-				octokitResult.octokit,
+			const accountOption = yield* getGitHubAccountByDiscordId(
+				ctx,
+				args.discordId,
 			);
 
+			if (Option.isNone(accountOption)) {
+				return yield* Effect.fail(
+					new GitHubNotLinkedError({ message: "GitHub account not linked" }),
+				);
+			}
+
+			const account = accountOption.value;
+			const octokit = yield* createOctokitClient(ctx, account);
+			const { repos, hasAllReposAccess } =
+				yield* fetchGitHubInstallationRepos(octokit);
+
 			return {
-				success: true as const,
-				repos,
+				_tag: "Success" as const,
+				repos: [...repos],
 				hasAllReposAccess,
 			};
-		} catch (error) {
-			return {
-				success: false as const,
-				error: error instanceof Error ? error.message : "Failed to fetch repos",
-				code: GitHubErrorCodes.FETCH_FAILED,
-			};
+		});
+
+		const result = await Effect.runPromise(Effect.either(fetchRepos));
+
+		if (Either.isLeft(result)) {
+			return serializeError(result.left);
 		}
+
+		return result.right;
 	},
 });
 
-type CreateIssueSuccess = {
-	success: true;
-	issue: {
-		id: number;
-		number: number;
-		url: string;
-		title: string;
-	};
-};
+const CreateGitHubIssueSuccessSchema = Schema.Struct({
+	_tag: Schema.Literal("Success"),
+	issue: Schema.Struct({
+		id: Schema.Number,
+		number: Schema.Number,
+		url: Schema.String,
+		title: Schema.String,
+	}),
+});
 
-type CreateIssueError = {
-	success: false;
-	error: string;
-	code: GitHubErrorCode;
-};
+const CreateGitHubIssueResultSchema = Schema.Union(
+	CreateGitHubIssueSuccessSchema,
+	CreateGitHubIssueErrorSchema,
+);
+
+type CreateGitHubIssueResult = Schema.Schema.Type<
+	typeof CreateGitHubIssueResultSchema
+>;
 
 export const createGitHubIssueFromDiscord = privateAction({
 	args: {
@@ -145,99 +142,82 @@ export const createGitHubIssueFromDiscord = privateAction({
 		discordMessageId: v.int64(),
 		discordThreadId: v.optional(v.int64()),
 	},
-	handler: async (
-		ctx,
-		args,
-	): Promise<CreateIssueSuccess | CreateIssueError> => {
-		const repoValidation = validateRepoOwnerAndName(
-			args.repoOwner,
-			args.repoName,
-		);
-		if (!repoValidation.valid) {
-			return {
-				success: false as const,
-				error: repoValidation.error,
-				code: GitHubErrorCodes.INVALID_REPO,
-			};
-		}
+	handler: async (ctx, args): Promise<CreateGitHubIssueResult> => {
+		const createIssue = Effect.gen(function* () {
+			yield* validateRepoOwnerAndName(args.repoOwner, args.repoName);
+			yield* validateIssueTitleAndBody(args.title, args.body);
 
-		const inputValidation = validateIssueTitleAndBody(args.title, args.body);
-		if (!inputValidation.valid) {
-			return {
-				success: false as const,
-				error: inputValidation.error,
-				code: GitHubErrorCodes.INVALID_INPUT,
-			};
-		}
+			const userIdOption = yield* getBetterAuthUserIdByDiscordId(
+				ctx,
+				args.discordId,
+			);
+			if (Option.isNone(userIdOption)) {
+				return yield* Effect.fail(
+					new GitHubUserNotFoundError({ message: "User not found" }),
+				);
+			}
+			const userId = userIdOption.value;
 
-		const userId = await getBetterAuthUserIdByDiscordId(ctx, args.discordId);
-		if (!userId) {
-			return {
-				success: false as const,
-				error: "User not found",
-				code: GitHubErrorCodes.USER_NOT_FOUND,
-			};
-		}
+			const rateLimitResult = yield* Effect.promise(() =>
+				ctx.runMutation(internal.internal.rateLimiter.checkGitHubCreateIssue, {
+					userId,
+				}),
+			);
+			if (!rateLimitResult.ok) {
+				const retryAfterSeconds = Math.ceil(
+					(rateLimitResult.retryAfter ?? 0) / 1000,
+				);
+				return yield* Effect.fail(
+					new GitHubRateLimitedError({
+						message: `Rate limited. Try again in ${retryAfterSeconds} seconds.`,
+						retryAfterSeconds,
+					}),
+				);
+			}
 
-		const rateLimitResult = await ctx.runMutation(
-			internal.internal.rateLimiter.checkGitHubCreateIssue,
-			{ userId },
-		);
-		if (!rateLimitResult.ok) {
-			return {
-				success: false as const,
-				error: `Rate limited. Try again in ${Math.ceil((rateLimitResult.retryAfter ?? 0) / 1000)} seconds.`,
-				code: GitHubErrorCodes.RATE_LIMITED,
-			};
-		}
+			const accountOption = yield* getGitHubAccountByDiscordId(
+				ctx,
+				args.discordId,
+			);
 
-		const account = await getGitHubAccountByDiscordId(ctx, args.discordId);
+			if (Option.isNone(accountOption)) {
+				return yield* Effect.fail(
+					new GitHubNotLinkedError({ message: "GitHub account not linked" }),
+				);
+			}
 
-		if (!account) {
-			return {
-				success: false as const,
-				error: "GitHub account not linked",
-				code: GitHubErrorCodes.NOT_LINKED,
-			};
-		}
+			const account = accountOption.value;
+			const octokit = yield* createOctokitClient(ctx, account);
 
-		const octokitResult = await createOctokitClient(ctx, account);
-		if (!octokitResult.success) {
-			return {
-				success: false as const,
-				error: octokitResult.error,
-				code: octokitResult.code,
-			};
-		}
-
-		try {
-			const issue = await createGitHubIssue(
-				octokitResult.octokit,
+			const issue = yield* createGitHubIssue(
+				octokit,
 				args.repoOwner,
 				args.repoName,
 				args.title,
 				args.body,
 			);
 
-			await ctx.runMutation(
-				internal.private.github.createGitHubIssueRecordInternal,
-				{
-					issueId: issue.id,
-					issueNumber: issue.number,
-					repoOwner: args.repoOwner,
-					repoName: args.repoName,
-					issueUrl: issue.htmlUrl,
-					issueTitle: issue.title,
-					discordServerId: args.discordServerId,
-					discordChannelId: args.discordChannelId,
-					discordMessageId: args.discordMessageId,
-					discordThreadId: args.discordThreadId,
-					createdByUserId: userId,
-				},
+			yield* Effect.promise(() =>
+				ctx.runMutation(
+					internal.private.github.createGitHubIssueRecordInternal,
+					{
+						issueId: issue.id,
+						issueNumber: issue.number,
+						repoOwner: args.repoOwner,
+						repoName: args.repoName,
+						issueUrl: issue.htmlUrl,
+						issueTitle: issue.title,
+						discordServerId: args.discordServerId,
+						discordChannelId: args.discordChannelId,
+						discordMessageId: args.discordMessageId,
+						discordThreadId: args.discordThreadId,
+						createdByUserId: userId,
+					},
+				),
 			);
 
 			return {
-				success: true as const,
+				_tag: "Success" as const,
 				issue: {
 					id: issue.id,
 					number: issue.number,
@@ -245,14 +225,15 @@ export const createGitHubIssueFromDiscord = privateAction({
 					title: issue.title,
 				},
 			};
-		} catch (error) {
-			return {
-				success: false as const,
-				error:
-					error instanceof Error ? error.message : "Failed to create issue",
-				code: GitHubErrorCodes.CREATE_FAILED,
-			};
+		});
+
+		const result = await Effect.runPromise(Effect.either(createIssue));
+
+		if (Either.isLeft(result)) {
+			return serializeError(result.left);
 		}
+
+		return result.right;
 	},
 });
 
@@ -339,3 +320,6 @@ export const updateGitHubIssueStatus = privateMutation({
 		return issue;
 	},
 });
+
+export { GetAccessibleReposResultSchema, CreateGitHubIssueResultSchema };
+export type { GetAccessibleReposResult, CreateGitHubIssueResult };

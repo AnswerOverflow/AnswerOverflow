@@ -87,12 +87,12 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 		queryKey: ["accessibleRepos", githubAccount?.isConnected],
 		queryFn: async () => {
 			const result = await getAccessibleRepos({});
-			if (result.success) {
+			if (result._tag === "Success") {
 				return {
-					repos: result.repos,
+					repos: result.data.repos,
 				};
 			} else {
-				throw new Error(result.error);
+				throw new Error(result._tag);
 			}
 		},
 		enabled: !!githubAccount?.isConnected,
