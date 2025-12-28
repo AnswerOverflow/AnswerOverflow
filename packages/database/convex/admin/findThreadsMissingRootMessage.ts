@@ -11,13 +11,6 @@ const THREAD_TYPES = [
 	ChannelType.PrivateThread,
 ] as const;
 
-type PageResult = {
-	threadsWithMissingRootMessage: ReadonlyArray<ThreadMissingRootMessage>;
-	channelsProcessed: number;
-	isDone: boolean;
-	continueCursor: string;
-};
-
 export const findThreadsMissingRootMessage = internalAction({
 	args: {},
 	returns: v.object({
@@ -38,7 +31,12 @@ export const findThreadsMissingRootMessage = internalAction({
 			let isDone = false;
 
 			while (!isDone && threads.length < limit) {
-				const result: PageResult = await ctx.runQuery(
+				const result: {
+					threadsWithMissingRootMessage: ReadonlyArray<ThreadMissingRootMessage>;
+					channelsProcessed: number;
+					isDone: boolean;
+					continueCursor: string;
+				} = await ctx.runQuery(
 					internal.admin.findThreadsMissingRootMessagePage
 						.findThreadsMissingRootMessagePage,
 					{

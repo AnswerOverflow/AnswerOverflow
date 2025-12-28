@@ -79,23 +79,26 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 		api.authenticated.github.getAccessibleRepos,
 	);
 
+	const githubAccountData =
+		githubAccount?._tag === "Success" ? githubAccount.data : null;
+
 	const {
 		data: reposData,
 		isLoading: isLoadingRepos,
 		error: reposError,
 	} = useQuery({
-		queryKey: ["accessibleRepos", githubAccount?.isConnected],
+		queryKey: ["accessibleRepos", githubAccountData?.isConnected],
 		queryFn: async () => {
 			const result = await getAccessibleRepos({});
-			if (result.success) {
+			if (result._tag === "Success") {
 				return {
-					repos: result.repos,
+					repos: result.data.repos,
 				};
 			} else {
-				throw new Error(result.error);
+				throw new Error(result._tag);
 			}
 		},
-		enabled: !!githubAccount?.isConnected,
+		enabled: !!githubAccountData?.isConnected,
 	});
 
 	const repos = reposData?.repos ?? [];
@@ -128,7 +131,7 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 			<CardContent className="space-y-4">
 				{githubAccount === undefined ? (
 					<div className="text-sm text-muted-foreground">Loading...</div>
-				) : githubAccount === null ? (
+				) : !githubAccountData ? (
 					<div className="space-y-3">
 						<p className="text-sm text-muted-foreground">
 							Connect your GitHub account to enable the "Create GitHub Issue"

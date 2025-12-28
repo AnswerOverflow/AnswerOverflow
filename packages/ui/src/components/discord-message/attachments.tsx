@@ -99,8 +99,9 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 		10: "grid gap-1 grid-cols-3 grid-rows-4 *:h-[181px] [&>*:first-child]:col-span-3",
 	};
 
-	const lightboxImages = images.map((attachment) => ({
-		src: attachment.url,
+	const imagesWithUrls = images.filter((a) => a.url);
+	const lightboxImages = imagesWithUrls.map((attachment) => ({
+		src: attachment.url!,
 		alt: attachment.filename,
 		width: attachment.width ?? undefined,
 		height: attachment.height ?? undefined,
@@ -116,10 +117,10 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 			<div
 				className={cn(
 					"w-full max-w-[550px] overflow-hidden rounded py-0.5",
-					styles[images.length],
+					styles[imagesWithUrls.length],
 				)}
 			>
-				{images.map((attachment, index) => {
+				{imagesWithUrls.map((attachment, index) => {
 					const hasDimensions = attachment.width && attachment.height;
 					const aspectRatio = hasDimensions
 						? Number(
@@ -129,7 +130,7 @@ function ImageGallery({ images }: { images: Attachment[] }) {
 					return (
 						<ImageWithAspectRatio
 							key={attachment.id}
-							imageUrl={attachment.url}
+							imageUrl={attachment.url!}
 							alt={attachment.filename}
 							width={attachment.width ?? undefined}
 							height={attachment.height ?? undefined}
