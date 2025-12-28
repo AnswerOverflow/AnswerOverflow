@@ -145,6 +145,8 @@ export const getRecentThreads = publicQuery({
 		const paginatedResult = await ctx.db
 			.query("messages")
 			.withIndex("by_childThreadId", (q) => q.gt("childThreadId", 0n))
+			// todo maybe bring back in future but is too noisy right now
+			.filter((q) => q.neq(q.field("serverId"), 1012610056921038868n))
 			.order("desc")
 			.paginate(args.paginationOpts);
 
