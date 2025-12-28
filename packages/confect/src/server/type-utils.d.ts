@@ -32,13 +32,15 @@ export type DeepMutable<T> = IsAny<T> extends true
 	? any
 	: T extends Brand.Brand<any> | GenericId<any>
 		? T
-		: T extends ReadonlyMap<infer K, infer V>
-			? Map<DeepMutable<K>, DeepMutable<V>>
-			: T extends ReadonlySet<infer V>
-				? Set<DeepMutable<V>>
-				: [keyof T] extends [never]
-					? T
-					: { -readonly [K in keyof T]: DeepMutable<T[K]> };
+		: T extends ReadonlyArray<infer U>
+			? DeepMutable<U>[]
+			: T extends ReadonlyMap<infer K, infer V>
+				? Map<DeepMutable<K>, DeepMutable<V>>
+				: T extends ReadonlySet<infer V>
+					? Set<DeepMutable<V>>
+					: [keyof T] extends [never]
+						? T
+						: { -readonly [K in keyof T]: DeepMutable<T[K]> };
 
 export type DeepReadonly<T> = IsAny<T> extends true
 	? any

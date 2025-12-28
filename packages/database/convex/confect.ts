@@ -10,11 +10,7 @@ import {
 	makeFunctions,
 	type TableNamesInConfectDataModel,
 } from "@packages/confect/server";
-import { confectSchema } from "./confectSchema";
-import {
-	mutation as triggerMutation,
-	internalMutation as triggerInternalMutation,
-} from "./triggers";
+import { confectSchema } from "./schema";
 
 export const {
 	query,
@@ -23,10 +19,7 @@ export const {
 	internalQuery,
 	internalMutation,
 	internalAction,
-} = makeFunctions(confectSchema, {
-	mutationBuilder: triggerMutation,
-	internalMutationBuilder: triggerInternalMutation,
-});
+} = makeFunctions(confectSchema);
 
 type ConfectSchema = typeof confectSchema;
 

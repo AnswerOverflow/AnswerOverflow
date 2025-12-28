@@ -5,11 +5,7 @@ import {
 	internalMutation,
 	internalQuery,
 } from "../confect";
-import {
-	PlanSchema,
-	ServerSchema,
-	ServerPreferencesSchema,
-} from "../confectSchema";
+import { PlanSchema, ServerSchema, ServerPreferencesSchema } from "../schema";
 
 const DEFAULT_PLAN = "FREE" as const;
 

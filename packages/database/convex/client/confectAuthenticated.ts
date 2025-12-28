@@ -10,7 +10,7 @@ import {
 	type ConfectQueryCtx as ConfectQueryCtxType,
 	makeFunctions,
 } from "@packages/confect/server";
-import { confectSchema } from "../confectSchema";
+import { confectSchema } from "../schema";
 import {
 	mutation as triggerMutation,
 	internalMutation as triggerInternalMutation,

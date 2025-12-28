@@ -6,7 +6,7 @@ import {
 	internalQuery,
 	internalMutation,
 } from "../confect";
-import { MessageSchema, ServerSchema } from "../confectSchema";
+import { MessageSchema, ServerSchema } from "../schema";
 import { Id } from "@packages/confect/server";
 
 export const getServerByDiscordId = query({

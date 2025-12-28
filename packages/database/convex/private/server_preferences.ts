@@ -5,7 +5,7 @@ import {
 	ConfectQueryCtx,
 	internalQuery as confectInternalQuery,
 } from "../confect";
-import { ServerPreferencesSchema } from "../confectSchema";
+import { ServerPreferencesSchema } from "../schema";
 import { privateMutation, privateQuery } from "../client";
 import { planValidator } from "../schema";
 import { validateCustomDomainUniqueness } from "../shared/shared";

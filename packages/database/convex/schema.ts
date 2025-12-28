@@ -1,26 +1,26 @@
-import { defineSchema, defineTable } from "convex/server";
-import { type Infer, v } from "convex/values";
-import { literals } from "convex-helpers/validators";
+import {
+	compileSchema,
+	defineSchema,
+	defineTable,
+	Id,
+} from "@packages/confect/server";
+import { Schema } from "effect";
 
-export const forumTagSchema = v.object({
-	id: v.int64(),
-	name: v.string(),
-	moderated: v.boolean(),
-	emojiId: v.optional(v.int64()),
-	emojiName: v.optional(v.string()),
+const ForumTagSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	name: Schema.String,
+	moderated: Schema.Boolean,
+	emojiId: Schema.optional(Schema.BigIntFromSelf),
+	emojiName: Schema.optional(Schema.String),
 });
 
-export type ForumTag = Infer<typeof forumTagSchema>;
-
-export const threadTagSchema = v.object({
-	threadId: v.int64(),
-	tagId: v.int64(),
-	parentChannelId: v.int64(),
+const ThreadTagSchema = Schema.Struct({
+	threadId: Schema.BigIntFromSelf,
+	tagId: Schema.BigIntFromSelf,
+	parentChannelId: Schema.BigIntFromSelf,
 });
 
-export type ThreadTag = Infer<typeof threadTagSchema>;
-
-export const planValidator = literals(
+const PlanSchema = Schema.Literal(
 	"FREE",
 	"STARTER",
 	"ADVANCED",
@@ -29,257 +29,240 @@ export const planValidator = literals(
 	"OPEN_SOURCE",
 );
 
-export type Plan = Infer<typeof planValidator>;
-
-const serverPreferencesSchema = v.object({
-	serverId: v.int64(),
-	stripeCustomerId: v.optional(v.string()),
-	stripeSubscriptionId: v.optional(v.string()),
-	plan: planValidator,
-	readTheRulesConsentEnabled: v.optional(v.boolean()),
-	considerAllMessagesPublicEnabled: v.optional(v.boolean()),
-	anonymizeMessagesEnabled: v.optional(v.boolean()),
-	customDomain: v.optional(v.string()),
-	subpath: v.optional(v.string()),
-	addedByUserId: v.optional(v.int64()),
-	botNickname: v.optional(v.string()),
-	botAvatarStorageId: v.optional(v.id("_storage")),
-	botBannerStorageId: v.optional(v.id("_storage")),
-	botBio: v.optional(v.string()),
+const ServerPreferencesSchema = Schema.Struct({
+	serverId: Schema.BigIntFromSelf,
+	stripeCustomerId: Schema.optional(Schema.String),
+	stripeSubscriptionId: Schema.optional(Schema.String),
+	plan: PlanSchema,
+	readTheRulesConsentEnabled: Schema.optional(Schema.Boolean),
+	considerAllMessagesPublicEnabled: Schema.optional(Schema.Boolean),
+	anonymizeMessagesEnabled: Schema.optional(Schema.Boolean),
+	customDomain: Schema.optional(Schema.String),
+	subpath: Schema.optional(Schema.String),
+	addedByUserId: Schema.optional(Schema.BigIntFromSelf),
+	botNickname: Schema.optional(Schema.String),
+	botAvatarStorageId: Schema.optional(Id.Id("_storage")),
+	botBannerStorageId: Schema.optional(Id.Id("_storage")),
+	botBio: Schema.optional(Schema.String),
 });
 
-export const serverSchema = v.object({
-	discordId: v.int64(),
-	name: v.string(),
-	icon: v.optional(v.string()),
-	banner: v.optional(v.string()),
-	description: v.optional(v.string()),
-	vanityInviteCode: v.optional(v.string()),
-	kickedTime: v.optional(v.number()),
-	approximateMemberCount: v.number(),
+const ServerSchema = Schema.Struct({
+	discordId: Schema.BigIntFromSelf,
+	name: Schema.String,
+	icon: Schema.optional(Schema.String),
+	banner: Schema.optional(Schema.String),
+	description: Schema.optional(Schema.String),
+	vanityInviteCode: Schema.optional(Schema.String),
+	kickedTime: Schema.optional(Schema.Number),
+	approximateMemberCount: Schema.Number,
 });
 
-export const discordAccountSchema = v.object({
-	id: v.int64(), // Discord snowflake ID
-	name: v.string(),
-	avatar: v.optional(v.string()),
+const DiscordAccountSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	name: Schema.String,
+	avatar: Schema.optional(Schema.String),
 });
 
-export const userServerSettingsSchema = v.object({
-	serverId: v.int64(),
-	userId: v.int64(), // Discord account ID (snowflake), not BetterAuth user ID
-	permissions: v.number(), // Bitfield of permissions for the user in the server, this comes from Discord and is not allowed to be modified by the user
-	canPubliclyDisplayMessages: v.boolean(),
-	messageIndexingDisabled: v.boolean(),
-	apiKey: v.optional(v.string()),
-	apiCallsUsed: v.number(),
-	botAddedTimestamp: v.optional(v.number()), // Timestamp when user clicked "Add to Server" button
+const UserServerSettingsSchema = Schema.Struct({
+	serverId: Schema.BigIntFromSelf,
+	userId: Schema.BigIntFromSelf,
+	permissions: Schema.Number,
+	canPubliclyDisplayMessages: Schema.Boolean,
+	messageIndexingDisabled: Schema.Boolean,
+	apiKey: Schema.optional(Schema.String),
+	apiCallsUsed: Schema.Number,
+	botAddedTimestamp: Schema.optional(Schema.Number),
 });
 
-export const ignoredDiscordAccountSchema = v.object({
-	id: v.int64(), // Discord snowflake ID
+const IgnoredDiscordAccountSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
 });
 
-export const channelSchema = v.object({
-	id: v.int64(),
-	serverId: v.int64(),
-	name: v.string(),
-	type: v.number(),
-	parentId: v.optional(v.int64()),
-	archivedTimestamp: v.optional(v.number()),
-	availableTags: v.optional(v.array(forumTagSchema)),
-	botPermissions: v.optional(v.union(v.string(), v.number())),
+const ChannelSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	serverId: Schema.BigIntFromSelf,
+	name: Schema.String,
+	type: Schema.Number,
+	parentId: Schema.optional(Schema.BigIntFromSelf),
+	archivedTimestamp: Schema.optional(Schema.Number),
+	availableTags: Schema.optional(
+		Schema.Array(ForumTagSchema).pipe(Schema.mutable),
+	),
+	botPermissions: Schema.optional(Schema.Union(Schema.String, Schema.Number)),
 });
 
-export const channelSettingsSchema = v.object({
-	channelId: v.int64(),
-	serverId: v.optional(v.int64()),
-	indexingEnabled: v.boolean(),
-	markSolutionEnabled: v.boolean(),
-	sendMarkSolutionInstructionsInNewThreads: v.boolean(),
-	autoThreadEnabled: v.boolean(),
-	forumGuidelinesConsentEnabled: v.boolean(),
-	solutionTagId: v.optional(v.int64()),
-	lastIndexedSnowflake: v.optional(v.int64()),
-	inviteCode: v.optional(v.string()),
+const ChannelSettingsSchema = Schema.Struct({
+	channelId: Schema.BigIntFromSelf,
+	serverId: Schema.optional(Schema.BigIntFromSelf),
+	indexingEnabled: Schema.Boolean,
+	markSolutionEnabled: Schema.Boolean,
+	sendMarkSolutionInstructionsInNewThreads: Schema.Boolean,
+	autoThreadEnabled: Schema.Boolean,
+	forumGuidelinesConsentEnabled: Schema.Boolean,
+	solutionTagId: Schema.optional(Schema.BigIntFromSelf),
+	lastIndexedSnowflake: Schema.optional(Schema.BigIntFromSelf),
+	inviteCode: Schema.optional(Schema.String),
 });
 
-const embedFooterSchema = v.object({
-	text: v.string(),
-	iconUrl: v.optional(v.string()),
-	proxyIconUrl: v.optional(v.string()),
-	iconStorageId: v.optional(v.id("_storage")),
-	iconS3Key: v.optional(v.string()),
+const EmbedFooterSchema = Schema.Struct({
+	text: Schema.String,
+	iconUrl: Schema.optional(Schema.String),
+	proxyIconUrl: Schema.optional(Schema.String),
+	iconStorageId: Schema.optional(Id.Id("_storage")),
+	iconS3Key: Schema.optional(Schema.String),
 });
 
-const embedImageSchema = v.object({
-	url: v.optional(v.string()),
-	proxyUrl: v.optional(v.string()),
-	height: v.optional(v.number()),
-	width: v.optional(v.number()),
-	storageId: v.optional(v.id("_storage")),
-	s3Key: v.optional(v.string()),
+const EmbedImageSchema = Schema.Struct({
+	url: Schema.optional(Schema.String),
+	proxyUrl: Schema.optional(Schema.String),
+	height: Schema.optional(Schema.Number),
+	width: Schema.optional(Schema.Number),
+	storageId: Schema.optional(Id.Id("_storage")),
+	s3Key: Schema.optional(Schema.String),
 });
 
-const embedThumbnailSchema = v.object({
-	url: v.optional(v.string()),
-	proxyUrl: v.optional(v.string()),
-	height: v.optional(v.number()),
-	width: v.optional(v.number()),
-	storageId: v.optional(v.id("_storage")),
-	s3Key: v.optional(v.string()),
+const EmbedThumbnailSchema = Schema.Struct({
+	url: Schema.optional(Schema.String),
+	proxyUrl: Schema.optional(Schema.String),
+	height: Schema.optional(Schema.Number),
+	width: Schema.optional(Schema.Number),
+	storageId: Schema.optional(Id.Id("_storage")),
+	s3Key: Schema.optional(Schema.String),
 });
 
-const embedVideoSchema = v.object({
-	url: v.optional(v.string()),
-	proxyUrl: v.optional(v.string()),
-	height: v.optional(v.number()),
-	width: v.optional(v.number()),
-	storageId: v.optional(v.id("_storage")),
-	s3Key: v.optional(v.string()),
+const EmbedVideoSchema = Schema.Struct({
+	url: Schema.optional(Schema.String),
+	proxyUrl: Schema.optional(Schema.String),
+	height: Schema.optional(Schema.Number),
+	width: Schema.optional(Schema.Number),
+	storageId: Schema.optional(Id.Id("_storage")),
+	s3Key: Schema.optional(Schema.String),
 });
 
-const embedProviderSchema = v.object({
-	name: v.optional(v.string()),
-	url: v.optional(v.string()),
+const EmbedProviderSchema = Schema.Struct({
+	name: Schema.optional(Schema.String),
+	url: Schema.optional(Schema.String),
 });
 
-const embedAuthorSchema = v.object({
-	name: v.optional(v.string()),
-	url: v.optional(v.string()),
-	iconUrl: v.optional(v.string()),
-	proxyIconUrl: v.optional(v.string()),
-	iconStorageId: v.optional(v.id("_storage")),
-	iconS3Key: v.optional(v.string()),
+const EmbedAuthorSchema = Schema.Struct({
+	name: Schema.optional(Schema.String),
+	url: Schema.optional(Schema.String),
+	iconUrl: Schema.optional(Schema.String),
+	proxyIconUrl: Schema.optional(Schema.String),
+	iconStorageId: Schema.optional(Id.Id("_storage")),
+	iconS3Key: Schema.optional(Schema.String),
 });
 
-const embedFieldSchema = v.object({
-	name: v.string(),
-	value: v.string(),
-	inline: v.optional(v.boolean()),
+const EmbedFieldSchema = Schema.Struct({
+	name: Schema.String,
+	value: Schema.String,
+	inline: Schema.optional(Schema.Boolean),
 });
 
-const embedSchema = v.object({
-	title: v.optional(v.string()),
-	type: v.optional(v.string()),
-	description: v.optional(v.string()),
-	url: v.optional(v.string()),
-	timestamp: v.optional(v.string()), // ISO8601 timestamp
-	color: v.optional(v.number()),
-	footer: v.optional(embedFooterSchema),
-	image: v.optional(embedImageSchema),
-	thumbnail: v.optional(embedThumbnailSchema),
-	video: v.optional(embedVideoSchema),
-	provider: v.optional(embedProviderSchema),
-	author: v.optional(embedAuthorSchema),
-	fields: v.optional(v.array(embedFieldSchema)),
+const EmbedSchema = Schema.Struct({
+	title: Schema.optional(Schema.String),
+	type: Schema.optional(Schema.String),
+	description: Schema.optional(Schema.String),
+	url: Schema.optional(Schema.String),
+	timestamp: Schema.optional(Schema.String),
+	color: Schema.optional(Schema.Number),
+	footer: Schema.optional(EmbedFooterSchema),
+	image: Schema.optional(EmbedImageSchema),
+	thumbnail: Schema.optional(EmbedThumbnailSchema),
+	video: Schema.optional(EmbedVideoSchema),
+	provider: Schema.optional(EmbedProviderSchema),
+	author: Schema.optional(EmbedAuthorSchema),
+	fields: Schema.optional(Schema.Array(EmbedFieldSchema).pipe(Schema.mutable)),
 });
 
-export const stickerSchema = v.object({
-	id: v.int64(), // Discord sticker ID
-	name: v.string(),
-	formatType: v.number(), // 1=PNG, 2=APNG, 3=Lottie, 4=GIF
+const StickerSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	name: Schema.String,
+	formatType: Schema.Number,
 });
 
-export const messageSchema = v.object({
-	id: v.int64(), // Discord snowflake ID
-	authorId: v.int64(), // Discord account ID
-	serverId: v.int64(), // Discord server ID
-	channelId: v.int64(), // Discord channel ID
-	parentChannelId: v.optional(v.int64()), // If message is in a thread, parent channel ID
-	childThreadId: v.optional(v.int64()), // Thread started by this message
-	questionId: v.optional(v.int64()), // If this is a solution, the question message ID
-	referenceId: v.optional(v.int64()), // Referenced message ID
-	applicationId: v.optional(v.int64()),
-	interactionId: v.optional(v.int64()),
-	webhookId: v.optional(v.int64()),
-	content: v.string(),
-	flags: v.optional(v.number()),
-	type: v.optional(v.number()),
-	pinned: v.optional(v.boolean()),
-	nonce: v.optional(v.string()),
-	tts: v.optional(v.boolean()),
-	embeds: v.optional(v.array(embedSchema)),
-	stickers: v.optional(v.array(stickerSchema)),
+const MessageSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	authorId: Schema.BigIntFromSelf,
+	serverId: Schema.BigIntFromSelf,
+	channelId: Schema.BigIntFromSelf,
+	parentChannelId: Schema.optional(Schema.BigIntFromSelf),
+	childThreadId: Schema.optional(Schema.BigIntFromSelf),
+	questionId: Schema.optional(Schema.BigIntFromSelf),
+	referenceId: Schema.optional(Schema.BigIntFromSelf),
+	applicationId: Schema.optional(Schema.BigIntFromSelf),
+	interactionId: Schema.optional(Schema.BigIntFromSelf),
+	webhookId: Schema.optional(Schema.BigIntFromSelf),
+	content: Schema.String,
+	flags: Schema.optional(Schema.Number),
+	type: Schema.optional(Schema.Number),
+	pinned: Schema.optional(Schema.Boolean),
+	nonce: Schema.optional(Schema.String),
+	tts: Schema.optional(Schema.Boolean),
+	embeds: Schema.optional(Schema.Array(EmbedSchema).pipe(Schema.mutable)),
+	stickers: Schema.optional(Schema.Array(StickerSchema).pipe(Schema.mutable)),
 });
 
-export const attachmentSchema = v.object({
-	id: v.int64(), // Discord attachment ID
-	messageId: v.int64(), // Discord message ID
-	contentType: v.optional(v.string()),
-	filename: v.string(),
-	width: v.optional(v.number()),
-	height: v.optional(v.number()),
-	size: v.number(),
-	description: v.optional(v.string()),
-	storageId: v.optional(v.id("_storage")), // Convex storage ID (dev/test only, for backwards compat)
+const AttachmentSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	messageId: Schema.BigIntFromSelf,
+	contentType: Schema.optional(Schema.String),
+	filename: Schema.String,
+	width: Schema.optional(Schema.Number),
+	height: Schema.optional(Schema.Number),
+	size: Schema.Number,
+	description: Schema.optional(Schema.String),
+	storageId: Schema.optional(Id.Id("_storage")),
 });
 
-export const emojiSchema = v.object({
-	id: v.int64(), // Discord emoji ID (snowflake)
-	name: v.string(),
-	animated: v.optional(v.boolean()),
+const EmojiSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	name: Schema.String,
+	animated: Schema.optional(Schema.Boolean),
 });
 
-export const reactionSchema = v.object({
-	messageId: v.int64(), // Discord message ID
-	userId: v.int64(), // Discord account ID
-	emojiId: v.int64(), // Discord emoji ID
+const ReactionSchema = Schema.Struct({
+	messageId: Schema.BigIntFromSelf,
+	userId: Schema.BigIntFromSelf,
+	emojiId: Schema.BigIntFromSelf,
 });
 
-export type ServerPreferences = Infer<typeof serverPreferencesSchema>;
-export type Server = Infer<typeof serverSchema>;
-export type Channel = Infer<typeof channelSchema>;
-export type ChannelSettings = Infer<typeof channelSettingsSchema>;
-export type DiscordAccount = Infer<typeof discordAccountSchema>;
-export type UserServerSettings = Infer<typeof userServerSettingsSchema>;
-export type Message = Infer<typeof messageSchema>;
-export type Attachment = Infer<typeof attachmentSchema> & {
-	url: string;
-};
-export type Emoji = Infer<typeof emojiSchema>;
-export type Reaction = Infer<typeof reactionSchema>;
-export type Embed = Infer<typeof embedSchema>;
-export type Sticker = Infer<typeof stickerSchema>;
+const GitHubIssueStatusSchema = Schema.Literal("open", "closed");
 
-export const githubIssueStatusValidator = literals("open", "closed");
-
-export const githubIssueSchema = v.object({
-	issueId: v.number(),
-	issueNumber: v.number(),
-	repoOwner: v.string(),
-	repoName: v.string(),
-	issueUrl: v.string(),
-	issueTitle: v.string(),
-	discordServerId: v.int64(),
-	discordChannelId: v.int64(),
-	discordMessageId: v.int64(),
-	discordThreadId: v.optional(v.int64()),
-	createdByUserId: v.string(),
-	status: githubIssueStatusValidator,
+const GitHubIssueSchema = Schema.Struct({
+	issueId: Schema.Number,
+	issueNumber: Schema.Number,
+	repoOwner: Schema.String,
+	repoName: Schema.String,
+	issueUrl: Schema.String,
+	issueTitle: Schema.String,
+	discordServerId: Schema.BigIntFromSelf,
+	discordChannelId: Schema.BigIntFromSelf,
+	discordMessageId: Schema.BigIntFromSelf,
+	discordThreadId: Schema.optional(Schema.BigIntFromSelf),
+	createdByUserId: Schema.String,
+	status: GitHubIssueStatusSchema,
 });
 
-export type GitHubIssue = Infer<typeof githubIssueSchema>;
-
-export default defineSchema({
-	servers: defineTable(serverSchema).index("by_discordId", ["discordId"]),
-	serverPreferences: defineTable(serverPreferencesSchema)
+export const confectSchema = defineSchema({
+	servers: defineTable(ServerSchema).index("by_discordId", ["discordId"]),
+	serverPreferences: defineTable(ServerPreferencesSchema)
 		.index("by_serverId", ["serverId"])
 		.index("by_customDomain", ["customDomain"])
 		.index("by_stripeCustomerId", ["stripeCustomerId"]),
-	discordAccounts: defineTable(discordAccountSchema).index(
+	discordAccounts: defineTable(DiscordAccountSchema).index(
 		"by_discordAccountId",
 		["id"],
 	),
-	userServerSettings: defineTable(userServerSettingsSchema)
+	userServerSettings: defineTable(UserServerSettingsSchema)
 		.index("by_serverId", ["serverId"])
 		.index("by_userId", ["userId"])
 		.index("by_userId_serverId", ["userId", "serverId"]),
-	ignoredDiscordAccounts: defineTable(ignoredDiscordAccountSchema).index(
+	ignoredDiscordAccounts: defineTable(IgnoredDiscordAccountSchema).index(
 		"by_discordAccountId",
 		["id"],
 	),
-	channels: defineTable(channelSchema)
+	channels: defineTable(ChannelSchema)
 		.index("by_serverId", ["serverId"])
 		.index("by_serverId_and_type", ["serverId", "type"])
 		.index("by_type", ["type"])
@@ -291,12 +274,12 @@ export default defineSchema({
 			searchField: "name",
 			filterFields: ["serverId", "type", "parentId"],
 		}),
-	channelSettings: defineTable(channelSettingsSchema)
+	channelSettings: defineTable(ChannelSettingsSchema)
 		.index("by_channelId", ["channelId"])
 		.index("by_serverId", ["serverId"])
 		.index("by_serverId_and_indexingEnabled", ["serverId", "indexingEnabled"])
 		.index("by_inviteCode", ["inviteCode"]),
-	messages: defineTable(messageSchema)
+	messages: defineTable(MessageSchema)
 		.index("by_messageId", ["id"])
 		.index("by_authorId", ["authorId"])
 		.index("by_authorId_and_childThreadId", ["authorId", "childThreadId"])
@@ -310,18 +293,18 @@ export default defineSchema({
 			searchField: "content",
 			filterFields: ["serverId", "channelId", "parentChannelId"],
 		}),
-	attachments: defineTable(attachmentSchema)
+	attachments: defineTable(AttachmentSchema)
 		.index("by_messageId", ["messageId"])
 		.index("by_attachmentId", ["id"]),
-	emojis: defineTable(emojiSchema).index("by_emojiId", ["id"]),
-	reactions: defineTable(reactionSchema)
+	emojis: defineTable(EmojiSchema).index("by_emojiId", ["id"]),
+	reactions: defineTable(ReactionSchema)
 		.index("by_messageId", ["messageId"])
 		.index("by_userId", ["userId"])
 		.index("by_emojiId", ["emojiId"]),
-	threadTags: defineTable(threadTagSchema)
+	threadTags: defineTable(ThreadTagSchema)
 		.index("by_threadId", ["threadId"])
 		.index("by_parentChannelId_and_tagId", ["parentChannelId", "tagId"]),
-	githubIssues: defineTable(githubIssueSchema)
+	githubIssues: defineTable(GitHubIssueSchema)
 		.index("by_repoOwner_and_repoName_and_issueNumber", [
 			"repoOwner",
 			"repoName",
@@ -330,3 +313,57 @@ export default defineSchema({
 		.index("by_discordMessageId", ["discordMessageId"])
 		.index("by_createdByUserId", ["createdByUserId"]),
 });
+
+export default confectSchema.convexSchemaDefinition;
+
+export {
+	ForumTagSchema,
+	ThreadTagSchema,
+	PlanSchema,
+	ServerPreferencesSchema,
+	ServerSchema,
+	DiscordAccountSchema,
+	UserServerSettingsSchema,
+	IgnoredDiscordAccountSchema,
+	ChannelSchema,
+	ChannelSettingsSchema,
+	EmbedSchema,
+	StickerSchema,
+	MessageSchema,
+	AttachmentSchema,
+	EmojiSchema,
+	ReactionSchema,
+	GitHubIssueStatusSchema,
+	GitHubIssueSchema,
+};
+
+export const serverSchema = compileSchema(ServerSchema);
+export const channelSchema = compileSchema(ChannelSchema);
+export const channelSettingsSchema = compileSchema(ChannelSettingsSchema);
+export const messageSchema = compileSchema(MessageSchema);
+export const attachmentSchema = compileSchema(AttachmentSchema);
+export const emojiSchema = compileSchema(EmojiSchema);
+export const discordAccountSchema = compileSchema(DiscordAccountSchema);
+export const userServerSettingsSchema = compileSchema(UserServerSettingsSchema);
+
+export const planValidator = compileSchema(PlanSchema);
+export const githubIssueStatusValidator = compileSchema(
+	GitHubIssueStatusSchema,
+);
+
+export type Plan = Schema.Schema.Type<typeof PlanSchema>;
+export type Channel = Schema.Schema.Type<typeof ChannelSchema>;
+export type ChannelSettings = Schema.Schema.Type<typeof ChannelSettingsSchema>;
+export type Message = Schema.Schema.Type<typeof MessageSchema>;
+export type Attachment = Schema.Schema.Type<typeof AttachmentSchema>;
+export type Emoji = Schema.Schema.Type<typeof EmojiSchema>;
+export type Sticker = Schema.Schema.Type<typeof StickerSchema>;
+export type Server = Schema.Schema.Type<typeof ServerSchema>;
+export type ServerPreferences = Schema.Schema.Type<
+	typeof ServerPreferencesSchema
+>;
+export type DiscordAccount = Schema.Schema.Type<typeof DiscordAccountSchema>;
+export type UserServerSettings = Schema.Schema.Type<
+	typeof UserServerSettingsSchema
+>;
+export type GitHubIssue = Schema.Schema.Type<typeof GitHubIssueSchema>;

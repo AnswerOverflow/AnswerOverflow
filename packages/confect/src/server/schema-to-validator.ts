@@ -47,6 +47,11 @@ import type {
 	UnionToTuple,
 } from "./type-utils";
 
+type JoinFieldPaths<
+	Prefix extends string,
+	Suffix extends string,
+> = Suffix extends "" ? Prefix : `${Prefix}.${Suffix}`;
+
 // Args
 
 export const compileArgsSchema = <ConfectValue, ConvexValue>(
@@ -76,16 +81,34 @@ export const compileReturnsSchema = <ConfectValue, ConvexValue>(
 
 // Table
 
+type SchemaEncodedFieldPaths<TableSchema extends Schema.Schema.AnyNoContext> =
+	TableSchema["Encoded"] extends infer E
+		? E extends ReadonlyRecordValue
+			? TopLevelFieldPaths<E>
+			: keyof TableSchema["Encoded"] & string
+		: keyof TableSchema["Encoded"] & string;
+
 /**
  * Convert a table `Schema` to a table `Validator`.
+ * Falls back to a permissive VObject if the type is too complex.
  */
 export type TableSchemaToTableValidator<
 	TableSchema extends Schema.Schema.AnyNoContext,
-> = ValueToValidator<TableSchema["Encoded"]> extends infer Vd extends
-	| VObject<any, any, any, any>
-	| VUnion<any, any, any, any>
-	? Vd
-	: never;
+> = ValueToValidator<TableSchema["Encoded"]> extends infer Vd
+	? Vd extends VObject<any, any, any, any> | VUnion<any, any, any, any>
+		? Vd
+		: VObject<
+				TableSchema["Encoded"],
+				Record<string, Validator<any, any, any>>,
+				"required",
+				SchemaEncodedFieldPaths<TableSchema>
+			>
+	: VObject<
+			TableSchema["Encoded"],
+			Record<string, Validator<any, any, any>>,
+			"required",
+			SchemaEncodedFieldPaths<TableSchema>
+		>;
 
 export const compileTableSchema = <
 	TableSchema extends Schema.Schema.AnyNoContext,
@@ -126,115 +149,188 @@ export type ReadonlyRecordValue = {
 	readonly [key: string]: ReadonlyValue | undefined;
 };
 
-export type ValueToValidator<Vl> = IsRecursive<Vl> extends true
-	? VAny
-	: [Vl] extends [never]
-		? never
-		: IsAny<Vl> extends true
-			? VAny
-			: [Vl] extends [ReadonlyValue]
-				? Vl extends {
-						__tableName: infer TableName extends string;
-					}
-					? VId<GenericId<TableName>>
-					: IsValueLiteral<Vl> extends true
-						? VLiteral<Vl>
-						: Vl extends null
-							? VNull
-							: Vl extends number
-								? VFloat64
-								: Vl extends bigint
-									? VInt64
-									: Vl extends boolean
-										? VBoolean
-										: Vl extends string
-											? VString
-											: Vl extends ArrayBuffer
-												? VBytes
-												: Vl extends ReadonlyArray<ReadonlyValue>
-													? ArrayValueToValidator<Vl>
-													: Vl extends ReadonlyRecordValue
-														? RecordValueToValidator<Vl>
-														: IsUnion<Vl> extends true
-															? UnionValueToValidator<Vl>
-															: TypeError<"Unexpected value", Vl>
-				: TypeError<"Not a valid Convex value", Vl>;
+type MaxTypeDepth = 6;
+type IncrementDepth<N extends number> = [1, 2, 3, 4, 5, 6, 7][N];
 
-type ArrayValueToValidator<Vl extends ReadonlyArray<ReadonlyValue>> =
-	Vl extends ReadonlyArray<infer El extends ReadonlyValue>
-		? ValueToValidator<El> extends infer Vd extends Validator<any, any, any>
+type CountKeys<T> = keyof T extends never
+	? 0
+	: keyof T extends string
+		? (keyof T)["length"] extends number
+			? 1
+			: 20
+		: 20;
+type IsTooComplex<T> = T extends ReadonlyRecordValue
+	? CountKeys<T> extends infer N extends number
+		? N extends 20
+			? true
+			: false
+		: false
+	: false;
+
+export type ValueToValidator<
+	Vl,
+	Depth extends number = 0,
+> = Depth extends MaxTypeDepth
+	? VAny
+	: IsRecursive<Vl> extends true
+		? VAny
+		: [Vl] extends [never]
+			? never
+			: IsAny<Vl> extends true
+				? VAny
+				: [Vl] extends [ReadonlyValue]
+					? Vl extends {
+							__tableName: infer TableName extends string;
+						}
+						? VId<GenericId<TableName>>
+						: IsValueLiteral<Vl> extends true
+							? VLiteral<Vl>
+							: Vl extends null
+								? VNull
+								: Vl extends number
+									? VFloat64
+									: Vl extends bigint
+										? VInt64
+										: Vl extends boolean
+											? VBoolean
+											: Vl extends string
+												? VString
+												: Vl extends ArrayBuffer
+													? VBytes
+													: Vl extends ReadonlyArray<ReadonlyValue>
+														? ArrayValueToValidator<Vl, Depth>
+														: Vl extends ReadonlyRecordValue
+															? RecordValueToValidator<Vl, Depth>
+															: IsUnion<Vl> extends true
+																? UnionValueToValidator<Vl, Depth>
+																: TypeError<"Unexpected value", Vl>
+					: TypeError<"Not a valid Convex value", Vl>;
+
+type ArrayValueToValidator<
+	Vl extends ReadonlyArray<ReadonlyValue>,
+	Depth extends number = 0,
+> = Depth extends MaxTypeDepth
+	? VArray<any, VAny>
+	: Vl extends ReadonlyArray<infer El extends ReadonlyValue>
+		? ValueToValidator<El, IncrementDepth<Depth>> extends infer Vd extends
+				Validator<any, any, any>
 			? VArray<DeepMutable<El[]>, Vd>
-			: never
+			: VArray<any, VAny>
+		: VArray<any, VAny>;
+
+type ExtractFieldPathsFromValue<
+	Vl,
+	Prefix extends string = "",
+	Depth extends number = 0,
+> = Depth extends 4
+	? Prefix
+	: Vl extends ReadonlyRecordValue
+		? {
+				[K in keyof Vl & string]:
+					| JoinFieldPaths<Prefix, K>
+					| ExtractFieldPathsFromValue<
+							NonNullable<Vl[K]>,
+							JoinFieldPaths<Prefix, K>,
+							IncrementDepth<Depth>
+					  >;
+			}[keyof Vl & string]
+		: Prefix;
+
+type TopLevelFieldPaths<Vl extends ReadonlyRecordValue> = {
+	[K in keyof Vl & string]:
+		| K
+		| (NonNullable<Vl[K]> extends ReadonlyRecordValue
+				? `${K}.${keyof NonNullable<Vl[K]> & string}`
+				: never);
+}[keyof Vl & string];
+
+type RecordValueToValidator<
+	Vl,
+	Depth extends number = 0,
+> = Depth extends MaxTypeDepth
+	? VObject<any, any>
+	: Vl extends ReadonlyRecordValue
+		? RecordValueToValidatorInner<Vl, Depth>
 		: never;
 
-type RecordValueToValidator<Vl> = Vl extends ReadonlyRecordValue
+type SimpleFieldPaths<Vl extends ReadonlyRecordValue> = keyof Vl & string;
+
+type RecordValueToValidatorInner<
+	Vl extends ReadonlyRecordValue,
+	Depth extends number,
+> = {
+	-readonly [K in keyof Vl]-?: IsAny<Vl[K]> extends true
+		? IsOptional<Vl, K> extends true
+			? VOptional<VAny>
+			: VAny
+		: UndefinedOrValueToValidator<Vl[K], Depth>;
+} extends infer VdRecord extends Record<string, any>
 	? {
-			-readonly [K in keyof Vl]-?: IsAny<Vl[K]> extends true
-				? IsOptional<Vl, K> extends true
-					? VOptional<VAny>
-					: VAny
-				: UndefinedOrValueToValidator<Vl[K]>;
-		} extends infer VdRecord extends Record<string, any>
-		? {
-				-readonly [K in keyof Vl]: DeepMutable<Vl[K]>;
-			} extends infer VlRecord extends Record<string, any>
-			? VObject<VlRecord, VdRecord>
-			: never
-		: never
-	: never;
+			-readonly [K in keyof Vl]: DeepMutable<Vl[K]>;
+		} extends infer VlRecord extends Record<string, any>
+		? VObject<VlRecord, VdRecord, "required", SimpleFieldPaths<Vl>>
+		: VObject<any, any>
+	: VObject<any, any>;
 
-export type UndefinedOrValueToValidator<Vl extends ReadonlyValue | undefined> =
-	undefined extends Vl
+export type UndefinedOrValueToValidator<
+	Vl extends ReadonlyValue | undefined,
+	Depth extends number = 0,
+> = Depth extends MaxTypeDepth
+	? VOptional<VAny>
+	: undefined extends Vl
 		? Vl extends infer Val extends ReadonlyValue | undefined
-			? ValueToValidator<Val> extends infer Vd extends Validator<
-					any,
-					OptionalProperty,
-					any
-				>
+			? ValueToValidator<Val, IncrementDepth<Depth>> extends infer Vd extends
+					Validator<any, OptionalProperty, any>
 				? VOptional<Vd>
-				: undefined
-			: never
+				: VOptional<VAny>
+			: VOptional<VAny>
 		: Vl extends ReadonlyValue
-			? ValueToValidator<Vl>
-			: never;
+			? ValueToValidator<Vl, IncrementDepth<Depth>>
+			: VAny;
 
-type UnionValueToValidator<Vl extends ReadonlyValue> = [Vl] extends [
-	ReadonlyValue,
-]
-	? IsUnion<Vl> extends true
-		? UnionToTuple<Vl> extends infer VlTuple extends
-				ReadonlyArray<ReadonlyValue>
-			? ValueTupleToValidatorTuple<VlTuple> extends infer VdTuple extends
-					Validator<any, "required", any>[]
-				? VUnion<DeepMutable<Vl>, VdTuple>
-				: TypeError<"Failed to convert value tuple to validator tuple">
-			: TypeError<"Failed to convert union to tuple">
-		: TypeError<"Expected a union of values, but got a single value instead">
-	: TypeError<"Provided value is not a valid Convex value">;
+type UnionValueToValidator<
+	Vl extends ReadonlyValue,
+	Depth extends number = 0,
+> = Depth extends MaxTypeDepth
+	? VAny
+	: [Vl] extends [ReadonlyValue]
+		? IsUnion<Vl> extends true
+			? UnionToTuple<Vl> extends infer VlTuple extends
+					ReadonlyArray<ReadonlyValue>
+				? ValueTupleToValidatorTuple<
+						VlTuple,
+						Depth
+					> extends infer VdTuple extends Validator<any, "required", any>[]
+					? VUnion<DeepMutable<Vl>, VdTuple>
+					: TypeError<"Failed to convert value tuple to validator tuple">
+				: TypeError<"Failed to convert union to tuple">
+			: TypeError<"Expected a union of values, but got a single value instead">
+		: TypeError<"Provided value is not a valid Convex value">;
 
-type ValueTupleToValidatorTuple<VlTuple extends ReadonlyArray<ReadonlyValue>> =
-	VlTuple extends
-		| [true, false, ...infer VlRest extends ReadonlyArray<ReadonlyValue>]
-		| [
-				false,
-				true,
-				// biome-ignore lint/suspicious/noRedeclare: This redeclare allows us to be more terse
-				...infer VlRest extends ReadonlyArray<ReadonlyValue>,
-		  ]
-		? ValueTupleToValidatorTuple<VlRest> extends infer VdRest extends Validator<
-				any,
-				any,
-				any
-			>[]
+type ValueTupleToValidatorTuple<
+	VlTuple extends ReadonlyArray<ReadonlyValue>,
+	Depth extends number = 0,
+> = Depth extends MaxTypeDepth
+	? []
+	: VlTuple extends
+				| [true, false, ...infer VlRest extends ReadonlyArray<ReadonlyValue>]
+				| [false, true, ...infer VlRest extends ReadonlyArray<ReadonlyValue>]
+		? ValueTupleToValidatorTuple<
+				VlRest,
+				IncrementDepth<Depth>
+			> extends infer VdRest extends Validator<any, any, any>[]
 			? [VBoolean<boolean>, ...VdRest]
 			: never
 		: VlTuple extends [
 					infer Vl extends ReadonlyValue,
 					...infer VlRest extends ReadonlyArray<ReadonlyValue>,
 				]
-			? ValueToValidator<Vl> extends infer Vd extends Validator<any, any, any>
-				? ValueTupleToValidatorTuple<VlRest> extends infer VdRest extends
-						Validator<any, "required", any>[]
+			? ValueToValidator<Vl, IncrementDepth<Depth>> extends infer Vd extends
+					Validator<any, any, any>
+				? ValueTupleToValidatorTuple<
+						VlRest,
+						IncrementDepth<Depth>
+					> extends infer VdRest extends Validator<any, "required", any>[]
 					? [Vd, ...VdRest]
 					: never
 				: never
