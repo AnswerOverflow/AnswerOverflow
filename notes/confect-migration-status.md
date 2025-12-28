@@ -361,8 +361,30 @@ Actions that use `ctx.runMutation(api.private.*)` create circular type inference
 - The API types are generated from the functions
 - The functions depend on the API types for the runMutation calls
 
+### 26. Migrated Authenticated Functions (Partial)
+
+**Fully Migrated:**
+1. **`authenticated/discord_token.ts`** - Token refresh logic:
+   - `updateAccountTokens` - Internal mutation to update OAuth tokens
+   - `refreshAndGetValidToken` - Internal action to refresh Discord tokens
+   - Uses Effect.gen with proper error handling via DiscordTokenError
+
+2. **`authenticated/vercel_domains.ts`** - Vercel domain management:
+   - `getDomainStatus` - Check domain verification status
+   - `addDomain` - Add domain to Vercel project
+   - Uses authenticatedAction wrapper
+
+**Not Yet Migrated (need custom confect wrappers):**
+1. **`authenticated/dashboard.ts`** - Uses guildManagerAction, manageGuildAction
+2. **`authenticated/dashboard_queries.ts`** - Uses guildManagerQuery, authenticatedQuery
+3. **`authenticated/dashboard_mutations.ts`** - Uses guildManagerMutation
+4. **`authenticated/stripe.ts`** - Uses manageGuildAction
+5. **`authenticated/admin.ts`** - Uses adminQuery (needs admin wrapper)
+
 ## Next Steps
 1. ~~Create `confectPublic.ts` wrapper that adds cache support~~ ✅ Done
 2. ~~Continue migrating public functions~~ ✅ Done (channels, messages migrated)
-3. Consider updating shared functions to accept readonly arrays
-4. Migrate authenticated functions (dashboard, stripe, etc.)
+3. ~~Migrate simple authenticated functions~~ ✅ Done (discord_token, vercel_domains)
+4. Create confect versions of guildManager wrappers
+5. Migrate dashboard and stripe functions
+6. Consider updating shared functions to accept readonly arrays
