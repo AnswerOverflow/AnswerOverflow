@@ -289,13 +289,21 @@ Use confect pattern for all new Convex functions. They automatically get:
    - `getServerByDomain` - Get server by custom domain
    - `getBrowseServers` - List browseable servers
    - `getServerByDiscordIdWithChannels` - Get server with indexed channels
+2. **`public/threadTags.ts`** - Thread tag queries
+3. **`public/discord_accounts.ts`** - Discord account queries
+4. **`public/channels.ts`** - All channel queries with cache support:
+   - `getChannelPageThreads` - Paginated threads for a channel
+   - `getServerPageThreads` - Paginated threads for a server
+   - `getCommunityPageHeaderData` - Header data for community pages
+5. **`public/messages.ts`** - Message queries with cache support:
+   - `getMessages` - Paginated messages for a channel
+   - `getMessagePageHeaderData` - Header data for message pages
+
+**Partially Migrated:**
+1. **`public/search.ts`** - Public queries use confect, internal queries/actions kept old pattern
 
 **Not Yet Migrated:**
-1. **`public/channels.ts`** - Complex functions with cache dependencies
-2. **`public/messages.ts`** - Uses cache for message enrichment
-3. **`public/search.ts`** - Search functionality
-4. **`public/discord_accounts.ts`** - Discord account queries
-5. **`public/threadTags.ts`** - Thread tag queries
+1. **`authenticated/*`** - Dashboard, stripe, admin functions
 
 ## Key Files
 - `packages/confect/` - Vendored confect package
@@ -341,14 +349,12 @@ Effect Schema produces `readonly T[]` for arrays. This doesn't match mutable `T[
 2. Update shared functions to accept `ReadonlyArray<T>`
 3. Use `Schema.mutable` on the array schema
 
-### Cache Dependency
-Some functions use `ctx.cache` which is added by `publicQuery`/`privateQuery` wrappers from `client/index.ts`:
-- `getMessagePageHeaderData` in messages.ts
-- Various functions in `public/channels.ts` and `public/messages.ts`
-
-These cannot be migrated to confect without:
-1. Creating a confect wrapper that adds cache to context
-2. Or refactoring to not use cache
+### Cache Dependency - RESOLVED
+Cache is now available via the `DataCache` Effect service in `confectPublic.ts`. Use:
+```typescript
+const ctxWithCache = yield* getQueryCtxWithCache;
+// ctxWithCache has both ctx and cache properties
+```
 
 ### Circular API References in Actions
 Actions that use `ctx.runMutation(api.private.*)` create circular type inference issues with confect because:
@@ -357,6 +363,6 @@ Actions that use `ctx.runMutation(api.private.*)` create circular type inference
 
 ## Next Steps
 1. ~~Create `confectPublic.ts` wrapper that adds cache support~~ ✅ Done
-2. Continue migrating public functions that don't heavily use cache
+2. ~~Continue migrating public functions~~ ✅ Done (channels, messages migrated)
 3. Consider updating shared functions to accept readonly arrays
 4. Migrate authenticated functions (dashboard, stripe, etc.)
