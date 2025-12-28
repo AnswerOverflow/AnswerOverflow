@@ -1,354 +1,420 @@
-import type { GenericDatabaseReader } from "convex/server";
-import { paginationOptsValidator } from "convex/server";
-import { v } from "convex/values";
-import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { Array as Arr, Predicate } from "effect";
-import type { DataModel } from "../_generated/dataModel";
+import { Array as Arr, Effect, Option, Predicate, Schema } from "effect";
+import { PaginationOpts } from "@packages/confect/server";
 import { enrichMessage } from "../shared/dataAccess";
 import { getThreadStartMessage } from "../shared/messages";
-import {
-	channelWithSystemFieldsValidator,
-	enrichedMessageValidator,
-	paginatedValidator,
-} from "../shared/publicSchemas";
 import { CHANNEL_TYPE, getChannelWithSettings } from "../shared/shared";
-import { publicQuery } from "./custom_functions";
+import {
+	publicQuery as confectPublicQuery,
+	ConfectQueryCtx,
+	getQueryCtxWithCache,
+} from "../client/confectPublic";
 
-export const getChannelPageThreads = publicQuery({
-	args: {
-		channelDiscordId: v.int64(),
-		tagIds: v.optional(v.array(v.string())),
-		paginationOpts: paginationOptsValidator,
-	},
-	returns: paginatedValidator(
-		v.object({
-			thread: channelWithSystemFieldsValidator,
-			message: v.union(enrichedMessageValidator, v.null()),
-		}),
-	),
-	handler: async (ctx, args) => {
-		const tagIdStrings = args.tagIds;
-		const hasTagFilter = tagIdStrings && tagIdStrings.length > 0;
+const PaginatedResultSchema = Schema.Struct({
+	page: Schema.Array(Schema.Unknown),
+	isDone: Schema.Boolean,
+	continueCursor: Schema.String,
+});
 
-		if (hasTagFilter) {
-			const tagIds = tagIdStrings.map((id) => BigInt(id));
-			const threadIdSets: Array<Set<bigint>> = await asyncMap(
-				tagIds,
-				async (tagId) => {
-					const entries = await ctx.db
-						.query("threadTags")
-						.withIndex("by_parentChannelId_and_tagId", (q) =>
-							q.eq("parentChannelId", args.channelDiscordId).eq("tagId", tagId),
-						)
-						.collect();
-					return new Set(entries.map((e) => e.threadId));
-				},
-			);
+export const getChannelPageThreads = confectPublicQuery({
+	args: Schema.Struct({
+		channelDiscordId: Schema.BigIntFromSelf,
+		tagIds: Schema.optional(Schema.Array(Schema.String)),
+		paginationOpts: PaginationOpts.PaginationOpts,
+	}),
+	returns: PaginatedResultSchema,
+	handler: ({ channelDiscordId, tagIds, paginationOpts }) =>
+		Effect.gen(function* () {
+			const { ctx, db } = yield* ConfectQueryCtx;
+			const ctxWithCache = yield* getQueryCtxWithCache;
 
-			const matchingThreadIds = new Set<bigint>();
-			for (const set of threadIdSets) {
-				for (const id of set) {
-					matchingThreadIds.add(id);
+			const tagIdStrings = tagIds;
+			const hasTagFilter = tagIdStrings && tagIdStrings.length > 0;
+
+			if (hasTagFilter) {
+				const tagIdsBigInt = [...tagIdStrings].map((id) => BigInt(id));
+
+				const threadIdSets = yield* Effect.all(
+					tagIdsBigInt.map((tagId) =>
+						Effect.gen(function* () {
+							const entries = yield* db
+								.query("threadTags")
+								.withIndex("by_parentChannelId_and_tagId", (q) =>
+									q.eq("parentChannelId", channelDiscordId).eq("tagId", tagId),
+								)
+								.collect();
+							return new Set([...entries].map((e) => e.threadId));
+						}),
+					),
+				);
+
+				const matchingThreadIds = new Set<bigint>();
+				for (const set of threadIdSets) {
+					for (const id of set) {
+						matchingThreadIds.add(id);
+					}
 				}
-			}
 
-			if (matchingThreadIds.size === 0) {
-				return { page: [], isDone: true, continueCursor: "" };
-			}
-
-			const sortedThreadIds = Array.from(matchingThreadIds).sort((a, b) =>
-				a > b ? -1 : a < b ? 1 : 0,
-			);
-
-			const cursor = args.paginationOpts.cursor;
-			const numItems = args.paginationOpts.numItems;
-			let startIndex = 0;
-
-			if (cursor) {
-				const cursorId = BigInt(cursor);
-				startIndex = sortedThreadIds.findIndex((id) => id < cursorId);
-				if (startIndex === -1) {
+				if (matchingThreadIds.size === 0) {
 					return { page: [], isDone: true, continueCursor: "" };
 				}
+
+				const sortedThreadIds = Array.from(matchingThreadIds).sort((a, b) =>
+					a > b ? -1 : a < b ? 1 : 0,
+				);
+
+				const cursor = paginationOpts.cursor;
+				const numItems = paginationOpts.numItems;
+				let startIndex = 0;
+
+				if (cursor) {
+					const cursorId = BigInt(cursor);
+					startIndex = sortedThreadIds.findIndex((id) => id < cursorId);
+					if (startIndex === -1) {
+						return { page: [], isDone: true, continueCursor: "" };
+					}
+				}
+
+				const pageThreadIds = sortedThreadIds.slice(
+					startIndex,
+					startIndex + numItems,
+				);
+				const isDone = startIndex + numItems >= sortedThreadIds.length;
+				const lastId = pageThreadIds[pageThreadIds.length - 1];
+				const continueCursor = isDone || !lastId ? "" : lastId.toString();
+
+				const threads = yield* Effect.promise(() =>
+					Promise.all(
+						pageThreadIds.map((threadId) =>
+							getOneFrom(
+								ctx.db,
+								"channels",
+								"by_discordChannelId",
+								threadId,
+								"id",
+							),
+						),
+					),
+				);
+
+				const validThreads = Arr.filter(threads, Predicate.isNotNull);
+
+				const page = yield* Effect.promise(() =>
+					Promise.all(
+						validThreads.map(async (thread) => {
+							const message = await getThreadStartMessage(
+								ctxWithCache,
+								thread.id,
+							);
+							const enrichedMessage = message
+								? await enrichMessage(ctxWithCache, message)
+								: null;
+
+							return {
+								thread,
+								message: enrichedMessage,
+							};
+						}),
+					),
+				);
+
+				return {
+					page,
+					isDone,
+					continueCursor,
+				};
 			}
 
-			const pageThreadIds = sortedThreadIds.slice(
-				startIndex,
-				startIndex + numItems,
-			);
-			const isDone = startIndex + numItems >= sortedThreadIds.length;
-			const lastId = pageThreadIds[pageThreadIds.length - 1];
-			const continueCursor = isDone || !lastId ? "" : lastId.toString();
+			const paginatedResult = yield* db
+				.query("channels")
+				.withIndex("by_parentId_and_id", (q) =>
+					q.eq("parentId", channelDiscordId),
+				)
+				.order("desc")
+				.paginate(paginationOpts);
 
-			const threads = await asyncMap(pageThreadIds, (threadId) =>
-				getOneFrom(ctx.db, "channels", "by_discordChannelId", threadId, "id"),
-			);
+			const threads = [...paginatedResult.page];
 
-			const page = await asyncMap(
-				Arr.filter(threads, Predicate.isNotNull),
-				async (thread) => {
-					const message = await getThreadStartMessage(ctx, thread.id);
-					const enrichedMessage = message
-						? await enrichMessage(ctx, message)
-						: null;
+			const page = yield* Effect.promise(() =>
+				Promise.all(
+					threads.map(async (thread) => {
+						const message = await getThreadStartMessage(
+							ctxWithCache,
+							thread.id,
+						);
+						const enrichedMessage = message
+							? await enrichMessage(ctxWithCache, message)
+							: null;
 
-					return {
-						thread,
-						message: enrichedMessage,
-					};
-				},
+						return {
+							thread,
+							message: enrichedMessage,
+						};
+					}),
+				),
 			);
 
 			return {
 				page,
-				isDone,
-				continueCursor,
+				isDone: paginatedResult.isDone,
+				continueCursor: paginatedResult.continueCursor,
 			};
-		}
-
-		const paginatedResult = await ctx.db
-			.query("channels")
-			.withIndex("by_parentId_and_id", (q) =>
-				q.eq("parentId", args.channelDiscordId),
-			)
-			.order("desc")
-			.paginate(args.paginationOpts);
-
-		const threads = paginatedResult.page;
-
-		const page = await asyncMap(threads, async (thread) => {
-			const message = await getThreadStartMessage(ctx, thread.id);
-			const enrichedMessage = message
-				? await enrichMessage(ctx, message)
-				: null;
-
-			return {
-				thread,
-				message: enrichedMessage,
-			};
-		});
-
-		return {
-			page,
-			isDone: paginatedResult.isDone,
-			continueCursor: paginatedResult.continueCursor,
-		};
-	},
+		}),
 });
 
-export const getChannelPageMessages = publicQuery({
-	args: {
-		channelDiscordId: v.int64(),
-		paginationOpts: paginationOptsValidator,
-	},
-	returns: paginatedValidator(
-		v.object({
-			message: v.union(enrichedMessageValidator, v.null()),
-		}),
-	),
-	handler: async (ctx, args) => {
-		const paginatedResult = await ctx.db
-			.query("messages")
-			.withIndex("by_channelId_and_id", (q) =>
-				q.eq("channelId", args.channelDiscordId),
-			)
-			.order("desc")
-			.paginate(args.paginationOpts);
+export const getChannelPageMessages = confectPublicQuery({
+	args: Schema.Struct({
+		channelDiscordId: Schema.BigIntFromSelf,
+		paginationOpts: PaginationOpts.PaginationOpts,
+	}),
+	returns: PaginatedResultSchema,
+	handler: ({ channelDiscordId, paginationOpts }) =>
+		Effect.gen(function* () {
+			const { db } = yield* ConfectQueryCtx;
+			const ctxWithCache = yield* getQueryCtxWithCache;
 
-		const page = await asyncMap(paginatedResult.page, async (message) => {
-			const enrichedMessage = await enrichMessage(ctx, message);
+			const paginatedResult = yield* db
+				.query("messages")
+				.withIndex("by_channelId_and_id", (q) =>
+					q.eq("channelId", channelDiscordId),
+				)
+				.order("desc")
+				.paginate(paginationOpts);
+
+			const page = yield* Effect.promise(() =>
+				Promise.all(
+					[...paginatedResult.page].map(async (message) => {
+						const enrichedMessage = await enrichMessage(ctxWithCache, message);
+						return {
+							message: enrichedMessage,
+						};
+					}),
+				),
+			);
+
 			return {
-				message: enrichedMessage,
+				page,
+				isDone: paginatedResult.isDone,
+				continueCursor: paginatedResult.continueCursor,
 			};
-		});
-
-		return {
-			page,
-			isDone: paginatedResult.isDone,
-			continueCursor: paginatedResult.continueCursor,
-		};
-	},
+		}),
 });
 
-export const getServerPageThreads = publicQuery({
-	args: {
-		serverDiscordId: v.int64(),
-		paginationOpts: paginationOptsValidator,
-	},
-	returns: paginatedValidator(
-		v.object({
-			thread: channelWithSystemFieldsValidator,
-			message: v.union(enrichedMessageValidator, v.null()),
-			channel: v.union(
-				v.object({
-					id: v.int64(),
-					name: v.string(),
-					type: v.number(),
-				}),
-				v.null(),
-			),
-		}),
-	),
-	handler: async (ctx, args) => {
-		const server = await getOneFrom(
-			ctx.db,
-			"servers",
-			"by_discordId",
-			args.serverDiscordId,
-		);
-		if (!server) {
-			return { page: [], isDone: true, continueCursor: "" };
-		}
+export const getServerPageThreads = confectPublicQuery({
+	args: Schema.Struct({
+		serverDiscordId: Schema.BigIntFromSelf,
+		paginationOpts: PaginationOpts.PaginationOpts,
+	}),
+	returns: PaginatedResultSchema,
+	handler: ({ serverDiscordId, paginationOpts }) =>
+		Effect.gen(function* () {
+			const { ctx, db } = yield* ConfectQueryCtx;
+			const ctxWithCache = yield* getQueryCtxWithCache;
 
-		const indexedSettings = await ctx.db
-			.query("channelSettings")
-			.withIndex("by_serverId_and_indexingEnabled", (q) =>
-				q.eq("serverId", server.discordId).eq("indexingEnabled", true),
-			)
-			.collect();
+			const serverOption = yield* db
+				.query("servers")
+				.withIndex("by_discordId", (q) => q.eq("discordId", serverDiscordId))
+				.first();
 
-		const indexedChannelIds = indexedSettings.map((s) => s.channelId);
-
-		const indexedChannels = await asyncMap(indexedChannelIds, (channelId) =>
-			getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
-		);
-
-		const channelIdToInfo = new Map<
-			bigint,
-			{ id: bigint; name: string; type: number }
-		>();
-		for (const channel of indexedChannels) {
-			if (channel) {
-				channelIdToInfo.set(channel.id, {
-					id: channel.id,
-					name: channel.name,
-					type: channel.type,
-				});
+			if (Option.isNone(serverOption)) {
+				return { page: [], isDone: true, continueCursor: "" };
 			}
-		}
 
-		const paginatedResult = await ctx.db
-			.query("channels")
-			.withIndex("by_serverId", (q) => q.eq("serverId", server.discordId))
-			.order("desc")
-			.paginate(args.paginationOpts);
+			const server = serverOption.value;
 
-		const threads = Arr.filter(
-			paginatedResult.page,
-			(channel) =>
-				channel.parentId !== undefined &&
-				indexedChannelIds.includes(channel.parentId),
-		);
+			const indexedSettings = yield* db
+				.query("channelSettings")
+				.withIndex("by_serverId_and_indexingEnabled", (q) =>
+					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+				)
+				.collect();
 
-		const page = await asyncMap(threads, async (thread) => {
-			const channel = thread.parentId
-				? (channelIdToInfo.get(thread.parentId) ?? null)
-				: null;
+			const indexedChannelIds = [...indexedSettings].map((s) => s.channelId);
 
-			const message = await getThreadStartMessage(ctx, thread.id);
-			const enrichedMessage = message
-				? await enrichMessage(ctx, message)
-				: null;
+			const indexedChannels = yield* Effect.promise(() =>
+				Promise.all(
+					indexedChannelIds.map((channelId) =>
+						getOneFrom(
+							ctx.db,
+							"channels",
+							"by_discordChannelId",
+							channelId,
+							"id",
+						),
+					),
+				),
+			);
+
+			const channelIdToInfo = new Map<
+				bigint,
+				{ id: bigint; name: string; type: number }
+			>();
+			for (const channel of indexedChannels) {
+				if (channel) {
+					channelIdToInfo.set(channel.id, {
+						id: channel.id,
+						name: channel.name,
+						type: channel.type,
+					});
+				}
+			}
+
+			const paginatedResult = yield* db
+				.query("channels")
+				.withIndex("by_serverId", (q) => q.eq("serverId", server.discordId))
+				.order("desc")
+				.paginate(paginationOpts);
+
+			const threads = Arr.filter(
+				[...paginatedResult.page],
+				(channel) =>
+					channel.parentId !== undefined &&
+					indexedChannelIds.includes(channel.parentId),
+			);
+
+			const page = yield* Effect.promise(() =>
+				Promise.all(
+					threads.map(async (thread) => {
+						const channel = thread.parentId
+							? (channelIdToInfo.get(thread.parentId) ?? null)
+							: null;
+
+						const message = await getThreadStartMessage(
+							ctxWithCache,
+							thread.id,
+						);
+						const enrichedMessage = message
+							? await enrichMessage(ctxWithCache, message)
+							: null;
+
+						return {
+							thread,
+							message: enrichedMessage,
+							channel,
+						};
+					}),
+				),
+			);
 
 			return {
-				thread,
-				message: enrichedMessage,
-				channel,
+				page,
+				isDone: paginatedResult.isDone,
+				continueCursor: paginatedResult.continueCursor,
 			};
-		});
-
-		return {
-			page,
-			isDone: paginatedResult.isDone,
-			continueCursor: paginatedResult.continueCursor,
-		};
-	},
+		}),
 });
 
-async function getServerHeaderData(
-	ctx: { db: GenericDatabaseReader<DataModel> },
-	serverDiscordId: bigint,
-) {
-	const server = await getOneFrom(
-		ctx.db,
-		"servers",
-		"by_discordId",
-		serverDiscordId,
-	);
+const CommunityPageHeaderDataSchema = Schema.Struct({
+	server: Schema.Unknown,
+	channels: Schema.Array(Schema.Unknown),
+	selectedChannel: Schema.NullOr(Schema.Unknown),
+});
 
-	if (!server) return null;
+export const getCommunityPageHeaderData = confectPublicQuery({
+	args: Schema.Struct({
+		serverDiscordId: Schema.BigIntFromSelf,
+		channelDiscordId: Schema.optional(Schema.BigIntFromSelf),
+	}),
+	returns: Schema.NullOr(CommunityPageHeaderDataSchema),
+	handler: ({ serverDiscordId, channelDiscordId }) =>
+		Effect.gen(function* () {
+			const { ctx, db } = yield* ConfectQueryCtx;
 
-	const [indexedSettings, serverPreferences] = await Promise.all([
-		ctx.db
-			.query("channelSettings")
-			.withIndex("by_serverId_and_indexingEnabled", (q) =>
-				q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+			const serverOption = yield* db
+				.query("servers")
+				.withIndex("by_discordId", (q) => q.eq("discordId", serverDiscordId))
+				.first();
+
+			if (Option.isNone(serverOption)) {
+				return null;
+			}
+
+			const server = serverOption.value;
+
+			const [indexedSettings, serverPreferences] = yield* Effect.all([
+				db
+					.query("channelSettings")
+					.withIndex("by_serverId_and_indexingEnabled", (q) =>
+						q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+					)
+					.collect(),
+				Effect.promise(() =>
+					getOneFrom(
+						ctx.db,
+						"serverPreferences",
+						"by_serverId",
+						server.discordId,
+					),
+				),
+			]);
+
+			const indexedChannelIds = [...indexedSettings].map((s) => s.channelId);
+
+			const allIndexedChannels = yield* Effect.promise(() =>
+				Promise.all(
+					indexedChannelIds.map((channelId) =>
+						getOneFrom(
+							ctx.db,
+							"channels",
+							"by_discordChannelId",
+							channelId,
+							"id",
+						),
+					),
+				),
+			);
+
+			const indexedChannels = Arr.filter(
+				allIndexedChannels,
+				Predicate.isNotNull,
 			)
-			.collect(),
-		getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
-	]);
+				.filter(
+					(c) =>
+						c.type === CHANNEL_TYPE.GuildText ||
+						c.type === CHANNEL_TYPE.GuildAnnouncement ||
+						c.type === CHANNEL_TYPE.GuildForum,
+				)
+				.sort((a, b) => {
+					if (a.type === CHANNEL_TYPE.GuildForum) return -1;
+					if (b.type === CHANNEL_TYPE.GuildForum) return 1;
+					if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
+					if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
+					return 0;
+				});
 
-	const indexedChannelIds = indexedSettings.map((s) => s.channelId);
+			const channelInviteCode = [...indexedSettings].find(
+				(s) => s.inviteCode,
+			)?.inviteCode;
+			const inviteCode = server.vanityInviteCode ?? channelInviteCode;
 
-	const allIndexedChannels = await asyncMap(indexedChannelIds, (channelId) =>
-		getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
-	);
+			const headerData = {
+				server: {
+					...server,
+					customDomain: serverPreferences?.customDomain,
+					subpath: serverPreferences?.subpath,
+					inviteCode,
+				},
+				channels: indexedChannels,
+			};
 
-	const indexedChannels = Arr.filter(allIndexedChannels, Predicate.isNotNull)
-		.filter(
-			(c) =>
-				c.type === CHANNEL_TYPE.GuildText ||
-				c.type === CHANNEL_TYPE.GuildAnnouncement ||
-				c.type === CHANNEL_TYPE.GuildForum,
-		)
-		.sort((a, b) => {
-			if (a.type === CHANNEL_TYPE.GuildForum) return -1;
-			if (b.type === CHANNEL_TYPE.GuildForum) return 1;
-			if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
-			if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
-			return 0;
-		});
+			if (!channelDiscordId) {
+				return {
+					...headerData,
+					selectedChannel: null,
+				};
+			}
 
-	const channelInviteCode = indexedSettings.find(
-		(s) => s.inviteCode,
-	)?.inviteCode;
-	const inviteCode = server.vanityInviteCode ?? channelInviteCode;
+			const channel = yield* Effect.promise(() =>
+				getChannelWithSettings(ctx, channelDiscordId),
+			);
 
-	return {
-		server: {
-			...server,
-			customDomain: serverPreferences?.customDomain,
-			subpath: serverPreferences?.subpath,
-			inviteCode,
-		},
-		channels: indexedChannels,
-	};
-}
+			if (!channel || channel.serverId !== headerData.server.discordId) {
+				return null;
+			}
 
-export const getCommunityPageHeaderData = publicQuery({
-	args: {
-		serverDiscordId: v.int64(),
-		channelDiscordId: v.optional(v.int64()),
-	},
-	handler: async (ctx, args) => {
-		const headerData = await getServerHeaderData(ctx, args.serverDiscordId);
-		if (!headerData) return null;
-
-		if (!args.channelDiscordId) {
 			return {
 				...headerData,
-				selectedChannel: null,
+				selectedChannel: channel,
 			};
-		}
-
-		const channel = await getChannelWithSettings(ctx, args.channelDiscordId);
-		if (!channel || channel.serverId !== headerData.server.discordId)
-			return null;
-
-		return {
-			...headerData,
-			selectedChannel: channel,
-		};
-	},
+		}),
 });
