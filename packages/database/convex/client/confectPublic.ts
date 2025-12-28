@@ -43,6 +43,14 @@ export class DataCache extends Context.Tag("DataCache")<
 	DataAccessCache
 >() {}
 
+import type { QueryCtxWithCache } from "../shared/dataAccess";
+
+export const getQueryCtxWithCache = Effect.gen(function* () {
+	const { ctx } = yield* ConfectQueryCtx;
+	const cache = yield* DataCache;
+	return { ...ctx, cache } as QueryCtxWithCache;
+});
+
 const baseFunctions = makeFunctions(confectSchema, {
 	mutationBuilder: triggerMutation,
 	internalMutationBuilder: triggerInternalMutation,
