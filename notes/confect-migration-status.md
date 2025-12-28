@@ -374,8 +374,25 @@ Actions that use `ctx.runMutation(api.private.*)` create circular type inference
    - `addDomain` - Add domain to Vercel project
    - Uses authenticatedAction wrapper
 
-**Not Yet Migrated (need custom confect wrappers):**
-1. **`authenticated/dashboard.ts`** - Uses guildManagerAction, manageGuildAction
+3. **`authenticated/stripe_actions.ts`** - Added return validator (kept old pattern due to circular refs)
+
+### 27. Created confectGuildManager Wrappers
+
+- File: `packages/database/convex/client/confectGuildManager.ts`
+- Provides confect versions of guild manager functions:
+  - `guildManagerQuery` - Query with guild permission checks
+  - `guildManagerMutation` - Mutation with guild permission checks
+  - `guildManagerAction` - Action with guild permission checks
+  - `manageGuildAction` - Alias for guildManagerAction
+- Exports error types:
+  - `NotAuthenticatedError` - When user is not authenticated
+  - `InsufficientPermissionsError` - When user lacks guild permissions
+- Exports context services:
+  - `GuildManagerContext` - Provides discordAccountId and serverId
+  - `DataCache` - Provides cache for queries/mutations
+
+**Not Yet Migrated (can use new confect wrappers):**
+1. **`authenticated/dashboard.ts`** - Complex, uses guildManagerAction, manageGuildAction
 2. **`authenticated/dashboard_queries.ts`** - Uses guildManagerQuery, authenticatedQuery
 3. **`authenticated/dashboard_mutations.ts`** - Uses guildManagerMutation
 4. **`authenticated/stripe.ts`** - Uses manageGuildAction
@@ -385,6 +402,7 @@ Actions that use `ctx.runMutation(api.private.*)` create circular type inference
 1. ~~Create `confectPublic.ts` wrapper that adds cache support~~ ✅ Done
 2. ~~Continue migrating public functions~~ ✅ Done (channels, messages migrated)
 3. ~~Migrate simple authenticated functions~~ ✅ Done (discord_token, vercel_domains)
-4. Create confect versions of guildManager wrappers
-5. Migrate dashboard and stripe functions
-6. Consider updating shared functions to accept readonly arrays
+4. ~~Create confect versions of guildManager wrappers~~ ✅ Done
+5. Migrate dashboard and stripe functions using new confect wrappers
+6. Create confect adminQuery wrapper
+7. Consider updating shared functions to accept readonly arrays
