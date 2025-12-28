@@ -58,105 +58,94 @@ export const makeFunctions = <ConfectSchema extends GenericConfectSchema>(
 	const internalMutationBuilder =
 		options?.internalMutationBuilder ?? internalMutationGeneric;
 
-	function query<
+	const query = <
 		ConvexArgs extends DefaultFunctionArgs,
 		ConfectArgs,
 		ConvexReturns,
 		ConfectReturns,
-		E,
-	>({
-		args,
-		returns,
-		handler,
-	}: {
-		args: Schema.Schema<ConfectArgs, ConvexArgs>;
-		returns: Schema.Schema<ConfectReturns, ConvexReturns>;
-		handler: (
-			a: ConfectArgs,
-		) => Effect.Effect<
-			ConfectReturns,
-			E,
-			ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}): RegisteredQuery<"public", ConvexArgs, Promise<ConvexReturns>>;
-	function query<
-		ConvexArgs extends DefaultFunctionArgs,
-		ConfectArgs,
-		ConvexSuccess,
-		ConfectSuccess,
 		ConvexError,
 		ConfectError extends { readonly _tag: string },
-	>({
-		args,
-		success,
-		error,
-		handler,
-	}: {
-		args: Schema.Schema<ConfectArgs, ConvexArgs>;
-		success: Schema.Schema<ConfectSuccess, ConvexSuccess>;
-		error: Schema.Schema<ConfectError, ConvexError>;
-		handler: (
-			a: ConfectArgs,
-		) => Effect.Effect<
-			ConfectSuccess,
-			ConfectError,
-			ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}): RegisteredQuery<
-		"public",
-		ConvexArgs,
-		Promise<{ _tag: "Success"; data: ConvexSuccess } | ConvexError>
-	>;
-	function query(opts: {
-		args: Schema.Schema<unknown, DefaultFunctionArgs>;
-		returns?: Schema.Schema<unknown, unknown>;
-		success?: Schema.Schema<unknown, unknown>;
-		error?: Schema.Schema<{ readonly _tag: string }, unknown>;
-		handler: (
-			a: unknown,
-		) => Effect.Effect<
-			unknown,
-			unknown,
-			ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}) {
-		if (opts.success && opts.error) {
+	>(
+		config:
+			| {
+					args: Schema.Schema<ConfectArgs, ConvexArgs>;
+					returns: Schema.Schema<ConfectReturns, ConvexReturns>;
+					handler: (
+						a: ConfectArgs,
+					) => Effect.Effect<
+						ConfectReturns,
+						never,
+						ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+					>;
+			  }
+			| {
+					args: Schema.Schema<ConfectArgs, ConvexArgs>;
+					success: Schema.Schema<ConfectReturns, ConvexReturns>;
+					error: Schema.Schema<ConfectError, ConvexError>;
+					handler: (
+						a: ConfectArgs,
+					) => Effect.Effect<
+						ConfectReturns,
+						ConfectError,
+						ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+					>;
+			  },
+	): "returns" extends keyof typeof config
+		? RegisteredQuery<"public", ConvexArgs, Promise<ConvexReturns>>
+		: RegisteredQuery<
+				"public",
+				ConvexArgs,
+				Promise<{ _tag: "Success"; data: ConvexReturns } | ConvexError>
+			> => {
+		if ("returns" in config) {
 			return queryGeneric(
-				confectQueryFunctionWithResult({
+				confectQueryFunctionDirect({
 					databaseSchemas,
-					args: opts.args,
-					success: opts.success,
-					error: opts.error,
-					handler: opts.handler as (
+					args: config.args,
+					returns: config.returns as Schema.Schema<unknown, ConvexReturns>,
+					handler: config.handler as (
 						a: unknown,
 					) => Effect.Effect<
 						unknown,
-						{ readonly _tag: string },
+						never,
 						ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
 					>,
 				}),
-			);
+			) as ReturnType<typeof query>;
 		}
+
 		return queryGeneric(
-			confectQueryFunction({
+			confectQueryFunctionWithResult({
 				databaseSchemas,
-				args: opts.args,
-				returns: opts.returns!,
-				handler: opts.handler,
+				args: config.args,
+				success: config.success as unknown as Schema.Schema<
+					unknown,
+					ConvexReturns
+				>,
+				error: config.error as unknown as Schema.Schema<
+					{ readonly _tag: string },
+					ConvexError
+				>,
+				handler: config.handler as (
+					a: unknown,
+				) => Effect.Effect<
+					unknown,
+					{ readonly _tag: string },
+					ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+				>,
 			}),
-		);
-	}
+		) as ReturnType<typeof query>;
+	};
 
-	function internalQuery<
+	const internalQuery = <
 		ConvexArgs extends DefaultFunctionArgs,
 		ConfectArgs,
 		ConvexReturns,
 		ConfectReturns,
-		E,
 	>({
 		args,
-		handler,
 		returns,
+		handler,
 	}: {
 		args: Schema.Schema<ConfectArgs, ConvexArgs>;
 		returns: Schema.Schema<ConfectReturns, ConvexReturns>;
@@ -164,173 +153,109 @@ export const makeFunctions = <ConfectSchema extends GenericConfectSchema>(
 			a: ConfectArgs,
 		) => Effect.Effect<
 			ConfectReturns,
-			E,
+			never,
 			ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
 		>;
-	}): RegisteredQuery<"internal", ConvexArgs, Promise<ConvexReturns>>;
-	function internalQuery<
-		ConvexArgs extends DefaultFunctionArgs,
-		ConfectArgs,
-		ConvexSuccess,
-		ConfectSuccess,
+	}): RegisteredQuery<"internal", ConvexArgs, Promise<ConvexReturns>> =>
+		internalQueryGeneric(
+			confectQueryFunctionDirect({
+				databaseSchemas,
+				args,
+				returns: returns as Schema.Schema<unknown, ConvexReturns>,
+				handler: handler as (
+					a: unknown,
+				) => Effect.Effect<
+					unknown,
+					never,
+					ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+				>,
+			}),
+		);
+
+	const mutation = <
+		ConvexValue extends DefaultFunctionArgs,
+		ConfectValue,
+		ConvexReturns,
+		ConfectReturns,
 		ConvexError,
 		ConfectError extends { readonly _tag: string },
-	>({
-		args,
-		success,
-		error,
-		handler,
-	}: {
-		args: Schema.Schema<ConfectArgs, ConvexArgs>;
-		success: Schema.Schema<ConfectSuccess, ConvexSuccess>;
-		error: Schema.Schema<ConfectError, ConvexError>;
-		handler: (
-			a: ConfectArgs,
-		) => Effect.Effect<
-			ConfectSuccess,
-			ConfectError,
-			ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}): RegisteredQuery<
-		"internal",
-		ConvexArgs,
-		Promise<{ _tag: "Success"; data: ConvexSuccess } | ConvexError>
-	>;
-	function internalQuery(opts: {
-		args: Schema.Schema<unknown, DefaultFunctionArgs>;
-		returns?: Schema.Schema<unknown, unknown>;
-		success?: Schema.Schema<unknown, unknown>;
-		error?: Schema.Schema<{ readonly _tag: string }, unknown>;
-		handler: (
-			a: unknown,
-		) => Effect.Effect<
-			unknown,
-			unknown,
-			ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}) {
-		if (opts.success && opts.error) {
-			return internalQueryGeneric(
-				confectQueryFunctionWithResult({
-					databaseSchemas,
-					args: opts.args,
-					success: opts.success,
-					error: opts.error,
-					handler: opts.handler as (
-						a: unknown,
+	>(
+		config:
+			| {
+					args: Schema.Schema<ConfectValue, ConvexValue>;
+					returns: Schema.Schema<ConfectReturns, ConvexReturns>;
+					handler: (
+						a: ConfectValue,
 					) => Effect.Effect<
-						unknown,
-						{ readonly _tag: string },
-						ConfectQueryCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-					>,
-				}),
-			);
-		}
-		return internalQueryGeneric(
-			confectQueryFunction({
-				databaseSchemas,
-				args: opts.args,
-				returns: opts.returns!,
-				handler: opts.handler,
-			}),
-		);
-	}
-
-	function mutation<
-		ConvexValue extends DefaultFunctionArgs,
-		ConfectValue,
-		ConvexReturns,
-		ConfectReturns,
-		E,
-	>({
-		args,
-		returns,
-		handler,
-	}: {
-		args: Schema.Schema<ConfectValue, ConvexValue>;
-		returns: Schema.Schema<ConfectReturns, ConvexReturns>;
-		handler: (
-			a: ConfectValue,
-		) => Effect.Effect<
-			ConfectReturns,
-			E,
-			ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}): RegisteredMutation<"public", ConvexValue, Promise<ConvexReturns>>;
-	function mutation<
-		ConvexValue extends DefaultFunctionArgs,
-		ConfectValue,
-		ConvexSuccess,
-		ConfectSuccess,
-		ConvexError,
-		ConfectError extends { readonly _tag: string },
-	>({
-		args,
-		success,
-		error,
-		handler,
-	}: {
-		args: Schema.Schema<ConfectValue, ConvexValue>;
-		success: Schema.Schema<ConfectSuccess, ConvexSuccess>;
-		error: Schema.Schema<ConfectError, ConvexError>;
-		handler: (
-			a: ConfectValue,
-		) => Effect.Effect<
-			ConfectSuccess,
-			ConfectError,
-			ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}): RegisteredMutation<
-		"public",
-		ConvexValue,
-		Promise<{ _tag: "Success"; data: ConvexSuccess } | ConvexError>
-	>;
-	function mutation(opts: {
-		args: Schema.Schema<unknown, DefaultFunctionArgs>;
-		returns?: Schema.Schema<unknown, unknown>;
-		success?: Schema.Schema<unknown, unknown>;
-		error?: Schema.Schema<{ readonly _tag: string }, unknown>;
-		handler: (
-			a: unknown,
-		) => Effect.Effect<
-			unknown,
-			unknown,
-			ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}) {
-		if (opts.success && opts.error) {
+						ConfectReturns,
+						never,
+						ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+					>;
+			  }
+			| {
+					args: Schema.Schema<ConfectValue, ConvexValue>;
+					success: Schema.Schema<ConfectReturns, ConvexReturns>;
+					error: Schema.Schema<ConfectError, ConvexError>;
+					handler: (
+						a: ConfectValue,
+					) => Effect.Effect<
+						ConfectReturns,
+						ConfectError,
+						ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+					>;
+			  },
+	): "returns" extends keyof typeof config
+		? RegisteredMutation<"public", ConvexValue, Promise<ConvexReturns>>
+		: RegisteredMutation<
+				"public",
+				ConvexValue,
+				Promise<{ _tag: "Success"; data: ConvexReturns } | ConvexError>
+			> => {
+		if ("returns" in config) {
 			return mutationBuilder(
-				confectMutationFunctionWithResult({
+				confectMutationFunctionDirect({
 					databaseSchemas,
-					args: opts.args,
-					success: opts.success,
-					error: opts.error,
-					handler: opts.handler as (
+					args: config.args,
+					returns: config.returns as Schema.Schema<unknown, ConvexReturns>,
+					handler: config.handler as (
 						a: unknown,
 					) => Effect.Effect<
 						unknown,
-						{ readonly _tag: string },
+						never,
 						ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
 					>,
 				}),
-			);
+			) as ReturnType<typeof mutation>;
 		}
-		return mutationBuilder(
-			confectMutationFunction({
-				databaseSchemas,
-				args: opts.args,
-				returns: opts.returns!,
-				handler: opts.handler,
-			}),
-		);
-	}
 
-	function internalMutation<
+		return mutationBuilder(
+			confectMutationFunctionWithResult({
+				databaseSchemas,
+				args: config.args,
+				success: config.success as unknown as Schema.Schema<
+					unknown,
+					ConvexReturns
+				>,
+				error: config.error as unknown as Schema.Schema<
+					{ readonly _tag: string },
+					ConvexError
+				>,
+				handler: config.handler as (
+					a: unknown,
+				) => Effect.Effect<
+					unknown,
+					{ readonly _tag: string },
+					ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+				>,
+			}),
+		) as ReturnType<typeof mutation>;
+	};
+
+	const internalMutation = <
 		ConvexValue extends DefaultFunctionArgs,
 		ConfectValue,
 		ConvexReturns,
 		ConfectReturns,
-		E,
 	>({
 		args,
 		returns,
@@ -342,137 +267,134 @@ export const makeFunctions = <ConfectSchema extends GenericConfectSchema>(
 			a: ConfectValue,
 		) => Effect.Effect<
 			ConfectReturns,
-			E,
+			never,
 			ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
 		>;
-	}): RegisteredMutation<"internal", ConvexValue, Promise<ConvexReturns>>;
-	function internalMutation<
-		ConvexValue extends DefaultFunctionArgs,
-		ConfectValue,
-		ConvexSuccess,
-		ConfectSuccess,
-		ConvexError,
-		ConfectError extends { readonly _tag: string },
-	>({
-		args,
-		success,
-		error,
-		handler,
-	}: {
-		args: Schema.Schema<ConfectValue, ConvexValue>;
-		success: Schema.Schema<ConfectSuccess, ConvexSuccess>;
-		error: Schema.Schema<ConfectError, ConvexError>;
-		handler: (
-			a: ConfectValue,
-		) => Effect.Effect<
-			ConfectSuccess,
-			ConfectError,
-			ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}): RegisteredMutation<
-		"internal",
-		ConvexValue,
-		Promise<{ _tag: "Success"; data: ConvexSuccess } | ConvexError>
-	>;
-	function internalMutation(opts: {
-		args: Schema.Schema<unknown, DefaultFunctionArgs>;
-		returns?: Schema.Schema<unknown, unknown>;
-		success?: Schema.Schema<unknown, unknown>;
-		error?: Schema.Schema<{ readonly _tag: string }, unknown>;
-		handler: (
-			a: unknown,
-		) => Effect.Effect<
-			unknown,
-			unknown,
-			ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}) {
-		if (opts.success && opts.error) {
-			return internalMutationBuilder(
-				confectMutationFunctionWithResult({
-					databaseSchemas,
-					args: opts.args,
-					success: opts.success,
-					error: opts.error,
-					handler: opts.handler as (
-						a: unknown,
-					) => Effect.Effect<
-						unknown,
-						{ readonly _tag: string },
-						ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-					>,
-				}),
-			);
-		}
-		return internalMutationBuilder(
-			confectMutationFunction({
+	}): RegisteredMutation<"internal", ConvexValue, Promise<ConvexReturns>> =>
+		internalMutationBuilder(
+			confectMutationFunctionDirect({
 				databaseSchemas,
-				args: opts.args,
-				returns: opts.returns!,
-				handler: opts.handler,
+				args,
+				returns: returns as Schema.Schema<unknown, ConvexReturns>,
+				handler: handler as (
+					a: unknown,
+				) => Effect.Effect<
+					unknown,
+					never,
+					ConfectMutationCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+				>,
 			}),
 		);
-	}
 
 	const action = <
 		ConvexValue extends DefaultFunctionArgs,
 		ConfectValue,
-		ConvexSuccess,
-		ConfectSuccess,
+		ConvexReturns,
+		ConfectReturns,
 		ConvexError,
 		ConfectError extends { readonly _tag: string },
-	>({
-		args,
-		success,
-		error,
-		handler,
-	}: {
-		args: Schema.Schema<ConfectValue, ConvexValue>;
-		success: Schema.Schema<ConfectSuccess, ConvexSuccess>;
-		error: Schema.Schema<ConfectError, ConvexError>;
-		handler: (
-			a: ConfectValue,
-		) => Effect.Effect<
-			ConfectSuccess,
-			ConfectError,
-			ConfectActionCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
-		>;
-	}): RegisteredAction<
-		"public",
-		ConvexValue,
-		Promise<{ _tag: "Success"; data: ConvexSuccess } | ConvexError>
-	> => actionGeneric(confectActionFunction({ args, success, error, handler }));
+	>(
+		config:
+			| {
+					args: Schema.Schema<ConfectValue, ConvexValue>;
+					returns: Schema.Schema<ConfectReturns, ConvexReturns>;
+					handler: (
+						a: ConfectValue,
+					) => Effect.Effect<
+						ConfectReturns,
+						never,
+						ConfectActionCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+					>;
+			  }
+			| {
+					args: Schema.Schema<ConfectValue, ConvexValue>;
+					success: Schema.Schema<ConfectReturns, ConvexReturns>;
+					error: Schema.Schema<ConfectError, ConvexError>;
+					handler: (
+						a: ConfectValue,
+					) => Effect.Effect<
+						ConfectReturns,
+						ConfectError,
+						ConfectActionCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+					>;
+			  },
+	): "returns" extends keyof typeof config
+		? RegisteredAction<"public", ConvexValue, Promise<ConvexReturns>>
+		: RegisteredAction<
+				"public",
+				ConvexValue,
+				Promise<{ _tag: "Success"; data: ConvexReturns } | ConvexError>
+			> => {
+		if ("returns" in config) {
+			return actionGeneric(
+				confectActionFunctionDirect({
+					args: config.args,
+					returns: config.returns as Schema.Schema<unknown, ConvexReturns>,
+					handler: config.handler as (
+						a: unknown,
+					) => Effect.Effect<
+						unknown,
+						never,
+						ConfectActionCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+					>,
+				}),
+			) as ReturnType<typeof action>;
+		}
+
+		return actionGeneric(
+			confectActionFunctionWithResult({
+				args: config.args,
+				success: config.success as unknown as Schema.Schema<
+					unknown,
+					ConvexReturns
+				>,
+				error: config.error as unknown as Schema.Schema<
+					{ readonly _tag: string },
+					ConvexError
+				>,
+				handler: config.handler as (
+					a: unknown,
+				) => Effect.Effect<
+					unknown,
+					{ readonly _tag: string },
+					ConfectActionCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+				>,
+			}),
+		) as ReturnType<typeof action>;
+	};
 
 	const internalAction = <
 		ConvexValue extends DefaultFunctionArgs,
 		ConfectValue,
-		ConvexSuccess,
-		ConfectSuccess,
-		ConvexError,
-		ConfectError extends { readonly _tag: string },
+		ConvexReturns,
+		ConfectReturns,
 	>({
 		args,
-		success,
-		error,
+		returns,
 		handler,
 	}: {
 		args: Schema.Schema<ConfectValue, ConvexValue>;
-		success: Schema.Schema<ConfectSuccess, ConvexSuccess>;
-		error: Schema.Schema<ConfectError, ConvexError>;
+		returns: Schema.Schema<ConfectReturns, ConvexReturns>;
 		handler: (
 			a: ConfectValue,
 		) => Effect.Effect<
-			ConfectSuccess,
-			ConfectError,
+			ConfectReturns,
+			never,
 			ConfectActionCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
 		>;
-	}): RegisteredAction<
-		"internal",
-		ConvexValue,
-		Promise<{ _tag: "Success"; data: ConvexSuccess } | ConvexError>
-	> =>
+	}): RegisteredAction<"internal", ConvexValue, Promise<ConvexReturns>> =>
 		internalActionGeneric(
-			confectActionFunction({ args, success, error, handler }),
+			confectActionFunctionDirect({
+				args,
+				returns: returns as Schema.Schema<unknown, ConvexReturns>,
+				handler: handler as (
+					a: unknown,
+				) => Effect.Effect<
+					unknown,
+					never,
+					ConfectActionCtx<ConfectDataModelFromConfectSchema<ConfectSchema>>
+				>,
+			}),
 		);
 
 	return {
@@ -485,13 +407,12 @@ export const makeFunctions = <ConfectSchema extends GenericConfectSchema>(
 	};
 };
 
-const confectQueryFunction = <
+const confectQueryFunctionDirect = <
 	ConfectDataModel extends GenericConfectDataModel,
 	ConvexArgs extends DefaultFunctionArgs,
 	ConfectArgs,
 	ConvexReturns,
 	ConfectReturns,
-	E,
 >({
 	databaseSchemas,
 	args,
@@ -503,7 +424,7 @@ const confectQueryFunction = <
 	returns: Schema.Schema<ConfectReturns, ConvexReturns>;
 	handler: (
 		a: ConfectArgs,
-	) => Effect.Effect<ConfectReturns, E, ConfectQueryCtx<ConfectDataModel>>;
+	) => Effect.Effect<ConfectReturns, never, ConfectQueryCtx<ConfectDataModel>>;
 }) => ({
 	args: compileArgsSchema(args),
 	returns: compileReturnsSchema(returns),
@@ -523,54 +444,7 @@ const confectQueryFunction = <
 					),
 				),
 			),
-			Effect.andThen((convexReturns) =>
-				Schema.encodeUnknown(returns)(convexReturns),
-			),
-			Effect.runPromise,
-		),
-});
-
-const confectMutationFunction = <
-	ConfectDataModel extends GenericConfectDataModel,
-	ConvexValue extends DefaultFunctionArgs,
-	ConfectValue,
-	ConvexReturns,
-	ConfectReturns,
-	E,
->({
-	databaseSchemas,
-	args,
-	returns,
-	handler,
-}: {
-	databaseSchemas: DatabaseSchemasFromConfectDataModel<ConfectDataModel>;
-	args: Schema.Schema<ConfectValue, ConvexValue>;
-	returns: Schema.Schema<ConfectReturns, ConvexReturns>;
-	handler: (
-		a: ConfectValue,
-	) => Effect.Effect<ConfectReturns, E, ConfectMutationCtx<ConfectDataModel>>;
-}) => ({
-	args: compileArgsSchema(args),
-	returns: compileReturnsSchema(returns),
-	handler: (
-		ctx: GenericMutationCtx<DataModelFromConfectDataModel<ConfectDataModel>>,
-		actualArgs: ConvexValue,
-	): Promise<ConvexReturns> =>
-		pipe(
-			actualArgs,
-			Schema.decode(args),
-			Effect.orDie,
-			Effect.andThen((decodedArgs) =>
-				handler(decodedArgs).pipe(
-					Effect.provideService(
-						ConfectMutationCtx<ConfectDataModel>(),
-						makeConfectMutationCtx(ctx, databaseSchemas),
-					),
-				),
-			),
-			Effect.andThen((convexReturns) =>
-				Schema.encodeUnknown(returns)(convexReturns),
-			),
+			Effect.andThen((result) => Schema.encode(returns)(result)),
 			Effect.runPromise,
 		),
 });
@@ -640,6 +514,52 @@ const confectQueryFunctionWithResult = <
 	};
 };
 
+const confectMutationFunctionDirect = <
+	ConfectDataModel extends GenericConfectDataModel,
+	ConvexValue extends DefaultFunctionArgs,
+	ConfectValue,
+	ConvexReturns,
+	ConfectReturns,
+>({
+	databaseSchemas,
+	args,
+	returns,
+	handler,
+}: {
+	databaseSchemas: DatabaseSchemasFromConfectDataModel<ConfectDataModel>;
+	args: Schema.Schema<ConfectValue, ConvexValue>;
+	returns: Schema.Schema<ConfectReturns, ConvexReturns>;
+	handler: (
+		a: ConfectValue,
+	) => Effect.Effect<
+		ConfectReturns,
+		never,
+		ConfectMutationCtx<ConfectDataModel>
+	>;
+}) => ({
+	args: compileArgsSchema(args),
+	returns: compileReturnsSchema(returns),
+	handler: (
+		ctx: GenericMutationCtx<DataModelFromConfectDataModel<ConfectDataModel>>,
+		actualArgs: ConvexValue,
+	): Promise<ConvexReturns> =>
+		pipe(
+			actualArgs,
+			Schema.decode(args),
+			Effect.orDie,
+			Effect.andThen((decodedArgs) =>
+				handler(decodedArgs).pipe(
+					Effect.provideService(
+						ConfectMutationCtx<ConfectDataModel>(),
+						makeConfectMutationCtx(ctx, databaseSchemas),
+					),
+				),
+			),
+			Effect.andThen((result) => Schema.encode(returns)(result)),
+			Effect.runPromise,
+		),
+});
+
 const confectMutationFunctionWithResult = <
 	ConfectDataModel extends GenericConfectDataModel,
 	ConvexValue extends DefaultFunctionArgs,
@@ -705,7 +625,47 @@ const confectMutationFunctionWithResult = <
 	};
 };
 
-const confectActionFunction = <
+const confectActionFunctionDirect = <
+	ConfectDataModel extends GenericConfectDataModel,
+	ConvexValue extends DefaultFunctionArgs,
+	ConfectValue,
+	ConvexReturns,
+	ConfectReturns,
+>({
+	args,
+	returns,
+	handler,
+}: {
+	args: Schema.Schema<ConfectValue, ConvexValue>;
+	returns: Schema.Schema<ConfectReturns, ConvexReturns>;
+	handler: (
+		a: ConfectValue,
+	) => Effect.Effect<ConfectReturns, never, ConfectActionCtx<ConfectDataModel>>;
+}) => ({
+	args: compileArgsSchema(args),
+	returns: compileReturnsSchema(returns),
+	handler: (
+		ctx: GenericActionCtx<DataModelFromConfectDataModel<ConfectDataModel>>,
+		actualArgs: ConvexValue,
+	): Promise<ConvexReturns> =>
+		pipe(
+			actualArgs,
+			Schema.decode(args),
+			Effect.orDie,
+			Effect.andThen((decodedArgs) =>
+				handler(decodedArgs).pipe(
+					Effect.provideService(
+						ConfectActionCtx<ConfectDataModel>(),
+						makeConfectActionCtx(ctx),
+					),
+				),
+			),
+			Effect.andThen((result) => Schema.encode(returns)(result)),
+			Effect.runPromise,
+		),
+});
+
+const confectActionFunctionWithResult = <
 	ConfectDataModel extends GenericConfectDataModel,
 	ConvexValue extends DefaultFunctionArgs,
 	ConfectValue,
