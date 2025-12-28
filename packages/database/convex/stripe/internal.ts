@@ -1,92 +1,117 @@
-import { v } from "convex/values";
-import { getOneFrom } from "convex-helpers/server/relationships";
-import { internalMutation, internalQuery } from "../client";
-import { planValidator } from "../schema";
+import { Effect, Option, Schema } from "effect";
+import {
+	ConfectMutationCtx,
+	ConfectQueryCtx,
+	internalMutation,
+	internalQuery,
+} from "../confect";
+import { PlanSchema, ServerSchema, ServerPreferencesSchema } from "../schema";
 
-const DEFAULT_SERVER_PREFERENCES = {
-	plan: "FREE" as const,
-};
+const DEFAULT_PLAN = "FREE" as const;
+
+const ServerWithStripeInfo = Schema.Struct({
+	...ServerSchema.fields,
+	stripeCustomerId: Schema.optional(Schema.String),
+	stripeSubscriptionId: Schema.optional(Schema.String),
+	plan: Schema.String,
+});
 
 export const getServerForStripe = internalQuery({
-	args: {
-		discordServerId: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		const server = await getOneFrom(
-			ctx.db,
-			"servers",
-			"by_discordId",
-			args.discordServerId,
-		);
-		if (!server) {
-			return null;
-		}
-		const preferences = await getOneFrom(
-			ctx.db,
-			"serverPreferences",
-			"by_serverId",
-			args.discordServerId,
-		);
-		return {
-			...server,
-			stripeCustomerId: preferences?.stripeCustomerId,
-			stripeSubscriptionId: preferences?.stripeSubscriptionId,
-			plan: preferences?.plan ?? "FREE",
-		};
-	},
+	args: Schema.Struct({
+		discordServerId: Schema.BigIntFromSelf,
+	}),
+	returns: Schema.NullOr(ServerWithStripeInfo),
+	handler: ({ discordServerId }) =>
+		Effect.gen(function* () {
+			const { db } = yield* ConfectQueryCtx;
+
+			const serverOption = yield* db
+				.query("servers")
+				.withIndex("by_discordId", (q) => q.eq("discordId", discordServerId))
+				.first();
+
+			if (Option.isNone(serverOption)) {
+				return null;
+			}
+
+			const server = serverOption.value;
+
+			const preferencesOption = yield* db
+				.query("serverPreferences")
+				.withIndex("by_serverId", (q) => q.eq("serverId", discordServerId))
+				.first();
+
+			const preferences = Option.getOrNull(preferencesOption);
+
+			return {
+				...server,
+				stripeCustomerId: preferences?.stripeCustomerId,
+				stripeSubscriptionId: preferences?.stripeSubscriptionId,
+				plan: preferences?.plan ?? DEFAULT_PLAN,
+			};
+		}),
 });
 
 export const updateServerStripeCustomer = internalMutation({
-	args: {
-		serverId: v.int64(),
-		stripeCustomerId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const existing = await getOneFrom(
-			ctx.db,
-			"serverPreferences",
-			"by_serverId",
-			args.serverId,
-		);
+	args: Schema.Struct({
+		serverId: Schema.BigIntFromSelf,
+		stripeCustomerId: Schema.String,
+	}),
+	returns: Schema.Null,
+	handler: ({ serverId, stripeCustomerId }) =>
+		Effect.gen(function* () {
+			const { db } = yield* ConfectMutationCtx;
 
-		if (existing) {
-			await ctx.db.patch(existing._id, {
-				stripeCustomerId: args.stripeCustomerId,
-			});
-		} else {
-			await ctx.db.insert("serverPreferences", {
-				...DEFAULT_SERVER_PREFERENCES,
-				serverId: args.serverId,
-				stripeCustomerId: args.stripeCustomerId,
-			});
-		}
-	},
+			const existingOption = yield* db
+				.query("serverPreferences")
+				.withIndex("by_serverId", (q) => q.eq("serverId", serverId))
+				.first();
+
+			if (Option.isSome(existingOption)) {
+				yield* db.patch(existingOption.value._id, { stripeCustomerId });
+			} else {
+				yield* db.insert("serverPreferences", {
+					serverId,
+					stripeCustomerId,
+					plan: DEFAULT_PLAN,
+				});
+			}
+
+			return null;
+		}),
 });
 
 export const updateServerSubscription = internalMutation({
-	args: {
-		stripeCustomerId: v.string(),
-		stripeSubscriptionId: v.union(v.string(), v.null()),
-		plan: planValidator,
-	},
-	handler: async (ctx, args) => {
-		const preferences = await getOneFrom(
-			ctx.db,
-			"serverPreferences",
-			"by_stripeCustomerId",
-			args.stripeCustomerId,
-			"stripeCustomerId",
-		);
+	args: Schema.Struct({
+		stripeCustomerId: Schema.String,
+		stripeSubscriptionId: Schema.NullOr(Schema.String),
+		plan: PlanSchema,
+	}),
+	returns: Schema.Null,
+	handler: ({ stripeCustomerId, stripeSubscriptionId, plan }) =>
+		Effect.gen(function* () {
+			const { db } = yield* ConfectMutationCtx;
 
-		if (!preferences) {
-			throw new Error(
-				`Server preferences not found for stripe customer ${args.stripeCustomerId}`,
-			);
-		}
+			const preferencesOption = yield* db
+				.query("serverPreferences")
+				.withIndex("by_stripeCustomerId", (q) =>
+					q.eq("stripeCustomerId", stripeCustomerId),
+				)
+				.first();
 
-		await ctx.db.patch(preferences._id, {
-			stripeSubscriptionId: args.stripeSubscriptionId ?? undefined,
-			plan: args.plan,
-		});
-	},
+			if (Option.isNone(preferencesOption)) {
+				return yield* Effect.die(
+					new Error(
+						`Server preferences not found for stripe customer ${stripeCustomerId}`,
+					),
+				);
+			}
+
+			yield* db.patch(preferencesOption.value._id, {
+				stripeSubscriptionId: stripeSubscriptionId ?? undefined,
+				plan,
+			});
+
+			return null;
+		}),
 });
