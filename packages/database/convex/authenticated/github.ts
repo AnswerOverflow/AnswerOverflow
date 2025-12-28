@@ -37,7 +37,7 @@ export const getGitHubAccount = query({
 
 			return {
 				accountId: accountOption.value.accountId,
-				isConnected: true,
+				isConnected: true as const,
 			};
 		}),
 });
