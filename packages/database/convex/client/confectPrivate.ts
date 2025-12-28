@@ -1,4 +1,9 @@
-import type { DefaultFunctionArgs } from "convex/server";
+import type {
+	DefaultFunctionArgs,
+	RegisteredQuery,
+	RegisteredMutation,
+	RegisteredAction,
+} from "convex/server";
 import { Data, Effect, Schema } from "effect";
 import {
 	ConfectActionCtx as ConfectActionCtxService,
@@ -87,7 +92,11 @@ export const privateQuery = <
 	handler: (
 		a: ConfectArgs,
 	) => Effect.Effect<ConfectReturns, never, ConfectQueryCtx>;
-}) =>
+}): RegisteredQuery<
+	"public",
+	ConvexArgs & { backendAccessToken: string },
+	Promise<ConvexReturns>
+> =>
 	baseFunctions.query({
 		args: Schema.extend(BackendAccessTokenArg, args),
 		returns,
@@ -114,7 +123,11 @@ export const privateMutation = <
 	handler: (
 		a: ConfectArgs,
 	) => Effect.Effect<ConfectReturns, never, ConfectMutationCtx>;
-}) =>
+}): RegisteredMutation<
+	"public",
+	ConvexArgs & { backendAccessToken: string },
+	Promise<ConvexReturns>
+> =>
 	baseFunctions.mutation({
 		args: Schema.extend(BackendAccessTokenArg, args),
 		returns,
@@ -141,7 +154,11 @@ export const privateAction = <
 	handler: (
 		a: ConfectArgs,
 	) => Effect.Effect<ConfectReturns, never, ConfectActionCtx>;
-}) =>
+}): RegisteredAction<
+	"public",
+	ConvexArgs & { backendAccessToken: string },
+	Promise<ConvexReturns>
+> =>
 	baseFunctions.action({
 		args: Schema.extend(BackendAccessTokenArg, args),
 		returns,

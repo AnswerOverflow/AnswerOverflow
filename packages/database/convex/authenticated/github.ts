@@ -22,8 +22,7 @@ const GitHubAccountResult = Schema.NullOr(
 
 export const getGitHubAccount = authenticatedQuery({
 	args: Schema.Struct({}),
-	success: GitHubAccountResult,
-	error: Schema.Never,
+	returns: GitHubAccountResult,
 	handler: () =>
 		Effect.gen(function* () {
 			const user = yield* AuthenticatedUser;
