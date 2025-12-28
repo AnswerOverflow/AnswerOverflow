@@ -12,7 +12,7 @@ const THREAD_TYPES = [
 ] as const;
 
 type PageResult = {
-	threadsWithMissingRootMessage: Array<ThreadMissingRootMessage>;
+	threadsWithMissingRootMessage: ReadonlyArray<ThreadMissingRootMessage>;
 	channelsProcessed: number;
 	isDone: boolean;
 	continueCursor: string;
