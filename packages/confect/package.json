@@ -1,0 +1,19 @@
+{
+	"name": "@packages/confect",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./server": "./src/server/index.ts",
+		"./react": "./src/react/index.ts"
+	},
+	"dependencies": {
+		"@effect/platform": "catalog:",
+		"convex": "catalog:",
+		"effect": "catalog:"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"typescript": "catalog:"
+	}
+}

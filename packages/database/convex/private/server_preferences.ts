@@ -1,6 +1,12 @@
+import { Effect, Option, Schema } from "effect";
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { internalQuery, privateMutation, privateQuery } from "../client";
+import {
+	ConfectQueryCtx,
+	internalQuery as confectInternalQuery,
+} from "../confect";
+import { ServerPreferencesSchema } from "../confectSchema";
+import { privateMutation, privateQuery } from "../client";
 import { planValidator } from "../schema";
 import { validateCustomDomainUniqueness } from "../shared/shared";
 
@@ -182,21 +188,21 @@ export const updateStripeSubscription = privateMutation({
 	},
 });
 
-export const getServerPreferencesByCustomDomain = internalQuery({
-	args: {
-		customDomain: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const preferences = await getOneFrom(
-			ctx.db,
-			"serverPreferences",
-			"by_customDomain",
-			args.customDomain,
-			"customDomain",
-		);
+export const getServerPreferencesByCustomDomain = confectInternalQuery({
+	args: Schema.Struct({
+		customDomain: Schema.String,
+	}),
+	returns: Schema.NullOr(ServerPreferencesSchema),
+	handler: ({ customDomain }) =>
+		Effect.gen(function* () {
+			const { db } = yield* ConfectQueryCtx;
+			const preferencesOption = yield* db
+				.query("serverPreferences")
+				.withIndex("by_customDomain", (q) => q.eq("customDomain", customDomain))
+				.first();
 
-		return preferences ?? null;
-	},
+			return Option.getOrNull(preferencesOption);
+		}),
 });
 
 const ADVANCED_AND_ABOVE_PLANS = [

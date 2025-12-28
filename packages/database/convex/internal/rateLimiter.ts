@@ -1,41 +1,48 @@
-import { v } from "convex/values";
-import { internalMutation } from "../client";
+import { Effect, Schema } from "effect";
+import { ConfectMutationCtx, internalMutation } from "../confect";
 import { rateLimiter } from "../shared/rateLimiter";
 
+const RateLimitResult = Schema.Struct({
+	ok: Schema.Boolean,
+	retryAfter: Schema.optional(Schema.Number),
+});
+
 export const checkGitHubCreateIssue = internalMutation({
-	args: {
-		userId: v.string(),
-	},
-	returns: v.object({
-		ok: v.boolean(),
-		retryAfter: v.optional(v.number()),
+	args: Schema.Struct({
+		userId: Schema.String,
 	}),
-	handler: async (ctx, args) => {
-		const result = await rateLimiter.limit(ctx, "githubCreateIssue", {
-			key: args.userId,
-		});
-		return {
-			ok: result.ok,
-			retryAfter: result.retryAfter ?? undefined,
-		};
-	},
+	returns: RateLimitResult,
+	handler: ({ userId }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
+			const result = yield* Effect.promise(() =>
+				rateLimiter.limit(ctx, "githubCreateIssue", {
+					key: userId,
+				}),
+			);
+			return {
+				ok: result.ok,
+				retryAfter: result.retryAfter ?? undefined,
+			};
+		}),
 });
 
 export const checkGitHubFetchRepos = internalMutation({
-	args: {
-		userId: v.string(),
-	},
-	returns: v.object({
-		ok: v.boolean(),
-		retryAfter: v.optional(v.number()),
+	args: Schema.Struct({
+		userId: Schema.String,
 	}),
-	handler: async (ctx, args) => {
-		const result = await rateLimiter.limit(ctx, "githubFetchRepos", {
-			key: args.userId,
-		});
-		return {
-			ok: result.ok,
-			retryAfter: result.retryAfter ?? undefined,
-		};
-	},
+	returns: RateLimitResult,
+	handler: ({ userId }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
+			const result = yield* Effect.promise(() =>
+				rateLimiter.limit(ctx, "githubFetchRepos", {
+					key: userId,
+				}),
+			);
+			return {
+				ok: result.ok,
+				retryAfter: result.retryAfter ?? undefined,
+			};
+		}),
 });

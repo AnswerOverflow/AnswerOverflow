@@ -120,6 +120,19 @@
         "postcss": "catalog:",
       },
     },
+    "packages/confect": {
+      "name": "@packages/confect",
+      "version": "1.0.0",
+      "dependencies": {
+        "@effect/platform": "catalog:",
+        "convex": "catalog:",
+        "effect": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/convex-test": {
       "name": "@packages/convex-test",
       "version": "0.0.38",
@@ -150,6 +163,7 @@
         "@effect/platform": "catalog:",
         "@effect/platform-node": "^0.103.0",
         "@octokit/auth-oauth-user": "^6.0.2",
+        "@packages/confect": "workspace:*",
         "@packages/discord-api": "workspace:*",
         "@typelytics/posthog": "^0.1.5",
         "@vercel/sdk": "^1.17.7",
@@ -356,7 +370,9 @@
     "@convex-dev/better-auth@0.10.9": "patches/@convex-dev%2Fbetter-auth@0.10.9.patch",
   },
   "overrides": {
+    "@effect/platform": "^0.93.6",
     "@modelcontextprotocol/sdk": "1.17.5",
+    "effect": "^3.19.8",
     "import-in-the-middle": "^2.0.0",
     "require-in-the-middle": "^8.0.1",
   },
@@ -1243,6 +1259,8 @@
     "@oslojs/crypto": ["@oslojs/crypto@1.0.1", "", { "dependencies": { "@oslojs/asn1": "1.0.0", "@oslojs/binary": "1.0.0" } }, "sha512-7n08G8nWjAr/Yu3vu9zzrd0L9XnrJfpMioQcvCMxBIiF5orECHe5/3J0jmXRVvgfqMm/+4oxlQ+Sq39COYLcNQ=="],
 
     "@oslojs/encoding": ["@oslojs/encoding@1.1.0", "", {}, "sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ=="],
+
+    "@packages/confect": ["@packages/confect@workspace:packages/confect"],
 
     "@packages/convex-test": ["@packages/convex-test@workspace:packages/convex-test"],
 

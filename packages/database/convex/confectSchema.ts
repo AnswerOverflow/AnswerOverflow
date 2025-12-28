@@ -1,0 +1,307 @@
+import { defineSchema, defineTable, Id } from "@packages/confect/server";
+import { Schema } from "effect";
+
+const ForumTagSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	name: Schema.String,
+	moderated: Schema.Boolean,
+	emojiId: Schema.optional(Schema.BigIntFromSelf),
+	emojiName: Schema.optional(Schema.String),
+});
+
+const ThreadTagSchema = Schema.Struct({
+	threadId: Schema.BigIntFromSelf,
+	tagId: Schema.BigIntFromSelf,
+	parentChannelId: Schema.BigIntFromSelf,
+});
+
+const PlanSchema = Schema.Literal(
+	"FREE",
+	"STARTER",
+	"ADVANCED",
+	"PRO",
+	"ENTERPRISE",
+	"OPEN_SOURCE",
+);
+
+const ServerPreferencesSchema = Schema.Struct({
+	serverId: Schema.BigIntFromSelf,
+	stripeCustomerId: Schema.optional(Schema.String),
+	stripeSubscriptionId: Schema.optional(Schema.String),
+	plan: PlanSchema,
+	readTheRulesConsentEnabled: Schema.optional(Schema.Boolean),
+	considerAllMessagesPublicEnabled: Schema.optional(Schema.Boolean),
+	anonymizeMessagesEnabled: Schema.optional(Schema.Boolean),
+	customDomain: Schema.optional(Schema.String),
+	subpath: Schema.optional(Schema.String),
+	addedByUserId: Schema.optional(Schema.BigIntFromSelf),
+	botNickname: Schema.optional(Schema.String),
+	botAvatarStorageId: Schema.optional(Id.Id("_storage")),
+	botBannerStorageId: Schema.optional(Id.Id("_storage")),
+	botBio: Schema.optional(Schema.String),
+});
+
+const ServerSchema = Schema.Struct({
+	discordId: Schema.BigIntFromSelf,
+	name: Schema.String,
+	icon: Schema.optional(Schema.String),
+	banner: Schema.optional(Schema.String),
+	description: Schema.optional(Schema.String),
+	vanityInviteCode: Schema.optional(Schema.String),
+	kickedTime: Schema.optional(Schema.Number),
+	approximateMemberCount: Schema.Number,
+});
+
+const DiscordAccountSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	name: Schema.String,
+	avatar: Schema.optional(Schema.String),
+});
+
+const UserServerSettingsSchema = Schema.Struct({
+	serverId: Schema.BigIntFromSelf,
+	userId: Schema.BigIntFromSelf,
+	permissions: Schema.Number,
+	canPubliclyDisplayMessages: Schema.Boolean,
+	messageIndexingDisabled: Schema.Boolean,
+	apiKey: Schema.optional(Schema.String),
+	apiCallsUsed: Schema.Number,
+	botAddedTimestamp: Schema.optional(Schema.Number),
+});
+
+const IgnoredDiscordAccountSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+});
+
+const ChannelSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	serverId: Schema.BigIntFromSelf,
+	name: Schema.String,
+	type: Schema.Number,
+	parentId: Schema.optional(Schema.BigIntFromSelf),
+	archivedTimestamp: Schema.optional(Schema.Number),
+	availableTags: Schema.optional(Schema.Array(ForumTagSchema)),
+	botPermissions: Schema.optional(Schema.Union(Schema.String, Schema.Number)),
+});
+
+const ChannelSettingsSchema = Schema.Struct({
+	channelId: Schema.BigIntFromSelf,
+	serverId: Schema.optional(Schema.BigIntFromSelf),
+	indexingEnabled: Schema.Boolean,
+	markSolutionEnabled: Schema.Boolean,
+	sendMarkSolutionInstructionsInNewThreads: Schema.Boolean,
+	autoThreadEnabled: Schema.Boolean,
+	forumGuidelinesConsentEnabled: Schema.Boolean,
+	solutionTagId: Schema.optional(Schema.BigIntFromSelf),
+	lastIndexedSnowflake: Schema.optional(Schema.BigIntFromSelf),
+	inviteCode: Schema.optional(Schema.String),
+});
+
+const EmbedFooterSchema = Schema.Struct({
+	text: Schema.String,
+	iconUrl: Schema.optional(Schema.String),
+});
+
+const EmbedImageSchema = Schema.Struct({
+	url: Schema.optional(Schema.String),
+	height: Schema.optional(Schema.Number),
+});
+
+const EmbedAuthorSchema = Schema.Struct({
+	name: Schema.optional(Schema.String),
+	url: Schema.optional(Schema.String),
+});
+
+const EmbedProviderSchema = Schema.Struct({
+	name: Schema.optional(Schema.String),
+	url: Schema.optional(Schema.String),
+});
+
+const EmbedVideoSchema = Schema.Struct({
+	url: Schema.optional(Schema.String),
+	height: Schema.optional(Schema.Number),
+});
+
+const EmbedThumbnailSchema = Schema.Struct({
+	url: Schema.optional(Schema.String),
+	height: Schema.optional(Schema.Number),
+});
+
+const EmbedFieldSchema = Schema.Struct({
+	name: Schema.String,
+	value: Schema.String,
+	inline: Schema.optional(Schema.Boolean),
+});
+
+const EmbedSchema = Schema.Struct({
+	title: Schema.optional(Schema.String),
+	footer: Schema.optional(EmbedFooterSchema),
+	image: Schema.optional(EmbedImageSchema),
+	author: Schema.optional(EmbedAuthorSchema),
+	provider: Schema.optional(EmbedProviderSchema),
+	video: Schema.optional(EmbedVideoSchema),
+	thumbnail: Schema.optional(EmbedThumbnailSchema),
+	fields: Schema.optional(Schema.Array(EmbedFieldSchema)),
+});
+
+const StickerSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	name: Schema.String,
+	formatType: Schema.Number,
+});
+
+const MessageSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	authorId: Schema.BigIntFromSelf,
+	serverId: Schema.BigIntFromSelf,
+	channelId: Schema.BigIntFromSelf,
+	parentChannelId: Schema.optional(Schema.BigIntFromSelf),
+	childThreadId: Schema.optional(Schema.BigIntFromSelf),
+	questionId: Schema.optional(Schema.BigIntFromSelf),
+	referenceId: Schema.optional(Schema.BigIntFromSelf),
+	applicationId: Schema.optional(Schema.BigIntFromSelf),
+	interactionId: Schema.optional(Schema.BigIntFromSelf),
+	webhookId: Schema.optional(Schema.BigIntFromSelf),
+	content: Schema.String,
+	flags: Schema.optional(Schema.Number),
+	type: Schema.optional(Schema.Number),
+	pinned: Schema.optional(Schema.Boolean),
+	nonce: Schema.optional(Schema.String),
+	tts: Schema.optional(Schema.Boolean),
+	embeds: Schema.optional(Schema.Array(EmbedSchema)),
+	stickers: Schema.optional(Schema.Array(StickerSchema)),
+});
+
+const AttachmentSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	messageId: Schema.BigIntFromSelf,
+	contentType: Schema.optional(Schema.String),
+	filename: Schema.String,
+	width: Schema.optional(Schema.Number),
+	height: Schema.optional(Schema.Number),
+	size: Schema.Number,
+	description: Schema.optional(Schema.String),
+	storageId: Schema.optional(Id.Id("_storage")),
+});
+
+const EmojiSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	name: Schema.String,
+	animated: Schema.optional(Schema.Boolean),
+});
+
+const ReactionSchema = Schema.Struct({
+	messageId: Schema.BigIntFromSelf,
+	userId: Schema.BigIntFromSelf,
+	emojiId: Schema.BigIntFromSelf,
+});
+
+const GitHubIssueStatusSchema = Schema.Literal("open", "closed");
+
+const GitHubIssueSchema = Schema.Struct({
+	issueId: Schema.Number,
+	issueNumber: Schema.Number,
+	repoOwner: Schema.String,
+	repoName: Schema.String,
+	issueUrl: Schema.String,
+	issueTitle: Schema.String,
+	discordServerId: Schema.BigIntFromSelf,
+	discordChannelId: Schema.BigIntFromSelf,
+	discordMessageId: Schema.BigIntFromSelf,
+	discordThreadId: Schema.optional(Schema.BigIntFromSelf),
+	createdByUserId: Schema.String,
+	status: GitHubIssueStatusSchema,
+});
+
+export const confectSchema = defineSchema({
+	servers: defineTable(ServerSchema).index("by_discordId", ["discordId"]),
+	serverPreferences: defineTable(ServerPreferencesSchema)
+		.index("by_serverId", ["serverId"])
+		.index("by_customDomain", ["customDomain"])
+		.index("by_stripeCustomerId", ["stripeCustomerId"]),
+	discordAccounts: defineTable(DiscordAccountSchema).index(
+		"by_discordAccountId",
+		["id"],
+	),
+	userServerSettings: defineTable(UserServerSettingsSchema)
+		.index("by_serverId", ["serverId"])
+		.index("by_userId", ["userId"])
+		.index("by_userId_serverId", ["userId", "serverId"]),
+	ignoredDiscordAccounts: defineTable(IgnoredDiscordAccountSchema).index(
+		"by_discordAccountId",
+		["id"],
+	),
+	channels: defineTable(ChannelSchema)
+		.index("by_serverId", ["serverId"])
+		.index("by_serverId_and_type", ["serverId", "type"])
+		.index("by_type", ["type"])
+		.index("by_type_and_id", ["type", "id"])
+		.index("by_discordChannelId", ["id"])
+		.index("by_parentId", ["parentId"])
+		.index("by_parentId_and_id", ["parentId", "id"])
+		.searchIndex("search_name", {
+			searchField: "name",
+			filterFields: ["serverId", "type", "parentId"],
+		}),
+	channelSettings: defineTable(ChannelSettingsSchema)
+		.index("by_channelId", ["channelId"])
+		.index("by_serverId", ["serverId"])
+		.index("by_serverId_and_indexingEnabled", ["serverId", "indexingEnabled"])
+		.index("by_inviteCode", ["inviteCode"]),
+	messages: defineTable(MessageSchema)
+		.index("by_messageId", ["id"])
+		.index("by_authorId", ["authorId"])
+		.index("by_authorId_and_childThreadId", ["authorId", "childThreadId"])
+		.index("by_serverId", ["serverId"])
+		.index("by_serverId_and_questionId", ["serverId", "questionId"])
+		.index("by_channelId", ["channelId"])
+		.index("by_questionId", ["questionId"])
+		.index("by_childThreadId", ["childThreadId"])
+		.index("by_channelId_and_id", ["channelId", "id"])
+		.searchIndex("search_content", {
+			searchField: "content",
+			filterFields: ["serverId", "channelId", "parentChannelId"],
+		}),
+	attachments: defineTable(AttachmentSchema)
+		.index("by_messageId", ["messageId"])
+		.index("by_attachmentId", ["id"]),
+	emojis: defineTable(EmojiSchema).index("by_emojiId", ["id"]),
+	reactions: defineTable(ReactionSchema)
+		.index("by_messageId", ["messageId"])
+		.index("by_userId", ["userId"])
+		.index("by_emojiId", ["emojiId"]),
+	threadTags: defineTable(ThreadTagSchema)
+		.index("by_threadId", ["threadId"])
+		.index("by_parentChannelId_and_tagId", ["parentChannelId", "tagId"]),
+	githubIssues: defineTable(GitHubIssueSchema)
+		.index("by_repoOwner_and_repoName_and_issueNumber", [
+			"repoOwner",
+			"repoName",
+			"issueNumber",
+		])
+		.index("by_discordMessageId", ["discordMessageId"])
+		.index("by_createdByUserId", ["createdByUserId"]),
+});
+
+export default confectSchema.convexSchemaDefinition;
+
+export {
+	ForumTagSchema,
+	ThreadTagSchema,
+	PlanSchema,
+	ServerPreferencesSchema,
+	ServerSchema,
+	DiscordAccountSchema,
+	UserServerSettingsSchema,
+	IgnoredDiscordAccountSchema,
+	ChannelSchema,
+	ChannelSettingsSchema,
+	EmbedSchema,
+	StickerSchema,
+	MessageSchema,
+	AttachmentSchema,
+	EmojiSchema,
+	ReactionSchema,
+	GitHubIssueStatusSchema,
+	GitHubIssueSchema,
+};

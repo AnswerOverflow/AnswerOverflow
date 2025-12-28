@@ -1,6 +1,10 @@
+import { Effect, Schema } from "effect";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { internalMutation } from "../client";
+import {
+	ConfectMutationCtx,
+	internalMutation as confectInternalMutation,
+} from "../confect";
 import {
 	privateAction,
 	privateMutation,
@@ -252,36 +256,42 @@ export const createGitHubIssueFromDiscord = privateAction({
 	},
 });
 
-export const createGitHubIssueRecordInternal = internalMutation({
-	args: {
-		issueId: v.number(),
-		issueNumber: v.number(),
-		repoOwner: v.string(),
-		repoName: v.string(),
-		issueUrl: v.string(),
-		issueTitle: v.string(),
-		discordServerId: v.int64(),
-		discordChannelId: v.int64(),
-		discordMessageId: v.int64(),
-		discordThreadId: v.optional(v.int64()),
-		createdByUserId: v.string(),
-	},
-	handler: async (ctx, args) => {
-		return await ctx.db.insert("githubIssues", {
-			issueId: args.issueId,
-			issueNumber: args.issueNumber,
-			repoOwner: args.repoOwner,
-			repoName: args.repoName,
-			issueUrl: args.issueUrl,
-			issueTitle: args.issueTitle,
-			discordServerId: args.discordServerId,
-			discordChannelId: args.discordChannelId,
-			discordMessageId: args.discordMessageId,
-			discordThreadId: args.discordThreadId,
-			createdByUserId: args.createdByUserId,
-			status: "open",
-		});
-	},
+const CreateGitHubIssueArgs = Schema.Struct({
+	issueId: Schema.Number,
+	issueNumber: Schema.Number,
+	repoOwner: Schema.String,
+	repoName: Schema.String,
+	issueUrl: Schema.String,
+	issueTitle: Schema.String,
+	discordServerId: Schema.BigIntFromSelf,
+	discordChannelId: Schema.BigIntFromSelf,
+	discordMessageId: Schema.BigIntFromSelf,
+	discordThreadId: Schema.optional(Schema.BigIntFromSelf),
+	createdByUserId: Schema.String,
+});
+
+export const createGitHubIssueRecordInternal = confectInternalMutation({
+	args: CreateGitHubIssueArgs,
+	returns: Schema.String,
+	handler: (args) =>
+		Effect.gen(function* () {
+			const { db } = yield* ConfectMutationCtx;
+			const id = yield* db.insert("githubIssues", {
+				issueId: args.issueId,
+				issueNumber: args.issueNumber,
+				repoOwner: args.repoOwner,
+				repoName: args.repoName,
+				issueUrl: args.issueUrl,
+				issueTitle: args.issueTitle,
+				discordServerId: args.discordServerId,
+				discordChannelId: args.discordChannelId,
+				discordMessageId: args.discordMessageId,
+				discordThreadId: args.discordThreadId,
+				createdByUserId: args.createdByUserId,
+				status: "open" as const,
+			});
+			return id;
+		}),
 });
 
 export const getGitHubIssueByRepoAndNumber = privateQuery({
