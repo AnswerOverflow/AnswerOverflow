@@ -1,15 +1,19 @@
 import { Effect, Option, Schema } from "effect";
-import { action, ConfectActionCtx, ConfectQueryCtx, query } from "../confect";
-import { authComponent } from "../shared/betterAuth";
+import { ConfectQueryCtx, query } from "../confect";
 import {
-	createOctokitClient,
+	authenticatedAction,
+	AuthenticatedUser,
+	ConfectActionCtx,
+} from "../client/confectAuthenticated";
+import {
+	createGitHubClient,
 	fetchGitHubInstallationRepos,
 	GetAccessibleReposErrorSchema,
-	GitHubNotLinkedError,
 	GitHubRepoSchema,
 	getGitHubAccountByUserId,
-	NotAuthenticatedError,
+	getGitHubAccountByUserIdOrFail,
 } from "../shared/github";
+import { authComponent } from "../shared/betterAuth";
 
 const GitHubAccountResult = Schema.NullOr(
 	Schema.Struct({
@@ -47,34 +51,22 @@ const GetAccessibleReposDataSchema = Schema.Struct({
 	hasAllReposAccess: Schema.Boolean,
 });
 
-export const getAccessibleRepos = action({
+export const getAccessibleRepos = authenticatedAction({
 	args: Schema.Struct({}),
 	success: GetAccessibleReposDataSchema,
 	error: GetAccessibleReposErrorSchema,
 	handler: () =>
 		Effect.gen(function* () {
 			const actionCtx = yield* ConfectActionCtx;
-			const { ctx } = actionCtx;
+			const user = yield* AuthenticatedUser;
 
-			const user = yield* Effect.promise(() => authComponent.getAuthUser(ctx));
-			if (!user) {
-				return yield* Effect.fail(
-					new NotAuthenticatedError({ message: "Not authenticated" }),
-				);
-			}
-
-			const accountOption = yield* getGitHubAccountByUserId(ctx, user._id);
-
-			if (Option.isNone(accountOption)) {
-				return yield* Effect.fail(
-					new GitHubNotLinkedError({ message: "GitHub account not linked" }),
-				);
-			}
-
-			const account = accountOption.value;
-			const octokit = yield* createOctokitClient(ctx, account);
+			const account = yield* getGitHubAccountByUserIdOrFail(
+				actionCtx.ctx,
+				user._id,
+			);
+			const client = yield* createGitHubClient(actionCtx.ctx, account);
 			const { repos, hasAllReposAccess } =
-				yield* fetchGitHubInstallationRepos(octokit);
+				yield* fetchGitHubInstallationRepos(client);
 
 			return { repos, hasAllReposAccess };
 		}),

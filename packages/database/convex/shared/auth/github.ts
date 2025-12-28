@@ -1,10 +1,15 @@
+import {
+	FetchHttpClient,
+	HttpClient,
+	HttpClientRequest,
+} from "@effect/platform";
 import type {
 	GenericActionCtx,
 	GenericMutationCtx,
 	GenericQueryCtx,
 } from "convex/server";
-import { Data, Effect, Option, Schema } from "effect";
-import { Octokit } from "octokit";
+import { Array as Arr, Data, Effect, Option, Schema } from "effect";
+import { make, type Client } from "@packages/github-api/generated";
 import { components } from "../../_generated/api";
 import type { DataModel } from "../../_generated/dataModel";
 
@@ -264,11 +269,11 @@ const RawGitHubAccountSchema = Schema.Struct({
 		exact: true,
 	}),
 	scope: Schema.optionalWith(Schema.NullishOr(Schema.String), { exact: true }),
-});
+}).pipe(Schema.annotations({ parseOptions: { onExcessProperty: "ignore" } }));
 
 const AccountWithUserIdSchema = Schema.Struct({
 	userId: Schema.String,
-});
+}).pipe(Schema.annotations({ parseOptions: { onExcessProperty: "ignore" } }));
 
 export const validateRepoOwnerAndName = (
 	owner: string,
@@ -363,6 +368,21 @@ export const getGitHubAccountByUserId = (
 		}));
 	});
 
+export const getGitHubAccountByUserIdOrFail = (
+	ctx: ConvexCtx,
+	userId: string,
+): Effect.Effect<GitHubAccountWithRefresh, GitHubNotLinkedError> =>
+	Effect.gen(function* () {
+		const accountOption = yield* getGitHubAccountByUserId(ctx, userId);
+		return yield* Option.match(accountOption, {
+			onNone: () =>
+				Effect.fail(
+					new GitHubNotLinkedError({ message: "GitHub account not linked" }),
+				),
+			onSome: Effect.succeed,
+		});
+	});
+
 export const getGitHubAccountByDiscordId = (
 	ctx: ConvexCtx,
 	discordId: bigint,
@@ -413,7 +433,7 @@ const GitHubTokenRefreshResponseSchema = Schema.Struct({
 	refresh_token_expires_in: Schema.Number,
 	error: Schema.optional(Schema.String),
 	error_description: Schema.optional(Schema.String),
-});
+}).pipe(Schema.annotations({ parseOptions: { onExcessProperty: "ignore" } }));
 
 const isTokenExpired = (expiresAt: number | null): boolean => {
 	if (expiresAt === null) return false;
@@ -496,11 +516,36 @@ const refreshGitHubToken = (
 		return data.access_token;
 	});
 
-export const createOctokitClient = (
+const createGitHubApiClient = (
+	token: string,
+): Effect.Effect<Client, never, HttpClient.HttpClient> =>
+	Effect.gen(function* () {
+		const httpClient = yield* HttpClient.HttpClient;
+		return make(httpClient, {
+			transformClient(client) {
+				return Effect.succeed(
+					client.pipe(
+						HttpClient.mapRequest((req) =>
+							HttpClientRequest.prependUrl(
+								HttpClientRequest.setHeader(
+									req,
+									"Authorization",
+									`token ${token}`,
+								),
+								"https://api.github.com",
+							),
+						),
+					),
+				);
+			},
+		});
+	});
+
+export const createGitHubClient = (
 	ctx: ActionCtx,
 	account: GitHubAccountWithRefresh,
 ): Effect.Effect<
-	Octokit,
+	Client,
 	| GitHubCredentialsNotConfiguredError
 	| GitHubNoTokenError
 	| GitHubRefreshFailedError
@@ -540,77 +585,133 @@ export const createOctokitClient = (
 			);
 		}
 
-		return new Octokit({ auth: accessToken });
+		return yield* createGitHubApiClient(accessToken).pipe(
+			Effect.provide(FetchHttpClient.layer),
+		);
+	});
+
+const mapGitHubApiError = (error: unknown): GitHubFetchFailedError => {
+	if (error instanceof Error) {
+		return new GitHubFetchFailedError({ message: error.message });
+	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"_tag" in error &&
+		"cause" in error
+	) {
+		const clientError = error as { _tag: string; cause?: { message?: string } };
+		return new GitHubFetchFailedError({
+			message: clientError.cause?.message ?? clientError._tag,
+		});
+	}
+	return new GitHubFetchFailedError({
+		message: "Failed to fetch from GitHub API",
+	});
+};
+
+const fetchInstallationReposPage = (
+	client: Client,
+	installationId: number,
+	page: number,
+): Effect.Effect<
+	{ repos: Array<GitHubRepo>; hasMore: boolean },
+	GitHubFetchFailedError
+> =>
+	Effect.gen(function* () {
+		const reposData = yield* client
+			.appsListInstallationReposForAuthenticatedUser(
+				installationId.toString(),
+				{
+					per_page: 100,
+					page,
+				},
+			)
+			.pipe(Effect.mapError(mapGitHubApiError));
+
+		const repos = reposData.repositories.map((repo) => ({
+			id: repo.id,
+			name: repo.name,
+			fullName: repo.full_name,
+			owner: repo.owner.login,
+			private: repo.private,
+			installationId,
+		}));
+
+		return {
+			repos,
+			hasMore: reposData.repositories.length === 100,
+		};
+	});
+
+const fetchAllInstallationRepos = (
+	client: Client,
+	installationId: number,
+): Effect.Effect<Array<GitHubRepo>, GitHubFetchFailedError> =>
+	Effect.gen(function* () {
+		const allRepos: Array<GitHubRepo> = [];
+		let page = 1;
+		let hasMore = true;
+
+		while (hasMore && allRepos.length < MAX_REPOS_PER_INSTALLATION) {
+			const result = yield* fetchInstallationReposPage(
+				client,
+				installationId,
+				page,
+			);
+			allRepos.push(...result.repos);
+			hasMore = result.hasMore;
+			page++;
+		}
+
+		return allRepos.slice(0, MAX_REPOS_PER_INSTALLATION);
 	});
 
 export const fetchGitHubInstallationRepos = (
-	octokit: Octokit,
+	client: Client,
 ): Effect.Effect<GitHubInstallationReposResult, GitHubFetchFailedError> =>
 	Effect.gen(function* () {
-		const installationsData = yield* Effect.tryPromise({
-			try: () => octokit.rest.apps.listInstallationsForAuthenticatedUser(),
-			catch: (error) =>
-				new GitHubFetchFailedError({
-					message:
-						error instanceof Error
-							? error.message
-							: "Failed to fetch installations",
-				}),
-		});
+		const installationsData = yield* client
+			.appsListInstallationsForAuthenticatedUser()
+			.pipe(Effect.mapError(mapGitHubApiError));
 
-		const repos: Array<GitHubRepo> = [];
-		let hasAllReposAccess = installationsData.data.installations.length > 0;
+		const installations = installationsData.installations;
+		const hasAllReposAccess =
+			installations.length > 0 &&
+			installations.every((i) => i.repository_selection === "all");
 
-		for (const installation of installationsData.data.installations) {
-			if (installation.repository_selection !== "all") {
-				hasAllReposAccess = false;
-			}
+		const allRepos = yield* Effect.forEach(
+			installations,
+			(installation) => fetchAllInstallationRepos(client, installation.id),
+			{ concurrency: 3 },
+		);
 
-			const allRepos: Array<GitHubRepo> = [];
-			let page = 1;
-
-			while (allRepos.length < MAX_REPOS_PER_INSTALLATION) {
-				const reposData = yield* Effect.tryPromise({
-					try: () =>
-						octokit.rest.apps.listInstallationReposForAuthenticatedUser({
-							installation_id: installation.id,
-							per_page: 100,
-							page,
-						}),
-					catch: (error) =>
-						new GitHubFetchFailedError({
-							message:
-								error instanceof Error
-									? error.message
-									: "Failed to fetch repos",
-						}),
-				});
-
-				for (const repo of reposData.data.repositories) {
-					allRepos.push({
-						id: repo.id,
-						name: repo.name,
-						fullName: repo.full_name,
-						owner: repo.owner.login,
-						private: repo.private,
-						installationId: installation.id,
-					});
-				}
-
-				if (reposData.data.repositories.length < 100) {
-					break;
-				}
-				page++;
-			}
-
-			repos.push(...allRepos);
-		}
-
-		return { repos, hasAllReposAccess };
+		return {
+			repos: Arr.flatten(allRepos),
+			hasAllReposAccess,
+		};
 	});
 
+const mapGitHubCreateError = (error: unknown): GitHubCreateFailedError => {
+	if (error instanceof Error) {
+		return new GitHubCreateFailedError({ message: error.message });
+	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"_tag" in error &&
+		"cause" in error
+	) {
+		const clientError = error as { _tag: string; cause?: { message?: string } };
+		return new GitHubCreateFailedError({
+			message: clientError.cause?.message ?? clientError._tag,
+		});
+	}
+	return new GitHubCreateFailedError({ message: "Failed to create issue" });
+};
+
 export const createGitHubIssue = (
-	octokit: Octokit,
+	client: Client,
 	owner: string,
 	repo: string,
 	title: string,
@@ -623,25 +724,19 @@ export const createGitHubIssue = (
 		yield* validateRepoOwnerAndName(owner, repo);
 		yield* validateIssueTitleAndBody(title, body);
 
-		const result = yield* Effect.tryPromise({
-			try: () =>
-				octokit.rest.issues.create({
-					owner,
-					repo,
+		const result = yield* client
+			.issuesCreate(owner, repo, {
+				payload: {
 					title,
 					body,
-				}),
-			catch: (error) =>
-				new GitHubCreateFailedError({
-					message:
-						error instanceof Error ? error.message : "Failed to create issue",
-				}),
-		});
+				},
+			})
+			.pipe(Effect.mapError(mapGitHubCreateError));
 
 		return {
-			id: result.data.id,
-			number: result.data.number,
-			htmlUrl: result.data.html_url,
-			title: result.data.title,
+			id: result.id,
+			number: result.number,
+			htmlUrl: result.html_url,
+			title: result.title,
 		};
 	});

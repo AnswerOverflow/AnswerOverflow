@@ -9,11 +9,12 @@ export type {
 } from "./auth/github";
 export {
 	createGitHubIssue,
-	createOctokitClient,
+	createGitHubClient,
 	fetchGitHubInstallationRepos,
 	getBetterAuthUserIdByDiscordId,
 	getGitHubAccountByDiscordId,
 	getGitHubAccountByUserId,
+	getGitHubAccountByUserIdOrFail,
 	validateIssueTitleAndBody,
 	validateRepoOwnerAndName,
 	serializeError,

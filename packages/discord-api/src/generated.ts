@@ -59,38 +59,137 @@ export class OAuth2Scopes extends S.Union(/**
 * allows /users/@me without email
 */
 S.Literal("identify"),
+/**
+* enables /users/@me to return an email
+*/
 S.Literal("email"),
+/**
+* allows /users/@me/connections to return linked third-party accounts
+*/
 S.Literal("connections"),
+/**
+* allows /users/@me/guilds to return basic information about all of a user's guilds
+*/
 S.Literal("guilds"),
+/**
+* allows /guilds/{guild.id}/members/{user.id} to be used for joining users to a guild
+*/
 S.Literal("guilds.join"),
+/**
+* allows /users/@me/guilds/{guild.id}/member to return a user's member information in a guild
+*/
 S.Literal("guilds.members.read"),
+/**
+* allows your app to join users to a group dm
+*/
 S.Literal("gdm.join"),
+/**
+* for oauth2 bots, this puts the bot in the user's selected guild by default
+*/
 S.Literal("bot"),
+/**
+* for local rpc server access, this allows you to control a user's local Discord client - requires Discord approval
+*/
 S.Literal("rpc"),
+/**
+* for local rpc server access, this allows you to receive notifications pushed out to the user - requires Discord approval
+*/
 S.Literal("rpc.notifications.read"),
+/**
+* for local rpc server access, this allows you to read a user's voice settings and listen for voice events - requires Discord approval
+*/
 S.Literal("rpc.voice.read"),
+/**
+* for local rpc server access, this allows you to update a user's voice settings - requires Discord approval
+*/
 S.Literal("rpc.voice.write"),
+/**
+* for local rpc server access, this allows you to read a user's video status - requires Discord approval
+*/
 S.Literal("rpc.video.read"),
+/**
+* for local rpc server access, this allows you to update a user's video settings - requires Discord approval
+*/
 S.Literal("rpc.video.write"),
+/**
+* for local rpc server access, this allows you to read a user's screenshare status- requires Discord approval
+*/
 S.Literal("rpc.screenshare.read"),
+/**
+* for local rpc server access, this allows you to update a user's screenshare settings- requires Discord approval
+*/
 S.Literal("rpc.screenshare.write"),
+/**
+* for local rpc server access, this allows you to update a user's activity - requires Discord approval
+*/
 S.Literal("rpc.activities.write"),
+/**
+* this generates a webhook that is returned in the oauth token response for authorization code grants
+*/
 S.Literal("webhook.incoming"),
+/**
+* for local rpc server api access, this allows you to read messages from all client channels (otherwise restricted to channels/guilds your app creates)
+*/
 S.Literal("messages.read"),
+/**
+* allows your app to upload/update builds for a user's applications - requires Discord approval
+*/
 S.Literal("applications.builds.upload"),
+/**
+* allows your app to read build data for a user's applications
+*/
 S.Literal("applications.builds.read"),
+/**
+* allows your app to use commands in a guild
+*/
 S.Literal("applications.commands"),
+/**
+* allows your app to update permissions for its commands in a guild a user has permissions to
+*/
 S.Literal("applications.commands.permissions.update"),
+/**
+* allows your app to update its commands using a Bearer token - client credentials grant only
+*/
 S.Literal("applications.commands.update"),
+/**
+* allows your app to read and update store data (SKUs, store listings, achievements, etc.) for a user's applications
+*/
 S.Literal("applications.store.update"),
+/**
+* allows your app to read entitlements for a user's applications
+*/
 S.Literal("applications.entitlements"),
+/**
+* allows your app to fetch data from a user's "Now Playing/Recently Played" list - requires Discord approval
+*/
 S.Literal("activities.read"),
+/**
+* allows your app to update a user's activity - requires Discord approval (NOT REQUIRED FOR GAMESDK ACTIVITY MANAGER)
+*/
 S.Literal("activities.write"),
+/**
+* allows your app to send activity invites - requires Discord approval (NOT REQUIRED FOR GAMESDK ACTIVITY MANAGER)
+*/
 S.Literal("activities.invites.write"),
+/**
+* allows your app to know a user's friends and implicit relationships - requires Discord approval
+*/
 S.Literal("relationships.read"),
+/**
+* allows your app to connect to voice on user's behalf and see all the voice members - requires Discord approval
+*/
 S.Literal("voice"),
+/**
+* allows your app to see information about the user's DMs and group DMs - requires Discord approval
+*/
 S.Literal("dm_channels.read"),
+/**
+* allows your app to update a user's connection and metadata for the app
+*/
 S.Literal("role_connections.write"),
+/**
+* for OpenID Connect, this allows your app to receive user id and basic profile information
+*/
 S.Literal("openid")) {}
 
 export class ApplicationOAuth2InstallParamsResponse extends S.Class<ApplicationOAuth2InstallParamsResponse>("ApplicationOAuth2InstallParamsResponse")({
@@ -102,12 +201,18 @@ export class ApplicationExplicitContentFilterTypes extends S.Union(/**
 * inherit guild content filter setting
 */
 S.Literal(0),
+/**
+* interactions will always be scanned
+*/
 S.Literal(1)) {}
 
 export class TeamMembershipStates extends S.Union(/**
 * User has been invited to the team.
 */
 S.Literal(1),
+/**
+* User has accepted the team invitation.
+*/
 S.Literal(2)) {}
 
 export class TeamMemberResponse extends S.Class<TeamMemberResponse>("TeamMemberResponse")({
@@ -158,34 +263,70 @@ export class PrivateApplicationResponse extends S.Class<PrivateApplicationRespon
   "team": S.optionalWith(TeamResponse, { nullable: true })
 }) {}
 
+/**
+* A single error, either for an API response or a specific field.
+*/
 export class RatelimitedResponse extends S.Class<RatelimitedResponse>("RatelimitedResponse")({
+  /**
+* The number of seconds to wait before retrying your request
+*/
 "retry_after": S.Number,
+  /**
+* Whether you are being ratelimited by the global ratelimit or a per-endpoint ratelimit
+*/
 "global": S.Boolean,
+  /**
+* Discord internal error code. See error code reference
+*/
 "code": S.Int,
+  /**
+* Human-readable error message
+*/
 "message": S.String
 }) {}
 
+/**
+* A single error, either for an API response or a specific field.
+*/
 export class Error extends S.Class<Error>("Error")({
+  /**
+* Discord internal error code. See error code reference
+*/
 "code": S.Int,
+  /**
+* Human-readable error message
+*/
 "message": S.String
 }) {}
 
 export class InnerErrors extends S.Class<InnerErrors>("InnerErrors")({
+  /**
+* The list of errors for this field
+*/
 "_errors": S.Array(Error)
 }) {}
 
 export class ErrorDetails extends S.Union(S.Record({ key: S.String, value: S.Unknown }),
 InnerErrors) {}
 
+/**
+* A single error, either for an API response or a specific field.
+*/
 export class ErrorResponse extends S.Class<ErrorResponse>("ErrorResponse")({
   "errors": S.optionalWith(ErrorDetails, { nullable: true }),
+  /**
+* Discord internal error code. See error code reference
+*/
 "code": S.Int,
+  /**
+* Human-readable error message
+*/
 "message": S.String
 }) {}
 
 export class ApplicationOAuth2InstallParams extends S.Class<ApplicationOAuth2InstallParams>("ApplicationOAuth2InstallParams")({
   "scopes": S.optionalWith(S.NonEmptyArray(S.Literal("applications.commands", "bot")).pipe(S.minItems(1)), { nullable: true }),
-  "permissions": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(9007199254740991)), { nullable: true })
+  "permissions": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(4503599627370495)), { nullable: true })
 }) {}
 
 export class ApplicationFormPartial extends S.Class<ApplicationFormPartial>("ApplicationFormPartial")({
@@ -212,8 +353,10 @@ export class EmbeddedActivityLocationKind extends S.Union(/**
 * guild channel
 */
 S.Literal("gc"),
-S.Literal("pc"),
-S.Literal("party")) {}
+/**
+* private channel
+*/
+S.Literal("pc")) {}
 
 export class GuildChannelLocation extends S.Class<GuildChannelLocation>("GuildChannelLocation")({
   "id": S.String,
@@ -297,36 +440,84 @@ export class ApplicationCommandType extends S.Union(/**
 * Slash commands; a text-based command that shows up when a user types /
 */
 S.Literal(1),
+/**
+* A UI-based command that shows up when you right click or tap on a user
+*/
 S.Literal(2),
+/**
+* A UI-based command that shows up when you right click or tap on a message
+*/
 S.Literal(3),
+/**
+* A command that represents the primary way to use an application (e.g. launching an Activity)
+*/
 S.Literal(4)) {}
 
 export class InteractionContextType extends S.Union(/**
 * This command can be used within a Guild.
 */
 S.Literal(0),
+/**
+* This command can be used within a DM with this application's bot.
+*/
 S.Literal(1),
+/**
+* This command can be used within DMs and Group DMs with users.
+*/
 S.Literal(2)) {}
 
 export class ApplicationIntegrationType extends S.Union(/**
 * For Guild install.
 */
 S.Literal(0),
+/**
+* For User install.
+*/
 S.Literal(1)) {}
 
 export class ApplicationCommandOptionType extends S.Union(/**
 * A sub-action within a command or group
 */
 S.Literal(1),
+/**
+* A group of subcommands
+*/
 S.Literal(2),
+/**
+* A string option
+*/
 S.Literal(3),
+/**
+* An integer option. Any integer between -2^53 and 2^53 is a valid value
+*/
 S.Literal(4),
+/**
+* A boolean option
+*/
 S.Literal(5),
+/**
+* A snowflake option that represents a User
+*/
 S.Literal(6),
+/**
+* A snowflake option that represents a Channel. Includes all channel types and categories
+*/
 S.Literal(7),
+/**
+* A snowflake option that represents a Role
+*/
 S.Literal(8),
+/**
+* A snowflake option that represents anything you can mention
+*/
 S.Literal(9),
+/**
+* A number option. Any double between -2^53 and 2^53 is a valid value
+*/
 S.Literal(10),
+/**
+* An attachment option
+*/
 S.Literal(11)) {}
 
 export class ApplicationCommandAttachmentOptionResponse extends S.Class<ApplicationCommandAttachmentOptionResponse>("ApplicationCommandAttachmentOptionResponse")({
@@ -355,16 +546,49 @@ export class ChannelTypes extends S.Union(/**
 * A direct message between users
 */
 S.Literal(1),
+/**
+* A direct message between multiple users
+*/
 S.Literal(3),
+/**
+* A text channel within a server
+*/
 S.Literal(0),
+/**
+* A voice channel within a server
+*/
 S.Literal(2),
+/**
+* An organizational category that contains up to 50 channels
+*/
 S.Literal(4),
+/**
+* A channel that users can follow and crosspost into their own server (formerly news channels)
+*/
 S.Literal(5),
+/**
+* A temporary sub-channel within a GUILD_ANNOUNCEMENT channel
+*/
 S.Literal(10),
+/**
+* A temporary sub-channel within a GUILD_TEXT or GUILD_THREADS_ONLY channel type set
+*/
 S.Literal(11),
+/**
+* A temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
+*/
 S.Literal(12),
+/**
+* A voice channel for hosting events with an audience
+*/
 S.Literal(13),
+/**
+* The channel in a hub containing the listed servers
+*/
 S.Literal(14),
+/**
+* Channel that can only contain threads
+*/
 S.Literal(15)) {}
 
 export class ApplicationCommandChannelOptionResponse extends S.Class<ApplicationCommandChannelOptionResponse>("ApplicationCommandChannelOptionResponse")({
@@ -700,7 +924,7 @@ ApplicationCommandStringOption,
 ApplicationCommandSubcommandGroupOption,
 ApplicationCommandSubcommandOption,
 ApplicationCommandUserOption)).pipe(S.maxItems(25)), { nullable: true }),
-  "default_member_permissions": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(9007199254740991)), { nullable: true }),
+  "default_member_permissions": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(4503599627370495)), { nullable: true }),
   "dm_permission": S.optionalWith(S.Boolean, { nullable: true }),
   "contexts": S.optionalWith(S.NonEmptyArray(InteractionContextType).pipe(S.minItems(1)), { nullable: true }),
   "integration_types": S.optionalWith(S.NonEmptyArray(ApplicationIntegrationType).pipe(S.minItems(1)), { nullable: true }),
@@ -729,7 +953,7 @@ ApplicationCommandStringOption,
 ApplicationCommandSubcommandGroupOption,
 ApplicationCommandSubcommandOption,
 ApplicationCommandUserOption)).pipe(S.maxItems(25)), { nullable: true }),
-  "default_member_permissions": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(9007199254740991)), { nullable: true }),
+  "default_member_permissions": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(4503599627370495)), { nullable: true }),
   "dm_permission": S.optionalWith(S.Boolean, { nullable: true }),
   "contexts": S.optionalWith(S.NonEmptyArray(InteractionContextType).pipe(S.minItems(1)), { nullable: true }),
   "integration_types": S.optionalWith(S.NonEmptyArray(ApplicationIntegrationType).pipe(S.minItems(1)), { nullable: true }),
@@ -753,7 +977,7 @@ ApplicationCommandStringOption,
 ApplicationCommandSubcommandGroupOption,
 ApplicationCommandSubcommandOption,
 ApplicationCommandUserOption)).pipe(S.maxItems(25)), { nullable: true }),
-  "default_member_permissions": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(9007199254740991)), { nullable: true }),
+  "default_member_permissions": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(4503599627370495)), { nullable: true }),
   "dm_permission": S.optionalWith(S.Boolean, { nullable: true }),
   "contexts": S.optionalWith(S.NonEmptyArray(InteractionContextType).pipe(S.minItems(1)), { nullable: true }),
   "integration_types": S.optionalWith(S.NonEmptyArray(ApplicationIntegrationType).pipe(S.minItems(1)), { nullable: true }),
@@ -822,8 +1046,7 @@ export class EntitlementResponse extends S.Class<EntitlementResponse>("Entitleme
   "type": EntitlementTypes,
   "fulfilled_at": S.optionalWith(S.String, { nullable: true }),
   "fulfillment_status": S.optionalWith(EntitlementTenantFulfillmentStatusResponse, { nullable: true }),
-  "consumed": S.optionalWith(S.Boolean, { nullable: true }),
-  "gifter_user_id": S.optionalWith(SnowflakeType, { nullable: true })
+  "consumed": S.optionalWith(S.Boolean, { nullable: true })
 }) {}
 
 export class GetEntitlements200 extends S.Array(S.Union(S.Null,
@@ -851,7 +1074,13 @@ export class ApplicationCommandPermissionType extends S.Union(/**
 * This permission is for a role.
 */
 S.Literal(1),
+/**
+* This permission is for a user.
+*/
 S.Literal(2),
+/**
+* This permission is for a channel.
+*/
 S.Literal(3)) {}
 
 export class CommandPermissionResponse extends S.Class<CommandPermissionResponse>("CommandPermissionResponse")({
@@ -883,12 +1112,33 @@ export class MetadataItemTypes extends S.Union(/**
 * the metadata value (integer) is less than or equal to the guild's configured value (integer)
 */
 S.Literal(1),
+/**
+* the metadata value (integer) is greater than or equal to the guild's configured value (integer)
+*/
 S.Literal(2),
+/**
+* the metadata value (integer) is equal to the guild's configured value (integer)
+*/
 S.Literal(3),
+/**
+* the metadata value (integer) is not equal to the guild's configured value (integer)
+*/
 S.Literal(4),
+/**
+* the metadata value (ISO8601 string) is less than or equal to the guild's configured value (integer; days before current date)
+*/
 S.Literal(5),
+/**
+* the metadata value (ISO8601 string) is greater than or equal to the guild's configured value (integer; days before current date)
+*/
 S.Literal(6),
+/**
+* the metadata value (integer) is equal to the guild's configured value (integer; 1)
+*/
 S.Literal(7),
+/**
+* the metadata value (integer) is not equal to the guild's configured value (integer; 1)
+*/
 S.Literal(8)) {}
 
 export class ApplicationRoleConnectionsMetadataItemResponse extends S.Class<ApplicationRoleConnectionsMetadataItemResponse>("ApplicationRoleConnectionsMetadataItemResponse")({
@@ -919,14 +1169,26 @@ export class VideoQualityModes extends S.Union(/**
 * Discord chooses the quality for optimal performance
 */
 S.Literal(1),
+/**
+* 720p
+*/
 S.Literal(2)) {}
 
 export class ThreadAutoArchiveDuration extends S.Union(/**
 * One hour
 */
 S.Literal(60),
+/**
+* One day
+*/
 S.Literal(1440),
+/**
+* Three days
+*/
 S.Literal(4320),
+/**
+* Seven days
+*/
 S.Literal(10080)) {}
 
 export class ChannelPermissionOverwrites extends S.Union(S.Literal(0),
@@ -956,19 +1218,31 @@ export class ThreadSortOrder extends S.Union(/**
 * Sort forum posts by activity
 */
 S.Literal(0),
+/**
+* Sort forum posts by creation time (from most recent to oldest)
+*/
 S.Literal(1)) {}
 
 export class ForumLayout extends S.Union(/**
 * No default has been set for forum channel
 */
 S.Literal(0),
+/**
+* Display posts as a list
+*/
 S.Literal(1),
+/**
+* Display posts as a collection of tiles
+*/
 S.Literal(2)) {}
 
 export class ThreadSearchTagSetting extends S.Union(/**
 * The thread tags must contain all tags in the search query
 */
 S.Literal("match_all"),
+/**
+* The thread tags must contain at least one of tags in the search query
+*/
 S.Literal("match_some")) {}
 
 export class GuildChannelResponse extends S.Class<GuildChannelResponse>("GuildChannelResponse")({
@@ -1220,15 +1494,134 @@ export class GroupDMInviteResponse extends S.Class<GroupDMInviteResponse>("Group
   "approximate_member_count": S.optionalWith(S.Int, { nullable: true })
 }) {}
 
-export class GuildFeatures extends S.String {}
+export class GuildFeatures extends S.Union(/**
+* guild has access to set an animated guild banner image
+*/
+S.Literal("ANIMATED_BANNER"),
+/**
+* guild has access to set an animated guild icon
+*/
+S.Literal("ANIMATED_ICON"),
+/**
+* guild is using the old permissions configuration behavior
+*/
+S.Literal("APPLICATION_COMMAND_PERMISSIONS_V2"),
+/**
+* guild has set up auto moderation rules
+*/
+S.Literal("AUTO_MODERATION"),
+/**
+* guild has access to set a guild banner image
+*/
+S.Literal("BANNER"),
+/**
+* guild can enable welcome screen, Membership Screening, stage channels and discovery, and             receives community updates
+*/
+S.Literal("COMMUNITY"),
+/**
+* guild has enabled monetization
+*/
+S.Literal("CREATOR_MONETIZABLE_PROVISIONAL"),
+/**
+* guild has enabled the role subscription promo page
+*/
+S.Literal("CREATOR_STORE_PAGE"),
+/**
+* guild has been set as a support server on the App Directory
+*/
+S.Literal("DEVELOPER_SUPPORT_SERVER"),
+/**
+* guild is able to be discovered in the directory
+*/
+S.Literal("DISCOVERABLE"),
+/**
+* guild is able to be featured in the directory
+*/
+S.Literal("FEATURABLE"),
+/**
+* guild has paused invites, preventing new users from joining
+*/
+S.Literal("INVITES_DISABLED"),
+/**
+* guild has access to set an invite splash background
+*/
+S.Literal("INVITE_SPLASH"),
+/**
+* guild has enabled Membership Screening
+*/
+S.Literal("MEMBER_VERIFICATION_GATE_ENABLED"),
+/**
+* guild has increased custom sticker slots
+*/
+S.Literal("MORE_STICKERS"),
+/**
+* guild has access to create announcement channels
+*/
+S.Literal("NEWS"),
+/**
+* guild is partnered
+*/
+S.Literal("PARTNERED"),
+/**
+* guild can be previewed before joining via Membership Screening or the directory
+*/
+S.Literal("PREVIEW_ENABLED"),
+/**
+* guild has disabled activity alerts in the configured safety alerts channel
+*/
+S.Literal("RAID_ALERTS_DISABLED"),
+/**
+* guild is able to set role icons
+*/
+S.Literal("ROLE_ICONS"),
+/**
+* guild has role subscriptions that can be purchased
+*/
+S.Literal("ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"),
+/**
+* guild has enabled role subscriptions
+*/
+S.Literal("ROLE_SUBSCRIPTIONS_ENABLED"),
+/**
+* guild has enabled ticketed events
+*/
+S.Literal("TICKETED_EVENTS_ENABLED"),
+/**
+* guild has access to set a vanity URL
+*/
+S.Literal("VANITY_URL"),
+/**
+* guild is verified
+*/
+S.Literal("VERIFIED"),
+/**
+* guild has access to set 384kbps bitrate in voice (previously VIP voice servers)
+*/
+S.Literal("VIP_REGIONS"),
+/**
+* guild has enabled the welcome screen
+*/
+S.Literal("WELCOME_SCREEN_ENABLED")) {}
 
 export class VerificationLevels extends S.Union(/**
 * unrestricted
 */
 S.Literal(0),
+/**
+* must have verified email on account
+*/
 S.Literal(1),
+/**
+* must be registered on Discord for longer than 5 minutes
+*/
 S.Literal(2),
+/**
+* must be a member of the server for longer than 10 minutes
+*/
 S.Literal(3),
+/**
+* must have a verified phone number
+*/
 S.Literal(4)) {}
 
 export class GuildNSFWContentLevel extends S.Union(S.Literal(0),
@@ -1502,22 +1895,66 @@ export class MessageComponentTypes extends S.Union(/**
 * Container for other components
 */
 S.Literal(1),
+/**
+* Button object
+*/
 S.Literal(2),
+/**
+* Select menu for picking from defined text options
+*/
 S.Literal(3),
+/**
+* Text input object
+*/
 S.Literal(4),
+/**
+* Select menu for users
+*/
 S.Literal(5),
+/**
+* Select menu for roles
+*/
 S.Literal(6),
+/**
+* Select menu for mentionables (users and roles)
+*/
 S.Literal(7),
+/**
+* Select menu for channels
+*/
 S.Literal(8),
+/**
+* Section component
+*/
 S.Literal(9),
+/**
+* Text component
+*/
 S.Literal(10),
+/**
+* Thumbnail component
+*/
 S.Literal(11),
+/**
+* Media gallery component
+*/
 S.Literal(12),
+/**
+* File component
+*/
 S.Literal(13),
+/**
+* Separator component
+*/
 S.Literal(14),
+/**
+* Container component
+*/
 S.Literal(17),
-S.Literal(18),
-S.Literal(19)) {}
+/**
+* Label component
+*/
+S.Literal(18)) {}
 
 export class ButtonStyleTypes extends S.Union(S.Literal(1),
 S.Literal(2),
@@ -1621,6 +2058,9 @@ export class TextInputStyleTypes extends S.Union(/**
 * Single-line input
 */
 S.Literal(1),
+/**
+* Multi-line input
+*/
 S.Literal(2)) {}
 
 export class TextInputComponentResponse extends S.Class<TextInputComponentResponse>("TextInputComponentResponse")({
@@ -1716,6 +2156,9 @@ export class MessageComponentSeparatorSpacingSize extends S.Union(/**
 * Small spacing
 */
 S.Literal(1),
+/**
+* Large spacing
+*/
 S.Literal(2)) {}
 
 export class SeparatorComponentResponse extends S.Class<SeparatorComponentResponse>("SeparatorComponentResponse")({
@@ -1742,6 +2185,9 @@ export class StickerTypes extends S.Union(/**
 * an official sticker in a pack, part of Nitro or in a removed purchasable pack
 */
 S.Literal(1),
+/**
+* a sticker uploaded to a guild for the guild's members
+*/
 S.Literal(2)) {}
 
 export class StickerFormatTypes extends S.Union(S.Literal(1),
@@ -1802,9 +2248,21 @@ export class InteractionTypes extends S.Union(/**
 * Sent by Discord to validate your application's interaction handler
 */
 S.Literal(1),
+/**
+* Sent when a user uses an application command
+*/
 S.Literal(2),
+/**
+* Sent when a user interacts with a message component previously sent by your application
+*/
 S.Literal(3),
+/**
+* Sent when a user is filling in an autocomplete option in a chat command
+*/
 S.Literal(4),
+/**
+* Sent when a user submits a modal previously sent by your application
+*/
 S.Literal(5)) {}
 
 export class MessageInteractionResponse extends S.Class<MessageInteractionResponse>("MessageInteractionResponse")({
@@ -1899,9 +2357,21 @@ export class MessageShareCustomUserThemeBaseTheme extends S.Union(/**
 * No base theme
 */
 S.Literal(0),
+/**
+* Dark base theme
+*/
 S.Literal(1),
+/**
+* Light base theme
+*/
 S.Literal(2),
+/**
+* Darker base theme
+*/
 S.Literal(3),
+/**
+* Midnight base theme
+*/
 S.Literal(4)) {}
 
 export class CustomClientThemeResponse extends S.Class<CustomClientThemeResponse>("CustomClientThemeResponse")({
@@ -2156,7 +2626,13 @@ export class AllowedMentionTypes extends S.Union(/**
 * Controls role mentions
 */
 S.Literal("users"),
+/**
+* Controls user mentions
+*/
 S.Literal("roles"),
+/**
+* Controls @everyone and @here mentions
+*/
 S.Literal("everyone")) {}
 
 export class MessageAllowedMentionsRequest extends S.Class<MessageAllowedMentionsRequest>("MessageAllowedMentionsRequest")({
@@ -2177,7 +2653,7 @@ export class ComponentEmojiForRequest extends S.Class<ComponentEmojiForRequest>(
 export class ButtonComponentForMessageRequest extends S.Class<ButtonComponentForMessageRequest>("ButtonComponentForMessageRequest")({
   "type": S.Literal(2),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.optionalWith(S.String.pipe(S.minLength(1), S.maxLength(100)), { nullable: true }),
+  "custom_id": S.optionalWith(S.String.pipe(S.maxLength(100)), { nullable: true }),
   "style": ButtonStyleTypes,
   "label": S.optionalWith(S.String.pipe(S.maxLength(80)), { nullable: true }),
   "disabled": S.optionalWith(S.Boolean, { nullable: true }),
@@ -2194,7 +2670,7 @@ export class ChannelSelectDefaultValue extends S.Class<ChannelSelectDefaultValue
 export class ChannelSelectComponentForMessageRequest extends S.Class<ChannelSelectComponentForMessageRequest>("ChannelSelectComponentForMessageRequest")({
   "type": S.Literal(8),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -2217,7 +2693,7 @@ export class UserSelectDefaultValue extends S.Class<UserSelectDefaultValue>("Use
 export class MentionableSelectComponentForMessageRequest extends S.Class<MentionableSelectComponentForMessageRequest>("MentionableSelectComponentForMessageRequest")({
   "type": S.Literal(7),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -2230,7 +2706,7 @@ UserSelectDefaultValue)).pipe(S.maxItems(25)), { nullable: true })
 export class RoleSelectComponentForMessageRequest extends S.Class<RoleSelectComponentForMessageRequest>("RoleSelectComponentForMessageRequest")({
   "type": S.Literal(6),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -2250,7 +2726,7 @@ export class StringSelectOptionForRequest extends S.Class<StringSelectOptionForR
 export class StringSelectComponentForMessageRequest extends S.Class<StringSelectComponentForMessageRequest>("StringSelectComponentForMessageRequest")({
   "type": S.Literal(3),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -2262,7 +2738,7 @@ export class StringSelectComponentForMessageRequest extends S.Class<StringSelect
 export class UserSelectComponentForMessageRequest extends S.Class<UserSelectComponentForMessageRequest>("UserSelectComponentForMessageRequest")({
   "type": S.Literal(5),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -2477,6 +2953,9 @@ export class ReactionTypes extends S.Union(/**
 * Normal reaction type
 */
 S.Literal(0),
+/**
+* Burst reaction type
+*/
 S.Literal(1)) {}
 
 export class ListMessageReactionsByEmojiParams extends S.Struct({
@@ -2658,7 +3137,13 @@ export class WebhookTypes extends S.Union(/**
 * Incoming Webhooks can post messages to channels with a generated token
 */
 S.Literal(1),
+/**
+* Channel Follower Webhooks are internal webhooks used with Channel Following to post new messages into channels
+*/
 S.Literal(2),
+/**
+* Application webhooks are webhooks used with Interactions
+*/
 S.Literal(3)) {}
 
 export class ApplicationIncomingWebhookResponse extends S.Class<ApplicationIncomingWebhookResponse>("ApplicationIncomingWebhookResponse")({
@@ -2739,51 +3224,159 @@ export class UserNotificationSettings extends S.Union(/**
 * members will receive notifications for all messages by default
 */
 S.Literal(0),
+/**
+* members will receive notifications only for messages that @mention them by default
+*/
 S.Literal(1)) {}
 
 export class GuildExplicitContentFilterTypes extends S.Union(/**
 * media content will not be scanned
 */
 S.Literal(0),
+/**
+* media content sent by members without roles will be scanned
+*/
 S.Literal(1),
+/**
+* media content sent by all members will be scanned
+*/
 S.Literal(2)) {}
 
 export class AvailableLocalesEnum extends S.Union(/**
 * The ar locale
 */
 S.Literal("ar"),
+/**
+* The bg locale
+*/
 S.Literal("bg"),
+/**
+* The cs locale
+*/
 S.Literal("cs"),
+/**
+* The da locale
+*/
 S.Literal("da"),
+/**
+* The de locale
+*/
 S.Literal("de"),
+/**
+* The el locale
+*/
 S.Literal("el"),
+/**
+* The en-GB locale
+*/
 S.Literal("en-GB"),
+/**
+* The en-US locale
+*/
 S.Literal("en-US"),
+/**
+* The es-419 locale
+*/
 S.Literal("es-419"),
+/**
+* The es-ES locale
+*/
 S.Literal("es-ES"),
+/**
+* The fi locale
+*/
 S.Literal("fi"),
+/**
+* The fr locale
+*/
 S.Literal("fr"),
+/**
+* The he locale
+*/
 S.Literal("he"),
+/**
+* The hi locale
+*/
 S.Literal("hi"),
+/**
+* The hr locale
+*/
 S.Literal("hr"),
+/**
+* The hu locale
+*/
 S.Literal("hu"),
+/**
+* The id locale
+*/
 S.Literal("id"),
+/**
+* The it locale
+*/
 S.Literal("it"),
+/**
+* The ja locale
+*/
 S.Literal("ja"),
+/**
+* The ko locale
+*/
 S.Literal("ko"),
+/**
+* The lt locale
+*/
 S.Literal("lt"),
+/**
+* The nl locale
+*/
 S.Literal("nl"),
+/**
+* The no locale
+*/
 S.Literal("no"),
+/**
+* The pl locale
+*/
 S.Literal("pl"),
+/**
+* The pt-BR locale
+*/
 S.Literal("pt-BR"),
+/**
+* The ro locale
+*/
 S.Literal("ro"),
+/**
+* The ru locale
+*/
 S.Literal("ru"),
+/**
+* The sv-SE locale
+*/
 S.Literal("sv-SE"),
+/**
+* The th locale
+*/
 S.Literal("th"),
+/**
+* The tr locale
+*/
 S.Literal("tr"),
+/**
+* The uk locale
+*/
 S.Literal("uk"),
+/**
+* The vi locale
+*/
 S.Literal("vi"),
+/**
+* The zh-CN locale
+*/
 S.Literal("zh-CN"),
+/**
+* The zh-TW locale
+*/
 S.Literal("zh-TW")) {}
 
 export class AfkTimeouts extends S.Union(S.Literal(60),
@@ -2792,18 +3385,11 @@ S.Literal(900),
 S.Literal(1800),
 S.Literal(3600)) {}
 
-export class GuildTemplateRoleColorsResponse extends S.Class<GuildTemplateRoleColorsResponse>("GuildTemplateRoleColorsResponse")({
-  "primary_color": S.Int,
-  "secondary_color": S.optionalWith(S.Int, { nullable: true }),
-  "tertiary_color": S.optionalWith(S.Int, { nullable: true })
-}) {}
-
 export class GuildTemplateRoleResponse extends S.Class<GuildTemplateRoleResponse>("GuildTemplateRoleResponse")({
   "id": S.Int,
   "name": S.String,
   "permissions": S.String,
   "color": S.Int,
-  "colors": S.optionalWith(GuildTemplateRoleColorsResponse, { nullable: true }),
   "hoist": S.Boolean,
   "mentionable": S.Boolean,
   "icon": S.optionalWith(S.String, { nullable: true }),
@@ -2917,14 +3503,26 @@ export class GuildMFALevel extends S.Union(/**
 * Guild has no MFA/2FA requirement for moderation actions
 */
 S.Literal(0),
+/**
+* Guild has a 2FA requirement for moderation actions
+*/
 S.Literal(1)) {}
 
 export class PremiumGuildTiers extends S.Union(/**
 * Guild has not unlocked any Server Boost perks
 */
 S.Literal(0),
+/**
+* Guild has unlocked Server Boost level 1 perks
+*/
 S.Literal(1),
+/**
+* Guild has unlocked Server Boost level 2 perks
+*/
 S.Literal(2),
+/**
+* Guild has unlocked Server Boost level 3 perks
+*/
 S.Literal(3)) {}
 
 export class GuildWithCountsResponse extends S.Class<GuildWithCountsResponse>("GuildWithCountsResponse")({
@@ -2983,6 +3581,7 @@ export class GuildPatchRequestPartial extends S.Class<GuildPatchRequestPartial>(
   "afk_timeout": S.optionalWith(AfkTimeouts, { nullable: true }),
   "afk_channel_id": S.optionalWith(SnowflakeType, { nullable: true }),
   "system_channel_id": S.optionalWith(SnowflakeType, { nullable: true }),
+  "owner_id": S.optionalWith(SnowflakeType, { nullable: true }),
   "splash": S.optionalWith(S.String, { nullable: true }),
   "banner": S.optionalWith(S.String, { nullable: true }),
   "system_channel_flags": S.optionalWith(S.Int, { nullable: true }),
@@ -3242,14 +3841,26 @@ export class AutomodEventType extends S.Union(/**
 * A user submitted a message to a channel
 */
 S.Literal(1),
+/**
+* A user is attempting to join the server or a member's properties were updated.
+*/
 S.Literal(2)) {}
 
 export class AutomodActionType extends S.Union(/**
 * Block a user's message and prevent it from being posted. A custom explanation can be specified and shown to members whenever their message is blocked
 */
 S.Literal(1),
+/**
+* Send a system message to a channel in order to log the user message that triggered the rule
+*/
 S.Literal(2),
+/**
+* Temporarily disable a user's ability to communicate in the server (timeout)
+*/
 S.Literal(3),
+/**
+* Prevent a user from interacting in the server
+*/
 S.Literal(4)) {}
 
 export class BlockMessageActionMetadataResponse extends S.Class<BlockMessageActionMetadataResponse>("BlockMessageActionMetadataResponse")({
@@ -3292,16 +3903,34 @@ export class AutomodTriggerType extends S.Union(/**
 * Check if content contains words from a list of keywords or matches regex
 */
 S.Literal(1),
+/**
+* DEPRECATED
+*/
 S.Literal(2),
+/**
+* Check if content represents generic spam
+*/
 S.Literal(3),
+/**
+* Check if content contains words from internal pre-defined wordsets
+*/
 S.Literal(4),
+/**
+* Check if content contains more unique mentions than allowed
+*/
 S.Literal(5)) {}
 
 export class AutomodKeywordPresetType extends S.Union(/**
 * Words and phrases that may be considered profanity
 */
 S.Literal(1),
+/**
+* Words and phrases that may be considered as sexual content
+*/
 S.Literal(2),
+/**
+* Words and phrases that may be considered slurs and hate speech
+*/
 S.Literal(3)) {}
 
 export class DefaultKeywordListTriggerMetadataResponse extends S.Class<DefaultKeywordListTriggerMetadataResponse>("DefaultKeywordListTriggerMetadataResponse")({
@@ -3753,15 +4382,30 @@ export class IntegrationExpireBehaviorTypes extends S.Union(/**
 * Remove role
 */
 S.Literal(0),
+/**
+* Kick
+*/
 S.Literal(1)) {}
 
 export class IntegrationExpireGracePeriodTypes extends S.Union(/**
 * 1 day
 */
 S.Literal(1),
+/**
+* 3 days
+*/
 S.Literal(3),
+/**
+* 7 days
+*/
 S.Literal(7),
+/**
+* 14 days
+*/
 S.Literal(14),
+/**
+* 30 days
+*/
 S.Literal(30)) {}
 
 export class ExternalConnectionIntegrationResponse extends S.Class<ExternalConnectionIntegrationResponse>("ExternalConnectionIntegrationResponse")({
@@ -3823,8 +4467,7 @@ export class PrivateGuildMemberResponse extends S.Class<PrivateGuildMemberRespon
   "collectibles": S.optionalWith(UserCollectiblesResponse, { nullable: true }),
   "user": UserResponse,
   "mute": S.Boolean,
-  "deaf": S.Boolean,
-  "permissions": S.optionalWith(S.String, { nullable: true })
+  "deaf": S.Boolean
 }) {}
 
 export class SearchGuildMembersParams extends S.Struct({
@@ -3852,6 +4495,14 @@ SnowflakeType)).pipe(S.maxItems(350)), { nullable: true }),
   "channel_id": S.optionalWith(SnowflakeType, { nullable: true }),
   "communication_disabled_until": S.optionalWith(S.String, { nullable: true }),
   "flags": S.optionalWith(S.Int, { nullable: true })
+}) {}
+
+export class GuildMFARequest extends S.Class<GuildMFARequest>("GuildMFARequest")({
+  "level": GuildMFALevel
+}) {}
+
+export class GuildMFALevelResponse extends S.Class<GuildMFALevelResponse>("GuildMFALevelResponse")({
+  "level": GuildMFALevel
 }) {}
 
 export class WelcomeMessageResponse extends S.Class<WelcomeMessageResponse>("WelcomeMessageResponse")({
@@ -3908,6 +4559,9 @@ export class OnboardingPromptType extends S.Union(/**
 * Multiple choice options
 */
 S.Literal(0),
+/**
+* Many options shown as a dropdown
+*/
 S.Literal(1)) {}
 
 export class OnboardingPromptResponse extends S.Class<OnboardingPromptResponse>("OnboardingPromptResponse")({
@@ -3952,6 +4606,9 @@ export class GuildOnboardingMode extends S.Union(/**
 * Only Default Channels considered in constraints
 */
 S.Literal(0),
+/**
+* Default Channels and Onboarding Prompts considered in constraints
+*/
 S.Literal(1)) {}
 
 export class UpdateGuildOnboardingRequest extends S.Class<UpdateGuildOnboardingRequest>("UpdateGuildOnboardingRequest")({
@@ -4345,9 +5002,21 @@ export class WidgetImageStyles extends S.Union(/**
 * shield style widget with Discord icon and guild members online count
 */
 S.Literal("shield"),
+/**
+* large image with guild icon, name and online count. "POWERED BY DISCORD" as the footer of the widget
+*/
 S.Literal("banner1"),
+/**
+* smaller widget style with guild icon, name and online count. Split on the right with Discord logo
+*/
 S.Literal("banner2"),
+/**
+* large image with guild icon, name and online count. In the footer, Discord logo on the left and "Chat Now" on the right
+*/
 S.Literal("banner3"),
+/**
+* large Discord logo at the top of the widget. Guild icon, name and online count in the middle portion of the widget and a "JOIN MY SERVER" button at the bottom
+*/
 S.Literal("banner4")) {}
 
 export class GetGuildWidgetPngParams extends S.Struct({
@@ -4418,9 +5087,9 @@ export class LaunchActivityInteractionCallbackRequest extends S.Class<LaunchActi
 export class TextInputComponentForModalRequest extends S.Class<TextInputComponentForModalRequest>("TextInputComponentForModalRequest")({
   "type": S.Literal(4),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "style": TextInputStyleTypes,
-  "label": S.optionalWith(S.String.pipe(S.minLength(1), S.maxLength(45)), { nullable: true }),
+  "label": S.optionalWith(S.String.pipe(S.maxLength(45)), { nullable: true }),
   "value": S.optionalWith(S.String.pipe(S.maxLength(4000)), { nullable: true }),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(100)), { nullable: true }),
   "required": S.optionalWith(S.Boolean, { nullable: true }),
@@ -4437,7 +5106,7 @@ export class ActionRowComponentForModalRequest extends S.Class<ActionRowComponen
 export class ChannelSelectComponentForModalRequest extends S.Class<ChannelSelectComponentForModalRequest>("ChannelSelectComponentForModalRequest")({
   "type": S.Literal(8),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -4447,19 +5116,10 @@ export class ChannelSelectComponentForModalRequest extends S.Class<ChannelSelect
   "channel_types": S.optionalWith(S.Array(ChannelTypes), { nullable: true })
 }) {}
 
-export class FileUploadComponentForModalRequest extends S.Class<FileUploadComponentForModalRequest>("FileUploadComponentForModalRequest")({
-  "type": S.Literal(19),
-  "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
-  "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(10)), { nullable: true }),
-  "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(10)), { nullable: true }),
-  "required": S.optionalWith(S.Boolean, { nullable: true })
-}) {}
-
 export class MentionableSelectComponentForModalRequest extends S.Class<MentionableSelectComponentForModalRequest>("MentionableSelectComponentForModalRequest")({
   "type": S.Literal(7),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -4472,7 +5132,7 @@ UserSelectDefaultValue)).pipe(S.maxItems(25)), { nullable: true })
 export class RoleSelectComponentForModalRequest extends S.Class<RoleSelectComponentForModalRequest>("RoleSelectComponentForModalRequest")({
   "type": S.Literal(6),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -4484,7 +5144,7 @@ export class RoleSelectComponentForModalRequest extends S.Class<RoleSelectCompon
 export class StringSelectComponentForModalRequest extends S.Class<StringSelectComponentForModalRequest>("StringSelectComponentForModalRequest")({
   "type": S.Literal(3),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -4496,7 +5156,7 @@ export class StringSelectComponentForModalRequest extends S.Class<StringSelectCo
 export class UserSelectComponentForModalRequest extends S.Class<UserSelectComponentForModalRequest>("UserSelectComponentForModalRequest")({
   "type": S.Literal(5),
   "id": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0)), { nullable: true }),
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
   "placeholder": S.optionalWith(S.String.pipe(S.maxLength(150)), { nullable: true }),
   "min_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(0), S.lessThanOrEqualTo(25)), { nullable: true }),
   "max_values": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(1), S.lessThanOrEqualTo(25)), { nullable: true }),
@@ -4511,7 +5171,6 @@ export class LabelComponentForModalRequest extends S.Class<LabelComponentForModa
   "label": S.String.pipe(S.minLength(1), S.maxLength(45)),
   "description": S.optionalWith(S.String.pipe(S.minLength(1), S.maxLength(100)), { nullable: true }),
   "component": S.Union(ChannelSelectComponentForModalRequest,
-FileUploadComponentForModalRequest,
 MentionableSelectComponentForModalRequest,
 RoleSelectComponentForModalRequest,
 StringSelectComponentForModalRequest,
@@ -4526,8 +5185,8 @@ export class TextDisplayComponentForModalRequest extends S.Class<TextDisplayComp
 }) {}
 
 export class ModalInteractionCallbackRequestData extends S.Class<ModalInteractionCallbackRequestData>("ModalInteractionCallbackRequestData")({
-  "custom_id": S.String.pipe(S.minLength(1), S.maxLength(100)),
-  "title": S.String.pipe(S.minLength(1), S.maxLength(45)),
+  "custom_id": S.String.pipe(S.maxLength(100)),
+  "title": S.String.pipe(S.maxLength(45)),
   "components": S.NonEmptyArray(S.Union(ActionRowComponentForModalRequest,
 LabelComponentForModalRequest,
 TextDisplayComponentForModalRequest)).pipe(S.minItems(1), S.maxItems(40))
@@ -4635,8 +5294,7 @@ export class LobbyResponse extends S.Class<LobbyResponse>("LobbyResponse")({
   "metadata": S.optionalWith(S.Record({ key: S.String, value: S.Unknown }), { nullable: true }),
   "members": S.Array(LobbyMemberResponse),
   "linked_channel": S.optionalWith(GuildChannelResponse, { nullable: true }),
-  "flags": UInt32Type,
-  "override_event_webhooks_url": S.optionalWith(S.String, { nullable: true })
+  "flags": UInt32Type
 }) {}
 
 export class LobbyMemberRequestFlagsEnum extends S.Literal(1) {}
@@ -4653,8 +5311,7 @@ export class CreateLobbyRequest extends S.Class<CreateLobbyRequest>("CreateLobby
   "idle_timeout_seconds": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(5), S.lessThanOrEqualTo(604800)), { nullable: true }),
   "members": S.optionalWith(S.Array(LobbyMemberRequest).pipe(S.maxItems(25)), { nullable: true }),
   "metadata": S.optionalWith(S.Record({ key: S.String, value: S.Unknown }), { nullable: true }),
-  "flags": S.optionalWith(CreateLobbyRequestFlagsEnum, { nullable: true }),
-  "override_event_webhooks_url": S.optionalWith(S.String.pipe(S.maxLength(512)), { nullable: true })
+  "flags": S.optionalWith(CreateLobbyRequestFlagsEnum, { nullable: true })
 }) {}
 
 export class EditLobbyRequestFlagsEnum extends S.Literal(1) {}
@@ -4663,8 +5320,7 @@ export class EditLobbyRequest extends S.Class<EditLobbyRequest>("EditLobbyReques
   "idle_timeout_seconds": S.optionalWith(S.Int.pipe(S.greaterThanOrEqualTo(5), S.lessThanOrEqualTo(604800)), { nullable: true }),
   "metadata": S.optionalWith(S.Record({ key: S.String, value: S.Unknown }), { nullable: true }),
   "members": S.optionalWith(S.Array(LobbyMemberRequest).pipe(S.maxItems(25)), { nullable: true }),
-  "flags": S.optionalWith(EditLobbyRequestFlagsEnum, { nullable: true }),
-  "override_event_webhooks_url": S.optionalWith(S.String.pipe(S.maxLength(512)), { nullable: true })
+  "flags": S.optionalWith(EditLobbyRequestFlagsEnum, { nullable: true })
 }) {}
 
 export class EditLobbyChannelLinkRequest extends S.Class<EditLobbyChannelLinkRequest>("EditLobbyChannelLinkRequest")({
@@ -4771,20 +5427,13 @@ export class ApplicationIdentityProviderAuthType extends S.Union(S.Literal("OIDC
 S.Literal("EPIC_ONLINE_SERVICES_ACCESS_TOKEN"),
 S.Literal("EPIC_ONLINE_SERVICES_ID_TOKEN"),
 S.Literal("STEAM_SESSION_TICKET"),
-S.Literal("UNITY_SERVICES_ID_TOKEN"),
-S.Literal("DISCORD_BOT_ISSUED_ACCESS_TOKEN"),
-S.Literal("APPLE_ID_TOKEN"),
-S.Literal("PLAYSTATION_NETWORK_ID_TOKEN")) {}
+S.Literal("UNITY_SERVICES_ID_TOKEN")) {}
 
 export class PartnerSdkUnmergeProvisionalAccountRequest extends S.Class<PartnerSdkUnmergeProvisionalAccountRequest>("PartnerSdkUnmergeProvisionalAccountRequest")({
   "client_id": SnowflakeType,
   "client_secret": S.optionalWith(S.String.pipe(S.maxLength(1024)), { nullable: true }),
   "external_auth_token": S.String.pipe(S.maxLength(10240)),
   "external_auth_type": ApplicationIdentityProviderAuthType
-}) {}
-
-export class BotPartnerSdkUnmergeProvisionalAccountRequest extends S.Class<BotPartnerSdkUnmergeProvisionalAccountRequest>("BotPartnerSdkUnmergeProvisionalAccountRequest")({
-  "external_user_id": S.String.pipe(S.maxLength(1024))
 }) {}
 
 export class PartnerSdkTokenRequest extends S.Class<PartnerSdkTokenRequest>("PartnerSdkTokenRequest")({
@@ -4816,6 +5465,9 @@ export class StageInstancesPrivacyLevels extends S.Union(/**
 * The Stage instance is visible publicly. (deprecated)
 */
 S.Literal(1),
+/**
+* The Stage instance is visible publicly. (deprecated)
+*/
 S.Literal(2)) {}
 
 export class CreateStageInstanceRequest extends S.Class<CreateStageInstanceRequest>("CreateStageInstanceRequest")({
@@ -4862,8 +5514,17 @@ export class PremiumTypes extends S.Union(/**
 * None
 */
 S.Literal(0),
+/**
+* Nitro Classic
+*/
 S.Literal(1),
+/**
+* Nitro Standard
+*/
 S.Literal(2),
+/**
+* Nitro Basic
+*/
 S.Literal(3)) {}
 
 export class UserPIIResponse extends S.Class<UserPIIResponse>("UserPIIResponse")({
@@ -6017,6 +6678,14 @@ export const make = (
       orElse: unexpectedStatus
     }))
   ),
+  "deleteGuild": (guildId) => HttpClientRequest.del(`/guilds/${guildId}`).pipe(
+    withResponse(HttpClientResponse.matchStatus({
+      "429": decodeError("RatelimitedResponse", RatelimitedResponse),
+      "4xx": decodeError("ErrorResponse", ErrorResponse),
+      "204": () => Effect.void,
+      orElse: unexpectedStatus
+    }))
+  ),
   "updateGuild": (guildId, options) => HttpClientRequest.patch(`/guilds/${guildId}`).pipe(
     HttpClientRequest.bodyUnsafeJson(options),
     withResponse(HttpClientResponse.matchStatus({
@@ -6289,6 +6958,15 @@ export const make = (
       "429": decodeError("RatelimitedResponse", RatelimitedResponse),
       "4xx": decodeError("ErrorResponse", ErrorResponse),
       "204": () => Effect.void,
+      orElse: unexpectedStatus
+    }))
+  ),
+  "setGuildMfaLevel": (guildId, options) => HttpClientRequest.post(`/guilds/${guildId}/mfa`).pipe(
+    HttpClientRequest.bodyUnsafeJson(options),
+    withResponse(HttpClientResponse.matchStatus({
+      "2xx": decodeSuccess(GuildMFALevelResponse),
+      "429": decodeError("RatelimitedResponse", RatelimitedResponse),
+      "4xx": decodeError("ErrorResponse", ErrorResponse),
       orElse: unexpectedStatus
     }))
   ),
@@ -6871,15 +7549,6 @@ export const make = (
       orElse: unexpectedStatus
     }))
   ),
-  "botPartnerSdkUnmergeProvisionalAccount": (options) => HttpClientRequest.post(`/partner-sdk/provisional-accounts/unmerge/bot`).pipe(
-    HttpClientRequest.bodyUnsafeJson(options),
-    withResponse(HttpClientResponse.matchStatus({
-      "429": decodeError("RatelimitedResponse", RatelimitedResponse),
-      "4xx": decodeError("ErrorResponse", ErrorResponse),
-      "204": () => Effect.void,
-      orElse: unexpectedStatus
-    }))
-  ),
   "partnerSdkToken": (options) => HttpClientRequest.post(`/partner-sdk/token`).pipe(
     HttpClientRequest.bodyUnsafeJson(options),
     withResponse(HttpClientResponse.matchStatus({
@@ -7290,6 +7959,7 @@ export interface Client {
   readonly "getBotGateway": () => Effect.Effect<typeof GatewayBotResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "getGuildTemplate": (code: string) => Effect.Effect<typeof GuildTemplateResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "getGuild": (guildId: string, options?: typeof GetGuildParams.Encoded | undefined) => Effect.Effect<typeof GuildWithCountsResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
+  readonly "deleteGuild": (guildId: string) => Effect.Effect<void, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "updateGuild": (guildId: string, options: typeof GuildPatchRequestPartial.Encoded) => Effect.Effect<typeof GuildResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "listGuildAuditLogEntries": (guildId: string, options?: typeof ListGuildAuditLogEntriesParams.Encoded | undefined) => Effect.Effect<typeof GuildAuditLogResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "listAutoModerationRules": (guildId: string) => Effect.Effect<typeof ListAutoModerationRules200.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
@@ -7322,6 +7992,7 @@ export interface Client {
   readonly "updateGuildMember": (guildId: string, userId: string, options: typeof UpdateGuildMemberRequest.Encoded) => Effect.Effect<typeof GuildMemberResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "addGuildMemberRole": (guildId: string, userId: string, roleId: string) => Effect.Effect<void, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "deleteGuildMemberRole": (guildId: string, userId: string, roleId: string) => Effect.Effect<void, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
+  readonly "setGuildMfaLevel": (guildId: string, options: typeof GuildMFARequest.Encoded) => Effect.Effect<typeof GuildMFALevelResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "getGuildNewMemberWelcome": (guildId: string) => Effect.Effect<typeof GuildHomeSettingsResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "getGuildsOnboarding": (guildId: string) => Effect.Effect<typeof UserGuildOnboardingResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "putGuildsOnboarding": (guildId: string, options: typeof UpdateGuildOnboardingRequest.Encoded) => Effect.Effect<typeof GuildOnboardingResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
@@ -7390,7 +8061,6 @@ export interface Client {
   readonly "getPublicKeys": () => Effect.Effect<typeof OAuth2GetKeys.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "getOpenidConnectUserinfo": () => Effect.Effect<typeof OAuth2GetOpenIDConnectUserInfoResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "partnerSdkUnmergeProvisionalAccount": (options: typeof PartnerSdkUnmergeProvisionalAccountRequest.Encoded) => Effect.Effect<void, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
-  readonly "botPartnerSdkUnmergeProvisionalAccount": (options: typeof BotPartnerSdkUnmergeProvisionalAccountRequest.Encoded) => Effect.Effect<void, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "partnerSdkToken": (options: typeof PartnerSdkTokenRequest.Encoded) => Effect.Effect<typeof ProvisionalTokenResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "botPartnerSdkToken": (options: typeof BotPartnerSdkTokenRequest.Encoded) => Effect.Effect<typeof ProvisionalTokenResponse.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>
   readonly "getSoundboardDefaultSounds": () => Effect.Effect<typeof GetSoundboardDefaultSounds200.Type, HttpClientError.HttpClientError | ParseError | ClientError<"RatelimitedResponse", typeof RatelimitedResponse.Type> | ClientError<"ErrorResponse", typeof ErrorResponse.Type>>

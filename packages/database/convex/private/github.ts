@@ -13,7 +13,7 @@ import {
 import { githubIssueStatusValidator } from "../schema";
 import {
 	createGitHubIssue,
-	createOctokitClient,
+	createGitHubClient,
 	fetchGitHubInstallationRepos,
 	type GitHubRepo,
 	getBetterAuthUserIdByDiscordId,
@@ -90,9 +90,9 @@ export const getAccessibleReposByDiscordId = privateAction({
 			}
 
 			const account = accountOption.value;
-			const octokit = yield* createOctokitClient(ctx, account);
+			const client = yield* createGitHubClient(ctx, account);
 			const { repos, hasAllReposAccess } =
-				yield* fetchGitHubInstallationRepos(octokit);
+				yield* fetchGitHubInstallationRepos(client);
 
 			return {
 				_tag: "Success" as const,
@@ -187,10 +187,10 @@ export const createGitHubIssueFromDiscord = privateAction({
 			}
 
 			const account = accountOption.value;
-			const octokit = yield* createOctokitClient(ctx, account);
+			const client = yield* createGitHubClient(ctx, account);
 
 			const issue = yield* createGitHubIssue(
-				octokit,
+				client,
 				args.repoOwner,
 				args.repoName,
 				args.title,
