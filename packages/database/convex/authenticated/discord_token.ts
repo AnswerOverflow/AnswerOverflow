@@ -1,174 +1,209 @@
+"use node";
+
 import { refreshAccessToken } from "better-auth/oauth2";
-import { v } from "convex/values";
+import { Data, Effect, Schema } from "effect";
 import { components, internal } from "../_generated/api";
-import { internalAction, internalMutation } from "../client";
+import { ConfectMutationCtx } from "../client/confectAuthenticated";
+import { internalMutation, internalAction, ConfectActionCtx } from "../confect";
 import { getDiscordAccountWithToken, getTokenStatus } from "../shared/auth";
 
-export class DiscordTokenError extends Error {
-	constructor(
-		message: string,
-		public readonly code:
-			| "REFRESH_FAILED"
-			| "NO_REFRESH_TOKEN"
-			| "REAUTH_REQUIRED",
-	) {
-		super(message);
-		this.name = "DiscordTokenError";
-	}
-}
+export class DiscordTokenError extends Data.TaggedError("DiscordTokenError")<{
+	readonly message: string;
+	readonly code: "REFRESH_FAILED" | "NO_REFRESH_TOKEN" | "REAUTH_REQUIRED";
+}> {}
 
 const DISCORD_TOKEN_ENDPOINT = "https://discord.com/api/oauth2/token";
 
-async function refreshDiscordToken(refreshToken: string) {
-	const clientId = process.env.DISCORD_CLIENT_ID;
-	const clientSecret = process.env.DISCORD_CLIENT_SECRET;
+const refreshDiscordToken = (
+	refreshToken: string,
+): Effect.Effect<
+	{ accessToken: string; refreshToken?: string; accessTokenExpiresAt?: Date },
+	DiscordTokenError
+> =>
+	Effect.gen(function* () {
+		const clientId = process.env.DISCORD_CLIENT_ID;
+		const clientSecret = process.env.DISCORD_CLIENT_SECRET;
 
-	if (!clientId || !clientSecret) {
-		throw new DiscordTokenError(
-			"Discord OAuth credentials not configured",
-			"REFRESH_FAILED",
-		);
-	}
+		if (!clientId || !clientSecret) {
+			return yield* Effect.fail(
+				new DiscordTokenError({
+					message: "Discord OAuth credentials not configured",
+					code: "REFRESH_FAILED",
+				}),
+			);
+		}
 
-	try {
-		const tokens = await refreshAccessToken({
-			refreshToken,
-			options: {
-				clientId,
-				clientSecret,
+		const result = yield* Effect.tryPromise({
+			try: () =>
+				refreshAccessToken({
+					refreshToken,
+					options: {
+						clientId,
+						clientSecret,
+					},
+					tokenEndpoint: DISCORD_TOKEN_ENDPOINT,
+				}),
+			catch: (error) => {
+				const errorMessage =
+					error instanceof Error ? error.message : String(error);
+
+				if (
+					errorMessage.includes("invalid_grant") ||
+					errorMessage.includes("401") ||
+					errorMessage.includes("400")
+				) {
+					return new DiscordTokenError({
+						message:
+							"Refresh token is invalid or expired. Please re-authenticate.",
+						code: "REAUTH_REQUIRED",
+					});
+				}
+
+				return new DiscordTokenError({
+					message: `Failed to refresh Discord token: ${errorMessage}`,
+					code: "REFRESH_FAILED",
+				});
 			},
-			tokenEndpoint: DISCORD_TOKEN_ENDPOINT,
 		});
 
-		if (!tokens.accessToken) {
-			throw new DiscordTokenError(
-				"No access token returned from refresh",
-				"REFRESH_FAILED",
+		if (!result.accessToken) {
+			return yield* Effect.fail(
+				new DiscordTokenError({
+					message: "No access token returned from refresh",
+					code: "REFRESH_FAILED",
+				}),
 			);
 		}
 
-		return tokens;
-	} catch (error) {
-		if (error instanceof DiscordTokenError) {
-			throw error;
-		}
-
-		const errorMessage = error instanceof Error ? error.message : String(error);
-
-		if (
-			errorMessage.includes("invalid_grant") ||
-			errorMessage.includes("401") ||
-			errorMessage.includes("400")
-		) {
-			throw new DiscordTokenError(
-				"Refresh token is invalid or expired. Please re-authenticate.",
-				"REAUTH_REQUIRED",
-			);
-		}
-
-		throw new DiscordTokenError(
-			`Failed to refresh Discord token: ${errorMessage}`,
-			"REFRESH_FAILED",
-		);
-	}
-}
+		return {
+			accessToken: result.accessToken,
+			refreshToken: result.refreshToken,
+			accessTokenExpiresAt: result.accessTokenExpiresAt,
+		};
+	});
 
 export const updateAccountTokens = internalMutation({
-	args: {
-		accountId: v.string(),
-		accessToken: v.string(),
-		refreshToken: v.string(),
-		accessTokenExpiresAt: v.number(),
-	},
-	handler: async (ctx, args) => {
-		await ctx.runMutation(components.betterAuth.adapter.updateOne, {
-			input: {
-				model: "account",
-				where: [
-					{
-						field: "accountId",
-						operator: "eq",
-						value: args.accountId,
-					},
-				],
-				update: {
-					accessToken: args.accessToken,
-					refreshToken: args.refreshToken,
-					accessTokenExpiresAt: args.accessTokenExpiresAt,
-					updatedAt: Date.now(),
-				},
-			},
-		});
+	args: Schema.Struct({
+		accountId: Schema.String,
+		accessToken: Schema.String,
+		refreshToken: Schema.String,
+		accessTokenExpiresAt: Schema.Number,
+	}),
+	returns: Schema.Null,
+	handler: ({ accountId, accessToken, refreshToken, accessTokenExpiresAt }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
 
-		return null;
-	},
+			yield* Effect.promise(() =>
+				ctx.runMutation(components.betterAuth.adapter.updateOne, {
+					input: {
+						model: "account",
+						where: [
+							{
+								field: "accountId",
+								operator: "eq",
+								value: accountId,
+							},
+						],
+						update: {
+							accessToken,
+							refreshToken,
+							accessTokenExpiresAt,
+							updatedAt: Date.now(),
+						},
+					},
+				}),
+			);
+
+			return null;
+		}),
 });
 
+type RefreshSuccess = {
+	readonly success: true;
+	readonly accountId: bigint;
+	readonly accessToken: string;
+};
+
+type RefreshFailure = {
+	readonly success: false;
+	readonly error: string;
+	readonly code:
+		| "NOT_AUTHENTICATED"
+		| "NO_REFRESH_TOKEN"
+		| "REFRESH_FAILED"
+		| "REAUTH_REQUIRED";
+};
+
+type RefreshResult = RefreshSuccess | RefreshFailure;
+
+const RefreshSuccessSchema = Schema.Struct({
+	success: Schema.Literal(true),
+	accountId: Schema.BigIntFromSelf,
+	accessToken: Schema.String,
+});
+
+const RefreshFailureSchema = Schema.Struct({
+	success: Schema.Literal(false),
+	error: Schema.String,
+	code: Schema.Union(
+		Schema.Literal("NOT_AUTHENTICATED"),
+		Schema.Literal("NO_REFRESH_TOKEN"),
+		Schema.Literal("REFRESH_FAILED"),
+		Schema.Literal("REAUTH_REQUIRED"),
+	),
+});
+
+const RefreshResultSchema = Schema.Union(
+	RefreshSuccessSchema,
+	RefreshFailureSchema,
+);
+
 export const refreshAndGetValidToken = internalAction({
-	args: {},
-	handler: async (ctx) => {
-		const account = await getDiscordAccountWithToken(ctx);
+	args: Schema.Struct({}),
+	returns: RefreshResultSchema,
+	handler: (): Effect.Effect<RefreshResult, never, ConfectActionCtx> =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectActionCtx;
 
-		if (!account) {
-			return {
-				success: false as const,
-				error: "Not authenticated",
-				code: "NOT_AUTHENTICATED" as const,
-			};
-		}
+			const account = yield* Effect.promise(() =>
+				getDiscordAccountWithToken(ctx),
+			);
 
-		const tokenStatus = getTokenStatus(account.accessTokenExpiresAt);
-		const needsRefresh = tokenStatus === "expired" || !account.accessToken;
-
-		if (!needsRefresh && account.accessToken) {
-			return {
-				success: true as const,
-				accountId: account.accountId,
-				accessToken: account.accessToken,
-			};
-		}
-
-		if (!account.refreshToken) {
-			return {
-				success: false as const,
-				error:
-					"Token expired and no refresh token available. Please re-authenticate.",
-				code: "NO_REFRESH_TOKEN" as const,
-			};
-		}
-
-		try {
-			const tokens = await refreshDiscordToken(account.refreshToken);
-
-			if (!tokens.accessToken) {
+			if (!account) {
 				return {
 					success: false as const,
-					error: "No access token returned from refresh",
-					code: "REFRESH_FAILED" as const,
+					error: "Not authenticated",
+					code: "NOT_AUTHENTICATED" as const,
 				};
 			}
 
-			const accessTokenExpiresAt = tokens.accessTokenExpiresAt
-				? tokens.accessTokenExpiresAt.getTime()
-				: Date.now() + 7 * 24 * 60 * 60 * 1000;
+			const tokenStatus = getTokenStatus(account.accessTokenExpiresAt);
+			const needsRefresh = tokenStatus === "expired" || !account.accessToken;
 
-			await ctx.runMutation(
-				internal.authenticated.discord_token.updateAccountTokens,
-				{
-					accountId: account.accountId.toString(),
-					accessToken: tokens.accessToken,
-					refreshToken: tokens.refreshToken ?? account.refreshToken,
-					accessTokenExpiresAt,
-				},
-			);
+			if (!needsRefresh && account.accessToken) {
+				return {
+					success: true as const,
+					accountId: account.accountId,
+					accessToken: account.accessToken,
+				};
+			}
 
-			return {
-				success: true as const,
-				accountId: account.accountId,
-				accessToken: tokens.accessToken,
-			};
-		} catch (error) {
-			if (error instanceof DiscordTokenError) {
+			if (!account.refreshToken) {
+				return {
+					success: false as const,
+					error:
+						"Token expired and no refresh token available. Please re-authenticate.",
+					code: "NO_REFRESH_TOKEN" as const,
+				};
+			}
+
+			const tokensResult = yield* refreshDiscordToken(
+				account.refreshToken,
+			).pipe(Effect.either);
+
+			if (tokensResult._tag === "Left") {
+				const error = tokensResult.left;
 				return {
 					success: false as const,
 					error: error.message,
@@ -176,12 +211,31 @@ export const refreshAndGetValidToken = internalAction({
 				};
 			}
 
-			console.error("Unexpected error refreshing Discord token:", error);
+			const tokens = tokensResult.right;
+
+			const accessToken = tokens.accessToken;
+			const newRefreshToken = tokens.refreshToken ?? account.refreshToken ?? "";
+
+			const accessTokenExpiresAt = tokens.accessTokenExpiresAt
+				? tokens.accessTokenExpiresAt.getTime()
+				: Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+			yield* Effect.promise(() =>
+				ctx.runMutation(
+					internal.authenticated.discord_token.updateAccountTokens,
+					{
+						accountId: account.accountId.toString(),
+						accessToken,
+						refreshToken: newRefreshToken,
+						accessTokenExpiresAt,
+					},
+				),
+			);
+
 			return {
-				success: false as const,
-				error: "An unexpected error occurred while refreshing the token",
-				code: "REFRESH_FAILED" as const,
+				success: true as const,
+				accountId: account.accountId,
+				accessToken,
 			};
-		}
-	},
+		}),
 });
