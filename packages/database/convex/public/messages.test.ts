@@ -7,6 +7,7 @@ import {
 	createTextChannelThreadWithReplies,
 	createTextChannelWithMessages,
 } from "../../src/test";
+import type { EnrichedMessage } from "../shared/messages";
 
 describe("getMessages", () => {
 	describe("forum channel thread", () => {
@@ -31,7 +32,8 @@ describe("getMessages", () => {
 				expect(result.page).toHaveLength(2);
 				expect(result.isDone).toBe(true);
 
-				const messageIds = result.page.map((m) => m.message.id);
+				const page = result.page as EnrichedMessage[];
+				const messageIds = page.map((m) => m.message.id);
 				expect(messageIds).not.toContain(rootMessage.id);
 				expect(messageIds).toContain(reply1.id);
 				expect(messageIds).toContain(reply2.id);
@@ -114,8 +116,9 @@ describe("getMessages", () => {
 					{ subscribe: false },
 				);
 
-				expect(result.page[0]?.author).not.toBeNull();
-				expect(result.page[0]?.author?.id).toBe(fixture.author.id);
+				const page = result.page as EnrichedMessage[];
+				expect(page[0]?.author).not.toBeNull();
+				expect(page[0]?.author?.id).toBe(fixture.author.id);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 	});
@@ -142,7 +145,8 @@ describe("getMessages", () => {
 				expect(result.page).toHaveLength(2);
 				expect(result.isDone).toBe(true);
 
-				const messageIds = result.page.map((m) => m.message.id);
+				const page = result.page as EnrichedMessage[];
+				const messageIds = page.map((m) => m.message.id);
 				expect(messageIds).not.toContain(rootMessage.id);
 				expect(messageIds).toContain(reply1.id);
 				expect(messageIds).toContain(reply2.id);
@@ -225,8 +229,9 @@ describe("getMessages", () => {
 					{ subscribe: false },
 				);
 
-				expect(result.page[0]?.author).not.toBeNull();
-				expect(result.page[0]?.author?.id).toBe(fixture.author.id);
+				const page = result.page as EnrichedMessage[];
+				expect(page[0]?.author).not.toBeNull();
+				expect(page[0]?.author?.id).toBe(fixture.author.id);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 	});
@@ -253,7 +258,8 @@ describe("getMessages", () => {
 				expect(result.page).toHaveLength(2);
 				expect(result.isDone).toBe(true);
 
-				const messageIds = result.page.map((m) => m.message.id);
+				const page = result.page as EnrichedMessage[];
+				const messageIds = page.map((m) => m.message.id);
 				expect(messageIds).not.toContain(msg1.id);
 				expect(messageIds).toContain(msg2.id);
 				expect(messageIds).toContain(msg3.id);
@@ -336,8 +342,9 @@ describe("getMessages", () => {
 					{ subscribe: false },
 				);
 
-				expect(result.page[0]?.author).not.toBeNull();
-				expect(result.page[0]?.author?.id).toBe(fixture.author.id);
+				const page = result.page as EnrichedMessage[];
+				expect(page[0]?.author).not.toBeNull();
+				expect(page[0]?.author?.id).toBe(fixture.author.id);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 	});
