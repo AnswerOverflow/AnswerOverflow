@@ -120,6 +120,19 @@
         "postcss": "catalog:",
       },
     },
+    "packages/confect": {
+      "name": "@packages/confect",
+      "version": "1.0.0",
+      "dependencies": {
+        "@effect/platform": "catalog:",
+        "convex": "catalog:",
+        "effect": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/convex-test": {
       "name": "@packages/convex-test",
       "version": "0.0.38",
@@ -198,6 +211,19 @@
         "@effect/platform": "catalog:",
         "@tim-smart/openapi-gen": "^0.4.13",
         "effect": "catalog:",
+      },
+    },
+    "packages/github-api": {
+      "name": "@packages/github-api",
+      "version": "0.1.0",
+      "dependencies": {
+        "@effect/platform": "catalog:",
+        "@tim-smart/openapi-gen": "^0.4.13",
+        "effect": "catalog:",
+      },
+      "devDependencies": {
+        "@packages/typescript-config": "workspace:*",
+        "@types/bun": "latest",
       },
     },
     "packages/observability": {
@@ -1244,6 +1270,8 @@
 
     "@oslojs/encoding": ["@oslojs/encoding@1.1.0", "", {}, "sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ=="],
 
+    "@packages/confect": ["@packages/confect@workspace:packages/confect"],
+
     "@packages/convex-test": ["@packages/convex-test@workspace:packages/convex-test"],
 
     "@packages/database": ["@packages/database@workspace:packages/database"],
@@ -1253,6 +1281,8 @@
     "@packages/discord-api": ["@packages/discord-api@workspace:packages/discord-api"],
 
     "@packages/discord-bot": ["@packages/discord-bot@workspace:apps/discord-bot"],
+
+    "@packages/github-api": ["@packages/github-api@workspace:packages/github-api"],
 
     "@packages/main-site": ["@packages/main-site@workspace:apps/main-site"],
 
