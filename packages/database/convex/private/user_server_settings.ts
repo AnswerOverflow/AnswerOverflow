@@ -1,165 +1,216 @@
-import { type Infer, v } from "convex/values";
 import { getManyFrom } from "convex-helpers/server/relationships";
-import { privateMutation, privateQuery } from "../client";
-import { userServerSettingsSchema } from "../schema";
+import { Effect, Schema } from "effect";
+import { Id } from "@packages/confect/server";
+import { UserServerSettingsSchema } from "../schema";
+import {
+	privateQuery,
+	privateMutation,
+	ConfectQueryCtx,
+	ConfectMutationCtx,
+} from "../client/confectPrivate";
 import {
 	deleteMessageInternalLogic,
 	findUserServerSettingsById as findUserServerSettingsByIdShared,
 } from "../shared/shared";
 
-type UserServerSettings = Infer<typeof userServerSettingsSchema>;
+const UserServerSettingsWithSystemFields = Schema.extend(
+	UserServerSettingsSchema,
+	Schema.Struct({
+		_id: Id.Id("userServerSettings"),
+		_creationTime: Schema.Number,
+	}),
+);
+
+const UserServerSettingsLookup = Schema.Struct({
+	userId: Schema.BigIntFromSelf,
+	serverId: Schema.BigIntFromSelf,
+});
 
 export const findUserServerSettingsById = privateQuery({
-	args: {
-		userId: v.int64(),
-		serverId: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		return await findUserServerSettingsByIdShared(
-			ctx,
-			args.userId,
-			args.serverId,
-		);
-	},
+	args: UserServerSettingsLookup,
+	returns: Schema.NullOr(UserServerSettingsWithSystemFields),
+	handler: ({ userId, serverId }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectQueryCtx;
+			const settings = yield* Effect.promise(() =>
+				findUserServerSettingsByIdShared(ctx, userId, serverId),
+			);
+			return settings;
+		}),
 });
 
 export const findManyUserServerSettings = privateQuery({
-	args: {
-		settings: v.array(
-			v.object({
-				userId: v.int64(),
-				serverId: v.int64(),
-			}),
-		),
-	},
-	handler: async (ctx, args) => {
-		if (args.settings.length === 0) return [];
+	args: Schema.Struct({
+		settings: Schema.Array(UserServerSettingsLookup),
+	}),
+	returns: Schema.Array(UserServerSettingsWithSystemFields),
+	handler: ({ settings }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectQueryCtx;
+			if (settings.length === 0) return [];
 
-		const results: UserServerSettings[] = [];
-		for (const setting of args.settings) {
-			const found = await findUserServerSettingsByIdShared(
-				ctx,
-				setting.userId,
-				setting.serverId,
-			);
-			if (found) {
-				results.push(found);
+			const results: Array<
+				Schema.Schema.Type<typeof UserServerSettingsWithSystemFields>
+			> = [];
+			for (const setting of settings) {
+				const found = yield* Effect.promise(() =>
+					findUserServerSettingsByIdShared(
+						ctx,
+						setting.userId,
+						setting.serverId,
+					),
+				);
+				if (found) {
+					results.push(found);
+				}
 			}
-		}
-		return results;
-	},
+			return results;
+		}),
 });
 
 export const upsertUserServerSettings = privateMutation({
-	args: {
-		settings: userServerSettingsSchema,
-	},
-	handler: async (ctx, args) => {
-		const existing = await findUserServerSettingsByIdShared(
-			ctx,
-			args.settings.userId,
-			args.settings.serverId,
-		);
+	args: Schema.Struct({
+		settings: UserServerSettingsSchema,
+	}),
+	returns: UserServerSettingsWithSystemFields,
+	handler: ({ settings }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
 
-		if (existing) {
-			const updatedSettings = { ...args.settings };
-			if (updatedSettings.messageIndexingDisabled) {
-				updatedSettings.canPubliclyDisplayMessages = false;
-			}
-
-			if (
-				updatedSettings.messageIndexingDisabled &&
-				!existing.messageIndexingDisabled
-			) {
-				const allMessages = await getManyFrom(
-					ctx.db,
-					"messages",
-					"by_authorId",
-					args.settings.userId,
-				);
-				const messages = allMessages.filter(
-					(m) => m.serverId === args.settings.serverId,
-				);
-
-				for (const message of messages) {
-					await deleteMessageInternalLogic(ctx, message.id);
-				}
-			}
-
-			await ctx.db.patch(existing._id, updatedSettings);
-			const updated = await findUserServerSettingsByIdShared(
-				ctx,
-				args.settings.userId,
-				args.settings.serverId,
+			const existing = yield* Effect.promise(() =>
+				findUserServerSettingsByIdShared(
+					ctx,
+					settings.userId,
+					settings.serverId,
+				),
 			);
-			if (!updated) {
-				throw new Error("Failed to update user server settings");
+
+			if (existing) {
+				const updatedSettings = { ...settings };
+				if (updatedSettings.messageIndexingDisabled) {
+					updatedSettings.canPubliclyDisplayMessages = false;
+				}
+
+				if (
+					updatedSettings.messageIndexingDisabled &&
+					!existing.messageIndexingDisabled
+				) {
+					const allMessages = yield* Effect.promise(() =>
+						getManyFrom(ctx.db, "messages", "by_authorId", settings.userId),
+					);
+					const messages = allMessages.filter(
+						(m) => m.serverId === settings.serverId,
+					);
+
+					for (const message of messages) {
+						yield* Effect.promise(() =>
+							deleteMessageInternalLogic(ctx, message.id),
+						);
+					}
+				}
+
+				yield* Effect.promise(() =>
+					ctx.db.patch(existing._id, updatedSettings),
+				);
+				const updated = yield* Effect.promise(() =>
+					findUserServerSettingsByIdShared(
+						ctx,
+						settings.userId,
+						settings.serverId,
+					),
+				);
+				if (!updated) {
+					return yield* Effect.die(
+						new Error("Failed to update user server settings"),
+					);
+				}
+				return updated;
 			}
-			return updated;
-		} else {
-			const newSettings = { ...args.settings };
+
+			const newSettings = { ...settings };
 			if (newSettings.messageIndexingDisabled) {
 				newSettings.canPubliclyDisplayMessages = false;
 			}
 
-			await ctx.db.insert("userServerSettings", newSettings);
-			const created = await findUserServerSettingsByIdShared(
-				ctx,
-				args.settings.userId,
-				args.settings.serverId,
+			yield* Effect.promise(() =>
+				ctx.db.insert("userServerSettings", newSettings),
+			);
+			const created = yield* Effect.promise(() =>
+				findUserServerSettingsByIdShared(
+					ctx,
+					settings.userId,
+					settings.serverId,
+				),
 			);
 			if (!created) {
-				throw new Error("Failed to create user server settings");
+				return yield* Effect.die(
+					new Error("Failed to create user server settings"),
+				);
 			}
 			return created;
-		}
-	},
+		}).pipe(Effect.orDie),
 });
 
 export const upsertManyBotUserServerSettings = privateMutation({
-	args: {
-		settings: v.array(userServerSettingsSchema),
-	},
-	handler: async (ctx, args) => {
-		if (args.settings.length === 0) return [];
+	args: Schema.Struct({
+		settings: Schema.Array(UserServerSettingsSchema),
+	}),
+	returns: Schema.Array(UserServerSettingsSchema),
+	handler: ({ settings }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
+			if (settings.length === 0) return [];
 
-		for (const setting of args.settings) {
-			const existing = await findUserServerSettingsByIdShared(
-				ctx,
-				setting.userId,
-				setting.serverId,
-			);
+			for (const setting of settings) {
+				const existing = yield* Effect.promise(() =>
+					findUserServerSettingsByIdShared(
+						ctx,
+						setting.userId,
+						setting.serverId,
+					),
+				);
 
-			if (existing) {
-				await ctx.db.patch(existing._id, setting);
-			} else {
-				await ctx.db.insert("userServerSettings", setting);
+				if (existing) {
+					yield* Effect.promise(() => ctx.db.patch(existing._id, setting));
+				} else {
+					yield* Effect.promise(() =>
+						ctx.db.insert("userServerSettings", setting),
+					);
+				}
 			}
-		}
 
-		return args.settings;
-	},
+			return [...settings];
+		}).pipe(Effect.orDie),
 });
 
 export const upsertManyUserServerSettings = privateMutation({
-	args: {
-		settings: v.array(userServerSettingsSchema),
-	},
-	handler: async (ctx, args) => {
-		for (const setting of args.settings) {
-			try {
-				await ctx.db.insert("userServerSettings", setting);
-			} catch (_e) {
-				const existing = await findUserServerSettingsByIdShared(
-					ctx,
-					setting.userId,
-					setting.serverId,
-				);
-				if (!existing) {
-					return null;
+	args: Schema.Struct({
+		settings: Schema.Array(UserServerSettingsSchema),
+	}),
+	returns: Schema.Null,
+	handler: ({ settings }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
+
+			for (const setting of settings) {
+				try {
+					yield* Effect.promise(() =>
+						ctx.db.insert("userServerSettings", setting),
+					);
+				} catch {
+					const existing = yield* Effect.promise(() =>
+						findUserServerSettingsByIdShared(
+							ctx,
+							setting.userId,
+							setting.serverId,
+						),
+					);
+					if (!existing) {
+						return null;
+					}
+					yield* Effect.promise(() => ctx.db.replace(existing._id, setting));
 				}
-				await ctx.db.replace(existing._id, setting);
 			}
-		}
-	},
+			return null;
+		}).pipe(Effect.orDie),
 });

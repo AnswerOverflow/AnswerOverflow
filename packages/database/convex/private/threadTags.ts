@@ -1,34 +1,36 @@
-import { v } from "convex/values";
 import { getManyFrom } from "convex-helpers/server/relationships";
-import { privateMutation } from "../client";
+import { Effect, Schema } from "effect";
+import { privateMutation, ConfectMutationCtx } from "../client/confectPrivate";
 
 export const syncThreadTags = privateMutation({
-	args: {
-		threadId: v.int64(),
-		parentChannelId: v.int64(),
-		tagIds: v.array(v.int64()),
-	},
-	returns: v.null(),
-	handler: async (ctx, args) => {
-		const existingTags = await getManyFrom(
-			ctx.db,
-			"threadTags",
-			"by_threadId",
-			args.threadId,
-		);
+	args: Schema.Struct({
+		threadId: Schema.BigIntFromSelf,
+		parentChannelId: Schema.BigIntFromSelf,
+		tagIds: Schema.Array(Schema.BigIntFromSelf),
+	}),
+	returns: Schema.Null,
+	handler: ({ threadId, parentChannelId, tagIds }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
 
-		for (const tag of existingTags) {
-			await ctx.db.delete(tag._id);
-		}
+			const existingTags = yield* Effect.promise(() =>
+				getManyFrom(ctx.db, "threadTags", "by_threadId", threadId),
+			);
 
-		for (const tagId of args.tagIds) {
-			await ctx.db.insert("threadTags", {
-				threadId: args.threadId,
-				tagId,
-				parentChannelId: args.parentChannelId,
-			});
-		}
+			for (const tag of existingTags) {
+				yield* Effect.promise(() => ctx.db.delete(tag._id));
+			}
 
-		return null;
-	},
+			for (const tagId of tagIds) {
+				yield* Effect.promise(() =>
+					ctx.db.insert("threadTags", {
+						threadId,
+						tagId,
+						parentChannelId,
+					}),
+				);
+			}
+
+			return null;
+		}).pipe(Effect.orDie),
 });

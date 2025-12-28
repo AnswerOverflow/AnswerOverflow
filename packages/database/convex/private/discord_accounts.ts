@@ -1,8 +1,13 @@
-import { type Infer, v } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
-import { Array as Arr, Predicate } from "effect";
-import { privateMutation, privateQuery } from "../client";
-import { discordAccountSchema } from "../schema";
+import { Array as Arr, Effect, Predicate, Schema } from "effect";
+import { Id } from "@packages/confect/server";
+import { DiscordAccountSchema } from "../schema";
+import {
+	privateQuery,
+	privateMutation,
+	ConfectQueryCtx,
+	ConfectMutationCtx,
+} from "../client/confectPrivate";
 import {
 	deleteMessageInternalLogic,
 	deleteUserServerSettingsByUserIdLogic,
@@ -10,225 +15,246 @@ import {
 	upsertIgnoredDiscordAccountInternalLogic,
 } from "../shared/shared";
 
-type DiscordAccount = Infer<typeof discordAccountSchema>;
-
-function getDefaultDiscordAccount(data: {
-	id: bigint;
-	name: string;
-}): DiscordAccount {
-	return {
-		id: data.id,
-		name: data.name,
-		avatar: undefined,
-	};
-}
+const DiscordAccountWithSystemFields = Schema.extend(
+	DiscordAccountSchema,
+	Schema.Struct({
+		_id: Id.Id("discordAccounts"),
+		_creationTime: Schema.Number,
+	}),
+);
 
 export const upsertDiscordAccount = privateMutation({
-	args: {
-		account: discordAccountSchema,
-	},
-	handler: async (ctx, args) => {
-		const existing = await getOneFrom(
-			ctx.db,
-			"discordAccounts",
-			"by_discordAccountId",
-			args.account.id,
-			"id",
-		);
+	args: Schema.Struct({
+		account: DiscordAccountSchema,
+	}),
+	returns: DiscordAccountSchema,
+	handler: ({ account }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
 
-		if (existing) {
-			await ctx.db.patch(existing._id, args.account);
-			const updated = await getOneFrom(
-				ctx.db,
-				"discordAccounts",
-				"by_discordAccountId",
-				args.account.id,
-				"id",
-			);
-			if (!updated) {
-				throw new Error("Failed to update account");
-			}
-			return updated;
-		} else {
-			const ignored = await getOneFrom(
-				ctx.db,
-				"ignoredDiscordAccounts",
-				"by_discordAccountId",
-				args.account.id,
-				"id",
-			);
-
-			if (ignored) {
-				return getDefaultDiscordAccount({
-					id: args.account.id,
-					name: args.account.name,
-				});
-			}
-
-			await ctx.db.insert("discordAccounts", args.account);
-			const created = await getOneFrom(
-				ctx.db,
-				"discordAccounts",
-				"by_discordAccountId",
-				args.account.id,
-				"id",
-			);
-			if (!created) {
-				throw new Error("Failed to create account");
-			}
-			return created;
-		}
-	},
-});
-
-export const deleteDiscordAccount = privateMutation({
-	args: {
-		id: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		const existing = await getOneFrom(
-			ctx.db,
-			"discordAccounts",
-			"by_discordAccountId",
-			args.id,
-			"id",
-		);
-
-		if (existing) {
-			await ctx.db.delete(existing._id);
-		}
-
-		await upsertIgnoredDiscordAccountInternalLogic(ctx, args.id);
-
-		const messages = await getManyFrom(
-			ctx.db,
-			"messages",
-			"by_authorId",
-			args.id,
-		);
-
-		for (const message of messages) {
-			await deleteMessageInternalLogic(ctx, message.id);
-		}
-
-		await deleteUserServerSettingsByUserIdLogic(ctx, args.id);
-
-		return true;
-	},
-});
-
-export const findManyDiscordAccountsByIds = privateQuery({
-	args: {
-		ids: v.array(v.int64()),
-	},
-	handler: async (ctx, args) => {
-		const accounts = await Promise.all(
-			args.ids.map((id) => getDiscordAccountByIdShared(ctx, id)),
-		);
-		return Arr.filter(accounts, Predicate.isNotNullable);
-	},
-});
-
-export const upsertManyDiscordAccounts = privateMutation({
-	args: {
-		accounts: v.array(discordAccountSchema),
-	},
-	handler: async (ctx, args) => {
-		if (args.accounts.length === 0) return [];
-
-		const results: Infer<typeof discordAccountSchema>[] = [];
-
-		for (const account of args.accounts) {
-			const existing = await getOneFrom(
-				ctx.db,
-				"discordAccounts",
-				"by_discordAccountId",
-				account.id,
-				"id",
+			const existing = yield* Effect.promise(() =>
+				getOneFrom(
+					ctx.db,
+					"discordAccounts",
+					"by_discordAccountId",
+					account.id,
+					"id",
+				),
 			);
 
 			if (existing) {
-				await ctx.db.patch(existing._id, account);
-				results.push(account);
-			} else {
-				const ignored = await getOneFrom(
+				yield* Effect.promise(() => ctx.db.patch(existing._id, account));
+				const updated = yield* Effect.promise(() =>
+					getOneFrom(
+						ctx.db,
+						"discordAccounts",
+						"by_discordAccountId",
+						account.id,
+						"id",
+					),
+				);
+				if (!updated) {
+					return yield* Effect.die(new Error("Failed to update account"));
+				}
+				return {
+					id: updated.id,
+					name: updated.name,
+					avatar: updated.avatar,
+				};
+			}
+
+			const ignored = yield* Effect.promise(() =>
+				getOneFrom(
 					ctx.db,
 					"ignoredDiscordAccounts",
 					"by_discordAccountId",
 					account.id,
 					"id",
+				),
+			);
+
+			if (ignored) {
+				return {
+					id: account.id,
+					name: account.name,
+					avatar: undefined,
+				};
+			}
+
+			yield* Effect.promise(() => ctx.db.insert("discordAccounts", account));
+			const created = yield* Effect.promise(() =>
+				getOneFrom(
+					ctx.db,
+					"discordAccounts",
+					"by_discordAccountId",
+					account.id,
+					"id",
+				),
+			);
+			if (!created) {
+				return yield* Effect.die(new Error("Failed to create account"));
+			}
+			return {
+				id: created.id,
+				name: created.name,
+				avatar: created.avatar,
+			};
+		}).pipe(Effect.orDie),
+});
+
+export const deleteDiscordAccount = privateMutation({
+	args: Schema.Struct({
+		id: Schema.BigIntFromSelf,
+	}),
+	returns: Schema.Boolean,
+	handler: ({ id }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
+
+			const existing = yield* Effect.promise(() =>
+				getOneFrom(ctx.db, "discordAccounts", "by_discordAccountId", id, "id"),
+			);
+
+			if (existing) {
+				yield* Effect.promise(() => ctx.db.delete(existing._id));
+			}
+
+			yield* Effect.promise(() =>
+				upsertIgnoredDiscordAccountInternalLogic(ctx, id),
+			);
+
+			const messages = yield* Effect.promise(() =>
+				getManyFrom(ctx.db, "messages", "by_authorId", id),
+			);
+
+			for (const message of messages) {
+				yield* Effect.promise(() =>
+					deleteMessageInternalLogic(ctx, message.id),
+				);
+			}
+
+			yield* Effect.promise(() =>
+				deleteUserServerSettingsByUserIdLogic(ctx, id),
+			);
+
+			return true;
+		}).pipe(Effect.orDie),
+});
+
+export const findManyDiscordAccountsByIds = privateQuery({
+	args: Schema.Struct({
+		ids: Schema.Array(Schema.BigIntFromSelf),
+	}),
+	returns: Schema.Array(DiscordAccountWithSystemFields),
+	handler: ({ ids }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectQueryCtx;
+
+			const accounts = yield* Effect.promise(() =>
+				Promise.all(ids.map((id) => getDiscordAccountByIdShared(ctx, id))),
+			);
+			return Arr.filter(accounts, Predicate.isNotNullable);
+		}),
+});
+
+export const upsertManyDiscordAccounts = privateMutation({
+	args: Schema.Struct({
+		accounts: Schema.Array(DiscordAccountSchema),
+	}),
+	returns: Schema.Array(DiscordAccountSchema),
+	handler: ({ accounts }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectMutationCtx;
+
+			if (accounts.length === 0) return [];
+
+			const results: Array<Schema.Schema.Type<typeof DiscordAccountSchema>> =
+				[];
+
+			for (const account of accounts) {
+				const existing = yield* Effect.promise(() =>
+					getOneFrom(
+						ctx.db,
+						"discordAccounts",
+						"by_discordAccountId",
+						account.id,
+						"id",
+					),
 				);
 
-				if (ignored) {
+				if (existing) {
+					yield* Effect.promise(() => ctx.db.patch(existing._id, account));
 					results.push({
 						id: account.id,
 						name: account.name,
-						avatar: undefined,
+						avatar: account.avatar,
 					});
 				} else {
-					await ctx.db.insert("discordAccounts", account);
-					results.push(account);
+					const ignored = yield* Effect.promise(() =>
+						getOneFrom(
+							ctx.db,
+							"ignoredDiscordAccounts",
+							"by_discordAccountId",
+							account.id,
+							"id",
+						),
+					);
+
+					if (ignored) {
+						results.push({
+							id: account.id,
+							name: account.name,
+							avatar: undefined,
+						});
+					} else {
+						yield* Effect.promise(() =>
+							ctx.db.insert("discordAccounts", account),
+						);
+						results.push({
+							id: account.id,
+							name: account.name,
+							avatar: account.avatar,
+						});
+					}
 				}
 			}
-		}
 
-		return results;
-	},
+			return results;
+		}).pipe(Effect.orDie),
+});
+
+const UserHeaderResult = Schema.Struct({
+	user: Schema.Struct({
+		id: Schema.String,
+		name: Schema.String,
+		avatar: Schema.optional(Schema.String),
+	}),
+	servers: Schema.Array(Schema.Unknown),
 });
 
 export const getUserPageHeaderData = privateQuery({
-	args: {
-		userId: v.int64(),
-	},
-	handler: async (ctx, args) => {
-		const user = await getDiscordAccountByIdShared(ctx, args.userId);
-		if (!user) {
-			return null;
-		}
+	args: Schema.Struct({
+		userId: Schema.BigIntFromSelf,
+	}),
+	returns: Schema.NullOr(UserHeaderResult),
+	handler: ({ userId }) =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectQueryCtx;
 
-		// const postMessages = await ctx.db
-		// 	.query("messages")
-		// 	.withIndex("by_authorId_and_childThreadId", (q) =>
-		// 		q.eq("authorId", args.userId).gte("childThreadId", 0n),
-		// 	)
-		// 	.order("desc")
-		// 	.take(50);
+			const user = yield* Effect.promise(() =>
+				getDiscordAccountByIdShared(ctx, userId),
+			);
+			if (!user) {
+				return null;
+			}
 
-		// const serverIds = new Set<bigint>();
-		// for (const message of postMessages) {
-		// 	serverIds.add(message.serverId);
-		// }
-
-		// const servers = Arr.filter(
-		// 	await Promise.all(
-		// 		Array.from(serverIds).map(async (serverId) => {
-		// 			const server = await getOneFrom(
-		// 				ctx.db,
-		// 				"servers",
-		// 				"by_discordId",
-		// 				serverId,
-		// 			);
-		// 			if (!server || server.kickedTime) {
-		// 				return null;
-		// 			}
-		// 			return {
-		// 				id: server.discordId.toString(),
-		// 				name: server.name,
-		// 				icon: server.icon,
-		// 				discordId: server.discordId,
-		// 			};
-		// 		}),
-		// 	),
-		// 	Predicate.isNotNullable,
-		// );
-
-		return {
-			user: {
-				id: user.id.toString(),
-				name: user.name,
-				avatar: user.avatar,
-			},
-			servers: [],
-		};
-	},
+			return {
+				user: {
+					id: user.id.toString(),
+					name: user.name,
+					avatar: user.avatar,
+				},
+				servers: [],
+			};
+		}),
 });
