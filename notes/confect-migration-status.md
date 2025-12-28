@@ -252,11 +252,36 @@ Use confect pattern for all new Convex functions. They automatically get:
 - Triggers now work correctly with the DataModel
 - Both "messages" and "channels" tables have trigger registration for count tracking
 
+### 22. Created Private Function Wrappers
+- File: `packages/database/convex/client/confectPrivate.ts`
+- `privateQuery`, `privateMutation`, `privateAction` - Wrappers that validate `backendAccessToken`
+- Provides `ConfectQueryCtx`, `ConfectMutationCtx`, `ConfectActionCtx` with both `ctx` (raw Convex) and `db` (confect)
+- Returns typed `RegisteredQuery`, `RegisteredMutation`, `RegisteredAction` for proper inference
+
+### 23. Migrated Private Functions to Confect
+
+**Fully Migrated:**
+1. **`private/servers.ts`** - Server CRUD operations
+2. **`private/discord_accounts.ts`** - Discord account operations  
+3. **`private/user_server_settings.ts`** - User server settings
+4. **`private/ignored_discord_accounts.ts`** - Ignored accounts
+5. **`private/threadTags.ts`** - Thread tag operations
+6. **`private/cache.ts`** - Cache-related operations
+7. **`private/channels.ts`** - Channel CRUD and settings
+8. **`private/github.ts`** - GitHub issue records
+9. **`private/server_preferences.ts`** - Server preferences
+
+**Not Migrated (keeping old pattern):**
+1. **`private/messages.ts`** - Uses `ctx.cache` (not available in confect) and complex shared functions expecting mutable arrays
+2. **`private/attachments.ts`** - Uses `ctx.runMutation(api.private.*)` which creates circular type inference issues
+3. **`private/counts.ts`** - Just exports aggregates, no functions to migrate
+
 ## Key Files
 - `packages/confect/` - Vendored confect package
 - `packages/database/convex/schema.ts` - Unified Effect-based schema
 - `packages/database/convex/confect.ts` - Function constructors & context tags
 - `packages/database/convex/client/confectAuthenticated.ts` - Authenticated function wrappers
+- `packages/database/convex/client/confectPrivate.ts` - Private function wrappers with backend token validation
 - `packages/database/convex/examples/confect-example.ts` - Example usage
 - `packages/database/convex/triggers.ts` - Trigger system for count tracking (currently simplified)
 - `packages/database/convex/shared/publicSchemas.ts` - Native Convex validators for public APIs
@@ -274,3 +299,41 @@ Schema.Array(ItemSchema).pipe(Schema.mutable)
 The `ValueToValidator` type has a depth limit of 6 to prevent TypeScript from hitting complexity limits. Complex nested schemas may fall back to `VAny`. For such cases:
 1. Use native Convex validators (`v.*`) directly
 2. Or simplify the schema structure
+
+### Mixing Confect with Raw Convex Context
+When migrating functions that call shared helper functions expecting raw Convex types:
+```typescript
+const { ctx, db } = yield* ConfectQueryCtx;
+const result = yield* Effect.promise(() =>
+  someSharedFunction(ctx, args)  // ctx is raw QueryCtx
+);
+```
+
+### Schema.Array Readonly Issue
+Effect Schema produces `readonly T[]` for arrays. This doesn't match mutable `T[]` expected by:
+- Some shared functions like `upsertManyMessagesOptimized`
+- Functions that modify arrays in place
+
+**Workarounds:**
+1. Use spread operator: `[...array]` when passing to functions expecting mutable
+2. Update shared functions to accept `ReadonlyArray<T>`
+3. Use `Schema.mutable` on the array schema
+
+### Cache Dependency
+Some functions use `ctx.cache` which is added by `publicQuery`/`privateQuery` wrappers from `client/index.ts`:
+- `getMessagePageHeaderData` in messages.ts
+- Various functions in `public/channels.ts` and `public/messages.ts`
+
+These cannot be migrated to confect without:
+1. Creating a confect wrapper that adds cache to context
+2. Or refactoring to not use cache
+
+### Circular API References in Actions
+Actions that use `ctx.runMutation(api.private.*)` create circular type inference issues with confect because:
+- The API types are generated from the functions
+- The functions depend on the API types for the runMutation calls
+
+## Next Steps
+1. Create `confectPublic.ts` wrapper that adds cache support
+2. Migrate public functions
+3. Consider updating shared functions to accept readonly arrays
