@@ -81,7 +81,9 @@
 	"overrides": {
 		"@modelcontextprotocol/sdk": "1.17.5",
 		"import-in-the-middle": "^2.0.0",
-		"require-in-the-middle": "^8.0.1"
+		"require-in-the-middle": "^8.0.1",
+		"effect": "^3.19.8",
+		"@effect/platform": "^0.93.6"
 	},
 	"dependencies": {
 		"@better-auth/stripe": "^1.4.7",
