@@ -3,15 +3,11 @@ import {
 	HttpClient,
 	HttpClientRequest,
 } from "@effect/platform";
-import type {
-	GenericActionCtx,
-	GenericMutationCtx,
-	GenericQueryCtx,
-} from "convex/server";
+import type { GenericActionCtx } from "convex/server";
 import { Array as Arr, Data, Effect, Option, Schema } from "effect";
 import { make, type Client } from "@packages/github-api/generated";
-import { components } from "../../_generated/api";
 import type { DataModel } from "../../_generated/dataModel";
+import { BetterAuthAccounts, type GitHubAccount } from "./betterAuthService";
 
 const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 
@@ -248,32 +244,19 @@ export type GitHubInstallationReposResult = Schema.Schema.Type<
 	typeof GitHubInstallationReposResultSchema
 >;
 
-type ConvexCtx =
-	| GenericQueryCtx<DataModel>
-	| GenericMutationCtx<DataModel>
-	| GenericActionCtx<DataModel>;
 type ActionCtx = GenericActionCtx<DataModel>;
 
-const RawGitHubAccountSchema = Schema.Struct({
-	_id: Schema.String,
-	accountId: Schema.String,
-	providerId: Schema.Literal("github"),
-	userId: Schema.String,
-	accessToken: Schema.optionalWith(Schema.NullishOr(Schema.String), {
-		exact: true,
-	}),
-	refreshToken: Schema.optionalWith(Schema.NullishOr(Schema.String), {
-		exact: true,
-	}),
-	accessTokenExpiresAt: Schema.optionalWith(Schema.NullishOr(Schema.Number), {
-		exact: true,
-	}),
-	scope: Schema.optionalWith(Schema.NullishOr(Schema.String), { exact: true }),
-}).pipe(Schema.annotations({ parseOptions: { onExcessProperty: "ignore" } }));
-
-const AccountWithUserIdSchema = Schema.Struct({
-	userId: Schema.String,
-}).pipe(Schema.annotations({ parseOptions: { onExcessProperty: "ignore" } }));
+const toGitHubAccountWithRefresh = (
+	account: GitHubAccount,
+): GitHubAccountWithRefresh => ({
+	_id: account._id,
+	accountId: account.accountId,
+	userId: account.userId,
+	accessToken: account.accessToken ?? null,
+	refreshToken: account.refreshToken ?? null,
+	accessTokenExpiresAt: account.accessTokenExpiresAt ?? null,
+	scope: account.scope ?? null,
+});
 
 export const validateRepoOwnerAndName = (
 	owner: string,
@@ -319,61 +302,37 @@ export const validateIssueTitleAndBody = (
 };
 
 export const getBetterAuthUserIdByDiscordId = (
-	ctx: ConvexCtx,
 	discordId: bigint,
-): Effect.Effect<Option.Option<string>> =>
+): Effect.Effect<Option.Option<string>, never, BetterAuthAccounts> =>
 	Effect.gen(function* () {
-		const discordAccountResult = yield* Effect.promise(() =>
-			ctx.runQuery(components.betterAuth.adapter.findOne, {
-				model: "account",
-				where: [
-					{ field: "accountId", operator: "eq", value: discordId.toString() },
-					{ field: "providerId", operator: "eq", value: "discord" },
-				],
-			}),
-		);
-
-		const decoded = Schema.decodeUnknownOption(AccountWithUserIdSchema)(
-			discordAccountResult,
-		);
-		return Option.map(decoded, (account) => account.userId);
+		const accounts = yield* BetterAuthAccounts;
+		const discordAccountOption =
+			yield* accounts.findDiscordAccountByDiscordId(discordId);
+		return Option.map(discordAccountOption, (account) => account.userId);
 	});
 
 export const getGitHubAccountByUserId = (
-	ctx: ConvexCtx,
 	userId: string,
-): Effect.Effect<Option.Option<GitHubAccountWithRefresh>> =>
+): Effect.Effect<
+	Option.Option<GitHubAccountWithRefresh>,
+	never,
+	BetterAuthAccounts
+> =>
 	Effect.gen(function* () {
-		const accountResult = yield* Effect.promise(() =>
-			ctx.runQuery(components.betterAuth.adapter.findOne, {
-				model: "account",
-				where: [
-					{ field: "userId", operator: "eq", value: userId },
-					{ field: "providerId", operator: "eq", value: "github" },
-				],
-			}),
-		);
-
-		const decoded = Schema.decodeUnknownOption(RawGitHubAccountSchema)(
-			accountResult,
-		);
-		return Option.map(decoded, (raw) => ({
-			_id: raw._id,
-			accountId: raw.accountId,
-			userId: raw.userId,
-			accessToken: raw.accessToken ?? null,
-			refreshToken: raw.refreshToken ?? null,
-			accessTokenExpiresAt: raw.accessTokenExpiresAt ?? null,
-			scope: raw.scope ?? null,
-		}));
+		const accounts = yield* BetterAuthAccounts;
+		const accountOption = yield* accounts.findGitHubAccountByUserId(userId);
+		return Option.map(accountOption, toGitHubAccountWithRefresh);
 	});
 
 export const getGitHubAccountByUserIdOrFail = (
-	ctx: ConvexCtx,
 	userId: string,
-): Effect.Effect<GitHubAccountWithRefresh, GitHubNotLinkedError> =>
+): Effect.Effect<
+	GitHubAccountWithRefresh,
+	GitHubNotLinkedError,
+	BetterAuthAccounts
+> =>
 	Effect.gen(function* () {
-		const accountOption = yield* getGitHubAccountByUserId(ctx, userId);
+		const accountOption = yield* getGitHubAccountByUserId(userId);
 		return yield* Option.match(accountOption, {
 			onNone: () =>
 				Effect.fail(
@@ -384,47 +343,19 @@ export const getGitHubAccountByUserIdOrFail = (
 	});
 
 export const getGitHubAccountByDiscordId = (
-	ctx: ConvexCtx,
 	discordId: bigint,
-): Effect.Effect<Option.Option<GitHubAccountWithRefresh>> =>
+): Effect.Effect<
+	Option.Option<GitHubAccountWithRefresh>,
+	never,
+	BetterAuthAccounts
+> =>
 	Effect.gen(function* () {
-		const userIdOption = yield* getBetterAuthUserIdByDiscordId(ctx, discordId);
+		const userIdOption = yield* getBetterAuthUserIdByDiscordId(discordId);
 		if (Option.isNone(userIdOption)) {
 			return Option.none();
 		}
-		return yield* getGitHubAccountByUserId(ctx, userIdOption.value);
+		return yield* getGitHubAccountByUserId(userIdOption.value);
 	});
-
-const RefreshedTokensSchema = Schema.Struct({
-	accessToken: Schema.String,
-	refreshToken: Schema.String,
-	accessTokenExpiresAt: Schema.Number,
-});
-
-type RefreshedTokens = Schema.Schema.Type<typeof RefreshedTokensSchema>;
-
-const updateGitHubAccountTokens = (
-	ctx: ActionCtx,
-	githubAccountId: string,
-	tokens: RefreshedTokens,
-): Effect.Effect<void> =>
-	Effect.promise(() =>
-		ctx.runMutation(components.betterAuth.adapter.updateOne, {
-			input: {
-				model: "account",
-				where: [
-					{ field: "accountId", operator: "eq", value: githubAccountId },
-					{ field: "providerId", operator: "eq", value: "github" },
-				],
-				update: {
-					accessToken: tokens.accessToken,
-					refreshToken: tokens.refreshToken,
-					accessTokenExpiresAt: tokens.accessTokenExpiresAt,
-					updatedAt: Date.now(),
-				},
-			},
-		}),
-	);
 
 const GitHubTokenRefreshResponseSchema = Schema.Struct({
 	access_token: Schema.String,
@@ -441,11 +372,14 @@ const isTokenExpired = (expiresAt: number | null): boolean => {
 };
 
 const refreshGitHubToken = (
-	ctx: ActionCtx,
 	account: GitHubAccountWithRefresh,
 	clientId: string,
 	clientSecret: string,
-): Effect.Effect<string, GitHubNoTokenError | GitHubRefreshFailedError> =>
+): Effect.Effect<
+	string,
+	GitHubNoTokenError | GitHubRefreshFailedError,
+	BetterAuthAccounts
+> =>
 	Effect.gen(function* () {
 		if (!account.refreshToken) {
 			return yield* Effect.fail(
@@ -507,7 +441,8 @@ const refreshGitHubToken = (
 		const now = Date.now();
 		const accessTokenExpiresAt = now + data.expires_in * 1000;
 
-		yield* updateGitHubAccountTokens(ctx, account.accountId, {
+		const accounts = yield* BetterAuthAccounts;
+		yield* accounts.updateAccount("github", account.accountId, {
 			accessToken: data.access_token,
 			refreshToken: data.refresh_token,
 			accessTokenExpiresAt,
@@ -542,13 +477,13 @@ const createGitHubApiClient = (
 	});
 
 export const createGitHubClient = (
-	ctx: ActionCtx,
 	account: GitHubAccountWithRefresh,
 ): Effect.Effect<
 	Client,
 	| GitHubCredentialsNotConfiguredError
 	| GitHubNoTokenError
-	| GitHubRefreshFailedError
+	| GitHubRefreshFailedError,
+	BetterAuthAccounts
 > =>
 	Effect.gen(function* () {
 		const clientId = process.env.GITHUB_CLIENT_ID;
@@ -577,12 +512,7 @@ export const createGitHubClient = (
 		let accessToken = account.accessToken;
 
 		if (isTokenExpired(account.accessTokenExpiresAt)) {
-			accessToken = yield* refreshGitHubToken(
-				ctx,
-				account,
-				clientId,
-				clientSecret,
-			);
+			accessToken = yield* refreshGitHubToken(account, clientId, clientSecret);
 		}
 
 		return yield* createGitHubApiClient(accessToken).pipe(

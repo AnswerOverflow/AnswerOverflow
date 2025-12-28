@@ -1,4 +1,4 @@
-import { Effect, Option, Schema } from "effect";
+import { Effect, Layer, Option, Schema } from "effect";
 import { ConfectQueryCtx, query } from "../confect";
 import {
 	authenticatedAction,
@@ -6,6 +6,8 @@ import {
 	ConfectActionCtx,
 } from "../client/confectAuthenticated";
 import {
+	BetterAuthAccounts,
+	BetterAuthAccountsLive,
 	createGitHubClient,
 	fetchGitHubInstallationRepos,
 	GetAccessibleReposErrorSchema,
@@ -34,7 +36,9 @@ export const getGitHubAccount = query({
 				return null;
 			}
 
-			const accountOption = yield* getGitHubAccountByUserId(ctx, user._id);
+			const accountOption = yield* getGitHubAccountByUserId(user._id).pipe(
+				Effect.provide(BetterAuthAccountsLive(ctx)),
+			);
 			if (Option.isNone(accountOption)) {
 				return null;
 			}
@@ -60,11 +64,12 @@ export const getAccessibleRepos = authenticatedAction({
 			const actionCtx = yield* ConfectActionCtx;
 			const user = yield* AuthenticatedUser;
 
-			const account = yield* getGitHubAccountByUserIdOrFail(
-				actionCtx.ctx,
-				user._id,
+			const account = yield* getGitHubAccountByUserIdOrFail(user._id).pipe(
+				Effect.provide(BetterAuthAccountsLive(actionCtx.ctx)),
 			);
-			const client = yield* createGitHubClient(actionCtx.ctx, account);
+			const client = yield* createGitHubClient(account).pipe(
+				Effect.provide(BetterAuthAccountsLive(actionCtx.ctx)),
+			);
 			const { repos, hasAllReposAccess } =
 				yield* fetchGitHubInstallationRepos(client);
 

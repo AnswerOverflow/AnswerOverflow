@@ -12,6 +12,7 @@ import {
 } from "../client/private";
 import { githubIssueStatusValidator } from "../schema";
 import {
+	BetterAuthAccountsLive,
 	createGitHubIssue,
 	createGitHubClient,
 	fetchGitHubInstallationRepos,
@@ -51,7 +52,6 @@ export const getAccessibleReposByDiscordId = privateAction({
 	handler: async (ctx, args): Promise<GetAccessibleReposResult> => {
 		const fetchRepos = Effect.gen(function* () {
 			const userIdOption = yield* getBetterAuthUserIdByDiscordId(
-				ctx,
 				args.discordId,
 			);
 			if (Option.isNone(userIdOption)) {
@@ -78,10 +78,7 @@ export const getAccessibleReposByDiscordId = privateAction({
 				);
 			}
 
-			const accountOption = yield* getGitHubAccountByDiscordId(
-				ctx,
-				args.discordId,
-			);
+			const accountOption = yield* getGitHubAccountByDiscordId(args.discordId);
 
 			if (Option.isNone(accountOption)) {
 				return yield* Effect.fail(
@@ -90,7 +87,7 @@ export const getAccessibleReposByDiscordId = privateAction({
 			}
 
 			const account = accountOption.value;
-			const client = yield* createGitHubClient(ctx, account);
+			const client = yield* createGitHubClient(account);
 			const { repos, hasAllReposAccess } =
 				yield* fetchGitHubInstallationRepos(client);
 
@@ -99,7 +96,7 @@ export const getAccessibleReposByDiscordId = privateAction({
 				repos: [...repos],
 				hasAllReposAccess,
 			};
-		});
+		}).pipe(Effect.provide(BetterAuthAccountsLive(ctx)));
 
 		const result = await Effect.runPromise(Effect.either(fetchRepos));
 
@@ -143,12 +140,11 @@ export const createGitHubIssueFromDiscord = privateAction({
 		discordThreadId: v.optional(v.int64()),
 	},
 	handler: async (ctx, args): Promise<CreateGitHubIssueResult> => {
-		const createIssue = Effect.gen(function* () {
+		const createIssueEffect = Effect.gen(function* () {
 			yield* validateRepoOwnerAndName(args.repoOwner, args.repoName);
 			yield* validateIssueTitleAndBody(args.title, args.body);
 
 			const userIdOption = yield* getBetterAuthUserIdByDiscordId(
-				ctx,
 				args.discordId,
 			);
 			if (Option.isNone(userIdOption)) {
@@ -175,10 +171,7 @@ export const createGitHubIssueFromDiscord = privateAction({
 				);
 			}
 
-			const accountOption = yield* getGitHubAccountByDiscordId(
-				ctx,
-				args.discordId,
-			);
+			const accountOption = yield* getGitHubAccountByDiscordId(args.discordId);
 
 			if (Option.isNone(accountOption)) {
 				return yield* Effect.fail(
@@ -187,7 +180,7 @@ export const createGitHubIssueFromDiscord = privateAction({
 			}
 
 			const account = accountOption.value;
-			const client = yield* createGitHubClient(ctx, account);
+			const client = yield* createGitHubClient(account);
 
 			const issue = yield* createGitHubIssue(
 				client,
@@ -225,9 +218,9 @@ export const createGitHubIssueFromDiscord = privateAction({
 					title: issue.title,
 				},
 			};
-		});
+		}).pipe(Effect.provide(BetterAuthAccountsLive(ctx)));
 
-		const result = await Effect.runPromise(Effect.either(createIssue));
+		const result = await Effect.runPromise(Effect.either(createIssueEffect));
 
 		if (Either.isLeft(result)) {
 			return serializeError(result.left);

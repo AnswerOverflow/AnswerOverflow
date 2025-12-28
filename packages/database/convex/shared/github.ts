@@ -47,3 +47,10 @@ export {
 	GetAccessibleReposErrorSchema,
 	CreateGitHubIssueErrorSchema,
 } from "./auth/github";
+
+export {
+	BetterAuthAccounts,
+	BetterAuthAccountsLive,
+	type DiscordAccount,
+	type GitHubAccount,
+} from "./auth/betterAuthService";
