@@ -1,14 +1,14 @@
 import { Effect, Option, Schema } from "effect";
-import { action, ConfectActionCtx, query, ConfectQueryCtx } from "../confect";
+import { action, ConfectActionCtx, ConfectQueryCtx, query } from "../confect";
 import { authComponent } from "../shared/betterAuth";
 import {
 	createOctokitClient,
 	fetchGitHubInstallationRepos,
-	getGitHubAccountByUserId,
-	GitHubRepoSchema,
-	GitHubNotLinkedError,
-	NotAuthenticatedError,
 	GetAccessibleReposErrorSchema,
+	GitHubNotLinkedError,
+	GitHubRepoSchema,
+	getGitHubAccountByUserId,
+	NotAuthenticatedError,
 } from "../shared/github";
 
 const GitHubAccountResult = Schema.NullOr(
@@ -37,7 +37,7 @@ export const getGitHubAccount = query({
 
 			return {
 				accountId: accountOption.value.accountId,
-				isConnected: true as const,
+				isConnected: true,
 			};
 		}),
 });
