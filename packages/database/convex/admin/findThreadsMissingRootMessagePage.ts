@@ -1,10 +1,9 @@
-import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
-import { Array as Arr, Predicate } from "effect";
-import type { Id } from "../_generated/dataModel";
-import { internalQuery } from "../client";
+import { Array as Arr, Effect, Predicate, Schema } from "effect";
+import { Id, PaginationOpts } from "@packages/confect/server";
+import { ConfectQueryCtx, internalQuery } from "../confect";
 
 export const threadMissingRootMessageValidator = v.object({
 	threadId: v.int64(),
@@ -13,60 +12,71 @@ export const threadMissingRootMessageValidator = v.object({
 	parentChannelId: v.optional(v.int64()),
 });
 
-export type ThreadMissingRootMessage = {
-	threadId: bigint;
-	threadConvexId: Id<"channels">;
-	serverId: bigint;
-	parentChannelId: bigint | undefined;
-};
+const ThreadMissingRootMessageSchema = Schema.Struct({
+	threadId: Schema.BigIntFromSelf,
+	threadConvexId: Id.Id("channels"),
+	serverId: Schema.BigIntFromSelf,
+	parentChannelId: Schema.optional(Schema.BigIntFromSelf),
+});
+
+export type ThreadMissingRootMessage = Schema.Schema.Type<
+	typeof ThreadMissingRootMessageSchema
+>;
+
+const FindThreadsMissingRootMessagePageResult = Schema.Struct({
+	threadsWithMissingRootMessage: Schema.Array(ThreadMissingRootMessageSchema),
+	channelsProcessed: Schema.Number,
+	isDone: Schema.Boolean,
+	continueCursor: Schema.String,
+});
 
 export const findThreadsMissingRootMessagePage = internalQuery({
-	args: {
-		paginationOpts: paginationOptsValidator,
-		threadType: v.number(),
-	},
-	returns: v.object({
-		threadsWithMissingRootMessage: v.array(threadMissingRootMessageValidator),
-		channelsProcessed: v.number(),
-		isDone: v.boolean(),
-		continueCursor: v.string(),
+	args: Schema.Struct({
+		paginationOpts: PaginationOpts.PaginationOpts,
+		threadType: Schema.Number,
 	}),
-	handler: async (ctx, args) => {
-		const paginatedChannels = await ctx.db
-			.query("channels")
-			.withIndex("by_type", (q) => q.eq("type", args.threadType))
-			.paginate(args.paginationOpts);
+	returns: FindThreadsMissingRootMessagePageResult,
+	handler: ({ paginationOpts, threadType }) =>
+		Effect.gen(function* () {
+			const { ctx, db } = yield* ConfectQueryCtx;
 
-		const results = await asyncMap(paginatedChannels.page, async (channel) => {
-			const rootMessage = await getOneFrom(
-				ctx.db,
-				"messages",
-				"by_messageId",
-				channel.id,
-				"id",
+			const paginatedChannels = yield* db
+				.query("channels")
+				.withIndex("by_type", (q) => q.eq("type", threadType))
+				.paginate(paginationOpts);
+
+			const results = yield* Effect.promise(() =>
+				asyncMap(paginatedChannels.page, async (channel) => {
+					const rootMessage = await getOneFrom(
+						ctx.db,
+						"messages",
+						"by_messageId",
+						channel.id,
+						"id",
+					);
+
+					if (!rootMessage) {
+						return {
+							threadId: channel.id,
+							threadConvexId: channel._id,
+							serverId: channel.serverId,
+							parentChannelId: channel.parentId,
+						};
+					}
+					return null;
+				}),
 			);
 
-			if (!rootMessage) {
-				return {
-					threadId: channel.id,
-					threadConvexId: channel._id,
-					serverId: channel.serverId,
-					parentChannelId: channel.parentId,
-				};
-			}
-			return null;
-		});
+			const threadsWithMissingRootMessage = Arr.filter(
+				results,
+				Predicate.isNotNull,
+			);
 
-		const threadsWithMissingRootMessage = Arr.filter(
-			results,
-			Predicate.isNotNull,
-		);
-
-		return {
-			threadsWithMissingRootMessage,
-			channelsProcessed: paginatedChannels.page.length,
-			isDone: paginatedChannels.isDone,
-			continueCursor: paginatedChannels.continueCursor,
-		};
-	},
+			return {
+				threadsWithMissingRootMessage,
+				channelsProcessed: paginatedChannels.page.length,
+				isDone: paginatedChannels.isDone,
+				continueCursor: paginatedChannels.continueCursor,
+			};
+		}),
 });
