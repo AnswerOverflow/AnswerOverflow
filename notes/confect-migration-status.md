@@ -276,12 +276,34 @@ Use confect pattern for all new Convex functions. They automatically get:
 2. **`private/attachments.ts`** - Uses `ctx.runMutation(api.private.*)` which creates circular type inference issues
 3. **`private/counts.ts`** - Just exports aggregates, no functions to migrate
 
+### 24. Created Public Function Wrapper with Cache Support
+- File: `packages/database/convex/client/confectPublic.ts`
+- `publicQuery`, `publicMutation`, `publicAction` - Wrappers that handle public auth args
+- Provides `DataCache` Effect service for accessing the data cache
+- Handles optional `publicBackendAccessToken`, `backendAccessToken`, `discordAccountId`, etc.
+
+### 25. Migrated Public Functions to Confect
+
+**Fully Migrated:**
+1. **`public/servers.ts`** - All three query functions migrated:
+   - `getServerByDomain` - Get server by custom domain
+   - `getBrowseServers` - List browseable servers
+   - `getServerByDiscordIdWithChannels` - Get server with indexed channels
+
+**Not Yet Migrated:**
+1. **`public/channels.ts`** - Complex functions with cache dependencies
+2. **`public/messages.ts`** - Uses cache for message enrichment
+3. **`public/search.ts`** - Search functionality
+4. **`public/discord_accounts.ts`** - Discord account queries
+5. **`public/threadTags.ts`** - Thread tag queries
+
 ## Key Files
 - `packages/confect/` - Vendored confect package
 - `packages/database/convex/schema.ts` - Unified Effect-based schema
 - `packages/database/convex/confect.ts` - Function constructors & context tags
 - `packages/database/convex/client/confectAuthenticated.ts` - Authenticated function wrappers
 - `packages/database/convex/client/confectPrivate.ts` - Private function wrappers with backend token validation
+- `packages/database/convex/client/confectPublic.ts` - Public function wrappers with cache support
 - `packages/database/convex/examples/confect-example.ts` - Example usage
 - `packages/database/convex/triggers.ts` - Trigger system for count tracking (currently simplified)
 - `packages/database/convex/shared/publicSchemas.ts` - Native Convex validators for public APIs
@@ -334,6 +356,7 @@ Actions that use `ctx.runMutation(api.private.*)` create circular type inference
 - The functions depend on the API types for the runMutation calls
 
 ## Next Steps
-1. Create `confectPublic.ts` wrapper that adds cache support
-2. Migrate public functions
+1. ~~Create `confectPublic.ts` wrapper that adds cache support~~ ✅ Done
+2. Continue migrating public functions that don't heavily use cache
 3. Consider updating shared functions to accept readonly arrays
+4. Migrate authenticated functions (dashboard, stripe, etc.)
