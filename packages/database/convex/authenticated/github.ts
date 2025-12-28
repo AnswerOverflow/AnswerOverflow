@@ -1,79 +1,78 @@
-import { authenticatedAction, authenticatedQuery } from "../client";
-import { authComponent } from "../shared/betterAuth";
+import { Effect, Layer, Option, Schema } from "effect";
+import { ConfectQueryCtx, query } from "../confect";
 import {
-	createOctokitClient,
+	authenticatedAction,
+	AuthenticatedUser,
+	ConfectActionCtx,
+} from "../client/confectAuthenticated";
+import {
+	BetterAuthAccounts,
+	BetterAuthAccountsLive,
+	createGitHubClient,
 	fetchGitHubInstallationRepos,
-	GitHubErrorCodes,
+	GetAccessibleReposErrorSchema,
+	GitHubRepoSchema,
 	getGitHubAccountByUserId,
+	getGitHubAccountByUserIdOrFail,
 } from "../shared/github";
+import { authComponent } from "../shared/betterAuth";
 
-export const getGitHubAccount = authenticatedQuery({
-	args: {},
-	handler: async (ctx) => {
-		const user = await authComponent.getAuthUser(ctx);
-		if (!user) {
-			return null;
-		}
+const GitHubAccountResult = Schema.NullOr(
+	Schema.Struct({
+		accountId: Schema.String,
+		isConnected: Schema.Literal(true),
+	}),
+);
 
-		const account = await getGitHubAccountByUserId(ctx, user._id);
-		if (!account) {
-			return null;
-		}
+export const getGitHubAccount = query({
+	args: Schema.Struct({}),
+	returns: GitHubAccountResult,
+	handler: () =>
+		Effect.gen(function* () {
+			const { ctx } = yield* ConfectQueryCtx;
 
-		return {
-			accountId: account.accountId,
-			isConnected: true,
-		};
-	},
+			const user = yield* Effect.promise(() => authComponent.getAuthUser(ctx));
+			if (!user) {
+				return null;
+			}
+
+			const accountOption = yield* getGitHubAccountByUserId(user._id).pipe(
+				Effect.provide(BetterAuthAccountsLive(ctx)),
+			);
+			if (Option.isNone(accountOption)) {
+				return null;
+			}
+
+			return {
+				accountId: accountOption.value.accountId,
+				isConnected: true as const,
+			};
+		}),
+});
+
+const GetAccessibleReposDataSchema = Schema.Struct({
+	repos: Schema.Array(GitHubRepoSchema),
+	hasAllReposAccess: Schema.Boolean,
 });
 
 export const getAccessibleRepos = authenticatedAction({
-	args: {},
-	handler: async (ctx) => {
-		const user = await authComponent.getAuthUser(ctx);
-		if (!user) {
-			return {
-				success: false as const,
-				error: "Not authenticated",
-				code: "NOT_AUTHENTICATED" as const,
-			};
-		}
+	args: Schema.Struct({}),
+	success: GetAccessibleReposDataSchema,
+	error: GetAccessibleReposErrorSchema,
+	handler: () =>
+		Effect.gen(function* () {
+			const actionCtx = yield* ConfectActionCtx;
+			const user = yield* AuthenticatedUser;
 
-		const account = await getGitHubAccountByUserId(ctx, user._id);
-
-		if (!account) {
-			return {
-				success: false as const,
-				error: "GitHub account not linked",
-				code: GitHubErrorCodes.NOT_LINKED,
-			};
-		}
-
-		const octokitResult = await createOctokitClient(ctx, account);
-		if (!octokitResult.success) {
-			return {
-				success: false as const,
-				error: octokitResult.error,
-				code: octokitResult.code,
-			};
-		}
-
-		try {
-			const { repos, hasAllReposAccess } = await fetchGitHubInstallationRepos(
-				octokitResult.octokit,
+			const account = yield* getGitHubAccountByUserIdOrFail(user._id).pipe(
+				Effect.provide(BetterAuthAccountsLive(actionCtx.ctx)),
 			);
+			const client = yield* createGitHubClient(account).pipe(
+				Effect.provide(BetterAuthAccountsLive(actionCtx.ctx)),
+			);
+			const { repos, hasAllReposAccess } =
+				yield* fetchGitHubInstallationRepos(client);
 
-			return {
-				success: true as const,
-				repos,
-				hasAllReposAccess,
-			};
-		} catch (error) {
-			return {
-				success: false as const,
-				error: error instanceof Error ? error.message : "Failed to fetch repos",
-				code: GitHubErrorCodes.FETCH_FAILED,
-			};
-		}
-	},
+			return { repos, hasAllReposAccess };
+		}),
 });

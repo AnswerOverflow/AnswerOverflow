@@ -1,8 +1,13 @@
-import { type Infer, v } from "convex/values";
-import { Octokit } from "octokit";
-import { z } from "zod";
-import { components } from "../../_generated/api";
-import type { ActionCtx, MutationCtx, QueryCtx } from "../../client";
+import {
+	FetchHttpClient,
+	HttpClient,
+	HttpClientRequest,
+} from "@effect/platform";
+import type { GenericActionCtx } from "convex/server";
+import { Array as Arr, Data, Effect, Option, Schema } from "effect";
+import { make, type Client } from "@packages/github-api/generated";
+import type { DataModel } from "../../_generated/dataModel";
+import { BetterAuthAccounts, type GitHubAccount } from "./betterAuthService";
 
 const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 
@@ -11,463 +16,657 @@ const GITHUB_ISSUE_TITLE_MAX_LENGTH = 256;
 const GITHUB_ISSUE_BODY_MAX_LENGTH = 65536;
 const MAX_REPOS_PER_INSTALLATION = 500;
 
-export const GitHubErrorCodes = {
-	NOT_LINKED: "NOT_LINKED",
-	NO_TOKEN: "NO_TOKEN",
-	REFRESH_REQUIRED: "REFRESH_REQUIRED",
-	REFRESH_FAILED: "REFRESH_FAILED",
-	FETCH_FAILED: "FETCH_FAILED",
-	CREATE_FAILED: "CREATE_FAILED",
-	USER_NOT_FOUND: "USER_NOT_FOUND",
-	INVALID_REPO: "INVALID_REPO",
-	INVALID_INPUT: "INVALID_INPUT",
-	RATE_LIMITED: "RATE_LIMITED",
-} as const;
+export class GitHubNotLinkedError extends Data.TaggedError(
+	"GitHubNotLinkedError",
+)<{
+	readonly message: string;
+}> {}
 
-export type GitHubErrorCode =
-	(typeof GitHubErrorCodes)[keyof typeof GitHubErrorCodes];
+export class GitHubNoTokenError extends Data.TaggedError("GitHubNoTokenError")<{
+	readonly message: string;
+}> {}
 
-const githubAccountSchema = z.object({
-	_id: z.string(),
-	accountId: z.string(),
-	providerId: z.literal("github"),
-	userId: z.string(),
-	accessToken: z.string().nullish(),
-	refreshToken: z.string().nullish(),
-	accessTokenExpiresAt: z.number().nullish(),
-	scope: z.string().nullish(),
+export class GitHubRefreshFailedError extends Data.TaggedError(
+	"GitHubRefreshFailedError",
+)<{
+	readonly message: string;
+}> {}
+
+export class GitHubFetchFailedError extends Data.TaggedError(
+	"GitHubFetchFailedError",
+)<{
+	readonly message: string;
+}> {}
+
+export class GitHubCreateFailedError extends Data.TaggedError(
+	"GitHubCreateFailedError",
+)<{
+	readonly message: string;
+}> {}
+
+export class GitHubUserNotFoundError extends Data.TaggedError(
+	"GitHubUserNotFoundError",
+)<{
+	readonly message: string;
+}> {}
+
+export class GitHubInvalidRepoError extends Data.TaggedError(
+	"GitHubInvalidRepoError",
+)<{
+	readonly message: string;
+}> {}
+
+export class GitHubInvalidInputError extends Data.TaggedError(
+	"GitHubInvalidInputError",
+)<{
+	readonly message: string;
+}> {}
+
+export class GitHubRateLimitedError extends Data.TaggedError(
+	"GitHubRateLimitedError",
+)<{
+	readonly message: string;
+	readonly retryAfterSeconds: number;
+}> {}
+
+export class GitHubCredentialsNotConfiguredError extends Data.TaggedError(
+	"GitHubCredentialsNotConfiguredError",
+)<{
+	readonly message: string;
+}> {}
+
+export class NotAuthenticatedError extends Data.TaggedError(
+	"NotAuthenticatedError",
+)<{
+	readonly message: string;
+}> {}
+
+export const GitHubNotLinkedErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubNotLinkedError"),
+	message: Schema.String,
 });
 
-const accountWithUserIdSchema = z.object({
-	userId: z.string(),
+export const GitHubNoTokenErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubNoTokenError"),
+	message: Schema.String,
 });
 
-const betterAuthAccountSchema = v.object({
-	_id: v.string(),
-	accountId: v.string(),
-	providerId: v.string(),
-	userId: v.string(),
-	accessToken: v.optional(v.union(v.null(), v.string())),
-	refreshToken: v.optional(v.union(v.null(), v.string())),
-	idToken: v.optional(v.union(v.null(), v.string())),
-	accessTokenExpiresAt: v.optional(v.union(v.null(), v.number())),
-	refreshTokenExpiresAt: v.optional(v.union(v.null(), v.number())),
-	scope: v.optional(v.union(v.null(), v.string())),
-	password: v.optional(v.union(v.null(), v.string())),
-	createdAt: v.number(),
-	updatedAt: v.number(),
+export const GitHubRefreshFailedErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubRefreshFailedError"),
+	message: Schema.String,
 });
 
-export type GitHubAccountWithRefresh = Pick<
-	Infer<typeof betterAuthAccountSchema>,
-	| "_id"
-	| "accountId"
-	| "userId"
-	| "accessToken"
-	| "refreshToken"
-	| "accessTokenExpiresAt"
-	| "scope"
-> & {
-	accessToken: string | null;
-	refreshToken: string | null;
-	accessTokenExpiresAt: number | null;
-	scope: string | null;
-};
+export const GitHubFetchFailedErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubFetchFailedError"),
+	message: Schema.String,
+});
 
-export type GitHubAccountToken = Pick<
-	GitHubAccountWithRefresh,
-	"accountId" | "accessToken" | "scope"
+export const GitHubCreateFailedErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubCreateFailedError"),
+	message: Schema.String,
+});
+
+export const GitHubUserNotFoundErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubUserNotFoundError"),
+	message: Schema.String,
+});
+
+export const GitHubInvalidRepoErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubInvalidRepoError"),
+	message: Schema.String,
+});
+
+export const GitHubInvalidInputErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubInvalidInputError"),
+	message: Schema.String,
+});
+
+export const GitHubRateLimitedErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubRateLimitedError"),
+	message: Schema.String,
+	retryAfterSeconds: Schema.Number,
+});
+
+export const GitHubCredentialsNotConfiguredErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("GitHubCredentialsNotConfiguredError"),
+	message: Schema.String,
+});
+
+export const NotAuthenticatedErrorSchema = Schema.Struct({
+	_tag: Schema.Literal("NotAuthenticatedError"),
+	message: Schema.String,
+});
+
+export const GetAccessibleReposErrorSchema = Schema.Union(
+	GitHubNotLinkedErrorSchema,
+	GitHubNoTokenErrorSchema,
+	GitHubRefreshFailedErrorSchema,
+	GitHubFetchFailedErrorSchema,
+	GitHubCredentialsNotConfiguredErrorSchema,
+	NotAuthenticatedErrorSchema,
+	GitHubRateLimitedErrorSchema,
+	GitHubUserNotFoundErrorSchema,
+);
+
+export type GetAccessibleReposError = Schema.Schema.Type<
+	typeof GetAccessibleReposErrorSchema
 >;
 
-export type GitHubRepo = {
-	id: number;
-	name: string;
-	fullName: string;
-	owner: string;
-	private: boolean;
-	installationId: number;
-};
+export const CreateGitHubIssueErrorSchema = Schema.Union(
+	GitHubNotLinkedErrorSchema,
+	GitHubNoTokenErrorSchema,
+	GitHubRefreshFailedErrorSchema,
+	GitHubCreateFailedErrorSchema,
+	GitHubInvalidRepoErrorSchema,
+	GitHubInvalidInputErrorSchema,
+	GitHubCredentialsNotConfiguredErrorSchema,
+	GitHubUserNotFoundErrorSchema,
+	GitHubRateLimitedErrorSchema,
+);
 
-export type GitHubCreateIssueResult = {
-	id: number;
-	number: number;
-	htmlUrl: string;
-	title: string;
-};
+export type CreateGitHubIssueError = Schema.Schema.Type<
+	typeof CreateGitHubIssueErrorSchema
+>;
 
-export type CreateOctokitClientResult =
-	| { success: true; octokit: Octokit }
-	| { success: false; error: string; code: GitHubErrorCode };
+export type GitHubError =
+	| GitHubNotLinkedError
+	| GitHubNoTokenError
+	| GitHubRefreshFailedError
+	| GitHubFetchFailedError
+	| GitHubCreateFailedError
+	| GitHubUserNotFoundError
+	| GitHubInvalidRepoError
+	| GitHubInvalidInputError
+	| GitHubRateLimitedError
+	| GitHubCredentialsNotConfiguredError
+	| NotAuthenticatedError;
 
-export function validateRepoOwnerAndName(
-	owner: string,
-	repo: string,
-): { valid: true } | { valid: false; error: string } {
-	if (!GITHUB_REPO_NAME_REGEX.test(owner)) {
-		return { valid: false, error: "Invalid repository owner" };
-	}
-	if (!GITHUB_REPO_NAME_REGEX.test(repo)) {
-		return { valid: false, error: "Invalid repository name" };
-	}
-	return { valid: true };
-}
-
-export function validateIssueTitleAndBody(
-	title: string,
-	body: string,
-): { valid: true } | { valid: false; error: string } {
-	if (title.length === 0) {
-		return { valid: false, error: "Issue title cannot be empty" };
-	}
-	if (title.length > GITHUB_ISSUE_TITLE_MAX_LENGTH) {
+export const serializeError = <E extends GitHubError>(
+	error: E,
+): E extends GitHubRateLimitedError
+	? { _tag: E["_tag"]; message: string; retryAfterSeconds: number }
+	: { _tag: E["_tag"]; message: string } => {
+	if (error._tag === "GitHubRateLimitedError") {
 		return {
-			valid: false,
-			error: `Issue title cannot exceed ${GITHUB_ISSUE_TITLE_MAX_LENGTH} characters (got ${title.length})`,
-		};
+			_tag: error._tag,
+			message: error.message,
+			retryAfterSeconds: (error as GitHubRateLimitedError).retryAfterSeconds,
+		} as ReturnType<typeof serializeError<E>>;
 	}
-	if (body.length > GITHUB_ISSUE_BODY_MAX_LENGTH) {
-		return {
-			valid: false,
-			error: `Issue body cannot exceed ${GITHUB_ISSUE_BODY_MAX_LENGTH} characters (got ${body.length})`,
-		};
-	}
-	return { valid: true };
-}
-
-export async function getBetterAuthUserIdByDiscordId(
-	ctx: QueryCtx | MutationCtx | ActionCtx,
-	discordId: bigint,
-): Promise<string | null> {
-	const discordAccountResult = await ctx.runQuery(
-		components.betterAuth.adapter.findOne,
-		{
-			model: "account",
-			where: [
-				{
-					field: "accountId",
-					operator: "eq",
-					value: discordId.toString(),
-				},
-				{
-					field: "providerId",
-					operator: "eq",
-					value: "discord",
-				},
-			],
-		},
-	);
-
-	const parsed = accountWithUserIdSchema.safeParse(discordAccountResult);
-	if (!parsed.success) {
-		return null;
-	}
-
-	return parsed.data.userId;
-}
-
-export async function getGitHubAccountByUserId(
-	ctx: QueryCtx | MutationCtx | ActionCtx,
-	userId: string,
-): Promise<GitHubAccountWithRefresh | null> {
-	const accountResult = await ctx.runQuery(
-		components.betterAuth.adapter.findOne,
-		{
-			model: "account",
-			where: [
-				{
-					field: "userId",
-					operator: "eq",
-					value: userId,
-				},
-				{
-					field: "providerId",
-					operator: "eq",
-					value: "github",
-				},
-			],
-		},
-	);
-
-	const parsed = githubAccountSchema.safeParse(accountResult);
-	if (!parsed.success) {
-		return null;
-	}
-
 	return {
-		_id: parsed.data._id,
-		accountId: parsed.data.accountId,
-		userId: parsed.data.userId,
-		accessToken: parsed.data.accessToken ?? null,
-		refreshToken: parsed.data.refreshToken ?? null,
-		accessTokenExpiresAt: parsed.data.accessTokenExpiresAt ?? null,
-		scope: parsed.data.scope ?? null,
-	};
-}
-
-export async function getGitHubAccountByDiscordId(
-	ctx: QueryCtx | MutationCtx | ActionCtx,
-	discordId: bigint,
-): Promise<GitHubAccountWithRefresh | null> {
-	const userId = await getBetterAuthUserIdByDiscordId(ctx, discordId);
-	if (!userId) {
-		return null;
-	}
-	return getGitHubAccountByUserId(ctx, userId);
-}
-
-type RefreshedTokens = {
-	accessToken: string;
-	refreshToken: string;
-	accessTokenExpiresAt: number;
+		_tag: error._tag,
+		message: error.message,
+	} as ReturnType<typeof serializeError<E>>;
 };
 
-async function updateGitHubAccountTokens(
-	ctx: ActionCtx,
-	githubAccountId: string,
-	tokens: RefreshedTokens,
-): Promise<void> {
-	await ctx.runMutation(components.betterAuth.adapter.updateOne, {
-		input: {
-			model: "account",
-			where: [
-				{
-					field: "accountId",
-					operator: "eq",
-					value: githubAccountId,
-				},
-				{
-					field: "providerId",
-					operator: "eq",
-					value: "github",
-				},
-			],
-			update: {
-				accessToken: tokens.accessToken,
-				refreshToken: tokens.refreshToken,
-				accessTokenExpiresAt: tokens.accessTokenExpiresAt,
-				updatedAt: Date.now(),
-			},
-		},
-	});
-}
-
-const githubTokenRefreshResponseSchema = z.object({
-	access_token: z.string(),
-	refresh_token: z.string(),
-	expires_in: z.number(),
-	refresh_token_expires_in: z.number(),
-	error: z.string().optional(),
-	error_description: z.string().optional(),
+export const GitHubAccountSchema = Schema.Struct({
+	_id: Schema.String,
+	accountId: Schema.String,
+	userId: Schema.String,
+	accessToken: Schema.NullOr(Schema.String),
+	refreshToken: Schema.NullOr(Schema.String),
+	accessTokenExpiresAt: Schema.NullOr(Schema.Number),
+	scope: Schema.NullOr(Schema.String),
 });
 
-function isTokenExpired(expiresAt: number | null): boolean {
+export type GitHubAccountWithRefresh = Schema.Schema.Type<
+	typeof GitHubAccountSchema
+>;
+
+export const GitHubRepoSchema = Schema.Struct({
+	id: Schema.Number,
+	name: Schema.String,
+	fullName: Schema.String,
+	owner: Schema.String,
+	private: Schema.Boolean,
+	installationId: Schema.Number,
+});
+
+export type GitHubRepo = Schema.Schema.Type<typeof GitHubRepoSchema>;
+
+export const GitHubCreateIssueResultSchema = Schema.Struct({
+	id: Schema.Number,
+	number: Schema.Number,
+	htmlUrl: Schema.String,
+	title: Schema.String,
+});
+
+export type GitHubCreateIssueResult = Schema.Schema.Type<
+	typeof GitHubCreateIssueResultSchema
+>;
+
+export const GitHubInstallationReposResultSchema = Schema.Struct({
+	repos: Schema.Array(GitHubRepoSchema),
+	hasAllReposAccess: Schema.Boolean,
+});
+
+export type GitHubInstallationReposResult = Schema.Schema.Type<
+	typeof GitHubInstallationReposResultSchema
+>;
+
+type ActionCtx = GenericActionCtx<DataModel>;
+
+const toGitHubAccountWithRefresh = (
+	account: GitHubAccount,
+): GitHubAccountWithRefresh => ({
+	_id: account._id,
+	accountId: account.accountId,
+	userId: account.userId,
+	accessToken: account.accessToken ?? null,
+	refreshToken: account.refreshToken ?? null,
+	accessTokenExpiresAt: account.accessTokenExpiresAt ?? null,
+	scope: account.scope ?? null,
+});
+
+export const validateRepoOwnerAndName = (
+	owner: string,
+	repo: string,
+): Effect.Effect<void, GitHubInvalidRepoError> => {
+	if (!GITHUB_REPO_NAME_REGEX.test(owner)) {
+		return Effect.fail(
+			new GitHubInvalidRepoError({ message: "Invalid repository owner" }),
+		);
+	}
+	if (!GITHUB_REPO_NAME_REGEX.test(repo)) {
+		return Effect.fail(
+			new GitHubInvalidRepoError({ message: "Invalid repository name" }),
+		);
+	}
+	return Effect.void;
+};
+
+export const validateIssueTitleAndBody = (
+	title: string,
+	body: string,
+): Effect.Effect<void, GitHubInvalidInputError> => {
+	if (title.length === 0) {
+		return Effect.fail(
+			new GitHubInvalidInputError({ message: "Issue title cannot be empty" }),
+		);
+	}
+	if (title.length > GITHUB_ISSUE_TITLE_MAX_LENGTH) {
+		return Effect.fail(
+			new GitHubInvalidInputError({
+				message: `Issue title cannot exceed ${GITHUB_ISSUE_TITLE_MAX_LENGTH} characters (got ${title.length})`,
+			}),
+		);
+	}
+	if (body.length > GITHUB_ISSUE_BODY_MAX_LENGTH) {
+		return Effect.fail(
+			new GitHubInvalidInputError({
+				message: `Issue body cannot exceed ${GITHUB_ISSUE_BODY_MAX_LENGTH} characters (got ${body.length})`,
+			}),
+		);
+	}
+	return Effect.void;
+};
+
+export const getBetterAuthUserIdByDiscordId = (
+	discordId: bigint,
+): Effect.Effect<Option.Option<string>, never, BetterAuthAccounts> =>
+	Effect.gen(function* () {
+		const accounts = yield* BetterAuthAccounts;
+		const discordAccountOption =
+			yield* accounts.findDiscordAccountByDiscordId(discordId);
+		return Option.map(discordAccountOption, (account) => account.userId);
+	});
+
+export const getGitHubAccountByUserId = (
+	userId: string,
+): Effect.Effect<
+	Option.Option<GitHubAccountWithRefresh>,
+	never,
+	BetterAuthAccounts
+> =>
+	Effect.gen(function* () {
+		const accounts = yield* BetterAuthAccounts;
+		const accountOption = yield* accounts.findGitHubAccountByUserId(userId);
+		return Option.map(accountOption, toGitHubAccountWithRefresh);
+	});
+
+export const getGitHubAccountByUserIdOrFail = (
+	userId: string,
+): Effect.Effect<
+	GitHubAccountWithRefresh,
+	GitHubNotLinkedError,
+	BetterAuthAccounts
+> =>
+	Effect.gen(function* () {
+		const accountOption = yield* getGitHubAccountByUserId(userId);
+		return yield* Option.match(accountOption, {
+			onNone: () =>
+				Effect.fail(
+					new GitHubNotLinkedError({ message: "GitHub account not linked" }),
+				),
+			onSome: Effect.succeed,
+		});
+	});
+
+export const getGitHubAccountByDiscordId = (
+	discordId: bigint,
+): Effect.Effect<
+	Option.Option<GitHubAccountWithRefresh>,
+	never,
+	BetterAuthAccounts
+> =>
+	Effect.gen(function* () {
+		const userIdOption = yield* getBetterAuthUserIdByDiscordId(discordId);
+		if (Option.isNone(userIdOption)) {
+			return Option.none();
+		}
+		return yield* getGitHubAccountByUserId(userIdOption.value);
+	});
+
+const GitHubTokenRefreshResponseSchema = Schema.Struct({
+	access_token: Schema.String,
+	refresh_token: Schema.String,
+	expires_in: Schema.Number,
+	refresh_token_expires_in: Schema.Number,
+	error: Schema.optional(Schema.String),
+	error_description: Schema.optional(Schema.String),
+}).pipe(Schema.annotations({ parseOptions: { onExcessProperty: "ignore" } }));
+
+const isTokenExpired = (expiresAt: number | null): boolean => {
 	if (expiresAt === null) return false;
 	return Date.now() >= expiresAt - TOKEN_EXPIRY_BUFFER_MS;
-}
+};
 
-async function refreshGitHubToken(
-	ctx: ActionCtx,
+const refreshGitHubToken = (
 	account: GitHubAccountWithRefresh,
 	clientId: string,
 	clientSecret: string,
-): Promise<
-	| { success: true; accessToken: string }
-	| { success: false; error: string; code: GitHubErrorCode }
-> {
-	if (!account.refreshToken) {
-		return {
-			success: false,
-			error: "No refresh token available",
-			code: GitHubErrorCodes.NO_TOKEN,
-		};
-	}
-
-	try {
-		// TODO: Replace manual fetch with Octokit's OAuth handling
-		// Consider using @octokit/oauth-app or Octokit's built-in token refresh methods
-		// instead of manual GitHub API calls for better error handling and type safety
-		const response = await fetch(
-			"https://github.com/login/oauth/access_token",
-			{
-				method: "POST",
-				headers: {
-					Accept: "application/json",
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					client_id: clientId,
-					client_secret: clientSecret,
-					grant_type: "refresh_token",
-					refresh_token: account.refreshToken,
-				}),
-			},
-		);
-
-		const rawData = await response.json();
-		const parseResult = githubTokenRefreshResponseSchema.safeParse(rawData);
-
-		if (!parseResult.success) {
-			return {
-				success: false,
-				error: `Invalid token response from GitHub: ${parseResult.error.message}`,
-				code: GitHubErrorCodes.REFRESH_FAILED,
-			};
+): Effect.Effect<
+	string,
+	GitHubNoTokenError | GitHubRefreshFailedError,
+	BetterAuthAccounts
+> =>
+	Effect.gen(function* () {
+		if (!account.refreshToken) {
+			return yield* Effect.fail(
+				new GitHubNoTokenError({ message: "No refresh token available" }),
+			);
 		}
 
-		const data = parseResult.data;
+		const response = yield* Effect.tryPromise({
+			try: () =>
+				fetch("https://github.com/login/oauth/access_token", {
+					method: "POST",
+					headers: {
+						Accept: "application/json",
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						client_id: clientId,
+						client_secret: clientSecret,
+						grant_type: "refresh_token",
+						refresh_token: account.refreshToken,
+					}),
+				}),
+			catch: (error) =>
+				new GitHubRefreshFailedError({
+					message:
+						error instanceof Error ? error.message : "Failed to refresh token",
+				}),
+		});
+
+		const rawData = yield* Effect.tryPromise({
+			try: () => response.json(),
+			catch: () =>
+				new GitHubRefreshFailedError({
+					message: "Failed to parse token response",
+				}),
+		});
+
+		const parseResult = Schema.decodeUnknownEither(
+			GitHubTokenRefreshResponseSchema,
+		)(rawData);
+		if (parseResult._tag === "Left") {
+			return yield* Effect.fail(
+				new GitHubRefreshFailedError({
+					message: `Invalid token response from GitHub: ${parseResult.left.message}`,
+				}),
+			);
+		}
+
+		const data = parseResult.right;
 
 		if (data.error) {
-			return {
-				success: false,
-				error: `${data.error_description ?? data.error}`,
-				code: GitHubErrorCodes.REFRESH_FAILED,
-			};
+			return yield* Effect.fail(
+				new GitHubRefreshFailedError({
+					message: data.error_description ?? data.error,
+				}),
+			);
 		}
 
 		const now = Date.now();
 		const accessTokenExpiresAt = now + data.expires_in * 1000;
 
-		await updateGitHubAccountTokens(ctx, account.accountId, {
+		const accounts = yield* BetterAuthAccounts;
+		yield* accounts.updateAccount("github", account.accountId, {
 			accessToken: data.access_token,
 			refreshToken: data.refresh_token,
 			accessTokenExpiresAt,
 		});
 
-		return { success: true, accessToken: data.access_token };
-	} catch (error) {
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : "Failed to refresh token",
-			code: GitHubErrorCodes.REFRESH_FAILED,
-		};
-	}
-}
+		return data.access_token;
+	});
 
-export async function createOctokitClient(
-	ctx: ActionCtx,
+const createGitHubApiClient = (
+	token: string,
+): Effect.Effect<Client, never, HttpClient.HttpClient> =>
+	Effect.gen(function* () {
+		const httpClient = yield* HttpClient.HttpClient;
+		return make(httpClient, {
+			transformClient(client) {
+				return Effect.succeed(
+					client.pipe(
+						HttpClient.mapRequest((req) =>
+							HttpClientRequest.prependUrl(
+								HttpClientRequest.setHeader(
+									req,
+									"Authorization",
+									`token ${token}`,
+								),
+								"https://api.github.com",
+							),
+						),
+					),
+				);
+			},
+		});
+	});
+
+export const createGitHubClient = (
 	account: GitHubAccountWithRefresh,
-): Promise<CreateOctokitClientResult> {
-	const clientId = process.env.GITHUB_CLIENT_ID;
-	const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+): Effect.Effect<
+	Client,
+	| GitHubCredentialsNotConfiguredError
+	| GitHubNoTokenError
+	| GitHubRefreshFailedError,
+	BetterAuthAccounts
+> =>
+	Effect.gen(function* () {
+		const clientId = process.env.GITHUB_CLIENT_ID;
+		const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
-	if (!clientId || !clientSecret) {
-		return {
-			success: false,
-			error: "GitHub App credentials not configured",
-			code: GitHubErrorCodes.REFRESH_FAILED,
-		};
-	}
+		if (!clientId || !clientSecret) {
+			return yield* Effect.fail(
+				new GitHubCredentialsNotConfiguredError({
+					message: "GitHub App credentials not configured",
+				}),
+			);
+		}
 
-	if (!account.accessToken) {
-		return {
-			success: false,
-			error: "No access token available",
-			code: GitHubErrorCodes.NO_TOKEN,
-		};
-	}
+		if (!account.accessToken) {
+			return yield* Effect.fail(
+				new GitHubNoTokenError({ message: "No access token available" }),
+			);
+		}
 
-	if (!account.refreshToken) {
-		return {
-			success: false,
-			error: "No refresh token available",
-			code: GitHubErrorCodes.NO_TOKEN,
-		};
-	}
+		if (!account.refreshToken) {
+			return yield* Effect.fail(
+				new GitHubNoTokenError({ message: "No refresh token available" }),
+			);
+		}
 
-	let accessToken = account.accessToken;
+		let accessToken = account.accessToken;
 
-	if (isTokenExpired(account.accessTokenExpiresAt)) {
-		const refreshResult = await refreshGitHubToken(
-			ctx,
-			account,
-			clientId,
-			clientSecret,
+		if (isTokenExpired(account.accessTokenExpiresAt)) {
+			accessToken = yield* refreshGitHubToken(account, clientId, clientSecret);
+		}
+
+		return yield* createGitHubApiClient(accessToken).pipe(
+			Effect.provide(FetchHttpClient.layer),
 		);
+	});
 
-		if (!refreshResult.success) {
-			return refreshResult;
-		}
-
-		accessToken = refreshResult.accessToken;
+const mapGitHubApiError = (error: unknown): GitHubFetchFailedError => {
+	if (error instanceof Error) {
+		return new GitHubFetchFailedError({ message: error.message });
 	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"_tag" in error &&
+		"cause" in error
+	) {
+		const clientError = error as { _tag: string; cause?: { message?: string } };
+		return new GitHubFetchFailedError({
+			message: clientError.cause?.message ?? clientError._tag,
+		});
+	}
+	return new GitHubFetchFailedError({
+		message: "Failed to fetch from GitHub API",
+	});
+};
 
-	const octokit = new Octokit({ auth: accessToken });
-
-	return { success: true, octokit };
-}
-
-export async function fetchGitHubInstallationRepos(
-	octokit: Octokit,
-): Promise<{ repos: Array<GitHubRepo>; hasAllReposAccess: boolean }> {
-	const { data: installationsData } =
-		await octokit.rest.apps.listInstallationsForAuthenticatedUser();
-
-	const repos: Array<GitHubRepo> = [];
-	let hasAllReposAccess = installationsData.installations.length > 0;
-
-	for (const installation of installationsData.installations) {
-		if (installation.repository_selection !== "all") {
-			hasAllReposAccess = false;
-		}
-
-		const allRepos: Array<GitHubRepo> = [];
-		let page = 1;
-
-		// TODO: GitHub's search API exists but is not suitable for this use case.
-		// The search API is for finding repositories by name/content across GitHub,
-		// but here we need to list all repositories accessible to a specific GitHub App installation.
-		// The current pagination approach using listInstallationReposForAuthenticatedUser
-		// is the correct and only way to get installation-specific repository access.
-		// GitHub's search API cannot filter by installation access permissions.
-		while (allRepos.length < MAX_REPOS_PER_INSTALLATION) {
-			const { data: reposData } =
-				await octokit.rest.apps.listInstallationReposForAuthenticatedUser({
-					installation_id: installation.id,
+const fetchInstallationReposPage = (
+	client: Client,
+	installationId: number,
+	page: number,
+): Effect.Effect<
+	{ repos: Array<GitHubRepo>; hasMore: boolean },
+	GitHubFetchFailedError
+> =>
+	Effect.gen(function* () {
+		const reposData = yield* client
+			.appsListInstallationReposForAuthenticatedUser(
+				installationId.toString(),
+				{
 					per_page: 100,
 					page,
-				});
+				},
+			)
+			.pipe(Effect.mapError(mapGitHubApiError));
 
-			for (const repo of reposData.repositories) {
-				allRepos.push({
-					id: repo.id,
-					name: repo.name,
-					fullName: repo.full_name,
-					owner: repo.owner.login,
-					private: repo.private,
-					installationId: installation.id,
-				});
-			}
+		const repos = reposData.repositories.map((repo) => ({
+			id: repo.id,
+			name: repo.name,
+			fullName: repo.full_name,
+			owner: repo.owner.login,
+			private: repo.private,
+			installationId,
+		}));
 
-			if (reposData.repositories.length < 100) {
-				break;
-			}
+		return {
+			repos,
+			hasMore: reposData.repositories.length === 100,
+		};
+	});
+
+const fetchAllInstallationRepos = (
+	client: Client,
+	installationId: number,
+): Effect.Effect<Array<GitHubRepo>, GitHubFetchFailedError> =>
+	Effect.gen(function* () {
+		const allRepos: Array<GitHubRepo> = [];
+		let page = 1;
+		let hasMore = true;
+
+		while (hasMore && allRepos.length < MAX_REPOS_PER_INSTALLATION) {
+			const result = yield* fetchInstallationReposPage(
+				client,
+				installationId,
+				page,
+			);
+			allRepos.push(...result.repos);
+			hasMore = result.hasMore;
 			page++;
 		}
 
-		repos.push(...allRepos);
+		return allRepos.slice(0, MAX_REPOS_PER_INSTALLATION);
+	});
+
+export const fetchGitHubInstallationRepos = (
+	client: Client,
+): Effect.Effect<GitHubInstallationReposResult, GitHubFetchFailedError> =>
+	Effect.gen(function* () {
+		const installationsData = yield* client
+			.appsListInstallationsForAuthenticatedUser()
+			.pipe(Effect.mapError(mapGitHubApiError));
+
+		const installations = installationsData.installations;
+		const hasAllReposAccess =
+			installations.length > 0 &&
+			installations.every((i) => i.repository_selection === "all");
+
+		const allRepos = yield* Effect.forEach(
+			installations,
+			(installation) => fetchAllInstallationRepos(client, installation.id),
+			{ concurrency: 3 },
+		);
+
+		return {
+			repos: Arr.flatten(allRepos),
+			hasAllReposAccess,
+		};
+	});
+
+const mapGitHubCreateError = (error: unknown): GitHubCreateFailedError => {
+	if (error instanceof Error) {
+		return new GitHubCreateFailedError({ message: error.message });
 	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"_tag" in error &&
+		"cause" in error
+	) {
+		const clientError = error as { _tag: string; cause?: { message?: string } };
+		return new GitHubCreateFailedError({
+			message: clientError.cause?.message ?? clientError._tag,
+		});
+	}
+	return new GitHubCreateFailedError({ message: "Failed to create issue" });
+};
 
-	return { repos, hasAllReposAccess };
-}
-
-export async function createGitHubIssue(
-	octokit: Octokit,
+export const createGitHubIssue = (
+	client: Client,
 	owner: string,
 	repo: string,
 	title: string,
 	body: string,
-): Promise<GitHubCreateIssueResult> {
-	const { data } = await octokit.rest.issues.create({
-		owner,
-		repo,
-		title,
-		body,
-	});
+): Effect.Effect<
+	GitHubCreateIssueResult,
+	GitHubInvalidRepoError | GitHubInvalidInputError | GitHubCreateFailedError
+> =>
+	Effect.gen(function* () {
+		yield* validateRepoOwnerAndName(owner, repo);
+		yield* validateIssueTitleAndBody(title, body);
 
-	return {
-		id: data.id,
-		number: data.number,
-		htmlUrl: data.html_url,
-		title: data.title,
-	};
-}
+		const result = yield* client
+			.issuesCreate(owner, repo, {
+				payload: {
+					title,
+					body,
+				},
+			})
+			.pipe(Effect.mapError(mapGitHubCreateError));
+
+		return {
+			id: result.id,
+			number: result.number,
+			htmlUrl: result.html_url,
+			title: result.title,
+		};
+	});
