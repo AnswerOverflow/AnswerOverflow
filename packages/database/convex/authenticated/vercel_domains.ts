@@ -1,8 +1,8 @@
 "use node";
 
 import { Vercel } from "@vercel/sdk";
-import { v } from "convex/values";
-import { authenticatedAction } from "../client";
+import { Effect, Schema } from "effect";
+import { authenticatedAction } from "../client/confectAuthenticated";
 
 const vercel = new Vercel({
 	bearerToken: process.env.AUTH_BEARER_TOKEN_VERCEL,
@@ -11,7 +11,7 @@ const vercel = new Vercel({
 const projectId = process.env.PROJECT_ID_VERCEL ?? "";
 const teamId = process.env.TEAM_ID_VERCEL;
 
-const ErrorSchema = {
+const ErrorSchemaParser = {
 	parse: (
 		data: unknown,
 	): { error: { code: string; message: string } } | null => {
@@ -49,117 +49,150 @@ export type DomainStatus =
 			dnsRecordsToSet: null;
 	  };
 
-async function checkDomainStatus(domain: string): Promise<DomainStatus> {
-	const [projectDomain, config] = await Promise.allSettled([
-		vercel.projects.getProjectDomain({
-			idOrName: projectId,
-			teamId,
-			domain,
-		}),
-		vercel.domains.getDomainConfig({
-			teamId,
-			domain,
-		}),
-		vercel.projects.verifyProjectDomain({
-			idOrName: projectId,
-			teamId,
-			domain,
-		}),
-	]);
+const checkDomainStatus = (domain: string): Effect.Effect<DomainStatus> =>
+	Effect.gen(function* () {
+		const [projectDomain, config] = yield* Effect.promise(() =>
+			Promise.allSettled([
+				vercel.projects.getProjectDomain({
+					idOrName: projectId,
+					teamId,
+					domain,
+				}),
+				vercel.domains.getDomainConfig({
+					teamId,
+					domain,
+				}),
+				vercel.projects.verifyProjectDomain({
+					idOrName: projectId,
+					teamId,
+					domain,
+				}),
+			]),
+		);
 
-	if (projectDomain.status === "rejected") {
+		if (projectDomain.status === "rejected") {
+			return {
+				status: "Domain is not added" as const,
+				dnsRecordsToSet: null,
+			};
+		}
+
+		if (config.status === "rejected") {
+			return {
+				status: "Domain is not added" as const,
+				dnsRecordsToSet: null,
+			};
+		}
+
+		const verificationTxt = projectDomain.value.verification?.at(0)?.value;
+
+		if (verificationTxt) {
+			return {
+				status: "Pending Verification" as const,
+				dnsRecordsToSet: {
+					name: "_vercel",
+					type: "TXT" as const,
+					value: verificationTxt,
+				},
+			};
+		}
+
+		if (config.value.misconfigured) {
+			const isApex = projectDomain.value.apexName === domain;
+			const dnsRecord: DNSRecord = isApex
+				? {
+						name: "@",
+						type: "A" as const,
+						value: "76.76.21.21",
+					}
+				: {
+						name: projectDomain.value.name.replace(
+							projectDomain.value.apexName,
+							"",
+						),
+						type: "CNAME" as const,
+						value: "cname.vercel-dns.com",
+					};
+			return {
+				status: "Invalid Configuration" as const,
+				dnsRecordsToSet: dnsRecord,
+			};
+		}
+
 		return {
-			status: "Domain is not added",
+			status: "Valid Configuration" as const,
 			dnsRecordsToSet: null,
 		};
-	}
+	});
 
-	if (config.status === "rejected") {
-		return {
-			status: "Domain is not added",
-			dnsRecordsToSet: null,
-		};
-	}
+const DNSRecordSchema = Schema.Struct({
+	type: Schema.Union(
+		Schema.Literal("CNAME"),
+		Schema.Literal("TXT"),
+		Schema.Literal("A"),
+	),
+	name: Schema.String,
+	value: Schema.String,
+	ttl: Schema.optional(Schema.String),
+});
 
-	const verificationTxt = projectDomain.value.verification?.at(0)?.value;
-
-	if (verificationTxt) {
-		return {
-			status: "Pending Verification",
-			dnsRecordsToSet: {
-				name: "_vercel",
-				type: "TXT",
-				value: verificationTxt,
-			},
-		};
-	}
-
-	if (config.value.misconfigured) {
-		const isApex = projectDomain.value.apexName === domain;
-		const dnsRecord: DNSRecord = isApex
-			? {
-					name: "@",
-					type: "A",
-					value: "76.76.21.21",
-				}
-			: {
-					name: projectDomain.value.name.replace(
-						projectDomain.value.apexName,
-						"",
-					),
-					type: "CNAME",
-					value: "cname.vercel-dns.com",
-				};
-		return {
-			status: "Invalid Configuration",
-			dnsRecordsToSet: dnsRecord,
-		};
-	}
-
-	return {
-		status: "Valid Configuration",
-		dnsRecordsToSet: null,
-	};
-}
+const DomainStatusSchema = Schema.Union(
+	Schema.Struct({
+		status: Schema.Union(
+			Schema.Literal("Pending Verification"),
+			Schema.Literal("Invalid Configuration"),
+		),
+		dnsRecordsToSet: DNSRecordSchema,
+	}),
+	Schema.Struct({
+		status: Schema.Union(
+			Schema.Literal("Domain is not added"),
+			Schema.Literal("Valid Configuration"),
+		),
+		dnsRecordsToSet: Schema.Null,
+	}),
+);
 
 export const getDomainStatus = authenticatedAction({
-	args: { domain: v.string() },
-	handler: async (_ctx, args) => {
-		return checkDomainStatus(args.domain);
-	},
+	args: Schema.Struct({ domain: Schema.String }),
+	returns: DomainStatusSchema,
+	handler: ({ domain }) => checkDomainStatus(domain),
 });
 
 export const addDomain = authenticatedAction({
-	args: { domain: v.string() },
-	handler: async (_ctx, args) => {
-		await vercel.projects
-			.addProjectDomain({
-				idOrName: projectId,
-				teamId,
-				requestBody: {
-					name: args.domain,
-				},
-			})
-			.catch((error) => {
-				console.log("Error adding domain", error);
-				if ("body" in error) {
-					try {
-						const errorBody =
-							typeof error.body === "string"
-								? JSON.parse(error.body)
-								: error.body;
-						const parsedError = ErrorSchema.parse(errorBody);
-						if (parsedError && parsedError.error.code === "not_found") {
-							return null;
+	args: Schema.Struct({ domain: Schema.String }),
+	returns: DomainStatusSchema,
+	handler: ({ domain }) =>
+		Effect.gen(function* () {
+			yield* Effect.promise(() =>
+				vercel.projects
+					.addProjectDomain({
+						idOrName: projectId,
+						teamId,
+						requestBody: {
+							name: domain,
+						},
+					})
+					.catch((error) => {
+						console.log("Error adding domain", error);
+						if ("body" in error) {
+							try {
+								const errorBody =
+									typeof error.body === "string"
+										? JSON.parse(error.body)
+										: error.body;
+								const parsedError = ErrorSchemaParser.parse(errorBody);
+								if (parsedError && parsedError.error.code === "not_found") {
+									return null;
+								}
+							} catch (_parseError) {
+								console.log("Failed to parse error:", _parseError);
+							}
 						}
-					} catch (_parseError) {
-						console.log("Failed to parse error:", _parseError);
-					}
-				}
-				return null;
-			});
+						return null;
+					}),
+			);
 
-		const status = await checkDomainStatus(args.domain);
-		return status;
-	},
+			return yield* checkDomainStatus(domain);
+		}),
 });
