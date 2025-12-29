@@ -2,17 +2,16 @@
 
 import { Checkbox } from "@packages/ui/components/checkbox";
 import { Input } from "@packages/ui/components/input";
+import { ChannelType } from "discord-api-types/v10";
 import { Hash, Megaphone, MessageSquare, Search } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import type { ChannelRecommendation } from "./wizard-context";
 
-const CHANNEL_TYPE_FORUM = 15;
-const CHANNEL_TYPE_ANNOUNCEMENT = 5;
 const SEARCH_THRESHOLD = 6;
 
 function getChannelIcon(type: number) {
-	if (type === CHANNEL_TYPE_FORUM) return MessageSquare;
-	if (type === CHANNEL_TYPE_ANNOUNCEMENT) return Megaphone;
+	if (type === ChannelType.GuildForum) return MessageSquare;
+	if (type === ChannelType.GuildAnnouncement) return Megaphone;
 	return Hash;
 }
 

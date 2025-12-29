@@ -13,6 +13,7 @@ import {
 import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import * as Sentry from "@sentry/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { CheckCircle2 } from "lucide-react";
@@ -114,7 +115,7 @@ export default function OnboardingPage() {
 		try {
 			await trackBotAddClick({ serverId: BigInt(discordId) });
 		} catch (error) {
-			console.error("Failed to track bot add click:", error);
+			Sentry.captureException(error);
 		}
 
 		const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${discordClientId}&permissions=328565083201&scope=bot+applications.commands&guild_id=${discordId}&disable_guild_select=true`;

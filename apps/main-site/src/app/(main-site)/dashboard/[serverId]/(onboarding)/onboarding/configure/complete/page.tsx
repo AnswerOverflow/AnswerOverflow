@@ -8,6 +8,7 @@ import {
 	TooltipTrigger,
 } from "@packages/ui/components/tooltip";
 import { useMutation } from "convex/react";
+import { ChannelType } from "discord-api-types/v10";
 import {
 	CheckCircle2,
 	GitBranch,
@@ -25,8 +26,6 @@ import {
 	useWizard,
 } from "../components/wizard-context";
 import { WizardNav } from "../components/wizard-nav";
-
-const CHANNEL_TYPE_FORUM = 15;
 
 type ChannelFeatures = {
 	indexing: boolean;
@@ -49,7 +48,7 @@ function getChannelFeatures(
 
 	let solvedTag: ForumTagInfo | null = null;
 	const solvedTagId = channelSettings.solvedTags.get(channelId);
-	if (solvedTagId && channel.type === CHANNEL_TYPE_FORUM) {
+	if (solvedTagId && channel.type === ChannelType.GuildForum) {
 		const tag = channel.availableTags?.find(
 			(t) => t.id.toString() === solvedTagId,
 		);
@@ -208,7 +207,7 @@ export default function CompletePage() {
 						{indexedChannels.map((channel) => {
 							const channelId = channel.id.toString();
 							const features = getChannelFeatures(channel, channelSettings);
-							const isForum = channel.type === CHANNEL_TYPE_FORUM;
+							const isForum = channel.type === ChannelType.GuildForum;
 
 							return (
 								<div

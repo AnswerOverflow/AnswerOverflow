@@ -2,6 +2,7 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { useAction } from "convex/react";
+import { ChannelType } from "discord-api-types/v10";
 import { useParams } from "next/navigation";
 import {
 	createContext,
@@ -10,8 +11,6 @@ import {
 	useEffect,
 	useState,
 } from "react";
-
-const CHANNEL_TYPE_FORUM = 15;
 
 export type ForumTagInfo = {
 	id: bigint;
@@ -273,19 +272,23 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 	}, [state.channels, state.channelSettings.indexingEnabled]);
 
 	const getNonForumIndexedChannels = useCallback(() => {
-		return getIndexedChannels().filter((c) => c.type !== CHANNEL_TYPE_FORUM);
+		return getIndexedChannels().filter(
+			(c) => c.type !== ChannelType.GuildForum,
+		);
 	}, [getIndexedChannels]);
 
 	const getForumIndexedChannels = useCallback(() => {
-		return getIndexedChannels().filter((c) => c.type === CHANNEL_TYPE_FORUM);
+		return getIndexedChannels().filter(
+			(c) => c.type === ChannelType.GuildForum,
+		);
 	}, [getIndexedChannels]);
 
 	const getAllNonForumChannels = useCallback(() => {
-		return state.channels.filter((c) => c.type !== CHANNEL_TYPE_FORUM);
+		return state.channels.filter((c) => c.type !== ChannelType.GuildForum);
 	}, [state.channels]);
 
 	const getAllForumChannels = useCallback(() => {
-		return state.channels.filter((c) => c.type === CHANNEL_TYPE_FORUM);
+		return state.channels.filter((c) => c.type === ChannelType.GuildForum);
 	}, [state.channels]);
 
 	const getMarkSolutionChannels = useCallback(() => {

@@ -42,6 +42,7 @@ import {
 import { useParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import React from "react";
+import { ChannelType } from "discord-api-types/v10";
 import { useAuthenticatedQuery } from "../../../../../../lib/use-authenticated-query";
 
 function ToggleChannelFlag({
@@ -430,7 +431,9 @@ export default function ChannelsPage() {
 			return getFlagValue("markSolutionEnabled") !== true;
 		}
 		if (flagKey === "forumGuidelinesConsentEnabled") {
-			return !selectedChannels.some((c: { type: number }) => c.type === 15);
+			return !selectedChannels.some(
+				(c: { type: number }) => c.type === ChannelType.GuildForum,
+			);
 		}
 		return false;
 	};
@@ -788,7 +791,7 @@ export default function ChannelsPage() {
 
 											{selectedChannels.length === 1 &&
 												selectedChannels[0] &&
-												selectedChannels[0].type === 15 && (
+												selectedChannels[0].type === ChannelType.GuildForum && (
 													<ChooseSolvedTagCard
 														channel={selectedChannels[0]}
 														onUpdate={async (solutionTagId) => {
@@ -804,7 +807,8 @@ export default function ChannelsPage() {
 												)}
 
 											{!selectedChannels.some(
-												(c: { type: number }) => c.type === 15,
+												(c: { type: number }) =>
+													c.type === ChannelType.GuildForum,
 											) && (
 												<ToggleChannelFlag
 													title="Auto Thread Enabled"
@@ -847,7 +851,8 @@ export default function ChannelsPage() {
 											/>
 
 											{selectedChannels.some(
-												(c: { type: number }) => c.type === 15,
+												(c: { type: number }) =>
+													c.type === ChannelType.GuildForum,
 											) && (
 												<ToggleChannelFlag
 													title="Forum Guidelines Consent Enabled"

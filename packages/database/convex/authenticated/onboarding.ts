@@ -39,10 +39,20 @@ export const applyRecommendedConfiguration = guildManagerMutation({
 			anonymizeMessagesEnabled: args.serverSettings.anonymizeMessagesEnabled,
 		});
 
+		const errors: Array<{ channelId: bigint; error: string }> = [];
 		for (const config of args.channelConfigurations) {
 			try {
 				await upsertChannelSettingsLogic(ctx, config.channelId, config);
-			} catch {}
+			} catch (error) {
+				errors.push({
+					channelId: config.channelId,
+					error: error instanceof Error ? error.message : String(error),
+				});
+			}
+		}
+
+		if (errors.length > 0) {
+			console.error("Failed to apply some channel configurations:", errors);
 		}
 
 		return { success: true };
