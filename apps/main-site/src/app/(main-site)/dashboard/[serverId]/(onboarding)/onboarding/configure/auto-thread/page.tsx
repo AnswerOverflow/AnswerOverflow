@@ -14,6 +14,11 @@ export default function AutoThreadPage() {
 
 	const allNonForumChannels = getAllNonForumChannels();
 
+	const handleSkip = () => {
+		const allChannelIds = allNonForumChannels.map((c) => c.id.toString());
+		setAllChannelSetting("autoThreadEnabled", allChannelIds, false);
+	};
+
 	return (
 		<ChannelToggleStep
 			title="Auto-Thread"
@@ -34,6 +39,7 @@ export default function AutoThreadPage() {
 				title: "No text or announcement channels in your server.",
 				description: "Auto-thread is only available for non-forum channels.",
 			}}
+			onSkip={handleSkip}
 		/>
 	);
 }

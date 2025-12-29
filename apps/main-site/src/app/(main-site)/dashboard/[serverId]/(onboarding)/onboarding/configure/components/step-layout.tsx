@@ -33,7 +33,7 @@ export function StepLayout({
 
 	if (requiresChannels && isLoading) {
 		return (
-			<div className="w-full max-w-2xl mx-auto space-y-4">
+			<div className="w-full max-w-2xl mx-auto space-y-4 flex-1">
 				{header}
 				<Card className="p-0">
 					<CardContent className="p-4 sm:p-6 min-h-[400px] flex items-center justify-center">
@@ -51,7 +51,7 @@ export function StepLayout({
 
 	if (error) {
 		return (
-			<div className="w-full max-w-2xl mx-auto space-y-4">
+			<div className="w-full max-w-2xl mx-auto space-y-4 flex-1">
 				{header}
 				<Card className="p-0">
 					<CardContent className="p-4 sm:p-6 min-h-[400px] flex items-center justify-center">
@@ -69,7 +69,7 @@ export function StepLayout({
 	}
 
 	return (
-		<div className="w-full max-w-2xl mx-auto space-y-4">
+		<div className="w-full max-w-2xl mx-auto space-y-4 flex-1">
 			{header}
 			{video}
 			{children}

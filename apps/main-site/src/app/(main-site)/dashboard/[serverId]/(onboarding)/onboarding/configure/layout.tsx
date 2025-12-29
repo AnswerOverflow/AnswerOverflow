@@ -34,8 +34,8 @@ export default function ConfigureLayout({
 
 	if (isSessionPending) {
 		return (
-			<main className="flex items-center justify-center p-6 md:p-8 min-h-[calc(100vh-4rem)]">
-				<div className="w-full max-w-2xl space-y-4">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+				<div className="w-full max-w-2xl mx-auto space-y-4">
 					<Skeleton className="h-8 w-48" />
 					<Skeleton className="h-5 w-96 max-w-full" />
 					<Skeleton className="h-[400px] w-full rounded-lg" />
@@ -54,7 +54,7 @@ export default function ConfigureLayout({
 
 	return (
 		<WizardProvider>
-			<main className="flex items-center justify-center p-6 md:p-8 min-h-[calc(100vh-4rem)]">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
 				{children}
 			</main>
 		</WizardProvider>

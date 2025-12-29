@@ -135,8 +135,8 @@ export default function OnboardingPage() {
 
 	if (isSessionPending || isServersLoading) {
 		return (
-			<main className="flex items-center justify-center p-4 md:p-8">
-				<div className="w-full max-w-2xl space-y-6">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+				<div className="w-full max-w-2xl mx-auto space-y-6">
 					<Skeleton className="h-12 w-64" />
 					<Skeleton className="h-96 w-full" />
 				</div>
@@ -146,8 +146,8 @@ export default function OnboardingPage() {
 
 	if (step === "auth" || !session?.user) {
 		return (
-			<main className="flex items-center justify-center p-4 md:p-8">
-				<div className="w-full max-w-2xl">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+				<div className="w-full max-w-2xl mx-auto">
 					<Card>
 						<CardHeader className="text-center">
 							<CardTitle className="text-3xl">
@@ -184,8 +184,8 @@ export default function OnboardingPage() {
 
 	if (!serverId || !selectedServer) {
 		return (
-			<main className="flex items-center justify-center p-4 md:p-8">
-				<div className="w-full max-w-2xl">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+				<div className="w-full max-w-2xl mx-auto">
 					<Card>
 						<CardHeader className="text-center">
 							<CardTitle className="text-2xl">Server not found</CardTitle>
@@ -206,8 +206,8 @@ export default function OnboardingPage() {
 
 	if (step === "install" && selectedServer) {
 		return (
-			<main className="flex items-center justify-center p-4 md:p-8">
-				<div className="w-full max-w-2xl">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+				<div className="w-full max-w-2xl mx-auto">
 					<BotPermissionsDisplay
 						server={{
 							discordId: BigInt(selectedServer.discordId),
@@ -228,8 +228,8 @@ export default function OnboardingPage() {
 		);
 
 		return (
-			<main className="flex items-center justify-center p-4 md:p-8">
-				<div className="w-full max-w-2xl space-y-6">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+				<div className="w-full max-w-2xl mx-auto space-y-6">
 					<Card>
 						<CardHeader className="text-center">
 							<div className="flex justify-center mb-4">

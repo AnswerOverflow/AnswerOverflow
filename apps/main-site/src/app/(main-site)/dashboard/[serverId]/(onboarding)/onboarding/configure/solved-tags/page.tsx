@@ -57,6 +57,12 @@ export default function SolvedTagsPage() {
 	);
 	const hasEligibleForums = eligibleForums.length > 0;
 
+	const handleSkip = () => {
+		for (const forum of eligibleForums) {
+			setSolvedTag(forum.id.toString(), undefined);
+		}
+	};
+
 	return (
 		<StepLayout
 			title="Solved Tags"
@@ -154,6 +160,7 @@ export default function SolvedTagsPage() {
 				backHref={`/dashboard/${serverId}/onboarding/configure/solution-instructions`}
 				nextHref={`/dashboard/${serverId}/onboarding/configure/complete`}
 				showSkip={hasEligibleForums}
+				onSkip={handleSkip}
 			/>
 		</StepLayout>
 	);

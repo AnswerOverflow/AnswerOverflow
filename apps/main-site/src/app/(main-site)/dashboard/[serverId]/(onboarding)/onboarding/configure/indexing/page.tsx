@@ -12,6 +12,11 @@ export default function IndexingPage() {
 		setAllChannelSetting,
 	} = useWizard();
 
+	const handleSkip = () => {
+		const allChannelIds = channels.map((c) => c.id.toString());
+		setAllChannelSetting("indexingEnabled", allChannelIds, false);
+	};
+
 	return (
 		<ChannelToggleStep
 			title="Enable Indexing"
@@ -29,6 +34,7 @@ export default function IndexingPage() {
 			nextHref={`/dashboard/${serverId}/onboarding/configure/auto-thread`}
 			isNextDisabled={channelSettings.indexingEnabled.size === 0}
 			showSkip
+			onSkip={handleSkip}
 		/>
 	);
 }

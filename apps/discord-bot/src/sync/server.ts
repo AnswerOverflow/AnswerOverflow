@@ -227,6 +227,12 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				yield* syncGuild(guild);
 				yield* catchAllSilentWithReport(trackServerJoin(guild));
 				yield* notifySuperUserOfServerJoin(guild);
+
+				yield* catchAllSilentWithReport(
+					database.private.servers.scheduleRecommendedConfigurationCache({
+						serverId: BigInt(guild.id),
+					}),
+				);
 			}).pipe(
 				Effect.withSpan("event.guild_create"),
 				catchAllWithReport((error) =>

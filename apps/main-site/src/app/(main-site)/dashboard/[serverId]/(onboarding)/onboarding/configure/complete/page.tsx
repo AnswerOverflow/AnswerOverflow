@@ -204,7 +204,7 @@ export default function CompletePage() {
 						{indexedChannels.length !== 1 ? "s" : ""} will be indexed
 					</div>
 
-					<div className="space-y-1.5 max-h-[280px] overflow-y-auto">
+					<div className="space-y-1.5 max-h-[400px] overflow-y-auto">
 						{indexedChannels.map((channel) => {
 							const channelId = channel.id.toString();
 							const features = getChannelFeatures(channel, channelSettings);

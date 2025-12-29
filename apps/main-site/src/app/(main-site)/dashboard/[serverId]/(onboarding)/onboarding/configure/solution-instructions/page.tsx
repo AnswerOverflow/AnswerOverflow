@@ -20,6 +20,11 @@ export default function SolutionInstructionsPage() {
 		? `/dashboard/${serverId}/onboarding/configure/solved-tags`
 		: `/dashboard/${serverId}/onboarding/configure/complete`;
 
+	const handleSkip = () => {
+		const allChannelIds = channels.map((c) => c.id.toString());
+		setAllChannelSetting("solutionInstructionsEnabled", allChannelIds, false);
+	};
+
 	return (
 		<ChannelToggleStep
 			title="Solution Instructions"
@@ -36,6 +41,7 @@ export default function SolutionInstructionsPage() {
 			backHref={`/dashboard/${serverId}/onboarding/configure/mark-solution`}
 			nextHref={nextHref}
 			showSkip
+			onSkip={handleSkip}
 		/>
 	);
 }

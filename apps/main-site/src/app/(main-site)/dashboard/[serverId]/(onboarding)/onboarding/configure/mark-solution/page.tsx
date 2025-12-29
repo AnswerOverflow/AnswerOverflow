@@ -12,6 +12,11 @@ export default function MarkSolutionPage() {
 		setAllChannelSetting,
 	} = useWizard();
 
+	const handleSkip = () => {
+		const allChannelIds = channels.map((c) => c.id.toString());
+		setAllChannelSetting("markSolutionEnabled", allChannelIds, false);
+	};
+
 	return (
 		<ChannelToggleStep
 			title="Mark Solution"
@@ -28,6 +33,7 @@ export default function MarkSolutionPage() {
 			backHref={`/dashboard/${serverId}/onboarding/configure/auto-thread`}
 			nextHref={`/dashboard/${serverId}/onboarding/configure/solution-instructions`}
 			showSkip
+			onSkip={handleSkip}
 		/>
 	);
 }

@@ -63,6 +63,7 @@ export const FUNCTION_TYPE_MAP = {
   "servers.getServerByDiscordId": "query",
   "servers.getServerByDiscordIdWithChannels": "query",
   "servers.getServerByDomain": "query",
+  "servers.scheduleRecommendedConfigurationCache": "mutation",
   "servers.updateServer": "mutation",
   "servers.upsertServer": "mutation",
   "threadTags.getTagsForThread": "query",
@@ -89,7 +90,7 @@ export const NAMESPACE_STRUCTURE = {
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","markMessageAsSolution","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
   "search": ["getCachedSimilarThreads","getRecentAnnouncements","getRecentThreads","getSimilarThreads","publicSearch"],
   "server_preferences": ["getBotCustomizationForServer","getServerPreferencesByServerId","getServersWithBotCustomization","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
-  "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getCachedBrowsableServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","updateServer","upsertServer"],
+  "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getCachedBrowsableServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","scheduleRecommendedConfigurationCache","updateServer","upsertServer"],
   "threadTags": ["getTagsForThread","getTagsForThreads","getThreadIdsByTags","syncThreadTags"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
 } as const;

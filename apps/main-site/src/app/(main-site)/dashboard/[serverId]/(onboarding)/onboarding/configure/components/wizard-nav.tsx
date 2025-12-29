@@ -13,6 +13,7 @@ type WizardNavProps = {
 	isLoading?: boolean;
 	showSkip?: boolean;
 	skipHref?: string;
+	onSkip?: () => void;
 };
 
 export function WizardNav({
@@ -24,6 +25,7 @@ export function WizardNav({
 	isLoading = false,
 	showSkip = false,
 	skipHref,
+	onSkip,
 }: WizardNavProps) {
 	const router = useRouter();
 
@@ -37,6 +39,7 @@ export function WizardNav({
 	};
 
 	const handleSkip = () => {
+		onSkip?.();
 		if (skipHref) {
 			router.push(skipHref);
 		} else if (nextHref) {

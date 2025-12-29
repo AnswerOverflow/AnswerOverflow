@@ -408,3 +408,20 @@ export const fetchBrowsableServersInternal = internalAction({
 		}));
 	},
 });
+
+export const scheduleRecommendedConfigurationCache = privateMutation({
+	args: {
+		serverId: v.int64(),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		await ctx.scheduler.runAfter(
+			0,
+			internal.authenticated.onboarding_action.fetchRecommendedConfiguration,
+			{
+				serverId: args.serverId,
+			},
+		);
+		return null;
+	},
+});
