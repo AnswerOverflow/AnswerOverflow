@@ -1683,8 +1683,8 @@ export const make = (
 		appsListInstallationsForAuthenticatedUser: (options) =>
 			HttpClientRequest.get(`/user/installations`).pipe(
 				HttpClientRequest.setUrlParams({
-					per_page: options?.["per_page"] as any,
-					page: options?.["page"] as any,
+					per_page: options?.per_page as any,
+					page: options?.page as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -1701,8 +1701,8 @@ export const make = (
 				`/user/installations/${installationId}/repositories`,
 			).pipe(
 				HttpClientRequest.setUrlParams({
-					per_page: options?.["per_page"] as any,
-					page: options?.["page"] as any,
+					per_page: options?.per_page as any,
+					page: options?.page as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({
@@ -1719,18 +1719,18 @@ export const make = (
 		issuesListForRepo: (owner, repo, options) =>
 			HttpClientRequest.get(`/repos/${owner}/${repo}/issues`).pipe(
 				HttpClientRequest.setUrlParams({
-					milestone: options?.["milestone"] as any,
-					state: options?.["state"] as any,
-					assignee: options?.["assignee"] as any,
-					type: options?.["type"] as any,
-					creator: options?.["creator"] as any,
-					mentioned: options?.["mentioned"] as any,
-					labels: options?.["labels"] as any,
-					sort: options?.["sort"] as any,
-					direction: options?.["direction"] as any,
-					since: options?.["since"] as any,
-					per_page: options?.["per_page"] as any,
-					page: options?.["page"] as any,
+					milestone: options?.milestone as any,
+					state: options?.state as any,
+					assignee: options?.assignee as any,
+					type: options?.type as any,
+					creator: options?.creator as any,
+					mentioned: options?.mentioned as any,
+					labels: options?.labels as any,
+					sort: options?.sort as any,
+					direction: options?.direction as any,
+					since: options?.since as any,
+					per_page: options?.per_page as any,
+					page: options?.page as any,
 				}),
 				withResponse(
 					HttpClientResponse.matchStatus({

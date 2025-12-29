@@ -3,7 +3,7 @@ import type {
 	GenericMutationCtx,
 	GenericQueryCtx,
 } from "convex/server";
-import { Context, Effect, Layer, Option, Schema } from "effect";
+import { Context, Effect, Layer, type Option, Schema } from "effect";
 import { components } from "../../_generated/api";
 import type { DataModel } from "../../_generated/dataModel";
 

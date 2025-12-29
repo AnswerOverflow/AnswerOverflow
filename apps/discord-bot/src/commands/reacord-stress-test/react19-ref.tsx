@@ -6,7 +6,7 @@ import {
 	TextDisplay,
 	useInstance,
 } from "@packages/reacord";
-import { useCallback, useRef, useState, type Ref, type RefObject } from "react";
+import { type Ref, type RefObject, useCallback, useRef, useState } from "react";
 
 interface LogEntry {
 	id: string;

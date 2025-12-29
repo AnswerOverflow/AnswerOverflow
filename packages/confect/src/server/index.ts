@@ -11,7 +11,7 @@ export type {
 
 export { NotUniqueError } from "./database";
 
-export { makeFunctions, type MakeFunctionsOptions } from "./functions";
+export { type MakeFunctionsOptions, makeFunctions } from "./functions";
 export {
 	type HttpApi,
 	makeHttpRouter,

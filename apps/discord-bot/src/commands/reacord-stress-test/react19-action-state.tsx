@@ -130,7 +130,7 @@ export function React19ActionStateScenario() {
 						? "⏳ Submitting..."
 						: state.success
 							? "✅ Success"
-							: "📝 " + state.message}
+							: `📝 ${state.message}`}
 				</TextDisplay>
 				{isPending && pendingData && (
 					<>

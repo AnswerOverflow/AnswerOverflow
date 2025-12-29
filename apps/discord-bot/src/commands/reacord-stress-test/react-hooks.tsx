@@ -11,6 +11,7 @@ import {
 } from "@packages/reacord";
 import {
 	memo,
+	type Ref,
 	useCallback,
 	useDebugValue,
 	useEffect,
@@ -22,7 +23,6 @@ import {
 	useRef,
 	useState,
 	useSyncExternalStore,
-	type Ref,
 } from "react";
 
 type CounterAction =

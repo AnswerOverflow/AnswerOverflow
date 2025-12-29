@@ -7,7 +7,7 @@ import {
 	MessageFlags,
 	type ModalSubmitInteraction,
 	SeparatorSpacingSize,
-	StringSelectMenuInteraction,
+	type StringSelectMenuInteraction,
 	type UserSelectMenuInteraction,
 } from "discord.js";
 import { Effect, Runtime } from "effect";

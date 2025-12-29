@@ -1,5 +1,3 @@
-import type { DefaultFunctionArgs } from "convex/server";
-import { Context, Data, Effect, Layer, Schema } from "effect";
 import {
 	ConfectActionCtx as ConfectActionCtxService,
 	type ConfectActionCtx as ConfectActionCtxType,
@@ -10,16 +8,18 @@ import {
 	type ConfectQueryCtx as ConfectQueryCtxType,
 	makeFunctions,
 } from "@packages/confect/server";
+import type { DefaultFunctionArgs } from "convex/server";
+import { Context, Data, Effect, Schema } from "effect";
 import { confectSchema } from "../schema";
-import {
-	mutation as triggerMutation,
-	internalMutation as triggerInternalMutation,
-} from "../triggers";
-import { authComponent } from "../shared/betterAuth";
 import {
 	BetterAuthAccounts,
 	BetterAuthAccountsLive,
 } from "../shared/auth/betterAuthService";
+import { authComponent } from "../shared/betterAuth";
+import {
+	internalMutation as triggerInternalMutation,
+	mutation as triggerMutation,
+} from "../triggers";
 
 export { BetterAuthAccounts };
 

@@ -9,12 +9,12 @@ import {
 	TextDisplay,
 	useAtomSet,
 	useAtomValue,
+	useInstance,
 } from "@packages/reacord";
-import { useInstance } from "@packages/reacord";
 import { Effect } from "effect";
 import { atomRuntime } from "../../core/runtime";
 
-const fetchStatsEffect = (_input: void) =>
+const fetchStatsEffect = (_input: undefined) =>
 	Effect.gen(function* () {
 		yield* Effect.sleep("1 second");
 		return {
