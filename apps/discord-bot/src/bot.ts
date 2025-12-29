@@ -9,6 +9,7 @@ import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
 import { LeaveCommandHandlerLayer } from "./commands/leave-command";
 import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
+import { OpenCodeCommandHandlerLayer } from "./commands/opencode";
 import { ReacordStressTestLayer } from "./commands/reacord-stress-test/index";
 import { Discord } from "./core/discord-service";
 import { ConsentButtonHandlerLayer } from "./interactions/consent-button";
@@ -30,6 +31,10 @@ import { MessageParityLayer } from "./sync/message";
 import { ServerParityLayer } from "./sync/server";
 import { UserParityLayer } from "./sync/user";
 
+/**
+ * Combines all bot feature layers into a single layer.
+ * This includes sync handlers, command handlers, and interaction handlers.
+ */
 export const BotLayers = Layer.mergeAll(
 	ServerParityLayer,
 	ChannelParityLayer,
@@ -60,6 +65,7 @@ export const BotLayers = Layer.mergeAll(
 	BotIdentitySyncHandlerLayer,
 	ConvertToGitHubIssueReacordLayer,
 	ReacordStressTestLayer,
+	OpenCodeCommandHandlerLayer,
 );
 
 export const program = Effect.gen(function* () {

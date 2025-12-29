@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@effect/cluster": "catalog:",
 		"@effect/platform-node": "catalog:",
+		"@opencode-ai/sdk": "^1.0.206",
 		"@packages/database": "workspace:*",
 		"@packages/database-utils": "workspace:*",
 		"@packages/observability": "workspace:*",

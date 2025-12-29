@@ -27,6 +27,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.4",
+		"@opencode-ai/sdk": "^1.0.206",
 		"@types/bytes": "^3.1.5",
 		"@typescript/native-preview": "^7.0.0-dev.20251203.1",
 		"husky": "^9.1.7",

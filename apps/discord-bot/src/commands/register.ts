@@ -70,6 +70,68 @@ const guildCommands = [
 					...REACORD_STRESS_TEST_SCENARIOS.map((s) => ({ name: s, value: s })),
 				),
 		),
+	new SlashCommandBuilder()
+		.setName("opencode")
+		.setDescription("Interact with OpenCode coding sessions (Rhys only)")
+		.setContexts(InteractionContextType.Guild, InteractionContextType.BotDM)
+		.addSubcommand((sub) =>
+			sub
+				.setName("session")
+				.setDescription("View an existing session or list recent sessions")
+				.addStringOption((opt) =>
+					opt
+						.setName("id")
+						.setDescription(
+							"Session ID to view (optional, lists sessions if not provided)",
+						),
+				),
+		)
+		.addSubcommand((sub) =>
+			sub
+				.setName("new")
+				.setDescription("Create a new OpenCode session")
+				.addStringOption((opt) =>
+					opt
+						.setName("prompt")
+						.setDescription("Initial prompt for the session"),
+				)
+				.addStringOption((opt) =>
+					opt
+						.setName("agent")
+						.setDescription("Agent to use (e.g., build, plan)")
+						.addChoices(
+							{ name: "Build", value: "build" },
+							{ name: "Plan", value: "plan" },
+						),
+				),
+		)
+		.addSubcommand((sub) =>
+			sub
+				.setName("prompt")
+				.setDescription("Send a prompt to OpenCode")
+				.addStringOption((opt) =>
+					opt
+						.setName("prompt")
+						.setDescription("The prompt to send")
+						.setRequired(true),
+				)
+				.addStringOption((opt) =>
+					opt
+						.setName("session")
+						.setDescription(
+							"Session ID to send the prompt to (creates new if not provided)",
+						),
+				)
+				.addStringOption((opt) =>
+					opt
+						.setName("agent")
+						.setDescription("Agent to use")
+						.addChoices(
+							{ name: "Build", value: "build" },
+							{ name: "Plan", value: "plan" },
+						),
+				),
+		),
 ] as const;
 
 const registerCommandsEffect = Effect.fn("register_commands")(function* () {

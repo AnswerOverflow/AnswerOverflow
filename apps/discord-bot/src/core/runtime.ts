@@ -9,6 +9,7 @@ import { Effect, Layer, Logger, LogLevel, ManagedRuntime } from "effect";
 import { BotLayers } from "../bot";
 import { DiscordClientLayer } from "./discord-client-service";
 import { DiscordLayerInternal } from "./discord-service";
+import { OpenCodeLive } from "./opencode-service";
 import { ReacordLayer } from "./reacord-layer";
 
 // todo: theres probably a better way to do this
@@ -83,6 +84,7 @@ export const createAppLayer = (
 		DiscordLayers,
 		StorageWithDatabase,
 		PostHogCaptureClientLayer,
+		OpenCodeLive,
 	);
 
 	return BotLayers.pipe(Layer.provideMerge(InfraLayer));
