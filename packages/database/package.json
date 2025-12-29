@@ -30,6 +30,7 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.940.0",
 		"@aws-sdk/lib-storage": "^3.940.0",
+		"@octokit/auth-oauth-user": "^6.0.2",
 		"@better-auth/stripe": "^1.4.7",
 		"@convex-dev/action-cache": "^0.3.0",
 		"@convex-dev/aggregate": "^0.2.0",
@@ -51,6 +52,7 @@
 		"cookie": "^1.1.1",
 		"discord-api-types": "^0.38.24",
 		"effect": "catalog:",
+		"octokit": "^5.0.5",
 		"posthog-node": "^4.2.0",
 		"stripe": "^20",
 		"unique-names-generator": "^4.7.1",

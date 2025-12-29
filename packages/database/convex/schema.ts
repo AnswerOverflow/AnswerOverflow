@@ -164,7 +164,7 @@ const EmbedSchema = Schema.Struct({
 	type: Schema.optional(Schema.String),
 	description: Schema.optional(Schema.String),
 	url: Schema.optional(Schema.String),
-	timestamp: Schema.optional(Schema.String),
+	timestamp: Schema.optional(Schema.String), // ISO8601 timestamp
 	color: Schema.optional(Schema.Number),
 	footer: Schema.optional(EmbedFooterSchema),
 	image: Schema.optional(EmbedImageSchema),
@@ -176,20 +176,20 @@ const EmbedSchema = Schema.Struct({
 });
 
 const StickerSchema = Schema.Struct({
-	id: Schema.BigIntFromSelf,
+	id: Schema.BigIntFromSelf, // Discord sticker ID
 	name: Schema.String,
-	formatType: Schema.Number,
+	formatType: Schema.Number, // 1=PNG, 2=APNG, 3=Lottie, 4=GIF
 });
 
 const MessageSchema = Schema.Struct({
-	id: Schema.BigIntFromSelf,
-	authorId: Schema.BigIntFromSelf,
-	serverId: Schema.BigIntFromSelf,
-	channelId: Schema.BigIntFromSelf,
-	parentChannelId: Schema.optional(Schema.BigIntFromSelf),
-	childThreadId: Schema.optional(Schema.BigIntFromSelf),
-	questionId: Schema.optional(Schema.BigIntFromSelf),
-	referenceId: Schema.optional(Schema.BigIntFromSelf),
+	id: Schema.BigIntFromSelf, // Discord snowflake ID
+	authorId: Schema.BigIntFromSelf, // Discord account ID
+	serverId: Schema.BigIntFromSelf, // Discord server ID
+	channelId: Schema.BigIntFromSelf, // Discord channel ID
+	parentChannelId: Schema.optional(Schema.BigIntFromSelf), // If message is in a thread, parent channel ID
+	childThreadId: Schema.optional(Schema.BigIntFromSelf), // Thread started by this message
+	questionId: Schema.optional(Schema.BigIntFromSelf), // If this is a solution, the question message ID
+	referenceId: Schema.optional(Schema.BigIntFromSelf), // Referenced message ID
 	applicationId: Schema.optional(Schema.BigIntFromSelf),
 	interactionId: Schema.optional(Schema.BigIntFromSelf),
 	webhookId: Schema.optional(Schema.BigIntFromSelf),
@@ -204,28 +204,27 @@ const MessageSchema = Schema.Struct({
 });
 
 const AttachmentSchema = Schema.Struct({
-	id: Schema.BigIntFromSelf,
-	messageId: Schema.BigIntFromSelf,
+	id: Schema.BigIntFromSelf, // Discord attachment ID
+	messageId: Schema.BigIntFromSelf, // Discord message ID
 	contentType: Schema.optional(Schema.String),
 	filename: Schema.String,
 	width: Schema.optional(Schema.Number),
 	height: Schema.optional(Schema.Number),
 	size: Schema.Number,
 	description: Schema.optional(Schema.String),
-	storageId: Schema.optional(Id.Id("_storage")),
-	url: Schema.optional(Schema.String),
+	storageId: Schema.optional(Id.Id("_storage")), // Convex storage ID (dev/test only, for backwards compat)
 });
 
 const EmojiSchema = Schema.Struct({
-	id: Schema.BigIntFromSelf,
+	id: Schema.BigIntFromSelf, // Discord emoji ID (snowflake)
 	name: Schema.String,
 	animated: Schema.optional(Schema.Boolean),
 });
 
 const ReactionSchema = Schema.Struct({
-	messageId: Schema.BigIntFromSelf,
-	userId: Schema.BigIntFromSelf,
-	emojiId: Schema.BigIntFromSelf,
+	messageId: Schema.BigIntFromSelf, // Discord message ID
+	userId: Schema.BigIntFromSelf, // Discord account ID
+	emojiId: Schema.BigIntFromSelf, // Discord emoji ID
 });
 
 const GitHubIssueStatusSchema = Schema.Literal("open", "closed");
@@ -356,7 +355,9 @@ export type Plan = Schema.Schema.Type<typeof PlanSchema>;
 export type Channel = Schema.Schema.Type<typeof ChannelSchema>;
 export type ChannelSettings = Schema.Schema.Type<typeof ChannelSettingsSchema>;
 export type Message = Schema.Schema.Type<typeof MessageSchema>;
-export type Attachment = Schema.Schema.Type<typeof AttachmentSchema>;
+export type Attachment = Schema.Schema.Type<typeof AttachmentSchema> & {
+	url: string;
+};
 export type Emoji = Schema.Schema.Type<typeof EmojiSchema>;
 export type Sticker = Schema.Schema.Type<typeof StickerSchema>;
 export type Server = Schema.Schema.Type<typeof ServerSchema>;
