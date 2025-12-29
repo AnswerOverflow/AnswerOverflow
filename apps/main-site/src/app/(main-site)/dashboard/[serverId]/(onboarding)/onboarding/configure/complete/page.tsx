@@ -2,16 +2,13 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { Badge } from "@packages/ui/components/badge";
-import { Button } from "@packages/ui/components/button";
 import {
 	Empty,
-	EmptyContent,
 	EmptyDescription,
 	EmptyHeader,
 	EmptyMedia,
 	EmptyTitle,
 } from "@packages/ui/components/empty";
-import { Link } from "@packages/ui/components/link";
 import {
 	Tooltip,
 	TooltipContent,
@@ -31,10 +28,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { StepLayout } from "../components/step-layout";
 import { WizardCard } from "../components/wizard-card";
-import type {
-	ChannelConfiguration,
-	ForumTagInfo,
-} from "../components/wizard-context";
+import type { ForumTagInfo } from "../components/wizard-context";
 import { useWizard } from "../components/wizard-context";
 import { WizardNav } from "../components/wizard-nav";
 
@@ -190,17 +184,14 @@ export default function CompletePage() {
 								configure channels or continue to the dashboard.
 							</EmptyDescription>
 						</EmptyHeader>
-						<EmptyContent>
-							<Button asChild>
-								<Link href={`/dashboard/${serverId}`}>
-									Continue to Dashboard
-								</Link>
-							</Button>
-						</EmptyContent>
 					</Empty>
 				</WizardCard>
 
-				<WizardNav backHref={backHref} />
+				<WizardNav
+					backHref={backHref}
+					nextHref={`/dashboard/${serverId}`}
+					nextLabel="Continue to Dashboard"
+				/>
 			</StepLayout>
 		);
 	}

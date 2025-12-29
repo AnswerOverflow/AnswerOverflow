@@ -12,14 +12,12 @@ export default function IndexingPage() {
 		aiRecommendedIds,
 		handleToggle,
 		handleSelectAll,
-		commitSelections,
 		handleSkip,
 	} = useChannelToggle({
 		channels: allChannels,
 		getAIRecommended: (id) => getAIRecommendation(id)?.indexing ?? false,
 		getEnabled: (c) => c.indexingEnabled,
 		setEnabled: (c, enabled) => ({ ...c, indexingEnabled: enabled }),
-		isFirstStep: true,
 	});
 
 	return (
@@ -34,10 +32,8 @@ export default function IndexingPage() {
 			onSelectAll={handleSelectAll}
 			backHref={`/dashboard/${serverId}/onboarding/configure`}
 			nextHref={`/dashboard/${serverId}/onboarding/configure/auto-thread`}
-			isNextDisabled={false}
 			showSkip
 			onSkip={handleSkip}
-			onNext={commitSelections}
 		/>
 	);
 }

@@ -13,7 +13,6 @@ export default function AutoThreadPage() {
 		aiRecommendedIds,
 		handleToggle,
 		handleSelectAll,
-		commitSelections,
 		handleSkip,
 	} = useChannelToggle({
 		channels,
@@ -40,7 +39,6 @@ export default function AutoThreadPage() {
 				description: "Auto-thread is only available for non-forum channels.",
 			}}
 			onSkip={handleSkip}
-			onNext={commitSelections}
 		/>
 	);
 }

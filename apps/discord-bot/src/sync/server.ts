@@ -312,15 +312,17 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* Effect.fork(syncGuild(guild));
-				yield* Effect.fork(catchAllSilentWithReport(trackServerJoin(guild)));
-				yield* Effect.fork(
+				yield* Effect.forkDaemon(syncGuild(guild));
+				yield* Effect.forkDaemon(
+					catchAllSilentWithReport(trackServerJoin(guild)),
+				);
+				yield* Effect.forkDaemon(
 					catchAllSilentWithReport(notifySuperUserOfServerJoin(guild)),
 				);
-				yield* Effect.fork(
+				yield* Effect.forkDaemon(
 					catchAllSilentWithReport(notifyUserWhoAddedBot(guild)),
 				);
-				yield* Effect.fork(
+				yield* Effect.forkDaemon(
 					catchAllSilentWithReport(
 						database.private.servers.scheduleRecommendedConfigurationCache({
 							serverId: BigInt(guild.id),

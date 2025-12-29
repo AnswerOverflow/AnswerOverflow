@@ -26,7 +26,6 @@ type ChannelToggleStepProps = {
 		description: string;
 	};
 	onSkip?: () => void;
-	onNext?: () => void | Promise<void>;
 };
 
 export function ChannelToggleStep({
@@ -44,7 +43,6 @@ export function ChannelToggleStep({
 	isNextDisabled,
 	emptyState,
 	onSkip,
-	onNext,
 }: ChannelToggleStepProps) {
 	const hasChannels = channels.length > 0;
 
@@ -85,7 +83,6 @@ export function ChannelToggleStep({
 				showSkip={hasChannels && showSkip}
 				isNextDisabled={isNextDisabled}
 				onSkip={onSkip}
-				onNext={onNext}
 			/>
 		</StepLayout>
 	);

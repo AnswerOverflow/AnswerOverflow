@@ -12,7 +12,6 @@ export default function MarkSolutionPage() {
 		aiRecommendedIds,
 		handleToggle,
 		handleSelectAll,
-		commitSelections,
 		handleSkip,
 	} = useChannelToggle({
 		channels: allChannels,
@@ -35,7 +34,6 @@ export default function MarkSolutionPage() {
 			nextHref={`/dashboard/${serverId}/onboarding/configure/solution-instructions`}
 			showSkip
 			onSkip={handleSkip}
-			onNext={commitSelections}
 		/>
 	);
 }

@@ -18,7 +18,6 @@ export default function SolutionInstructionsPage() {
 		aiRecommendedIds,
 		handleToggle,
 		handleSelectAll,
-		commitSelections,
 		handleSkip,
 	} = useChannelToggle({
 		channels: allChannels,
@@ -45,7 +44,6 @@ export default function SolutionInstructionsPage() {
 			nextHref={nextHref}
 			showSkip
 			onSkip={handleSkip}
-			onNext={commitSelections}
 		/>
 	);
 }
