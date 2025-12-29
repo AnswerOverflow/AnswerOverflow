@@ -87,52 +87,16 @@ const RHYS_AVATAR_URL =
 	"https://cdn.discordapp.com/avatars/523949187663134754/7716e305f7de26045526d9da6eef2dab.webp";
 
 function getPacificAvailabilityTimestamps() {
-	const now = new Date();
-
-	const pacificFormatter = new Intl.DateTimeFormat("en-US", {
+	const today = new Date().toLocaleDateString("en-CA", {
 		timeZone: "America/Los_Angeles",
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
 	});
-	const pacificDateStr = pacificFormatter.format(now);
-	const [month, day, year] = pacificDateStr.split("/");
-
-	const startPacific = new Date(
-		`${year}-${month}-${day}T08:00:00-08:00`.replace(
-			"-08:00",
-			getPackificOffset(now),
-		),
-	);
-	const endPacific = new Date(
-		`${year}-${month}-${day}T22:00:00-08:00`.replace(
-			"-08:00",
-			getPackificOffset(now),
-		),
-	);
+	const start = new Date(`${today}T08:00:00-08:00`);
+	const end = new Date(`${today}T22:00:00-08:00`);
 
 	return {
-		start: Math.floor(startPacific.getTime() / 1000),
-		end: Math.floor(endPacific.getTime() / 1000),
+		start: Math.floor(start.getTime() / 1000),
+		end: Math.floor(end.getTime() / 1000),
 	};
-}
-
-function getPackificOffset(date: Date): string {
-	const jan = new Date(date.getFullYear(), 0, 1);
-	const jul = new Date(date.getFullYear(), 6, 1);
-	const stdOffset = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-
-	const pacificFormatter = new Intl.DateTimeFormat("en-US", {
-		timeZone: "America/Los_Angeles",
-		timeZoneName: "shortOffset",
-	});
-	const parts = pacificFormatter.formatToParts(date);
-	const offsetPart = parts.find((p) => p.type === "timeZoneName");
-
-	if (offsetPart?.value === "GMT-7") {
-		return "-07:00";
-	}
-	return "-08:00";
 }
 
 function notifyUserWhoAddedBot(guild: Guild) {
