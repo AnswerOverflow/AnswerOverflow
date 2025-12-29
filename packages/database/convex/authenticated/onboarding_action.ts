@@ -22,9 +22,10 @@ type ChannelRecommendation = {
 	name: string;
 	type: number;
 	shouldIndex: boolean;
-	availableTags?: Array<{ id: bigint; name: string }>;
+	availableTags?: Array<ForumTag>;
 	recommendedSettings: {
 		indexingEnabled: boolean;
+		autoThreadEnabled: boolean;
 		markSolutionEnabled: boolean;
 		sendMarkSolutionInstructionsInNewThreads: boolean;
 		solutionTagId?: bigint;
@@ -91,7 +92,24 @@ export const getRecommendedConfiguration = guildManagerAction({
 			};
 		}
 
-		const channelsForAI: Array<ChannelInfo> = rootChannels.map(
+		const forumChannels = rootChannels.filter(
+			(c: ChannelWithFlags) => c.type === CHANNEL_TYPE.GuildForum,
+		);
+		const announcementChannels = rootChannels.filter(
+			(c: ChannelWithFlags) => c.type === CHANNEL_TYPE.GuildAnnouncement,
+		);
+		const textChannels = rootChannels.filter(
+			(c: ChannelWithFlags) =>
+				c.type !== CHANNEL_TYPE.GuildForum &&
+				c.type !== CHANNEL_TYPE.GuildAnnouncement,
+		);
+
+		const alwaysIndexIds = new Set([
+			...forumChannels.map((c) => c.id.toString()),
+			...announcementChannels.map((c) => c.id.toString()),
+		]);
+
+		const textChannelsForAI: Array<ChannelInfo> = textChannels.map(
 			(c: ChannelWithFlags) => ({
 				id: c.id.toString(),
 				name: c.name,
@@ -99,26 +117,26 @@ export const getRecommendedConfiguration = guildManagerAction({
 			}),
 		);
 
-		let recommendedChannelIds: Array<string> = [];
+		let recommendedTextChannelIds: Array<string> = [];
 		let detectionSuccessful = true;
 		let errorMessage: string | undefined;
 
-		try {
-			recommendedChannelIds = await detectPublicChannels(channelsForAI);
-		} catch (error) {
-			console.error("Failed to detect public channels:", error);
-			detectionSuccessful = false;
-			errorMessage =
-				"Failed to auto-detect channels. Please configure manually.";
+		if (textChannelsForAI.length > 0) {
+			try {
+				recommendedTextChannelIds =
+					await detectPublicChannels(textChannelsForAI);
+			} catch (error) {
+				console.error("Failed to detect public channels:", error);
+				detectionSuccessful = false;
+				errorMessage =
+					"Failed to auto-detect channels. Please configure manually.";
+			}
 		}
 
-		const recommendedIdSet = new Set(recommendedChannelIds);
-
-		const forumChannels = rootChannels.filter(
-			(c: ChannelWithFlags) =>
-				c.type === CHANNEL_TYPE.GuildForum &&
-				recommendedIdSet.has(c.id.toString()),
-		);
+		const recommendedIdSet = new Set([
+			...alwaysIndexIds,
+			...recommendedTextChannelIds,
+		]);
 
 		const solutionTagMap = new Map<
 			string,
@@ -160,18 +178,19 @@ export const getRecommendedConfiguration = guildManagerAction({
 			rootChannels.map((channel: ChannelWithFlags) => {
 				const shouldIndex = recommendedIdSet.has(channel.id.toString());
 				const solutionTag = solutionTagMap.get(channel.id.toString());
+				const isTextChannel =
+					channel.type !== CHANNEL_TYPE.GuildForum &&
+					channel.type !== CHANNEL_TYPE.GuildAnnouncement;
 
 				return {
 					id: channel.id,
 					name: channel.name,
 					type: channel.type,
 					shouldIndex,
-					availableTags: channel.availableTags?.map((t) => ({
-						id: t.id,
-						name: t.name,
-					})),
+					availableTags: channel.availableTags,
 					recommendedSettings: {
 						indexingEnabled: shouldIndex,
+						autoThreadEnabled: shouldIndex && isTextChannel,
 						markSolutionEnabled: shouldIndex,
 						sendMarkSolutionInstructionsInNewThreads: shouldIndex,
 						solutionTagId: solutionTag?.id,

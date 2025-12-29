@@ -13,12 +13,20 @@ import {
 
 const CHANNEL_TYPE_FORUM = 15;
 
+export type ForumTagInfo = {
+	id: bigint;
+	name: string;
+	moderated: boolean;
+	emojiId?: bigint;
+	emojiName?: string;
+};
+
 export type ChannelRecommendation = {
 	id: bigint;
 	name: string;
 	type: number;
 	shouldIndex: boolean;
-	availableTags?: Array<{ id: bigint; name: string }>;
+	availableTags?: Array<ForumTagInfo>;
 	recommendedSolvedTagId?: bigint;
 };
 
@@ -120,16 +128,20 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 				(channel) => {
 					const channelId = channel.id.toString();
 
-					if (channel.shouldIndex) {
+					if (channel.recommendedSettings.indexingEnabled) {
 						indexingEnabled.add(channelId);
-						markSolutionEnabled.add(channelId);
-						solutionInstructionsEnabled.add(channelId);
-
-						if (channel.type !== CHANNEL_TYPE_FORUM) {
-							autoThreadEnabled.add(channelId);
-						}
 					}
-
+					if (channel.recommendedSettings.autoThreadEnabled) {
+						autoThreadEnabled.add(channelId);
+					}
+					if (channel.recommendedSettings.markSolutionEnabled) {
+						markSolutionEnabled.add(channelId);
+					}
+					if (
+						channel.recommendedSettings.sendMarkSolutionInstructionsInNewThreads
+					) {
+						solutionInstructionsEnabled.add(channelId);
+					}
 					if (channel.recommendedSettings.solutionTagId) {
 						solvedTags.set(
 							channelId,

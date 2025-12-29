@@ -106,9 +106,13 @@ export function ChannelList({
 
 	return (
 		<div className="space-y-2">
-			<div className="flex items-center justify-between">
+			<div className="flex items-center gap-2">
+				<Checkbox
+					checked={allSelected ? true : someSelected ? "indeterminate" : false}
+					onCheckedChange={handleSelectAll}
+				/>
 				<span className="text-sm text-muted-foreground">
-					{selectedIds.size}/{channels.length} selected
+					{selectedIds.size} / {channels.length}
 				</span>
 			</div>
 
@@ -124,16 +128,6 @@ export function ChannelList({
 					/>
 				</div>
 			)}
-
-			<div className="flex items-center gap-3 py-1">
-				<Checkbox
-					checked={allSelected ? true : someSelected ? "indeterminate" : false}
-					onCheckedChange={handleSelectAll}
-				/>
-				<span className="text-sm text-muted-foreground">
-					{allSelected ? "Deselect all" : "Select all"}
-				</span>
-			</div>
 
 			<div className="max-h-[300px] overflow-y-auto space-y-1 pt-1">
 				{sortedChannels.length === 0 ? (

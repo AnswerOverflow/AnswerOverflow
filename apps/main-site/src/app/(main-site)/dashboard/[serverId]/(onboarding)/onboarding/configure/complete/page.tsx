@@ -1,21 +1,43 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import { useMutation } from "convex/react";
-import { CheckCircle2, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
+import {
+	CheckCircle2,
+	GitBranch,
+	Loader2,
+	MessageSquare,
+	Search,
+	Send,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { StepLayout } from "../components/step-layout";
 import { WizardCard } from "../components/wizard-card";
 import {
 	type ChannelRecommendation,
+	type ForumTagInfo,
 	useWizard,
 } from "../components/wizard-context";
 
 const CHANNEL_TYPE_FORUM = 15;
 
-function getChannelChanges(
+type ChannelFeatures = {
+	indexing: boolean;
+	autoThread: boolean;
+	markSolution: boolean;
+	solutionInstructions: boolean;
+	solvedTag: ForumTagInfo | null;
+};
+
+function getChannelFeatures(
 	channel: ChannelRecommendation,
 	channelSettings: {
 		autoThreadEnabled: Set<string>;
@@ -23,35 +45,68 @@ function getChannelChanges(
 		solutionInstructionsEnabled: Set<string>;
 		solvedTags: Map<string, string>;
 	},
-): Array<string> {
+): ChannelFeatures {
 	const channelId = channel.id.toString();
-	const changes: Array<string> = [];
 
-	changes.push("Indexing enabled");
-
-	if (channelSettings.autoThreadEnabled.has(channelId)) {
-		changes.push("Auto-thread enabled");
-	}
-
-	if (channelSettings.markSolutionEnabled.has(channelId)) {
-		changes.push("Mark solution enabled");
-	}
-
-	if (channelSettings.solutionInstructionsEnabled.has(channelId)) {
-		changes.push("Solution instructions enabled");
-	}
-
+	let solvedTag: ForumTagInfo | null = null;
 	const solvedTagId = channelSettings.solvedTags.get(channelId);
 	if (solvedTagId && channel.type === CHANNEL_TYPE_FORUM) {
 		const tag = channel.availableTags?.find(
 			(t) => t.id.toString() === solvedTagId,
 		);
 		if (tag) {
-			changes.push(`Solved tag: ${tag.name}`);
+			solvedTag = tag;
 		}
 	}
 
-	return changes;
+	return {
+		indexing: true,
+		autoThread: channelSettings.autoThreadEnabled.has(channelId),
+		markSolution: channelSettings.markSolutionEnabled.has(channelId),
+		solutionInstructions:
+			channelSettings.solutionInstructionsEnabled.has(channelId),
+		solvedTag,
+	};
+}
+
+function FeatureBadge({
+	icon: Icon,
+	label,
+}: {
+	icon: typeof Search;
+	label: string;
+}) {
+	return (
+		<Badge variant="secondary" className="gap-1 text-xs font-normal">
+			<Icon className="h-3 w-3" />
+			{label}
+		</Badge>
+	);
+}
+
+function TagEmoji({ tag }: { tag: ForumTagInfo }) {
+	if (tag.emojiId) {
+		return (
+			<img
+				src={`https://cdn.discordapp.com/emojis/${tag.emojiId}.webp?size=16`}
+				alt=""
+				className="size-3"
+			/>
+		);
+	}
+	if (tag.emojiName) {
+		return <span className="text-xs">{tag.emojiName}</span>;
+	}
+	return null;
+}
+
+function SolvedTagBadge({ tag }: { tag: ForumTagInfo }) {
+	return (
+		<Badge variant="secondary" className="gap-1 text-xs font-normal">
+			<TagEmoji tag={tag} />
+			{tag.name}
+		</Badge>
+	);
 }
 
 export default function CompletePage() {
@@ -66,7 +121,6 @@ export default function CompletePage() {
 
 	const [isApplying, setIsApplying] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [expandedChannel, setExpandedChannel] = useState<string | null>(null);
 
 	const applyConfiguration = useMutation(
 		api.authenticated.onboarding.applyRecommendedConfiguration,
@@ -118,81 +172,55 @@ export default function CompletePage() {
 
 	return (
 		<StepLayout
-			title="Ready to Go!"
-			description="Review your configuration and apply it to start indexing your server."
+			title="Review Configuration"
+			description="Review your configuration, you can change these settings at any time."
 		>
 			<WizardCard>
 				<div className="space-y-4">
-					<div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
-						<CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-						<div>
-							<p className="font-medium">
-								{indexedChannels.length} channel
-								{indexedChannels.length !== 1 ? "s" : ""} will be indexed
-							</p>
-							<p className="text-sm text-muted-foreground mt-1">
-								{serverSettings.publicMessages
-									? "Messages will be publicly searchable"
-									: "Messages will be private"}
-								{serverSettings.anonymizeUsernames &&
-									" • Usernames will be anonymized"}
-							</p>
-						</div>
+					<div className="text-sm text-muted-foreground">
+						{indexedChannels.length} channel
+						{indexedChannels.length !== 1 ? "s" : ""} will be indexed
 					</div>
 
-					<div className="space-y-2">
-						<p className="text-sm font-medium text-muted-foreground">
-							Changes per channel:
-						</p>
-						<div className="space-y-1 max-h-64 overflow-y-auto">
-							{indexedChannels.map((channel) => {
-								const channelId = channel.id.toString();
-								const isExpanded = expandedChannel === channelId;
-								const changes = getChannelChanges(channel, channelSettings);
-								const isForum = channel.type === CHANNEL_TYPE_FORUM;
+					<div className="space-y-2 max-h-80 overflow-y-auto">
+						{indexedChannels.map((channel) => {
+							const channelId = channel.id.toString();
+							const features = getChannelFeatures(channel, channelSettings);
+							const isForum = channel.type === CHANNEL_TYPE_FORUM;
 
-								return (
-									<div
-										key={channelId}
-										className="border rounded-md overflow-hidden"
-									>
-										<button
-											type="button"
-											onClick={() =>
-												setExpandedChannel(isExpanded ? null : channelId)
-											}
-											className="w-full flex items-center gap-2 p-2 hover:bg-muted/50 transition-colors text-left"
-										>
-											{isExpanded ? (
-												<ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-											) : (
-												<ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-											)}
-											<span className="text-sm font-medium truncate">
-												{isForum ? "" : "#"}
-												{channel.name}
-											</span>
-											<span className="text-xs text-muted-foreground ml-auto shrink-0">
-												{changes.length} change
-												{changes.length !== 1 ? "s" : ""}
-											</span>
-										</button>
-										{isExpanded && (
-											<div className="px-8 pb-2 space-y-1">
-												{changes.map((change) => (
-													<p
-														key={change}
-														className="text-sm text-muted-foreground"
-													>
-														• {change}
-													</p>
-												))}
-											</div>
+							return (
+								<div
+									key={channelId}
+									className="flex items-start gap-3 p-3 border rounded-lg"
+								>
+									<div className="flex items-center gap-2 min-w-0 shrink-0">
+										{isForum ? (
+											<MessageSquare className="h-4 w-4 text-muted-foreground" />
+										) : (
+											<span className="text-muted-foreground">#</span>
+										)}
+										<span className="font-medium text-sm truncate max-w-[140px]">
+											{channel.name}
+										</span>
+									</div>
+									<div className="flex flex-wrap gap-1 ml-auto">
+										<FeatureBadge icon={Search} label="Index" />
+										{features.autoThread && (
+											<FeatureBadge icon={GitBranch} label="Auto-thread" />
+										)}
+										{features.markSolution && (
+											<FeatureBadge icon={CheckCircle2} label="Solutions" />
+										)}
+										{features.solutionInstructions && (
+											<FeatureBadge icon={Send} label="Instructions" />
+										)}
+										{features.solvedTag && (
+											<SolvedTagBadge tag={features.solvedTag} />
 										)}
 									</div>
-								);
-							})}
-						</div>
+								</div>
+							);
+						})}
 					</div>
 
 					{error && (

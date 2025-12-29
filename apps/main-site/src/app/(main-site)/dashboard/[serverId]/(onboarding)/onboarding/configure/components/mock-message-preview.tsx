@@ -2,7 +2,7 @@
 
 import { Button } from "@packages/ui/components/button";
 import { Expand, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type FeaturePreviewPlaceholderProps = {
 	feature:
@@ -31,8 +31,22 @@ export function FeaturePreviewPlaceholder({
 }: FeaturePreviewPlaceholderProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
+	const thumbnailVideoRef = useRef<HTMLVideoElement>(null);
+	const fullscreenVideoRef = useRef<HTMLVideoElement>(null);
 
 	const videoUrl = videoUrls[feature];
+
+	useEffect(() => {
+		if (thumbnailVideoRef.current) {
+			thumbnailVideoRef.current.playbackRate = 2;
+		}
+	}, []);
+
+	useEffect(() => {
+		if (isOpen && fullscreenVideoRef.current) {
+			fullscreenVideoRef.current.playbackRate = 2;
+		}
+	}, [isOpen]);
 
 	const handleClose = useCallback(() => {
 		setIsClosing(true);
@@ -91,6 +105,7 @@ export function FeaturePreviewPlaceholder({
 						aria-label="Expand video demo"
 					>
 						<video
+							ref={thumbnailVideoRef}
 							src={videoUrl}
 							width={1920}
 							height={1080}
@@ -121,6 +136,7 @@ export function FeaturePreviewPlaceholder({
 							<X className="h-6 w-6" />
 						</Button>
 						<video
+							ref={fullscreenVideoRef}
 							src={videoUrl}
 							width={1920}
 							height={1080}
