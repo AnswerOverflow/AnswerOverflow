@@ -72,15 +72,27 @@ function getChannelFeatures(
 function FeatureBadge({
 	icon: Icon,
 	label,
+	tooltip,
 }: {
 	icon: typeof Search;
 	label: string;
+	tooltip: string;
 }) {
 	return (
-		<Badge variant="secondary" className="gap-1 text-xs font-normal">
-			<Icon className="h-3 w-3" />
-			{label}
-		</Badge>
+		<Tooltip>
+			<TooltipTrigger asChild>
+				<Badge
+					variant="secondary"
+					className="gap-1 text-xs font-normal cursor-help"
+				>
+					<Icon className="h-3 w-3" />
+					{label}
+				</Badge>
+			</TooltipTrigger>
+			<TooltipContent>
+				<p>{tooltip}</p>
+			</TooltipContent>
+		</Tooltip>
 	);
 }
 
@@ -102,10 +114,20 @@ function TagEmoji({ tag }: { tag: ForumTagInfo }) {
 
 function SolvedTagBadge({ tag }: { tag: ForumTagInfo }) {
 	return (
-		<Badge variant="secondary" className="gap-1 text-xs font-normal">
-			<TagEmoji tag={tag} />
-			{tag.name}
-		</Badge>
+		<Tooltip>
+			<TooltipTrigger asChild>
+				<Badge
+					variant="secondary"
+					className="gap-1 text-xs font-normal cursor-help"
+				>
+					<TagEmoji tag={tag} />
+					{tag.name}
+				</Badge>
+			</TooltipTrigger>
+			<TooltipContent>
+				<p>This tag will be applied when a thread is marked as solved</p>
+			</TooltipContent>
+		</Tooltip>
 	);
 }
 
@@ -204,15 +226,31 @@ export default function CompletePage() {
 										</span>
 									</div>
 									<div className="flex flex-wrap gap-1 ml-auto">
-										<FeatureBadge icon={Search} label="Index" />
+										<FeatureBadge
+											icon={Search}
+											label="Index"
+											tooltip="Messages sent in this channel will appear on Answer Overflow"
+										/>
 										{features.autoThread && (
-											<FeatureBadge icon={GitBranch} label="Auto-thread" />
+											<FeatureBadge
+												icon={GitBranch}
+												label="Auto-thread"
+												tooltip="A thread will be created for every message in this channel"
+											/>
 										)}
 										{features.markSolution && (
-											<FeatureBadge icon={CheckCircle2} label="Solutions" />
+											<FeatureBadge
+												icon={CheckCircle2}
+												label="Solutions"
+												tooltip="Users can mark messages as the solution to their question"
+											/>
 										)}
 										{features.solutionInstructions && (
-											<FeatureBadge icon={Send} label="Instructions" />
+											<FeatureBadge
+												icon={Send}
+												label="Instructions"
+												tooltip="New threads will receive a message explaining how to mark a solution"
+											/>
 										)}
 										{features.solvedTag && (
 											<SolvedTagBadge tag={features.solvedTag} />
