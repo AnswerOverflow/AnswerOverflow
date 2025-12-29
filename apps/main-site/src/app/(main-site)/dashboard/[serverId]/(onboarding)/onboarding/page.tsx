@@ -31,12 +31,13 @@ export default function OnboardingPage() {
 		allowAnonymous: false,
 	});
 	const getUserServers = useAction(api.authenticated.dashboard.getUserServers);
-	const trackBotAdded = useAction(api.authenticated.dashboard.trackBotAddClick);
+	const trackBotAddClick = useAction(
+		api.authenticated.dashboard.trackBotAddClick,
+	);
 	const [step, setStep] = useState<OnboardingStep>("auth");
 	const [installingServerId, setInstallingServerId] = useState<string | null>(
 		null,
 	);
-	const [hasTrackedBotAdd, setHasTrackedBotAdd] = useState(false);
 
 	const {
 		data: servers,
@@ -94,16 +95,6 @@ export default function OnboardingPage() {
 				);
 				if (server?.hasBot && server.aoServerId) {
 					clearInterval(interval);
-
-					if (!hasTrackedBotAdd) {
-						setHasTrackedBotAdd(true);
-						try {
-							await trackBotAdded({ serverId: BigInt(installingServerId) });
-						} catch (error) {
-							console.error("Failed to track bot add:", error);
-						}
-					}
-
 					router.push(`/dashboard/${installingServerId}/onboarding/configure`);
 				} else if (attempts >= maxAttempts) {
 					clearInterval(interval);
@@ -112,20 +103,18 @@ export default function OnboardingPage() {
 
 			return () => clearInterval(interval);
 		}
-	}, [
-		step,
-		installingServerId,
-		selectedServer,
-		refetchServers,
-		router,
-		hasTrackedBotAdd,
-		trackBotAdded,
-	]);
+	}, [step, installingServerId, selectedServer, refetchServers, router]);
 
-	const handleInstallClick = (discordId: string) => {
+	const handleInstallClick = async (discordId: string) => {
 		const discordClientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
 		if (!discordClientId) {
 			return;
+		}
+
+		try {
+			await trackBotAddClick({ serverId: BigInt(discordId) });
+		} catch (error) {
+			console.error("Failed to track bot add click:", error);
 		}
 
 		const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${discordClientId}&permissions=328565083201&scope=bot+applications.commands&guild_id=${discordId}&disable_guild_select=true`;

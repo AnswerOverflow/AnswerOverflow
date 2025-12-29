@@ -1,6 +1,14 @@
 import { Database } from "@packages/database/database";
 import { Storage } from "@packages/database/storage";
-import { ChannelType, EmbedBuilder, type Guild } from "discord.js";
+import { getBaseUrl } from "@packages/ui/utils/links";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	ChannelType,
+	EmbedBuilder,
+	type Guild,
+} from "discord.js";
 import { Array as Arr, Console, Effect, Layer, Metric } from "effect";
 import { registerCommands } from "../commands/register";
 import { SUPER_USER_ID } from "../constants/super-user";
@@ -72,6 +80,94 @@ function notifySuperUserOfServerJoin(guild: Guild) {
 					Console.error("Failed to notify super user of server join:", error),
 				),
 			);
+	});
+}
+
+const RHYS_AVATAR_URL =
+	"https://cdn.discordapp.com/avatars/523949187663134754/7716e305f7de26045526d9da6eef2dab.webp";
+const BOT_ID = "958907348389339146";
+
+function getPstAvailabilityTimestamps() {
+	const now = new Date();
+	const pstOffset = -8 * 60;
+	const utcNow = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+	const pstNow = new Date(utcNow + pstOffset * 60 * 1000);
+
+	const startOfDay = new Date(pstNow);
+	startOfDay.setHours(8, 0, 0, 0);
+	const endOfDay = new Date(pstNow);
+	endOfDay.setHours(22, 0, 0, 0);
+
+	const startUtc = new Date(
+		startOfDay.getTime() -
+			pstOffset * 60 * 1000 -
+			now.getTimezoneOffset() * 60 * 1000,
+	);
+	const endUtc = new Date(
+		endOfDay.getTime() -
+			pstOffset * 60 * 1000 -
+			now.getTimezoneOffset() * 60 * 1000,
+	);
+
+	return {
+		start: Math.floor(startUtc.getTime() / 1000),
+		end: Math.floor(endUtc.getTime() / 1000),
+	};
+}
+
+function notifyUserWhoAddedBot(guild: Guild) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const discord = yield* Discord;
+
+		const preferences =
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId: BigInt(guild.id),
+				},
+			);
+
+		if (!preferences?.addedByUserId) {
+			yield* Console.log(
+				`No addedByUserId found for server ${guild.name}, skipping DM`,
+			);
+			return;
+		}
+
+		const addedByUserId = preferences.addedByUserId.toString();
+		const { start, end } = getPstAvailabilityTimestamps();
+
+		yield* discord.callClient(async () => {
+			const user = await guild.client.users.fetch(addedByUserId);
+
+			const embed = new EmbedBuilder()
+				.setColor("#5865F2")
+				.setAuthor({
+					name: "Rhys",
+					iconURL: RHYS_AVATAR_URL,
+				})
+				.setDescription(
+					`Hey! Thanks for adding Answer Overflow to **${guild.name}**!\n\n` +
+						`If you need any help with setup, just DM <@${BOT_ID}> - it comes straight to me.\n\n` +
+						`I'm usually available <t:${start}:t> - <t:${end}:t> PST, so if I don't respond right away, I'll get back to you as soon as I can!`,
+				)
+				.setTimestamp();
+
+			const setupButton = new ButtonBuilder()
+				.setLabel("Continue Setup")
+				.setStyle(ButtonStyle.Link)
+				.setURL(`${getBaseUrl()}/dashboard/${guild.id}/onboarding/configure`);
+
+			const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+				setupButton,
+			);
+
+			await user.send({ embeds: [embed], components: [actionRow] });
+		});
+
+		yield* Console.log(
+			`Sent welcome DM to user ${addedByUserId} for server ${guild.name}`,
+		);
 	});
 }
 
@@ -224,14 +320,20 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* syncGuild(guild);
-				yield* catchAllSilentWithReport(trackServerJoin(guild));
-				yield* notifySuperUserOfServerJoin(guild);
-
-				yield* catchAllSilentWithReport(
-					database.private.servers.scheduleRecommendedConfigurationCache({
-						serverId: BigInt(guild.id),
-					}),
+				yield* Effect.fork(syncGuild(guild));
+				yield* Effect.fork(catchAllSilentWithReport(trackServerJoin(guild)));
+				yield* Effect.fork(
+					catchAllSilentWithReport(notifySuperUserOfServerJoin(guild)),
+				);
+				yield* Effect.fork(
+					catchAllSilentWithReport(notifyUserWhoAddedBot(guild)),
+				);
+				yield* Effect.fork(
+					catchAllSilentWithReport(
+						database.private.servers.scheduleRecommendedConfigurationCache({
+							serverId: BigInt(guild.id),
+						}),
+					),
 				);
 			}).pipe(
 				Effect.withSpan("event.guild_create"),
