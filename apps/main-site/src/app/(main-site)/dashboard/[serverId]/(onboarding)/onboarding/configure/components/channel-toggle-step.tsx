@@ -61,12 +61,12 @@ export function ChannelToggleStep({
 						onSelectAll={onSelectAll}
 					/>
 				) : emptyState ? (
-					<div className="text-center py-8 text-muted-foreground">
-						<p>{emptyState.title}</p>
-						<p className="text-sm mt-2">{emptyState.description}</p>
+					<div className="text-center py-12 text-muted-foreground min-h-[200px] flex flex-col items-center justify-center">
+						<p className="font-medium">{emptyState.title}</p>
+						<p className="text-sm mt-1">{emptyState.description}</p>
 					</div>
 				) : (
-					<div className="text-center py-8 text-muted-foreground">
+					<div className="text-center py-12 text-muted-foreground min-h-[200px] flex items-center justify-center">
 						No channels available
 					</div>
 				)}

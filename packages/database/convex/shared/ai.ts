@@ -1,16 +1,10 @@
 import { gateway, generateObject } from "ai";
 import { z } from "zod";
+import type { Channel, ForumTag } from "../schema";
 
-export type ChannelInfo = {
-	id: string;
-	name: string;
-	type: number;
-};
+export type ChannelInfo = Pick<Channel, "id" | "name" | "type">;
 
-export type TagInfo = {
-	id: string;
-	name: string;
-};
+export type TagInfo = Pick<ForumTag, "id" | "name">;
 
 export async function detectPublicChannels(
 	channels: Array<ChannelInfo>,
@@ -54,35 +48,60 @@ Return the IDs of channels that would be good for public indexing.`,
 	return result.object.channelIds;
 }
 
-export async function detectSolvedTag(
-	channelName: string,
-	tags: Array<TagInfo>,
-): Promise<string | null> {
-	if (tags.length === 0) {
-		return null;
+export type ChannelWithTags = {
+	channelId: bigint;
+	channelName: string;
+	tags: Array<TagInfo>;
+};
+
+export type SolvedTagResult = {
+	channelId: string;
+	solvedTagId: string | null;
+};
+
+export async function detectSolvedTags(
+	channels: Array<ChannelWithTags>,
+): Promise<Array<SolvedTagResult>> {
+	const channelsWithTags = channels.filter((c) => c.tags.length > 0);
+
+	if (channelsWithTags.length === 0) {
+		return [];
 	}
 
-	const tagList = tags.map((t) => `- ${t.name} (id: ${t.id})`).join("\n");
+	const channelList = channelsWithTags
+		.map((c) => {
+			const tagList = c.tags
+				.map((t) => `    - ${t.name} (id: ${t.id})`)
+				.join("\n");
+			return `Channel: ${c.channelName} (id: ${c.channelId})\n  Tags:\n${tagList}`;
+		})
+		.join("\n\n");
 
 	const result = await generateObject({
 		model: gateway("google/gemini-2.0-flash"),
 		schema: z.object({
-			solvedTagId: z
-				.string()
-				.nullable()
-				.describe(
-					"The ID of the tag that represents solved/answered, or null if none",
-				),
+			results: z
+				.array(
+					z.object({
+						channelId: z.string().describe("The channel ID"),
+						solvedTagId: z
+							.string()
+							.nullable()
+							.describe("The ID of the solved tag, or null if none"),
+					}),
+				)
+				.describe("Solved tag detection results for each channel"),
 		}),
-		prompt: `You are analyzing Discord forum tags for a channel called "${channelName}". Your task is to identify which tag (if any) represents a "solved" or "answered" state.
+		prompt: `You are analyzing Discord forum tags for multiple channels. For each channel, identify which tag (if any) represents a "solved" or "answered" state.
 
 Common solved tag names include: solved, resolved, answered, done, fixed, completed, closed, solution found, etc.
 
-Here are the available tags:
-${tagList}
+Here are the channels and their available tags:
 
-Return the ID of the tag that best represents a solved/answered state, or null if no such tag exists.`,
+${channelList}
+
+For each channel, return its ID and the ID of the tag that best represents a solved/answered state (or null if no such tag exists).`,
 	});
 
-	return result.object.solvedTagId;
+	return result.object.results;
 }

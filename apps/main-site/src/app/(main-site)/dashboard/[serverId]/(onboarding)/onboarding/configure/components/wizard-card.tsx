@@ -11,7 +11,7 @@ type WizardCardProps = {
 export function WizardCard({ children, className }: WizardCardProps) {
 	return (
 		<Card className="p-0">
-			<CardContent className={cn("px-3 py-4 sm:px-6", className)}>
+			<CardContent className={cn("p-4 sm:p-6", className)}>
 				{children}
 			</CardContent>
 		</Card>

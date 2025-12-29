@@ -29,7 +29,7 @@ function ChannelItem({ channel, isSelected, onToggle }: ChannelItemProps) {
 		<div
 			role="button"
 			tabIndex={0}
-			className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent/50 cursor-pointer transition-colors"
+			className="flex items-center gap-3 px-3 py-2.5 rounded-lg border hover:bg-accent/50 cursor-pointer transition-colors"
 			onClick={onToggle}
 			onKeyDown={(e) => {
 				if (e.key === "Enter" || e.key === " ") {
@@ -44,7 +44,9 @@ function ChannelItem({ channel, isSelected, onToggle }: ChannelItemProps) {
 				onClick={(e) => e.stopPropagation()}
 			/>
 			<Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-			<span className="font-medium truncate flex-1">{channel.name}</span>
+			<span className="font-medium truncate flex-1 text-sm">
+				{channel.name}
+			</span>
 		</div>
 	);
 }
@@ -98,21 +100,26 @@ export function ChannelList({
 
 	if (channels.length === 0) {
 		return (
-			<div className="text-center py-8 text-muted-foreground">
+			<div className="text-center py-12 text-muted-foreground min-h-[200px] flex items-center justify-center">
 				No channels available
 			</div>
 		);
 	}
 
 	return (
-		<div className="space-y-2">
-			<div className="flex items-center gap-2">
-				<Checkbox
-					checked={allSelected ? true : someSelected ? "indeterminate" : false}
-					onCheckedChange={handleSelectAll}
-				/>
+		<div className="space-y-3">
+			<div className="flex items-center justify-between gap-4">
+				<div className="flex items-center gap-2">
+					<Checkbox
+						checked={
+							allSelected ? true : someSelected ? "indeterminate" : false
+						}
+						onCheckedChange={handleSelectAll}
+					/>
+					<span className="text-sm text-muted-foreground">Select all</span>
+				</div>
 				<span className="text-sm text-muted-foreground">
-					{selectedIds.size} / {channels.length}
+					{selectedIds.size} of {channels.length} selected
 				</span>
 			</div>
 
@@ -129,9 +136,9 @@ export function ChannelList({
 				</div>
 			)}
 
-			<div className="max-h-[300px] overflow-y-auto space-y-1 pt-1">
+			<div className="max-h-[280px] overflow-y-auto space-y-1.5">
 				{sortedChannels.length === 0 ? (
-					<div className="text-center py-4 text-sm text-muted-foreground">
+					<div className="text-center py-8 text-sm text-muted-foreground">
 						No channels matching "{searchQuery}"
 					</div>
 				) : (

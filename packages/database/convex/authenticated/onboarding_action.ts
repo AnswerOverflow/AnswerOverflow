@@ -5,9 +5,9 @@ import type { Doc } from "../_generated/dataModel";
 import { guildManagerAction } from "../client/guildManager";
 import {
 	type ChannelInfo,
+	type ChannelWithTags,
 	detectPublicChannels,
-	detectSolvedTag,
-	type TagInfo,
+	detectSolvedTags,
 } from "../shared/ai";
 import { CHANNEL_TYPE, isThreadType } from "../shared/channels";
 import type { Channel, ChannelSettings, ForumTag } from "../schema";
@@ -111,7 +111,7 @@ export const getRecommendedConfiguration = guildManagerAction({
 
 		const textChannelsForAI: Array<ChannelInfo> = textChannels.map(
 			(c: ChannelWithFlags) => ({
-				id: c.id.toString(),
+				id: c.id,
 				name: c.name,
 				type: c.type,
 			}),
@@ -144,32 +144,34 @@ export const getRecommendedConfiguration = guildManagerAction({
 		>();
 
 		if (detectionSuccessful) {
-			for (const channel of forumChannels) {
-				if (channel.availableTags && channel.availableTags.length > 0) {
-					try {
-						const tags: Array<TagInfo> = channel.availableTags.map(
-							(t: ForumTag) => ({
-								id: t.id.toString(),
-								name: t.name,
-							}),
-						);
-						const solvedTagId = await detectSolvedTag(channel.name, tags);
-						if (solvedTagId) {
+			const channelsWithTags: Array<ChannelWithTags> = forumChannels
+				.filter((c) => c.availableTags && c.availableTags.length > 0)
+				.map((c) => ({
+					channelId: c.id,
+					channelName: c.name,
+					tags: c.availableTags!.map((t) => ({ id: t.id, name: t.name })),
+				}));
+
+			if (channelsWithTags.length > 0) {
+				try {
+					const solvedTagResults = await detectSolvedTags(channelsWithTags);
+					for (const result of solvedTagResults) {
+						if (result.solvedTagId) {
+							const channel = forumChannels.find(
+								(c) => c.id.toString() === result.channelId,
+							);
 							const tagName =
-								channel.availableTags.find(
-									(t) => t.id.toString() === solvedTagId,
+								channel?.availableTags?.find(
+									(t) => t.id.toString() === result.solvedTagId,
 								)?.name ?? "Solved";
-							solutionTagMap.set(channel.id.toString(), {
-								id: BigInt(solvedTagId),
+							solutionTagMap.set(result.channelId, {
+								id: BigInt(result.solvedTagId),
 								name: tagName,
 							});
 						}
-					} catch (error) {
-						console.error(
-							`Failed to detect solved tag for channel ${channel.name}:`,
-							error,
-						);
 					}
+				} catch (error) {
+					console.error("Failed to detect solved tags:", error);
 				}
 			}
 		}

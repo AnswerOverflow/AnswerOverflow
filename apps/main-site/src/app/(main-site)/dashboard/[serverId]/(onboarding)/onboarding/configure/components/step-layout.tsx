@@ -22,14 +22,21 @@ export function StepLayout({
 }: StepLayoutProps) {
 	const { isLoading, error, reload } = useWizard();
 
+	const header = (
+		<div className="space-y-2">
+			<h1 className="text-xl sm:text-2xl font-semibold">{title}</h1>
+			<p className="text-sm sm:text-base text-muted-foreground">
+				{description}
+			</p>
+		</div>
+	);
+
 	if (requiresChannels && isLoading) {
 		return (
-			<div className="w-full max-w-4xl mx-auto space-y-3 sm:space-y-4">
-				<div>
-					<h1 className="text-xl sm:text-2xl font-semibold">{title}</h1>
-				</div>
+			<div className="w-full max-w-2xl mx-auto space-y-4">
+				{header}
 				<Card className="p-0">
-					<CardContent className="px-3 py-4 sm:px-6 min-h-[400px] flex items-center justify-center">
+					<CardContent className="p-4 sm:p-6 min-h-[400px] flex items-center justify-center">
 						<div className="flex flex-col items-center justify-center text-center">
 							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground mb-3" />
 							<p className="text-sm text-muted-foreground">
@@ -38,21 +45,16 @@ export function StepLayout({
 						</div>
 					</CardContent>
 				</Card>
-				<p className="text-sm sm:text-base text-muted-foreground mt-1">
-					{description}
-				</p>
 			</div>
 		);
 	}
 
 	if (error) {
 		return (
-			<div className="w-full max-w-4xl mx-auto space-y-3 sm:space-y-4">
-				<div>
-					<h1 className="text-xl sm:text-2xl font-semibold">{title}</h1>
-				</div>
+			<div className="w-full max-w-2xl mx-auto space-y-4">
+				{header}
 				<Card className="p-0">
-					<CardContent className="px-3 py-4 sm:px-6 min-h-[400px] flex items-center justify-center">
+					<CardContent className="p-4 sm:p-6 min-h-[400px] flex items-center justify-center">
 						<div className="flex flex-col items-center justify-center text-center">
 							<AlertCircle className="h-6 w-6 text-destructive mb-3" />
 							<p className="text-sm text-muted-foreground mb-4">{error}</p>
@@ -62,22 +64,14 @@ export function StepLayout({
 						</div>
 					</CardContent>
 				</Card>
-				<p className="text-sm sm:text-base text-muted-foreground mt-1">
-					{description}
-				</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className="w-full max-w-4xl mx-auto space-y-3 sm:space-y-4">
-			<div>
-				<h1 className="text-xl sm:text-2xl font-semibold">{title}</h1>
-			</div>
+		<div className="w-full max-w-2xl mx-auto space-y-4">
+			{header}
 			{video}
-			<p className="text-sm sm:text-base text-muted-foreground mt-1">
-				{description}
-			</p>
 			{children}
 		</div>
 	);

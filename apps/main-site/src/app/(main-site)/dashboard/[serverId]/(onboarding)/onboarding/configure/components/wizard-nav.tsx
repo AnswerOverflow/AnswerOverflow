@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@packages/ui/components/button";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type WizardNavProps = {
@@ -45,16 +45,15 @@ export function WizardNav({
 	};
 
 	return (
-		<div className="flex items-center justify-between pt-3 sm:pt-4 mt-auto">
+		<div className="flex items-center justify-between pt-4">
 			<div>
 				{backHref && (
 					<Button variant="ghost" onClick={() => router.push(backHref)}>
-						<ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" />
-						<span className="hidden sm:inline">Back</span>
+						Back
 					</Button>
 				)}
 			</div>
-			<div className="flex items-center gap-1 sm:gap-2">
+			<div className="flex items-center gap-2">
 				{showSkip && (
 					<Button variant="ghost" onClick={handleSkip}>
 						Skip
@@ -63,14 +62,11 @@ export function WizardNav({
 				<Button onClick={handleNext} disabled={isNextDisabled || isLoading}>
 					{isLoading ? (
 						<>
-							<Loader2 className="h-4 w-4 mr-1 sm:mr-2 animate-spin" />
-							<span className="hidden sm:inline">Please wait...</span>
+							<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+							Please wait...
 						</>
 					) : (
-						<>
-							{nextLabel}
-							{nextHref && <ArrowRight className="h-4 w-4 ml-1 sm:ml-2" />}
-						</>
+						nextLabel
 					)}
 				</Button>
 			</div>

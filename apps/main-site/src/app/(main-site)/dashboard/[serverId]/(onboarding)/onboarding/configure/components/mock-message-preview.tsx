@@ -88,16 +88,9 @@ export function FeaturePreviewPlaceholder({
 	if (videoUrl) {
 		return (
 			<>
-				<div className="max-w-md mx-auto">
-					<div className="flex items-center justify-center gap-2 mb-2">
-						<div className="h-px flex-1 bg-border" />
-						<span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-							Watch a demo
-						</span>
-						<div className="h-px flex-1 bg-border" />
-					</div>
+				<div className="max-w-sm mx-auto">
 					<div
-						className="relative rounded-lg overflow-hidden border border-border cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98] group"
+						className="relative rounded-lg overflow-hidden border border-border cursor-pointer transition-transform hover:scale-[1.01] active:scale-[0.99] group"
 						onClick={() => setIsOpen(true)}
 						onKeyDown={handleKeyDown}
 						role="button"
@@ -119,6 +112,9 @@ export function FeaturePreviewPlaceholder({
 							<Expand className="h-4 w-4" />
 						</div>
 					</div>
+					<p className="text-xs text-center text-muted-foreground mt-2">
+						Click to expand
+					</p>
 				</div>
 
 				{isOpen && (

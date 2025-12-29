@@ -17,13 +17,10 @@ export default function ServerSettingsPage() {
 			requiresChannels={false}
 		>
 			<WizardCard>
-				<div className="space-y-4">
-					<div className="flex justify-between gap-4">
-						<div className="space-y-1">
-							<Label
-								htmlFor="public-messages"
-								className="text-base font-medium"
-							>
+				<div className="space-y-6">
+					<div className="flex items-start justify-between gap-4">
+						<div className="space-y-1 flex-1">
+							<Label htmlFor="public-messages" className="text-sm font-medium">
 								Public messages
 							</Label>
 							<p className="text-sm text-muted-foreground">
@@ -38,14 +35,13 @@ export default function ServerSettingsPage() {
 							onCheckedChange={(checked) =>
 								setServerSettings({ publicMessages: checked })
 							}
-							className="mt-1"
 						/>
 					</div>
-					<div className="flex justify-between gap-4">
-						<div className="space-y-1">
+					<div className="flex items-start justify-between gap-4">
+						<div className="space-y-1 flex-1">
 							<Label
 								htmlFor="anonymize-usernames"
-								className="text-base font-medium"
+								className="text-sm font-medium"
 							>
 								Anonymize usernames
 							</Label>
@@ -61,7 +57,6 @@ export default function ServerSettingsPage() {
 							onCheckedChange={(checked) =>
 								setServerSettings({ anonymizeUsernames: checked })
 							}
-							className="mt-1"
 						/>
 					</div>
 				</div>
@@ -70,7 +65,6 @@ export default function ServerSettingsPage() {
 			<WizardNav
 				backHref={`/dashboard/${serverId}/onboarding`}
 				nextHref={`/dashboard/${serverId}/onboarding/configure/indexing`}
-				showSkip
 			/>
 		</StepLayout>
 	);

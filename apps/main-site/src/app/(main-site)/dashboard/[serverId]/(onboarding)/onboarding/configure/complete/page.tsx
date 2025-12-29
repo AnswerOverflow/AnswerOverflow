@@ -2,7 +2,6 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { Badge } from "@packages/ui/components/badge";
-import { Button } from "@packages/ui/components/button";
 import {
 	Tooltip,
 	TooltipContent,
@@ -12,7 +11,6 @@ import { useMutation } from "convex/react";
 import {
 	CheckCircle2,
 	GitBranch,
-	Loader2,
 	MessageSquare,
 	Search,
 	Send,
@@ -26,6 +24,7 @@ import {
 	type ForumTagInfo,
 	useWizard,
 } from "../components/wizard-context";
+import { WizardNav } from "../components/wizard-nav";
 
 const CHANNEL_TYPE_FORUM = 15;
 
@@ -172,6 +171,7 @@ export default function CompletePage() {
 					sendMarkSolutionInstructionsInNewThreads:
 						channelSettings.solutionInstructionsEnabled.has(channelId),
 					solutionTagId: tagIdStr ? BigInt(tagIdStr) : undefined,
+					forumGuidelinesConsentEnabled: false,
 				};
 			});
 
@@ -195,16 +195,16 @@ export default function CompletePage() {
 	return (
 		<StepLayout
 			title="Review Configuration"
-			description="Review your configuration, you can change these settings at any time."
+			description="Review your configuration. You can change these settings at any time from the dashboard."
 		>
-			<WizardCard className="pb-0">
-				<div className="space-y-4">
+			<WizardCard>
+				<div className="space-y-3">
 					<div className="text-sm text-muted-foreground">
 						{indexedChannels.length} channel
 						{indexedChannels.length !== 1 ? "s" : ""} will be indexed
 					</div>
 
-					<div className="space-y-2 max-h-80 overflow-y-auto">
+					<div className="space-y-1.5 max-h-[280px] overflow-y-auto">
 						{indexedChannels.map((channel) => {
 							const channelId = channel.id.toString();
 							const features = getChannelFeatures(channel, channelSettings);
@@ -213,7 +213,7 @@ export default function CompletePage() {
 							return (
 								<div
 									key={channelId}
-									className="flex items-start gap-3 p-3 border rounded-lg"
+									className="flex items-start gap-3 px-3 py-2.5 border rounded-lg"
 								>
 									<div className="flex items-center gap-2 min-w-0 shrink-0">
 										{isForum ? (
@@ -221,7 +221,7 @@ export default function CompletePage() {
 										) : (
 											<span className="text-muted-foreground">#</span>
 										)}
-										<span className="font-medium text-sm truncate max-w-[140px]">
+										<span className="font-medium text-sm truncate max-w-[120px]">
 											{channel.name}
 										</span>
 									</div>
@@ -259,7 +259,6 @@ export default function CompletePage() {
 								</div>
 							);
 						})}
-						<div className="pb-2" />
 					</div>
 
 					{error && (
@@ -270,25 +269,13 @@ export default function CompletePage() {
 				</div>
 			</WizardCard>
 
-			<div className="flex items-center justify-between pt-3 sm:pt-4 mt-auto">
-				<Button
-					variant="ghost"
-					onClick={() => router.push(backHref)}
-					disabled={isApplying}
-				>
-					Back
-				</Button>
-				<Button onClick={handleApply} disabled={isApplying}>
-					{isApplying ? (
-						<>
-							<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-							Applying...
-						</>
-					) : (
-						"Apply Configuration"
-					)}
-				</Button>
-			</div>
+			<WizardNav
+				backHref={backHref}
+				nextLabel="Apply Configuration"
+				onNext={handleApply}
+				isLoading={isApplying}
+				isNextDisabled={indexedChannels.length === 0}
+			/>
 		</StepLayout>
 	);
 }
