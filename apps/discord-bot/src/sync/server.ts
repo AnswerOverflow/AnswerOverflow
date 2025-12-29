@@ -85,34 +85,54 @@ function notifySuperUserOfServerJoin(guild: Guild) {
 
 const RHYS_AVATAR_URL =
 	"https://cdn.discordapp.com/avatars/523949187663134754/7716e305f7de26045526d9da6eef2dab.webp";
-const BOT_ID = "958907348389339146";
 
-function getPstAvailabilityTimestamps() {
+function getPacificAvailabilityTimestamps() {
 	const now = new Date();
-	const pstOffset = -8 * 60;
-	const utcNow = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
-	const pstNow = new Date(utcNow + pstOffset * 60 * 1000);
 
-	const startOfDay = new Date(pstNow);
-	startOfDay.setHours(8, 0, 0, 0);
-	const endOfDay = new Date(pstNow);
-	endOfDay.setHours(22, 0, 0, 0);
+	const pacificFormatter = new Intl.DateTimeFormat("en-US", {
+		timeZone: "America/Los_Angeles",
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	});
+	const pacificDateStr = pacificFormatter.format(now);
+	const [month, day, year] = pacificDateStr.split("/");
 
-	const startUtc = new Date(
-		startOfDay.getTime() -
-			pstOffset * 60 * 1000 -
-			now.getTimezoneOffset() * 60 * 1000,
+	const startPacific = new Date(
+		`${year}-${month}-${day}T08:00:00-08:00`.replace(
+			"-08:00",
+			getPackificOffset(now),
+		),
 	);
-	const endUtc = new Date(
-		endOfDay.getTime() -
-			pstOffset * 60 * 1000 -
-			now.getTimezoneOffset() * 60 * 1000,
+	const endPacific = new Date(
+		`${year}-${month}-${day}T22:00:00-08:00`.replace(
+			"-08:00",
+			getPackificOffset(now),
+		),
 	);
 
 	return {
-		start: Math.floor(startUtc.getTime() / 1000),
-		end: Math.floor(endUtc.getTime() / 1000),
+		start: Math.floor(startPacific.getTime() / 1000),
+		end: Math.floor(endPacific.getTime() / 1000),
 	};
+}
+
+function getPackificOffset(date: Date): string {
+	const jan = new Date(date.getFullYear(), 0, 1);
+	const jul = new Date(date.getFullYear(), 6, 1);
+	const stdOffset = Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+
+	const pacificFormatter = new Intl.DateTimeFormat("en-US", {
+		timeZone: "America/Los_Angeles",
+		timeZoneName: "shortOffset",
+	});
+	const parts = pacificFormatter.formatToParts(date);
+	const offsetPart = parts.find((p) => p.type === "timeZoneName");
+
+	if (offsetPart?.value === "GMT-7") {
+		return "-07:00";
+	}
+	return "-08:00";
 }
 
 function notifyUserWhoAddedBot(guild: Guild) {
@@ -135,35 +155,39 @@ function notifyUserWhoAddedBot(guild: Guild) {
 		}
 
 		const addedByUserId = preferences.addedByUserId.toString();
-		const { start, end } = getPstAvailabilityTimestamps();
+		const { start, end } = getPacificAvailabilityTimestamps();
+		const botId = guild.client.user?.id;
 
-		yield* discord.callClient(async () => {
-			const user = await guild.client.users.fetch(addedByUserId);
+		yield* catchAllSilentWithReport(
+			discord.callClient(async () => {
+				const user = await guild.client.users.fetch(addedByUserId);
 
-			const embed = new EmbedBuilder()
-				.setColor("#5865F2")
-				.setAuthor({
-					name: "Rhys",
-					iconURL: RHYS_AVATAR_URL,
-				})
-				.setDescription(
-					`Hey! Thanks for adding Answer Overflow to **${guild.name}**!\n\n` +
-						`If you need any help with setup, just DM <@${BOT_ID}> - it comes straight to me.\n\n` +
-						`I'm usually available <t:${start}:t> - <t:${end}:t> PST, so if I don't respond right away, I'll get back to you as soon as I can!`,
-				)
-				.setTimestamp();
+				const botMention = botId ? `<@${botId}>` : "the bot";
+				const embed = new EmbedBuilder()
+					.setColor("#5865F2")
+					.setAuthor({
+						name: "Rhys",
+						iconURL: RHYS_AVATAR_URL,
+					})
+					.setDescription(
+						`Hey! Thanks for adding Answer Overflow to **${guild.name}**!\n\n` +
+							`If you need any help with setup, just DM ${botMention} - it comes straight to me.\n\n` +
+							`I'm usually available <t:${start}:t> - <t:${end}:t>, so if I don't respond right away, I'll get back to you as soon as I can!`,
+					)
+					.setTimestamp();
 
-			const setupButton = new ButtonBuilder()
-				.setLabel("Continue Setup")
-				.setStyle(ButtonStyle.Link)
-				.setURL(`${getBaseUrl()}/dashboard/${guild.id}/onboarding/configure`);
+				const setupButton = new ButtonBuilder()
+					.setLabel("Continue Setup")
+					.setStyle(ButtonStyle.Link)
+					.setURL(`${getBaseUrl()}/dashboard/${guild.id}/onboarding/configure`);
 
-			const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-				setupButton,
-			);
+				const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+					setupButton,
+				);
 
-			await user.send({ embeds: [embed], components: [actionRow] });
-		});
+				await user.send({ embeds: [embed], components: [actionRow] });
+			}),
+		);
 
 		yield* Console.log(
 			`Sent welcome DM to user ${addedByUserId} for server ${guild.name}`,
