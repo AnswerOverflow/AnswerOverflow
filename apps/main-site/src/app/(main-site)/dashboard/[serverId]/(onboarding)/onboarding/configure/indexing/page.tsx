@@ -28,6 +28,7 @@ export default function IndexingPage() {
 			backHref={`/dashboard/${serverId}/onboarding/configure`}
 			nextHref={`/dashboard/${serverId}/onboarding/configure/auto-thread`}
 			isNextDisabled={channelSettings.indexingEnabled.size === 0}
+			showSkip
 		/>
 	);
 }

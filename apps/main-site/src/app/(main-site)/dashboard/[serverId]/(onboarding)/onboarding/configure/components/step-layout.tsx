@@ -27,9 +27,6 @@ export function StepLayout({
 			<div className="w-full max-w-4xl mx-auto space-y-3 sm:space-y-4">
 				<div>
 					<h1 className="text-xl sm:text-2xl font-semibold">{title}</h1>
-					<p className="text-sm sm:text-base text-muted-foreground mt-1">
-						{description}
-					</p>
 				</div>
 				<Card className="p-0">
 					<CardContent className="px-3 py-4 sm:px-6 min-h-[400px] flex items-center justify-center">
@@ -41,6 +38,9 @@ export function StepLayout({
 						</div>
 					</CardContent>
 				</Card>
+				<p className="text-sm sm:text-base text-muted-foreground mt-1">
+					{description}
+				</p>
 			</div>
 		);
 	}
@@ -50,9 +50,6 @@ export function StepLayout({
 			<div className="w-full max-w-4xl mx-auto space-y-3 sm:space-y-4">
 				<div>
 					<h1 className="text-xl sm:text-2xl font-semibold">{title}</h1>
-					<p className="text-sm sm:text-base text-muted-foreground mt-1">
-						{description}
-					</p>
 				</div>
 				<Card className="p-0">
 					<CardContent className="px-3 py-4 sm:px-6 min-h-[400px] flex items-center justify-center">
@@ -65,6 +62,9 @@ export function StepLayout({
 						</div>
 					</CardContent>
 				</Card>
+				<p className="text-sm sm:text-base text-muted-foreground mt-1">
+					{description}
+				</p>
 			</div>
 		);
 	}
@@ -73,11 +73,11 @@ export function StepLayout({
 		<div className="w-full max-w-4xl mx-auto space-y-3 sm:space-y-4">
 			<div>
 				<h1 className="text-xl sm:text-2xl font-semibold">{title}</h1>
-				<p className="text-sm sm:text-base text-muted-foreground mt-1">
-					{description}
-				</p>
 			</div>
 			{video}
+			<p className="text-sm sm:text-base text-muted-foreground mt-1">
+				{description}
+			</p>
 			{children}
 		</div>
 	);

@@ -70,6 +70,7 @@ export default function ServerSettingsPage() {
 			<WizardNav
 				backHref={`/dashboard/${serverId}/onboarding`}
 				nextHref={`/dashboard/${serverId}/onboarding/configure/indexing`}
+				showSkip
 			/>
 		</StepLayout>
 	);

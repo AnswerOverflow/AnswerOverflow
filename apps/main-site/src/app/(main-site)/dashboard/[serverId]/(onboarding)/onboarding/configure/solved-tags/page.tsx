@@ -106,7 +106,7 @@ export default function SolvedTagsPage() {
 			<WizardNav
 				backHref={`/dashboard/${serverId}/onboarding/configure/solution-instructions`}
 				nextHref={`/dashboard/${serverId}/onboarding/configure/complete`}
-				showSkip={hasEligibleForums}
+				showSkip
 			/>
 		</StepLayout>
 	);
