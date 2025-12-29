@@ -197,7 +197,7 @@ export default function CompletePage() {
 			title="Review Configuration"
 			description="Review your configuration, you can change these settings at any time."
 		>
-			<WizardCard>
+			<WizardCard className="pb-0">
 				<div className="space-y-4">
 					<div className="text-sm text-muted-foreground">
 						{indexedChannels.length} channel
@@ -259,6 +259,7 @@ export default function CompletePage() {
 								</div>
 							);
 						})}
+						<div className="pb-2" />
 					</div>
 
 					{error && (

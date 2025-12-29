@@ -1,15 +1,19 @@
 "use client";
 
 import { Card, CardContent } from "@packages/ui/components/card";
+import { cn } from "@packages/ui/lib/utils";
 
 type WizardCardProps = {
 	children: React.ReactNode;
+	className?: string;
 };
 
-export function WizardCard({ children }: WizardCardProps) {
+export function WizardCard({ children, className }: WizardCardProps) {
 	return (
 		<Card className="p-0">
-			<CardContent className="px-3 pb-0 pt-4 sm:px-6">{children}</CardContent>
+			<CardContent className={cn("px-3 py-4 sm:px-6", className)}>
+				{children}
+			</CardContent>
 		</Card>
 	);
 }
