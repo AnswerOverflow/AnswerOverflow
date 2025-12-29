@@ -10,7 +10,6 @@ import { usePathname } from "next/navigation";
 export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 	const isDashboard = pathname?.startsWith("/dashboard");
-	const isAbout = pathname === "/about";
 
 	if (isDashboard) {
 		return <>{children}</>;
@@ -23,7 +22,7 @@ export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 			<div className="sm:hidden">
 				<MainSiteFooter />
 			</div>
-			<CompactStickyFooter disableHideOnScroll={isAbout} />
+			<CompactStickyFooter />
 		</>
 	);
 }

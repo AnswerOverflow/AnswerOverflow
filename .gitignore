@@ -54,3 +54,5 @@ temp-*
 .source/
 next-env.d.ts
 personal-notes/
+.next-production/
+.next*

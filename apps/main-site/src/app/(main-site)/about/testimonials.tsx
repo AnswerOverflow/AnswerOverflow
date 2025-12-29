@@ -26,6 +26,15 @@ function XLogo({ className }: { className?: string }) {
 	);
 }
 
+function decodeHtmlEntities(text: string): string {
+	return text
+		.replace(/&amp;/g, "&")
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">")
+		.replace(/&quot;/g, '"')
+		.replace(/&#39;/g, "'");
+}
+
 function TestimonialCard({ tweet }: { tweet: Tweet }) {
 	const tweetUrl = `https://x.com/${tweet.user.screen_name}/status/${tweet.id_str}`;
 
@@ -35,7 +44,9 @@ function TestimonialCard({ tweet }: { tweet: Tweet }) {
 			className="relative flex flex-col gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-accent"
 		>
 			<XLogo className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-			<p className="text-sm text-foreground pr-6">{tweet.text}</p>
+			<p className="text-sm text-foreground pr-6">
+				{decodeHtmlEntities(tweet.text)}
+			</p>
 			<div className="flex items-center gap-2">
 				<img
 					src={tweet.user.profile_image_url_https}

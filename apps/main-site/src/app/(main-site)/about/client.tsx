@@ -5,7 +5,7 @@ import { Link } from "@packages/ui/components/link";
 import { LinkButton } from "@packages/ui/components/link-button";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { cn } from "@packages/ui/lib/utils";
-import { ArrowRight, Plus, Search } from "lucide-react";
+import { ArrowRight, Gift, Plus, Search, X } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -715,6 +715,57 @@ function CTASection() {
 	);
 }
 
+function FloatingPromo() {
+	const [isDismissed, setIsDismissed] = useState(false);
+	const [isVisible, setIsVisible] = useState(false);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (window.scrollY > 100) {
+				setIsVisible(true);
+			}
+		};
+
+		window.addEventListener("scroll", handleScroll);
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
+
+	if (isDismissed || !isVisible) {
+		return null;
+	}
+
+	return (
+		<div className="fixed bottom-4 right-4 z-50 w-80 max-w-[calc(100vw-2rem)] animate-in slide-in-from-bottom-4 fade-in duration-300">
+			<div className="relative rounded-xl border bg-card p-5 shadow-lg">
+				<button
+					type="button"
+					onClick={() => setIsDismissed(true)}
+					className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+					aria-label="Dismiss"
+				>
+					<X className="h-4 w-4" />
+				</button>
+				<div className="flex items-center gap-2 mb-2">
+					<Gift className="h-5 w-5 text-primary" />
+					<h3 className="font-semibold text-foreground">
+						Get a free advanced plan
+					</h3>
+				</div>
+				<p className="text-sm text-muted-foreground mb-4">
+					Join a 15 minute call with our founder to talk about your use case and
+					get a free advanced plan for 3 months
+				</p>
+				<LinkButton
+					href="https://cal.com/rhys-sullivan/answer-overflow-advanced-plan"
+					className="w-full"
+				>
+					Schedule
+				</LinkButton>
+			</div>
+		</div>
+	);
+}
+
 export function AboutPageClient({
 	servers,
 	testimonialsSection,
@@ -730,6 +781,7 @@ export function AboutPageClient({
 			<PricingSection />
 			<PricingFAQ />
 			<CTASection />
+			<FloatingPromo />
 		</div>
 	);
 }
