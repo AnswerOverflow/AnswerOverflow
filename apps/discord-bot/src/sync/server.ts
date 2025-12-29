@@ -135,7 +135,7 @@ function notifyUserWhoAddedBot(guild: Guild) {
 					})
 					.setDescription(
 						`Hey! Thanks for adding Answer Overflow to **${guild.name}**!\n\n` +
-							`If you need any help with setup, just DM ${botMention} - it comes straight to me.\n\n` +
+							`If you need any help with setup, have any bugs, feedback, or feature requests just DM ${botMention} - it comes straight to me.\n\n` +
 							`I'm usually available <t:${start}:t> - <t:${end}:t>, so if I don't respond right away, I'll get back to you as soon as I can!`,
 					)
 					.setTimestamp();
