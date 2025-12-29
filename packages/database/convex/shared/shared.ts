@@ -33,6 +33,7 @@ export {
 	sortServersByBotAndRole,
 	uploadAttachmentFromUrlLogic,
 	uploadFromUrlLogic,
+	upsertChannelSettingsLogic,
 	upsertIgnoredDiscordAccountInternalLogic,
 	upsertManyMessagesOptimized,
 	upsertMessageInternalLogic,
