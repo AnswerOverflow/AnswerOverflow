@@ -20,13 +20,33 @@ export type ForumTagInfo = {
 	emojiName?: string;
 };
 
-export type ChannelRecommendation = {
+export type ChannelInfo = {
 	id: bigint;
 	name: string;
 	type: number;
-	shouldIndex: boolean;
 	availableTags?: Array<ForumTagInfo>;
-	recommendedSolvedTagId?: bigint;
+};
+
+export type ChannelConfiguration = {
+	channelId: bigint;
+	indexingEnabled: boolean;
+	autoThreadEnabled: boolean;
+	markSolutionEnabled: boolean;
+	sendMarkSolutionInstructionsInNewThreads: boolean;
+	solutionTagId?: bigint;
+};
+
+type AIRecommendations = {
+	channels: Map<
+		string,
+		{
+			indexing: boolean;
+			autoThread: boolean;
+			markSolution: boolean;
+			solutionInstructions: boolean;
+			solutionTagId?: bigint;
+		}
+	>;
 };
 
 type ServerSettings = {
@@ -34,41 +54,33 @@ type ServerSettings = {
 	anonymizeUsernames: boolean;
 };
 
-type ChannelSettings = {
-	indexingEnabled: Set<string>;
-	autoThreadEnabled: Set<string>;
-	markSolutionEnabled: Set<string>;
-	solutionInstructionsEnabled: Set<string>;
-	solvedTags: Map<string, string>;
-};
-
 type WizardState = {
 	isLoading: boolean;
 	error: string | null;
-	channels: Array<ChannelRecommendation>;
+	allChannels: Array<ChannelInfo>;
+	configurations: Array<ChannelConfiguration>;
 	serverSettings: ServerSettings;
-	channelSettings: ChannelSettings;
+	aiRecommendations: AIRecommendations;
 };
 
 type WizardContextValue = WizardState & {
 	serverId: string;
 	setServerSettings: (settings: Partial<ServerSettings>) => void;
-	toggleChannelSetting: (
-		setting: keyof Omit<ChannelSettings, "solvedTags">,
+	updateChannelConfig: (
+		channelId: bigint,
+		config: Partial<Omit<ChannelConfiguration, "channelId">>,
+	) => void;
+	setChannelConfigs: (configs: Array<ChannelConfiguration>) => void;
+	getChannelConfig: (channelId: bigint) => ChannelConfiguration | undefined;
+	getAllChannels: () => Array<ChannelInfo>;
+	getAllForumChannels: () => Array<ChannelInfo>;
+	getAllNonForumChannels: () => Array<ChannelInfo>;
+	getConfiguredChannels: () => Array<ChannelConfiguration>;
+	getAIRecommendation: (
 		channelId: string,
-	) => void;
-	setAllChannelSetting: (
-		setting: keyof Omit<ChannelSettings, "solvedTags">,
-		channelIds: Array<string>,
-		enabled: boolean,
-	) => void;
-	setSolvedTag: (channelId: string, tagId: string | undefined) => void;
-	getIndexedChannels: () => Array<ChannelRecommendation>;
-	getNonForumIndexedChannels: () => Array<ChannelRecommendation>;
-	getForumIndexedChannels: () => Array<ChannelRecommendation>;
-	getAllNonForumChannels: () => Array<ChannelRecommendation>;
-	getAllForumChannels: () => Array<ChannelRecommendation>;
-	getMarkSolutionChannels: () => Array<ChannelRecommendation>;
+	) => AIRecommendations["channels"] extends Map<string, infer V>
+		? V | undefined
+		: never;
 	reload: () => Promise<void>;
 };
 
@@ -82,6 +94,17 @@ export function useWizard() {
 	return context;
 }
 
+function createEmptyConfig(channelId: bigint): ChannelConfiguration {
+	return {
+		channelId,
+		indexingEnabled: false,
+		autoThreadEnabled: false,
+		markSolutionEnabled: false,
+		sendMarkSolutionInstructionsInNewThreads: false,
+		solutionTagId: undefined,
+	};
+}
+
 export function WizardProvider({ children }: { children: React.ReactNode }) {
 	const params = useParams();
 	const serverId = params.serverId as string;
@@ -89,17 +112,14 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 	const [state, setState] = useState<WizardState>({
 		isLoading: true,
 		error: null,
-		channels: [],
+		allChannels: [],
+		configurations: [],
 		serverSettings: {
 			publicMessages: true,
 			anonymizeUsernames: false,
 		},
-		channelSettings: {
-			indexingEnabled: new Set(),
-			autoThreadEnabled: new Set(),
-			markSolutionEnabled: new Set(),
-			solutionInstructionsEnabled: new Set(),
-			solvedTags: new Map(),
+		aiRecommendations: {
+			channels: new Map(),
 		},
 	});
 
@@ -117,63 +137,42 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 				serverId: BigInt(serverId),
 			});
 
-			const indexingEnabled = new Set<string>();
-			const autoThreadEnabled = new Set<string>();
-			const markSolutionEnabled = new Set<string>();
-			const solutionInstructionsEnabled = new Set<string>();
-			const solvedTags = new Map<string, string>();
-
-			const channels: Array<ChannelRecommendation> = config.channels.map(
-				(channel) => {
-					const channelId = channel.id.toString();
-
-					if (channel.recommendedSettings.indexingEnabled) {
-						indexingEnabled.add(channelId);
-					}
-					if (channel.recommendedSettings.autoThreadEnabled) {
-						autoThreadEnabled.add(channelId);
-					}
-					if (channel.recommendedSettings.markSolutionEnabled) {
-						markSolutionEnabled.add(channelId);
-					}
-					if (
-						channel.recommendedSettings.sendMarkSolutionInstructionsInNewThreads
-					) {
-						solutionInstructionsEnabled.add(channelId);
-					}
-					if (channel.recommendedSettings.solutionTagId) {
-						solvedTags.set(
-							channelId,
-							channel.recommendedSettings.solutionTagId.toString(),
-						);
-					}
-
-					return {
-						id: channel.id,
-						name: channel.name,
-						type: channel.type,
-						shouldIndex: channel.shouldIndex,
-						availableTags: channel.availableTags,
-						recommendedSolvedTagId: channel.recommendedSettings.solutionTagId,
-					};
-				},
+			const allChannels: Array<ChannelInfo> = config.channels.map(
+				(channel) => ({
+					id: channel.id,
+					name: channel.name,
+					type: channel.type,
+					availableTags: channel.availableTags,
+				}),
 			);
+
+			const aiRecommendations: AIRecommendations = {
+				channels: new Map(),
+			};
+
+			for (const channel of config.channels) {
+				aiRecommendations.channels.set(channel.id.toString(), {
+					indexing: channel.recommendedSettings.indexingEnabled,
+					autoThread: channel.recommendedSettings.autoThreadEnabled,
+					markSolution: channel.recommendedSettings.markSolutionEnabled,
+					solutionInstructions:
+						channel.recommendedSettings
+							.sendMarkSolutionInstructionsInNewThreads,
+					solutionTagId: channel.recommendedSettings.solutionTagId,
+				});
+			}
 
 			setState({
 				isLoading: false,
 				error: null,
-				channels,
+				allChannels,
+				configurations: [],
 				serverSettings: {
-					publicMessages: true,
-					anonymizeUsernames: false,
+					publicMessages:
+						config.serverSettings.considerAllMessagesPublicEnabled,
+					anonymizeUsernames: config.serverSettings.anonymizeMessagesEnabled,
 				},
-				channelSettings: {
-					indexingEnabled,
-					autoThreadEnabled,
-					markSolutionEnabled,
-					solutionInstructionsEnabled,
-					solvedTags,
-				},
+				aiRecommendations,
 			});
 		} catch (error) {
 			console.error("Failed to load configuration:", error);
@@ -196,120 +195,107 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 		}));
 	}, []);
 
-	const toggleChannelSetting = useCallback(
-		(setting: keyof Omit<ChannelSettings, "solvedTags">, channelId: string) => {
-			setState((prev) => {
-				const newSet = new Set(prev.channelSettings[setting]);
-				if (newSet.has(channelId)) {
-					newSet.delete(channelId);
-				} else {
-					newSet.add(channelId);
-				}
-				return {
-					...prev,
-					channelSettings: {
-						...prev.channelSettings,
-						[setting]: newSet,
-					},
-				};
-			});
-		},
-		[],
-	);
-
-	const setAllChannelSetting = useCallback(
+	const updateChannelConfig = useCallback(
 		(
-			setting: keyof Omit<ChannelSettings, "solvedTags">,
-			channelIds: Array<string>,
-			enabled: boolean,
+			channelId: bigint,
+			config: Partial<Omit<ChannelConfiguration, "channelId">>,
 		) => {
 			setState((prev) => {
-				const newSet = new Set(prev.channelSettings[setting]);
-				for (const channelId of channelIds) {
-					if (enabled) {
-						newSet.add(channelId);
-					} else {
-						newSet.delete(channelId);
-					}
+				const existingIndex = prev.configurations.findIndex(
+					(c) => c.channelId === channelId,
+				);
+
+				if (existingIndex >= 0) {
+					const existing = prev.configurations[existingIndex];
+					if (!existing) return prev;
+					const updated = [...prev.configurations];
+					const updatedConfig: ChannelConfiguration = {
+						channelId: existing.channelId,
+						indexingEnabled: config.indexingEnabled ?? existing.indexingEnabled,
+						autoThreadEnabled:
+							config.autoThreadEnabled ?? existing.autoThreadEnabled,
+						markSolutionEnabled:
+							config.markSolutionEnabled ?? existing.markSolutionEnabled,
+						sendMarkSolutionInstructionsInNewThreads:
+							config.sendMarkSolutionInstructionsInNewThreads ??
+							existing.sendMarkSolutionInstructionsInNewThreads,
+						solutionTagId: config.solutionTagId ?? existing.solutionTagId,
+					};
+					updated[existingIndex] = updatedConfig;
+					return { ...prev, configurations: updated };
 				}
-				return {
-					...prev,
-					channelSettings: {
-						...prev.channelSettings,
-						[setting]: newSet,
-					},
+
+				const newConfig: ChannelConfiguration = {
+					channelId,
+					indexingEnabled: config.indexingEnabled ?? false,
+					autoThreadEnabled: config.autoThreadEnabled ?? false,
+					markSolutionEnabled: config.markSolutionEnabled ?? false,
+					sendMarkSolutionInstructionsInNewThreads:
+						config.sendMarkSolutionInstructionsInNewThreads ?? false,
+					solutionTagId: config.solutionTagId,
 				};
+				return { ...prev, configurations: [...prev.configurations, newConfig] };
 			});
 		},
 		[],
 	);
 
-	const setSolvedTag = useCallback(
-		(channelId: string, tagId: string | undefined) => {
-			setState((prev) => {
-				const newMap = new Map(prev.channelSettings.solvedTags);
-				if (tagId) {
-					newMap.set(channelId, tagId);
-				} else {
-					newMap.delete(channelId);
-				}
-				return {
-					...prev,
-					channelSettings: {
-						...prev.channelSettings,
-						solvedTags: newMap,
-					},
-				};
-			});
+	const setChannelConfigs = useCallback(
+		(configs: Array<ChannelConfiguration>) => {
+			setState((prev) => ({ ...prev, configurations: configs }));
 		},
 		[],
 	);
 
-	const getIndexedChannels = useCallback(() => {
-		return state.channels.filter((c) =>
-			state.channelSettings.indexingEnabled.has(c.id.toString()),
-		);
-	}, [state.channels, state.channelSettings.indexingEnabled]);
+	const getChannelConfig = useCallback(
+		(channelId: bigint) => {
+			return state.configurations.find((c) => c.channelId === channelId);
+		},
+		[state.configurations],
+	);
 
-	const getNonForumIndexedChannels = useCallback(() => {
-		return getIndexedChannels().filter(
-			(c) => c.type !== ChannelType.GuildForum,
-		);
-	}, [getIndexedChannels]);
-
-	const getForumIndexedChannels = useCallback(() => {
-		return getIndexedChannels().filter(
-			(c) => c.type === ChannelType.GuildForum,
-		);
-	}, [getIndexedChannels]);
-
-	const getAllNonForumChannels = useCallback(() => {
-		return state.channels.filter((c) => c.type !== ChannelType.GuildForum);
-	}, [state.channels]);
+	const getAllChannels = useCallback(() => {
+		return state.allChannels;
+	}, [state.allChannels]);
 
 	const getAllForumChannels = useCallback(() => {
-		return state.channels.filter((c) => c.type === ChannelType.GuildForum);
-	}, [state.channels]);
+		return state.allChannels.filter((c) => c.type === ChannelType.GuildForum);
+	}, [state.allChannels]);
 
-	const getMarkSolutionChannels = useCallback(() => {
-		return state.channels.filter((c) =>
-			state.channelSettings.markSolutionEnabled.has(c.id.toString()),
+	const getAllNonForumChannels = useCallback(() => {
+		return state.allChannels.filter((c) => c.type !== ChannelType.GuildForum);
+	}, [state.allChannels]);
+
+	const getConfiguredChannels = useCallback(() => {
+		return state.configurations.filter(
+			(c) =>
+				c.indexingEnabled ||
+				c.autoThreadEnabled ||
+				c.markSolutionEnabled ||
+				c.sendMarkSolutionInstructionsInNewThreads ||
+				c.solutionTagId !== undefined,
 		);
-	}, [state.channels, state.channelSettings.markSolutionEnabled]);
+	}, [state.configurations]);
+
+	const getAIRecommendation = useCallback(
+		(channelId: string) => {
+			return state.aiRecommendations.channels.get(channelId);
+		},
+		[state.aiRecommendations],
+	);
 
 	const value: WizardContextValue = {
 		...state,
 		serverId,
 		setServerSettings,
-		toggleChannelSetting,
-		setAllChannelSetting,
-		setSolvedTag,
-		getIndexedChannels,
-		getNonForumIndexedChannels,
-		getForumIndexedChannels,
-		getAllNonForumChannels,
+		updateChannelConfig,
+		setChannelConfigs,
+		getChannelConfig,
+		getAllChannels,
 		getAllForumChannels,
-		getMarkSolutionChannels,
+		getAllNonForumChannels,
+		getConfiguredChannels,
+		getAIRecommendation,
 		reload: loadConfiguration,
 	};
 

@@ -2,6 +2,16 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import { Badge } from "@packages/ui/components/badge";
+import { Button } from "@packages/ui/components/button";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@packages/ui/components/empty";
+import { Link } from "@packages/ui/components/link";
 import {
 	Tooltip,
 	TooltipContent,
@@ -15,57 +25,18 @@ import {
 	MessageSquare,
 	Search,
 	Send,
+	Settings2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { StepLayout } from "../components/step-layout";
 import { WizardCard } from "../components/wizard-card";
-import {
-	type ChannelRecommendation,
-	type ForumTagInfo,
-	useWizard,
+import type {
+	ChannelConfiguration,
+	ForumTagInfo,
 } from "../components/wizard-context";
+import { useWizard } from "../components/wizard-context";
 import { WizardNav } from "../components/wizard-nav";
-
-type ChannelFeatures = {
-	indexing: boolean;
-	autoThread: boolean;
-	markSolution: boolean;
-	solutionInstructions: boolean;
-	solvedTag: ForumTagInfo | null;
-};
-
-function getChannelFeatures(
-	channel: ChannelRecommendation,
-	channelSettings: {
-		autoThreadEnabled: Set<string>;
-		markSolutionEnabled: Set<string>;
-		solutionInstructionsEnabled: Set<string>;
-		solvedTags: Map<string, string>;
-	},
-): ChannelFeatures {
-	const channelId = channel.id.toString();
-
-	let solvedTag: ForumTagInfo | null = null;
-	const solvedTagId = channelSettings.solvedTags.get(channelId);
-	if (solvedTagId && channel.type === ChannelType.GuildForum) {
-		const tag = channel.availableTags?.find(
-			(t) => t.id.toString() === solvedTagId,
-		);
-		if (tag) {
-			solvedTag = tag;
-		}
-	}
-
-	return {
-		indexing: true,
-		autoThread: channelSettings.autoThreadEnabled.has(channelId),
-		markSolution: channelSettings.markSolutionEnabled.has(channelId),
-		solutionInstructions:
-			channelSettings.solutionInstructionsEnabled.has(channelId),
-		solvedTag,
-	};
-}
 
 function FeatureBadge({
 	icon: Icon,
@@ -134,8 +105,8 @@ export default function CompletePage() {
 	const {
 		serverId,
 		serverSettings,
-		channelSettings,
-		getIndexedChannels,
+		allChannels,
+		getConfiguredChannels,
 		getAllForumChannels,
 	} = useWizard();
 
@@ -146,33 +117,43 @@ export default function CompletePage() {
 		api.authenticated.onboarding.applyRecommendedConfiguration,
 	);
 
-	const indexedChannels = getIndexedChannels();
+	const configuredChannels = getConfiguredChannels();
 	const forumChannels = getAllForumChannels();
 	const backHref =
 		forumChannels.length > 0
 			? `/dashboard/${serverId}/onboarding/configure/solved-tags`
 			: `/dashboard/${serverId}/onboarding/configure/solution-instructions`;
 
+	const channelInfoMap = useMemo(() => {
+		const map = new Map<
+			string,
+			{ name: string; type: number; availableTags?: Array<ForumTagInfo> }
+		>();
+		for (const channel of allChannels) {
+			map.set(channel.id.toString(), {
+				name: channel.name,
+				type: channel.type,
+				availableTags: channel.availableTags,
+			});
+		}
+		return map;
+	}, [allChannels]);
+
 	const handleApply = async () => {
 		setIsApplying(true);
 		setError(null);
 
 		try {
-			const channelConfigurations = indexedChannels.map((channel) => {
-				const channelId = channel.id.toString();
-				const tagIdStr = channelSettings.solvedTags.get(channelId);
-				return {
-					channelId: channel.id,
-					indexingEnabled: true,
-					autoThreadEnabled: channelSettings.autoThreadEnabled.has(channelId),
-					markSolutionEnabled:
-						channelSettings.markSolutionEnabled.has(channelId),
-					sendMarkSolutionInstructionsInNewThreads:
-						channelSettings.solutionInstructionsEnabled.has(channelId),
-					solutionTagId: tagIdStr ? BigInt(tagIdStr) : undefined,
-					forumGuidelinesConsentEnabled: false,
-				};
-			});
+			const channelConfigurations = configuredChannels.map((config) => ({
+				channelId: config.channelId,
+				indexingEnabled: config.indexingEnabled,
+				autoThreadEnabled: config.autoThreadEnabled,
+				markSolutionEnabled: config.markSolutionEnabled,
+				sendMarkSolutionInstructionsInNewThreads:
+					config.sendMarkSolutionInstructionsInNewThreads,
+				solutionTagId: config.solutionTagId,
+				forumGuidelinesConsentEnabled: false,
+			}));
 
 			await applyConfiguration({
 				serverId: BigInt(serverId),
@@ -191,6 +172,39 @@ export default function CompletePage() {
 		}
 	};
 
+	if (configuredChannels.length === 0) {
+		return (
+			<StepLayout
+				title="Review Configuration"
+				description="Review your configuration before applying."
+			>
+				<WizardCard>
+					<Empty className="py-12">
+						<EmptyHeader>
+							<EmptyMedia variant="icon">
+								<Settings2 />
+							</EmptyMedia>
+							<EmptyTitle>No channels configured</EmptyTitle>
+							<EmptyDescription>
+								You haven't configured any channels. You can go back to
+								configure channels or continue to the dashboard.
+							</EmptyDescription>
+						</EmptyHeader>
+						<EmptyContent>
+							<Button asChild>
+								<Link href={`/dashboard/${serverId}`}>
+									Continue to Dashboard
+								</Link>
+							</Button>
+						</EmptyContent>
+					</Empty>
+				</WizardCard>
+
+				<WizardNav backHref={backHref} />
+			</StepLayout>
+		);
+	}
+
 	return (
 		<StepLayout
 			title="Review Configuration"
@@ -198,16 +212,23 @@ export default function CompletePage() {
 		>
 			<WizardCard>
 				<div className="space-y-3">
-					<div className="text-sm text-muted-foreground">
-						{indexedChannels.length} channel
-						{indexedChannels.length !== 1 ? "s" : ""} will be indexed
-					</div>
-
 					<div className="space-y-1.5 max-h-[400px] overflow-y-auto">
-						{indexedChannels.map((channel) => {
-							const channelId = channel.id.toString();
-							const features = getChannelFeatures(channel, channelSettings);
-							const isForum = channel.type === ChannelType.GuildForum;
+						{configuredChannels.map((config) => {
+							const channelId = config.channelId.toString();
+							const channelInfo = channelInfoMap.get(channelId);
+							if (!channelInfo) return null;
+
+							const isForum = channelInfo.type === ChannelType.GuildForum;
+
+							let solvedTag: ForumTagInfo | null = null;
+							if (config.solutionTagId && isForum) {
+								const tag = channelInfo.availableTags?.find(
+									(t) => t.id === config.solutionTagId,
+								);
+								if (tag) {
+									solvedTag = tag;
+								}
+							}
 
 							return (
 								<div
@@ -221,39 +242,39 @@ export default function CompletePage() {
 											<span className="text-muted-foreground">#</span>
 										)}
 										<span className="font-medium text-sm truncate max-w-[120px]">
-											{channel.name}
+											{channelInfo.name}
 										</span>
 									</div>
 									<div className="flex flex-wrap gap-1 ml-auto">
-										<FeatureBadge
-											icon={Search}
-											label="Index"
-											tooltip="Messages sent in this channel will appear on Answer Overflow"
-										/>
-										{features.autoThread && (
+										{config.indexingEnabled && (
+											<FeatureBadge
+												icon={Search}
+												label="Index"
+												tooltip="Messages sent in this channel will appear on Answer Overflow"
+											/>
+										)}
+										{config.autoThreadEnabled && (
 											<FeatureBadge
 												icon={GitBranch}
 												label="Auto-thread"
 												tooltip="A thread will be created for every message in this channel"
 											/>
 										)}
-										{features.markSolution && (
+										{config.markSolutionEnabled && (
 											<FeatureBadge
 												icon={CheckCircle2}
 												label="Solutions"
 												tooltip="Users can mark messages as the solution to their question"
 											/>
 										)}
-										{features.solutionInstructions && (
+										{config.sendMarkSolutionInstructionsInNewThreads && (
 											<FeatureBadge
 												icon={Send}
 												label="Instructions"
 												tooltip="New threads will receive a message explaining how to mark a solution"
 											/>
 										)}
-										{features.solvedTag && (
-											<SolvedTagBadge tag={features.solvedTag} />
-										)}
+										{solvedTag && <SolvedTagBadge tag={solvedTag} />}
 									</div>
 								</div>
 							);
@@ -273,7 +294,6 @@ export default function CompletePage() {
 				nextLabel="Apply Configuration"
 				onNext={handleApply}
 				isLoading={isApplying}
-				isNextDisabled={indexedChannels.length === 0}
 			/>
 		</StepLayout>
 	);

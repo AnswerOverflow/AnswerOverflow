@@ -81,8 +81,11 @@ export const catchAllSilentWithReport = <A, E, R>(
 ): Effect.Effect<A | undefined, never, R> =>
 	effect.pipe(
 		Effect.tapError((error) =>
-			Effect.sync(() => {
-				captureException(error);
+			Effect.gen(function* () {
+				yield* Effect.sync(() => {
+					captureException(error);
+				});
+				yield* Effect.logError(error);
 			}),
 		),
 		Effect.catchAll(() => Effect.succeed(undefined)),

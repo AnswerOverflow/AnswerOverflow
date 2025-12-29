@@ -101,6 +101,11 @@ function getPacificAvailabilityTimestamps() {
 
 function notifyUserWhoAddedBot(guild: Guild) {
 	return Effect.gen(function* () {
+		yield* Effect.annotateCurrentSpan({
+			guild_id: guild.id,
+			guild_name: guild.name,
+		});
+
 		const database = yield* Database;
 		const discord = yield* Discord;
 
@@ -112,9 +117,10 @@ function notifyUserWhoAddedBot(guild: Guild) {
 			);
 
 		if (!preferences?.addedByUserId) {
-			yield* Console.log(
-				`No addedByUserId found for server ${guild.name}, skipping DM`,
-			);
+			yield* Effect.annotateCurrentSpan({
+				skipped: true,
+				reason: "no_added_by_user_id",
+			});
 			return;
 		}
 
@@ -122,41 +128,41 @@ function notifyUserWhoAddedBot(guild: Guild) {
 		const { start, end } = getPacificAvailabilityTimestamps();
 		const botId = guild.client.user?.id;
 
-		yield* catchAllSilentWithReport(
-			discord.callClient(async () => {
-				const user = await guild.client.users.fetch(addedByUserId);
+		yield* Effect.annotateCurrentSpan({ target_user_id: addedByUserId });
 
-				const botMention = botId ? `<@${botId}>` : "the bot";
-				const embed = new EmbedBuilder()
-					.setColor("#5865F2")
-					.setAuthor({
-						name: "Rhys",
-						iconURL: RHYS_AVATAR_URL,
-					})
-					.setDescription(
-						`Hey! Thanks for adding Answer Overflow to **${guild.name}**!\n\n` +
-							`If you need any help with setup, have any bugs, feedback, or feature requests just DM ${botMention} - it comes straight to me.\n\n` +
-							`I'm usually available <t:${start}:t> - <t:${end}:t>, so if I don't respond right away, I'll get back to you as soon as I can!`,
-					)
-					.setTimestamp();
+		yield* discord.callClient(async () => {
+			const user = await guild.client.users.fetch(addedByUserId);
 
-				const setupButton = new ButtonBuilder()
-					.setLabel("Continue Setup")
-					.setStyle(ButtonStyle.Link)
-					.setURL(`${getBaseUrl()}/dashboard/${guild.id}/onboarding/configure`);
+			const botMention = botId ? `<@${botId}>` : "the bot";
+			const embed = new EmbedBuilder()
+				.setColor("#5865F2")
+				.setAuthor({
+					name: "Rhys",
+					iconURL: RHYS_AVATAR_URL,
+				})
+				.setDescription(
+					`Hey! Thanks for adding Answer Overflow to **${guild.name}**!\n\n` +
+						`If you need any help with setup, have any bugs, feedback, or feature requests just DM ${botMention} - it comes straight to me.\n\n` +
+						`I'm usually available <t:${start}:t> - <t:${end}:t>, so if I don't respond right away, I'll get back to you as soon as I can!`,
+				)
+				.setTimestamp();
 
-				const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-					setupButton,
-				);
+			const setupButton = new ButtonBuilder()
+				.setLabel("Continue Setup")
+				.setStyle(ButtonStyle.Link)
+				.setURL(`${getBaseUrl()}/dashboard/${guild.id}/onboarding/configure`);
 
-				await user.send({ embeds: [embed], components: [actionRow] });
-			}),
-		);
+			const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+				setupButton,
+			);
+
+			await user.send({ embeds: [embed], components: [actionRow] });
+		});
 
 		yield* Console.log(
 			`Sent welcome DM to user ${addedByUserId} for server ${guild.name}`,
 		);
-	});
+	}).pipe(Effect.withSpan("notify_user_who_added_bot"));
 }
 
 const VANITY_INVITE_OVERRIDES: Record<string, string> = {
@@ -299,9 +305,7 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				});
 				yield* Metric.incrementBy(activeGuilds, 1);
 
-				yield* Console.log(
-					`Bot joined new server: ${guild.name} (${guild.id})`,
-				);
+				yield* Console.log(`Bot joined server: ${guild.name} (${guild.id})`);
 
 				const leftServer = yield* leaveServerIfNecessary(guild);
 				if (leftServer) {

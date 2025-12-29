@@ -8,6 +8,7 @@ import {
 	SelectValue,
 } from "@packages/ui/components/select";
 import { MessageSquare } from "lucide-react";
+import { useMemo, useState } from "react";
 import { FeaturePreviewPlaceholder } from "../components/mock-message-preview";
 import { StepLayout } from "../components/step-layout";
 import { WizardCard } from "../components/wizard-card";
@@ -43,24 +44,72 @@ function TagDisplay({ tag }: { tag: ForumTagInfo }) {
 export default function SolvedTagsPage() {
 	const {
 		serverId,
-		channelSettings,
-		setSolvedTag,
-		getForumIndexedChannels,
-		getMarkSolutionChannels,
+		configurations,
+		setChannelConfigs,
+		getAllForumChannels,
+		getAIRecommendation,
 	} = useWizard();
 
-	const forumChannels = getForumIndexedChannels();
-	const markSolutionChannels = getMarkSolutionChannels();
+	const forumChannels = getAllForumChannels();
 
-	const eligibleForums = forumChannels.filter((forum) =>
-		markSolutionChannels.some((c) => c.id === forum.id),
-	);
+	const eligibleForums = useMemo(() => {
+		return forumChannels.filter((forum) =>
+			configurations.some(
+				(c) => c.channelId === forum.id && c.markSolutionEnabled,
+			),
+		);
+	}, [forumChannels, configurations]);
+
 	const hasEligibleForums = eligibleForums.length > 0;
 
-	const handleSkip = () => {
+	const [tagSelections, setTagSelections] = useState<
+		Map<string, string | undefined>
+	>(() => {
+		const selections = new Map<string, string | undefined>();
 		for (const forum of eligibleForums) {
-			setSolvedTag(forum.id.toString(), undefined);
+			const existing = configurations.find((c) => c.channelId === forum.id);
+			if (existing?.solutionTagId) {
+				selections.set(forum.id.toString(), existing.solutionTagId.toString());
+			} else {
+				const rec = getAIRecommendation(forum.id.toString());
+				if (rec?.solutionTagId) {
+					selections.set(forum.id.toString(), rec.solutionTagId.toString());
+				}
+			}
 		}
+		return selections;
+	});
+
+	const handleTagChange = (channelId: string, tagId: string | undefined) => {
+		setTagSelections((prev) => {
+			const next = new Map(prev);
+			if (tagId) {
+				next.set(channelId, tagId);
+			} else {
+				next.delete(channelId);
+			}
+			return next;
+		});
+	};
+
+	const commitSelections = () => {
+		const updatedConfigs = configurations.map((config) => {
+			const channelId = config.channelId.toString();
+			const tagIdStr = tagSelections.get(channelId);
+			return {
+				...config,
+				solutionTagId: tagIdStr ? BigInt(tagIdStr) : undefined,
+			};
+		});
+		setChannelConfigs(updatedConfigs);
+	};
+
+	const handleSkip = () => {
+		const updatedConfigs = configurations.map((config) => ({
+			...config,
+			solutionTagId: undefined,
+		}));
+		setChannelConfigs(updatedConfigs);
 	};
 
 	return (
@@ -85,9 +134,7 @@ export default function SolvedTagsPage() {
 						<div className="max-h-[280px] overflow-y-auto space-y-1.5">
 							{eligibleForums.map((channel) => {
 								const tags = channel.availableTags ?? [];
-								const currentTagId = channelSettings.solvedTags.get(
-									channel.id.toString(),
-								);
+								const currentTagId = tagSelections.get(channel.id.toString());
 								const selectedTag = tags.find(
 									(t) => t.id.toString() === currentTagId,
 								);
@@ -107,7 +154,7 @@ export default function SolvedTagsPage() {
 											<Select
 												value={currentTagId ?? "none"}
 												onValueChange={(value) =>
-													setSolvedTag(
+													handleTagChange(
 														channel.id.toString(),
 														value === "none" ? undefined : value,
 													)
@@ -150,7 +197,8 @@ export default function SolvedTagsPage() {
 							No forum channels with mark solution enabled.
 						</p>
 						<p className="text-sm mt-1">
-							Solved tags are only available for forum channels.
+							Solved tags are only available for forum channels with mark
+							solution enabled.
 						</p>
 					</div>
 				)}
@@ -161,6 +209,7 @@ export default function SolvedTagsPage() {
 				nextHref={`/dashboard/${serverId}/onboarding/configure/complete`}
 				showSkip={hasEligibleForums}
 				onSkip={handleSkip}
+				onNext={commitSelections}
 			/>
 		</StepLayout>
 	);

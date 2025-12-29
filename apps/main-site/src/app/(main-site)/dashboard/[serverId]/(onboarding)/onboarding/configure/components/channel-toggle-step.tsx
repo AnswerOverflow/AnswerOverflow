@@ -5,15 +5,16 @@ import { FeaturePreviewPlaceholder } from "./mock-message-preview";
 import { StepLayout } from "./step-layout";
 import { ChannelList } from "./toggle-channel-sections";
 import { WizardCard } from "./wizard-card";
-import type { ChannelRecommendation } from "./wizard-context";
+import type { ChannelInfo } from "./wizard-context";
 import { WizardNav } from "./wizard-nav";
 
 type ChannelToggleStepProps = {
 	title: string;
 	description: string;
 	feature: FeaturePreviewPlaceholderProps["feature"];
-	channels: Array<ChannelRecommendation>;
+	channels: Array<ChannelInfo>;
 	selectedIds: Set<string>;
+	initialSelectedIds?: Set<string>;
 	onToggle: (channelId: string) => void;
 	onSelectAll: (channelIds: Array<string>, enabled: boolean) => void;
 	backHref: string;
@@ -25,6 +26,7 @@ type ChannelToggleStepProps = {
 		description: string;
 	};
 	onSkip?: () => void;
+	onNext?: () => void | Promise<void>;
 };
 
 export function ChannelToggleStep({
@@ -33,6 +35,7 @@ export function ChannelToggleStep({
 	feature,
 	channels,
 	selectedIds,
+	initialSelectedIds,
 	onToggle,
 	onSelectAll,
 	backHref,
@@ -41,6 +44,7 @@ export function ChannelToggleStep({
 	isNextDisabled,
 	emptyState,
 	onSkip,
+	onNext,
 }: ChannelToggleStepProps) {
 	const hasChannels = channels.length > 0;
 
@@ -59,6 +63,7 @@ export function ChannelToggleStep({
 					<ChannelList
 						channels={channels}
 						selectedIds={selectedIds}
+						initialSelectedIds={initialSelectedIds}
 						onToggle={onToggle}
 						onSelectAll={onSelectAll}
 					/>
@@ -80,6 +85,7 @@ export function ChannelToggleStep({
 				showSkip={hasChannels && showSkip}
 				isNextDisabled={isNextDisabled}
 				onSkip={onSkip}
+				onNext={onNext}
 			/>
 		</StepLayout>
 	);

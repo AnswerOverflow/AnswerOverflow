@@ -20,40 +20,6 @@ type ChannelWithFlags = Channel & {
 	availableTags?: Array<ForumTag>;
 };
 
-type SerializedForumTag = {
-	id: string;
-	name: string;
-	emojiId?: string;
-	emojiName?: string;
-	moderated: boolean;
-};
-
-type SerializedChannelRecommendation = {
-	id: string;
-	name: string;
-	type: number;
-	shouldIndex: boolean;
-	availableTags?: Array<SerializedForumTag>;
-	recommendedSettings: {
-		indexingEnabled: boolean;
-		autoThreadEnabled: boolean;
-		markSolutionEnabled: boolean;
-		sendMarkSolutionInstructionsInNewThreads: boolean;
-		solutionTagId?: string;
-		solutionTagName?: string;
-	};
-};
-
-type SerializedRecommendedConfiguration = {
-	channels: Array<SerializedChannelRecommendation>;
-	serverSettings: {
-		considerAllMessagesPublicEnabled: boolean;
-		anonymizeMessagesEnabled: boolean;
-	};
-	detectionSuccessful: boolean;
-	errorMessage?: string;
-};
-
 type ChannelRecommendation = {
 	id: bigint;
 	name: string;
@@ -70,7 +36,7 @@ type ChannelRecommendation = {
 	};
 };
 
-type RecommendedConfiguration = {
+export type RecommendedConfiguration = {
 	channels: Array<ChannelRecommendation>;
 	serverSettings: {
 		considerAllMessagesPublicEnabled: boolean;
@@ -79,62 +45,6 @@ type RecommendedConfiguration = {
 	detectionSuccessful: boolean;
 	errorMessage?: string;
 };
-
-function serializeForumTag(tag: ForumTag): SerializedForumTag {
-	return {
-		id: tag.id.toString(),
-		name: tag.name,
-		emojiId: tag.emojiId?.toString(),
-		emojiName: tag.emojiName,
-		moderated: tag.moderated,
-	};
-}
-
-function deserializeForumTag(tag: SerializedForumTag): ForumTag {
-	return {
-		id: BigInt(tag.id),
-		name: tag.name,
-		emojiId: tag.emojiId ? BigInt(tag.emojiId) : undefined,
-		emojiName: tag.emojiName,
-		moderated: tag.moderated,
-	};
-}
-
-function serializeConfiguration(
-	config: RecommendedConfiguration,
-): SerializedRecommendedConfiguration {
-	return {
-		...config,
-		channels: config.channels.map((channel) => ({
-			...channel,
-			id: channel.id.toString(),
-			availableTags: channel.availableTags?.map(serializeForumTag),
-			recommendedSettings: {
-				...channel.recommendedSettings,
-				solutionTagId: channel.recommendedSettings.solutionTagId?.toString(),
-			},
-		})),
-	};
-}
-
-function deserializeConfiguration(
-	config: SerializedRecommendedConfiguration,
-): RecommendedConfiguration {
-	return {
-		...config,
-		channels: config.channels.map((channel) => ({
-			...channel,
-			id: BigInt(channel.id),
-			availableTags: channel.availableTags?.map(deserializeForumTag),
-			recommendedSettings: {
-				...channel.recommendedSettings,
-				solutionTagId: channel.recommendedSettings.solutionTagId
-					? BigInt(channel.recommendedSettings.solutionTagId)
-					: undefined,
-			},
-		})),
-	};
-}
 
 type ActionContext = {
 	runQuery: <Query extends import("convex/server").FunctionReference<"query">>(
@@ -314,9 +224,8 @@ export const fetchRecommendedConfiguration = internalAction({
 	args: {
 		serverId: v.int64(),
 	},
-	handler: async (ctx, args): Promise<SerializedRecommendedConfiguration> => {
-		const config = await computeRecommendedConfiguration(ctx, args.serverId);
-		return serializeConfiguration(config);
+	handler: async (ctx, args): Promise<RecommendedConfiguration> => {
+		return await computeRecommendedConfiguration(ctx, args.serverId);
 	},
 });
 
@@ -331,9 +240,8 @@ const getRecommendedConfigurationCache = () =>
 export const getRecommendedConfiguration = guildManagerAction({
 	args: {},
 	handler: async (ctx, args): Promise<RecommendedConfiguration> => {
-		const cached = await getRecommendedConfigurationCache().fetch(ctx, {
+		return await getRecommendedConfigurationCache().fetch(ctx, {
 			serverId: args.serverId,
 		});
-		return deserializeConfiguration(cached);
 	},
 });

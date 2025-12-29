@@ -1,40 +1,43 @@
 "use client";
 
 import { ChannelToggleStep } from "../components/channel-toggle-step";
+import { useChannelToggle } from "../components/use-channel-toggle";
 import { useWizard } from "../components/wizard-context";
 
 export default function IndexingPage() {
-	const {
-		serverId,
-		channels,
-		channelSettings,
-		toggleChannelSetting,
-		setAllChannelSetting,
-	} = useWizard();
+	const { serverId, allChannels, getAIRecommendation } = useWizard();
 
-	const handleSkip = () => {
-		const allChannelIds = channels.map((c) => c.id.toString());
-		setAllChannelSetting("indexingEnabled", allChannelIds, false);
-	};
+	const {
+		selectedIds,
+		aiRecommendedIds,
+		handleToggle,
+		handleSelectAll,
+		commitSelections,
+		handleSkip,
+	} = useChannelToggle({
+		channels: allChannels,
+		getAIRecommended: (id) => getAIRecommendation(id)?.indexing ?? false,
+		getEnabled: (c) => c.indexingEnabled,
+		setEnabled: (c, enabled) => ({ ...c, indexingEnabled: enabled }),
+		isFirstStep: true,
+	});
 
 	return (
 		<ChannelToggleStep
 			title="Enable Indexing"
 			description="Select which channels should be searchable on the web. We've pre-selected channels that look like good candidates."
 			feature="indexing"
-			channels={channels}
-			selectedIds={channelSettings.indexingEnabled}
-			onToggle={(channelId) =>
-				toggleChannelSetting("indexingEnabled", channelId)
-			}
-			onSelectAll={(channelIds, enabled) =>
-				setAllChannelSetting("indexingEnabled", channelIds, enabled)
-			}
+			channels={allChannels}
+			selectedIds={selectedIds}
+			initialSelectedIds={aiRecommendedIds}
+			onToggle={handleToggle}
+			onSelectAll={handleSelectAll}
 			backHref={`/dashboard/${serverId}/onboarding/configure`}
 			nextHref={`/dashboard/${serverId}/onboarding/configure/auto-thread`}
-			isNextDisabled={channelSettings.indexingEnabled.size === 0}
+			isNextDisabled={false}
 			showSkip
 			onSkip={handleSkip}
+			onNext={commitSelections}
 		/>
 	);
 }

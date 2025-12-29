@@ -5,7 +5,7 @@ import { Input } from "@packages/ui/components/input";
 import { ChannelType } from "discord-api-types/v10";
 import { Hash, Megaphone, MessageSquare, Search } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
-import type { ChannelRecommendation } from "./wizard-context";
+import type { ChannelInfo } from "./wizard-context";
 
 const SEARCH_THRESHOLD = 6;
 
@@ -16,7 +16,7 @@ function getChannelIcon(type: number) {
 }
 
 type ChannelItemProps = {
-	channel: ChannelRecommendation;
+	channel: ChannelInfo;
 	isSelected: boolean;
 	onToggle: () => void;
 };
@@ -51,10 +51,11 @@ function ChannelItem({ channel, isSelected, onToggle }: ChannelItemProps) {
 }
 
 type ChannelListProps = {
-	channels: Array<ChannelRecommendation>;
+	channels: Array<ChannelInfo>;
 	selectedIds: Set<string>;
 	onToggle: (channelId: string) => void;
 	onSelectAll: (channelIds: Array<string>, enabled: boolean) => void;
+	initialSelectedIds?: Set<string>;
 };
 
 export function ChannelList({
@@ -62,11 +63,12 @@ export function ChannelList({
 	selectedIds,
 	onToggle,
 	onSelectAll,
+	initialSelectedIds,
 }: ChannelListProps) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const showSearch = channels.length >= SEARCH_THRESHOLD;
 
-	const initialSelectedIdsRef = useRef(selectedIds);
+	const initialSelectedIdsRef = useRef(initialSelectedIds ?? selectedIds);
 
 	const sortedChannels = useMemo(() => {
 		const filtered = searchQuery

@@ -1,37 +1,37 @@
 "use client";
 
 import { ChannelToggleStep } from "../components/channel-toggle-step";
+import { useChannelToggle } from "../components/use-channel-toggle";
 import { useWizard } from "../components/wizard-context";
 
 export default function AutoThreadPage() {
+	const { serverId, getAllNonForumChannels, getAIRecommendation } = useWizard();
+	const channels = getAllNonForumChannels();
+
 	const {
-		serverId,
-		channelSettings,
-		toggleChannelSetting,
-		setAllChannelSetting,
-		getAllNonForumChannels,
-	} = useWizard();
-
-	const allNonForumChannels = getAllNonForumChannels();
-
-	const handleSkip = () => {
-		const allChannelIds = allNonForumChannels.map((c) => c.id.toString());
-		setAllChannelSetting("autoThreadEnabled", allChannelIds, false);
-	};
+		selectedIds,
+		aiRecommendedIds,
+		handleToggle,
+		handleSelectAll,
+		commitSelections,
+		handleSkip,
+	} = useChannelToggle({
+		channels,
+		getAIRecommended: (id) => getAIRecommendation(id)?.autoThread ?? false,
+		getEnabled: (c) => c.autoThreadEnabled,
+		setEnabled: (c, enabled) => ({ ...c, autoThreadEnabled: enabled }),
+	});
 
 	return (
 		<ChannelToggleStep
 			title="Auto-Thread"
 			description="When someone posts a message in these channels, the bot will automatically create a thread for the conversation. This keeps discussions organized."
 			feature="auto-thread"
-			channels={allNonForumChannels}
-			selectedIds={channelSettings.autoThreadEnabled}
-			onToggle={(channelId) =>
-				toggleChannelSetting("autoThreadEnabled", channelId)
-			}
-			onSelectAll={(channelIds, enabled) =>
-				setAllChannelSetting("autoThreadEnabled", channelIds, enabled)
-			}
+			channels={channels}
+			selectedIds={selectedIds}
+			initialSelectedIds={aiRecommendedIds}
+			onToggle={handleToggle}
+			onSelectAll={handleSelectAll}
 			backHref={`/dashboard/${serverId}/onboarding/configure/indexing`}
 			nextHref={`/dashboard/${serverId}/onboarding/configure/mark-solution`}
 			showSkip
@@ -40,6 +40,7 @@ export default function AutoThreadPage() {
 				description: "Auto-thread is only available for non-forum channels.",
 			}}
 			onSkip={handleSkip}
+			onNext={commitSelections}
 		/>
 	);
 }
