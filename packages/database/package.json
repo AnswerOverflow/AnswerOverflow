@@ -47,6 +47,8 @@
 		"@packages/github-api": "workspace:*",
 		"@typelytics/posthog": "^0.1.5",
 		"@vercel/sdk": "^1.17.7",
+		"@ai-sdk/mcp": "^1.0.2",
+		"@modelcontextprotocol/sdk": "^1.17.5",
 		"ai": "catalog:",
 		"better-auth": "catalog:",
 		"convex": "catalog:",

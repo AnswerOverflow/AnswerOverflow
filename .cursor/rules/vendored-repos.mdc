@@ -63,3 +63,21 @@ We include the Effect Atom repository as a git submodule under `.context/effect-
 - **Updating the submodule**:
   - `git submodule update --remote .context/effect-atom`
   - Or navigate to `.context/effect-atom` and pull changes: `cd .context/effect-atom && git pull`
+
+## Vercel AI SDK
+
+We include the Vercel AI SDK repository as a git submodule under `.context/vercel-ai/`.
+
+- **Context**: This is the official Vercel AI SDK for building AI-powered applications. Use it as a reference for AI integration patterns, streaming responses, tool calling, and best practices when working with LLMs.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/vercel-ai`
+  - Or navigate to `.context/vercel-ai` and pull changes: `cd .context/vercel-ai && git pull`
+
+## AI Elements
+
+We include the Vercel AI Elements repository as a git submodule under `.context/ai-elements/`.
+
+- **Context**: This is the Vercel AI Elements library providing React components for AI chat interfaces. Use it as a reference for building chat UIs, message rendering, and AI interaction patterns.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/ai-elements`
+  - Or navigate to `.context/ai-elements` and pull changes: `cd .context/ai-elements && git pull`

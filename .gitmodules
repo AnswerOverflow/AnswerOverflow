@@ -25,3 +25,9 @@
 [submodule ".context/effect-atom"]
 	path = .context/effect-atom
 	url = https://github.com/tim-smart/effect-atom.git
+[submodule ".context/ai-elements"]
+	path = .context/ai-elements
+	url = https://github.com/vercel/ai-elements.git
+[submodule ".context/vercel-ai"]
+	path = .context/vercel-ai
+	url = https://github.com/vercel/ai.git

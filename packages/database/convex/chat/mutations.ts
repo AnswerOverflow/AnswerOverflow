@@ -1,10 +1,12 @@
 /** biome-ignore-all lint/style/noRestrictedImports: chat functions need direct server access */
+
+import { createMCPClient } from "@ai-sdk/mcp";
 import {
 	createThread,
-	saveMessage,
-	vStreamArgs,
 	listUIMessages,
+	saveMessage,
 	syncStreams,
+	vStreamArgs,
 } from "@packages/agent";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
@@ -49,12 +51,29 @@ export const generateResponse = internalAction({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		await chatAgent.streamText(
-			ctx,
-			{ threadId: args.threadId },
-			{ promptMessageId: args.promptMessageId },
-			{ saveStreamDeltas: true },
-		);
+		const mcpClient = await createMCPClient({
+			transport: {
+				type: "http",
+				url: "https://www.answeroverflow.com/mcp",
+			},
+		});
+
+		try {
+			const mcpTools = await mcpClient.tools();
+
+			await chatAgent.streamText(
+				ctx,
+				{ threadId: args.threadId },
+				{
+					promptMessageId: args.promptMessageId,
+					tools: { ...chatAgent.options.tools, ...mcpTools },
+				},
+				{ saveStreamDeltas: true },
+			);
+		} finally {
+			await mcpClient.close();
+		}
+
 		return null;
 	},
 });
