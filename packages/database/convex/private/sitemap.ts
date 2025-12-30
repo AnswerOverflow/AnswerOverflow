@@ -6,7 +6,7 @@ import { internalQuery, privateAction } from "../client";
 import { getIndexedChannelIdsForServer } from "../shared/channels";
 import { threadMessageCounts } from "./counts";
 
-const getServersForSitemapPage = internalQuery({
+export const getServersForSitemapPage = internalQuery({
 	args: {
 		cursor: v.union(v.string(), v.null()),
 	},
