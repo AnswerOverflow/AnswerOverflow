@@ -22,7 +22,7 @@ import { ButtonStyle, ComponentType, MessageFlags } from "discord.js";
 import { Cause, Data, Duration, Effect, Layer, Metric } from "effect";
 import { Suspense, useState } from "react";
 import { Discord } from "../core/discord-service";
-import { atomRuntime } from "../core/runtime";
+import { atomRuntime } from "../core/atom-runtime";
 import { commandExecuted } from "../metrics";
 import {
 	catchAllDefectWithReport,

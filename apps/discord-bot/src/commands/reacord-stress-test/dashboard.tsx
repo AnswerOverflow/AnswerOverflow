@@ -12,7 +12,7 @@ import {
 	useInstance,
 } from "@packages/reacord";
 import { Effect } from "effect";
-import { atomRuntime } from "../../core/runtime";
+import { atomRuntime } from "../../core/atom-runtime";
 
 const fetchStatsEffect = () =>
 	Effect.gen(function* () {
