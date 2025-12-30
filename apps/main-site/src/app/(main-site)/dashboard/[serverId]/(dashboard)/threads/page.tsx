@@ -30,6 +30,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { useCachedPaginatedQuery } from "@packages/ui/hooks/use-cached-paginated-query";
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 import { cn } from "@packages/ui/lib/utils";
+import { useAction } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { ChannelType } from "discord-api-types/v10";
 import {
@@ -37,18 +38,20 @@ import {
 	ArrowUpAZ,
 	ArrowLeft,
 	CheckCircle2,
+	Eye,
 	ExternalLink,
 	Hash,
 	MessageSquare,
 	Search,
 	Tag,
+	TrendingUp,
 	X,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const SORT_OPTIONS = ["newest", "oldest"] as const;
+const SORT_OPTIONS = ["newest", "oldest", "most_viewed"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
 
 const STATUS_OPTIONS = ["all", "open", "solved", "closed"] as const;
