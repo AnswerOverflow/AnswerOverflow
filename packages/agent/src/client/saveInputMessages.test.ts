@@ -131,7 +131,7 @@ describe("saveInputMessages", () => {
 				expect(result.promptMessageId).toBe("saved-1");
 				expect(result.pendingMessage?._id).toBe("pending-1");
 				expect(result.savedMessages).toHaveLength(1);
-				expect(result.savedMessages[0]._id).toBe("saved-1");
+				expect(result.savedMessages[0]!._id).toBe("saved-1");
 			});
 		});
 

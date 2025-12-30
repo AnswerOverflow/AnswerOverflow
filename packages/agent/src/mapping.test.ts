@@ -173,8 +173,8 @@ describe.skip("mapping", () => {
 		expect(fileIds).toEqual(["file-123"]);
 		// Should have replaced data with a URL
 		const serArr = ser as SerializedContent;
-		expect(typeof (serArr as { data: unknown }[])[0].data).toBe("string");
-		expect((serArr as { data: unknown }[])[0].data as string).toMatch(
+		expect(typeof (serArr as { data: unknown }[])[0]!.data).toBe("string");
+		expect((serArr as { data: unknown }[])[0]!.data as string).toMatch(
 			/^https?:\/\//,
 		);
 	});

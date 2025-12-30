@@ -37,17 +37,17 @@ describe("fromUIMessages round-trip tests", () => {
 		});
 
 		expect(uiMessages).toHaveLength(1);
-		expect(uiMessages[0].role).toBe("user");
-		expect(uiMessages[0].text).toBe("Hello world!");
+		expect(uiMessages[0]!.role).toBe("user");
+		expect(uiMessages[0]!.text).toBe("Hello world!");
 
 		expect(backToMessageDocs).toHaveLength(1);
-		expect(backToMessageDocs[0].text).toBe("Hello world!");
-		expect(backToMessageDocs[0].threadId).toBe("thread1");
+		expect(backToMessageDocs[0]!.text).toBe("Hello world!");
+		expect(backToMessageDocs[0]!.threadId).toBe("thread1");
 
 		// Content gets normalized to array format
-		expect(Array.isArray(backToMessageDocs[0].message?.content)).toBe(true);
-		if (Array.isArray(backToMessageDocs[0].message?.content)) {
-			expect(backToMessageDocs[0].message.content[0]).toMatchObject({
+		expect(Array.isArray(backToMessageDocs[0]!.message?.content)).toBe(true);
+		if (Array.isArray(backToMessageDocs[0]!.message?.content)) {
+			expect(backToMessageDocs[0]!.message.content[0]!).toMatchObject({
 				type: "text",
 				text: "Hello world!",
 			});
@@ -71,11 +71,11 @@ describe("fromUIMessages round-trip tests", () => {
 		});
 
 		expect(uiMessages).toHaveLength(1);
-		expect(uiMessages[0].role).toBe("assistant");
-		expect(uiMessages[0].text).toBe("Hi there! How can I help?");
+		expect(uiMessages[0]!.role).toBe("assistant");
+		expect(uiMessages[0]!.text).toBe("Hi there! How can I help?");
 
 		expect(backToMessageDocs).toHaveLength(1);
-		expect(backToMessageDocs[0].text).toBe("Hi there! How can I help?");
+		expect(backToMessageDocs[0]!.text).toBe("Hi there! How can I help?");
 	});
 
 	it("preserves system messages correctly", () => {
@@ -95,15 +95,15 @@ describe("fromUIMessages round-trip tests", () => {
 		});
 
 		expect(uiMessages).toHaveLength(1);
-		expect(uiMessages[0].role).toBe("system");
-		expect(uiMessages[0].text).toBe("You are a helpful assistant.");
+		expect(uiMessages[0]!.role).toBe("system");
+		expect(uiMessages[0]!.text).toBe("You are a helpful assistant.");
 
 		expect(backToMessageDocs).toHaveLength(1);
-		expect(backToMessageDocs[0].text).toBe("You are a helpful assistant.");
-		expect(backToMessageDocs[0].message?.role).toBe("system");
+		expect(backToMessageDocs[0]!.text).toBe("You are a helpful assistant.");
+		expect(backToMessageDocs[0]!.message?.role).toBe("system");
 
 		// System content stays as string
-		expect(backToMessageDocs[0].message?.content).toBe(
+		expect(backToMessageDocs[0]!.message?.content).toBe(
 			"You are a helpful assistant.",
 		);
 	});
@@ -135,21 +135,21 @@ describe("fromUIMessages round-trip tests", () => {
 		});
 
 		expect(uiMessages).toHaveLength(1);
-		expect(uiMessages[0].text).toBe("Here's my response.");
+		expect(uiMessages[0]!.text).toBe("Here's my response.");
 
 		// Check that reasoning parts are preserved in UI message
-		const reasoningParts = uiMessages[0].parts.filter(
+		const reasoningParts = uiMessages[0]!.parts.filter(
 			(part) => part.type === "reasoning",
 		);
 		expect(reasoningParts).toHaveLength(1);
-		expect(reasoningParts[0]).toMatchObject({
+		expect(reasoningParts[0]!).toMatchObject({
 			type: "reasoning",
 			text: "Let me think about this...",
 		});
 
 		expect(backToMessageDocs).toHaveLength(1);
-		expect(backToMessageDocs[0].text).toBe("Here's my response.");
-		expect(backToMessageDocs[0].reasoning).toBe("Let me think about this...");
+		expect(backToMessageDocs[0]!.text).toBe("Here's my response.");
+		expect(backToMessageDocs[0]!.reasoning).toBe("Let me think about this...");
 	});
 
 	it("handles tool calls and groups them correctly", () => {
@@ -202,7 +202,7 @@ describe("fromUIMessages round-trip tests", () => {
 
 			// Should be grouped into single UI message
 			expect(uiMessages).toHaveLength(1);
-			const uiMessage = uiMessages[0];
+			const uiMessage = uiMessages[0]!;
 			expect(uiMessage.role).toBe("assistant");
 			expect(uiMessage.id).toBe("msg1");
 
@@ -211,7 +211,7 @@ describe("fromUIMessages round-trip tests", () => {
 				(part) => part.type === "tool-calculator",
 			);
 			expect(toolParts).toHaveLength(1);
-			expect(toolParts[0]).toMatchObject({
+			expect(toolParts[0]!).toMatchObject({
 				type: "tool-calculator",
 				toolCallId: "call1",
 				state: "output-available",
@@ -225,8 +225,8 @@ describe("fromUIMessages round-trip tests", () => {
 			// Check that tool information is preserved
 			const toolMessages = backToMessageDocs.filter((msg) => msg.tool);
 			expect(toolMessages.length).toBeGreaterThan(0);
-			expect(toolMessages[0].stepOrder).toBe(1);
-			expect(toolMessages[1].stepOrder).toBe(2);
+			expect(toolMessages[0]!.stepOrder).toBe(1);
+			expect(toolMessages[1]!.stepOrder).toBe(2);
 		}
 	});
 
@@ -257,20 +257,20 @@ describe("fromUIMessages round-trip tests", () => {
 		});
 
 		expect(uiMessages).toHaveLength(1);
-		expect(uiMessages[0].role).toBe("user");
-		expect(uiMessages[0].text).toBe("What's in this image?");
+		expect(uiMessages[0]!.role).toBe("user");
+		expect(uiMessages[0]!.text).toBe("What's in this image?");
 
 		// Check file parts exist in UI message
-		const fileParts = uiMessages[0].parts.filter(
+		const fileParts = uiMessages[0]!.parts.filter(
 			(part) => part.type === "file",
 		);
 		expect(fileParts).toHaveLength(1);
 
 		expect(backToMessageDocs).toHaveLength(1);
-		expect(backToMessageDocs[0].text).toBe("What's in this image?");
+		expect(backToMessageDocs[0]!.text).toBe("What's in this image?");
 
 		// Check file content is preserved
-		const content = backToMessageDocs[0].message?.content;
+		const content = backToMessageDocs[0]!.message?.content;
 		expect(Array.isArray(content)).toBe(true);
 		if (Array.isArray(content)) {
 			const fileContent = content.find((c) => c.type === "file");
@@ -322,14 +322,14 @@ describe("fromUIMessages round-trip tests", () => {
 		expect(uiMessages).toHaveLength(1);
 
 		// Check source parts exist in UI message
-		const sourceParts = uiMessages[0].parts.filter(
+		const sourceParts = uiMessages[0]!.parts.filter(
 			(part) => part.type === "source-url" || part.type === "source-document",
 		);
 		expect(sourceParts).toHaveLength(2);
 
 		expect(backToMessageDocs).toHaveLength(1);
-		expect(backToMessageDocs[0].sources).toHaveLength(2);
-		expect(backToMessageDocs[0].sources![0]).toMatchObject({
+		expect(backToMessageDocs[0]!.sources).toHaveLength(2);
+		expect(backToMessageDocs[0]!.sources![0]!).toMatchObject({
 			type: "source",
 			sourceType: "url",
 			id: "source1",
@@ -361,10 +361,10 @@ describe("fromUIMessages round-trip tests", () => {
 		});
 
 		expect(uiMessages).toHaveLength(1);
-		expect(uiMessages[0].metadata).toEqual(testMetadata);
+		expect(uiMessages[0]!.metadata).toEqual(testMetadata);
 
 		expect(backToMessageDocs).toHaveLength(1);
-		expect(backToMessageDocs[0].metadata).toEqual(testMetadata);
+		expect(backToMessageDocs[0]!.metadata).toEqual(testMetadata);
 	});
 
 	it("handles streaming status correctly", () => {
@@ -386,11 +386,11 @@ describe("fromUIMessages round-trip tests", () => {
 		});
 
 		expect(uiMessages).toHaveLength(1);
-		expect(uiMessages[0].status).toBe("streaming");
+		expect(uiMessages[0]!.status).toBe("streaming");
 
 		expect(backToMessageDocs).toHaveLength(1);
-		expect(backToMessageDocs[0].streaming).toBe(true);
-		expect(backToMessageDocs[0].status).toBe("pending");
+		expect(backToMessageDocs[0]!.streaming).toBe(true);
+		expect(backToMessageDocs[0]!.status).toBe("pending");
 	});
 });
 
@@ -418,7 +418,7 @@ describe("fromUIMessages functionality tests", () => {
 			threadId: "custom-thread-id",
 		});
 		expect(result).toHaveLength(1);
-		expect(result[0].threadId).toBe("custom-thread-id");
+		expect(result[0]!.threadId).toBe("custom-thread-id");
 	});
 
 	it("correctly determines tool status", () => {
@@ -477,12 +477,12 @@ describe("fromUIMessages functionality tests", () => {
 		// Should have tool messages
 		const toolMessages = result.filter((msg) => msg.tool);
 		expect(toolMessages.length).toBe(1);
-		expect(toolMessages[0].message?.role).toBe("assistant");
-		expect(toolMessages[0].message?.content[0]).toMatchObject({
+		expect(toolMessages[0]!.message?.role).toBe("assistant");
+		expect(toolMessages[0]!.message?.content[0]!).toMatchObject({
 			type: "text",
 			text: "Tool call",
 		});
-		expect(toolMessages[0].message?.content[1]).toMatchObject({
+		expect(toolMessages[0]!.message?.content[1]!).toMatchObject({
 			args: { a: 1, b: 2 },
 			toolCallId: "call1",
 			toolName: "calculator",

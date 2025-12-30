@@ -48,13 +48,13 @@ describe("dedupeMessages", () => {
 		const result = dedupeMessages(messages, streamMessages);
 
 		expect(result).toHaveLength(2);
-		expect(result[0]).toEqual({
+		expect(result[0]!).toEqual({
 			order: 1,
 			stepOrder: 0,
 			status: "success",
 			id: "finalized1",
 		});
-		expect(result[1]).toEqual({
+		expect(result[1]!).toEqual({
 			order: 2,
 			stepOrder: 0,
 			status: "success",
@@ -73,7 +73,7 @@ describe("dedupeMessages", () => {
 		const result = dedupeMessages(messages, streamMessages);
 
 		expect(result).toHaveLength(1);
-		expect(result[0]).toEqual({
+		expect(result[0]!).toEqual({
 			order: 1,
 			stepOrder: 0,
 			status: "streaming",
@@ -92,7 +92,7 @@ describe("dedupeMessages", () => {
 		const result = dedupeMessages(messages, streamMessages);
 
 		expect(result).toHaveLength(1);
-		expect(result[0]).toEqual({
+		expect(result[0]!).toEqual({
 			order: 1,
 			stepOrder: 0,
 			status: "success",
@@ -117,35 +117,35 @@ describe("dedupeMessages", () => {
 
 		expect(result).toHaveLength(5);
 		// Order 1: streaming should replace pending
-		expect(result[0]).toEqual({
+		expect(result[0]!).toEqual({
 			order: 1,
 			stepOrder: 0,
 			status: "streaming",
 			id: "streaming1",
 		});
 		// Order 2: success should be kept over streaming
-		expect(result[1]).toEqual({
+		expect(result[1]!).toEqual({
 			order: 2,
 			stepOrder: 0,
 			status: "success",
 			id: "success2",
 		});
 		// Order 3: failed should be kept (no streaming equivalent)
-		expect(result[2]).toEqual({
+		expect(result[2]!).toEqual({
 			order: 3,
 			stepOrder: 0,
 			status: "failed",
 			id: "failed3",
 		});
 		// Order 4: success should be kept (no streaming equivalent)
-		expect(result[3]).toEqual({
+		expect(result[3]!).toEqual({
 			order: 4,
 			stepOrder: 0,
 			status: "success",
 			id: "success4",
 		});
 		// Order 5: streaming should be added (no messages equivalent)
-		expect(result[4]).toEqual({
+		expect(result[4]!).toEqual({
 			order: 5,
 			stepOrder: 0,
 			status: "streaming",
@@ -167,21 +167,21 @@ describe("dedupeMessages", () => {
 
 		expect(result).toHaveLength(3);
 		// Order 1, stepOrder 0: streaming should replace pending
-		expect(result[0]).toEqual({
+		expect(result[0]!).toEqual({
 			order: 1,
 			stepOrder: 0,
 			status: "streaming",
 			id: "streaming1-0",
 		});
 		// Order 1, stepOrder 1: success should be kept
-		expect(result[1]).toEqual({
+		expect(result[1]!).toEqual({
 			order: 1,
 			stepOrder: 1,
 			status: "success",
 			id: "success1-1",
 		});
 		// Order 1, stepOrder 2: streaming should be added
-		expect(result[2]).toEqual({
+		expect(result[2]!).toEqual({
 			order: 1,
 			stepOrder: 2,
 			status: "streaming",
@@ -204,25 +204,25 @@ describe("dedupeMessages", () => {
 
 		expect(result).toHaveLength(4);
 		// Should be sorted by order, then stepOrder
-		expect(result[0]).toEqual({
+		expect(result[0]!).toEqual({
 			order: 1,
 			stepOrder: 0,
 			status: "streaming",
 			id: "stream1-0",
 		});
-		expect(result[1]).toEqual({
+		expect(result[1]!).toEqual({
 			order: 1,
 			stepOrder: 1,
 			status: "success",
 			id: "msg1-1",
 		});
-		expect(result[2]).toEqual({
+		expect(result[2]!).toEqual({
 			order: 2,
 			stepOrder: 0,
 			status: "streaming",
 			id: "stream2",
 		});
-		expect(result[3]).toEqual({
+		expect(result[3]!).toEqual({
 			order: 3,
 			stepOrder: 0,
 			status: "success",
@@ -250,6 +250,6 @@ describe("dedupeMessages", () => {
 		expect(result).toHaveLength(1);
 		// The result depends on which array comes first in messages.concat(streamMessages)
 		// Since messages comes first, it should win when both have same status
-		expect(result[0].id).toBe("messages-success");
+		expect(result[0]!.id).toBe("messages-success");
 	});
 });

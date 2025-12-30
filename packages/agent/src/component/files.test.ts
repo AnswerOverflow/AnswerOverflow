@@ -112,7 +112,7 @@ describe("files", () => {
 					},
 				});
 			expect(page.length).toBe(1);
-			seen.push(page[0]._id);
+			seen.push(page[0]!._id);
 			cursor = continueCursor;
 			expect(isDone).toBe(false);
 		}

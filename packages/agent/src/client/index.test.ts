@@ -315,7 +315,7 @@ describe("Agent message operations", () => {
 			}),
 		);
 		expect(messages.length).toBe(2);
-		expect(messages[1]._id).toBeDefined();
+		expect(messages[1]!._id).toBeDefined();
 	});
 });
 
@@ -392,7 +392,7 @@ describe("Agent-generated mutations/actions/queries", () => {
 			],
 		});
 		expect(result.messages.length).toBe(1);
-		expect(result.messages[0]._id).toBeDefined();
+		expect(result.messages[0]!._id).toBeDefined();
 	});
 });
 

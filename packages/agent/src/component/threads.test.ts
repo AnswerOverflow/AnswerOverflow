@@ -148,8 +148,8 @@ describe("threads", () => {
 			order: "desc",
 		});
 
-		expect(descResult.page[0]._id).toBe(thread2._id);
-		expect(descResult.page[1]._id).toBe(thread1._id);
+		expect(descResult.page[0]!._id).toBe(thread2._id);
+		expect(descResult.page[1]!._id).toBe(thread1._id);
 
 		// Test ascending order
 		const ascResult = await t.query(api.threads.listThreadsByUserId, {
@@ -157,8 +157,8 @@ describe("threads", () => {
 			order: "asc",
 		});
 
-		expect(ascResult.page[0]._id).toBe(thread1._id);
-		expect(ascResult.page[1]._id).toBe(thread2._id);
+		expect(ascResult.page[0]!._id).toBe(thread1._id);
+		expect(ascResult.page[1]!._id).toBe(thread2._id);
 	});
 
 	test("updateThread updates thread fields", async () => {
@@ -558,9 +558,9 @@ describe("threads", () => {
 		});
 
 		expect(user1Threads.page).toHaveLength(1);
-		expect(user1Threads.page[0]._id).toBe(thread1._id);
+		expect(user1Threads.page[0]!._id).toBe(thread1._id);
 
 		expect(user2Threads.page).toHaveLength(1);
-		expect(user2Threads.page[0]._id).toBe(thread2._id);
+		expect(user2Threads.page[0]!._id).toBe(thread2._id);
 	});
 });

@@ -174,10 +174,10 @@ describe("mergeDeltas", () => {
 			deltas,
 		);
 		expect(messages).toHaveLength(1);
-		expect(messages[0].text).toBe("Hello");
-		expect(messages[0].role).toBe("assistant");
+		expect(messages[0]!.text).toBe("Hello");
+		expect(messages[0]!.role).toBe("assistant");
 		expect(changed).toBe(true);
-		expect(newStreams[0].cursor).toBe(5);
+		expect(newStreams[0]!.cursor).toBe(5);
 	});
 
 	it("merges multiple deltas for the same stream", () => {
@@ -203,9 +203,9 @@ describe("mergeDeltas", () => {
 			deltas,
 		);
 		expect(messages).toHaveLength(1);
-		expect(messages[0].text).toBe("Hello World!");
+		expect(messages[0]!.text).toBe("Hello World!");
 		expect(changed).toBe(true);
-		expect(newStreams[0].cursor).toBe(11);
+		expect(newStreams[0]!.cursor).toBe(11);
 	});
 
 	it("handles tool-call and tool-result parts", () => {
@@ -270,7 +270,7 @@ describe("mergeDeltas", () => {
 			deltas,
 		);
 		expect(changed).toBe(false);
-		expect(newStreams[0].cursor).toBe(0);
+		expect(newStreams[0]!.cursor).toBe(0);
 	});
 
 	it("handles multiple streams and sorts by order/stepOrder", () => {
@@ -298,12 +298,12 @@ describe("mergeDeltas", () => {
 			deltas,
 		);
 		expect(messages).toHaveLength(2);
-		expect(messages[0].text).toBe("A");
-		expect(messages[1].text).toBe("B");
+		expect(messages[0]!.text).toBe("A");
+		expect(messages[1]!.text).toBe("B");
 		expect(changed).toBe(true);
 		// Sorted by order
-		expect(messages[0].order).toBe(1);
-		expect(messages[1].order).toBe(2);
+		expect(messages[0]!.order).toBe(1);
+		expect(messages[1]!.order).toBe(2);
 	});
 
 	it("does not duplicate text content when merging sequential text-deltas", () => {
@@ -335,13 +335,13 @@ describe("mergeDeltas", () => {
 			deltas,
 		);
 		expect(messages).toHaveLength(1);
-		expect(messages[0].text).toBe("Hello World!!");
+		expect(messages[0]!.text).toBe("Hello World!!");
 		// There should only be one text part per message
-		const content = messages[0].parts;
+		const content = messages[0]!.parts;
 		if (Array.isArray(content)) {
 			const textParts = content.filter((p) => p.type === "text");
 			expect(textParts).toHaveLength(1);
-			expect(textParts[0].text).toBe("Hello World!!");
+			expect(textParts[0]!.text).toBe("Hello World!!");
 		}
 	});
 
@@ -379,13 +379,13 @@ describe("mergeDeltas", () => {
 			deltas,
 		);
 		expect(messages).toHaveLength(1);
-		if (Array.isArray(messages[0].parts)) {
-			const reasoningParts = messages[0].parts.filter(
+		if (Array.isArray(messages[0]!.parts)) {
+			const reasoningParts = messages[0]!.parts.filter(
 				(p) => p.type === "reasoning",
 			);
 			expect(reasoningParts).toHaveLength(1);
-			expect(reasoningParts[0].text).toBe("I'm thinking... Still thinking...");
-			expect(reasoningParts[0].state).toBe("done");
+			expect(reasoningParts[0]!.text).toBe("I'm thinking... Still thinking...");
+			expect(reasoningParts[0]!.state).toBe("done");
 		}
 	});
 

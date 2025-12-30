@@ -231,8 +231,8 @@ describe("search.ts", () => {
 
 			const result = filterOutOrphanedToolMessages(messages);
 			expect(result).toHaveLength(2);
-			expect(result[0]._id).toBe("0");
-			expect(result[1]._id).toBe("3");
+			expect(result[0]!._id).toBe("0");
+			expect(result[1]!._id).toBe("3");
 		});
 	});
 
@@ -275,8 +275,8 @@ describe("search.ts", () => {
 			});
 
 			expect(result.length).toBe(2);
-			expect(result[0]._id).toBe("1"); // Should be reversed back to asc order
-			expect(result[1]._id).toBe("2");
+			expect(result[0]!._id).toBe("1"); // Should be reversed back to asc order
+			expect(result[1]!._id).toBe("2");
 		});
 
 		it("should skip recent messages when recentMessages is 0", async () => {
@@ -313,7 +313,7 @@ describe("search.ts", () => {
 			});
 
 			expect(result.length).toBe(1);
-			expect(result[0]._id).toBe("search1");
+			expect(result[0]!._id).toBe("search1");
 		});
 
 		it("should throw error when trying to search in non-action context", async () => {
@@ -363,7 +363,7 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(1);
-			expect(result.messages[0]).toEqual({
+			expect(result.messages[0]!).toEqual({
 				role: "user",
 				content: "Hello, how are you?",
 			});
@@ -417,9 +417,9 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(3);
-			expect(result.messages[0].content).toBe("Context message 1");
-			expect(result.messages[1].content).toBe("Context response 1");
-			expect(result.messages[2]).toEqual({
+			expect(result.messages[0]!.content).toBe("Context message 1");
+			expect(result.messages[1]!.content).toBe("Context response 1");
+			expect(result.messages[2]!).toEqual({
 				role: "user",
 				content: "New prompt",
 			});
@@ -439,9 +439,9 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(3);
-			expect(result.messages[0]).toEqual(inputMessages[0]);
-			expect(result.messages[1]).toEqual(inputMessages[1]);
-			expect(result.messages[2]).toEqual({
+			expect(result.messages[0]!).toEqual(inputMessages[0]!);
+			expect(result.messages[1]!).toEqual(inputMessages[1]!);
+			expect(result.messages[2]!).toEqual({
 				role: "user",
 				content: "Final prompt",
 			});
@@ -479,12 +479,12 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(3);
-			expect(result.messages[0].content).toBe("Before prompt");
-			expect(result.messages[1]).toEqual({
+			expect(result.messages[0]!.content).toBe("Before prompt");
+			expect(result.messages[1]!).toEqual({
 				role: "user",
 				content: "New replacement prompt",
 			});
-			expect(result.messages[2].content).toBe("After prompt");
+			expect(result.messages[2]!.content).toBe("After prompt");
 			expect(result.order).toBe(2);
 		});
 
@@ -520,9 +520,9 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(3);
-			expect(result.messages[0].content).toBe("Before prompt");
-			expect(result.messages[1].content).toBe("Original prompt");
-			expect(result.messages[2].content).toBe("After prompt");
+			expect(result.messages[0]!.content).toBe("Before prompt");
+			expect(result.messages[1]!.content).toBe("Original prompt");
+			expect(result.messages[2]!.content).toBe("After prompt");
 		});
 
 		it("should handle complex message ordering correctly", async () => {
@@ -561,10 +561,10 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(4);
-			expect(result.messages[0].content).toBe("Context 1"); // Pre-prompt
-			expect(result.messages[1].content).toBe("Input message"); // Input messages
-			expect(result.messages[2].content).toBe("New prompt"); // New prompt
-			expect(result.messages[3].content).toBe("Context 2"); // Post-prompt
+			expect(result.messages[0]!.content).toBe("Context 1"); // Pre-prompt
+			expect(result.messages[1]!.content).toBe("Input message"); // Input messages
+			expect(result.messages[2]!.content).toBe("New prompt"); // New prompt
+			expect(result.messages[3]!.content).toBe("Context 2"); // Post-prompt
 		});
 
 		it("should handle empty context and messages", async () => {
@@ -610,10 +610,10 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(4);
-			expect(result.messages[0].content).toBe("Hello");
-			expect(result.messages[1].content).toBe("Hi there!");
-			expect(result.messages[2].content).toBe("How are you?");
-			expect(result.messages[3]).toEqual({
+			expect(result.messages[0]!.content).toBe("Hello");
+			expect(result.messages[1]!.content).toBe("Hi there!");
+			expect(result.messages[2]!.content).toBe("How are you?");
+			expect(result.messages[3]!).toEqual({
 				role: "user",
 				content: "What's the weather?",
 			});
@@ -641,7 +641,7 @@ describe("search.ts", () => {
 				});
 			});
 
-			const promptMessageId = savedMessages[1]._id; // The prompt message
+			const promptMessageId = savedMessages[1]!._id; // The prompt message
 
 			const result = await fetchContextWithPrompt(ctx, components.agent, {
 				...baseArgs,
@@ -654,12 +654,12 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(3);
-			expect(result.messages[0].content).toBe("Before prompt");
-			expect(result.messages[1]).toEqual({
+			expect(result.messages[0]!.content).toBe("Before prompt");
+			expect(result.messages[1]!).toEqual({
 				role: "user",
 				content: "New replacement prompt",
 			});
-			expect(result.messages[2].content).toBe("Assistant response");
+			expect(result.messages[2]!.content).toBe("Assistant response");
 			// The prompt is the second user message, each on a new order.
 			expect(result.order).toBe(1);
 			expect(result.stepOrder).toBe(0);
@@ -689,11 +689,11 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(5);
-			expect(result.messages[0].content).toBe("Context message");
-			expect(result.messages[1].content).toBe("Context response");
-			expect(result.messages[2].content).toBe("Input message 1");
-			expect(result.messages[3].content).toBe("Input message 2");
-			expect(result.messages[4]).toEqual({
+			expect(result.messages[0]!.content).toBe("Context message");
+			expect(result.messages[1]!.content).toBe("Context response");
+			expect(result.messages[2]!.content).toBe("Input message 1");
+			expect(result.messages[3]!.content).toBe("Input message 2");
+			expect(result.messages[4]!).toEqual({
 				role: "user",
 				content: "Final prompt",
 			});
@@ -722,9 +722,9 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(3); // 2 context + 1 prompt
-			expect(result.messages[0].content).toBe("Response 2"); // 4th message
-			expect(result.messages[1].content).toBe("Message 3"); // 5th message
-			expect(result.messages[2]).toEqual({
+			expect(result.messages[0]!.content).toBe("Response 2"); // 4th message
+			expect(result.messages[1]!.content).toBe("Message 3"); // 5th message
+			expect(result.messages[2]!).toEqual({
 				role: "user",
 				content: "New prompt",
 			});
@@ -746,7 +746,7 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(1);
-			expect(result.messages[0]).toEqual({
+			expect(result.messages[0]!).toEqual({
 				role: "user",
 				content: "Only prompt",
 			});
@@ -816,10 +816,10 @@ describe("search.ts", () => {
 
 			// Result should follow the custom order: inputMessages, inputPrompt, recent
 			expect(result.messages).toHaveLength(4);
-			expect(result.messages[0].content).toBe("Input message"); // inputMessages
-			expect(result.messages[1].content).toBe("Custom prompt"); // inputPrompt
-			expect(result.messages[2].content).toBe("Recent message 1"); // recent
-			expect(result.messages[3].content).toBe("Recent response 1"); // recent
+			expect(result.messages[0]!.content).toBe("Input message"); // inputMessages
+			expect(result.messages[1]!.content).toBe("Custom prompt"); // inputPrompt
+			expect(result.messages[2]!.content).toBe("Recent message 1"); // recent
+			expect(result.messages[3]!.content).toBe("Recent response 1"); // recent
 		});
 
 		it("should allow contextHandler to filter out messages", async () => {
@@ -858,9 +858,9 @@ describe("search.ts", () => {
 
 			// Should only have user messages and the prompt
 			expect(result.messages).toHaveLength(3);
-			expect(result.messages[0].content).toBe("Keep this message");
-			expect(result.messages[1].content).toBe("Keep this too");
-			expect(result.messages[2].content).toBe("Filter prompt");
+			expect(result.messages[0]!.content).toBe("Keep this message");
+			expect(result.messages[1]!.content).toBe("Keep this too");
+			expect(result.messages[2]!.content).toBe("Filter prompt");
 
 			// Should not contain the filtered assistant message
 			expect(
@@ -897,12 +897,12 @@ describe("search.ts", () => {
 			});
 
 			expect(result.messages).toHaveLength(3);
-			expect(result.messages[0].role).toBe("system");
-			expect(result.messages[0].content).toBe(
+			expect(result.messages[0]!.role).toBe("system");
+			expect(result.messages[0]!.content).toBe(
 				"This is a custom system message added by contextHandler",
 			);
-			expect(result.messages[1].content).toBe("Original message");
-			expect(result.messages[2].content).toBe("Test prompt");
+			expect(result.messages[1]!.content).toBe("Original message");
+			expect(result.messages[2]!.content).toBe("Test prompt");
 		});
 
 		it("should work with search messages in contextHandler", async () => {
@@ -972,7 +972,7 @@ describe("search.ts", () => {
 				});
 			});
 
-			const promptMessageId = savedMessages[1]._id; // The prompt message
+			const promptMessageId = savedMessages[1]!._id; // The prompt message
 
 			const contextHandler = vi.fn(async (ctx, args) => {
 				// Put existing responses first to test they're properly identified
@@ -1007,10 +1007,10 @@ describe("search.ts", () => {
 			);
 
 			expect(result.messages).toHaveLength(4);
-			expect(result.messages[0].content).toBe("Before prompt");
-			expect(result.messages[1].content).toBe("Existing response 1");
-			expect(result.messages[2].content).toBe("Existing response 2");
-			expect(result.messages[3].content).toBe("New replacement prompt");
+			expect(result.messages[0]!.content).toBe("Before prompt");
+			expect(result.messages[1]!.content).toBe("Existing response 1");
+			expect(result.messages[2]!.content).toBe("Existing response 2");
+			expect(result.messages[3]!.content).toBe("New replacement prompt");
 		});
 
 		it("should work without contextHandler (default behavior)", async () => {
@@ -1033,9 +1033,9 @@ describe("search.ts", () => {
 
 			// Should follow default order: recent, input, prompt
 			expect(result.messages).toHaveLength(3);
-			expect(result.messages[0].content).toBe("Default order test"); // recent
-			expect(result.messages[1].content).toBe("Input message"); // inputMessages
-			expect(result.messages[2].content).toBe("Default prompt"); // inputPrompt
+			expect(result.messages[0]!.content).toBe("Default order test"); // recent
+			expect(result.messages[1]!.content).toBe("Input message"); // inputMessages
+			expect(result.messages[2]!.content).toBe("Default prompt"); // inputPrompt
 		});
 	});
 });

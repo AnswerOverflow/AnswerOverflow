@@ -315,7 +315,7 @@ describe("agent", () => {
 			threadId: thread._id as Id<"threads">,
 			messages: [{ message: { role: "user", content: "hello" } }],
 		});
-		const messageId = messages[0]._id as Id<"messages">;
+		const messageId = messages[0]!._id as Id<"messages">;
 
 		const updatedMessage = await t.mutation(api.messages.updateMessage, {
 			messageId,
@@ -339,10 +339,10 @@ describe("agent", () => {
 				{ message: { role: "assistant", content: "hello" }, status: "pending" },
 			],
 		});
-		const messageId = messages[0]._id as Id<"messages">;
+		const messageId = messages[0]!._id as Id<"messages">;
 
 		// Initial status should be pending
-		expect(messages[0].status).toBe("pending");
+		expect(messages[0]!.status).toBe("pending");
 
 		// Update to success
 		const updatedMessage = await t.mutation(api.messages.updateMessage, {
@@ -364,7 +364,7 @@ describe("agent", () => {
 				{ message: { role: "assistant", content: "hello" }, status: "pending" },
 			],
 		});
-		const messageId = messages[0]._id as Id<"messages">;
+		const messageId = messages[0]!._id as Id<"messages">;
 
 		const updatedMessage = await t.mutation(api.messages.updateMessage, {
 			messageId,
@@ -398,7 +398,7 @@ describe("agent", () => {
 				},
 			],
 		});
-		const messageId = messages[0]._id as Id<"messages">;
+		const messageId = messages[0]!._id as Id<"messages">;
 
 		const updatedMessage = await t.mutation(api.messages.updateMessage, {
 			messageId,
@@ -457,10 +457,10 @@ describe("agent", () => {
 
 		const messageIds = messages.map((m) => m._id as Id<"messages">);
 		const deletedIds = await t.mutation(api.messages.deleteByIds, {
-			messageIds: [messageIds[0], messageIds[2]], // Delete first and third messages
+			messageIds: [messageIds[0]!, messageIds[2]!], // Delete first and third messages
 		});
 
-		expect(deletedIds).toEqual([messageIds[0], messageIds[2]]);
+		expect(deletedIds).toEqual([messageIds[0]!, messageIds[2]!]);
 
 		// Verify messages are actually deleted
 		const remainingMessages = await t.query(
@@ -468,7 +468,7 @@ describe("agent", () => {
 			{ threadId: thread._id as Id<"threads">, order: "asc" },
 		);
 		expect(remainingMessages.page).toHaveLength(1);
-		expect(remainingMessages.page[0]._id).toBe(messageIds[1]);
+		expect(remainingMessages.page[0]!._id).toBe(messageIds[1]!);
 	});
 
 	test("deleteByIds handles non-existent message IDs gracefully", async () => {
@@ -481,7 +481,7 @@ describe("agent", () => {
 			messages: [{ message: { role: "user", content: "hello" } }],
 		});
 
-		const messageId = messages[0]._id as Id<"messages">;
+		const messageId = messages[0]!._id as Id<"messages">;
 		const validDeletedIds = await t.mutation(api.messages.deleteByIds, {
 			messageIds: [messageId],
 		});
@@ -550,7 +550,7 @@ describe("agent", () => {
 		);
 
 		expect(remainingMessages.page).toHaveLength(1); // Should have messages from order 2
-		expect(remainingMessages.page[0].message!.content).toBe(
+		expect(remainingMessages.page[0]!.message!.content).toBe(
 			"message order 2, step 0",
 		);
 	});

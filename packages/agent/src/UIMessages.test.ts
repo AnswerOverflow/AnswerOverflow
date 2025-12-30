@@ -51,11 +51,11 @@ describe("combineUIMessages", () => {
 		const combined = combineUIMessages([message1, message2]);
 
 		expect(combined).toHaveLength(1);
-		expect(combined[0].role).toBe("assistant");
-		expect(combined[0].text).toBe("The result is 5.");
-		expect(combined[0].parts).toHaveLength(2);
+		expect(combined[0]!.role).toBe("assistant");
+		expect(combined[0]!.text).toBe("The result is 5.");
+		expect(combined[0]!.parts).toHaveLength(2);
 
-		const toolPart = combined[0].parts.find(
+		const toolPart = combined[0]!.parts.find(
 			(p) => p.type === "tool-calculator",
 		);
 		expect(toolPart).toMatchObject({
@@ -66,7 +66,7 @@ describe("combineUIMessages", () => {
 			output: { result: 5 },
 		});
 
-		const textPart = combined[0].parts.find((p) => p.type === "text");
+		const textPart = combined[0]!.parts.find((p) => p.type === "text");
 		expect(textPart).toMatchObject({
 			type: "text",
 			text: "The result is 5.",
@@ -108,8 +108,8 @@ describe("combineUIMessages", () => {
 		const combined = combineUIMessages([userMessage, assistantMessage]);
 
 		expect(combined).toHaveLength(2);
-		expect(combined[0]).toEqual(userMessage);
-		expect(combined[1]).toEqual(assistantMessage);
+		expect(combined[0]!).toEqual(userMessage);
+		expect(combined[1]!).toEqual(assistantMessage);
 	});
 
 	it("combines multiple tool calls across pages", () => {
@@ -175,11 +175,11 @@ describe("combineUIMessages", () => {
 		const combined = combineUIMessages([message1, message2]);
 
 		expect(combined).toHaveLength(1);
-		expect(combined[0].role).toBe("assistant");
-		expect(combined[0].text).toBe("The formatted result is: 5");
-		expect(combined[0].parts).toHaveLength(3);
+		expect(combined[0]!.role).toBe("assistant");
+		expect(combined[0]!.text).toBe("The formatted result is: 5");
+		expect(combined[0]!.parts).toHaveLength(3);
 
-		const calculatorPart = combined[0].parts.find(
+		const calculatorPart = combined[0]!.parts.find(
 			(p) =>
 				p.type === "tool-calculator" &&
 				"toolCallId" in p &&
@@ -193,7 +193,7 @@ describe("combineUIMessages", () => {
 			output: { result: 5 },
 		});
 
-		const formatterPart = combined[0].parts.find(
+		const formatterPart = combined[0]!.parts.find(
 			(p) =>
 				p.type === "tool-formatter" &&
 				"toolCallId" in p &&
@@ -250,11 +250,11 @@ describe("combineUIMessages", () => {
 		const combined = combineUIMessages([message1, message2]);
 
 		expect(combined).toHaveLength(1);
-		expect(combined[0].role).toBe("assistant");
-		expect(combined[0].text).toBe("Still processing...");
-		expect(combined[0].parts).toHaveLength(2);
+		expect(combined[0]!.role).toBe("assistant");
+		expect(combined[0]!.text).toBe("Still processing...");
+		expect(combined[0]!.parts).toHaveLength(2);
 
-		const toolPart = combined[0].parts.find((p) => p.type === "dynamic-tool");
+		const toolPart = combined[0]!.parts.find((p) => p.type === "dynamic-tool");
 		expect(toolPart).toMatchObject({
 			type: "dynamic-tool",
 			state: "input-available",
@@ -263,7 +263,7 @@ describe("combineUIMessages", () => {
 			input: { operation: "add", a: 2, b: 3 },
 		});
 
-		const textPart = combined[0].parts.find((p) => p.type === "text");
+		const textPart = combined[0]!.parts.find((p) => p.type === "text");
 		expect(textPart).toMatchObject({
 			type: "text",
 			text: "Still processing...",
