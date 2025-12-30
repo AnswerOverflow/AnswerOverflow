@@ -1,0 +1,153 @@
+{
+	"name": "@convex-dev/agent",
+	"description": "A agent component for Convex.",
+	"repository": "github:get-convex/agent",
+	"homepage": "https://github.com/get-convex/agent#readme",
+	"bugs": {
+		"email": "support@convex.dev",
+		"url": "https://github.com/get-convex/agent/issues"
+	},
+	"version": "0.3.2",
+	"license": "Apache-2.0",
+	"keywords": [
+		"convex",
+		"ai",
+		"agent",
+		"component"
+	],
+	"type": "module",
+	"scripts": {
+		"setup": "node setup.cjs --init",
+		"dev": "run-p -r 'dev:*'",
+		"dev:backend": "convex dev --typecheck-components",
+		"dev:frontend": "cd example && vite --clearScreen false",
+		"dev:build": "chokidar 'tsconfig*.json' 'src/**/*.ts' -i '**/*.test.ts' -c 'convex codegen --component-dir ./src/component && npm run build' --initial",
+		"predev": "path-exists .env.local || (npm run build && convex dev --once)",
+		"clean": "rm -rf dist *.tsbuildinfo",
+		"build": "tsc --project ./tsconfig.build.json",
+		"typecheck": "tsc --noEmit && tsc -p example && tsc -p example/convex",
+		"lint": "eslint .",
+		"all": "run-p -r 'dev:*' 'test:watch'",
+		"test": "vitest run --typecheck",
+		"test:watch": "vitest --typecheck --clearScreen false",
+		"test:debug": "vitest --inspect-brk --no-file-parallelism",
+		"test:coverage": "vitest run --coverage --coverage.reporter=text",
+		"prepare": "npm run build",
+		"alpha": "npm run clean && npm ci && run-p test lint typecheck && npm version prerelease --preid alpha && npm publish --tag alpha && git push --tags",
+		"release": "npm run clean && npm ci && run-p test lint typecheck && npm version patch && npm publish && git push --tags",
+		"version": "pbcopy <<<$npm_package_version; vim CHANGELOG.md && prettier -w CHANGELOG.md && git add CHANGELOG.md"
+	},
+	"files": [
+		"dist",
+		"src"
+	],
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"types": "./dist/client/index.d.ts",
+			"default": "./dist/client/index.js"
+		},
+		"./validators": {
+			"types": "./dist/validators.d.ts",
+			"default": "./dist/validators.js"
+		},
+		"./react": {
+			"types": "./dist/react/index.d.ts",
+			"default": "./dist/react/index.js"
+		},
+		"./test": "./src/test.ts",
+		"./_generated/component.js": {
+			"types": "./dist/component/_generated/component.d.ts"
+		},
+		"./convex.config": {
+			"types": "./dist/component/convex.config.d.ts",
+			"default": "./dist/component/convex.config.js"
+		},
+		"./convex.config.js": {
+			"types": "./dist/component/convex.config.d.ts",
+			"default": "./dist/component/convex.config.js"
+		}
+	},
+	"peerDependencies": {
+		"@ai-sdk/provider-utils": "^3.0.7",
+		"ai": "^5.0.29",
+		"convex": "^1.24.8",
+		"convex-helpers": "^0.1.103",
+		"react": "^18.3.1 || ^19.0.0"
+	},
+	"peerDependenciesMeta": {
+		"react": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@ai-sdk/anthropic": "2.0.39",
+		"@ai-sdk/groq": "2.0.26",
+		"@ai-sdk/openai": "2.0.57",
+		"@ai-sdk/provider": "2.0.0",
+		"@ai-sdk/provider-utils": "3.0.14",
+		"@convex-dev/rag": "0.6.0",
+		"@convex-dev/rate-limiter": "0.3.0",
+		"@convex-dev/workflow": "0.3.2",
+		"@edge-runtime/vm": "5.0.0",
+		"@eslint/js": "9.38.0",
+		"@hookform/resolvers": "5.2.2",
+		"@langchain/textsplitters": "0.1.0",
+		"@openrouter/ai-sdk-provider": "1.2.0",
+		"@radix-ui/react-accordion": "1.2.12",
+		"@radix-ui/react-checkbox": "1.3.3",
+		"@radix-ui/react-label": "2.1.7",
+		"@radix-ui/react-select": "2.2.6",
+		"@radix-ui/react-slot": "1.2.3",
+		"@radix-ui/react-toast": "1.2.15",
+		"@tailwindcss/typography": "0.5.19",
+		"@types/node": "20.19.24",
+		"@types/react": "19.2.2",
+		"@types/react-dom": "19.2.2",
+		"@vitejs/plugin-react": "4.7.0",
+		"ai": "5.0.82",
+		"autoprefixer": "10.4.21",
+		"chokidar-cli": "3.0.0",
+		"class-variance-authority": "0.7.1",
+		"clsx": "2.1.1",
+		"convex": "1.29.3",
+		"convex-helpers": "0.1.104",
+		"convex-test": "0.0.38",
+		"cpy-cli": "5.0.0",
+		"dayjs": "1.11.18",
+		"dotenv": "16.6.1",
+		"eslint": "9.38.0",
+		"eslint-plugin-jsx-a11y": "6.10.2",
+		"eslint-plugin-react": "7.37.5",
+		"eslint-plugin-react-hooks": "^6",
+		"eslint-plugin-react-refresh": "0.4.24",
+		"globals": "16.4.0",
+		"lucide-react": "0.548.0",
+		"npm-run-all2": "8.0.4",
+		"ollama-ai-provider": "1.2.0",
+		"openai": "5.23.2",
+		"path-exists-cli": "^2.0.0",
+		"pkg-pr-new": "0.0.60",
+		"postcss": "8.5.6",
+		"prettier": "3.6.2",
+		"react": "19.2.3",
+		"react-dom": "19.2.3",
+		"react-hook-form": "7.65.0",
+		"react-markdown": "10.1.0",
+		"react-router-dom": "7.9.5",
+		"readline": "1.3.0",
+		"tailwind-merge": "3.3.1",
+		"tailwindcss": "3.4.18",
+		"tailwindcss-animate": "1.0.7",
+		"typescript": "5.9.3",
+		"typescript-eslint": "8.46.2",
+		"vite": "6.4.1",
+		"vitest": "3.2.4",
+		"zod": "3.25.76"
+	},
+	"types": "./dist/client/index.d.ts",
+	"module": "./dist/client/index.js",
+	"optionalDependencies": {
+		"@ungap/structured-clone": "^1.3.0"
+	}
+}

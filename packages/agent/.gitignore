@@ -1,0 +1,19 @@
+.DS_Store
+.idea
+*.local
+*.log
+/.vscode/
+/docs/.vitepress/cache
+dist
+dist-ssr
+explorations
+node_modules
+.eslintcache
+
+# this is a package-json-redirect stub dir, see https://github.com/andrewbranch/example-subpath-exports-ts-compat?tab=readme-ov-file
+react/package.json
+# npm pack output
+*.tgz
+
+*.tsbuildinfo
+.claude
