@@ -11,6 +11,13 @@ import {
 import { useSession } from "@packages/ui/components/convex-client-provider";
 import { EmptyStateCard } from "@packages/ui/components/empty";
 import { Input } from "@packages/ui/components/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@packages/ui/components/select";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import {
 	Table,
@@ -23,10 +30,24 @@ import {
 import { useCachedPaginatedQuery } from "@packages/ui/hooks/use-cached-paginated-query";
 import type { FunctionReturnType } from "convex/server";
 import { ChannelType } from "discord-api-types/v10";
-import { CheckCircle2, Hash, MessageSquare, Search } from "lucide-react";
+import {
+	ArrowDownAZ,
+	ArrowUpAZ,
+	CheckCircle2,
+	Hash,
+	MessageSquare,
+	Search,
+	Tag,
+} from "lucide-react";
 import { useParams } from "next/navigation";
-import { useQueryState } from "nuqs";
-import React, { useCallback, useEffect, useRef } from "react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+
+const SORT_OPTIONS = ["newest", "oldest"] as const;
+type SortOption = (typeof SORT_OPTIONS)[number];
+
+const STATUS_OPTIONS = ["all", "open", "solved", "closed"] as const;
+type StatusOption = (typeof STATUS_OPTIONS)[number];
 
 const DISCORD_EPOCH = 1420070400000n;
 
@@ -106,12 +127,21 @@ function getThreadStatus(
 	message: ThreadItem["message"],
 ) {
 	if (thread.archivedTimestamp) {
-		return { label: "Closed", variant: "secondary" as const };
+		return {
+			key: "closed" as const,
+			label: "Closed",
+			variant: "secondary" as const,
+		};
 	}
 	if ((message?.solutions.length ?? 0) > 0) {
-		return { label: "Solved", variant: "default" as const, icon: CheckCircle2 };
+		return {
+			key: "solved" as const,
+			label: "Solved",
+			variant: "default" as const,
+			icon: CheckCircle2,
+		};
 	}
-	return { label: "Open", variant: "secondary" as const };
+	return { key: "open" as const, label: "Open", variant: "secondary" as const };
 }
 
 function ThreadRow({ item }: { item: ThreadItem }) {
@@ -214,6 +244,20 @@ export default function ThreadsPage() {
 	const [searchQuery, setSearchQuery] = useQueryState("search", {
 		defaultValue: "",
 	});
+	const [sortOrder, setSortOrder] = useQueryState(
+		"sort",
+		parseAsStringLiteral(SORT_OPTIONS).withDefault("newest"),
+	);
+	const [statusFilter, setStatusFilter] = useQueryState(
+		"status",
+		parseAsStringLiteral(STATUS_OPTIONS).withDefault("all"),
+	);
+	const [channelFilter, setChannelFilter] = useQueryState("channel", {
+		defaultValue: "",
+	});
+	const [tagFilter, setTagFilter] = useQueryState("tag", {
+		defaultValue: "",
+	});
 
 	const { results, status, loadMore } = useCachedPaginatedQuery(
 		api.authenticated.threads.getThreadsForServer,
@@ -237,18 +281,76 @@ export default function ThreadsPage() {
 
 	const sentinelRef = useIntersectionObserver(handleLoadMore, canLoadMore);
 
-	const filteredThreads = React.useMemo(() => {
+	const parentChannels = useMemo(() => {
+		if (!results) return [];
+		const channelMap = new Map<string, { id: bigint; name: string }>();
+		for (const item of results) {
+			if (item.parentChannel) {
+				channelMap.set(item.parentChannel.id.toString(), {
+					id: item.parentChannel.id,
+					name: item.parentChannel.name,
+				});
+			}
+		}
+		return Array.from(channelMap.values()).sort((a, b) =>
+			a.name.localeCompare(b.name),
+		);
+	}, [results]);
+
+	const allTags = useMemo(() => {
+		if (!results) return [];
+		const tagMap = new Map<string, { id: bigint; name: string }>();
+		for (const item of results) {
+			for (const tag of item.tags) {
+				tagMap.set(tag.id.toString(), { id: tag.id, name: tag.name });
+			}
+		}
+		return Array.from(tagMap.values()).sort((a, b) =>
+			a.name.localeCompare(b.name),
+		);
+	}, [results]);
+
+	const filteredThreads = useMemo(() => {
 		if (!results) return [];
 
-		const query = searchQuery?.toLowerCase().trim();
-		if (!query) return results;
+		let filtered = results;
 
-		return results.filter(
-			(item) =>
-				item.thread.name.toLowerCase().includes(query) ||
-				item.message?.message.content.toLowerCase().includes(query),
-		);
-	}, [results, searchQuery]);
+		const query = searchQuery?.toLowerCase().trim();
+		if (query) {
+			filtered = filtered.filter(
+				(item) =>
+					item.thread.name.toLowerCase().includes(query) ||
+					item.message?.message.content.toLowerCase().includes(query),
+			);
+		}
+
+		if (statusFilter !== "all") {
+			filtered = filtered.filter((item) => {
+				const threadStatus = getThreadStatus(item.thread, item.message);
+				return threadStatus.key === statusFilter;
+			});
+		}
+
+		if (channelFilter) {
+			filtered = filtered.filter(
+				(item) => item.parentChannel?.id.toString() === channelFilter,
+			);
+		}
+
+		if (tagFilter) {
+			filtered = filtered.filter((item) =>
+				item.tags.some((tag) => tag.id.toString() === tagFilter),
+			);
+		}
+
+		if (sortOrder === "oldest") {
+			filtered = [...filtered].sort((a, b) =>
+				a.thread.id < b.thread.id ? -1 : 1,
+			);
+		}
+
+		return filtered;
+	}, [results, searchQuery, statusFilter, channelFilter, tagFilter, sortOrder]);
 
 	if (isLoadingFirstPage) {
 		return (
@@ -257,8 +359,12 @@ export default function ThreadsPage() {
 					<Skeleton className="h-8 w-32" />
 					<Skeleton className="h-5 w-64 mt-2" />
 				</div>
-				<div className="flex items-center gap-4">
-					<Skeleton className="h-10 w-80" />
+				<div className="flex flex-wrap items-center gap-3">
+					<Skeleton className="h-10 w-[200px]" />
+					<Skeleton className="h-10 w-[130px]" />
+					<Skeleton className="h-10 w-[180px]" />
+					<Skeleton className="h-10 w-[150px]" />
+					<Skeleton className="h-10 w-[130px]" />
 				</div>
 				<div className="border rounded-lg">
 					<Table>
@@ -305,8 +411,8 @@ export default function ThreadsPage() {
 				</p>
 			</div>
 
-			<div className="flex items-center gap-4">
-				<div className="relative flex-1 max-w-sm">
+			<div className="flex flex-wrap items-center gap-3">
+				<div className="relative flex-1 min-w-[200px] max-w-sm">
 					<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
 					<Input
 						type="search"
@@ -316,17 +422,108 @@ export default function ThreadsPage() {
 						className="pl-9"
 					/>
 				</div>
-				<div className="text-sm text-muted-foreground">
+
+				<Select
+					value={statusFilter}
+					onValueChange={(value: StatusOption) => setStatusFilter(value)}
+				>
+					<SelectTrigger className="w-[130px]">
+						<SelectValue placeholder="Status" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">All Status</SelectItem>
+						<SelectItem value="open">Open</SelectItem>
+						<SelectItem value="solved">Solved</SelectItem>
+						<SelectItem value="closed">Closed</SelectItem>
+					</SelectContent>
+				</Select>
+
+				{parentChannels.length > 0 && (
+					<Select
+						value={channelFilter || "all"}
+						onValueChange={(value) =>
+							setChannelFilter(value === "all" ? null : value)
+						}
+					>
+						<SelectTrigger className="w-[180px]">
+							<SelectValue placeholder="Channel" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Channels</SelectItem>
+							{parentChannels.map((channel) => (
+								<SelectItem
+									key={channel.id.toString()}
+									value={channel.id.toString()}
+								>
+									<span className="flex items-center gap-1.5">
+										<Hash className="size-3.5" />
+										{channel.name}
+									</span>
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				)}
+
+				{allTags.length > 0 && (
+					<Select
+						value={tagFilter || "all"}
+						onValueChange={(value) =>
+							setTagFilter(value === "all" ? null : value)
+						}
+					>
+						<SelectTrigger className="w-[150px]">
+							<SelectValue placeholder="Tag" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Tags</SelectItem>
+							{allTags.map((tag) => (
+								<SelectItem key={tag.id.toString()} value={tag.id.toString()}>
+									<span className="flex items-center gap-1.5">
+										<Tag className="size-3.5" />
+										{tag.name}
+									</span>
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				)}
+
+				<Select
+					value={sortOrder}
+					onValueChange={(value: SortOption) => setSortOrder(value)}
+				>
+					<SelectTrigger className="w-[130px]">
+						<SelectValue placeholder="Sort" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="newest">
+							<span className="flex items-center gap-1.5">
+								<ArrowDownAZ className="size-3.5" />
+								Newest
+							</span>
+						</SelectItem>
+						<SelectItem value="oldest">
+							<span className="flex items-center gap-1.5">
+								<ArrowUpAZ className="size-3.5" />
+								Oldest
+							</span>
+						</SelectItem>
+					</SelectContent>
+				</Select>
+
+				<div className="text-sm text-muted-foreground ml-auto">
 					{filteredThreads.length} thread
 					{filteredThreads.length !== 1 ? "s" : ""}
 				</div>
 			</div>
 
-			{filteredThreads.length === 0 && searchQuery ? (
+			{filteredThreads.length === 0 &&
+			(searchQuery || statusFilter !== "all" || channelFilter || tagFilter) ? (
 				<EmptyStateCard
 					icon={MessageSquare}
-					title="No threads match your search"
-					description={`No threads found matching "${searchQuery}". Try a different search term.`}
+					title="No threads match your filters"
+					description="Try adjusting your search or filter criteria."
 				/>
 			) : (
 				<div className="border rounded-lg">
