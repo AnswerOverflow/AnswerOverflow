@@ -55,4 +55,10 @@ export {
 	getDiscordAccountById,
 	upsertIgnoredDiscordAccountInternalLogic,
 } from "./users";
+export {
+	enrichThread,
+	enrichThreads,
+	type EnrichedThread,
+	type ThreadTag,
+} from "./threads";
 export { omit, pick } from "./validators";

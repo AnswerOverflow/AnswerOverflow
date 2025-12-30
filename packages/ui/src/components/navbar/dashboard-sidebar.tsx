@@ -31,6 +31,11 @@ function SidebarNavigation({ onLinkClick }: { onLinkClick?: () => void }) {
 					icon: null,
 				},
 				{
+					label: "Threads",
+					href: `/dashboard/${serverId}/threads`,
+					icon: null,
+				},
+				{
 					label: "Settings",
 					href: `/dashboard/${serverId}/settings`,
 					icon: null,
