@@ -105,6 +105,18 @@
 			}
 		},
 		{
+			"includes": ["packages/database/convex/agent/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "off"
+						}
+					}
+				}
+			}
+		},
+		{
 			"includes": ["**/*.test.ts", "**/*.test.tsx"],
 			"linter": {
 				"rules": {

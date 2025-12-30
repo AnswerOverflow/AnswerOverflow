@@ -138,14 +138,23 @@ const generateGlobalSitemaps = Effect.fn("sitemap.generate_global")(function* (
 	yield* Effect.logInfo(`Uploaded sitemap index with ${chunks.length} chunks`);
 });
 
+type ServerForSitemap = {
+	_id: string;
+	discordId: bigint;
+	hasCustomDomain: boolean;
+	hasSubpath: boolean;
+	isKicked: boolean;
+};
+
 const runSitemapGenerationCore = Effect.fn("sitemap.run_core")(function* () {
 	const database = yield* Database;
 	const startTime = yield* Clock.currentTimeMillis;
 
-	const servers = yield* database.private.sitemap.getServersForSitemap(
-		{},
-		{ subscribe: false },
-	);
+	const servers: Array<ServerForSitemap> =
+		yield* database.private.sitemap.getServersForSitemap(
+			{},
+			{ subscribe: false },
+		);
 
 	const regularServers = Arr.filter(
 		servers,

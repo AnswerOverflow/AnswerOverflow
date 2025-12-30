@@ -5,6 +5,7 @@ import { ConvertToGitHubIssueReacordLayer } from "./commands/convert-to-github-i
 import { DebugCommandHandlerLayer } from "./commands/debug";
 import { FeedbackCommandHandlerLayer } from "./commands/feedback";
 import { IndexCommandHandlerLayer } from "./commands/index-command";
+import { SitemapCommandHandlerLayer } from "./commands/sitemap-command";
 import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
 import { LeaveCommandHandlerLayer } from "./commands/leave-command";
 import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
@@ -62,6 +63,7 @@ export const BotLayers = Layer.mergeAll(
 	ConvertToGitHubIssueReacordLayer,
 	ReacordStressTestLayer,
 	SitemapHandlerLayer,
+	SitemapCommandHandlerLayer,
 );
 
 export const program = Effect.gen(function* () {
