@@ -1,21 +1,17 @@
 import { v } from "convex/values";
 import { guildManagerMutation } from "../client/guildManager";
-import { channelSettingsSchema } from "../schema";
 import {
 	getServerByDiscordId,
-	pick,
 	upsertChannelSettingsLogic,
 	upsertServerPreferencesLogic,
 } from "../shared";
 
 const channelConfigurationValidator = v.object({
-	...pick(channelSettingsSchema, [
-		"channelId",
-		"indexingEnabled",
-		"markSolutionEnabled",
-		"sendMarkSolutionInstructionsInNewThreads",
-		"solutionTagId",
-	]),
+	channelId: v.int64(),
+	indexingEnabled: v.boolean(),
+	markSolutionEnabled: v.boolean(),
+	sendMarkSolutionInstructionsInNewThreads: v.boolean(),
+	solutionTagId: v.optional(v.int64()),
 	autoThreadEnabled: v.optional(v.boolean()),
 });
 

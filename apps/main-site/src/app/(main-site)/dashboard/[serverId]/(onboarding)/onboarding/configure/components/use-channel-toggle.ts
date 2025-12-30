@@ -20,7 +20,7 @@ export function useChannelToggle({
 	getEnabled,
 	setEnabled,
 }: UseChannelToggleOptions) {
-	const { allChannels, configurations, setChannelConfigs } = useWizard();
+	const { configurations, setChannelConfigs } = useWizard();
 
 	const aiRecommendedIds = useMemo(() => {
 		const ids = new Set<string>();
@@ -33,85 +33,41 @@ export function useChannelToggle({
 	}, [channels, getAIRecommended]);
 
 	const selectedIds = useMemo(() => {
-		const fromConfigs = new Set(
+		return new Set(
 			configurations.filter(getEnabled).map((c) => c.channelId.toString()),
 		);
-		return fromConfigs.size > 0 ? fromConfigs : aiRecommendedIds;
-	}, [configurations, getEnabled, aiRecommendedIds]);
-
-	const ensureConfigExists = (channelId: bigint): ChannelConfiguration => {
-		const existing = configurations.find((c) => c.channelId === channelId);
-		if (existing) return existing;
-		return {
-			channelId,
-			indexingEnabled: false,
-			autoThreadEnabled: false,
-			markSolutionEnabled: false,
-			sendMarkSolutionInstructionsInNewThreads: false,
-			solutionTagId: undefined,
-		};
-	};
+	}, [configurations, getEnabled]);
 
 	const handleToggle = (channelId: string) => {
 		const id = BigInt(channelId);
-		const config = ensureConfigExists(id);
-		const isCurrentlyEnabled = selectedIds.has(channelId);
-		const updated = setEnabled(config, !isCurrentlyEnabled);
-
-		const existingIndex = configurations.findIndex((c) => c.channelId === id);
-		if (existingIndex >= 0) {
-			const newConfigs = [...configurations];
-			newConfigs[existingIndex] = updated;
-			setChannelConfigs(newConfigs);
-		} else {
-			setChannelConfigs([...configurations, updated]);
-		}
-	};
-
-	const handleSelectAll = (channelIds: Array<string>, enabled: boolean) => {
-		const updates = new Map<string, ChannelConfiguration>();
-
-		for (const channelId of channelIds) {
-			const id = BigInt(channelId);
-			const config = ensureConfigExists(id);
-			updates.set(channelId, setEnabled(config, enabled));
-		}
-
 		const newConfigs = configurations.map((c) => {
-			const update = updates.get(c.channelId.toString());
-			if (update) {
-				updates.delete(c.channelId.toString());
-				return update;
+			if (c.channelId === id) {
+				return setEnabled(c, !selectedIds.has(channelId));
 			}
 			return c;
 		});
+		setChannelConfigs(newConfigs);
+	};
 
-		for (const config of updates.values()) {
-			newConfigs.push(config);
-		}
-
+	const handleSelectAll = (channelIds: Array<string>, enabled: boolean) => {
+		const idsToUpdate = new Set(channelIds);
+		const newConfigs = configurations.map((c) => {
+			if (idsToUpdate.has(c.channelId.toString())) {
+				return setEnabled(c, enabled);
+			}
+			return c;
+		});
 		setChannelConfigs(newConfigs);
 	};
 
 	const handleSkip = () => {
 		const channelIdsInScope = new Set(channels.map((c) => c.id.toString()));
-
-		const newConfigs = allChannels.map((channel) => {
-			const existing = configurations.find((c) => c.channelId === channel.id);
-			const base = existing ?? {
-				channelId: channel.id,
-				indexingEnabled: false,
-				autoThreadEnabled: false,
-				markSolutionEnabled: false,
-				sendMarkSolutionInstructionsInNewThreads: false,
-				solutionTagId: undefined,
-			};
-			if (channelIdsInScope.has(channel.id.toString())) {
-				return setEnabled(base, false);
+		const newConfigs = configurations.map((c) => {
+			if (channelIdsInScope.has(c.channelId.toString())) {
+				return setEnabled(c, false);
 			}
-			return base;
+			return c;
 		});
-
 		setChannelConfigs(newConfigs);
 	};
 

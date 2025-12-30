@@ -150,15 +150,26 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 				channels: new Map(),
 			};
 
+			const initialConfigurations: Array<ChannelConfiguration> = [];
+
 			for (const channel of config.channels) {
+				const rec = channel.recommendedSettings;
 				aiRecommendations.channels.set(channel.id.toString(), {
-					indexing: channel.recommendedSettings.indexingEnabled,
-					autoThread: channel.recommendedSettings.autoThreadEnabled,
-					markSolution: channel.recommendedSettings.markSolutionEnabled,
-					solutionInstructions:
-						channel.recommendedSettings
-							.sendMarkSolutionInstructionsInNewThreads,
-					solutionTagId: channel.recommendedSettings.solutionTagId,
+					indexing: rec.indexingEnabled,
+					autoThread: rec.autoThreadEnabled,
+					markSolution: rec.markSolutionEnabled,
+					solutionInstructions: rec.sendMarkSolutionInstructionsInNewThreads,
+					solutionTagId: rec.solutionTagId,
+				});
+
+				initialConfigurations.push({
+					channelId: channel.id,
+					indexingEnabled: rec.indexingEnabled,
+					autoThreadEnabled: rec.autoThreadEnabled,
+					markSolutionEnabled: rec.markSolutionEnabled,
+					sendMarkSolutionInstructionsInNewThreads:
+						rec.sendMarkSolutionInstructionsInNewThreads,
+					solutionTagId: rec.solutionTagId,
 				});
 			}
 
@@ -166,7 +177,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 				isLoading: false,
 				error: null,
 				allChannels,
-				configurations: [],
+				configurations: initialConfigurations,
 				serverSettings: {
 					publicMessages:
 						config.serverSettings.considerAllMessagesPublicEnabled,

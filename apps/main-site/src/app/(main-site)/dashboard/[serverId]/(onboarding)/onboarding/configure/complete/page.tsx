@@ -146,7 +146,6 @@ export default function CompletePage() {
 				sendMarkSolutionInstructionsInNewThreads:
 					config.sendMarkSolutionInstructionsInNewThreads,
 				solutionTagId: config.solutionTagId,
-				forumGuidelinesConsentEnabled: false,
 			}));
 
 			await applyConfiguration({
