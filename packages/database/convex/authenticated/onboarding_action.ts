@@ -6,6 +6,7 @@ import { api, components, internal } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
 import { internalAction } from "../client";
 import { guildManagerAction } from "../client/guildManager";
+import type { Channel, ChannelSettings, ForumTag } from "../schema";
 import {
 	type ChannelInfo,
 	type ChannelWithTags,
@@ -13,7 +14,6 @@ import {
 	detectSolvedTags,
 } from "../shared/ai";
 import { CHANNEL_TYPE, isThreadType } from "../shared/channels";
-import type { Channel, ChannelSettings, ForumTag } from "../schema";
 
 type ChannelWithFlags = Channel & {
 	flags: ChannelSettings;

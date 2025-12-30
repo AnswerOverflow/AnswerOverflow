@@ -31,6 +31,7 @@ import {
 } from "@packages/ui/components/select";
 import { Switch } from "@packages/ui/components/switch";
 import { useMutation } from "convex/react";
+import { ChannelType } from "discord-api-types/v10";
 import {
 	ChevronDown,
 	Hash,
@@ -42,7 +43,6 @@ import {
 import { useParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import React from "react";
-import { ChannelType } from "discord-api-types/v10";
 import { useAuthenticatedQuery } from "../../../../../../lib/use-authenticated-query";
 
 function ToggleChannelFlag({

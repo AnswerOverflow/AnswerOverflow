@@ -94,7 +94,7 @@ export function useWizard() {
 	return context;
 }
 
-function createEmptyConfig(channelId: bigint): ChannelConfiguration {
+function _createEmptyConfig(channelId: bigint): ChannelConfiguration {
 	return {
 		channelId,
 		indexingEnabled: false,

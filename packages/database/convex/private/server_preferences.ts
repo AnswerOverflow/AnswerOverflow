@@ -1,9 +1,8 @@
-import { getOneFrom } from "convex-helpers/server/relationships";
 import { v } from "convex/values";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { internalQuery, privateMutation, privateQuery } from "../client";
 import { planValidator } from "../schema";
 import {
-	DEFAULT_SERVER_PREFERENCES,
 	upsertServerPreferencesLogic,
 	validateCustomDomainUniqueness,
 } from "../shared";
