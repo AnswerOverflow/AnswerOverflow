@@ -129,15 +129,57 @@ async function computeRecommendedConfiguration(
 	let recommendedTextChannelIds: Array<string> = [];
 	let detectionSuccessful = true;
 	let errorMessage: string | undefined;
+	const solutionTagMap = new Map<string, { id: bigint; name: string } | null>();
 
-	if (textChannelsForAI.length > 0) {
-		try {
-			recommendedTextChannelIds = await detectPublicChannels(textChannelsForAI);
-		} catch (error) {
-			console.error("Failed to detect public channels:", error);
-			detectionSuccessful = false;
-			errorMessage =
-				"Failed to auto-detect channels. Please configure manually.";
+	const channelsWithTags: Array<ChannelWithTags> = forumChannels
+		.filter((c) => c.availableTags && c.availableTags.length > 0)
+		.map((c) => ({
+			channelId: c.id,
+			channelName: c.name,
+			tags: c.availableTags!.map((t) => ({ id: t.id, name: t.name })),
+		}));
+
+	const publicChannelsPromise =
+		textChannelsForAI.length > 0
+			? detectPublicChannels(textChannelsForAI).catch((error) => {
+					console.error("Failed to detect public channels:", error);
+					return null;
+				})
+			: Promise.resolve([]);
+
+	const solvedTagsPromise =
+		channelsWithTags.length > 0
+			? detectSolvedTags(channelsWithTags).catch((error) => {
+					console.error("Failed to detect solved tags:", error);
+					return [];
+				})
+			: Promise.resolve([]);
+
+	const [publicChannelsResult, solvedTagResults] = await Promise.all([
+		publicChannelsPromise,
+		solvedTagsPromise,
+	]);
+
+	if (publicChannelsResult === null) {
+		detectionSuccessful = false;
+		errorMessage = "Failed to auto-detect channels. Please configure manually.";
+	} else {
+		recommendedTextChannelIds = publicChannelsResult;
+	}
+
+	for (const result of solvedTagResults) {
+		if (result.solvedTagId) {
+			const channel = forumChannels.find(
+				(c) => c.id.toString() === result.channelId,
+			);
+			const tagName =
+				channel?.availableTags?.find(
+					(t) => t.id.toString() === result.solvedTagId,
+				)?.name ?? "Solved";
+			solutionTagMap.set(result.channelId, {
+				id: BigInt(result.solvedTagId),
+				name: tagName,
+			});
 		}
 	}
 
@@ -145,41 +187,6 @@ async function computeRecommendedConfiguration(
 		...alwaysIndexIds,
 		...recommendedTextChannelIds,
 	]);
-
-	const solutionTagMap = new Map<string, { id: bigint; name: string } | null>();
-
-	if (detectionSuccessful) {
-		const channelsWithTags: Array<ChannelWithTags> = forumChannels
-			.filter((c) => c.availableTags && c.availableTags.length > 0)
-			.map((c) => ({
-				channelId: c.id,
-				channelName: c.name,
-				tags: c.availableTags!.map((t) => ({ id: t.id, name: t.name })),
-			}));
-
-		if (channelsWithTags.length > 0) {
-			try {
-				const solvedTagResults = await detectSolvedTags(channelsWithTags);
-				for (const result of solvedTagResults) {
-					if (result.solvedTagId) {
-						const channel = forumChannels.find(
-							(c) => c.id.toString() === result.channelId,
-						);
-						const tagName =
-							channel?.availableTags?.find(
-								(t) => t.id.toString() === result.solvedTagId,
-							)?.name ?? "Solved";
-						solutionTagMap.set(result.channelId, {
-							id: BigInt(result.solvedTagId),
-							name: tagName,
-						});
-					}
-				}
-			} catch (error) {
-				console.error("Failed to detect solved tags:", error);
-			}
-		}
-	}
 
 	const channelRecommendations: Array<ChannelRecommendation> = rootChannels.map(
 		(channel: ChannelWithFlags) => {
