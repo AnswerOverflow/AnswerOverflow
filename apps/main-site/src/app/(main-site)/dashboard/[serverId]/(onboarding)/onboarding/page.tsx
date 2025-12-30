@@ -221,14 +221,12 @@ export default function OnboardingPage() {
 				<div className="w-full max-w-2xl mx-auto">
 					<BotPermissionsDisplay
 						server={{
-							discordId: selectedServer.discordId,
+							discordId: BigInt(selectedServer.discordId),
 							name: selectedServer.name,
 							icon: selectedServer.icon,
 						}}
 						onCancel={() => router.push("/dashboard")}
-						onAdd={() =>
-							handleInstallClick(selectedServer.discordId.toString())
-						}
+						onAdd={() => handleInstallClick(selectedServer.discordId)}
 					/>
 				</div>
 			</main>
