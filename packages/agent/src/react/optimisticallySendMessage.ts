@@ -1,13 +1,13 @@
-import { insertAtTop } from "convex/react";
-import type { MessageDoc, StreamArgs } from "../validators.js";
 import type { OptimisticLocalStore } from "convex/browser";
-import type { UIMessage } from "../UIMessages.js";
+import { insertAtTop } from "convex/react";
 import type {
 	FunctionReference,
 	PaginationOptions,
 	PaginationResult,
 } from "convex/server";
-import type { SyncStreamsReturnValue } from "@convex-dev/agent";
+import type { SyncStreamsReturnValue } from "../client/types.js";
+import type { UIMessage } from "../UIMessages.js";
+import type { MessageDoc, StreamArgs } from "../validators.js";
 
 /**
  * Adds a sent message to the end of a list of messages, so it shows up until
