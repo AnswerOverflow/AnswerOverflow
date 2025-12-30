@@ -49,16 +49,16 @@ export {
 	validateCustomDomainUniqueness,
 } from "./servers";
 export {
+	type EnrichedThread,
+	enrichThread,
+	enrichThreads,
+	type ThreadTag,
+} from "./threads";
+export {
 	deleteUserServerSettingsByUserIdLogic,
 	findIgnoredDiscordAccountById,
 	findUserServerSettingsById,
 	getDiscordAccountById,
 	upsertIgnoredDiscordAccountInternalLogic,
 } from "./users";
-export {
-	enrichThread,
-	enrichThreads,
-	type EnrichedThread,
-	type ThreadTag,
-} from "./threads";
 export { omit, pick } from "./validators";

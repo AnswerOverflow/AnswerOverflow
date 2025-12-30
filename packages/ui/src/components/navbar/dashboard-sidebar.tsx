@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, usePathname } from "next/navigation";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
 import { AnswerOverflowLogo } from "../answer-overflow-logo";
@@ -17,6 +18,7 @@ function SidebarNavigation({ onLinkClick }: { onLinkClick?: () => void }) {
 	const params = useParams();
 	const pathname = usePathname();
 	const serverId = params.serverId as string | undefined;
+	const threadsEnabled = useFeatureFlagEnabled("dashboard-threads-list");
 
 	const navItems = serverId
 		? [
@@ -30,11 +32,15 @@ function SidebarNavigation({ onLinkClick }: { onLinkClick?: () => void }) {
 					href: `/dashboard/${serverId}/channels`,
 					icon: null,
 				},
-				{
-					label: "Threads",
-					href: `/dashboard/${serverId}/threads`,
-					icon: null,
-				},
+				...(threadsEnabled
+					? [
+							{
+								label: "Threads",
+								href: `/dashboard/${serverId}/threads`,
+								icon: null,
+							},
+						]
+					: []),
 				{
 					label: "Settings",
 					href: `/dashboard/${serverId}/settings`,

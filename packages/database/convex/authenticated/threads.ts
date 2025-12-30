@@ -2,12 +2,12 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { guildManagerQuery } from "../client/guildManager";
 import { isThreadType } from "../shared/channels";
-import { enrichThreads } from "../shared/threads";
 import {
 	channelWithSystemFieldsValidator,
 	enrichedMessageValidator,
 	paginatedValidator,
 } from "../shared/publicSchemas";
+import { enrichThreads } from "../shared/threads";
 
 const threadTagValidator = v.object({ id: v.int64(), name: v.string() });
 

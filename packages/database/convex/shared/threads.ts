@@ -3,7 +3,7 @@ import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
 import type { QueryCtxWithCache } from "./dataAccess";
 import { enrichMessage } from "./dataAccess";
-import { getThreadStartMessage, type EnrichedMessage } from "./messages";
+import { type EnrichedMessage, getThreadStartMessage } from "./messages";
 
 export type ThreadTag = {
 	id: bigint;
