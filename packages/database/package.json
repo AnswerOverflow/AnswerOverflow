@@ -37,6 +37,7 @@
 		"@convex-dev/migrations": "^0.3.1",
 		"@convex-dev/rate-limiter": "^0.3.2",
 		"@effect-aws/client-s3": "^1.10.6",
+		"@packages/agent": "workspace:*",
 		"@effect/ai": "^0.32.1",
 		"@effect/platform": "catalog:",
 		"@effect/platform-node": "^0.103.0",

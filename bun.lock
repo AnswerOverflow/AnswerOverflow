@@ -192,6 +192,7 @@
         "@effect/platform": "catalog:",
         "@effect/platform-node": "^0.103.0",
         "@octokit/auth-oauth-user": "^6.0.2",
+        "@packages/agent": "workspace:*",
         "@packages/confect": "workspace:*",
         "@packages/discord-api": "workspace:*",
         "@packages/github-api": "workspace:*",
