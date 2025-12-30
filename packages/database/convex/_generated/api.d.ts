@@ -44,6 +44,7 @@ import type * as private_ignored_discord_accounts from "../private/ignored_disco
 import type * as private_messages from "../private/messages.js";
 import type * as private_server_preferences from "../private/server_preferences.js";
 import type * as private_servers from "../private/servers.js";
+import type * as private_sitemap from "../private/sitemap.js";
 import type * as private_threadTags from "../private/threadTags.js";
 import type * as private_user_server_settings from "../private/user_server_settings.js";
 import type * as public_channels from "../public/channels.js";
@@ -126,6 +127,7 @@ declare const fullApi: ApiFromModules<{
   "private/messages": typeof private_messages;
   "private/server_preferences": typeof private_server_preferences;
   "private/servers": typeof private_servers;
+  "private/sitemap": typeof private_sitemap;
   "private/threadTags": typeof private_threadTags;
   "private/user_server_settings": typeof private_user_server_settings;
   "public/channels": typeof public_channels;

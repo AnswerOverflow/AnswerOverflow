@@ -66,6 +66,8 @@ export const FUNCTION_TYPE_MAP = {
   "servers.scheduleRecommendedConfigurationCache": "mutation",
   "servers.updateServer": "mutation",
   "servers.upsertServer": "mutation",
+  "sitemap.collectThreadsForServer": "action",
+  "sitemap.getServersForSitemap": "query",
   "threadTags.getTagsForThread": "query",
   "threadTags.getTagsForThreads": "query",
   "threadTags.getThreadIdsByTags": "query",
@@ -77,7 +79,7 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.upsertUserServerSettings": "mutation"
 } as const;
 
-export const NAMESPACES = ["attachments","cache","channels","counts","discord_accounts","github","ignored_discord_accounts","messages","search","server_preferences","servers","threadTags","user_server_settings"] as const;
+export const NAMESPACES = ["attachments","cache","channels","counts","discord_accounts","github","ignored_discord_accounts","messages","search","server_preferences","servers","sitemap","threadTags","user_server_settings"] as const;
 
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
@@ -91,6 +93,7 @@ export const NAMESPACE_STRUCTURE = {
   "search": ["getCachedSimilarThreads","getRecentAnnouncements","getRecentThreads","getSimilarThreads","publicSearch"],
   "server_preferences": ["getBotCustomizationForServer","getServerPreferencesByServerId","getServersWithBotCustomization","updateServerPreferences","updateStripeCustomer","updateStripeSubscription","upsertServerPreferences"],
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getCachedBrowsableServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","scheduleRecommendedConfigurationCache","updateServer","upsertServer"],
+  "sitemap": ["collectThreadsForServer","getServersForSitemap"],
   "threadTags": ["getTagsForThread","getTagsForThreads","getThreadIdsByTags","syncThreadTags"],
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
 } as const;

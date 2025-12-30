@@ -23,6 +23,7 @@ import { BotIdentitySyncHandlerLayer } from "./services/bot-identity-sync";
 import { DMForwardingHandlerLayer } from "./services/dm-forwarding";
 import { IndexingHandlerLayer } from "./services/indexing";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./services/send-mark-solution-instructions-handler";
+import { SitemapHandlerLayer } from "./services/sitemap";
 import { StatusUpdateHandlerLayer } from "./services/status-update";
 import { BotPermissionsSyncLayer } from "./sync/bot-permissions";
 import { ChannelParityLayer } from "./sync/channel";
@@ -60,6 +61,7 @@ export const BotLayers = Layer.mergeAll(
 	BotIdentitySyncHandlerLayer,
 	ConvertToGitHubIssueReacordLayer,
 	ReacordStressTestLayer,
+	SitemapHandlerLayer,
 );
 
 export const program = Effect.gen(function* () {

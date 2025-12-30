@@ -31,6 +31,11 @@ export interface UploadEmbedImageInput {
 	field: EmbedImageField;
 }
 
+export interface UploadSitemapInput {
+	filename: string;
+	content: string;
+}
+
 export class Storage extends Context.Tag("Storage")<
 	Storage,
 	{
@@ -40,6 +45,7 @@ export class Storage extends Context.Tag("Storage")<
 		uploadEmbedImage: (
 			input: UploadEmbedImageInput,
 		) => Effect.Effect<void, Error>;
+		uploadSitemap: (input: UploadSitemapInput) => Effect.Effect<void, Error>;
 	}
 >() {}
 
@@ -141,9 +147,31 @@ const S3StorageServiceLive = Effect.gen(function* () {
 			);
 		});
 
+	const uploadSitemap = (input: UploadSitemapInput) =>
+		Effect.gen(function* () {
+			yield* Effect.tryPromise({
+				try: () =>
+					new Upload({
+						client: rawS3Client,
+						params: {
+							Bucket: bucketName,
+							Key: `sitemaps/${input.filename}`,
+							Body: input.content,
+							ContentType: "text/xml",
+						},
+					}).done(),
+				catch: (error) => new Error(`Failed to upload sitemap to S3: ${error}`),
+			});
+		}).pipe(
+			Effect.withSpan("storage.upload_sitemap", {
+				attributes: { filename: input.filename },
+			}),
+		);
+
 	return {
 		uploadFileFromUrl,
 		uploadEmbedImage,
+		uploadSitemap,
 	};
 });
 
@@ -194,9 +222,17 @@ const ConvexStorageServiceLive = Effect.gen(function* () {
 			});
 		});
 
+	const uploadSitemap = (_input: UploadSitemapInput) =>
+		Effect.gen(function* () {
+			yield* Effect.logWarning(
+				"ConvexStorage: uploadSitemap not supported, use S3Storage",
+			);
+		});
+
 	return {
 		uploadFileFromUrl,
 		uploadEmbedImage,
+		uploadSitemap,
 	};
 });
 

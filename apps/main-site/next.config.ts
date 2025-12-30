@@ -67,6 +67,11 @@ const nextConfig: NextConfig = {
 					"https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path",
 			},
 			{
+				source: "/c/:serverId/sitemap.xml",
+				destination:
+					"https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/servers/:serverId.xml",
+			},
+			{
 				source: `/api/${process.env.NEXT_PUBLIC_ANALYTICS_PATH ?? "a"}/static/:path*`,
 				destination: "https://us-assets.i.posthog.com/static/:path*",
 			},

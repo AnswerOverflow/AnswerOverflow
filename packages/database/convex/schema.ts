@@ -264,6 +264,7 @@ export const confectSchema = defineSchema({
 	),
 	channels: defineTable(ChannelSchema)
 		.index("by_serverId", ["serverId"])
+		.index("by_serverId_and_id", ["serverId", "id"])
 		.index("by_serverId_and_type", ["serverId", "type"])
 		.index("by_type", ["type"])
 		.index("by_type_and_id", ["type", "id"])

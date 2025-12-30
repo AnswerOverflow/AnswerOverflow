@@ -143,3 +143,17 @@ export async function upsertChannelSettingsLogic(
 
 	return channelId;
 }
+
+export async function getIndexedChannelIdsForServer(
+	ctx: QueryCtx | MutationCtx,
+	serverId: bigint,
+): Promise<Set<bigint>> {
+	const indexedSettings = await ctx.db
+		.query("channelSettings")
+		.withIndex("by_serverId_and_indexingEnabled", (q) =>
+			q.eq("serverId", serverId).eq("indexingEnabled", true),
+		)
+		.collect();
+
+	return new Set(indexedSettings.map((s) => s.channelId));
+}
