@@ -2,10 +2,10 @@
 
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { api } from "./_generated/api.js";
-import schema from "./schema.js";
-import { modules } from "./setup.test.js";
-import type { Doc } from "./_generated/dataModel.js";
+import { api } from "./_generated/api";
+import schema from "./schema";
+import { modules } from "./setup.test";
+import type { Doc } from "./_generated/dataModel";
 import type { PaginationResult } from "convex/server";
 
 describe("files", () => {

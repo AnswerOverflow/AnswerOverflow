@@ -35,9 +35,9 @@ import type {
 	StreamDelta,
 	StreamMessage,
 	ThreadDoc,
-} from "../validators.js";
-import type { StreamingOptions } from "./streaming.js";
-import type { ComponentApi } from "../component/_generated/component.js";
+} from "../validators";
+import type { StreamingOptions } from "./streaming";
+import type { ComponentApi } from "../component/_generated/component";
 
 export type AgentPrompt = {
 	/**

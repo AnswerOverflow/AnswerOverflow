@@ -17,14 +17,14 @@ import {
 	type StreamArgs,
 	type StreamDelta,
 	type StreamMessage,
-} from "../validators.js";
+} from "../validators";
 import type {
 	ActionCtx,
 	AgentComponent,
 	MutationCtx,
 	QueryCtx,
 	SyncStreamsReturnValue,
-} from "./types.js";
+} from "./types";
 
 export const vStreamMessagesReturnValue = v.object({
 	...vPaginationResult(vMessageDoc).fields,

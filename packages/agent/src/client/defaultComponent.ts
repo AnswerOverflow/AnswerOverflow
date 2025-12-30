@@ -1,5 +1,5 @@
 import { componentsGeneric } from "convex/server";
-import type { AgentComponent } from "./types.js";
+import type { AgentComponent } from "./types";
 
 export type CustomComponent = {
 	/**

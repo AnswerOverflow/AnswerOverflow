@@ -16,6 +16,7 @@
 		"clean": "rm -rf node_modules .next"
 	},
 	"dependencies": {
+		"@packages/agent": "workspace:*",
 		"@convex-dev/better-auth": "catalog:",
 		"@effect/language-service": "catalog:",
 		"@elysiajs/openapi": "^1.4.12",

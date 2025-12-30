@@ -8,10 +8,10 @@ import {
 	type GenericSchema,
 	type SchemaDefinition,
 } from "convex/server";
-import { type AgentComponent } from "./index.js";
+import { type AgentComponent } from "./index";
 import { componentsGeneric } from "convex/server";
 export { componentSchema };
-import componentSchema from "../component/schema.js";
+import componentSchema from "../component/schema";
 export const componentModules = import.meta.glob("../component/**/*.ts");
 
 export function initConvexTest<

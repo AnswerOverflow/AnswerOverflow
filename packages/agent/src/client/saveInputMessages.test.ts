@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { saveInputMessages } from "./saveInputMessages.js";
-import type { MessageDoc } from "../validators.js";
-import type { ActionCtx } from "./types.js";
+import { saveInputMessages } from "./saveInputMessages";
+import type { MessageDoc } from "../validators";
+import type { ActionCtx } from "./types";
 import {
 	defineSchema,
 	type Auth,
 	type StorageActionWriter,
 } from "convex/server";
-import { initConvexTest } from "./setup.test.js";
-import { components } from "./setup.test.js";
+import { initConvexTest } from "./setup.test";
+import { components } from "./setup.test";
 
 const schema = defineSchema({});
 
@@ -18,12 +18,12 @@ const { mockSaveMessages, mockEmbedMessages } = vi.hoisted(() => ({
 	mockEmbedMessages: vi.fn(),
 }));
 
-vi.mock("./messages.js", () => ({
+vi.mock("./messages", () => ({
 	saveMessages: mockSaveMessages,
 }));
 
-vi.mock("./search.js", async () => {
-	const actual = await vi.importActual("./search.js");
+vi.mock("./search", async () => {
+	const actual = await vi.importActual("./search");
 	return {
 		...actual,
 		embedMessages: mockEmbedMessages,

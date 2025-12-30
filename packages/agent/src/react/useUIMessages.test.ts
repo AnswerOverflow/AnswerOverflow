@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { dedupeMessages } from "./useUIMessages.js";
+import { dedupeMessages } from "./useUIMessages";
 
 type TestMessage = {
 	order: number;

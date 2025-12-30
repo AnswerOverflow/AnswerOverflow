@@ -1,14 +1,14 @@
 import { paginator } from "convex-helpers/server/pagination";
 import { mergedStream, stream } from "convex-helpers/server/stream";
 import { v } from "convex/values";
-import type { Id } from "../_generated/dataModel.js";
+import type { Id } from "../_generated/dataModel";
 import {
 	type ActionCtx,
 	mutation,
 	type MutationCtx,
 	query,
-} from "../_generated/server.js";
-import schema from "../schema.js";
+} from "../_generated/server";
+import schema from "../schema";
 import {
 	type EmbeddingsWithoutDenormalizedFields,
 	getVectorTableName,
@@ -16,7 +16,7 @@ import {
 	vEmbeddingsWithoutDenormalizedFields,
 	vVectorDimension,
 	vVectorId,
-} from "./tables.js";
+} from "./tables";
 
 export const paginate = query({
 	args: {

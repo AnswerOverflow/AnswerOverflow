@@ -4,11 +4,11 @@ import {
 	type ModelMessage,
 } from "ai";
 import { assert } from "convex-helpers";
-import type { MessageDoc } from "../validators.js";
+import type { MessageDoc } from "../validators";
 import {
 	validateVectorDimension,
 	type VectorDimension,
-} from "../component/vector/tables.js";
+} from "../component/vector/tables";
 import {
 	DEFAULT_MESSAGE_RANGE,
 	DEFAULT_RECENT_MESSAGES,
@@ -17,8 +17,8 @@ import {
 	getProviderName,
 	isTool,
 	sorted,
-} from "../shared.js";
-import type { Message } from "../validators.js";
+} from "../shared";
+import type { Message } from "../validators";
 import type {
 	AgentComponent,
 	Config,
@@ -27,9 +27,9 @@ import type {
 	QueryCtx,
 	MutationCtx,
 	ActionCtx,
-} from "./types.js";
-import { inlineMessagesFiles } from "./files.js";
-import { docsToModelMessages, toModelMessage } from "../mapping.js";
+} from "./types";
+import { inlineMessagesFiles } from "./files";
+import { docsToModelMessages, toModelMessage } from "../mapping";
 
 const DEFAULT_VECTOR_SCORE_THRESHOLD = 0.0;
 // 10k characters should be more than enough for most cases, and stays under

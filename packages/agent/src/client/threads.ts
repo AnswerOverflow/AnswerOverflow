@@ -1,11 +1,11 @@
 import type { WithoutSystemFields } from "convex/server";
-import type { ThreadDoc } from "../validators.js";
+import type { ThreadDoc } from "../validators";
 import type {
 	ActionCtx,
 	AgentComponent,
 	MutationCtx,
 	QueryCtx,
-} from "./types.js";
+} from "./types";
 
 /**
  * Create a thread to store messages with an Agent.

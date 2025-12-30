@@ -1,7 +1,7 @@
 import { assert } from "convex-helpers";
 import { describe, expect, it } from "vitest";
-import { toUIMessages } from "./UIMessages.js";
-import type { MessageDoc } from "./validators.js";
+import { toUIMessages } from "./UIMessages";
+import type { MessageDoc } from "./validators";
 
 // Helper to create a base message doc
 function baseMessageDoc(overrides: Partial<MessageDoc> = {}): MessageDoc {

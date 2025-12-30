@@ -10,18 +10,18 @@ import {
 	DeltaStreamer,
 	mergeTransforms,
 	type StreamingOptions,
-} from "./streaming.js";
+} from "./streaming";
 import type {
 	ActionCtx,
 	AgentComponent,
 	AgentPrompt,
 	GenerationOutputMetadata,
 	Options,
-} from "./types.js";
-import { startGeneration } from "./start.js";
-import type { Agent } from "./index.js";
-import { getModelName, getProviderName } from "../shared.js";
-import { errorToString, willContinue } from "./utils.js";
+} from "./types";
+import { startGeneration } from "./start";
+import type { Agent } from "./index";
+import { getModelName, getProviderName } from "../shared";
+import { errorToString, willContinue } from "./utils";
 
 /**
  * This behaves like {@link streamText} from the "ai" package except that

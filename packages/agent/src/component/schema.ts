@@ -11,9 +11,9 @@ import {
 	vProviderOptions,
 	vProviderMetadata,
 	vReasoningDetails,
-} from "../validators.js";
+} from "../validators";
 import { typedV } from "convex-helpers/validators";
-import vectorTables, { vVectorId } from "./vector/tables.js";
+import vectorTables, { vVectorId } from "./vector/tables";
 
 export const schema = defineSchema({
 	threads: defineTable({

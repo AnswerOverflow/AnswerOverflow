@@ -16,16 +16,16 @@ import type {
 	PaginationResult,
 } from "convex/server";
 import { useMemo } from "react";
-import type { SyncStreamsReturnValue } from "../client/types.js";
-import type { StreamArgs } from "../validators.js";
-import type { StreamQuery } from "./types.js";
+import type { SyncStreamsReturnValue } from "../client/types";
+import type { StreamArgs } from "../validators";
+import type { StreamQuery } from "./types";
 import {
 	type UIMessage,
 	type UIStatus,
 	combineUIMessages,
-} from "../UIMessages.js";
-import { sorted } from "../shared.js";
-import { useStreamingUIMessages } from "./useStreamingUIMessages.js";
+} from "../UIMessages";
+import { sorted } from "../shared";
+import { useStreamingUIMessages } from "./useStreamingUIMessages";
 
 export type UIMessageLike = {
 	order: number;

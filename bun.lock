@@ -67,6 +67,7 @@
         "@mdx-js/react": "^3.1.1",
         "@modelcontextprotocol/sdk": "1.17.5",
         "@next/mdx": "^16.0.4",
+        "@packages/agent": "workspace:*",
         "@packages/database": "workspace:*",
         "@packages/observability": "workspace:*",
         "@packages/ui": "workspace:*",

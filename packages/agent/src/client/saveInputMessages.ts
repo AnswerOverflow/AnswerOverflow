@@ -1,16 +1,16 @@
 import { type ModelMessage } from "ai";
-import type { MessageDoc } from "../validators.js";
-import { embedMessages, getPromptArray } from "./search.js";
+import type { MessageDoc } from "../validators";
+import { embedMessages, getPromptArray } from "./search";
 import type {
 	ActionCtx,
 	AgentComponent,
 	Config,
 	MutationCtx,
-} from "./types.js";
-import { saveMessages } from "./messages.js";
-import type { Message } from "../validators.js";
+} from "./types";
+import { saveMessages } from "./messages";
+import type { Message } from "../validators";
 import { assert } from "convex-helpers";
-import type { VectorDimension } from "../component/vector/tables.js";
+import type { VectorDimension } from "../component/vector/tables";
 
 export async function saveInputMessages(
 	ctx: MutationCtx | ActionCtx,

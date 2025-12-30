@@ -36,10 +36,10 @@ import {
 	type SourcePart,
 	vToolResultOutput,
 	type MessageDoc,
-} from "./validators.js";
-import type { ActionCtx, AgentComponent } from "./client/types.js";
-import type { MutationCtx } from "./client/types.js";
-import { MAX_FILE_SIZE, storeFile } from "./client/files.js";
+} from "./validators";
+import type { ActionCtx, AgentComponent } from "./client/types";
+import type { MutationCtx } from "./client/types";
+import { MAX_FILE_SIZE, storeFile } from "./client/files";
 import type { Infer } from "convex/values";
 import {
 	convertUint8ArrayToBase64,
@@ -51,7 +51,7 @@ import {
 	getModelName,
 	getProviderName,
 	type ModelOrMetadata,
-} from "./shared.js";
+} from "./shared";
 export type AIMessageWithoutId = Omit<AIMessage, "id">;
 
 export type SerializeUrlsAndUint8Arrays<T> = T extends URL

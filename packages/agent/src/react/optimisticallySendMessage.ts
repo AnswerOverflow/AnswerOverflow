@@ -5,9 +5,9 @@ import type {
 	PaginationOptions,
 	PaginationResult,
 } from "convex/server";
-import type { SyncStreamsReturnValue } from "../client/types.js";
-import type { UIMessage } from "../UIMessages.js";
-import type { MessageDoc, StreamArgs } from "../validators.js";
+import type { SyncStreamsReturnValue } from "../client/types";
+import type { UIMessage } from "../UIMessages";
+import type { MessageDoc, StreamArgs } from "../validators";
 
 /**
  * Adds a sent message to the end of a list of messages, so it shows up until

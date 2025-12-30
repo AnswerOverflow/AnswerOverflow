@@ -1,15 +1,15 @@
 "use client";
 import { useMemo, useState, useEffect } from "react";
 import { type UIDataTypes, type UIMessageChunk, type UITools } from "ai";
-import type { StreamQuery, StreamQueryArgs } from "./types.js";
-import { type UIMessage } from "../UIMessages.js";
+import type { StreamQuery, StreamQueryArgs } from "./types";
+import { type UIMessage } from "../UIMessages";
 import {
 	blankUIMessage,
 	getParts,
 	updateFromUIMessageChunks,
 	deriveUIMessagesFromTextStreamParts,
-} from "../deltas.js";
-import { useDeltaStreams } from "./useDeltaStreams.js";
+} from "../deltas";
+import { useDeltaStreams } from "./useDeltaStreams";
 
 // Polyfill structuredClone to support readUIMessageStream on ReactNative
 if (!("structuredClone" in globalThis)) {

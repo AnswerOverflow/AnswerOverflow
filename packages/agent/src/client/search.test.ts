@@ -13,17 +13,17 @@ import {
 	type StorageActionWriter,
 	type StorageReader,
 } from "convex/server";
-import type { MessageDoc } from "../validators.js";
-import type { ActionCtx, QueryCtx } from "./types.js";
+import type { MessageDoc } from "../validators";
+import type { ActionCtx, QueryCtx } from "./types";
 import {
 	fetchContextWithPrompt,
 	fetchContextMessages,
 	filterOutOrphanedToolMessages,
 	getPromptArray,
-} from "./search.js";
-import { components, initConvexTest } from "./setup.test.js";
-import { createThread } from "./threads.js";
-import { saveMessages } from "./messages.js";
+} from "./search";
+import { components, initConvexTest } from "./setup.test";
+import { createThread } from "./threads";
+import { saveMessages } from "./messages";
 
 // Helper to create mock MessageDoc
 const createMockMessageDoc = (

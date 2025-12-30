@@ -21,21 +21,21 @@ import {
 	type UserContent,
 } from "ai";
 import type { Infer } from "convex/values";
-import { toModelMessage, fromModelMessage, toUIFilePart } from "./mapping.js";
+import { toModelMessage, fromModelMessage, toUIFilePart } from "./mapping";
 import {
 	extractReasoning,
 	extractText,
 	isTool,
 	joinText,
 	sorted,
-} from "./shared.js";
+} from "./shared";
 import type {
 	MessageDoc,
 	MessageStatus,
 	ProviderOptions,
 	SourcePart,
 	vSource,
-} from "./validators.js";
+} from "./validators";
 import { omit, pick } from "convex-helpers";
 
 function filterDefined<T>(arr: (T | undefined)[]): T[] {

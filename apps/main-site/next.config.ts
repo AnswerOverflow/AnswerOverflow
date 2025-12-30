@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
 		ignoreBuildErrors: true,
 	},
 	pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
-	transpilePackages: ["@packages/ui", "@packages/database"],
+	transpilePackages: ["@packages/ui", "@packages/database", "@packages/agent"],
 	images: {
 		remotePatterns: [
 			{

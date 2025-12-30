@@ -4,9 +4,9 @@ import { validate } from "convex-helpers/validators";
 import fs from "fs";
 import path from "path";
 import { describe, expect, test } from "vitest";
-import type { ActionCtx, AgentComponent } from "./client/types.js";
-import { api } from "./component/_generated/api.js";
-import type { SerializedContent } from "./mapping.js";
+import type { ActionCtx, AgentComponent } from "./client/types";
+import { api } from "./component/_generated/api";
+import type { SerializedContent } from "./mapping";
 import {
 	guessMimeType,
 	serializeContent,
@@ -15,8 +15,8 @@ import {
 	toModelMessage,
 	toModelMessageContent,
 	toModelMessageDataOrUrl,
-} from "./mapping.js";
-import { vMessage, type vToolResultPart } from "./validators.js";
+} from "./mapping";
+import { vMessage, type vToolResultPart } from "./validators";
 
 const testAssetsDir = path.join(__dirname, "../test-assets");
 const testFiles = [

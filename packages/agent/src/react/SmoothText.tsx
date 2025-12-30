@@ -1,4 +1,4 @@
-import { useSmoothText, type SmoothTextOptions } from "./useSmoothText.js";
+import { useSmoothText, type SmoothTextOptions } from "./useSmoothText";
 
 export function SmoothText({
 	text,

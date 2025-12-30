@@ -2,11 +2,11 @@
 
 import { convexTest } from "convex-test";
 import { describe, expect, test } from "vitest";
-import { api } from "./_generated/api.js";
-import type { Id } from "./_generated/dataModel.js";
-import { getMaxMessage } from "./messages.js";
-import schema from "./schema.js";
-import { modules } from "./setup.test.js";
+import { api } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
+import { getMaxMessage } from "./messages";
+import schema from "./schema";
+import { modules } from "./setup.test";
 
 describe("agent", () => {
 	test("getMaxMessage works for threads", async () => {

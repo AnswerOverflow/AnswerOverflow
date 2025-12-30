@@ -4,8 +4,8 @@ import {
 	deriveUIMessagesFromTextStreamParts,
 	updateFromTextStreamParts,
 	updateFromUIMessageChunks,
-} from "./deltas.js";
-import type { StreamMessage, StreamDelta } from "./validators.js";
+} from "./deltas";
+import type { StreamMessage, StreamDelta } from "./validators";
 import { omit } from "convex-helpers";
 import type { Tool, ToolUIPart, TypedToolResult } from "ai";
 

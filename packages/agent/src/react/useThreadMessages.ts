@@ -17,17 +17,17 @@ import type {
 	PaginationResult,
 } from "convex/server";
 import { useMemo } from "react";
-import type { SyncStreamsReturnValue } from "../client/types.js";
-import { sorted } from "../shared.js";
-import { fromUIMessages } from "../UIMessages.js";
+import type { SyncStreamsReturnValue } from "../client/types";
+import { sorted } from "../shared";
+import { fromUIMessages } from "../UIMessages";
 import type {
 	Message,
 	MessageDoc,
 	MessageStatus,
 	StreamArgs,
-} from "../validators.js";
-import type { StreamQueryArgs, StreamQuery } from "./types.js";
-import { useStreamingUIMessages } from "./useStreamingUIMessages.js";
+} from "../validators";
+import type { StreamQueryArgs, StreamQuery } from "./types";
+import { useStreamingUIMessages } from "./useStreamingUIMessages";
 
 export type MessageDocLike = {
 	order: number;
@@ -137,8 +137,7 @@ export function useThreadMessages<Query extends ThreadMessagesQuery<any, any>>(
 	let startOrder = paginated.results.at(-1)?.order ?? 0;
 	for (let i = paginated.results.length - 1; i >= 0; i--) {
 		const m = paginated.results[i];
-		if (!m.streaming && m.status === "pending") {
-			// round down to the nearest 10 for some cache benefits
+		if (m && !m.streaming && m.status === "pending") {
 			startOrder = m.order - (m.order % 10);
 			break;
 		}

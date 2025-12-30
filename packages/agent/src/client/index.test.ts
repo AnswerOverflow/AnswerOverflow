@@ -4,7 +4,7 @@ import {
 	createThread,
 	filterOutOrphanedToolMessages,
 	type MessageDoc,
-} from "./index.js";
+} from "./index";
 import type { DataModelFromSchemaDefinition } from "convex/server";
 import {
 	anyApi,
@@ -21,9 +21,9 @@ import type {
 import { v } from "convex/values";
 import { defineSchema } from "convex/server";
 import { stepCountIs } from "ai";
-import { components, initConvexTest } from "./setup.test.js";
+import { components, initConvexTest } from "./setup.test";
 import { z } from "zod/v4";
-import { mockModel } from "./mockModel.js";
+import { mockModel } from "./mockModel";
 
 const schema = defineSchema({});
 type DataModel = DataModelFromSchemaDefinition<typeof schema>;

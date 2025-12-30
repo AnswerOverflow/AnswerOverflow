@@ -1,8 +1,8 @@
 import type { GenericId, Infer } from "convex/values";
 import { expectTypeOf, test } from "vitest";
-import type { ContextOptions, StorageOptions } from "./client/types.js";
-import { vContextOptions, vMessageDoc, vStorageOptions } from "./validators.js";
-import type { Doc } from "./component/_generated/dataModel.js";
+import type { ContextOptions, StorageOptions } from "./client/types";
+import { vContextOptions, vMessageDoc, vStorageOptions } from "./validators";
+import type { Doc } from "./component/_generated/dataModel";
 
 expectTypeOf<Infer<typeof vContextOptions>>().toExtend<ContextOptions>();
 expectTypeOf<ContextOptions>().toExtend<Infer<typeof vContextOptions>>();

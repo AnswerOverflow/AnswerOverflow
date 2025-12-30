@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { MessageDoc } from "./client/index.js";
-import type { UIMessage } from "./UIMessages.js";
-import { fromUIMessages, toUIMessages } from "./UIMessages.js";
+import type { MessageDoc } from "./client/index";
+import type { UIMessage } from "./UIMessages";
+import { fromUIMessages, toUIMessages } from "./UIMessages";
 
 // Helper to create a base message doc
 function baseMessageDoc<T = unknown>(

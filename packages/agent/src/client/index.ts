@@ -34,15 +34,15 @@ import {
 	type WithoutSystemFields,
 } from "convex/server";
 import { convexToJson, v, type Value } from "convex/values";
-import type { threadFieldsSupportingPatch } from "../component/threads.js";
-import { type VectorDimension } from "../component/vector/tables.js";
+import type { threadFieldsSupportingPatch } from "../component/threads";
+import { type VectorDimension } from "../component/vector/tables";
 import {
 	toModelMessage,
 	serializeMessage,
 	serializeNewMessagesInStep,
 	serializeObjectResult,
-} from "../mapping.js";
-import { getModelName, getProviderName } from "../shared.js";
+} from "../mapping";
+import { getModelName, getProviderName } from "../shared";
 import {
 	vMessageEmbeddings,
 	vMessageWithMetadata,
@@ -55,22 +55,22 @@ import {
 	type ProviderMetadata,
 	type StreamArgs,
 	type ThreadDoc,
-} from "../validators.js";
+} from "../validators";
 import {
 	listMessages,
 	saveMessages,
 	type SaveMessageArgs,
 	type SaveMessagesArgs,
-} from "./messages.js";
+} from "./messages";
 import {
 	embedMany,
 	embedMessages,
 	fetchContextMessages,
 	generateAndSaveEmbeddings,
-} from "./search.js";
-import { startGeneration } from "./start.js";
-import { syncStreams, type StreamingOptions } from "./streaming.js";
-import { createThread, getThreadMetadata } from "./threads.js";
+} from "./search";
+import { startGeneration } from "./start";
+import { syncStreams, type StreamingOptions } from "./streaming";
+import { createThread, getThreadMetadata } from "./threads";
 import type {
 	ActionCtx,
 	AgentComponent,
@@ -92,9 +92,9 @@ import type {
 	UsageHandler,
 	QueryCtx,
 	AgentPrompt,
-} from "./types.js";
-import { streamText } from "./streamText.js";
-import { errorToString, willContinue } from "./utils.js";
+} from "./types";
+import { streamText } from "./streamText";
+import { errorToString, willContinue } from "./utils";
 
 export { stepCountIs } from "ai";
 export {
@@ -106,10 +106,10 @@ export {
 	serializeDataOrUrl,
 	serializeMessage,
 	toUIFilePart,
-} from "../mapping.js";
+} from "../mapping";
 // NOTE: these are also exported via @convex-dev/agent/validators
 // a future version may put them all here or move these over there
-export { extractText, isTool, sorted } from "../shared.js";
+export { extractText, isTool, sorted } from "../shared";
 export {
 	vAssistantMessage,
 	vContent,
@@ -131,14 +131,14 @@ export {
 	type SourcePart,
 	type ThreadDoc,
 	type Usage,
-} from "../validators.js";
-export { createTool, type ToolCtx } from "./createTool.js";
+} from "../validators";
+export { createTool, type ToolCtx } from "./createTool";
 export {
 	definePlaygroundAPI,
 	type AgentsFn,
 	type PlaygroundAPI,
-} from "./definePlaygroundAPI.js";
-export { getFile, storeFile } from "./files.js";
+} from "./definePlaygroundAPI";
+export { getFile, storeFile } from "./files";
 export {
 	listMessages,
 	listUIMessages,
@@ -146,8 +146,8 @@ export {
 	saveMessages,
 	type SaveMessageArgs,
 	type SaveMessagesArgs,
-} from "./messages.js";
-export { mockModel } from "./mockModel.js";
+} from "./messages";
+export { mockModel } from "./mockModel";
 export {
 	fetchContextMessages,
 	filterOutOrphanedToolMessages,
@@ -155,8 +155,8 @@ export {
 	generateAndSaveEmbeddings,
 	embedMessages,
 	embedMany,
-} from "./search.js";
-export { startGeneration } from "./start.js";
+} from "./search";
+export { startGeneration } from "./start";
 export {
 	DEFAULT_STREAMING_OPTIONS,
 	DeltaStreamer,
@@ -165,20 +165,20 @@ export {
 	listStreams,
 	syncStreams,
 	vStreamMessagesReturnValue,
-} from "./streaming.js";
+} from "./streaming";
 export {
 	createThread,
 	getThreadMetadata,
 	searchThreadTitles,
 	updateThreadMetadata,
-} from "./threads.js";
-export type { ContextHandler } from "./types.js";
+} from "./threads";
+export type { ContextHandler } from "./types";
 export {
 	toUIMessages,
 	fromUIMessages,
 	fromUIMessagesAsync,
 	type UIMessage,
-} from "../UIMessages.js";
+} from "../UIMessages";
 
 export type {
 	AgentComponent,

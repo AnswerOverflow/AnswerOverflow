@@ -3,20 +3,20 @@ import { paginator } from "convex-helpers/server/pagination";
 import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import type { ObjectType } from "convex/values";
-import { type ThreadDoc, vThreadDoc } from "../client/index.js";
-import { vPaginationResult } from "../validators.js";
-import { api, internal } from "./_generated/api.js";
-import type { Doc } from "./_generated/dataModel.js";
+import { type ThreadDoc, vThreadDoc } from "../client/index";
+import { vPaginationResult } from "../validators";
+import { api, internal } from "./_generated/api";
+import type { Doc } from "./_generated/dataModel";
 import {
 	action,
 	internalMutation,
 	mutation,
 	type MutationCtx,
 	query,
-} from "./_generated/server.js";
-import { deleteMessage } from "./messages.js";
-import { schema, v } from "./schema.js";
-import { deleteStreamsPageForThreadId } from "./streams.js";
+} from "./_generated/server";
+import { deleteMessage } from "./messages";
+import { schema, v } from "./schema";
+import { deleteStreamsPageForThreadId } from "./streams";
 
 function publicThreadOrNull(thread: Doc<"threads"> | null): ThreadDoc | null {
 	if (thread === null) {

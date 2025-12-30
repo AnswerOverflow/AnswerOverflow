@@ -12,19 +12,19 @@ import {
 import {
 	serializeNewMessagesInStep,
 	serializeObjectResult,
-} from "../mapping.js";
-import { embedMessages, fetchContextWithPrompt } from "./search.js";
-import type { ActionCtx, AgentComponent, Config, Options } from "./types.js";
-import type { Message, MessageDoc } from "../validators.js";
+} from "../mapping";
+import { embedMessages, fetchContextWithPrompt } from "./search";
+import type { ActionCtx, AgentComponent, Config, Options } from "./types";
+import type { Message, MessageDoc } from "../validators";
 import {
 	getModelName,
 	getProviderName,
 	type ModelOrMetadata,
-} from "../shared.js";
-import { wrapTools, type ToolCtx } from "./createTool.js";
-import type { Agent } from "./index.js";
+} from "../shared";
+import { wrapTools, type ToolCtx } from "./createTool";
+import type { Agent } from "./index";
 import { assert, omit } from "convex-helpers";
-import { saveInputMessages } from "./saveInputMessages.js";
+import { saveInputMessages } from "./saveInputMessages";
 import type { GenericActionCtx, GenericDataModel } from "convex/server";
 
 export async function startGeneration<

@@ -11,7 +11,7 @@ import {
 	extractText,
 	isTool,
 	sorted,
-} from "../shared.js";
+} from "../shared";
 import {
 	vMessageDoc,
 	vMessageEmbeddingsWithDimension,
@@ -19,9 +19,9 @@ import {
 	vMessageWithMetadataInternal,
 	vPaginationResult,
 	type MessageDoc,
-} from "../validators.js";
-import { api, internal } from "./_generated/api.js";
-import type { Doc, Id } from "./_generated/dataModel.js";
+} from "../validators";
+import { api, internal } from "./_generated/api";
+import type { Doc, Id } from "./_generated/dataModel";
 import {
 	action,
 	internalMutation,
@@ -30,16 +30,16 @@ import {
 	type MutationCtx,
 	query,
 	type QueryCtx,
-} from "./_generated/server.js";
-import { schema, v } from "./schema.js";
-import { insertVector, searchVectors } from "./vector/index.js";
+} from "./_generated/server";
+import { schema, v } from "./schema";
+import { insertVector, searchVectors } from "./vector/index";
 import {
 	validateVectorDimension,
 	type VectorTableId,
 	vVectorId,
-} from "./vector/tables.js";
-import { changeRefcount } from "./files.js";
-import { getStreamingMessagesWithMetadata } from "./streams.js";
+} from "./vector/tables";
+import { changeRefcount } from "./files";
+import { getStreamingMessagesWithMetadata } from "./streams";
 import { partial } from "convex-helpers/validators";
 
 function publicMessage(message: Doc<"messages">): MessageDoc {

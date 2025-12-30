@@ -1,7 +1,7 @@
 import type { ModelMessage } from "ai";
 import type { PaginationOptions, PaginationResult } from "convex/server";
-import type { MessageDoc } from "../validators.js";
-import { validateVectorDimension } from "../component/vector/tables.js";
+import type { MessageDoc } from "../validators";
+import { validateVectorDimension } from "../component/vector/tables";
 import {
 	vMessageWithMetadata,
 	type Message,
@@ -9,15 +9,15 @@ import {
 	type MessageEmbeddingsWithDimension,
 	type MessageStatus,
 	type MessageWithMetadata,
-} from "../validators.js";
-import { serializeMessage } from "../mapping.js";
-import { toUIMessages, type UIMessage } from "../UIMessages.js";
+} from "../validators";
+import { serializeMessage } from "../mapping";
+import { toUIMessages, type UIMessage } from "../UIMessages";
 import type {
 	AgentComponent,
 	MutationCtx,
 	QueryCtx,
 	ActionCtx,
-} from "./types.js";
+} from "./types";
 import { parse } from "convex-helpers/validators";
 
 /**

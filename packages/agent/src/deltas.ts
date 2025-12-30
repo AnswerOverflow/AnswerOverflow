@@ -10,13 +10,13 @@ import {
 	type UIMessageChunk,
 } from "ai";
 import { assert, pick } from "convex-helpers";
-import { type UIMessage } from "./UIMessages.js";
-import { joinText, sorted } from "./shared.js";
+import { type UIMessage } from "./UIMessages";
+import { joinText, sorted } from "./shared";
 import {
 	type MessageStatus,
 	type StreamDelta,
 	type StreamMessage,
-} from "./validators.js";
+} from "./validators";
 import { getErrorMessage } from "@ai-sdk/provider-utils";
 
 export function blankUIMessage<METADATA = unknown>(

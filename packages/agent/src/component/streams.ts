@@ -6,23 +6,23 @@ import {
 	type StreamMessage,
 	vStreamDelta,
 	vStreamMessage,
-} from "../validators.js";
-import { api, internal } from "./_generated/api.js";
-import type { Doc, Id } from "./_generated/dataModel.js";
+} from "../validators";
+import { api, internal } from "./_generated/api";
+import type { Doc, Id } from "./_generated/dataModel";
 import {
 	internalMutation,
 	mutation,
 	type MutationCtx,
 	query,
 	action,
-} from "./_generated/server.js";
-import schema from "./schema.js";
+} from "./_generated/server";
+import schema from "./schema";
 import { stream } from "convex-helpers/server/stream";
 import { mergedStream } from "convex-helpers/server/stream";
 import { paginator } from "convex-helpers/server/pagination";
 import type { WithoutSystemFields } from "convex/server";
-import { deriveUIMessagesFromDeltas } from "../deltas.js";
-import { fromUIMessagesAsync } from "../UIMessages.js";
+import { deriveUIMessagesFromDeltas } from "../deltas";
+import { fromUIMessagesAsync } from "../UIMessages";
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;

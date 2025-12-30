@@ -14,7 +14,7 @@ import type {
 	UIMessagePart,
 	UITools,
 } from "ai";
-import type { Message, MessageContentParts } from "./validators.js";
+import type { Message, MessageContentParts } from "./validators";
 
 export const DEFAULT_RECENT_MESSAGES = 100;
 

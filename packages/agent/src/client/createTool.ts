@@ -1,9 +1,9 @@
 import type { FlexibleSchema } from "@ai-sdk/provider-utils";
 import type { Tool, ToolExecutionOptions, ToolSet } from "ai";
 import { tool } from "ai";
-import type { Agent } from "./index.js";
+import type { Agent } from "./index";
 import type { GenericActionCtx, GenericDataModel } from "convex/server";
-import type { ProviderOptions } from "../validators.js";
+import type { ProviderOptions } from "../validators";
 
 export type ToolCtx<DataModel extends GenericDataModel = GenericDataModel> =
 	GenericActionCtx<DataModel> & {

@@ -2,10 +2,10 @@
 
 import { convexTest } from "convex-test";
 import { describe, expect, test, vi } from "vitest";
-import { api, internal } from "./_generated/api.js";
-import type { Id } from "./_generated/dataModel.js";
-import schema from "./schema.js";
-import { modules } from "./setup.test.js";
+import { api, internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
+import schema from "./schema";
+import { modules } from "./setup.test";
 
 describe("users", () => {
 	test("listUsersWithThreads returns users who have threads", async () => {

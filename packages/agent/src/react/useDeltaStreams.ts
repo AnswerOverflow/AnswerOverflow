@@ -1,10 +1,10 @@
 "use client";
 
-import type { StreamQuery, StreamQueryArgs } from "./types.js";
-import type { SyncStreamsReturnValue } from "../client/types.js";
+import type { StreamQuery, StreamQueryArgs } from "./types";
+import type { SyncStreamsReturnValue } from "../client/types";
 import type { FunctionArgs } from "convex/server";
-import type { StreamArgs, StreamDelta, StreamMessage } from "../validators.js";
-import { sorted } from "../shared.js";
+import type { StreamArgs, StreamDelta, StreamMessage } from "../validators";
+import { sorted } from "../shared";
 import { useQuery } from "convex/react";
 import { useState } from "react";
 import { assert } from "convex-helpers";

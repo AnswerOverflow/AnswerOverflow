@@ -27,9 +27,9 @@ import {
 	isTool,
 	extractText,
 	type MessageDoc,
-} from "./index.js";
-import { serializeNewMessagesInStep } from "../mapping.js";
-import { getModelName, getProviderName } from "../shared.js";
+} from "./index";
+import { serializeNewMessagesInStep } from "../mapping";
+import { getModelName, getProviderName } from "../shared";
 
 export type PlaygroundAPI = ApiFromModules<{
 	playground: ReturnType<typeof definePlaygroundAPI>;

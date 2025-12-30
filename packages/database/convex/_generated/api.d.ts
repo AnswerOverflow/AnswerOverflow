@@ -24,6 +24,8 @@ import type * as authenticated_stripe_actions from "../authenticated/stripe_acti
 import type * as authenticated_threads from "../authenticated/threads.js";
 import type * as authenticated_threads_action from "../authenticated/threads_action.js";
 import type * as authenticated_vercel_domains from "../authenticated/vercel_domains.js";
+import type * as chat_agent from "../chat/agent.js";
+import type * as chat_mutations from "../chat/mutations.js";
 import type * as client_admin from "../client/admin.js";
 import type * as client_apiKey from "../client/apiKey.js";
 import type * as client_authenticated from "../client/authenticated.js";
@@ -109,6 +111,8 @@ declare const fullApi: ApiFromModules<{
   "authenticated/threads": typeof authenticated_threads;
   "authenticated/threads_action": typeof authenticated_threads_action;
   "authenticated/vercel_domains": typeof authenticated_vercel_domains;
+  "chat/agent": typeof chat_agent;
+  "chat/mutations": typeof chat_mutations;
   "client/admin": typeof client_admin;
   "client/apiKey": typeof client_apiKey;
   "client/authenticated": typeof client_authenticated;

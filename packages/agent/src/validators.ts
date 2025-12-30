@@ -1,5 +1,5 @@
 import { v, type Infer, type Validator, type Value } from "convex/values";
-import { vVectorDimension } from "./component/vector/tables.js";
+import { vVectorDimension } from "./component/vector/tables";
 
 // const deprecated = v.optional(v.any()) as unknown as VNull<unknown, "optional">;
 
