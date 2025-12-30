@@ -103,6 +103,11 @@ const nextConfig: NextConfig = {
 				destination: "/about#pricing",
 				permanent: false,
 			},
+			{
+				source: "/onboarding:slug*",
+				destination: "/dashboard",
+				permanent: false,
+			},
 		];
 	},
 };

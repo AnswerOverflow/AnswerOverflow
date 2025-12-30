@@ -9,10 +9,10 @@
  */
 
 import type {
-	DataModelFromSchemaDefinition,
-	DocumentByName,
-	TableNamesInDataModel,
-	SystemTableNames,
+  DataModelFromSchemaDefinition,
+  DocumentByName,
+  TableNamesInDataModel,
+  SystemTableNames,
 } from "convex/server";
 import type { GenericId } from "convex/values";
 import schema from "../schema.js";
@@ -28,8 +28,8 @@ export type TableNames = TableNamesInDataModel<DataModel>;
  * @typeParam TableName - A string literal type of the table name (like "users").
  */
 export type Doc<TableName extends TableNames> = DocumentByName<
-	DataModel,
-	TableName
+  DataModel,
+  TableName
 >;
 
 /**
@@ -46,7 +46,7 @@ export type Doc<TableName extends TableNames> = DocumentByName<
  * @typeParam TableName - A string literal type of the table name (like "users").
  */
 export type Id<TableName extends TableNames | SystemTableNames> =
-	GenericId<TableName>;
+  GenericId<TableName>;
 
 /**
  * A type describing your Convex data model.

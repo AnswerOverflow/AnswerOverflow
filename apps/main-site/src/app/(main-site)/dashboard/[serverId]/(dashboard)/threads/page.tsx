@@ -32,21 +32,18 @@ import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 import { cn } from "@packages/ui/lib/utils";
 import { useAction } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { ChannelType } from "discord-api-types/v10";
 import {
 	ArrowDownAZ,
 	ArrowLeft,
 	ArrowUpAZ,
 	CheckCircle2,
 	ExternalLink,
-	Eye,
 	Hash,
 	Loader2,
 	MessageSquare,
 	Search,
 	Sparkles,
 	Tag,
-	TrendingUp,
 	X,
 } from "lucide-react";
 import { useParams } from "next/navigation";

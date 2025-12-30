@@ -5,12 +5,12 @@ import { ConvertToGitHubIssueReacordLayer } from "./commands/convert-to-github-i
 import { DebugCommandHandlerLayer } from "./commands/debug";
 import { FeedbackCommandHandlerLayer } from "./commands/feedback";
 import { IndexCommandHandlerLayer } from "./commands/index-command";
-import { SitemapCommandHandlerLayer } from "./commands/sitemap-command";
 import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
 import { LeaveCommandHandlerLayer } from "./commands/leave-command";
 import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
 import { ReacordStressTestLayer } from "./commands/reacord-stress-test/index";
+import { SitemapCommandHandlerLayer } from "./commands/sitemap-command";
 import { Discord } from "./core/discord-service";
 import { ConsentButtonHandlerLayer } from "./interactions/consent-button";
 import { DismissButtonHandlerLayer } from "./interactions/dismiss-button";
