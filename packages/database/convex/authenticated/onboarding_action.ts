@@ -1,5 +1,3 @@
-"use node";
-
 import { ActionCache } from "@convex-dev/action-cache";
 import { v } from "convex/values";
 import { api, components, internal } from "../_generated/api";
