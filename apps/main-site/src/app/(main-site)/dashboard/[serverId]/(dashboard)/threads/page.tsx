@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import type { FunctionReturnType } from "convex/server";
 import { Badge } from "@packages/ui/components/badge";
 import {
 	Card,
@@ -22,6 +21,7 @@ import {
 	TableRow,
 } from "@packages/ui/components/table";
 import { useCachedPaginatedQuery } from "@packages/ui/hooks/use-cached-paginated-query";
+import type { FunctionReturnType } from "convex/server";
 import { ChannelType } from "discord-api-types/v10";
 import { CheckCircle2, Hash, MessageSquare, Search } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -76,7 +76,7 @@ type ThreadItem = FunctionReturnType<
 function ThreadRowSkeleton() {
 	return (
 		<TableRow>
-			<TableCell>
+			<TableCell className="pl-6">
 				<div className="flex items-start gap-3">
 					<Skeleton className="size-4 mt-1" />
 					<div className="space-y-2">
@@ -94,23 +94,36 @@ function ThreadRowSkeleton() {
 			<TableCell>
 				<Skeleton className="h-5 w-20" />
 			</TableCell>
-			<TableCell className="text-right">
+			<TableCell className="text-right pr-6">
 				<Skeleton className="h-4 w-16 ml-auto" />
 			</TableCell>
 		</TableRow>
 	);
 }
 
+function getThreadStatus(
+	thread: ThreadItem["thread"],
+	message: ThreadItem["message"],
+) {
+	if (thread.archivedTimestamp) {
+		return { label: "Closed", variant: "secondary" as const };
+	}
+	if ((message?.solutions.length ?? 0) > 0) {
+		return { label: "Solved", variant: "default" as const, icon: CheckCircle2 };
+	}
+	return { label: "Open", variant: "secondary" as const };
+}
+
 function ThreadRow({ item }: { item: ThreadItem }) {
 	const { thread, message, parentChannel, tags } = item;
 	const createdAt = snowflakeToDate(thread.id);
 	const { icon: TypeIcon } = getThreadTypeInfo(thread.type);
-	const isSolved = (message?.solutions.length ?? 0) > 0;
+	const status = getThreadStatus(thread, message);
 	const contentPreview = message?.message.content.slice(0, 200);
 
 	return (
 		<TableRow>
-			<TableCell>
+			<TableCell className="pl-6">
 				<div className="flex items-start gap-3">
 					<TypeIcon className="size-4 mt-1 shrink-0 text-muted-foreground" />
 					<div className="min-w-0">
@@ -134,17 +147,13 @@ function ThreadRow({ item }: { item: ThreadItem }) {
 				)}
 			</TableCell>
 			<TableCell>
-				{isSolved ? (
-					<Badge variant="default" className="gap-1">
-						<CheckCircle2 className="size-3" />
-						Solved
-					</Badge>
-				) : (
-					<Badge variant="secondary">Open</Badge>
-				)}
+				<Badge variant={status.variant} className={status.icon ? "gap-1" : ""}>
+					{status.icon && <status.icon className="size-3" />}
+					{status.label}
+				</Badge>
 			</TableCell>
 			<TableCell>
-				{tags.length > 0 ? (
+				{tags.length > 0 && (
 					<div className="flex flex-wrap gap-1">
 						{tags.slice(0, 2).map((tag) => (
 							<Badge
@@ -161,11 +170,9 @@ function ThreadRow({ item }: { item: ThreadItem }) {
 							</Badge>
 						)}
 					</div>
-				) : (
-					<span className="text-muted-foreground">—</span>
 				)}
 			</TableCell>
-			<TableCell className="text-right text-sm text-muted-foreground">
+			<TableCell className="text-right text-sm text-muted-foreground pr-6">
 				{formatRelativeTime(createdAt)}
 			</TableCell>
 		</TableRow>
@@ -257,11 +264,11 @@ export default function ThreadsPage() {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead className="w-[40%]">Thread</TableHead>
+								<TableHead className="w-[40%] pl-6">Thread</TableHead>
 								<TableHead>Channel</TableHead>
 								<TableHead>Status</TableHead>
 								<TableHead>Tags</TableHead>
-								<TableHead className="text-right">Created</TableHead>
+								<TableHead className="text-right pr-6">Created</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -326,11 +333,11 @@ export default function ThreadsPage() {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead className="w-[40%]">Thread</TableHead>
+								<TableHead className="w-[40%] pl-6">Thread</TableHead>
 								<TableHead>Channel</TableHead>
 								<TableHead>Status</TableHead>
 								<TableHead>Tags</TableHead>
-								<TableHead className="text-right">Created</TableHead>
+								<TableHead className="text-right pr-6">Created</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
