@@ -28,13 +28,16 @@ const dashboardThreadItemValidator = v.object({
 export const getThreadsForServer = guildManagerQuery({
 	args: {
 		paginationOpts: paginationOptsValidator,
+		sortOrder: v.optional(v.union(v.literal("newest"), v.literal("oldest"))),
 	},
 	returns: paginatedValidator(dashboardThreadItemValidator),
 	handler: async (ctx, args) => {
+		const order = args.sortOrder === "oldest" ? "asc" : "desc";
+
 		const paginatedResult = await ctx.db
 			.query("channels")
-			.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-			.order("desc")
+			.withIndex("by_serverId_and_id", (q) => q.eq("serverId", args.serverId))
+			.order(order)
 			.paginate(args.paginationOpts);
 
 		const threads = paginatedResult.page.filter((channel) =>
