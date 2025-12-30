@@ -22,6 +22,7 @@ import type * as authenticated_onboarding_action from "../authenticated/onboardi
 import type * as authenticated_stripe from "../authenticated/stripe.js";
 import type * as authenticated_stripe_actions from "../authenticated/stripe_actions.js";
 import type * as authenticated_threads from "../authenticated/threads.js";
+import type * as authenticated_threads_action from "../authenticated/threads_action.js";
 import type * as authenticated_vercel_domains from "../authenticated/vercel_domains.js";
 import type * as client_admin from "../client/admin.js";
 import type * as client_apiKey from "../client/apiKey.js";
@@ -78,6 +79,7 @@ import type * as shared_servers from "../shared/servers.js";
 import type * as shared_shared from "../shared/shared.js";
 import type * as shared_similarThreads from "../shared/similarThreads.js";
 import type * as shared_stripe from "../shared/stripe.js";
+import type * as shared_threadSummaryAgent from "../shared/threadSummaryAgent.js";
 import type * as shared_threads from "../shared/threads.js";
 import type * as shared_users from "../shared/users.js";
 import type * as shared_validators from "../shared/validators.js";
@@ -105,6 +107,7 @@ declare const fullApi: ApiFromModules<{
   "authenticated/stripe": typeof authenticated_stripe;
   "authenticated/stripe_actions": typeof authenticated_stripe_actions;
   "authenticated/threads": typeof authenticated_threads;
+  "authenticated/threads_action": typeof authenticated_threads_action;
   "authenticated/vercel_domains": typeof authenticated_vercel_domains;
   "client/admin": typeof client_admin;
   "client/apiKey": typeof client_apiKey;
@@ -161,6 +164,7 @@ declare const fullApi: ApiFromModules<{
   "shared/shared": typeof shared_shared;
   "shared/similarThreads": typeof shared_similarThreads;
   "shared/stripe": typeof shared_stripe;
+  "shared/threadSummaryAgent": typeof shared_threadSummaryAgent;
   "shared/threads": typeof shared_threads;
   "shared/users": typeof shared_users;
   "shared/validators": typeof shared_validators;

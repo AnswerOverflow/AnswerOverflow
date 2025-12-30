@@ -41,8 +41,10 @@ import {
 	Eye,
 	ExternalLink,
 	Hash,
+	Loader2,
 	MessageSquare,
 	Search,
+	Sparkles,
 	Tag,
 	TrendingUp,
 	X,
@@ -200,14 +202,38 @@ function ThreadDetailPanel({
 	item,
 	onClose,
 	showBackButton = false,
+	serverId,
 }: {
 	item: ThreadItem;
 	onClose: () => void;
 	showBackButton?: boolean;
+	serverId: string;
 }) {
 	const { thread, message, parentChannel, tags } = item;
 	const createdAt = snowflakeToDate(thread.id);
 	const status = getThreadStatus(thread, message);
+
+	const [summary, setSummary] = useState<string | null>(null);
+	const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+
+	const generateSummary = useAction(
+		api.authenticated.threads_action.generateThreadSummary,
+	);
+
+	const handleGenerateSummary = async () => {
+		setIsGeneratingSummary(true);
+		try {
+			const result = await generateSummary({
+				serverId: BigInt(serverId),
+				threadId: thread.id,
+			});
+			setSummary(result.summary);
+		} catch (error) {
+			console.error("Failed to generate summary:", error);
+		} finally {
+			setIsGeneratingSummary(false);
+		}
+	};
 
 	const discordUrl = `https://discord.com/channels/${thread.serverId}/${thread.id}`;
 
@@ -272,6 +298,40 @@ function ThreadDetailPanel({
 
 			<ScrollArea className="flex-1">
 				<div className="p-4 space-y-4">
+					<div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+						<div className="flex items-center justify-between">
+							<h3 className="text-sm font-medium flex items-center gap-2">
+								<Sparkles className="size-4 text-primary" />
+								AI Summary
+							</h3>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleGenerateSummary}
+								disabled={isGeneratingSummary}
+							>
+								{isGeneratingSummary ? (
+									<>
+										<Loader2 className="size-4 mr-2 animate-spin" />
+										Generating...
+									</>
+								) : summary ? (
+									"Regenerate"
+								) : (
+									"Generate Summary"
+								)}
+							</Button>
+						</div>
+						{summary ? (
+							<p className="text-sm text-muted-foreground">{summary}</p>
+						) : (
+							<p className="text-sm text-muted-foreground italic">
+								Click "Generate Summary" to create an AI-powered summary of this
+								thread.
+							</p>
+						)}
+					</div>
+
 					{message ? (
 						<div className="rounded-lg border bg-card overflow-hidden">
 							<div className="p-4">
@@ -601,6 +661,7 @@ export default function ThreadsPage() {
 							item={selectedThread}
 							onClose={() => setSelectedThreadId(null)}
 							showBackButton
+							serverId={serverId}
 						/>
 					) : (
 						<ScrollArea className="h-full">
@@ -656,6 +717,7 @@ export default function ThreadsPage() {
 								<ThreadDetailPanel
 									item={selectedThread}
 									onClose={() => setSelectedThreadId(null)}
+									serverId={serverId}
 								/>
 							) : (
 								<ThreadDetailEmpty />
