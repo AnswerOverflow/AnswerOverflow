@@ -59,7 +59,7 @@ export async function storeFile(
 		sha256 ||
 		Array.from(
 			new Uint8Array(
-				await crypto.subtle.digest("SHA-256", await blob.slice().arrayBuffer()),
+				await crypto.subtle.digest("SHA-256", await blob.arrayBuffer()),
 			),
 		)
 			.map((b) => b.toString(16).padStart(2, "0"))

@@ -151,13 +151,8 @@ export async function fromUIMessagesAsync<METADATA = unknown>(
 		const commonFields = createCommonFields(uiMessage, meta);
 		const modelMessages = await convertToModelMessages([uiMessage]);
 
-		for (let i = 0; i < modelMessages.length; i++) {
-			const doc = modelMessageToDoc(
-				modelMessages[i],
-				uiMessage,
-				commonFields,
-				i,
-			);
+		for (const [i, modelMessage] of modelMessages.entries()) {
+			const doc = modelMessageToDoc(modelMessage, uiMessage, commonFields, i);
 			if (doc) results.push(doc);
 		}
 	}
@@ -516,9 +511,9 @@ function createAssistantUIMessage<
 	groupUnordered: (MessageDoc & ExtraFields<METADATA>)[],
 ): UIMessage<METADATA, DATA_PARTS, TOOLS> {
 	const group = sorted(groupUnordered);
-	const firstMessage = group[0];
+	const firstMessage = group[0]!;
+	const lastMessage = group[group.length - 1]!;
 
-	// Use first message for special fields
 	const common = {
 		id: firstMessage._id,
 		_creationTime: firstMessage._creationTime,
@@ -528,8 +523,6 @@ function createAssistantUIMessage<
 		agentName: firstMessage.agentName,
 	};
 
-	// Get status from last message
-	const lastMessage = group[group.length - 1];
 	const status = lastMessage.streaming
 		? ("streaming" as const)
 		: lastMessage.status;

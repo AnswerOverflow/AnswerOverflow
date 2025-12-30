@@ -639,7 +639,8 @@ function normalizeToolResult(
 export function guessMimeType(buf: ArrayBuffer | string): string {
 	if (typeof buf === "string") {
 		if (buf.match(/^data:\w+\/\w+;base64/)) {
-			return buf.split(";")[0].split(":")[1]!;
+			const mimeType = buf.split(";")[0]?.split(":")[1];
+			return mimeType ?? "application/octet-stream";
 		}
 		return "text/plain";
 	}

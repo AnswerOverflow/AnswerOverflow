@@ -870,16 +870,17 @@ export class Agent<
 					this.options.textEmbeddingModel,
 					"A textEmbeddingModel is required to be set on the Agent that you're doing vector search with",
 				);
+				const result = await embedMany(ctx, {
+					...this.options,
+					agentName: this.options.name,
+					userId: args.userId,
+					threadId: args.threadId,
+					values: [text],
+				});
+				const embedding = result.embeddings[0];
+				assert(embedding, "Expected at least one embedding result");
 				return {
-					embedding: (
-						await embedMany(ctx, {
-							...this.options,
-							agentName: this.options.name,
-							userId: args.userId,
-							threadId: args.threadId,
-							values: [text],
-						})
-					).embeddings[0],
+					embedding,
 					textEmbeddingModel: this.options.textEmbeddingModel,
 				};
 			},
@@ -962,6 +963,9 @@ export class Agent<
 				messageIds: args.messageIds,
 			})
 		).filter((m): m is NonNullable<typeof m> => m !== null);
+		if (messages.length === 0) {
+			throw new Error("No messages found for the given IDs");
+		}
 		if (messages.length !== args.messageIds.length) {
 			throw new Error(
 				"Some messages were not found: " +
@@ -985,14 +989,15 @@ export class Agent<
 				"No embeddings were generated for the messages. You must pass a textEmbeddingModel to the agent constructor.",
 			);
 		}
+		const firstMessage = messages[0]!;
 		await generateAndSaveEmbeddings(
 			ctx,
 			this.component,
 			{
 				...this.options,
 				agentName: this.options.name,
-				threadId: messages[0].threadId,
-				userId: messages[0].userId,
+				threadId: firstMessage.threadId,
+				userId: firstMessage.userId,
 				textEmbeddingModel,
 			},
 			messages,

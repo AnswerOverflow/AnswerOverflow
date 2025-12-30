@@ -500,8 +500,7 @@ export function updateFromTextStreamParts(
 		}
 	}
 	// Consider reasoning done once something else happens
-	for (let i = 0; i < message.parts.length - 1; i++) {
-		const part = message.parts[i];
+	for (const part of message.parts.slice(0, -1)) {
 		if (part.type === "reasoning") {
 			part.state = "done";
 		}

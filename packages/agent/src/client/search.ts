@@ -338,7 +338,8 @@ export async function embedMessages(
 		embeddingsOrNull[i] = textEmbeddings.embeddings[j];
 	});
 	if (textEmbeddings.embeddings.length > 0) {
-		const dimension = textEmbeddings.embeddings[0].length;
+		const firstEmbedding = textEmbeddings.embeddings[0]!;
+		const dimension = firstEmbedding.length;
 		validateVectorDimension(dimension);
 		const model = getModelName(options.textEmbeddingModel);
 		embeddings = { vectors: embeddingsOrNull, dimension, model };
@@ -508,15 +509,16 @@ export async function fetchContextWithPrompt(
 					textEmbeddingModel,
 					"A textEmbeddingModel is required to be set on the Agent that you're doing vector search with",
 				);
+				const result = await embedMany(ctx, {
+					...args,
+					userId,
+					values: [text],
+					textEmbeddingModel,
+				});
+				const embedding = result.embeddings[0];
+				assert(embedding, "Expected at least one embedding result");
 				return {
-					embedding: (
-						await embedMany(ctx, {
-							...args,
-							userId,
-							values: [text],
-							textEmbeddingModel,
-						})
-					).embeddings[0],
+					embedding,
 					textEmbeddingModel,
 				};
 			},

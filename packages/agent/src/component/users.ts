@@ -165,7 +165,7 @@ async function deletePageForUserId(
 			});
 		threadsCursor = threads.continueCursor;
 		if (threads.page.length > 0) {
-			threadInProgress = threads.page[0]._id;
+			threadInProgress = threads.page[0]!._id;
 			messagesCursor = null;
 			streamsInProgress = false;
 			streamOrder = undefined;

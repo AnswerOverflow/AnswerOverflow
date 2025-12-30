@@ -218,17 +218,12 @@ async function addMessagesHandler(
 			"embeddings.vectors.length must match messages.length",
 		);
 	}
-	for (let i = 0; i < messages.length; i++) {
-		const message = messages[i];
+	for (const [i, message] of messages.entries()) {
 		let embeddingId: VectorTableId | undefined;
-		if (
-			embeddings &&
-			embeddings.vectors[i] &&
-			!fail &&
-			message.status !== "failed"
-		) {
+		const vector = embeddings?.vectors[i];
+		if (embeddings && vector && !fail && message.status !== "failed") {
 			embeddingId = await insertVector(ctx, embeddings.dimension, {
-				vector: embeddings.vectors[i]!,
+				vector,
 				model: embeddings.model,
 				table: "messages",
 				userId: hideFromUserIdSearch ? undefined : userId,
@@ -494,8 +489,10 @@ export const cloneMessageBatch = internalMutation({
 			upToAndIncludingMessageId: args.upToAndIncludingMessageId,
 		});
 
+		const firstPage = result.page[0];
+		const lastPage = result.page[result.page.length - 1];
 		const existing =
-			result.page.length === 0
+			result.page.length === 0 || !firstPage || !lastPage
 				? []
 				: await mergedStream(
 						[true, false].flatMap((tool) =>
@@ -507,8 +504,8 @@ export const cloneMessageBatch = internalMutation({
 											.eq("threadId", args.targetThreadId)
 											.eq("status", status)
 											.eq("tool", tool)
-											.gte("order", result.page[0].order)
-											.lte("order", result.page[result.page.length - 1].order),
+											.gte("order", firstPage.order)
+											.lte("order", lastPage.order),
 									),
 							),
 						),
@@ -845,18 +842,19 @@ export const _fetchSearchMessages = internalQuery({
 			const order = m.order!;
 			let earliest = order - before;
 			let latest = order + after;
+			const includedSet = included[searchId]!;
 			for (; earliest <= latest; earliest++) {
-				if (!included[searchId].has(earliest)) {
+				if (!includedSet.has(earliest)) {
 					break;
 				}
 			}
 			for (; latest >= earliest; latest--) {
-				if (!included[searchId].has(latest)) {
+				if (!includedSet.has(latest)) {
 					break;
 				}
 			}
 			for (let i = earliest; i <= latest; i++) {
-				included[searchId].add(i);
+				includedSet.add(i);
 			}
 			if (earliest !== latest) {
 				const surrounding = await ctx.db

@@ -184,8 +184,9 @@ export class MockLanguageModel implements LanguageModelV2 {
 			} else if (Array.isArray(args.doGenerate)) {
 				return args.doGenerate[this.doGenerateCalls.length];
 			} else if (contentSteps.length) {
+				const content = contentSteps[callIndex % contentSteps.length]!;
 				const result = {
-					content: contentSteps[callIndex % contentSteps.length],
+					content,
 					finishReason: "stop" as const,
 					usage: DEFAULT_USAGE,
 					...metadata,
@@ -209,8 +210,9 @@ export class MockLanguageModel implements LanguageModelV2 {
 			} else if (Array.isArray(args.doStream)) {
 				return args.doStream[this.doStreamCalls.length];
 			} else if (contentSteps) {
+				const chunks = chunkResponses[callIndex % chunkResponses.length]!;
 				const stream = simulateReadableStream({
-					chunks: chunkResponses[callIndex % chunkResponses.length],
+					chunks,
 					initialDelayInMs,
 					chunkDelayInMs,
 				});
