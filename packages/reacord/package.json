@@ -16,7 +16,7 @@
 		"react-reconciler": "^0.31.0"
 	},
 	"devDependencies": {
-		"@types/react": "^19.1.6",
+		"@types/react": "catalog:",
 		"@types/react-reconciler": "^0.31.0"
 	},
 	"peerDependencies": {

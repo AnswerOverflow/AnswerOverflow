@@ -31,7 +31,7 @@
 		"@edge-runtime/vm": "5.0.0",
 		"@langchain/textsplitters": "0.1.0",
 		"@types/node": "20.19.24",
-		"@types/react": "19.2.2",
+		"@types/react": "catalog:",
 		"convex-test": "0.0.38",
 		"react": "19.2.3",
 		"typescript": "5.9.3",
