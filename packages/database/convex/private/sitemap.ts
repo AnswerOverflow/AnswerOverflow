@@ -13,15 +13,6 @@ export const getServersForSitemap = privateQuery({
 		const results = [];
 
 		for (const server of allServers) {
-			const hasIndexingEnabled = await ctx.db
-				.query("channelSettings")
-				.withIndex("by_serverId_and_indexingEnabled", (q) =>
-					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
-				)
-				.first();
-
-			if (!hasIndexingEnabled) continue;
-
 			const msgCount = await threadMessageCounts.count(ctx, {
 				bounds: { prefix: [server.discordId] },
 			});
