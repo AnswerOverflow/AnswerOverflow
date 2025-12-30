@@ -41,14 +41,20 @@ export async function getTenantData(
 
 	const defaultDescription = `Explore the ${raw.server.name} community Discord server on the web. Search and browse discussions, find answers, and join the conversation.`;
 
+	const resolveSubpath = (): string | null => {
+		if (subpathTenant) {
+			return normalizeSubpath(subpathTenant.subpath);
+		}
+		if (raw.preferences.subpath) {
+			return normalizeSubpath(raw.preferences.subpath);
+		}
+		return null;
+	};
+
 	const tenant: Tenant = {
 		customDomain: raw.preferences.customDomain,
 		description: raw.server.description ?? defaultDescription,
-		subpath: subpathTenant
-			? normalizeSubpath(subpathTenant.subpath)
-			: raw.preferences.subpath
-				? normalizeSubpath(raw.preferences.subpath)
-				: null,
+		subpath: resolveSubpath(),
 		name: raw.server.name,
 		icon: raw.server.icon,
 		discordId: raw.server.discordId,

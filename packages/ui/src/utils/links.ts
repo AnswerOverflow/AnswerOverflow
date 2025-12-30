@@ -1,6 +1,40 @@
+import { parse } from "tldts";
+
 const stripTrailingSlash = (value: string) => {
 	return value.endsWith("/") ? value.slice(0, -1) : value;
 };
+
+export type ParsedAnswerOverflowAppDomain = {
+	domain: string;
+	subpath: string;
+};
+
+export function parseAnswerOverflowAppDomain(
+	host: string,
+): ParsedAnswerOverflowAppDomain | null {
+	const hostWithoutPort = host.split(":")[0];
+	if (!hostWithoutPort) return null;
+
+	const parsed = parse(hostWithoutPort);
+
+	if (parsed.domain !== "answeroverflow.app" || !parsed.subdomain) {
+		return null;
+	}
+
+	const lastDashIndex = parsed.subdomain.lastIndexOf("-");
+	if (lastDashIndex === -1) {
+		return null;
+	}
+
+	const domain = parsed.subdomain.slice(0, lastDashIndex);
+	const subpath = parsed.subdomain.slice(lastDashIndex + 1);
+
+	if (!domain || !subpath) {
+		return null;
+	}
+
+	return { domain, subpath };
+}
 
 export function getBaseUrl(hostOverride?: string) {
 	const siteUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -133,11 +167,12 @@ export function getTenantCanonicalUrl(
 	tenant: TenantInfo | null,
 	path: string,
 ): string {
+	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
 	if (subpathLookup[tenant?.customDomain ?? ""]) {
-		const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 		return `https://${subpathLookup[tenant?.customDomain ?? ""]}${normalizedPath}`;
 	}
+
 	const baseUrl = getTenantBaseUrl(tenant);
-	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 	return `${baseUrl}${normalizedPath}`;
 }

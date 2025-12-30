@@ -2,6 +2,7 @@ import { isIP } from "node:net";
 import {
 	extractLocalhostSubdomain,
 	isOnMainSite,
+	parseAnswerOverflowAppDomain,
 } from "@packages/ui/utils/links";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -73,6 +74,17 @@ export function proxy(request: NextRequest) {
 			return NextResponse.rewrite(url);
 		}
 		url.pathname = `/${localhostSubdomain}${pathname}`;
+		return NextResponse.rewrite(url);
+	}
+
+	const parsedAppDomain = parseAnswerOverflowAppDomain(host);
+	if (parsedAppDomain) {
+		const pathnameWithoutSubpath = pathname.startsWith(
+			`/${parsedAppDomain.subpath}`,
+		)
+			? pathname.slice(parsedAppDomain.subpath.length + 1) || "/"
+			: pathname;
+		url.pathname = `/${parsedAppDomain.domain}${pathnameWithoutSubpath}`;
 		return NextResponse.rewrite(url);
 	}
 

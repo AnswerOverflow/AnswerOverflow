@@ -73,6 +73,7 @@
 		"shiki": "^3.12.2",
 		"sonner": "^2.0.7",
 		"tailwind-merge": "^3.3.1",
+		"tldts": "^7.0.19",
 		"tw-animate-css": "^1.3.6",
 		"vaul": "^1.1.2"
 	},
