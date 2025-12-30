@@ -1,4 +1,5 @@
 import { gateway, generateObject } from "ai";
+import { ChannelType } from "discord-api-types/v10";
 import { z } from "zod";
 import type { Channel, ForumTag } from "../schema";
 
@@ -12,7 +13,11 @@ export async function detectPublicChannels(
 	const channelList = channels
 		.map((c) => {
 			const typeLabel =
-				c.type === 15 ? "Forum" : c.type === 5 ? "Announcement" : "Text";
+				c.type === ChannelType.GuildForum
+					? "Forum"
+					: c.type === ChannelType.GuildAnnouncement
+						? "Announcement"
+						: "Text";
 			return `- ${c.name} (${typeLabel}, id: ${c.id})`;
 		})
 		.join("\n");

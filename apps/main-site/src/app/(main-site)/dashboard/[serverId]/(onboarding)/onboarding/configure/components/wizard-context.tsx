@@ -3,16 +3,11 @@
 import { api } from "@packages/database/convex/_generated/api";
 import type { RecommendedConfiguration } from "@packages/database/convex/authenticated/onboarding_action";
 import type { ForumTag } from "@packages/database/convex/schema";
+import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { ChannelType } from "discord-api-types/v10";
 import { useParams } from "next/navigation";
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useState,
-} from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 export type ForumTagInfo = ForumTag;
 
@@ -84,28 +79,18 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 	const params = useParams();
 	const serverId = params.serverId as string;
 
-	const [state, setState] = useState<WizardState>({
-		isLoading: true,
-		error: null,
-		allChannels: [],
-		configurations: [],
-		serverSettings: {
-			considerAllMessagesPublicEnabled: true,
-			anonymizeMessagesEnabled: false,
-		},
-		aiRecommendations: new Map(),
-	});
-
 	const getRecommendedConfiguration = useAction(
 		api.authenticated.onboarding_action.getRecommendedConfiguration,
 	);
 
-	const loadConfiguration = useCallback(async () => {
-		if (!serverId) return;
-
-		setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-		try {
+	const {
+		data: configData,
+		isLoading,
+		error,
+		refetch,
+	} = useTanstackQuery({
+		queryKey: ["wizard-configuration", serverId],
+		queryFn: async () => {
 			const config = await getRecommendedConfiguration({
 				serverId: BigInt(serverId),
 			});
@@ -143,49 +128,60 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 				});
 			}
 
-			setState({
-				isLoading: false,
-				error: null,
+			return {
 				allChannels,
 				configurations: initialConfigurations,
 				serverSettings: config.serverSettings,
 				aiRecommendations,
-			});
-		} catch (error) {
-			console.error("Failed to load configuration:", error);
-			setState((prev) => ({
-				...prev,
-				isLoading: false,
-				error: "Failed to load channel data. Please try again.",
+			};
+		},
+		enabled: !!serverId,
+	});
+
+	const [configurationsOverride, setConfigurationsOverride] =
+		useState<Array<ChannelConfiguration> | null>(null);
+	const [serverSettingsOverride, setServerSettingsOverride] =
+		useState<ServerSettings | null>(null);
+
+	const configurations =
+		configurationsOverride ?? configData?.configurations ?? [];
+	const serverSettings = serverSettingsOverride ??
+		configData?.serverSettings ?? {
+			considerAllMessagesPublicEnabled: true,
+			anonymizeMessagesEnabled: false,
+		};
+	const allChannels = configData?.allChannels ?? [];
+	const aiRecommendations = configData?.aiRecommendations ?? new Map();
+
+	const setServerSettings = useCallback(
+		(settings: Partial<ServerSettings>) => {
+			setServerSettingsOverride((prev) => ({
+				...(prev ??
+					configData?.serverSettings ?? {
+						considerAllMessagesPublicEnabled: true,
+						anonymizeMessagesEnabled: false,
+					}),
+				...settings,
 			}));
-		}
-	}, [serverId, getRecommendedConfiguration]);
-
-	useEffect(() => {
-		loadConfiguration();
-	}, [loadConfiguration]);
-
-	const setServerSettings = useCallback((settings: Partial<ServerSettings>) => {
-		setState((prev) => ({
-			...prev,
-			serverSettings: { ...prev.serverSettings, ...settings },
-		}));
-	}, []);
+		},
+		[configData?.serverSettings],
+	);
 
 	const updateChannelConfig = useCallback(
 		(
 			channelId: bigint,
 			config: Partial<Omit<ChannelConfiguration, "channelId">>,
 		) => {
-			setState((prev) => {
-				const existingIndex = prev.configurations.findIndex(
+			setConfigurationsOverride((prev) => {
+				const currentConfigs = prev ?? configData?.configurations ?? [];
+				const existingIndex = currentConfigs.findIndex(
 					(c) => c.channelId === channelId,
 				);
 
 				if (existingIndex >= 0) {
-					const existing = prev.configurations[existingIndex];
-					if (!existing) return prev;
-					const updated = [...prev.configurations];
+					const existing = currentConfigs[existingIndex];
+					if (!existing) return currentConfigs;
+					const updated = [...currentConfigs];
 					const updatedConfig: ChannelConfiguration = {
 						channelId: existing.channelId,
 						indexingEnabled: config.indexingEnabled ?? existing.indexingEnabled,
@@ -199,7 +195,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 						solutionTagId: config.solutionTagId ?? existing.solutionTagId,
 					};
 					updated[existingIndex] = updatedConfig;
-					return { ...prev, configurations: updated };
+					return updated;
 				}
 
 				const newConfig: ChannelConfiguration = {
@@ -211,40 +207,40 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 						config.sendMarkSolutionInstructionsInNewThreads ?? false,
 					solutionTagId: config.solutionTagId,
 				};
-				return { ...prev, configurations: [...prev.configurations, newConfig] };
+				return [...currentConfigs, newConfig];
 			});
 		},
-		[],
+		[configData?.configurations],
 	);
 
 	const setChannelConfigs = useCallback(
 		(configs: Array<ChannelConfiguration>) => {
-			setState((prev) => ({ ...prev, configurations: configs }));
+			setConfigurationsOverride(configs);
 		},
 		[],
 	);
 
 	const getChannelConfig = useCallback(
 		(channelId: bigint) => {
-			return state.configurations.find((c) => c.channelId === channelId);
+			return configurations.find((c) => c.channelId === channelId);
 		},
-		[state.configurations],
+		[configurations],
 	);
 
 	const getAllChannels = useCallback(() => {
-		return state.allChannels;
-	}, [state.allChannels]);
+		return allChannels;
+	}, [allChannels]);
 
 	const getAllForumChannels = useCallback(() => {
-		return state.allChannels.filter((c) => c.type === ChannelType.GuildForum);
-	}, [state.allChannels]);
+		return allChannels.filter((c) => c.type === ChannelType.GuildForum);
+	}, [allChannels]);
 
 	const getAllNonForumChannels = useCallback(() => {
-		return state.allChannels.filter((c) => c.type !== ChannelType.GuildForum);
-	}, [state.allChannels]);
+		return allChannels.filter((c) => c.type !== ChannelType.GuildForum);
+	}, [allChannels]);
 
 	const getConfiguredChannels = useCallback(() => {
-		return state.configurations.filter(
+		return configurations.filter(
 			(c) =>
 				c.indexingEnabled ||
 				c.autoThreadEnabled ||
@@ -252,17 +248,28 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 				c.sendMarkSolutionInstructionsInNewThreads ||
 				c.solutionTagId !== undefined,
 		);
-	}, [state.configurations]);
+	}, [configurations]);
 
 	const getAIRecommendation = useCallback(
 		(channelId: string) => {
-			return state.aiRecommendations.get(channelId);
+			return aiRecommendations.get(channelId);
 		},
-		[state.aiRecommendations],
+		[aiRecommendations],
 	);
 
+	const reload = useCallback(async () => {
+		setConfigurationsOverride(null);
+		setServerSettingsOverride(null);
+		await refetch();
+	}, [refetch]);
+
 	const value: WizardContextValue = {
-		...state,
+		isLoading,
+		error: error ? "Failed to load channel data. Please try again." : null,
+		allChannels,
+		configurations,
+		serverSettings,
+		aiRecommendations,
 		serverId,
 		setServerSettings,
 		updateChannelConfig,
@@ -273,7 +280,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 		getAllNonForumChannels,
 		getConfiguredChannels,
 		getAIRecommendation,
-		reload: loadConfiguration,
+		reload,
 	};
 
 	return (
