@@ -2,7 +2,10 @@ import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { internalQuery, privateMutation, privateQuery } from "../client";
 import { planValidator } from "../schema";
-import { validateCustomDomainUniqueness } from "../shared/shared";
+import {
+	upsertServerPreferencesLogic,
+	validateCustomDomainUniqueness,
+} from "../shared";
 
 const serverPreferencesSchema = v.object({
 	serverId: v.int64(),
@@ -16,13 +19,6 @@ const serverPreferencesSchema = v.object({
 	subpath: v.optional(v.string()),
 	addedByUserId: v.optional(v.int64()),
 });
-
-const DEFAULT_SERVER_PREFERENCES = {
-	plan: "FREE" as const,
-	readTheRulesConsentEnabled: false,
-	considerAllMessagesPublicEnabled: true,
-	anonymizeMessagesEnabled: false,
-};
 
 export const getServerPreferencesByServerId = privateQuery({
 	args: {
@@ -100,27 +96,7 @@ export const updateServerPreferences = privateMutation({
 		preferences: serverPreferencesSchema.partial(),
 	},
 	handler: async (ctx, args) => {
-		const existing = await getOneFrom(
-			ctx.db,
-			"serverPreferences",
-			"by_serverId",
-			args.serverId,
-		);
-
-		if (existing) {
-			await ctx.db.patch(existing._id, {
-				...existing,
-				...args.preferences,
-				serverId: args.serverId,
-			});
-		} else {
-			await ctx.db.insert("serverPreferences", {
-				...DEFAULT_SERVER_PREFERENCES,
-				...args.preferences,
-				serverId: args.serverId,
-			});
-		}
-
+		await upsertServerPreferencesLogic(ctx, args.serverId, args.preferences);
 		return args.serverId;
 	},
 });
@@ -131,24 +107,9 @@ export const updateStripeCustomer = privateMutation({
 		stripeCustomerId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		const existing = await getOneFrom(
-			ctx.db,
-			"serverPreferences",
-			"by_serverId",
-			args.serverId,
-		);
-
-		if (existing) {
-			await ctx.db.patch(existing._id, {
-				stripeCustomerId: args.stripeCustomerId,
-			});
-		} else {
-			await ctx.db.insert("serverPreferences", {
-				...DEFAULT_SERVER_PREFERENCES,
-				serverId: args.serverId,
-				stripeCustomerId: args.stripeCustomerId,
-			});
-		}
+		await upsertServerPreferencesLogic(ctx, args.serverId, {
+			stripeCustomerId: args.stripeCustomerId,
+		});
 	},
 });
 
@@ -159,26 +120,10 @@ export const updateStripeSubscription = privateMutation({
 		plan: planValidator,
 	},
 	handler: async (ctx, args) => {
-		const existing = await getOneFrom(
-			ctx.db,
-			"serverPreferences",
-			"by_serverId",
-			args.serverId,
-		);
-
-		if (existing) {
-			await ctx.db.patch(existing._id, {
-				stripeSubscriptionId: args.stripeSubscriptionId ?? undefined,
-				plan: args.plan,
-			});
-		} else {
-			await ctx.db.insert("serverPreferences", {
-				...DEFAULT_SERVER_PREFERENCES,
-				serverId: args.serverId,
-				stripeSubscriptionId: args.stripeSubscriptionId ?? undefined,
-				plan: args.plan,
-			});
-		}
+		await upsertServerPreferencesLogic(ctx, args.serverId, {
+			stripeSubscriptionId: args.stripeSubscriptionId ?? undefined,
+			plan: args.plan,
+		});
 	},
 });
 

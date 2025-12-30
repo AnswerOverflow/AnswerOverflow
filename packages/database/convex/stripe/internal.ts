@@ -2,10 +2,7 @@ import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { internalMutation, internalQuery } from "../client";
 import { planValidator } from "../schema";
-
-const DEFAULT_SERVER_PREFERENCES = {
-	plan: "FREE" as const,
-};
+import { DEFAULT_SERVER_PREFERENCES } from "../shared";
 
 export const getServerForStripe = internalQuery({
 	args: {

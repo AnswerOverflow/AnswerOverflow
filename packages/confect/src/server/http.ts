@@ -146,15 +146,14 @@ const makeHttpRouter = (httpApis: HttpApis): HttpRouter => {
 const applyMonkeyPatches = () => {
 	// These are necessary until the Convex runtime supports these APIs. See https://discord.com/channels/1019350475847499849/1281364098419785760
 
-	// biome-ignore lint/suspicious/noGlobalAssign: See above note.
-	URL = class extends URL {
-		override get username() {
-			return "";
-		}
-		override get password() {
-			return "";
-		}
-	};
+	Object.defineProperty(URL.prototype, "username", {
+		get: () => "",
+		configurable: true,
+	});
+	Object.defineProperty(URL.prototype, "password", {
+		get: () => "",
+		configurable: true,
+	});
 
 	Object.defineProperty(Request.prototype, "signal", {
 		get: () => new AbortSignal(),

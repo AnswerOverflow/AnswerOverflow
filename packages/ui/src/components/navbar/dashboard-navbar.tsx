@@ -47,12 +47,10 @@ export function DashboardNavbar({
 			value={{ mobileSidebarOpen, setMobileSidebarOpen }}
 		>
 			<div className="relative flex w-full flex-col">
-				{/* Header - Fixed at top */}
 				<header
-					className="fixed left-0 right-0 z-40 flex h-navbar items-center gap-4 border-b bg-background px-4"
+					className="fixed left-0 right-0 z-40 flex h-navbar items-center gap-4 border-b bg-background px-4 lg:pl-[calc(255.44px+1rem)]"
 					style={{ top: isImpersonating ? "40px" : "0" }}
 				>
-					{/* Mobile Menu Button */}
 					<Button
 						variant="ghost"
 						size="icon"
@@ -63,23 +61,18 @@ export function DashboardNavbar({
 						<PanelLeftIcon className="h-5 w-5" />
 					</Button>
 
-					{/* Logo */}
-					<Link href={homeHref} className="hidden lg:flex items-center">
-						<AnswerOverflowLogo width={160} />
+					<Link
+						href={homeHref}
+						className="lg:hidden flex items-center shrink-0"
+					>
+						<AnswerOverflowLogo width={140} />
 						<span className="sr-only">Answer Overflow</span>
 					</Link>
 
-					{/* Separator */}
-					{serverSelect && (
-						<span className="hidden lg:inline text-muted-foreground">/</span>
-					)}
-
-					{/* Server Select */}
-					<div className="flex-1">
+					<div className="flex-1 min-w-0">
 						{serverSelect && <ServerSelectDropdown {...serverSelect} />}
 					</div>
 
-					{/* User Section */}
 					<UserSection />
 				</header>
 

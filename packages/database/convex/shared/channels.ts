@@ -1,7 +1,7 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { ChannelType } from "discord-api-types/v10";
 import type { MutationCtx, QueryCtx } from "../client";
-import type { Channel } from "../schema";
+import type { Channel, ChannelSettings } from "../schema";
 
 export { ChannelType };
 
@@ -109,4 +109,37 @@ export async function deleteChannelInternalLogic(
 	if (channel) {
 		await ctx.db.delete(channel._id);
 	}
+}
+
+export async function upsertChannelSettingsLogic(
+	ctx: MutationCtx,
+	channelId: bigint,
+	settings: Partial<Omit<ChannelSettings, "channelId" | "serverId">>,
+) {
+	const [existingSettings, channel] = await Promise.all([
+		getOneFrom(ctx.db, "channelSettings", "by_channelId", channelId),
+		getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
+	]);
+
+	if (!channel) {
+		throw new Error(`Channel ${channelId} not found`);
+	}
+
+	if (existingSettings) {
+		await ctx.db.patch(existingSettings._id, {
+			...existingSettings,
+			...settings,
+			channelId,
+			serverId: channel.serverId,
+		});
+	} else {
+		await ctx.db.insert("channelSettings", {
+			...DEFAULT_CHANNEL_SETTINGS,
+			...settings,
+			channelId,
+			serverId: channel.serverId,
+		});
+	}
+
+	return channelId;
 }

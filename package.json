@@ -36,7 +36,7 @@
 		"typescript": "catalog:"
 	},
 	"engines": {
-		"node": ">=18.8.0"
+		"node": ">=18.0.0"
 	},
 	"workspaces": {
 		"packages": [
@@ -90,7 +90,7 @@
 		"jsdom": "^27.3.0",
 		"main-site": "^7.4.2",
 		"react-tweet": "^3.3.0",
-		"stripe": "^20"
+		"stripe": "^20.1.0"
 	},
 	"lint-staged": {
 		"*": [

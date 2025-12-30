@@ -14,7 +14,7 @@ import {
 import { Effect } from "effect";
 import { atomRuntime } from "../../core/runtime";
 
-const fetchStatsEffect = (_input: undefined) =>
+const fetchStatsEffect = () =>
 	Effect.gen(function* () {
 		yield* Effect.sleep("1 second");
 		return {

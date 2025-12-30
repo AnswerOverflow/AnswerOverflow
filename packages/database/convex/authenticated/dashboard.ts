@@ -526,11 +526,35 @@ export const getTopPagesForServer = guildManagerAction({
 	},
 });
 
-export const trackBotAddClick = guildManagerAction({
-	args: {},
+export const trackBotAddClick = authenticatedAction({
+	args: {
+		serverId: v.int64(),
+	},
 	handler: async (ctx, args) => {
 		const { discordAccountId } = args;
 		const backendAccessToken = getBackendAccessToken();
+
+		const discordGuilds = await getDiscordGuildsCache().fetch(ctx, {
+			discordAccountId,
+		});
+
+		const targetGuild = discordGuilds.find(
+			(guild) => guild.id === args.serverId.toString(),
+		);
+
+		if (!targetGuild) {
+			throw new Error("Server not found in user's Discord guilds");
+		}
+
+		const permissions = BigInt(targetGuild.permissions);
+		const hasManageGuild =
+			targetGuild.owner ||
+			hasPermission(permissions, DISCORD_PERMISSIONS.ManageGuild) ||
+			hasPermission(permissions, DISCORD_PERMISSIONS.Administrator);
+
+		if (!hasManageGuild) {
+			throw new Error("User does not have Manage Guild permissions");
+		}
 
 		await ctx.runMutation(
 			api.private.server_preferences.updateServerPreferences,

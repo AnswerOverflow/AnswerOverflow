@@ -1,6 +1,14 @@
 import { Database } from "@packages/database/database";
 import { Storage } from "@packages/database/storage";
-import { ChannelType, EmbedBuilder, type Guild } from "discord.js";
+import { getBaseUrl } from "@packages/ui/utils/links";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	ChannelType,
+	EmbedBuilder,
+	type Guild,
+} from "discord.js";
 import { Array as Arr, Console, Effect, Layer, Metric } from "effect";
 import { registerCommands } from "../commands/register";
 import { SUPER_USER_ID } from "../constants/super-user";
@@ -73,6 +81,88 @@ function notifySuperUserOfServerJoin(guild: Guild) {
 				),
 			);
 	});
+}
+
+const RHYS_AVATAR_URL =
+	"https://cdn.discordapp.com/avatars/523949187663134754/7716e305f7de26045526d9da6eef2dab.webp";
+
+function getPacificAvailabilityTimestamps() {
+	const today = new Date().toLocaleDateString("en-CA", {
+		timeZone: "America/Los_Angeles",
+	});
+	const start = new Date(`${today}T08:00:00-08:00`);
+	const end = new Date(`${today}T22:00:00-08:00`);
+
+	return {
+		start: Math.floor(start.getTime() / 1000),
+		end: Math.floor(end.getTime() / 1000),
+	};
+}
+
+function notifyUserWhoAddedBot(guild: Guild) {
+	return Effect.gen(function* () {
+		yield* Effect.annotateCurrentSpan({
+			guild_id: guild.id,
+			guild_name: guild.name,
+		});
+
+		const database = yield* Database;
+		const discord = yield* Discord;
+
+		const preferences =
+			yield* database.private.server_preferences.getServerPreferencesByServerId(
+				{
+					serverId: BigInt(guild.id),
+				},
+			);
+
+		if (!preferences?.addedByUserId) {
+			yield* Effect.annotateCurrentSpan({
+				skipped: true,
+				reason: "no_added_by_user_id",
+			});
+			return;
+		}
+
+		const addedByUserId = preferences.addedByUserId.toString();
+		const { start, end } = getPacificAvailabilityTimestamps();
+		const botId = guild.client.user?.id;
+
+		yield* Effect.annotateCurrentSpan({ target_user_id: addedByUserId });
+
+		yield* discord.callClient(async () => {
+			const user = await guild.client.users.fetch(addedByUserId);
+
+			const botMention = botId ? `<@${botId}>` : "the bot";
+			const embed = new EmbedBuilder()
+				.setColor("#5865F2")
+				.setAuthor({
+					name: "Rhys",
+					iconURL: RHYS_AVATAR_URL,
+				})
+				.setDescription(
+					`Hey! Thanks for adding Answer Overflow to **${guild.name}**!\n\n` +
+						`If you need any help with setup, have any bugs, feedback, or feature requests just DM ${botMention} - it comes straight to me.\n\n` +
+						`I'm usually available <t:${start}:t> - <t:${end}:t>, so if I don't respond right away, I'll get back to you as soon as I can!`,
+				)
+				.setTimestamp();
+
+			const setupButton = new ButtonBuilder()
+				.setLabel("Continue Setup")
+				.setStyle(ButtonStyle.Link)
+				.setURL(`${getBaseUrl()}/dashboard/${guild.id}/onboarding/configure`);
+
+			const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+				setupButton,
+			);
+
+			await user.send({ embeds: [embed], components: [actionRow] });
+		});
+
+		yield* Console.log(
+			`Sent welcome DM to user ${addedByUserId} for server ${guild.name}`,
+		);
+	}).pipe(Effect.withSpan("notify_user_who_added_bot"));
 }
 
 const VANITY_INVITE_OVERRIDES: Record<string, string> = {
@@ -215,18 +305,30 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				});
 				yield* Metric.incrementBy(activeGuilds, 1);
 
-				yield* Console.log(
-					`Bot joined new server: ${guild.name} (${guild.id})`,
-				);
+				yield* Console.log(`Bot joined server: ${guild.name} (${guild.id})`);
 
 				const leftServer = yield* leaveServerIfNecessary(guild);
 				if (leftServer) {
 					return;
 				}
 
-				yield* syncGuild(guild);
-				yield* catchAllSilentWithReport(trackServerJoin(guild));
-				yield* notifySuperUserOfServerJoin(guild);
+				yield* Effect.forkDaemon(syncGuild(guild));
+				yield* Effect.forkDaemon(
+					catchAllSilentWithReport(trackServerJoin(guild)),
+				);
+				yield* Effect.forkDaemon(
+					catchAllSilentWithReport(notifySuperUserOfServerJoin(guild)),
+				);
+				yield* Effect.forkDaemon(
+					catchAllSilentWithReport(notifyUserWhoAddedBot(guild)),
+				);
+				yield* Effect.forkDaemon(
+					catchAllSilentWithReport(
+						database.private.servers.scheduleRecommendedConfigurationCache({
+							serverId: BigInt(guild.id),
+						}),
+					),
+				);
 			}).pipe(
 				Effect.withSpan("event.guild_create"),
 				catchAllWithReport((error) =>

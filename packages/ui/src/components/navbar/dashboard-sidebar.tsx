@@ -3,12 +3,14 @@
 import { useParams, usePathname } from "next/navigation";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
+import { AnswerOverflowLogo } from "../answer-overflow-logo";
 import { Link } from "../link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../sheet";
 import { useDashboardNavbar } from "./dashboard-navbar";
 
 export interface DashboardSidebarProps {
 	children?: React.ReactNode;
+	homeHref?: string;
 }
 
 function SidebarNavigation({ onLinkClick }: { onLinkClick?: () => void }) {
@@ -64,23 +66,37 @@ function SidebarNavigation({ onLinkClick }: { onLinkClick?: () => void }) {
 	);
 }
 
-export function DashboardSidebar({ children }: DashboardSidebarProps) {
+function SidebarHeader({ homeHref }: { homeHref: string }) {
+	return (
+		<div className="h-navbar flex items-center px-4 border-b shrink-0">
+			<Link href={homeHref} className="flex items-center">
+				<AnswerOverflowLogo width={160} />
+				<span className="sr-only">Answer Overflow</span>
+			</Link>
+		</div>
+	);
+}
+
+export function DashboardSidebar({
+	children,
+	homeHref = "/",
+}: DashboardSidebarProps) {
 	const { mobileSidebarOpen, setMobileSidebarOpen } = useDashboardNavbar();
 
 	return (
 		<div className="relative flex w-full">
-			{/* Desktop Sidebar - Fixed on left */}
-			<aside className="hidden lg:flex fixed left-0 top-[60px] bottom-0 z-40 w-[255.44px] flex-col border-r bg-background">
+			<aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-50 w-[255.44px] flex-col border-r bg-background">
+				<SidebarHeader homeHref={homeHref} />
 				<SidebarNavigation />
 			</aside>
 
-			{/* Mobile Sidebar - Sheet */}
 			<Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
 				<SheetContent side="left" className="w-[255.44px] p-0">
 					<SheetHeader className="sr-only">
 						<SheetTitle>Navigation</SheetTitle>
 					</SheetHeader>
 					<div className="flex h-full flex-col">
+						<SidebarHeader homeHref={homeHref} />
 						<SidebarNavigation
 							onLinkClick={() => setMobileSidebarOpen(false)}
 						/>
@@ -88,7 +104,6 @@ export function DashboardSidebar({ children }: DashboardSidebarProps) {
 				</SheetContent>
 			</Sheet>
 
-			{/* Main Content - Offset for sidebar */}
 			<div className="lg:ml-[255.44px] flex-1">{children}</div>
 		</div>
 	);
