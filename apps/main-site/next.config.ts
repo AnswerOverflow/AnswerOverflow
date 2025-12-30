@@ -104,7 +104,7 @@ const nextConfig: NextConfig = {
 				permanent: false,
 			},
 			{
-				source: "/onboarding:path*",
+				source: "/onboarding",
 				destination: "/dashboard",
 				permanent: false,
 			},
