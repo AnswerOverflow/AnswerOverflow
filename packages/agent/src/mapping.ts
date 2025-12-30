@@ -401,6 +401,12 @@ export async function serializeContent(
 				case "source": {
 					return part satisfies Infer<typeof vSourcePart>;
 				}
+				// TODO: Implement tool approval workflow support
+				// AI SDK 6.0 introduced tool-approval-request and tool-approval-response
+				// content types for human-in-the-loop approval of tool calls. These are
+				// currently filtered out since we don't have UI/UX for approval workflows.
+				// To implement: store approval state, expose in UI, handle user responses.
+				// See: https://sdk.vercel.ai/docs/ai-sdk-core/tools-and-tool-calling#tool-approval
 				case "tool-approval-request":
 				case "tool-approval-response":
 					return null;
@@ -469,6 +475,12 @@ export function fromModelMessageContent(content: Content): Message["content"] {
 						text: part.text,
 						...metadata,
 					} satisfies Infer<typeof vReasoningPart>;
+				// TODO: Implement tool approval workflow support
+				// AI SDK 6.0 introduced tool-approval-request and tool-approval-response
+				// content types for human-in-the-loop approval of tool calls. These are
+				// currently filtered out since we don't have UI/UX for approval workflows.
+				// To implement: store approval state, expose in UI, handle user responses.
+				// See: https://sdk.vercel.ai/docs/ai-sdk-core/tools-and-tool-calling#tool-approval
 				case "tool-approval-request":
 				case "tool-approval-response":
 					return null;
@@ -563,6 +575,12 @@ export function toModelMessageContent(
 					} satisfies ReasoningPart;
 				case "source":
 					return part satisfies SourcePart;
+				// TODO: Implement tool approval workflow support
+				// AI SDK 6.0 introduced tool-approval-request and tool-approval-response
+				// content types for human-in-the-loop approval of tool calls. These are
+				// currently filtered out since we don't have UI/UX for approval workflows.
+				// To implement: store approval state, expose in UI, handle user responses.
+				// See: https://sdk.vercel.ai/docs/ai-sdk-core/tools-and-tool-calling#tool-approval
 				case "tool-approval-request":
 				case "tool-approval-response":
 					return null;

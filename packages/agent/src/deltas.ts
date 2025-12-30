@@ -483,12 +483,15 @@ export function updateFromTextStreamParts(
 				break;
 			default: {
 				const partType = (part as { type: string }).type;
+				// TODO: Implement tool approval workflow support
+				// AI SDK 6.0 introduced these content types for human-in-the-loop
+				// approval of tool calls. Currently ignored in streaming.
+				// See: https://sdk.vercel.ai/docs/ai-sdk-core/tools-and-tool-calling#tool-approval
 				if (
 					partType === "tool-approval-request" ||
 					partType === "tool-approval-response" ||
 					partType === "tool-output-denied"
 				) {
-					// Ignore tool approval types in streaming
 					break;
 				}
 				console.warn(`Received unexpected part: ${JSON.stringify(part)}`);

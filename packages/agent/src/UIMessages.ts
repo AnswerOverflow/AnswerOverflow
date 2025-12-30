@@ -38,6 +38,10 @@ import type {
 } from "./validators.js";
 import { omit, pick } from "convex-helpers";
 
+function filterDefined<T>(arr: (T | undefined)[]): T[] {
+	return arr.filter((x): x is T => x !== undefined);
+}
+
 export type UIStatus = "streaming" | MessageStatus;
 
 export type UIMessage<
@@ -54,155 +58,126 @@ export type UIMessage<
 	_creationTime: number;
 };
 
-/**
- * Converts a list of UIMessages to MessageDocs, along with extra metadata that
- * may be available to associate with the MessageDocs.
- * @param messages - The UIMessages to convert to MessageDocs.
- * @param meta - The metadata to add to the MessageDocs.
- * @returns
- */
-export async function fromUIMessagesAsync<METADATA = unknown>(
-	messages: UIMessage<METADATA>[],
-	meta: {
-		threadId: string;
-		userId?: string;
-		model?: string;
-		provider?: string;
-		providerOptions?: ProviderOptions;
-		metadata?: METADATA;
-	},
-): Promise<(MessageDoc & { streaming: boolean; metadata?: METADATA })[]> {
-	const results: (MessageDoc & { streaming: boolean; metadata?: METADATA })[] =
-		[];
-	for (const uiMessage of messages) {
-		const stepOrder = uiMessage.stepOrder;
-		const commonFields = {
-			...pick(meta, [
-				"threadId",
-				"userId",
-				"model",
-				"provider",
-				"providerOptions",
-				"metadata",
-			]),
-			...omit(uiMessage, ["parts", "role", "key", "text"]),
-			status: uiMessage.status === "streaming" ? "pending" : "success",
-			streaming: uiMessage.status === "streaming",
-			_id: uiMessage.id,
-			tool: false,
-		} satisfies MessageDoc & { streaming: boolean; metadata?: METADATA };
-		const modelMessages = await convertToModelMessages([uiMessage]);
-		for (let i = 0; i < modelMessages.length; i++) {
-			const modelMessage = modelMessages[i];
-			if (modelMessage.content.length === 0) {
-				continue;
-			}
-			const message = fromModelMessage(modelMessage);
-			const tool = isTool(message);
-			const doc: MessageDoc & { streaming: boolean; metadata?: METADATA } = {
-				...commonFields,
-				_id: uiMessage.id + `-${i}`,
-				stepOrder: stepOrder + i,
-				message,
-				tool,
-				text: extractText(message),
-				reasoning: extractReasoning(message),
-				finishReason: tool ? "tool-calls" : "stop",
-				sources: fromSourceParts(uiMessage.parts),
-			};
-			if (Array.isArray(modelMessage.content)) {
-				for (const c of modelMessage.content) {
-					if (
-						c.type !== "tool-approval-request" &&
-						c.type !== "tool-approval-response" &&
-						c.providerOptions
-					) {
-						doc.providerMetadata = c.providerOptions;
-						doc.providerOptions ??= c.providerOptions;
-						break;
-					}
-				}
-			}
-			results.push(doc);
+type FromUIMessagesMeta<METADATA = unknown> = {
+	threadId: string;
+	userId?: string;
+	model?: string;
+	provider?: string;
+	providerOptions?: ProviderOptions;
+	metadata?: METADATA;
+};
+
+type MessageDocWithStreaming<METADATA = unknown> = MessageDoc & {
+	streaming: boolean;
+	metadata?: METADATA;
+};
+
+function createCommonFields<METADATA = unknown>(
+	uiMessage: UIMessage<METADATA>,
+	meta: FromUIMessagesMeta<METADATA>,
+): MessageDocWithStreaming<METADATA> {
+	return {
+		...pick(meta, [
+			"threadId",
+			"userId",
+			"model",
+			"provider",
+			"providerOptions",
+			"metadata",
+		]),
+		...omit(uiMessage, ["parts", "role", "key", "text"]),
+		status: uiMessage.status === "streaming" ? "pending" : "success",
+		streaming: uiMessage.status === "streaming",
+		_id: uiMessage.id,
+		tool: false,
+	} satisfies MessageDocWithStreaming<METADATA>;
+}
+
+function extractProviderMetadata<METADATA = unknown>(
+	modelMessage: ModelMessage,
+	doc: MessageDocWithStreaming<METADATA>,
+): void {
+	if (!Array.isArray(modelMessage.content)) return;
+
+	for (const c of modelMessage.content) {
+		// TODO: Implement tool approval workflow support
+		// AI SDK 6.0 introduced tool-approval-request and tool-approval-response
+		// content types. These are currently skipped when extracting provider metadata.
+		if (
+			c.type !== "tool-approval-request" &&
+			c.type !== "tool-approval-response" &&
+			c.providerOptions
+		) {
+			doc.providerMetadata = c.providerOptions;
+			doc.providerOptions ??= c.providerOptions;
+			break;
 		}
 	}
+}
+
+function modelMessageToDoc<METADATA = unknown>(
+	modelMessage: ModelMessage,
+	uiMessage: UIMessage<METADATA>,
+	commonFields: MessageDocWithStreaming<METADATA>,
+	index: number,
+): MessageDocWithStreaming<METADATA> | undefined {
+	if (modelMessage.content.length === 0) return undefined;
+
+	const message = fromModelMessage(modelMessage);
+	const tool = isTool(message);
+	const doc: MessageDocWithStreaming<METADATA> = {
+		...commonFields,
+		_id: uiMessage.id + `-${index}`,
+		stepOrder: uiMessage.stepOrder + index,
+		message,
+		tool,
+		text: extractText(message),
+		reasoning: extractReasoning(message),
+		finishReason: tool ? "tool-calls" : "stop",
+		sources: fromSourceParts(uiMessage.parts),
+	};
+
+	extractProviderMetadata(modelMessage, doc);
+	return doc;
+}
+
+export async function fromUIMessagesAsync<METADATA = unknown>(
+	messages: UIMessage<METADATA>[],
+	meta: FromUIMessagesMeta<METADATA>,
+): Promise<MessageDocWithStreaming<METADATA>[]> {
+	const results: MessageDocWithStreaming<METADATA>[] = [];
+
+	for (const uiMessage of messages) {
+		const commonFields = createCommonFields(uiMessage, meta);
+		const modelMessages = await convertToModelMessages([uiMessage]);
+
+		for (let i = 0; i < modelMessages.length; i++) {
+			const doc = modelMessageToDoc(
+				modelMessages[i],
+				uiMessage,
+				commonFields,
+				i,
+			);
+			if (doc) results.push(doc);
+		}
+	}
+
 	return results;
 }
 
-/**
- * Synchronous version of fromUIMessagesAsync.
- * This is kept for backward compatibility with React hooks that need
- * synchronous data. It manually converts UI messages to MessageDocs
- * without using the async convertToModelMessages from AI SDK 6.0.
- *
- * @param messages - The UIMessages to convert to MessageDocs.
- * @param meta - The metadata to add to the MessageDocs.
- * @returns
- */
 export function fromUIMessages<METADATA = unknown>(
 	messages: UIMessage<METADATA>[],
-	meta: {
-		threadId: string;
-		userId?: string;
-		model?: string;
-		provider?: string;
-		providerOptions?: ProviderOptions;
-		metadata?: METADATA;
-	},
-): (MessageDoc & { streaming: boolean; metadata?: METADATA })[] {
+	meta: FromUIMessagesMeta<METADATA>,
+): MessageDocWithStreaming<METADATA>[] {
 	return messages.flatMap((uiMessage) => {
-		const stepOrder = uiMessage.stepOrder;
-		const commonFields = {
-			...pick(meta, [
-				"threadId",
-				"userId",
-				"model",
-				"provider",
-				"providerOptions",
-				"metadata",
-			]),
-			...omit(uiMessage, ["parts", "role", "key", "text"]),
-			status: uiMessage.status === "streaming" ? "pending" : "success",
-			streaming: uiMessage.status === "streaming",
-			_id: uiMessage.id,
-			tool: false,
-		} satisfies MessageDoc & { streaming: boolean; metadata?: METADATA };
-
+		const commonFields = createCommonFields(uiMessage, meta);
 		const modelMessages = convertUIMessageToModelMessagesSync(uiMessage);
-		return modelMessages
-			.map((modelMessage, i) => {
-				if (modelMessage.content.length === 0) {
-					return undefined;
-				}
-				const message = fromModelMessage(modelMessage);
-				const tool = isTool(message);
-				const doc: MessageDoc & { streaming: boolean; metadata?: METADATA } = {
-					...commonFields,
-					_id: uiMessage.id + `-${i}`,
-					stepOrder: stepOrder + i,
-					message,
-					tool,
-					text: extractText(message),
-					reasoning: extractReasoning(message),
-					finishReason: tool ? "tool-calls" : "stop",
-					sources: fromSourceParts(uiMessage.parts),
-				};
-				if (Array.isArray(modelMessage.content)) {
-					for (const c of modelMessage.content) {
-						if (
-							c.type !== "tool-approval-request" &&
-							c.type !== "tool-approval-response" &&
-							c.providerOptions
-						) {
-							doc.providerMetadata = c.providerOptions;
-							doc.providerOptions ??= c.providerOptions;
-							break;
-						}
-					}
-				}
-				return doc;
-			})
-			.filter((d) => d !== undefined);
+
+		return filterDefined(
+			modelMessages.map((modelMessage, i) =>
+				modelMessageToDoc(modelMessage, uiMessage, commonFields, i),
+			),
+		);
 	});
 }
 
@@ -299,8 +274,8 @@ function convertUIMessageToModelMessagesSync<
 }
 
 function fromSourceParts(parts: UIMessage["parts"]): Infer<typeof vSource>[] {
-	return parts
-		.map((part) => {
+	return filterDefined(
+		parts.map((part) => {
 			if (part.type === "source-url") {
 				return {
 					type: "source",
@@ -322,8 +297,8 @@ function fromSourceParts(parts: UIMessage["parts"]): Infer<typeof vSource>[] {
 				} satisfies Infer<typeof vSource>;
 			}
 			return undefined;
-		})
-		.filter((p) => p !== undefined);
+		}),
+	);
 }
 
 type ExtraFields<METADATA = unknown> = {
