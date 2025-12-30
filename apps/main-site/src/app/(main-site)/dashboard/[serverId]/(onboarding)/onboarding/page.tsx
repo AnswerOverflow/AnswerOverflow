@@ -14,14 +14,13 @@ import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import * as Sentry from "@sentry/nextjs";
-import { useQuery } from "@tanstack/react-query";
-import { useAction } from "convex/react";
-import { CheckCircle2 } from "lucide-react";
+import { useQuery as useTanstackQuery } from "@tanstack/react-query";
+import { useAction, useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthClient } from "../../../../../../lib/auth-client";
 
-type OnboardingStep = "auth" | "install" | "complete";
+type OnboardingStep = "auth" | "install";
 
 export default function OnboardingPage() {
 	const router = useRouter();
@@ -36,15 +35,9 @@ export default function OnboardingPage() {
 		api.authenticated.dashboard.trackBotAddClick,
 	);
 	const [step, setStep] = useState<OnboardingStep>("auth");
-	const [installingServerId, setInstallingServerId] = useState<string | null>(
-		null,
-	);
+	const [isWaitingForBot, setIsWaitingForBot] = useState(false);
 
-	const {
-		data: servers,
-		isLoading: isServersLoading,
-		refetch: refetchServers,
-	} = useQuery({
+	const { data: servers, isLoading: isServersLoading } = useTanstackQuery({
 		queryKey: ["dashboard-servers"],
 		queryFn: async () => {
 			if (!session?.user) {
@@ -56,6 +49,14 @@ export default function OnboardingPage() {
 	});
 
 	const selectedServer = servers?.find((s) => s.discordId === serverId);
+
+	const serverFromDb = useQuery(
+		api.authenticated.dashboard_queries.getUserServersForDropdown,
+		isWaitingForBot && session?.user ? {} : "skip",
+	);
+	const serverWithBot = serverFromDb?.find(
+		(s) => s.discordId.toString() === serverId && s.hasBot && s.aoServerId,
+	);
 
 	useEffect(() => {
 		if (isSessionPending) {
@@ -84,27 +85,10 @@ export default function OnboardingPage() {
 	}, [session, isSessionPending, serverId, step, router, selectedServer]);
 
 	useEffect(() => {
-		if (step === "install" && installingServerId && selectedServer) {
-			let attempts = 0;
-			const maxAttempts = 40;
-
-			const interval = setInterval(async () => {
-				attempts++;
-				const updatedServers = await refetchServers();
-				const server = updatedServers.data?.find(
-					(s) => s.discordId === installingServerId,
-				);
-				if (server?.hasBot && server.aoServerId) {
-					clearInterval(interval);
-					router.push(`/dashboard/${installingServerId}/onboarding/configure`);
-				} else if (attempts >= maxAttempts) {
-					clearInterval(interval);
-				}
-			}, 3000);
-
-			return () => clearInterval(interval);
+		if (isWaitingForBot && serverWithBot) {
+			router.push(`/dashboard/${serverId}/onboarding/configure`);
 		}
-	}, [step, installingServerId, selectedServer, refetchServers, router]);
+	}, [isWaitingForBot, serverWithBot, serverId, router]);
 
 	const handleInstallClick = async (discordId: string) => {
 		const discordClientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
@@ -120,7 +104,7 @@ export default function OnboardingPage() {
 
 		const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${discordClientId}&permissions=328565083201&scope=bot+applications.commands&guild_id=${discordId}&disable_guild_select=true`;
 		window.open(inviteUrl, "_blank", "noopener,noreferrer");
-		setInstallingServerId(discordId);
+		setIsWaitingForBot(true);
 	};
 
 	if (isSessionPending || isServersLoading) {
@@ -195,76 +179,57 @@ export default function OnboardingPage() {
 	}
 
 	if (step === "install" && selectedServer) {
+		if (isWaitingForBot) {
+			return (
+				<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+					<div className="w-full max-w-2xl mx-auto">
+						<Card>
+							<CardHeader className="text-center">
+								<CardTitle className="text-2xl">
+									Waiting for Bot Installation
+								</CardTitle>
+								<CardDescription>
+									Complete the bot installation in the popup window. This page
+									will automatically continue once the bot is added to{" "}
+									{selectedServer.name}.
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="flex flex-col items-center gap-6">
+								<div className="flex items-center gap-2">
+									<div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+									<span className="text-muted-foreground">
+										Waiting for bot to be added...
+									</span>
+								</div>
+								<Button
+									variant="outline"
+									onClick={() =>
+										handleInstallClick(selectedServer.discordId.toString())
+									}
+								>
+									Open Installation Window Again
+								</Button>
+							</CardContent>
+						</Card>
+					</div>
+				</main>
+			);
+		}
+
 		return (
 			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
 				<div className="w-full max-w-2xl mx-auto">
 					<BotPermissionsDisplay
 						server={{
-							discordId: BigInt(selectedServer.discordId),
+							discordId: selectedServer.discordId,
 							name: selectedServer.name,
 							icon: selectedServer.icon,
 						}}
 						onCancel={() => router.push("/dashboard")}
-						onAdd={() => handleInstallClick(selectedServer.discordId)}
+						onAdd={() =>
+							handleInstallClick(selectedServer.discordId.toString())
+						}
 					/>
-				</div>
-			</main>
-		);
-	}
-
-	if (step === "complete" && selectedServer) {
-		const serverWithBot = servers?.find(
-			(s) => s.discordId === serverId && s.hasBot && s.aoServerId,
-		);
-
-		return (
-			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
-				<div className="w-full max-w-2xl mx-auto space-y-6">
-					<Card>
-						<CardHeader className="text-center">
-							<div className="flex justify-center mb-4">
-								<CheckCircle2 className="h-16 w-16 text-green-500" />
-							</div>
-							<CardTitle className="text-2xl">Installation Complete!</CardTitle>
-							<CardDescription>
-								Answer Overflow has been successfully added to{" "}
-								{selectedServer.name}
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-6">
-							<div className="space-y-4">
-								<p className="text-muted-foreground">
-									Great! Answer Overflow is now installed on your server. Here's
-									what you can do next:
-								</p>
-
-								<ul className="list-disc list-inside space-y-2 text-muted-foreground">
-									<li>Configure which channels to index</li>
-									<li>Set up custom domain (if applicable)</li>
-									<li>View analytics and insights</li>
-									<li>Manage server settings</li>
-								</ul>
-							</div>
-
-							<div className="flex flex-col gap-3">
-								{serverWithBot ? (
-									<Button asChild size="lg">
-										<Link href={`/dashboard/${serverWithBot.discordId}`}>
-											Go to Dashboard
-										</Link>
-									</Button>
-								) : (
-									<Button asChild size="lg">
-										<Link href="/dashboard">Go to Dashboard</Link>
-									</Button>
-								)}
-
-								<Button variant="outline" asChild>
-									<Link href="/dashboard">Add to another server</Link>
-								</Button>
-							</div>
-						</CardContent>
-					</Card>
 				</div>
 			</main>
 		);

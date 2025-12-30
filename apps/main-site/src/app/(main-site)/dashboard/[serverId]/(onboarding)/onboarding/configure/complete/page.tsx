@@ -151,10 +151,7 @@ export default function CompletePage() {
 			await applyConfiguration({
 				serverId: BigInt(serverId),
 				channelConfigurations,
-				serverSettings: {
-					considerAllMessagesPublicEnabled: serverSettings.publicMessages,
-					anonymizeMessagesEnabled: serverSettings.anonymizeUsernames,
-				},
+				serverSettings,
 			});
 
 			router.push(`/dashboard/${serverId}`);

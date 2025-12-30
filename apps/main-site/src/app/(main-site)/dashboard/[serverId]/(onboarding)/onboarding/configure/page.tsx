@@ -1,5 +1,6 @@
 "use client";
 
+import { BlueLink } from "@packages/ui/components/blue-link";
 import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
 import { StepLayout } from "./components/step-layout";
@@ -21,19 +22,25 @@ export default function ServerSettingsPage() {
 					<div className="flex items-start justify-between gap-4">
 						<div className="space-y-1 flex-1">
 							<Label htmlFor="public-messages" className="text-sm font-medium">
-								Public messages
+								Consider All Messages In Indexed Channels Public
 							</Label>
 							<p className="text-sm text-muted-foreground">
-								Allow messages to be indexed by search engines like Google. This
-								makes your community's knowledge discoverable to anyone
-								searching for answers.
+								All messages in indexed channels will be considered public and
+								displayed on the web. Learn more about{" "}
+								<BlueLink
+									href="https://www.answeroverflow.com/docs/user-settings/displaying-messages"
+									target="_blank"
+								>
+									displaying messages
+								</BlueLink>
+								.
 							</p>
 						</div>
 						<Switch
 							id="public-messages"
-							checked={serverSettings.publicMessages}
+							checked={serverSettings.considerAllMessagesPublicEnabled}
 							onCheckedChange={(checked) =>
-								setServerSettings({ publicMessages: checked })
+								setServerSettings({ considerAllMessagesPublicEnabled: checked })
 							}
 						/>
 					</div>
@@ -53,9 +60,9 @@ export default function ServerSettingsPage() {
 						</div>
 						<Switch
 							id="anonymize-usernames"
-							checked={serverSettings.anonymizeUsernames}
+							checked={serverSettings.anonymizeMessagesEnabled}
 							onCheckedChange={(checked) =>
-								setServerSettings({ anonymizeUsernames: checked })
+								setServerSettings({ anonymizeMessagesEnabled: checked })
 							}
 						/>
 					</div>
@@ -63,7 +70,6 @@ export default function ServerSettingsPage() {
 			</WizardCard>
 
 			<WizardNav
-				backHref={`/dashboard/${serverId}/onboarding`}
 				nextHref={`/dashboard/${serverId}/onboarding/configure/indexing`}
 			/>
 		</StepLayout>

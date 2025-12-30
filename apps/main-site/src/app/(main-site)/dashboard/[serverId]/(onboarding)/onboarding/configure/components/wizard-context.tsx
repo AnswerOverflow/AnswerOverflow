@@ -1,6 +1,8 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import type { RecommendedConfiguration } from "@packages/database/convex/authenticated/onboarding_action";
+import type { ForumTag } from "@packages/database/convex/schema";
 import { useAction } from "convex/react";
 import { ChannelType } from "discord-api-types/v10";
 import { useParams } from "next/navigation";
@@ -12,20 +14,16 @@ import {
 	useState,
 } from "react";
 
-export type ForumTagInfo = {
-	id: bigint;
-	name: string;
-	moderated: boolean;
-	emojiId?: bigint;
-	emojiName?: string;
-};
+export type ForumTagInfo = ForumTag;
 
-export type ChannelInfo = {
-	id: bigint;
-	name: string;
-	type: number;
-	availableTags?: Array<ForumTagInfo>;
-};
+export type ChannelInfo = RecommendedConfiguration["channels"][number] extends {
+	id: infer Id;
+	name: infer Name;
+	type: infer Type;
+	availableTags?: infer Tags;
+}
+	? { id: Id; name: Name; type: Type; availableTags?: Tags }
+	: never;
 
 export type ChannelConfiguration = {
 	channelId: bigint;
@@ -36,23 +34,15 @@ export type ChannelConfiguration = {
 	solutionTagId?: bigint;
 };
 
-type AIRecommendations = {
-	channels: Map<
-		string,
-		{
-			indexing: boolean;
-			autoThread: boolean;
-			markSolution: boolean;
-			solutionInstructions: boolean;
-			solutionTagId?: bigint;
-		}
-	>;
+type AIRecommendation = {
+	indexing: boolean;
+	autoThread: boolean;
+	markSolution: boolean;
+	solutionInstructions: boolean;
+	solutionTagId?: bigint;
 };
 
-type ServerSettings = {
-	publicMessages: boolean;
-	anonymizeUsernames: boolean;
-};
+type ServerSettings = RecommendedConfiguration["serverSettings"];
 
 type WizardState = {
 	isLoading: boolean;
@@ -60,7 +50,7 @@ type WizardState = {
 	allChannels: Array<ChannelInfo>;
 	configurations: Array<ChannelConfiguration>;
 	serverSettings: ServerSettings;
-	aiRecommendations: AIRecommendations;
+	aiRecommendations: Map<string, AIRecommendation>;
 };
 
 type WizardContextValue = WizardState & {
@@ -76,11 +66,7 @@ type WizardContextValue = WizardState & {
 	getAllForumChannels: () => Array<ChannelInfo>;
 	getAllNonForumChannels: () => Array<ChannelInfo>;
 	getConfiguredChannels: () => Array<ChannelConfiguration>;
-	getAIRecommendation: (
-		channelId: string,
-	) => AIRecommendations["channels"] extends Map<string, infer V>
-		? V | undefined
-		: never;
+	getAIRecommendation: (channelId: string) => AIRecommendation | undefined;
 	reload: () => Promise<void>;
 };
 
@@ -94,17 +80,6 @@ export function useWizard() {
 	return context;
 }
 
-function _createEmptyConfig(channelId: bigint): ChannelConfiguration {
-	return {
-		channelId,
-		indexingEnabled: false,
-		autoThreadEnabled: false,
-		markSolutionEnabled: false,
-		sendMarkSolutionInstructionsInNewThreads: false,
-		solutionTagId: undefined,
-	};
-}
-
 export function WizardProvider({ children }: { children: React.ReactNode }) {
 	const params = useParams();
 	const serverId = params.serverId as string;
@@ -115,12 +90,10 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 		allChannels: [],
 		configurations: [],
 		serverSettings: {
-			publicMessages: true,
-			anonymizeUsernames: false,
+			considerAllMessagesPublicEnabled: true,
+			anonymizeMessagesEnabled: false,
 		},
-		aiRecommendations: {
-			channels: new Map(),
-		},
+		aiRecommendations: new Map(),
 	});
 
 	const getRecommendedConfiguration = useAction(
@@ -146,15 +119,12 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 				}),
 			);
 
-			const aiRecommendations: AIRecommendations = {
-				channels: new Map(),
-			};
-
+			const aiRecommendations = new Map<string, AIRecommendation>();
 			const initialConfigurations: Array<ChannelConfiguration> = [];
 
 			for (const channel of config.channels) {
 				const rec = channel.recommendedSettings;
-				aiRecommendations.channels.set(channel.id.toString(), {
+				aiRecommendations.set(channel.id.toString(), {
 					indexing: rec.indexingEnabled,
 					autoThread: rec.autoThreadEnabled,
 					markSolution: rec.markSolutionEnabled,
@@ -178,11 +148,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 				error: null,
 				allChannels,
 				configurations: initialConfigurations,
-				serverSettings: {
-					publicMessages:
-						config.serverSettings.considerAllMessagesPublicEnabled,
-					anonymizeUsernames: config.serverSettings.anonymizeMessagesEnabled,
-				},
+				serverSettings: config.serverSettings,
 				aiRecommendations,
 			});
 		} catch (error) {
@@ -290,7 +256,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 
 	const getAIRecommendation = useCallback(
 		(channelId: string) => {
-			return state.aiRecommendations.channels.get(channelId);
+			return state.aiRecommendations.get(channelId);
 		},
 		[state.aiRecommendations],
 	);
