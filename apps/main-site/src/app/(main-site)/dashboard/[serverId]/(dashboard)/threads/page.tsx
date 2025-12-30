@@ -35,11 +35,11 @@ import type { FunctionReturnType } from "convex/server";
 import { ChannelType } from "discord-api-types/v10";
 import {
 	ArrowDownAZ,
-	ArrowUpAZ,
 	ArrowLeft,
+	ArrowUpAZ,
 	CheckCircle2,
-	Eye,
 	ExternalLink,
+	Eye,
 	Hash,
 	Loader2,
 	MessageSquare,
@@ -53,7 +53,7 @@ import { useParams } from "next/navigation";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const SORT_OPTIONS = ["newest", "oldest", "most_viewed"] as const;
+const SORT_OPTIONS = ["newest", "oldest"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
 
 const STATUS_OPTIONS = ["all", "open", "solved", "closed"] as const;
