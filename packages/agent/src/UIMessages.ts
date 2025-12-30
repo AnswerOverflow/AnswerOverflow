@@ -1,5 +1,12 @@
 import {
 	convertToModelMessages,
+	isFileUIPart,
+	isReasoningUIPart,
+	isTextUIPart,
+	type AssistantContent,
+	type FileUIPart,
+	type ModelMessage,
+	type ToolContent,
 	type UIMessage as AIUIMessage,
 	type DeepPartial,
 	type DynamicToolUIPart,
@@ -11,6 +18,7 @@ import {
 	type ToolUIPart,
 	type UIDataTypes,
 	type UITools,
+	type UserContent,
 } from "ai";
 import type { Infer } from "convex/values";
 import { toModelMessage, fromModelMessage, toUIFilePart } from "./mapping.js";
@@ -53,6 +61,84 @@ export type UIMessage<
  * @param meta - The metadata to add to the MessageDocs.
  * @returns
  */
+export async function fromUIMessagesAsync<METADATA = unknown>(
+	messages: UIMessage<METADATA>[],
+	meta: {
+		threadId: string;
+		userId?: string;
+		model?: string;
+		provider?: string;
+		providerOptions?: ProviderOptions;
+		metadata?: METADATA;
+	},
+): Promise<(MessageDoc & { streaming: boolean; metadata?: METADATA })[]> {
+	const results: (MessageDoc & { streaming: boolean; metadata?: METADATA })[] =
+		[];
+	for (const uiMessage of messages) {
+		const stepOrder = uiMessage.stepOrder;
+		const commonFields = {
+			...pick(meta, [
+				"threadId",
+				"userId",
+				"model",
+				"provider",
+				"providerOptions",
+				"metadata",
+			]),
+			...omit(uiMessage, ["parts", "role", "key", "text"]),
+			status: uiMessage.status === "streaming" ? "pending" : "success",
+			streaming: uiMessage.status === "streaming",
+			_id: uiMessage.id,
+			tool: false,
+		} satisfies MessageDoc & { streaming: boolean; metadata?: METADATA };
+		const modelMessages = await convertToModelMessages([uiMessage]);
+		for (let i = 0; i < modelMessages.length; i++) {
+			const modelMessage = modelMessages[i];
+			if (modelMessage.content.length === 0) {
+				continue;
+			}
+			const message = fromModelMessage(modelMessage);
+			const tool = isTool(message);
+			const doc: MessageDoc & { streaming: boolean; metadata?: METADATA } = {
+				...commonFields,
+				_id: uiMessage.id + `-${i}`,
+				stepOrder: stepOrder + i,
+				message,
+				tool,
+				text: extractText(message),
+				reasoning: extractReasoning(message),
+				finishReason: tool ? "tool-calls" : "stop",
+				sources: fromSourceParts(uiMessage.parts),
+			};
+			if (Array.isArray(modelMessage.content)) {
+				for (const c of modelMessage.content) {
+					if (
+						c.type !== "tool-approval-request" &&
+						c.type !== "tool-approval-response" &&
+						c.providerOptions
+					) {
+						doc.providerMetadata = c.providerOptions;
+						doc.providerOptions ??= c.providerOptions;
+						break;
+					}
+				}
+			}
+			results.push(doc);
+		}
+	}
+	return results;
+}
+
+/**
+ * Synchronous version of fromUIMessagesAsync.
+ * This is kept for backward compatibility with React hooks that need
+ * synchronous data. It manually converts UI messages to MessageDocs
+ * without using the async convertToModelMessages from AI SDK 6.0.
+ *
+ * @param messages - The UIMessages to convert to MessageDocs.
+ * @param meta - The metadata to add to the MessageDocs.
+ * @returns
+ */
 export function fromUIMessages<METADATA = unknown>(
 	messages: UIMessage<METADATA>[],
 	meta: {
@@ -78,11 +164,11 @@ export function fromUIMessages<METADATA = unknown>(
 			...omit(uiMessage, ["parts", "role", "key", "text"]),
 			status: uiMessage.status === "streaming" ? "pending" : "success",
 			streaming: uiMessage.status === "streaming",
-			// to override
 			_id: uiMessage.id,
 			tool: false,
 		} satisfies MessageDoc & { streaming: boolean; metadata?: METADATA };
-		const modelMessages = convertToModelMessages([uiMessage]);
+
+		const modelMessages = convertUIMessageToModelMessagesSync(uiMessage);
 		return modelMessages
 			.map((modelMessage, i) => {
 				if (modelMessage.content.length === 0) {
@@ -102,19 +188,114 @@ export function fromUIMessages<METADATA = unknown>(
 					sources: fromSourceParts(uiMessage.parts),
 				};
 				if (Array.isArray(modelMessage.content)) {
-					const providerOptions = modelMessage.content.find(
-						(c) => c.providerOptions,
-					)?.providerOptions;
-					if (providerOptions) {
-						// convertToModelMessages changes providerMetadata to providerOptions
-						doc.providerMetadata = providerOptions;
-						doc.providerOptions ??= providerOptions;
+					for (const c of modelMessage.content) {
+						if (
+							c.type !== "tool-approval-request" &&
+							c.type !== "tool-approval-response" &&
+							c.providerOptions
+						) {
+							doc.providerMetadata = c.providerOptions;
+							doc.providerOptions ??= c.providerOptions;
+							break;
+						}
 					}
 				}
 				return doc;
 			})
 			.filter((d) => d !== undefined);
 	});
+}
+
+function convertUIMessageToModelMessagesSync<
+	METADATA = unknown,
+	DATA_PARTS extends UIDataTypes = UIDataTypes,
+	TOOLS extends UITools = UITools,
+>(uiMessage: UIMessage<METADATA, DATA_PARTS, TOOLS>): ModelMessage[] {
+	const messages: ModelMessage[] = [];
+	const parts = uiMessage.parts;
+
+	if (uiMessage.role === "user") {
+		const content: UserContent = [];
+		for (const part of parts) {
+			if (isTextUIPart(part)) {
+				content.push({ type: "text", text: part.text });
+			} else if (isFileUIPart(part)) {
+				content.push({
+					type: "file",
+					data: part.url,
+					mediaType: part.mediaType,
+					filename: part.filename,
+				});
+			}
+		}
+		if (content.length > 0) {
+			messages.push({ role: "user", content });
+		}
+	} else if (uiMessage.role === "system") {
+		const textParts = parts.filter(isTextUIPart);
+		if (textParts.length > 0) {
+			messages.push({
+				role: "system",
+				content: textParts.map((p) => p.text).join("\n"),
+			});
+		}
+	} else {
+		const assistantContent: AssistantContent = [];
+		const toolContent: ToolContent = [];
+
+		for (const part of parts) {
+			if (isTextUIPart(part)) {
+				assistantContent.push({ type: "text", text: part.text });
+			} else if (isReasoningUIPart(part)) {
+				assistantContent.push({ type: "reasoning", text: part.text });
+			} else if (isFileUIPart(part)) {
+				assistantContent.push({
+					type: "file",
+					data: part.url,
+					mediaType: part.mediaType,
+					filename: part.filename,
+				});
+			} else if (
+				part.type.startsWith("tool-") &&
+				"toolCallId" in part &&
+				part.type !== "tool-result"
+			) {
+				const toolName = part.type.replace("tool-", "");
+				const toolPart = part as ToolUIPart<TOOLS>;
+				assistantContent.push({
+					type: "tool-call",
+					toolCallId: toolPart.toolCallId,
+					toolName,
+					input: toolPart.input ?? null,
+					providerExecuted: toolPart.providerExecuted,
+				});
+
+				if (
+					toolPart.state === "output-available" ||
+					toolPart.state === "output-error"
+				) {
+					toolContent.push({
+						type: "tool-result",
+						toolCallId: toolPart.toolCallId,
+						toolName,
+						output: {
+							type: "json",
+							value: toolPart.output ?? null,
+						},
+					});
+				}
+			}
+		}
+
+		if (assistantContent.length > 0) {
+			messages.push({ role: "assistant", content: assistantContent });
+		}
+		if (toolContent.length > 0) {
+			messages.push({ role: "tool", content: toolContent });
+		}
+	}
+
+	return messages;
 }
 
 function fromSourceParts(parts: UIMessage["parts"]): Infer<typeof vSource>[] {
@@ -459,10 +640,13 @@ function createAssistantUIMessage<
 					break;
 				}
 				case "tool-result": {
+					const rawOutput = contentPart.output;
 					const output =
-						typeof contentPart.output?.type === "string"
-							? contentPart.output.value
-							: contentPart.output;
+						rawOutput?.type === "text" || rawOutput?.type === "json"
+							? rawOutput.value
+							: rawOutput?.type === "execution-denied"
+								? rawOutput.reason
+								: rawOutput;
 					const call = allParts.find(
 						(part) =>
 							part.type === `tool-${contentPart.toolName}` &&
@@ -505,16 +689,12 @@ function createAssistantUIMessage<
 					}
 					break;
 				}
+				case "tool-approval-request":
+				case "tool-approval-response":
+					// Tool approval types are handled at a higher level, skip them here
+					break;
 				default: {
-					const maybeSource = contentPart as SourcePart;
-					if (maybeSource.type === "source") {
-						allParts.push(toSourcePart(maybeSource));
-					} else {
-						console.warn(
-							"Unknown content part type for assistant",
-							contentPart,
-						);
-					}
+					console.warn("Unknown content part type for assistant", contentPart);
 				}
 			}
 		}

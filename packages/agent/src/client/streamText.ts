@@ -4,7 +4,7 @@ import type {
 	ToolSet,
 	UIMessage as AIUIMessage,
 } from "ai";
-import { streamText as streamTextAi } from "ai";
+import { Output, streamText as streamTextAi } from "ai";
 import {
 	compressUIMessageChunks,
 	DeltaStreamer,
@@ -30,11 +30,7 @@ import { errorToString, willContinue } from "./utils.js";
  * Use {@link continueThread} to get a version of this function already scoped
  * to a thread (and optionally userId).
  */
-export async function streamText<
-	TOOLS extends ToolSet,
-	OUTPUT = never,
-	PARTIAL_OUTPUT = never,
->(
+export async function streamText<TOOLS extends ToolSet>(
 	ctx: ActionCtx,
 	component: AgentComponent,
 	/**
@@ -43,7 +39,7 @@ export async function streamText<
 	 */
 	streamTextArgs: AgentPrompt &
 		Omit<
-			Parameters<typeof streamTextAi<TOOLS, OUTPUT, PARTIAL_OUTPUT>>[0],
+			Parameters<typeof streamTextAi<TOOLS>>[0],
 			"model" | "prompt" | "messages"
 		> & {
 			/**
@@ -73,7 +69,10 @@ export async function streamText<
 		saveStreamDeltas?: boolean | StreamingOptions;
 		agentForToolCtx?: Agent;
 	},
-): Promise<StreamTextResult<TOOLS, PARTIAL_OUTPUT> & GenerationOutputMetadata> {
+): Promise<
+	StreamTextResult<TOOLS, ReturnType<typeof Output.text>> &
+		GenerationOutputMetadata
+> {
 	const { threadId } = options ?? {};
 	const { args, userId, order, stepOrder, promptMessageId, ...call } =
 		await startGeneration(ctx, component, streamTextArgs, options);
@@ -141,7 +140,7 @@ export async function streamText<
 			await call.save({ step }, createPendingMessage);
 			return args.onStepFinish?.(step);
 		},
-	}) as StreamTextResult<TOOLS, PARTIAL_OUTPUT>;
+	}) as StreamTextResult<TOOLS, ReturnType<typeof Output.text>>;
 	const stream = streamer?.consumeStream(
 		result.toUIMessageStream<AIUIMessage<TOOLS>>(),
 	);

@@ -22,7 +22,7 @@ import { mergedStream } from "convex-helpers/server/stream";
 import { paginator } from "convex-helpers/server/pagination";
 import type { WithoutSystemFields } from "convex/server";
 import { deriveUIMessagesFromDeltas } from "../deltas.js";
-import { fromUIMessages } from "../UIMessages.js";
+import { fromUIMessagesAsync } from "../UIMessages.js";
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -544,8 +544,12 @@ export async function getStreamingMessagesWithMetadata(
 				);
 				// We don't save messages that have already been saved
 				const numToSkip = stepOrder - streamingMessage.stepOrder;
+				const convertedMessages = await fromUIMessagesAsync(
+					uiMessages,
+					streamingMessage,
+				);
 				const messages = await Promise.all(
-					fromUIMessages(uiMessages, streamingMessage)
+					convertedMessages
 						.slice(numToSkip)
 						.filter((m) => m.message !== undefined)
 						.map(async (msg) => {

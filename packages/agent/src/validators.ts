@@ -131,23 +131,88 @@ const vToolResultContent = v.array(
 	),
 );
 
+const vToolResultContentPart = v.union(
+	v.object({
+		type: v.literal("text"),
+		text: v.string(),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("media"),
+		data: v.string(),
+		mediaType: v.string(),
+	}),
+	v.object({
+		type: v.literal("file-data"),
+		data: v.string(),
+		mediaType: v.string(),
+		filename: v.optional(v.string()),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("file-url"),
+		url: v.string(),
+		mediaType: v.optional(v.string()),
+		filename: v.optional(v.string()),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("image-url"),
+		url: v.string(),
+		mediaType: v.optional(v.string()),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("image-data"),
+		data: v.string(),
+		mediaType: v.string(),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("file-id"),
+		fileId: v.union(v.string(), v.record(v.string(), v.string())),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("image-file-id"),
+		fileId: v.union(v.string(), v.record(v.string(), v.string())),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("custom"),
+		providerOptions: v.optional(v.any()),
+	}),
+);
+
 export const vToolResultOutput = v.union(
-	v.object({ type: v.literal("text"), value: v.string() }),
-	v.object({ type: v.literal("json"), value: v.any() }),
-	v.object({ type: v.literal("error-text"), value: v.string() }),
-	v.object({ type: v.literal("error-json"), value: v.any() }),
+	v.object({
+		type: v.literal("text"),
+		value: v.string(),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("json"),
+		value: v.any(),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("error-text"),
+		value: v.string(),
+		providerOptions: v.optional(v.any()),
+	}),
+	v.object({
+		type: v.literal("error-json"),
+		value: v.any(),
+		providerOptions: v.optional(v.any()),
+	}),
 	v.object({
 		type: v.literal("content"),
-		value: v.array(
-			v.union(
-				v.object({ type: v.literal("text"), text: v.string() }),
-				v.object({
-					type: v.literal("media"),
-					data: v.string(),
-					mediaType: v.string(),
-				}),
-			),
-		),
+		value: v.array(vToolResultContentPart),
+	}),
+	v.object({
+		type: v.literal("execution-denied"),
+		reason: v.optional(v.string()),
+		providerOptions: v.optional(v.any()),
 	}),
 );
 

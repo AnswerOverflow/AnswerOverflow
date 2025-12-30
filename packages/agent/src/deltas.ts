@@ -479,11 +479,18 @@ export function updateFromTextStreamParts(
 			case "raw":
 			case "start-step":
 			case "start":
-				// ignore
+				// ignore these types
 				break;
 			default: {
-				// Should never happen
-				const _: never = part;
+				const partType = (part as { type: string }).type;
+				if (
+					partType === "tool-approval-request" ||
+					partType === "tool-approval-response" ||
+					partType === "tool-output-denied"
+				) {
+					// Ignore tool approval types in streaming
+					break;
+				}
 				console.warn(`Received unexpected part: ${JSON.stringify(part)}`);
 				break;
 			}

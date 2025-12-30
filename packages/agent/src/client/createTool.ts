@@ -1,5 +1,5 @@
 import type { FlexibleSchema } from "@ai-sdk/provider-utils";
-import type { Tool, ToolCallOptions, ToolSet } from "ai";
+import type { Tool, ToolExecutionOptions, ToolSet } from "ai";
 import { tool } from "ai";
 import type { Agent } from "./index.js";
 import type { GenericActionCtx, GenericDataModel } from "convex/server";
@@ -43,7 +43,7 @@ export function createTool<INPUT, OUTPUT, Ctx extends ToolCtx = ToolCtx>(def: {
 	handler: (
 		ctx: Ctx,
 		args: INPUT,
-		options: ToolCallOptions,
+		options: ToolExecutionOptions,
 	) => PromiseLike<OUTPUT> | AsyncIterable<OUTPUT>;
 	/**
 	 * Provide the context to use, e.g. when defining the tool at runtime.
@@ -55,7 +55,7 @@ export function createTool<INPUT, OUTPUT, Ctx extends ToolCtx = ToolCtx>(def: {
 	 */
 	onInputStart?: (
 		ctx: Ctx,
-		options: ToolCallOptions,
+		options: ToolExecutionOptions,
 	) => void | PromiseLike<void>;
 	/**
 	 * Optional function that is called when an argument streaming delta is available.
@@ -63,7 +63,7 @@ export function createTool<INPUT, OUTPUT, Ctx extends ToolCtx = ToolCtx>(def: {
 	 */
 	onInputDelta?: (
 		ctx: Ctx,
-		options: { inputTextDelta: string } & ToolCallOptions,
+		options: { inputTextDelta: string } & ToolExecutionOptions,
 	) => void | PromiseLike<void>;
 	/**
 	 * Optional function that is called when a tool call can be started,
@@ -72,8 +72,8 @@ export function createTool<INPUT, OUTPUT, Ctx extends ToolCtx = ToolCtx>(def: {
 	onInputAvailable?: (
 		ctx: Ctx,
 		options: {
-			input: [INPUT] extends [never] ? undefined : INPUT;
-		} & ToolCallOptions,
+			input: [INPUT] extends [never] ? unknown : INPUT;
+		} & ToolExecutionOptions,
 	) => void | PromiseLike<void>;
 
 	// Extra AI SDK pass-through options.
@@ -85,7 +85,7 @@ export function createTool<INPUT, OUTPUT, Ctx extends ToolCtx = ToolCtx>(def: {
 		ctx: def.ctx,
 		description: def.description,
 		inputSchema: def.args,
-		execute(args: INPUT, options: ToolCallOptions) {
+		execute(args: INPUT, options: ToolExecutionOptions) {
 			if (!getCtx(this)) {
 				throw new Error(
 					"To use a Convex tool, you must either provide the ctx" +

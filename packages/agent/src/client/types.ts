@@ -5,22 +5,22 @@ import type {
 	ProviderOptions,
 } from "@ai-sdk/provider-utils";
 import type { JSONValue } from "@ai-sdk/provider";
-import type {
-	EmbeddingModel,
-	GenerateObjectResult,
-	generateText,
-	GenerateTextResult,
-	LanguageModelRequestMetadata,
-	LanguageModelResponseMetadata,
-	LanguageModelUsage,
-	LanguageModel,
+import {
+	type EmbeddingModel,
+	type GenerateObjectResult,
+	type generateText,
+	type GenerateTextResult,
+	type LanguageModelRequestMetadata,
+	type LanguageModelResponseMetadata,
+	type LanguageModelUsage,
+	type LanguageModel,
 	Output,
-	streamObject,
-	streamText,
-	StreamTextResult,
-	ToolSet,
-	CallSettings,
-	generateObject,
+	type streamObject,
+	type streamText,
+	type StreamTextResult,
+	type ToolSet,
+	type CallSettings,
+	type generateObject,
 } from "ai";
 import type {
 	GenericActionCtx,
@@ -331,10 +331,9 @@ export type AgentComponent = ComponentApi;
 export type TextArgs<
 	AgentTools extends ToolSet,
 	TOOLS extends ToolSet | undefined = undefined,
-	OUTPUT extends Output = Output<string, string>,
 > = Omit<
 	Parameters<
-		typeof generateText<TOOLS extends undefined ? AgentTools : TOOLS, OUTPUT>
+		typeof generateText<TOOLS extends undefined ? AgentTools : TOOLS>
 	>[0],
 	"model" | "prompt" | "messages"
 > & {
@@ -348,10 +347,9 @@ export type TextArgs<
 export type StreamingTextArgs<
 	AgentTools extends ToolSet,
 	TOOLS extends ToolSet | undefined = undefined,
-	OUTPUT extends Output = Output<string, string>,
 > = Omit<
 	Parameters<
-		typeof streamText<TOOLS extends undefined ? AgentTools : TOOLS, OUTPUT>
+		typeof streamText<TOOLS extends undefined ? AgentTools : TOOLS>
 	>[0],
 	"model" | "prompt" | "messages"
 > & {
@@ -402,6 +400,7 @@ export type MaybeCustomCtx<
 	CustomCtx,
 	DataModel extends GenericDataModel,
 	AgentTools extends ToolSet,
+	LLMArgs = TextArgs<AgentTools>,
 > = CustomCtx extends Record<string, unknown>
 	? {
 			/**
@@ -426,7 +425,7 @@ export type MaybeCustomCtx<
 					userId?: string | undefined;
 					threadId?: string | undefined;
 				},
-				llmArgs: TextArgs<AgentTools>,
+				llmArgs: LLMArgs,
 			) => CustomCtx;
 		}
 	: { customCtx?: never };
@@ -462,15 +461,15 @@ export interface Thread<DefaultTools extends ToolSet> {
 	 * for the {@link ContextOptions} and {@link StorageOptions}.
 	 * @returns The result of the generateText function.
 	 */
-	generateText<
-		TOOLS extends ToolSet | undefined = undefined,
-		OUTPUT extends Output = Output<string, string>,
-	>(
+	generateText<TOOLS extends ToolSet | undefined = undefined>(
 		generateTextArgs: AgentPrompt &
-			TextArgs<TOOLS extends undefined ? DefaultTools : TOOLS, TOOLS, OUTPUT>,
+			TextArgs<TOOLS extends undefined ? DefaultTools : TOOLS, TOOLS>,
 		options?: Options,
 	): Promise<
-		GenerateTextResult<TOOLS extends undefined ? DefaultTools : TOOLS, OUTPUT> &
+		GenerateTextResult<
+			TOOLS extends undefined ? DefaultTools : TOOLS,
+			ReturnType<typeof Output.text>
+		> &
 			ThreadOutputMetadata
 	>;
 
@@ -484,16 +483,9 @@ export interface Thread<DefaultTools extends ToolSet> {
 	 * for the {@link ContextOptions} and {@link StorageOptions}.
 	 * @returns The result of the streamText function.
 	 */
-	streamText<
-		TOOLS extends ToolSet | undefined = undefined,
-		OUTPUT extends Output = Output<string, string>,
-	>(
+	streamText<TOOLS extends ToolSet | undefined = undefined>(
 		streamTextArgs: AgentPrompt &
-			StreamingTextArgs<
-				TOOLS extends undefined ? DefaultTools : TOOLS,
-				TOOLS,
-				OUTPUT
-			>,
+			StreamingTextArgs<TOOLS extends undefined ? DefaultTools : TOOLS, TOOLS>,
 		options?: Options & {
 			/**
 			 * Whether to save incremental data (deltas) from streaming responses.
@@ -508,7 +500,10 @@ export interface Thread<DefaultTools extends ToolSet> {
 			saveStreamDeltas?: boolean | StreamingOptions;
 		},
 	): Promise<
-		StreamTextResult<TOOLS extends undefined ? DefaultTools : TOOLS, OUTPUT> &
+		StreamTextResult<
+			TOOLS extends undefined ? DefaultTools : TOOLS,
+			ReturnType<typeof Output.text>
+		> &
 			ThreadOutputMetadata
 	>;
 	/**

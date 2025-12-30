@@ -8,6 +8,8 @@ import type {
 import type {
 	ModelMessage,
 	TextPart,
+	ToolApprovalRequest,
+	ToolApprovalResponse,
 	UIDataTypes,
 	UIMessagePart,
 	UITools,
@@ -55,6 +57,8 @@ export function joinText(
 		| ToolCallPart
 		| ToolResultPart
 		| MessageContentParts
+		| ToolApprovalRequest
+		| ToolApprovalResponse
 	)[],
 ) {
 	return parts

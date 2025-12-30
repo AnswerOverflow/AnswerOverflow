@@ -2,8 +2,9 @@ import type {
 	LanguageModelV2,
 	LanguageModelV2Content,
 	LanguageModelV2StreamPart,
+	SharedV2ProviderMetadata,
 } from "@ai-sdk/provider";
-import { simulateReadableStream, type ProviderMetadata } from "ai";
+import { simulateReadableStream } from "ai";
 import { assert, pick } from "convex-helpers";
 
 export const DEFAULT_TEXT = `
@@ -36,7 +37,7 @@ export type MockModelArgs = {
 	// provide either content, contentResponses or doGenerate & doStream
 	doGenerate?: LanguageModelV2["doGenerate"];
 	doStream?: LanguageModelV2["doStream"];
-	providerMetadata?: ProviderMetadata;
+	providerMetadata?: SharedV2ProviderMetadata;
 	fail?:
 		| boolean
 		| {

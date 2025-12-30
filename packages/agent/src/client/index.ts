@@ -16,7 +16,13 @@ import type {
 	ToolChoice,
 	ToolSet,
 } from "ai";
-import { generateObject, generateText, stepCountIs, streamObject } from "ai";
+import {
+	generateObject,
+	generateText,
+	Output,
+	stepCountIs,
+	streamObject,
+} from "ai";
 import { assert, omit, pick } from "convex-helpers";
 import {
 	internalActionGeneric,
@@ -167,7 +173,12 @@ export {
 	updateThreadMetadata,
 } from "./threads.js";
 export type { ContextHandler } from "./types.js";
-export { toUIMessages, fromUIMessages, type UIMessage } from "../UIMessages.js";
+export {
+	toUIMessages,
+	fromUIMessages,
+	fromUIMessagesAsync,
+	type UIMessage,
+} from "../UIMessages.js";
 
 export type {
 	AgentComponent,
@@ -442,22 +453,20 @@ export class Agent<
 	 * @param options Extra controls for the {@link ContextOptions} and {@link StorageOptions}.
 	 * @returns The result of the generateText function.
 	 */
-	async generateText<
-		TOOLS extends ToolSet | undefined = undefined,
-		OUTPUT = never,
-		OUTPUT_PARTIAL = never,
-	>(
+	async generateText<TOOLS extends ToolSet | undefined = undefined>(
 		ctx: ActionCtx & CustomCtx,
 		threadOpts: { userId?: string | null; threadId?: string },
 		/**
 		 * The arguments to the generateText function, similar to the ai sdk's
 		 * {@link generateText} function, along with Agent prompt options.
 		 */
-		generateTextArgs: AgentPrompt &
-			TextArgs<AgentTools, TOOLS, OUTPUT, OUTPUT_PARTIAL>,
+		generateTextArgs: AgentPrompt & TextArgs<AgentTools, TOOLS>,
 		options?: Options,
 	): Promise<
-		GenerateTextResult<TOOLS extends undefined ? AgentTools : TOOLS, OUTPUT> &
+		GenerateTextResult<
+			TOOLS extends undefined ? AgentTools : TOOLS,
+			ReturnType<typeof Output.text>
+		> &
 			GenerationOutputMetadata
 	> {
 		const { args, promptMessageId, order, ...call } = await this.start(
@@ -469,7 +478,7 @@ export class Agent<
 		type Tools = TOOLS extends undefined ? AgentTools : TOOLS;
 		const steps: StepResult<Tools>[] = [];
 		try {
-			const result = (await generateText<Tools, OUTPUT, OUTPUT_PARTIAL>({
+			const result = (await generateText<Tools>({
 				...args,
 				prepareStep: async (options) => {
 					const result = await generateTextArgs.prepareStep?.(options);
@@ -481,7 +490,7 @@ export class Agent<
 					await call.save({ step }, await willContinue(steps, args.stopWhen));
 					return generateTextArgs.onStepFinish?.(step);
 				},
-			})) as GenerateTextResult<Tools, OUTPUT>;
+			})) as GenerateTextResult<Tools, ReturnType<typeof Output.text>>;
 			const metadata: GenerationOutputMetadata = {
 				promptMessageId,
 				order,
@@ -502,19 +511,14 @@ export class Agent<
 	 * Use {@link continueThread} to get a version of this function already scoped
 	 * to a thread (and optionally userId).
 	 */
-	async streamText<
-		TOOLS extends ToolSet | undefined = undefined,
-		OUTPUT = never,
-		PARTIAL_OUTPUT = never,
-	>(
+	async streamText<TOOLS extends ToolSet | undefined = undefined>(
 		ctx: ActionCtx & CustomCtx,
 		threadOpts: { userId?: string | null; threadId?: string },
 		/**
 		 * The arguments to the streamText function, similar to the ai sdk's
 		 * {@link streamText} function, along with Agent prompt options.
 		 */
-		streamTextArgs: AgentPrompt &
-			StreamingTextArgs<AgentTools, TOOLS, OUTPUT, PARTIAL_OUTPUT>,
+		streamTextArgs: AgentPrompt & StreamingTextArgs<AgentTools, TOOLS>,
 		/**
 		 * The {@link ContextOptions} and {@link StorageOptions}
 		 * options to use for fetching contextual messages and saving input/output messages.
@@ -535,12 +539,12 @@ export class Agent<
 	): Promise<
 		StreamTextResult<
 			TOOLS extends undefined ? AgentTools : TOOLS,
-			PARTIAL_OUTPUT
+			ReturnType<typeof Output.text>
 		> &
 			GenerationOutputMetadata
 	> {
 		type Tools = TOOLS extends undefined ? AgentTools : TOOLS;
-		return streamText<Tools, OUTPUT, PARTIAL_OUTPUT>(
+		return streamText<Tools>(
 			ctx,
 			this.component,
 			{
@@ -1421,7 +1425,13 @@ export class Agent<
 	 */
 	asObjectAction<T, DataModel extends GenericDataModel>(
 		objectArgs: GenerateObjectArgs<FlexibleSchema<T>> & Partial<AgentPrompt>,
-		options?: Options & MaybeCustomCtx<CustomCtx, DataModel, AgentTools>,
+		options?: Options &
+			MaybeCustomCtx<
+				CustomCtx,
+				DataModel,
+				AgentTools,
+				GenerateObjectArgs<FlexibleSchema<T>>
+			>,
 	) {
 		return internalActionGeneric({
 			args: vSafeObjectArgs,

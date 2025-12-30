@@ -1,4 +1,4 @@
-import { gateway, generateObject } from "ai";
+import { gateway, generateText, Output } from "ai";
 import { ChannelType } from "discord-api-types/v10";
 import { z } from "zod";
 import type { Channel, ForumTag } from "../schema";
@@ -22,10 +22,12 @@ export async function detectPublicChannels(
 		})
 		.join("\n");
 
-	const result = await generateObject({
+	const result = await generateText({
 		model: gateway("google/gemini-2.0-flash"),
-		schema: z.object({
-			channelIds: z.array(z.string()).describe("IDs of channels to index"),
+		output: Output.object({
+			schema: z.object({
+				channelIds: z.array(z.string()).describe("IDs of channels to index"),
+			}),
 		}),
 		prompt: `You are analyzing Discord channel names for a community server. Your task is to identify which channels would be good to make publicly indexable by search engines.
 
@@ -50,7 +52,7 @@ ${channelList}
 Return the IDs of channels that would be good for public indexing.`,
 	});
 
-	return result.object.channelIds;
+	return result.output!.channelIds;
 }
 
 export type ChannelWithTags = {
@@ -82,20 +84,22 @@ export async function detectSolvedTags(
 		})
 		.join("\n\n");
 
-	const result = await generateObject({
+	const result = await generateText({
 		model: gateway("google/gemini-2.0-flash"),
-		schema: z.object({
-			results: z
-				.array(
-					z.object({
-						channelId: z.string().describe("The channel ID"),
-						solvedTagId: z
-							.string()
-							.nullable()
-							.describe("The ID of the solved tag, or null if none"),
-					}),
-				)
-				.describe("Solved tag detection results for each channel"),
+		output: Output.object({
+			schema: z.object({
+				results: z
+					.array(
+						z.object({
+							channelId: z.string().describe("The channel ID"),
+							solvedTagId: z
+								.string()
+								.nullable()
+								.describe("The ID of the solved tag, or null if none"),
+						}),
+					)
+					.describe("Solved tag detection results for each channel"),
+			}),
 		}),
 		prompt: `You are analyzing Discord forum tags for multiple channels. For each channel, identify which tag (if any) represents a "solved" or "answered" state.
 
@@ -108,5 +112,5 @@ ${channelList}
 For each channel, return its ID and the ID of the tag that best represents a solved/answered state (or null if no such tag exists).`,
 	});
 
-	return result.object.results;
+	return result.output!.results;
 }

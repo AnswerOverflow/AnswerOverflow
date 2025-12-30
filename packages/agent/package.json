@@ -16,15 +16,15 @@
 		"./convex.config": "./src/component/convex.config.ts"
 	},
 	"dependencies": {
-		"@ai-sdk/provider-utils": "^3.0.7",
-		"ai": "^5.0.29",
+		"@ai-sdk/provider-utils": "catalog:",
+		"ai": "catalog:",
 		"convex": "^1.24.8",
 		"convex-helpers": "^0.1.103"
 	},
 	"devDependencies": {
-		"@ai-sdk/anthropic": "2.0.39",
-		"@ai-sdk/openai": "2.0.57",
-		"@ai-sdk/provider": "2.0.0",
+		"@ai-sdk/anthropic": "catalog:",
+		"@ai-sdk/openai": "catalog:",
+		"@ai-sdk/provider": "catalog:",
 		"@convex-dev/rag": "0.6.0",
 		"@convex-dev/rate-limiter": "0.3.0",
 		"@convex-dev/workflow": "0.3.2",

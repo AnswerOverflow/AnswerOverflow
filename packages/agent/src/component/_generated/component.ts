@@ -289,20 +289,82 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 														>;
 														isError?: boolean;
 														output?:
-															| { type: "text"; value: string }
-															| { type: "json"; value: any }
-															| { type: "error-text"; value: string }
-															| { type: "error-json"; value: any }
+															| {
+																	providerOptions?: any;
+																	type: "text";
+																	value: string;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "json";
+																	value: any;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "error-text";
+																	value: string;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "error-json";
+																	value: any;
+															  }
 															| {
 																	type: "content";
 																	value: Array<
-																		| { text: string; type: "text" }
+																		| {
+																				providerOptions?: any;
+																				text: string;
+																				type: "text";
+																		  }
 																		| {
 																				data: string;
 																				mediaType: string;
 																				type: "media";
 																		  }
+																		| {
+																				data: string;
+																				filename?: string;
+																				mediaType: string;
+																				providerOptions?: any;
+																				type: "file-data";
+																		  }
+																		| {
+																				filename?: string;
+																				mediaType?: string;
+																				providerOptions?: any;
+																				type: "file-url";
+																				url: string;
+																		  }
+																		| {
+																				mediaType?: string;
+																				providerOptions?: any;
+																				type: "image-url";
+																				url: string;
+																		  }
+																		| {
+																				data: string;
+																				mediaType: string;
+																				providerOptions?: any;
+																				type: "image-data";
+																		  }
+																		| {
+																				fileId: string | Record<string, string>;
+																				providerOptions?: any;
+																				type: "file-id";
+																		  }
+																		| {
+																				fileId: string | Record<string, string>;
+																				providerOptions?: any;
+																				type: "image-file-id";
+																		  }
+																		| { providerOptions?: any; type: "custom" }
 																	>;
+															  }
+															| {
+																	providerOptions?: any;
+																	reason?: string;
+																	type: "execution-denied";
 															  };
 														providerExecuted?: boolean;
 														providerMetadata?: Record<
@@ -362,16 +424,70 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 										>;
 										isError?: boolean;
 										output?:
-											| { type: "text"; value: string }
-											| { type: "json"; value: any }
-											| { type: "error-text"; value: string }
-											| { type: "error-json"; value: any }
+											| { providerOptions?: any; type: "text"; value: string }
+											| { providerOptions?: any; type: "json"; value: any }
+											| {
+													providerOptions?: any;
+													type: "error-text";
+													value: string;
+											  }
+											| {
+													providerOptions?: any;
+													type: "error-json";
+													value: any;
+											  }
 											| {
 													type: "content";
 													value: Array<
-														| { text: string; type: "text" }
+														| {
+																providerOptions?: any;
+																text: string;
+																type: "text";
+														  }
 														| { data: string; mediaType: string; type: "media" }
+														| {
+																data: string;
+																filename?: string;
+																mediaType: string;
+																providerOptions?: any;
+																type: "file-data";
+														  }
+														| {
+																filename?: string;
+																mediaType?: string;
+																providerOptions?: any;
+																type: "file-url";
+																url: string;
+														  }
+														| {
+																mediaType?: string;
+																providerOptions?: any;
+																type: "image-url";
+																url: string;
+														  }
+														| {
+																data: string;
+																mediaType: string;
+																providerOptions?: any;
+																type: "image-data";
+														  }
+														| {
+																fileId: string | Record<string, string>;
+																providerOptions?: any;
+																type: "file-id";
+														  }
+														| {
+																fileId: string | Record<string, string>;
+																providerOptions?: any;
+																type: "image-file-id";
+														  }
+														| { providerOptions?: any; type: "custom" }
 													>;
+											  }
+											| {
+													providerOptions?: any;
+													reason?: string;
+													type: "execution-denied";
 											  };
 										providerExecuted?: boolean;
 										providerMetadata?: Record<string, Record<string, any>>;
@@ -592,20 +708,82 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 														>;
 														isError?: boolean;
 														output?:
-															| { type: "text"; value: string }
-															| { type: "json"; value: any }
-															| { type: "error-text"; value: string }
-															| { type: "error-json"; value: any }
+															| {
+																	providerOptions?: any;
+																	type: "text";
+																	value: string;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "json";
+																	value: any;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "error-text";
+																	value: string;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "error-json";
+																	value: any;
+															  }
 															| {
 																	type: "content";
 																	value: Array<
-																		| { text: string; type: "text" }
+																		| {
+																				providerOptions?: any;
+																				text: string;
+																				type: "text";
+																		  }
 																		| {
 																				data: string;
 																				mediaType: string;
 																				type: "media";
 																		  }
+																		| {
+																				data: string;
+																				filename?: string;
+																				mediaType: string;
+																				providerOptions?: any;
+																				type: "file-data";
+																		  }
+																		| {
+																				filename?: string;
+																				mediaType?: string;
+																				providerOptions?: any;
+																				type: "file-url";
+																				url: string;
+																		  }
+																		| {
+																				mediaType?: string;
+																				providerOptions?: any;
+																				type: "image-url";
+																				url: string;
+																		  }
+																		| {
+																				data: string;
+																				mediaType: string;
+																				providerOptions?: any;
+																				type: "image-data";
+																		  }
+																		| {
+																				fileId: string | Record<string, string>;
+																				providerOptions?: any;
+																				type: "file-id";
+																		  }
+																		| {
+																				fileId: string | Record<string, string>;
+																				providerOptions?: any;
+																				type: "image-file-id";
+																		  }
+																		| { providerOptions?: any; type: "custom" }
 																	>;
+															  }
+															| {
+																	providerOptions?: any;
+																	reason?: string;
+																	type: "execution-denied";
 															  };
 														providerExecuted?: boolean;
 														providerMetadata?: Record<
@@ -665,16 +843,70 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 										>;
 										isError?: boolean;
 										output?:
-											| { type: "text"; value: string }
-											| { type: "json"; value: any }
-											| { type: "error-text"; value: string }
-											| { type: "error-json"; value: any }
+											| { providerOptions?: any; type: "text"; value: string }
+											| { providerOptions?: any; type: "json"; value: any }
+											| {
+													providerOptions?: any;
+													type: "error-text";
+													value: string;
+											  }
+											| {
+													providerOptions?: any;
+													type: "error-json";
+													value: any;
+											  }
 											| {
 													type: "content";
 													value: Array<
-														| { text: string; type: "text" }
+														| {
+																providerOptions?: any;
+																text: string;
+																type: "text";
+														  }
 														| { data: string; mediaType: string; type: "media" }
+														| {
+																data: string;
+																filename?: string;
+																mediaType: string;
+																providerOptions?: any;
+																type: "file-data";
+														  }
+														| {
+																filename?: string;
+																mediaType?: string;
+																providerOptions?: any;
+																type: "file-url";
+																url: string;
+														  }
+														| {
+																mediaType?: string;
+																providerOptions?: any;
+																type: "image-url";
+																url: string;
+														  }
+														| {
+																data: string;
+																mediaType: string;
+																providerOptions?: any;
+																type: "image-data";
+														  }
+														| {
+																fileId: string | Record<string, string>;
+																providerOptions?: any;
+																type: "file-id";
+														  }
+														| {
+																fileId: string | Record<string, string>;
+																providerOptions?: any;
+																type: "image-file-id";
+														  }
+														| { providerOptions?: any; type: "custom" }
 													>;
+											  }
+											| {
+													providerOptions?: any;
+													reason?: string;
+													type: "execution-denied";
 											  };
 										providerExecuted?: boolean;
 										providerMetadata?: Record<string, Record<string, any>>;
@@ -921,20 +1153,82 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 													>;
 													isError?: boolean;
 													output?:
-														| { type: "text"; value: string }
-														| { type: "json"; value: any }
-														| { type: "error-text"; value: string }
-														| { type: "error-json"; value: any }
+														| {
+																providerOptions?: any;
+																type: "text";
+																value: string;
+														  }
+														| {
+																providerOptions?: any;
+																type: "json";
+																value: any;
+														  }
+														| {
+																providerOptions?: any;
+																type: "error-text";
+																value: string;
+														  }
+														| {
+																providerOptions?: any;
+																type: "error-json";
+																value: any;
+														  }
 														| {
 																type: "content";
 																value: Array<
-																	| { text: string; type: "text" }
+																	| {
+																			providerOptions?: any;
+																			text: string;
+																			type: "text";
+																	  }
 																	| {
 																			data: string;
 																			mediaType: string;
 																			type: "media";
 																	  }
+																	| {
+																			data: string;
+																			filename?: string;
+																			mediaType: string;
+																			providerOptions?: any;
+																			type: "file-data";
+																	  }
+																	| {
+																			filename?: string;
+																			mediaType?: string;
+																			providerOptions?: any;
+																			type: "file-url";
+																			url: string;
+																	  }
+																	| {
+																			mediaType?: string;
+																			providerOptions?: any;
+																			type: "image-url";
+																			url: string;
+																	  }
+																	| {
+																			data: string;
+																			mediaType: string;
+																			providerOptions?: any;
+																			type: "image-data";
+																	  }
+																	| {
+																			fileId: string | Record<string, string>;
+																			providerOptions?: any;
+																			type: "file-id";
+																	  }
+																	| {
+																			fileId: string | Record<string, string>;
+																			providerOptions?: any;
+																			type: "image-file-id";
+																	  }
+																	| { providerOptions?: any; type: "custom" }
 																>;
+														  }
+														| {
+																providerOptions?: any;
+																reason?: string;
+																type: "execution-denied";
 														  };
 													providerExecuted?: boolean;
 													providerMetadata?: Record<
@@ -985,16 +1279,66 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 									>;
 									isError?: boolean;
 									output?:
-										| { type: "text"; value: string }
-										| { type: "json"; value: any }
-										| { type: "error-text"; value: string }
-										| { type: "error-json"; value: any }
+										| { providerOptions?: any; type: "text"; value: string }
+										| { providerOptions?: any; type: "json"; value: any }
+										| {
+												providerOptions?: any;
+												type: "error-text";
+												value: string;
+										  }
+										| { providerOptions?: any; type: "error-json"; value: any }
 										| {
 												type: "content";
 												value: Array<
-													| { text: string; type: "text" }
+													| {
+															providerOptions?: any;
+															text: string;
+															type: "text";
+													  }
 													| { data: string; mediaType: string; type: "media" }
+													| {
+															data: string;
+															filename?: string;
+															mediaType: string;
+															providerOptions?: any;
+															type: "file-data";
+													  }
+													| {
+															filename?: string;
+															mediaType?: string;
+															providerOptions?: any;
+															type: "file-url";
+															url: string;
+													  }
+													| {
+															mediaType?: string;
+															providerOptions?: any;
+															type: "image-url";
+															url: string;
+													  }
+													| {
+															data: string;
+															mediaType: string;
+															providerOptions?: any;
+															type: "image-data";
+													  }
+													| {
+															fileId: string | Record<string, string>;
+															providerOptions?: any;
+															type: "file-id";
+													  }
+													| {
+															fileId: string | Record<string, string>;
+															providerOptions?: any;
+															type: "image-file-id";
+													  }
+													| { providerOptions?: any; type: "custom" }
 												>;
+										  }
+										| {
+												providerOptions?: any;
+												reason?: string;
+												type: "execution-denied";
 										  };
 									providerExecuted?: boolean;
 									providerMetadata?: Record<string, Record<string, any>>;
@@ -1241,20 +1585,82 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 														>;
 														isError?: boolean;
 														output?:
-															| { type: "text"; value: string }
-															| { type: "json"; value: any }
-															| { type: "error-text"; value: string }
-															| { type: "error-json"; value: any }
+															| {
+																	providerOptions?: any;
+																	type: "text";
+																	value: string;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "json";
+																	value: any;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "error-text";
+																	value: string;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "error-json";
+																	value: any;
+															  }
 															| {
 																	type: "content";
 																	value: Array<
-																		| { text: string; type: "text" }
+																		| {
+																				providerOptions?: any;
+																				text: string;
+																				type: "text";
+																		  }
 																		| {
 																				data: string;
 																				mediaType: string;
 																				type: "media";
 																		  }
+																		| {
+																				data: string;
+																				filename?: string;
+																				mediaType: string;
+																				providerOptions?: any;
+																				type: "file-data";
+																		  }
+																		| {
+																				filename?: string;
+																				mediaType?: string;
+																				providerOptions?: any;
+																				type: "file-url";
+																				url: string;
+																		  }
+																		| {
+																				mediaType?: string;
+																				providerOptions?: any;
+																				type: "image-url";
+																				url: string;
+																		  }
+																		| {
+																				data: string;
+																				mediaType: string;
+																				providerOptions?: any;
+																				type: "image-data";
+																		  }
+																		| {
+																				fileId: string | Record<string, string>;
+																				providerOptions?: any;
+																				type: "file-id";
+																		  }
+																		| {
+																				fileId: string | Record<string, string>;
+																				providerOptions?: any;
+																				type: "image-file-id";
+																		  }
+																		| { providerOptions?: any; type: "custom" }
 																	>;
+															  }
+															| {
+																	providerOptions?: any;
+																	reason?: string;
+																	type: "execution-denied";
 															  };
 														providerExecuted?: boolean;
 														providerMetadata?: Record<
@@ -1314,16 +1720,70 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 										>;
 										isError?: boolean;
 										output?:
-											| { type: "text"; value: string }
-											| { type: "json"; value: any }
-											| { type: "error-text"; value: string }
-											| { type: "error-json"; value: any }
+											| { providerOptions?: any; type: "text"; value: string }
+											| { providerOptions?: any; type: "json"; value: any }
+											| {
+													providerOptions?: any;
+													type: "error-text";
+													value: string;
+											  }
+											| {
+													providerOptions?: any;
+													type: "error-json";
+													value: any;
+											  }
 											| {
 													type: "content";
 													value: Array<
-														| { text: string; type: "text" }
+														| {
+																providerOptions?: any;
+																text: string;
+																type: "text";
+														  }
 														| { data: string; mediaType: string; type: "media" }
+														| {
+																data: string;
+																filename?: string;
+																mediaType: string;
+																providerOptions?: any;
+																type: "file-data";
+														  }
+														| {
+																filename?: string;
+																mediaType?: string;
+																providerOptions?: any;
+																type: "file-url";
+																url: string;
+														  }
+														| {
+																mediaType?: string;
+																providerOptions?: any;
+																type: "image-url";
+																url: string;
+														  }
+														| {
+																data: string;
+																mediaType: string;
+																providerOptions?: any;
+																type: "image-data";
+														  }
+														| {
+																fileId: string | Record<string, string>;
+																providerOptions?: any;
+																type: "file-id";
+														  }
+														| {
+																fileId: string | Record<string, string>;
+																providerOptions?: any;
+																type: "image-file-id";
+														  }
+														| { providerOptions?: any; type: "custom" }
 													>;
+											  }
+											| {
+													providerOptions?: any;
+													reason?: string;
+													type: "execution-denied";
 											  };
 										providerExecuted?: boolean;
 										providerMetadata?: Record<string, Record<string, any>>;
@@ -1537,20 +1997,82 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 													>;
 													isError?: boolean;
 													output?:
-														| { type: "text"; value: string }
-														| { type: "json"; value: any }
-														| { type: "error-text"; value: string }
-														| { type: "error-json"; value: any }
+														| {
+																providerOptions?: any;
+																type: "text";
+																value: string;
+														  }
+														| {
+																providerOptions?: any;
+																type: "json";
+																value: any;
+														  }
+														| {
+																providerOptions?: any;
+																type: "error-text";
+																value: string;
+														  }
+														| {
+																providerOptions?: any;
+																type: "error-json";
+																value: any;
+														  }
 														| {
 																type: "content";
 																value: Array<
-																	| { text: string; type: "text" }
+																	| {
+																			providerOptions?: any;
+																			text: string;
+																			type: "text";
+																	  }
 																	| {
 																			data: string;
 																			mediaType: string;
 																			type: "media";
 																	  }
+																	| {
+																			data: string;
+																			filename?: string;
+																			mediaType: string;
+																			providerOptions?: any;
+																			type: "file-data";
+																	  }
+																	| {
+																			filename?: string;
+																			mediaType?: string;
+																			providerOptions?: any;
+																			type: "file-url";
+																			url: string;
+																	  }
+																	| {
+																			mediaType?: string;
+																			providerOptions?: any;
+																			type: "image-url";
+																			url: string;
+																	  }
+																	| {
+																			data: string;
+																			mediaType: string;
+																			providerOptions?: any;
+																			type: "image-data";
+																	  }
+																	| {
+																			fileId: string | Record<string, string>;
+																			providerOptions?: any;
+																			type: "file-id";
+																	  }
+																	| {
+																			fileId: string | Record<string, string>;
+																			providerOptions?: any;
+																			type: "image-file-id";
+																	  }
+																	| { providerOptions?: any; type: "custom" }
 																>;
+														  }
+														| {
+																providerOptions?: any;
+																reason?: string;
+																type: "execution-denied";
 														  };
 													providerExecuted?: boolean;
 													providerMetadata?: Record<
@@ -1601,16 +2123,66 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 									>;
 									isError?: boolean;
 									output?:
-										| { type: "text"; value: string }
-										| { type: "json"; value: any }
-										| { type: "error-text"; value: string }
-										| { type: "error-json"; value: any }
+										| { providerOptions?: any; type: "text"; value: string }
+										| { providerOptions?: any; type: "json"; value: any }
+										| {
+												providerOptions?: any;
+												type: "error-text";
+												value: string;
+										  }
+										| { providerOptions?: any; type: "error-json"; value: any }
 										| {
 												type: "content";
 												value: Array<
-													| { text: string; type: "text" }
+													| {
+															providerOptions?: any;
+															text: string;
+															type: "text";
+													  }
 													| { data: string; mediaType: string; type: "media" }
+													| {
+															data: string;
+															filename?: string;
+															mediaType: string;
+															providerOptions?: any;
+															type: "file-data";
+													  }
+													| {
+															filename?: string;
+															mediaType?: string;
+															providerOptions?: any;
+															type: "file-url";
+															url: string;
+													  }
+													| {
+															mediaType?: string;
+															providerOptions?: any;
+															type: "image-url";
+															url: string;
+													  }
+													| {
+															data: string;
+															mediaType: string;
+															providerOptions?: any;
+															type: "image-data";
+													  }
+													| {
+															fileId: string | Record<string, string>;
+															providerOptions?: any;
+															type: "file-id";
+													  }
+													| {
+															fileId: string | Record<string, string>;
+															providerOptions?: any;
+															type: "image-file-id";
+													  }
+													| { providerOptions?: any; type: "custom" }
 												>;
+										  }
+										| {
+												providerOptions?: any;
+												reason?: string;
+												type: "execution-denied";
 										  };
 									providerExecuted?: boolean;
 									providerMetadata?: Record<string, Record<string, any>>;
@@ -1811,20 +2383,82 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 													>;
 													isError?: boolean;
 													output?:
-														| { type: "text"; value: string }
-														| { type: "json"; value: any }
-														| { type: "error-text"; value: string }
-														| { type: "error-json"; value: any }
+														| {
+																providerOptions?: any;
+																type: "text";
+																value: string;
+														  }
+														| {
+																providerOptions?: any;
+																type: "json";
+																value: any;
+														  }
+														| {
+																providerOptions?: any;
+																type: "error-text";
+																value: string;
+														  }
+														| {
+																providerOptions?: any;
+																type: "error-json";
+																value: any;
+														  }
 														| {
 																type: "content";
 																value: Array<
-																	| { text: string; type: "text" }
+																	| {
+																			providerOptions?: any;
+																			text: string;
+																			type: "text";
+																	  }
 																	| {
 																			data: string;
 																			mediaType: string;
 																			type: "media";
 																	  }
+																	| {
+																			data: string;
+																			filename?: string;
+																			mediaType: string;
+																			providerOptions?: any;
+																			type: "file-data";
+																	  }
+																	| {
+																			filename?: string;
+																			mediaType?: string;
+																			providerOptions?: any;
+																			type: "file-url";
+																			url: string;
+																	  }
+																	| {
+																			mediaType?: string;
+																			providerOptions?: any;
+																			type: "image-url";
+																			url: string;
+																	  }
+																	| {
+																			data: string;
+																			mediaType: string;
+																			providerOptions?: any;
+																			type: "image-data";
+																	  }
+																	| {
+																			fileId: string | Record<string, string>;
+																			providerOptions?: any;
+																			type: "file-id";
+																	  }
+																	| {
+																			fileId: string | Record<string, string>;
+																			providerOptions?: any;
+																			type: "image-file-id";
+																	  }
+																	| { providerOptions?: any; type: "custom" }
 																>;
+														  }
+														| {
+																providerOptions?: any;
+																reason?: string;
+																type: "execution-denied";
 														  };
 													providerExecuted?: boolean;
 													providerMetadata?: Record<
@@ -1875,16 +2509,66 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 									>;
 									isError?: boolean;
 									output?:
-										| { type: "text"; value: string }
-										| { type: "json"; value: any }
-										| { type: "error-text"; value: string }
-										| { type: "error-json"; value: any }
+										| { providerOptions?: any; type: "text"; value: string }
+										| { providerOptions?: any; type: "json"; value: any }
+										| {
+												providerOptions?: any;
+												type: "error-text";
+												value: string;
+										  }
+										| { providerOptions?: any; type: "error-json"; value: any }
 										| {
 												type: "content";
 												value: Array<
-													| { text: string; type: "text" }
+													| {
+															providerOptions?: any;
+															text: string;
+															type: "text";
+													  }
 													| { data: string; mediaType: string; type: "media" }
+													| {
+															data: string;
+															filename?: string;
+															mediaType: string;
+															providerOptions?: any;
+															type: "file-data";
+													  }
+													| {
+															filename?: string;
+															mediaType?: string;
+															providerOptions?: any;
+															type: "file-url";
+															url: string;
+													  }
+													| {
+															mediaType?: string;
+															providerOptions?: any;
+															type: "image-url";
+															url: string;
+													  }
+													| {
+															data: string;
+															mediaType: string;
+															providerOptions?: any;
+															type: "image-data";
+													  }
+													| {
+															fileId: string | Record<string, string>;
+															providerOptions?: any;
+															type: "file-id";
+													  }
+													| {
+															fileId: string | Record<string, string>;
+															providerOptions?: any;
+															type: "image-file-id";
+													  }
+													| { providerOptions?: any; type: "custom" }
 												>;
+										  }
+										| {
+												providerOptions?: any;
+												reason?: string;
+												type: "execution-denied";
 										  };
 									providerExecuted?: boolean;
 									providerMetadata?: Record<string, Record<string, any>>;
@@ -2103,20 +2787,82 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 														>;
 														isError?: boolean;
 														output?:
-															| { type: "text"; value: string }
-															| { type: "json"; value: any }
-															| { type: "error-text"; value: string }
-															| { type: "error-json"; value: any }
+															| {
+																	providerOptions?: any;
+																	type: "text";
+																	value: string;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "json";
+																	value: any;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "error-text";
+																	value: string;
+															  }
+															| {
+																	providerOptions?: any;
+																	type: "error-json";
+																	value: any;
+															  }
 															| {
 																	type: "content";
 																	value: Array<
-																		| { text: string; type: "text" }
+																		| {
+																				providerOptions?: any;
+																				text: string;
+																				type: "text";
+																		  }
 																		| {
 																				data: string;
 																				mediaType: string;
 																				type: "media";
 																		  }
+																		| {
+																				data: string;
+																				filename?: string;
+																				mediaType: string;
+																				providerOptions?: any;
+																				type: "file-data";
+																		  }
+																		| {
+																				filename?: string;
+																				mediaType?: string;
+																				providerOptions?: any;
+																				type: "file-url";
+																				url: string;
+																		  }
+																		| {
+																				mediaType?: string;
+																				providerOptions?: any;
+																				type: "image-url";
+																				url: string;
+																		  }
+																		| {
+																				data: string;
+																				mediaType: string;
+																				providerOptions?: any;
+																				type: "image-data";
+																		  }
+																		| {
+																				fileId: string | Record<string, string>;
+																				providerOptions?: any;
+																				type: "file-id";
+																		  }
+																		| {
+																				fileId: string | Record<string, string>;
+																				providerOptions?: any;
+																				type: "image-file-id";
+																		  }
+																		| { providerOptions?: any; type: "custom" }
 																	>;
+															  }
+															| {
+																	providerOptions?: any;
+																	reason?: string;
+																	type: "execution-denied";
 															  };
 														providerExecuted?: boolean;
 														providerMetadata?: Record<
@@ -2176,16 +2922,70 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 										>;
 										isError?: boolean;
 										output?:
-											| { type: "text"; value: string }
-											| { type: "json"; value: any }
-											| { type: "error-text"; value: string }
-											| { type: "error-json"; value: any }
+											| { providerOptions?: any; type: "text"; value: string }
+											| { providerOptions?: any; type: "json"; value: any }
+											| {
+													providerOptions?: any;
+													type: "error-text";
+													value: string;
+											  }
+											| {
+													providerOptions?: any;
+													type: "error-json";
+													value: any;
+											  }
 											| {
 													type: "content";
 													value: Array<
-														| { text: string; type: "text" }
+														| {
+																providerOptions?: any;
+																text: string;
+																type: "text";
+														  }
 														| { data: string; mediaType: string; type: "media" }
+														| {
+																data: string;
+																filename?: string;
+																mediaType: string;
+																providerOptions?: any;
+																type: "file-data";
+														  }
+														| {
+																filename?: string;
+																mediaType?: string;
+																providerOptions?: any;
+																type: "file-url";
+																url: string;
+														  }
+														| {
+																mediaType?: string;
+																providerOptions?: any;
+																type: "image-url";
+																url: string;
+														  }
+														| {
+																data: string;
+																mediaType: string;
+																providerOptions?: any;
+																type: "image-data";
+														  }
+														| {
+																fileId: string | Record<string, string>;
+																providerOptions?: any;
+																type: "file-id";
+														  }
+														| {
+																fileId: string | Record<string, string>;
+																providerOptions?: any;
+																type: "image-file-id";
+														  }
+														| { providerOptions?: any; type: "custom" }
 													>;
+											  }
+											| {
+													providerOptions?: any;
+													reason?: string;
+													type: "execution-denied";
 											  };
 										providerExecuted?: boolean;
 										providerMetadata?: Record<string, Record<string, any>>;
@@ -2323,20 +3123,82 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 													>;
 													isError?: boolean;
 													output?:
-														| { type: "text"; value: string }
-														| { type: "json"; value: any }
-														| { type: "error-text"; value: string }
-														| { type: "error-json"; value: any }
+														| {
+																providerOptions?: any;
+																type: "text";
+																value: string;
+														  }
+														| {
+																providerOptions?: any;
+																type: "json";
+																value: any;
+														  }
+														| {
+																providerOptions?: any;
+																type: "error-text";
+																value: string;
+														  }
+														| {
+																providerOptions?: any;
+																type: "error-json";
+																value: any;
+														  }
 														| {
 																type: "content";
 																value: Array<
-																	| { text: string; type: "text" }
+																	| {
+																			providerOptions?: any;
+																			text: string;
+																			type: "text";
+																	  }
 																	| {
 																			data: string;
 																			mediaType: string;
 																			type: "media";
 																	  }
+																	| {
+																			data: string;
+																			filename?: string;
+																			mediaType: string;
+																			providerOptions?: any;
+																			type: "file-data";
+																	  }
+																	| {
+																			filename?: string;
+																			mediaType?: string;
+																			providerOptions?: any;
+																			type: "file-url";
+																			url: string;
+																	  }
+																	| {
+																			mediaType?: string;
+																			providerOptions?: any;
+																			type: "image-url";
+																			url: string;
+																	  }
+																	| {
+																			data: string;
+																			mediaType: string;
+																			providerOptions?: any;
+																			type: "image-data";
+																	  }
+																	| {
+																			fileId: string | Record<string, string>;
+																			providerOptions?: any;
+																			type: "file-id";
+																	  }
+																	| {
+																			fileId: string | Record<string, string>;
+																			providerOptions?: any;
+																			type: "image-file-id";
+																	  }
+																	| { providerOptions?: any; type: "custom" }
 																>;
+														  }
+														| {
+																providerOptions?: any;
+																reason?: string;
+																type: "execution-denied";
 														  };
 													providerExecuted?: boolean;
 													providerMetadata?: Record<
@@ -2387,16 +3249,66 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
 									>;
 									isError?: boolean;
 									output?:
-										| { type: "text"; value: string }
-										| { type: "json"; value: any }
-										| { type: "error-text"; value: string }
-										| { type: "error-json"; value: any }
+										| { providerOptions?: any; type: "text"; value: string }
+										| { providerOptions?: any; type: "json"; value: any }
+										| {
+												providerOptions?: any;
+												type: "error-text";
+												value: string;
+										  }
+										| { providerOptions?: any; type: "error-json"; value: any }
 										| {
 												type: "content";
 												value: Array<
-													| { text: string; type: "text" }
+													| {
+															providerOptions?: any;
+															text: string;
+															type: "text";
+													  }
 													| { data: string; mediaType: string; type: "media" }
+													| {
+															data: string;
+															filename?: string;
+															mediaType: string;
+															providerOptions?: any;
+															type: "file-data";
+													  }
+													| {
+															filename?: string;
+															mediaType?: string;
+															providerOptions?: any;
+															type: "file-url";
+															url: string;
+													  }
+													| {
+															mediaType?: string;
+															providerOptions?: any;
+															type: "image-url";
+															url: string;
+													  }
+													| {
+															data: string;
+															mediaType: string;
+															providerOptions?: any;
+															type: "image-data";
+													  }
+													| {
+															fileId: string | Record<string, string>;
+															providerOptions?: any;
+															type: "file-id";
+													  }
+													| {
+															fileId: string | Record<string, string>;
+															providerOptions?: any;
+															type: "image-file-id";
+													  }
+													| { providerOptions?: any; type: "custom" }
 												>;
+										  }
+										| {
+												providerOptions?: any;
+												reason?: string;
+												type: "execution-denied";
 										  };
 									providerExecuted?: boolean;
 									providerMetadata?: Record<string, Record<string, any>>;
