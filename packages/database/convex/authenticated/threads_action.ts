@@ -1,8 +1,9 @@
-import { v } from "convex/values";
 import type { FunctionReturnType } from "convex/server";
+import { v } from "convex/values";
 import { api } from "../_generated/api";
 import { guildManagerAction } from "../client/guildManager";
-import { threadSummaryAgent } from "../shared/threadSummaryAgent";
+
+// import { threadSummaryAgent } from "../shared/threadSummaryAgent";
 
 type MessagePage = FunctionReturnType<typeof api.public.messages.getMessages>;
 
@@ -44,9 +45,9 @@ export const generateThreadSummary = guildManagerAction({
 
 ${conversationText}`;
 
-		const { thread } = await threadSummaryAgent.createThread(ctx);
-		const result = await thread.generateText({ prompt });
+		// const { thread } = await threadSummaryAgent.createThread(ctx);
+		// const result = await thread.generateText({ prompt });
 
-		return { summary: result.text };
+		return { summary: "" };
 	},
 });

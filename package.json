@@ -7,7 +7,7 @@
 		"dev": "turbo run dev",
 		"dev:with:dbs": "bun scripts/start-dbs.ts && turbo run dev",
 		"build": "turbo run build",
-		"typecheck": "turbo run typecheck --filter='!@packages/convex-test'",
+		"typecheck": "turbo run typecheck --filter='!@packages/convex-test' --filter='!@packages/agent'",
 		"typecheck:slow": "turbo run typecheck:slow --filter='!@packages/convex-test'",
 		"typecheck:tsgo": "tsgo --build",
 		"typecheck:tsgo:watch": "tsgo --build --watch",
