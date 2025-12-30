@@ -65,19 +65,23 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 
 	const canLoadMore = status === "CanLoadMore";
 	const isLoadingMore = status === "LoadingMore";
-	const lastPageTriggered = useRef(0);
+	const lastLoadedLength = useRef(0);
 
 	const handleRangeChanged = useCallback(
 		(range: { startIndex: number; endIndex: number }) => {
-			if (!canLoadMore) return;
+			if (!canLoadMore || !results) return;
 
-			const currentPage = Math.floor(range.endIndex / pageSize);
-			if (currentPage > lastPageTriggered.current) {
-				lastPageTriggered.current = currentPage;
+			if (results.length > lastLoadedLength.current) {
+				lastLoadedLength.current = results.length;
+			}
+
+			const lastPageStart = lastLoadedLength.current - pageSize;
+			if (range.endIndex >= lastPageStart) {
+				lastLoadedLength.current = results.length + pageSize;
 				loadMore(pageSize);
 			}
 		},
-		[canLoadMore, loadMore, pageSize],
+		[canLoadMore, loadMore, pageSize, results],
 	);
 
 	const isLoadingFirstPage = status === "LoadingFirstPage";
