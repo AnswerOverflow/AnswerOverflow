@@ -151,10 +151,7 @@ const runSitemapGenerationCore = Effect.fn("sitemap.run_core")(function* () {
 	const startTime = yield* Clock.currentTimeMillis;
 
 	const servers: Array<ServerForSitemap> =
-		yield* database.private.sitemap.getServersForSitemap(
-			{},
-			{ subscribe: false },
-		);
+		yield* database.private.sitemap.getServersForSitemap({});
 
 	const regularServers = Arr.filter(
 		servers,

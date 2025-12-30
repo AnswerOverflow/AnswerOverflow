@@ -67,7 +67,7 @@ export const FUNCTION_TYPE_MAP = {
   "servers.updateServer": "mutation",
   "servers.upsertServer": "mutation",
   "sitemap.collectThreadsForServer": "action",
-  "sitemap.getServersForSitemap": "query",
+  "sitemap.getServersForSitemap": "action",
   "threadTags.getTagsForThread": "query",
   "threadTags.getTagsForThreads": "query",
   "threadTags.getThreadIdsByTags": "query",

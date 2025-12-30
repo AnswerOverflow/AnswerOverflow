@@ -2,17 +2,22 @@ import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { ChannelType } from "discord-api-types/v10";
 import { internal } from "../_generated/api";
-import { internalQuery, privateAction, privateQuery } from "../client";
+import { internalQuery, privateAction } from "../client";
 import { getIndexedChannelIdsForServer } from "../shared/channels";
 import { threadMessageCounts } from "./counts";
 
-export const getServersForSitemap = privateQuery({
-	args: {},
-	handler: async (ctx) => {
-		const allServers = await ctx.db.query("servers").collect();
-		const results = [];
+const getServersForSitemapPage = internalQuery({
+	args: {
+		cursor: v.union(v.string(), v.null()),
+	},
+	handler: async (ctx, args) => {
+		const result = await ctx.db
+			.query("servers")
+			.paginate({ numItems: 50, cursor: args.cursor });
 
-		for (const server of allServers) {
+		const servers = [];
+
+		for (const server of result.page) {
 			const msgCount = await threadMessageCounts.count(ctx, {
 				bounds: { prefix: [server.discordId] },
 			});
@@ -26,7 +31,7 @@ export const getServersForSitemap = privateQuery({
 				server.discordId,
 			);
 
-			results.push({
+			servers.push({
 				_id: server._id,
 				discordId: server.discordId,
 				hasCustomDomain: !!prefs?.customDomain,
@@ -35,7 +40,43 @@ export const getServersForSitemap = privateQuery({
 			});
 		}
 
-		return results;
+		return {
+			servers,
+			isDone: result.isDone,
+			continueCursor: result.continueCursor,
+		};
+	},
+});
+
+export const getServersForSitemap = privateAction({
+	args: {},
+	handler: async (ctx) => {
+		const allServers: Array<{
+			_id: string;
+			discordId: bigint;
+			hasCustomDomain: boolean;
+			hasSubpath: boolean;
+			isKicked: boolean;
+		}> = [];
+		let cursor: string | null = null;
+		let isDone = false;
+
+		while (!isDone) {
+			const result: {
+				servers: typeof allServers;
+				isDone: boolean;
+				continueCursor: string | null;
+			} = await ctx.runQuery(
+				internal.private.sitemap.getServersForSitemapPage,
+				{ cursor },
+			);
+
+			allServers.push(...result.servers);
+			cursor = result.continueCursor;
+			isDone = result.isDone;
+		}
+
+		return allServers;
 	},
 });
 
