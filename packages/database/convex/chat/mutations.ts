@@ -1,5 +1,3 @@
-/** biome-ignore-all lint/style/noRestrictedImports: chat functions need direct server access */
-
 import { createMCPClient } from "@ai-sdk/mcp";
 import {
 	createThread,
@@ -11,10 +9,10 @@ import {
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
-import { internalAction, mutation, query } from "../_generated/server";
+import { adminMutation, adminQuery, internalAction } from "../client";
 import { chatAgent } from "./agent";
 
-export const createChatThread = mutation({
+export const createChatThread = adminMutation({
 	args: {},
 	returns: v.string(),
 	handler: async (ctx) => {
@@ -23,7 +21,7 @@ export const createChatThread = mutation({
 	},
 });
 
-export const sendMessage = mutation({
+export const sendMessage = adminMutation({
 	args: {
 		threadId: v.string(),
 		prompt: v.string(),
@@ -78,7 +76,7 @@ export const generateResponse = internalAction({
 	},
 });
 
-export const listMessages = query({
+export const listMessages = adminQuery({
 	args: {
 		threadId: v.string(),
 		paginationOpts: paginationOptsValidator,
