@@ -191,7 +191,6 @@ export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
 		const repoName = urlParts[urlParts.length - 1] || "repo";
 		const owner = urlParts[urlParts.length - 2] || "";
 
-		const isShallow = args.includes("--depth");
 		const depthIndex = args.indexOf("--depth");
 		const depth =
 			depthIndex !== -1 ? Number.parseInt(args[depthIndex + 1] ?? "1", 10) : 1;
@@ -241,8 +240,9 @@ export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
 				http,
 				dir: tempDir,
 				url: repoUrl,
-				depth: isShallow ? depth : undefined,
+				depth,
 				singleBranch: true,
+				noTags: true,
 				onAuth: token
 					? () => ({ username: "x-access-token", password: token })
 					: undefined,
