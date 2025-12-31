@@ -17,7 +17,7 @@
   },
   "license": "Apache-2.0",
   "peerDependencies": {
-    "convex": "^1.16.4"
+    "convex": "catalog:"
   },
 	"devDependencies": {
 		"@edge-runtime/vm": "catalog:",

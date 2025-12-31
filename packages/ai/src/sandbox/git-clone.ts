@@ -1,7 +1,7 @@
 import { defineCommand } from "just-bash";
 import git from "isomorphic-git";
 import http from "isomorphic-git/http/web";
-import { isBinaryFile } from "./binary-extensions.ts";
+import { isBinaryFile } from "./binary-extensions";
 
 export type GitCredentialProvider = (
 	owner: string,
@@ -77,10 +77,18 @@ function createIsomorphicFSAdapter(bashFs: JustBashFS) {
 				await bashFs.mkdir(path, options);
 			},
 			rmdir: async (path: string) => {
-				await bashFs.rm(path, { recursive: true });
+				try {
+					await bashFs.rm(path, { recursive: true });
+				} catch {
+					// Ignore errors - directory may not exist
+				}
 			},
 			unlink: async (path: string) => {
-				await bashFs.rm(path);
+				try {
+					await bashFs.rm(path);
+				} catch {
+					// Ignore errors - file may not exist
+				}
 			},
 			stat: async (path: string) => {
 				const exists = await bashFs.exists(path);

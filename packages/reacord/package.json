@@ -12,7 +12,7 @@
 	"dependencies": {
 		"@effect-atom/atom": "^0.4.11",
 		"@effect-atom/atom-react": "^0.4.4",
-		"react": "^19.1.0",
+		"react": "catalog:",
 		"react-reconciler": "^0.31.0"
 	},
 	"devDependencies": {
@@ -21,8 +21,8 @@
 	},
 	"peerDependencies": {
 		"@effect/experimental": "^0.57.0",
-		"@effect/platform": "^0.93.0",
+		"@effect/platform": "catalog:",
 		"discord.js": "^14",
-		"effect": "^3"
+		"effect": "catalog:"
 	}
 }

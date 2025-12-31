@@ -1,4 +1,3 @@
-import { createMCPClient } from "@ai-sdk/mcp";
 import {
 	createThread,
 	listUIMessages,
@@ -9,8 +8,7 @@ import {
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
-import { adminMutation, adminQuery, internalAction } from "../client";
-import { chatAgent } from "./agent";
+import { adminMutation, adminQuery } from "../client";
 
 export const createChatThread = adminMutation({
 	args: {},
@@ -33,44 +31,10 @@ export const sendMessage = adminMutation({
 			prompt: args.prompt,
 		});
 
-		await ctx.scheduler.runAfter(0, internal.chat.mutations.generateResponse, {
+		await ctx.scheduler.runAfter(0, internal.chat.actions.generateResponse, {
 			threadId: args.threadId,
 			promptMessageId: messageId,
 		});
-
-		return null;
-	},
-});
-
-export const generateResponse = internalAction({
-	args: {
-		threadId: v.string(),
-		promptMessageId: v.string(),
-	},
-	returns: v.null(),
-	handler: async (ctx, args) => {
-		const mcpClient = await createMCPClient({
-			transport: {
-				type: "http",
-				url: "https://www.answeroverflow.com/mcp",
-			},
-		});
-
-		try {
-			const mcpTools = await mcpClient.tools();
-
-			await chatAgent.streamText(
-				ctx,
-				{ threadId: args.threadId },
-				{
-					promptMessageId: args.promptMessageId,
-					tools: { ...chatAgent.options.tools, ...mcpTools },
-				},
-				{ saveStreamDeltas: true },
-			);
-		} finally {
-			await mcpClient.close();
-		}
 
 		return null;
 	},

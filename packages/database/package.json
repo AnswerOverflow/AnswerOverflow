@@ -38,6 +38,7 @@
 		"@convex-dev/rate-limiter": "^0.3.2",
 		"@effect-aws/client-s3": "^1.10.6",
 		"@packages/agent": "workspace:*",
+		"@packages/ai": "workspace:*",
 		"@effect/ai": "^0.32.1",
 		"@effect/platform": "catalog:",
 		"@effect/platform-node": "^0.103.0",
@@ -60,7 +61,7 @@
 		"posthog-node": "^4.2.0",
 		"stripe": "^20.1.0",
 		"unique-names-generator": "^4.7.1",
-		"zod": "^4.2.1"
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@edge-runtime/vm": "catalog:",

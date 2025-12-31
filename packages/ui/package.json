@@ -44,7 +44,7 @@
 		"@tailwindcss/typography": "^0.5.19",
 		"@tanstack/react-query": "catalog:",
 		"@xyflow/react": "^12.10.0",
-		"ai": "^6.0.5",
+		"ai": "catalog:",
 		"better-auth": "catalog:",
 		"bytes": "^3.1.2",
 		"class-variance-authority": "^0.7.1",

@@ -15,12 +15,16 @@
 		"clean": "rm -rf node_modules .turbo",
 		"sandbox-prompt": "bun run --silent with-env bun run scripts/sandbox-prompt.ts",
 		"test:sandbox": "bun run --silent with-env bun run scripts/test-sandbox.ts",
-		"test:sandbox:security": "bun run --silent with-env bun run scripts/stress-test-sandbox.ts"
+		"test:sandbox:security": "bun run --silent with-env bun run scripts/stress-test-sandbox.ts",
+		"test:sdk:basic": "bun run --silent with-env bun run scripts/test-sdk-basic.ts",
+		"test:sdk:events": "bun run --silent with-env bun run scripts/test-sdk-events.ts"
 	},
 	"dependencies": {
+		"ai": "catalog:",
 		"just-bash": "^1.2.5",
 		"@opencode-ai/sdk": "^1.0.219",
-		"isomorphic-git": "^1.36.1"
+		"isomorphic-git": "^1.36.1",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",

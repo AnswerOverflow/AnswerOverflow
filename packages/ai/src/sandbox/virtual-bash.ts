@@ -2,7 +2,7 @@ import { Bash } from "just-bash";
 import {
 	createGitCloneCommand,
 	type GitCloneCommandOptions,
-} from "./git-clone.ts";
+} from "./git-clone";
 
 export interface VirtualBashOptions {
 	gitClone?: GitCloneCommandOptions;
