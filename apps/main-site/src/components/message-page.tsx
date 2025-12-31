@@ -112,6 +112,8 @@ function ReplyMessage(props: {
 	);
 }
 
+const HIDDEN_AUTHOR_IDS = [958907348389339146n];
+
 export function RepliesSection(props: {
 	channelId: bigint;
 	after: bigint;
@@ -132,8 +134,21 @@ export function RepliesSection(props: {
 		channel,
 		initialData,
 		nextCursor,
-		currentCursor,
 	} = props;
+
+	const filterMessages = (messages: MessagePageReplies["page"]) =>
+		messages.filter(
+			(m) =>
+				!HIDDEN_AUTHOR_IDS.includes(m.message.authorId) &&
+				m.message.id !== firstMessage?.message.id,
+		);
+
+	const filteredInitialData = initialData
+		? {
+				...initialData,
+				page: filterMessages(initialData.page),
+			}
+		: undefined;
 
 	return (
 		<>
@@ -148,7 +163,8 @@ export function RepliesSection(props: {
 						pageSize={50}
 						initialLoaderCount={3}
 						loader={<ReplyMessageSkeleton />}
-						initialData={initialData}
+						initialData={filteredInitialData}
+						filterResults={filterMessages}
 						emptyState={
 							server && channel ? (
 								<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
@@ -168,24 +184,15 @@ export function RepliesSection(props: {
 								</div>
 							)
 						}
-						renderItem={(message) => {
-							const HIDDEN_AUTHOR_IDS = [958907348389339146n];
-							if (
-								HIDDEN_AUTHOR_IDS.includes(message.message.authorId) ||
-								message.message.id === firstMessage?.message.id
-							) {
-								return null;
-							}
-							return (
-								<ReplyMessage
-									key={message.message.id.toString()}
-									message={message}
-									solutionMessageId={solutionMessageId}
-									firstMessageAuthorId={firstMessage?.author?.id}
-									isLast={false}
-								/>
-							);
-						}}
+						renderItem={(message) => (
+							<ReplyMessage
+								key={message.message.id.toString()}
+								message={message}
+								solutionMessageId={solutionMessageId}
+								firstMessageAuthorId={firstMessage?.author?.id}
+								isLast={false}
+							/>
+						)}
 					/>
 				</div>
 			</div>
