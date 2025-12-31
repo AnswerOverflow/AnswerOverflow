@@ -1,0 +1,29 @@
+{
+	"name": "@packages/ai",
+	"version": "1.0.0",
+	"type": "module",
+	"exports": {
+		"./sandbox": "./src/sandbox/index.ts",
+		"./sandbox/virtual-bash": "./src/sandbox/virtual-bash.ts",
+		"./sandbox/git-clone": "./src/sandbox/git-clone.ts",
+		"./sandbox/mcp-server": "./src/sandbox/mcp-server.ts"
+	},
+	"scripts": {
+		"with-env": "bun run --silent --env-file=../../.env",
+		"typecheck": "tsgo --noEmit",
+		"with-env:prod": "bun run --silent --env-file=../../.env.production",
+		"clean": "rm -rf node_modules .turbo",
+		"sandbox-prompt": "bun run --silent with-env bun run scripts/sandbox-prompt.ts",
+		"test:sandbox": "bun run --silent with-env bun run scripts/test-sandbox.ts",
+		"test:sandbox:security": "bun run --silent with-env bun run scripts/stress-test-sandbox.ts"
+	},
+	"dependencies": {
+		"just-bash": "^1.2.5",
+		"@opencode-ai/sdk": "^1.0.219",
+		"isomorphic-git": "^1.36.1"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"typescript": "catalog:"
+	}
+}

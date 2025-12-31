@@ -6,7 +6,7 @@
 		"moduleResolution": "bundler",
 		"rootDir": "."
 	},
-	"include": ["src/**/*", "convex/**/*"],
+	"include": ["src/**/*", "convex/**/*", "scripts/**/*"],
 	"exclude": [
 		"node_modules",
 		"dist",
