@@ -242,7 +242,6 @@ export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
 				url: repoUrl,
 				depth,
 				singleBranch: true,
-				noTags: true,
 				onAuth: token
 					? () => ({ username: "x-access-token", password: token })
 					: undefined,
