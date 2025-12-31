@@ -21,6 +21,7 @@ import {
 	PromptInputSubmit,
 	PromptInputFooter,
 	PromptInputTools,
+	PromptInputBody,
 	type PromptInputMessage,
 } from "@packages/ui/components/ai-elements/prompt-input";
 import {
@@ -34,7 +35,7 @@ import { Loader } from "@packages/ui/components/ai-elements/loader";
 import { api } from "@packages/database/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { Bot, CopyIcon, RefreshCcwIcon } from "lucide-react";
-import { memo } from "react";
+import { memo, useRef } from "react";
 import { useCallback, useState } from "react";
 import {
 	isToolUIPart,
@@ -42,6 +43,7 @@ import {
 	type ToolUIPart,
 	type DynamicToolUIPart,
 } from "ai";
+import { useStickToBottom } from "use-stick-to-bottom";
 
 const SmoothMessageResponse = memo(function SmoothMessageResponse({
 	text,
@@ -136,6 +138,18 @@ function MessageParts({
 export default function ChatPage() {
 	const [threadId, setThreadId] = useState<string | null>(null);
 	const [input, setInput] = useState("");
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
+	const stickToBottomInstance = useStickToBottom({
+		initial: "instant",
+		resize: "instant",
+	});
+
+	const setScrollRef = (element: HTMLDivElement | null) => {
+		scrollContainerRef.current = element;
+		if (element && stickToBottomInstance.scrollRef) {
+			stickToBottomInstance.scrollRef(element);
+		}
+	};
 
 	const createThread = useMutation(api.chat.mutations.createChatThread);
 	const sendMessage = useMutation(api.chat.mutations.sendMessage);
@@ -154,7 +168,7 @@ export default function ChatPage() {
 	const handleSubmit = useCallback(
 		async (message: PromptInputMessage) => {
 			if (!threadId) return;
-			const text = message.text.trim();
+			const text = message.text?.trim();
 			if (!text) return;
 
 			setInput("");
@@ -163,72 +177,87 @@ export default function ChatPage() {
 		[threadId, sendMessage],
 	);
 
-	if (!threadId) {
-		return (
-			<div className="flex h-screen flex-col items-center justify-center gap-6 p-6">
-				<div className="flex flex-col items-center gap-4 text-center">
-					<div className="flex size-16 items-center justify-center rounded-full bg-muted">
-						<Bot className="size-8 text-muted-foreground" />
-					</div>
-					<div className="space-y-2">
-						<h1 className="text-2xl font-semibold">Agent Chat</h1>
-						<p className="text-muted-foreground">
-							Test the Convex Agent with streaming, tool calls, and MCP
-							integration.
-						</p>
-						<p className="text-sm text-muted-foreground">
-							Try: "What time is it?" or "Roll 2d20"
-						</p>
-					</div>
-					<Button onClick={handleCreateThread} size="lg">
-						Start Chat
-					</Button>
-				</div>
-			</div>
-		);
-	}
-
 	const isLoading = status === "LoadingFirstPage";
 	const hasMessages = messages.length > 0;
 	const lastMessageId = messages.at(-1)?.id;
 
 	return (
-		<div className="mx-auto flex h-screen max-w-4xl flex-col p-6">
-			<Conversation className="flex-1">
-				<ConversationContent>
-					{isLoading ? (
-						<div className="flex h-full items-center justify-center">
-							<Loader size={32} />
+		<div className="relative flex h-[calc(100dvh-4rem)] w-full flex-col overflow-hidden">
+			<div
+				ref={setScrollRef}
+				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
+			>
+				{!threadId ? (
+					<div className="max-w-4xl mx-auto w-full flex flex-col flex-1 px-4 sm:px-6 pt-12 pb-4">
+						<div className="flex flex-1 flex-col items-center justify-center gap-6">
+							<div className="flex flex-col items-center gap-4 text-center">
+								<div className="flex size-16 items-center justify-center rounded-full bg-muted">
+									<Bot className="size-8 text-muted-foreground" />
+								</div>
+								<div className="space-y-2">
+									<h1 className="text-2xl font-semibold">Agent Chat</h1>
+									<p className="text-muted-foreground">
+										Test the Convex Agent with streaming, tool calls, and MCP
+										integration.
+									</p>
+									<p className="text-sm text-muted-foreground">
+										Try: "What time is it?" or "Roll 2d20"
+									</p>
+								</div>
+								<Button onClick={handleCreateThread} size="lg">
+									Start Chat
+								</Button>
+							</div>
 						</div>
-					) : !hasMessages ? (
-						<div className="flex h-full flex-col items-center justify-center gap-3 text-center text-muted-foreground">
-							<Bot className="size-12 opacity-50" />
-							<p>Send a message to start chatting!</p>
-						</div>
-					) : (
-						messages.map((message) => (
-							<MessageParts
-								key={message.key}
-								message={message}
-								isLastMessage={message.id === lastMessageId}
-							/>
-						))
-					)}
-				</ConversationContent>
-				<ConversationScrollButton />
-			</Conversation>
+					</div>
+				) : (
+					<div className="max-w-4xl mx-auto w-full flex flex-col flex-1 px-4 sm:px-6 pt-6 pb-4">
+						<Conversation instance={stickToBottomInstance}>
+							<ConversationContent>
+								{isLoading ? (
+									<div className="flex h-full items-center justify-center">
+										<Loader size={32} />
+									</div>
+								) : !hasMessages ? (
+									<div className="flex h-full flex-col items-center justify-center gap-3 text-center text-muted-foreground">
+										<Bot className="size-12 opacity-50" />
+										<p>Send a message to start chatting!</p>
+									</div>
+								) : (
+									messages.map((message) => (
+										<MessageParts
+											key={message.key}
+											message={message}
+											isLastMessage={message.id === lastMessageId}
+										/>
+									))
+								)}
+							</ConversationContent>
+							<ConversationScrollButton />
+						</Conversation>
+					</div>
+				)}
+			</div>
 
-			<PromptInput onSubmit={handleSubmit} className="mt-4">
-				<PromptInputTextarea
-					value={input}
-					onChange={(e) => setInput(e.target.value)}
-					placeholder="Send a message..."
-				/>
-				<PromptInputFooter>
-					<PromptInputTools />
-					<PromptInputSubmit disabled={!input.trim()} />
-				</PromptInputFooter>
-			</PromptInput>
+			<div className="sticky bottom-0 z-10 bg-background border-t">
+				<div className="grid shrink-0 gap-2 sm:gap-4 pt-2 sm:pt-4 pb-14 sm:pb-16">
+					<div className="w-full px-2 sm:px-4 max-w-4xl mx-auto">
+						<PromptInput onSubmit={handleSubmit}>
+							<PromptInputBody>
+								<PromptInputTextarea
+									value={input}
+									onChange={(e) => setInput(e.target.value)}
+									placeholder="Send a message..."
+								/>
+							</PromptInputBody>
+							<PromptInputFooter>
+								<PromptInputTools />
+								<PromptInputSubmit disabled={!input.trim()} />
+							</PromptInputFooter>
+						</PromptInput>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 }

@@ -18,7 +18,7 @@
 	url = https://github.com/get-convex/convex-js.git
 [submodule ".context/typelytics"]
 	path = .context/typelytics
-	url = https://github.com/RhysSullivan/typelytics
+	url = https://github.com/RhysSullivan/typelytics.git
 [submodule ".context/tweakcn"]
 	path = .context/tweakcn
 	url = https://github.com/jnsahaj/tweakcn.git
@@ -31,3 +31,9 @@
 [submodule ".context/vercel-ai"]
 	path = .context/vercel-ai
 	url = https://github.com/vercel/ai.git
+[submodule ".context/posthog-com"]
+	path = .context/posthog-com
+	url = https://github.com/PostHog/posthog.com.git
+[submodule ".context/posthog"]
+	path = .context/posthog
+	url = https://github.com/PostHog/posthog.git

@@ -81,3 +81,30 @@ We include the Vercel AI Elements repository as a git submodule under `.context/
 - **Updating the submodule**:
   - `git submodule update --remote .context/ai-elements`
   - Or navigate to `.context/ai-elements` and pull changes: `cd .context/ai-elements && git pull`
+
+## PostHog
+
+We include the PostHog repository as a git submodule under `.context/posthog/`.
+
+- **Context**: This is the main PostHog product analytics platform. Use it as a reference for analytics patterns, event tracking, feature flags, session recording, and self-hosted analytics implementations.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/posthog`
+  - Or navigate to `.context/posthog` and pull changes: `cd .context/posthog && git pull`
+
+## PostHog Website
+
+We include the PostHog website repository as a git submodule under `.context/posthog-com/`.
+
+- **Context**: This is the PostHog marketing website and documentation. Use it as a reference for documentation patterns, marketing site architecture, and content organization.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/posthog-com`
+  - Or navigate to `.context/posthog-com` and pull changes: `cd .context/posthog-com && git pull`
+
+## Typelytics
+
+We include the Typelytics repository as a git submodule under `.context/typelytics/`.
+
+- **Context**: This is a type-safe PostHog client library. Use it as a reference for type-safe analytics patterns, PostHog integration, and building strongly-typed event tracking systems.
+- **Updating the submodule**:
+  - `git submodule update --remote .context/typelytics`
+  - Or navigate to `.context/typelytics` and pull changes: `cd .context/typelytics && git pull`
