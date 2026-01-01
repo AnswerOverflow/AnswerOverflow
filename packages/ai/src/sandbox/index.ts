@@ -1,14 +1,25 @@
 export {
-	type CreateSandboxToolOptions,
-	createSandboxTool,
-} from "./ai-tool";
-export { BINARY_EXTENSIONS, isBinaryFile } from "./binary-extensions";
+	createVirtualBash,
+	type VirtualBash,
+	type VirtualBashOptions,
+	type VirtualBashResult,
+} from "./virtual-bash";
+
 export {
 	createGitCloneCommand,
 	type GitCloneCommandOptions,
 	type GitCredentialProvider,
 } from "./git-clone";
+
 export {
-	createVirtualBash,
-	type VirtualBashOptions,
-} from "./virtual-bash";
+	createVirtualBashMCPServer,
+	type VirtualBashMCPServer,
+	type VirtualBashMCPServerOptions,
+} from "./mcp-server";
+
+export {
+	createSandboxTool,
+	type CreateSandboxToolOptions,
+} from "./ai-tool";
+
+export { BINARY_EXTENSIONS, isBinaryFile } from "./binary-extensions";

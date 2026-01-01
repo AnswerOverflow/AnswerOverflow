@@ -8,6 +8,17 @@ export interface VirtualBashOptions {
 	gitClone?: GitCloneCommandOptions;
 }
 
+export interface VirtualBashResult {
+	stdout: string;
+	stderr: string;
+	exitCode: number;
+}
+
+export interface VirtualBash {
+	exec: (command: string) => Promise<VirtualBashResult>;
+	getBashEnv: () => Bash;
+}
+
 export function createVirtualBash(
 	options: VirtualBashOptions = {},
 ): VirtualBash {
@@ -17,8 +28,17 @@ export function createVirtualBash(
 		customCommands: [gitCloneCommand],
 	});
 
+	async function exec(command: string): Promise<VirtualBashResult> {
+		const result = await bashEnv.exec(command);
+		return {
+			stdout: result.stdout,
+			stderr: result.stderr,
+			exitCode: result.exitCode,
+		};
+	}
+
 	return {
-		exec: bashEnv.exec,
+		exec,
 		getBashEnv: () => bashEnv,
 	};
 }
