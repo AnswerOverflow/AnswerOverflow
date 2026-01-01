@@ -42,6 +42,8 @@ function isGitHubRepoUrl(pathname: string): boolean {
 		"dashboard",
 		"about",
 		"blog",
+		"m",
+		"c",
 		"browse",
 		"search",
 		"mcp",

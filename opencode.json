@@ -307,13 +307,6 @@
 				"Authorization": "Bearer {env:POSTHOG_PERSONAL_API_KEY}"
 			}
 		},
-		"kernel": {
-			"type": "remote",
-			"url": "https://mcp.onkernel.com/mcp",
-			"oauth": {
-				"scope": "tools:read tools:execute"
-			}
-		},
 		"answeroverflow-dev": {
 			"type": "remote",
 			"url": "http://localhost:3000/mcp",
@@ -324,10 +317,10 @@
 			"url": "https://www.answeroverflow.com/mcp",
 			"enabled": false
 		},
-		"discord-docs": {
-			"type": "remote",
-			"url": "https://discord.mintlify.app/mcp",
-			"enabled": false
+		"playwriter": {
+			"type": "local",
+			"enabled": true,
+			"command": ["npx", "-y", "playwriter"]
 		}
 	},
 	"tools": {
