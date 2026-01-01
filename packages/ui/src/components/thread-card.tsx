@@ -93,9 +93,10 @@ export function ThreadCard({ result, hideServer = false }: ThreadCardProps) {
 	const ChannelIcon = result.channel
 		? getChannelIcon(result.channel.type)
 		: Hash;
-	const canonicalId = result.thread
-		? result.message.message.channelId
-		: result.message.message.id;
+	const canonicalId =
+		result.thread?.id ??
+		result.message.message.childThreadId ??
+		result.message.message.id;
 	const canonicalHref = `/m/${canonicalId}`;
 
 	const hasSolution = result.message.solutions.length > 0;
