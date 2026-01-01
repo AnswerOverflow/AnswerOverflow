@@ -273,7 +273,7 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 		: "Send a message...";
 
 	return (
-		<div className="relative flex h-[calc(100dvh-0.5rem)] w-full flex-col overflow-hidden">
+		<div className="relative flex h-[calc(100dvh-var(--navbar-height))] w-full flex-col overflow-hidden">
 			<div
 				ref={setScrollRef}
 				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
