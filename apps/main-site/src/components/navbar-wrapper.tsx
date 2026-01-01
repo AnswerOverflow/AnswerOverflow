@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 	const isDashboard = pathname?.startsWith("/dashboard");
+	const isChat = pathname?.startsWith("/chat");
 
 	if (isDashboard) {
 		return <>{children}</>;
@@ -19,10 +20,14 @@ export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 		<>
 			<MainSiteNavbar />
 			<div className="pt-navbar">{children}</div>
-			<div className="sm:hidden">
-				<MainSiteFooter />
-			</div>
-			<CompactStickyFooter />
+			{!isChat && (
+				<>
+					<div className="sm:hidden">
+						<MainSiteFooter />
+					</div>
+					<CompactStickyFooter />
+				</>
+			)}
 		</>
 	);
 }

@@ -1,7 +1,13 @@
 "use client";
 
-import { useUIMessages, useSmoothText } from "@packages/agent/react";
 import type { UIMessage } from "@packages/agent/react";
+import {
+	optimisticallySendMessage,
+	useSmoothText,
+	useUIMessages,
+} from "@packages/agent/react";
+import { api } from "@packages/database/convex/_generated/api";
+import { defaultModelId, models } from "@packages/database/models";
 import {
 	Conversation,
 	ConversationContent,
@@ -9,31 +15,33 @@ import {
 } from "@packages/ui/components/ai-elements/conversation";
 import {
 	Message,
+	MessageAction,
+	MessageActions,
 	MessageContent,
 	MessageResponse,
-	MessageActions,
-	MessageAction,
 } from "@packages/ui/components/ai-elements/message";
-import {
-	PromptInput,
-	PromptInputTextarea,
-	PromptInputSubmit,
-	PromptInputFooter,
-	PromptInputTools,
-	PromptInputBody,
-	PromptInputButton,
-	type PromptInputMessage,
-} from "@packages/ui/components/ai-elements/prompt-input";
 import {
 	ModelSelectorLogo,
 	ModelSelectorLogoGroup,
 	ModelSelectorName,
 } from "@packages/ui/components/ai-elements/model-selector";
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@packages/ui/components/popover";
+	PromptInput,
+	PromptInputBody,
+	PromptInputButton,
+	PromptInputFooter,
+	type PromptInputMessage,
+	PromptInputSubmit,
+	PromptInputTextarea,
+	PromptInputTools,
+} from "@packages/ui/components/ai-elements/prompt-input";
+import {
+	Tool,
+	ToolContent,
+	ToolHeader,
+	ToolInput,
+	ToolOutput,
+} from "@packages/ui/components/ai-elements/tool";
 import {
 	Command,
 	CommandEmpty,
@@ -43,79 +51,21 @@ import {
 	CommandList,
 } from "@packages/ui/components/command";
 import {
-	Tool,
-	ToolHeader,
-	ToolContent,
-	ToolInput,
-	ToolOutput,
-} from "@packages/ui/components/ai-elements/tool";
-
-import { api } from "@packages/database/convex/_generated/api";
-import { useMutation } from "convex/react";
-import { optimisticallySendMessage } from "@packages/agent/react";
-import { Bot, CheckIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
-import { memo, useRef } from "react";
-import { useCallback, useState } from "react";
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@packages/ui/components/popover";
 import {
-	isToolUIPart,
-	getToolName,
-	type ToolUIPart,
 	type DynamicToolUIPart,
+	getToolName,
+	isToolUIPart,
+	type ToolUIPart,
 } from "ai";
-import { useStickToBottom } from "use-stick-to-bottom";
+import { useMutation } from "convex/react";
+import { Bot, CheckIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
 import Image from "next/image";
-
-const models = [
-	{
-		id: "glm-4.7",
-		name: "GLM-4.7",
-		chef: "ZAI",
-		chefSlug: "zai",
-		providers: ["zai"],
-	},
-	{
-		id: "minimax-m2",
-		name: "MiniMax M2",
-		chef: "MiniMax",
-		chefSlug: "minimax",
-		providers: ["minimax"],
-	},
-	{
-		id: "gpt-4o",
-		name: "GPT-4o",
-		chef: "OpenAI",
-		chefSlug: "openai",
-		providers: ["openai", "azure"],
-	},
-	{
-		id: "gpt-4o-mini",
-		name: "GPT-4o Mini",
-		chef: "OpenAI",
-		chefSlug: "openai",
-		providers: ["openai", "azure"],
-	},
-	{
-		id: "claude-opus-4-20250514",
-		name: "Claude 4 Opus",
-		chef: "Anthropic",
-		chefSlug: "anthropic",
-		providers: ["anthropic", "azure", "google", "amazon-bedrock"],
-	},
-	{
-		id: "claude-sonnet-4-20250514",
-		name: "Claude 4 Sonnet",
-		chef: "Anthropic",
-		chefSlug: "anthropic",
-		providers: ["anthropic", "azure", "google", "amazon-bedrock"],
-	},
-	{
-		id: "gemini-2.0-flash-exp",
-		name: "Gemini 2.0 Flash",
-		chef: "Google",
-		chefSlug: "google",
-		providers: ["google"],
-	},
-];
+import { memo, useCallback, useRef, useState } from "react";
+import { useStickToBottom } from "use-stick-to-bottom";
 
 export type GitHubRepo = {
 	owner: string;
@@ -239,7 +189,7 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 	const primaryRepo = repos[0];
 	const [threadId, setThreadId] = useState<string | null>(null);
 	const [input, setInput] = useState("");
-	const [model, setModel] = useState(models[0]?.id ?? "gpt-4o");
+	const [model, setModel] = useState(defaultModelId);
 	const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const selectedModelData = models.find((m) => m.id === model);
@@ -289,13 +239,14 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 							filePath: primaryRepo.filePath,
 						}
 					: undefined,
+				modelId: model,
 			});
 
 			if (!threadId) {
 				setThreadId(returnedThreadId);
 			}
 		},
-		[threadId, primaryRepo, sendMessageMutation],
+		[threadId, primaryRepo, sendMessageMutation, model],
 	);
 
 	const lastMessage = messages.at(-1);
@@ -322,7 +273,7 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 		: "Send a message...";
 
 	return (
-		<div className="relative flex h-[calc(100dvh-4rem)] w-full flex-col overflow-hidden">
+		<div className="relative flex h-[calc(100dvh-0.5rem)] w-full flex-col overflow-hidden">
 			<div
 				ref={setScrollRef}
 				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
@@ -363,7 +314,7 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 				</div>
 			</div>
 
-			<div className="sticky bottom-0 z-10 bg-background border-t">
+			<div className="sticky bottom-0 z-10">
 				<div className="grid shrink-0 gap-2 sm:gap-4 pt-2 sm:pt-4 pb-14 sm:pb-16">
 					<div className="w-full px-2 sm:px-4 max-w-4xl mx-auto">
 						<PromptInput onSubmit={handleSubmit}>

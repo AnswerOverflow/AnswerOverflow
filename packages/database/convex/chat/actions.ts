@@ -5,15 +5,18 @@ import { createSandboxTool, createVirtualBash } from "@packages/ai/sandbox";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction } from "../client";
-import { chatAgent, createRepoInstructions } from "./agent";
+import { createChatAgent, createRepoInstructions } from "./agent";
+import { vModelId, defaultModelId, getModelById } from "../shared/models";
 
 export const generateResponse = internalAction({
 	args: {
 		threadId: v.string(),
 		promptMessageId: v.string(),
+		modelId: v.optional(vModelId),
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
+		const modelId = args.modelId ?? defaultModelId;
 		const threadMetadata = await ctx.runQuery(
 			internal.chat.queries.getThreadMetadata,
 			{ threadId: args.threadId },
@@ -47,17 +50,22 @@ export const generateResponse = internalAction({
 		try {
 			const mcpTools = await mcpClient.tools();
 
-			const systemOverride =
-				repos.length > 0 ? createRepoInstructions(repos) : undefined;
+			const model = getModelById(modelId);
+			const modelName = model?.name ?? "Unknown Model";
 
-			await chatAgent.streamText(
+			const systemOverride =
+				repos.length > 0 ? createRepoInstructions(repos, modelName) : undefined;
+
+			const agent = createChatAgent(modelId);
+
+			await agent.streamText(
 				ctx,
 				{ threadId: args.threadId },
 				{
 					promptMessageId: args.promptMessageId,
 					system: systemOverride,
 					tools: {
-						...chatAgent.options.tools,
+						...agent.options.tools,
 						...mcpTools,
 						sandbox: sandboxTool,
 					},

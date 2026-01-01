@@ -1,8 +1,12 @@
 import { Agent } from "@packages/agent";
 import { gateway } from "ai";
 import { components } from "../_generated/api";
+import { getModelById, type ModelId, defaultModelId } from "../shared/models";
 
-const instructions = `You are AnswerOverflow's AI assistant, helping users find answers from Discord community discussions.
+function createInstructions(modelName: string) {
+	return `You are AnswerOverflow's AI assistant, helping users find answers from Discord community discussions.
+
+You are currently running as **${modelName}**.
 
 # Tools
 
@@ -30,6 +34,7 @@ You have access to:
 - Use markdown for formatting when helpful
 - Code snippets should include the language for syntax highlighting
 - Keep responses focused on answering the user's question`;
+}
 
 export type RepoContext = {
 	owner: string;
@@ -37,9 +42,12 @@ export type RepoContext = {
 	filePath?: string;
 };
 
-export function createRepoInstructions(repos: RepoContext[]): string {
+export function createRepoInstructions(
+	repos: RepoContext[],
+	modelName: string,
+): string {
 	if (repos.length === 0) {
-		return instructions;
+		return createInstructions(modelName);
 	}
 
 	const isSingleRepo = repos.length === 1;
@@ -78,6 +86,8 @@ When answering questions, prioritize information related to these files unless t
 
 	return `You are a code exploration assistant for ${repoDescription}.
 
+You are currently running as **${modelName}**.
+
 # Repositories
 
 ${repoListMarkdown}
@@ -105,9 +115,15 @@ ${fileContextSection}
 - Keep responses focused on answering the user's question about the codebase`;
 }
 
-export const chatAgent = new Agent(components.agent, {
-	name: "AnswerOverflow Assistant",
-	languageModel: gateway("anthropic/claude-sonnet-4-20250514"),
-	instructions,
-	maxSteps: 150,
-});
+export function createChatAgent(modelId: ModelId = defaultModelId) {
+	const model = getModelById(modelId);
+	const gatewayId = model?.gatewayId ?? "anthropic/claude-sonnet-4-20250514";
+	const modelName = model?.name ?? "Unknown Model";
+
+	return new Agent(components.agent, {
+		name: "AnswerOverflow Assistant",
+		languageModel: gateway(gatewayId),
+		instructions: createInstructions(modelName),
+		maxSteps: 150,
+	});
+}

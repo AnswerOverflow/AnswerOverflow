@@ -13,6 +13,7 @@ import { HydrationProvider } from "./hydration-context";
 import { ImpersonationBanner } from "./impersonation-banner";
 import { SignInIfAnon } from "./sign-in-if-anon";
 import { type Tenant, TenantProvider } from "./tenant-context";
+import { VercelToolbar } from "./vercel-toolbar";
 
 function IdentifyUser() {
 	const { data } = useSession();
@@ -58,6 +59,7 @@ export function Providers({
 							<SignInIfAnon />
 							<IdentifyUser />
 							<ImpersonationBanner />
+							<VercelToolbar />
 							{children}
 						</ConvexClientProvider>
 					</NextThemesProvider>

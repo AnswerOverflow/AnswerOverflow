@@ -9,6 +9,7 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
 import { adminMutation, adminQuery } from "../client";
+import { vModelId, defaultModelId } from "../shared/models";
 
 export const vRepoContext = v.object({
 	owner: v.string(),
@@ -21,10 +22,12 @@ export const sendMessage = adminMutation({
 		threadId: v.optional(v.string()),
 		prompt: v.string(),
 		repoContext: v.optional(vRepoContext),
+		modelId: v.optional(vModelId),
 	},
 	returns: v.string(),
 	handler: async (ctx, args) => {
 		let threadId = args.threadId;
+		const modelId = args.modelId ?? defaultModelId;
 
 		if (!threadId) {
 			threadId = await createThread(ctx, components.agent, {});
@@ -45,6 +48,7 @@ export const sendMessage = adminMutation({
 		await ctx.scheduler.runAfter(0, internal.chat.actions.generateResponse, {
 			threadId,
 			promptMessageId: messageId,
+			modelId,
 		});
 
 		return threadId;

@@ -43,6 +43,7 @@
 		"@radix-ui/react-use-controllable-state": "^1.2.2",
 		"@tailwindcss/typography": "^0.5.19",
 		"@tanstack/react-query": "catalog:",
+		"@vercel/toolbar": "^0.1.41",
 		"@xyflow/react": "^12.10.0",
 		"ai": "catalog:",
 		"better-auth": "catalog:",

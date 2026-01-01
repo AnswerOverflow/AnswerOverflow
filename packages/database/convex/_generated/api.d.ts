@@ -75,6 +75,7 @@ import type * as shared_index from "../shared/index.js";
 import type * as shared_mentions from "../shared/mentions.js";
 import type * as shared_messagePrivacy from "../shared/messagePrivacy.js";
 import type * as shared_messages from "../shared/messages.js";
+import type * as shared_models from "../shared/models.js";
 import type * as shared_permissions from "../shared/permissions.js";
 import type * as shared_permissionsShared from "../shared/permissionsShared.js";
 import type * as shared_publicSchemas from "../shared/publicSchemas.js";
@@ -164,6 +165,7 @@ declare const fullApi: ApiFromModules<{
   "shared/mentions": typeof shared_mentions;
   "shared/messagePrivacy": typeof shared_messagePrivacy;
   "shared/messages": typeof shared_messages;
+  "shared/models": typeof shared_models;
   "shared/permissions": typeof shared_permissions;
   "shared/permissionsShared": typeof shared_permissionsShared;
   "shared/publicSchemas": typeof shared_publicSchemas;

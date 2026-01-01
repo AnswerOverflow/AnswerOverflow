@@ -97,7 +97,7 @@ export function proxy(request: NextRequest) {
 		if (match) {
 			const [, owner, repo, rest] = match;
 			url.pathname = `/chat/${owner}/${repo}${rest ?? ""}`;
-			return NextResponse.rewrite(url);
+			return NextResponse.redirect(url);
 		}
 	}
 
