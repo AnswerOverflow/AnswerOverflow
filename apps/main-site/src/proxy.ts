@@ -92,14 +92,14 @@ export function proxy(request: NextRequest) {
 		return NextResponse.next();
 	}
 
-	if (isOnMainSite(host) && isGitHubRepoUrl(pathname)) {
-		const match = pathname.match(GITHUB_OWNER_PATTERN);
-		if (match) {
-			const [, owner, repo, rest] = match;
-			url.pathname = `/chat/${owner}/${repo}${rest ?? ""}`;
-			return NextResponse.redirect(url);
-		}
-	}
+	// if (isOnMainSite(host) && isGitHubRepoUrl(pathname)) {
+	// 	const match = pathname.match(GITHUB_OWNER_PATTERN);
+	// 	if (match) {
+	// 		const [, owner, repo, rest] = match;
+	// 		url.pathname = `/chat/${owner}/${repo}${rest ?? ""}`;
+	// 		return NextResponse.redirect(url);
+	// 	}
+	// }
 
 	if (isOnMainSite(host)) {
 		return NextResponse.next();
