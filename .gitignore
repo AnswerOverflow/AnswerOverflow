@@ -56,3 +56,6 @@ next-env.d.ts
 personal-notes/
 .next-production/
 .next*
+
+# Local development context repos (cloned via `bun run setup:context`)
+.context/

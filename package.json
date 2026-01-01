@@ -3,6 +3,7 @@
 	"private": true,
 	"scripts": {
 		"i": "bun install",
+		"setup:context": "bun scripts/setup-context.ts",
 		"ci": "bun run lint && bun run typecheck && bun run test",
 		"dev": "turbo run dev",
 		"dev:with:dbs": "bun scripts/start-dbs.ts && turbo run dev",
