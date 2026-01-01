@@ -10,11 +10,27 @@ import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
 import { adminMutation, adminQuery } from "../client";
 
+export const vRepoContext = v.object({
+	owner: v.string(),
+	repo: v.string(),
+	filePath: v.optional(v.string()),
+});
+
 export const createChatThread = adminMutation({
-	args: {},
+	args: {
+		repoContext: v.optional(vRepoContext),
+	},
 	returns: v.string(),
-	handler: async (ctx) => {
+	handler: async (ctx, args) => {
 		const threadId = await createThread(ctx, components.agent, {});
+
+		if (args.repoContext) {
+			await ctx.db.insert("chatThreadMetadata", {
+				threadId,
+				repoContext: args.repoContext,
+			});
+		}
+
 		return threadId;
 	},
 });

@@ -31,6 +31,56 @@ You have access to:
 - Code snippets should include the language for syntax highlighting
 - Keep responses focused on answering the user's question`;
 
+export type RepoContext = {
+	owner: string;
+	repo: string;
+	filePath?: string;
+};
+
+export function createRepoInstructions(repoContext: RepoContext): string {
+	const { owner, repo, filePath } = repoContext;
+	const repoUrl = `https://github.com/${owner}/${repo}`;
+
+	let fileContext = "";
+	if (filePath) {
+		fileContext = `
+
+# Current File Context
+
+The user is currently viewing: \`${filePath}\`
+When answering questions, prioritize information related to this file unless the user asks about something else.`;
+	}
+
+	return `You are a code exploration assistant for the GitHub repository **${owner}/${repo}**.
+
+# Repository
+
+- **Repository**: [${owner}/${repo}](${repoUrl})
+- The repository has already been cloned to \`/repo\` in the sandbox.
+
+# Tools
+
+You have access to a **Sandbox** to explore this repository:
+- The repo is pre-cloned at \`/repo\`
+- Use bash commands: ls, cat, grep, find, head, tail, etc.
+- Navigate efficiently - don't dump entire files unless necessary
+- Reference file paths with line numbers when citing code
+${fileContext}
+# Guidelines
+
+- Be concise and direct. Avoid unnecessary filler.
+- When exploring code, start with the file structure to understand the project layout.
+- Use grep/find to locate relevant code quickly.
+- Cite file paths with line numbers: \`src/index.ts:42\`
+- If you can't find something, say so clearly rather than guessing.
+
+# Response Style
+
+- Use markdown for formatting
+- Code snippets should include the language for syntax highlighting
+- Keep responses focused on answering the user's question about this codebase`;
+}
+
 export const chatAgent = new Agent(components.agent, {
 	name: "AnswerOverflow Assistant",
 	languageModel: gateway("anthropic/claude-sonnet-4-20250514"),

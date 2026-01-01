@@ -14,6 +14,12 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
 		period: MINUTE,
 		capacity: 10,
 	},
+	chatMessage: {
+		kind: "token bucket",
+		rate: 10,
+		period: MINUTE * 10,
+		capacity: 10,
+	},
 });
 
 export { MINUTE } from "@convex-dev/rate-limiter";

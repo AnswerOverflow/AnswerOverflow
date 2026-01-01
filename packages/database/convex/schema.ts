@@ -244,6 +244,17 @@ const GitHubIssueSchema = Schema.Struct({
 	status: GitHubIssueStatusSchema,
 });
 
+const RepoContextSchema = Schema.Struct({
+	owner: Schema.String,
+	repo: Schema.String,
+	filePath: Schema.optional(Schema.String),
+});
+
+const ChatThreadMetadataSchema = Schema.Struct({
+	threadId: Schema.String,
+	repoContext: Schema.optional(RepoContextSchema),
+});
+
 export const confectSchema = defineSchema({
 	servers: defineTable(ServerSchema).index("by_discordId", ["discordId"]),
 	serverPreferences: defineTable(ServerPreferencesSchema)
@@ -313,6 +324,10 @@ export const confectSchema = defineSchema({
 		])
 		.index("by_discordMessageId", ["discordMessageId"])
 		.index("by_createdByUserId", ["createdByUserId"]),
+	chatThreadMetadata: defineTable(ChatThreadMetadataSchema).index(
+		"by_threadId",
+		["threadId"],
+	),
 });
 
 export default confectSchema.convexSchemaDefinition;

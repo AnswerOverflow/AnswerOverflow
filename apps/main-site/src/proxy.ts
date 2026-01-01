@@ -25,6 +25,43 @@ const subpathTenants = [
 	},
 ];
 
+const GITHUB_OWNER_PATTERN =
+	/^\/([a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)\/([a-zA-Z0-9._-]+)(\/.*)?$/;
+
+function isGitHubRepoUrl(pathname: string): boolean {
+	if (pathname.startsWith("/chat/")) return false;
+
+	const match = pathname.match(GITHUB_OWNER_PATTERN);
+	if (!match) return false;
+
+	const [, owner, repo] = match;
+	if (!owner || !repo) return false;
+
+	const reservedFirstSegments = [
+		"chat",
+		"dashboard",
+		"about",
+		"blog",
+		"browse",
+		"search",
+		"mcp",
+	];
+	if (reservedFirstSegments.includes(owner)) return false;
+
+	const reservedSecondSegments = [
+		"c",
+		"m",
+		"u",
+		"search",
+		"mcp",
+		"robots.txt",
+		"sitemap.xml",
+	];
+	if (reservedSecondSegments.includes(repo)) return false;
+
+	return true;
+}
+
 export function proxy(request: NextRequest) {
 	const url = request.nextUrl;
 	const pathname = url.pathname;
@@ -53,6 +90,15 @@ export function proxy(request: NextRequest) {
 
 	if (pathname.startsWith("/og")) {
 		return NextResponse.next();
+	}
+
+	if (isOnMainSite(host) && isGitHubRepoUrl(pathname)) {
+		const match = pathname.match(GITHUB_OWNER_PATTERN);
+		if (match) {
+			const [, owner, repo, rest] = match;
+			url.pathname = `/chat/${owner}/${repo}${rest ?? ""}`;
+			return NextResponse.rewrite(url);
+		}
 	}
 
 	if (isOnMainSite(host)) {
