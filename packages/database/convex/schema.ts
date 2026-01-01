@@ -252,7 +252,7 @@ const RepoContextSchema = Schema.Struct({
 
 const ChatThreadMetadataSchema = Schema.Struct({
 	threadId: Schema.String,
-	repoContext: Schema.optional(RepoContextSchema),
+	repos: Schema.Array(RepoContextSchema).pipe(Schema.mutable),
 });
 
 export const confectSchema = defineSchema({

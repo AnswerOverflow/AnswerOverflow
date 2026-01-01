@@ -33,10 +33,12 @@ export const generateResponse = internalAction({
 			},
 		});
 
-		if (threadMetadata?.repoContext) {
-			const { owner, repo } = threadMetadata.repoContext;
+		const repos = threadMetadata?.repos ?? [];
+		for (const repo of repos) {
+			const clonePath =
+				repos.length === 1 ? "/repo" : `/repos/${repo.owner}/${repo.repo}`;
 			await virtualBash.exec(
-				`git clone https://github.com/${owner}/${repo} /repo`,
+				`git clone https://github.com/${repo.owner}/${repo.repo} ${clonePath}`,
 			);
 		}
 
@@ -45,9 +47,8 @@ export const generateResponse = internalAction({
 		try {
 			const mcpTools = await mcpClient.tools();
 
-			const systemOverride = threadMetadata?.repoContext
-				? createRepoInstructions(threadMetadata.repoContext)
-				: undefined;
+			const systemOverride =
+				repos.length > 0 ? createRepoInstructions(repos) : undefined;
 
 			await chatAgent.streamText(
 				ctx,

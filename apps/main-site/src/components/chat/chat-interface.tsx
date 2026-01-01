@@ -2,7 +2,6 @@
 
 import { useUIMessages, useSmoothText } from "@packages/agent/react";
 import type { UIMessage } from "@packages/agent/react";
-import { Button } from "@packages/ui/components/button";
 import {
 	Conversation,
 	ConversationContent,
@@ -46,7 +45,7 @@ import {
 import { useStickToBottom } from "use-stick-to-bottom";
 import { RepoDisplay } from "./repo-display";
 
-export type GitHubRepoContext = {
+export type GitHubRepo = {
 	owner: string;
 	repo: string;
 	filePath?: string;
@@ -143,10 +142,11 @@ function MessageParts({
 }
 
 type ChatInterfaceProps = {
-	repoContext?: GitHubRepoContext;
+	repos?: GitHubRepo[];
 };
 
-export function ChatInterface({ repoContext }: ChatInterfaceProps) {
+export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
+	const primaryRepo = repos[0];
 	const [threadId, setThreadId] = useState<string | null>(null);
 	const [input, setInput] = useState("");
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -171,45 +171,52 @@ export function ChatInterface({ repoContext }: ChatInterfaceProps) {
 		{ initialNumItems: 50, stream: true },
 	);
 
-	const handleCreateThread = useCallback(async () => {
-		const newThreadId = await createThread({
-			repoContext: repoContext
-				? {
-						owner: repoContext.owner,
-						repo: repoContext.repo,
-						filePath: repoContext.filePath,
-					}
-				: undefined,
-		});
-		setThreadId(newThreadId);
-	}, [createThread, repoContext]);
-
 	const handleSubmit = useCallback(
 		async (message: PromptInputMessage) => {
-			if (!threadId) return;
 			const text = message.text?.trim();
 			if (!text) return;
 
 			setInput("");
-			await sendMessage({ threadId, prompt: text });
+
+			let currentThreadId = threadId;
+			if (!currentThreadId) {
+				currentThreadId = await createThread({
+					repoContext: primaryRepo
+						? {
+								owner: primaryRepo.owner,
+								repo: primaryRepo.repo,
+								filePath: primaryRepo.filePath,
+							}
+						: undefined,
+				});
+				setThreadId(currentThreadId);
+			}
+
+			await sendMessage({ threadId: currentThreadId, prompt: text });
 		},
-		[threadId, sendMessage],
+		[threadId, createThread, primaryRepo, sendMessage],
 	);
 
 	const isLoading = status === "LoadingFirstPage";
 	const hasMessages = messages.length > 0;
 	const lastMessageId = messages.at(-1)?.id;
 
-	const title = repoContext
-		? `Chat with ${repoContext.owner}/${repoContext.repo}`
+	const title = primaryRepo
+		? repos.length === 1
+			? `Chat with ${primaryRepo.owner}/${primaryRepo.repo}`
+			: `Chat with ${repos.length} repositories`
 		: "Agent Chat";
 
-	const description = repoContext
-		? `Ask questions about the ${repoContext.owner}/${repoContext.repo} codebase`
+	const description = primaryRepo
+		? repos.length === 1
+			? `Ask questions about the ${primaryRepo.owner}/${primaryRepo.repo} codebase`
+			: `Ask questions about ${repos.length} codebases`
 		: "Test the Convex Agent with streaming, tool calls, and MCP integration.";
 
-	const placeholder = repoContext
-		? `Ask about ${repoContext.owner}/${repoContext.repo}...`
+	const placeholder = primaryRepo
+		? repos.length === 1
+			? `Ask about ${primaryRepo.owner}/${primaryRepo.repo}...`
+			: "Ask about the codebases..."
 		: "Send a message...";
 
 	return (
@@ -218,8 +225,8 @@ export function ChatInterface({ repoContext }: ChatInterfaceProps) {
 				ref={setScrollRef}
 				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
 			>
-				{!threadId ? (
-					<div className="max-w-4xl mx-auto w-full flex flex-col flex-1 px-4 sm:px-6 pt-12 pb-4">
+				<div className="max-w-4xl mx-auto w-full flex flex-col flex-1 px-4 sm:px-6 pt-6 pb-4">
+					{!threadId ? (
 						<div className="flex flex-1 flex-col items-center justify-center gap-6">
 							<div className="flex flex-col items-center gap-4 text-center">
 								<div className="flex size-16 items-center justify-center rounded-full bg-muted">
@@ -228,20 +235,15 @@ export function ChatInterface({ repoContext }: ChatInterfaceProps) {
 								<div className="space-y-2">
 									<h1 className="text-2xl font-semibold">{title}</h1>
 									<p className="text-muted-foreground">{description}</p>
-									{!repoContext && (
+									{repos.length === 0 && (
 										<p className="text-sm text-muted-foreground">
 											Try: "What time is it?" or "Roll 2d20"
 										</p>
 									)}
 								</div>
-								<Button onClick={handleCreateThread} size="lg">
-									Start Chat
-								</Button>
 							</div>
 						</div>
-					</div>
-				) : (
-					<div className="max-w-4xl mx-auto w-full flex flex-col flex-1 px-4 sm:px-6 pt-6 pb-4">
+					) : (
 						<Conversation instance={stickToBottomInstance}>
 							<ConversationContent>
 								{isLoading ? (
@@ -265,8 +267,8 @@ export function ChatInterface({ repoContext }: ChatInterfaceProps) {
 							</ConversationContent>
 							<ConversationScrollButton />
 						</Conversation>
-					</div>
-				)}
+					)}
+				</div>
 			</div>
 
 			<div className="sticky bottom-0 z-10 bg-background border-t">
@@ -274,7 +276,9 @@ export function ChatInterface({ repoContext }: ChatInterfaceProps) {
 					<div className="w-full px-2 sm:px-4 max-w-4xl mx-auto">
 						<PromptInput onSubmit={handleSubmit}>
 							<PromptInputBody>
-								{repoContext && <RepoDisplay repoContext={repoContext} />}
+								{repos.map((repo) => (
+									<RepoDisplay key={`${repo.owner}/${repo.repo}`} repo={repo} />
+								))}
 								<PromptInputTextarea
 									value={input}
 									onChange={(e) => setInput(e.target.value)}

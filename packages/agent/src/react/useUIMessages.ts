@@ -32,7 +32,7 @@ export type UIMessageLike = {
 	stepOrder: number;
 	status: UIStatus;
 	parts: UIMessage["parts"];
-	role: UIMessage["role"];
+	role: "user" | "assistant" | "system";
 };
 
 export type UIMessagesQuery<
@@ -170,6 +170,7 @@ export function dedupeMessages<
 		order: number;
 		stepOrder: number;
 		status: UIStatus;
+		role: "user" | "assistant" | "system";
 	},
 >(messages: M[], streamMessages: M[]): M[] {
 	return sorted(messages.concat(streamMessages)).reduce((msgs, msg) => {
@@ -177,18 +178,20 @@ export function dedupeMessages<
 		if (!last) {
 			return [msg];
 		}
-		if (last.order !== msg.order || last.stepOrder !== msg.stepOrder) {
+		const isSameMessage =
+			last.order === msg.order &&
+			(last.role === "assistant" && msg.role === "assistant"
+				? true
+				: last.stepOrder === msg.stepOrder);
+		if (!isSameMessage) {
 			return [...msgs, msg];
 		}
 		if (
 			(last.status === "pending" || last.status === "streaming") &&
 			msg.status !== "pending"
 		) {
-			// Let's prefer a streaming or finalized message over a pending
-			// one.
 			return [...msgs.slice(0, -1), msg];
 		}
-		// skip the new one if the previous one (listed) was finalized
 		return msgs;
 	}, [] as M[]);
 }

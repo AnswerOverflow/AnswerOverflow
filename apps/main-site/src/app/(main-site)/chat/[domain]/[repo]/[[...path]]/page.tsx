@@ -2,7 +2,7 @@
 
 import {
 	ChatInterface,
-	type GitHubRepoContext,
+	type GitHubRepo,
 } from "@/components/chat/chat-interface";
 import { useParams } from "next/navigation";
 
@@ -13,11 +13,11 @@ export default function RepoChatPage() {
 		path?: string[];
 	}>();
 
-	const repoContext: GitHubRepoContext = {
+	const repo: GitHubRepo = {
 		owner: params.domain,
 		repo: params.repo,
 		filePath: params.path?.join("/"),
 	};
 
-	return <ChatInterface repoContext={repoContext} />;
+	return <ChatInterface repos={[repo]} />;
 }

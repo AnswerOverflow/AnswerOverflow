@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import type { GitHubRepoContext } from "./chat-interface";
+import type { GitHubRepo } from "./chat-interface";
 
 type RepoDisplayProps = {
-	repoContext: GitHubRepoContext;
+	repo: GitHubRepo;
 };
 
-export function RepoDisplay({ repoContext }: RepoDisplayProps) {
-	const { owner, repo } = repoContext;
+export function RepoDisplay({ repo }: RepoDisplayProps) {
+	const { owner, repo: repoName } = repo;
 	const avatarUrl = `https://github.com/${owner}.png?size=40`;
 
 	return (
@@ -23,7 +23,7 @@ export function RepoDisplay({ repoContext }: RepoDisplayProps) {
 			/>
 			<span className="font-medium text-foreground">{owner}</span>
 			<span className="text-muted-foreground">/</span>
-			<span className="font-medium text-foreground">{repo}</span>
+			<span className="font-medium text-foreground">{repoName}</span>
 		</div>
 	);
 }

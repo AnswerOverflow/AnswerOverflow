@@ -17,7 +17,7 @@ export const getThreadMetadata = internalQuery({
 
 		return {
 			threadId: metadata.threadId,
-			repoContext: metadata.repoContext,
+			repos: metadata.repos,
 		};
 	},
 });

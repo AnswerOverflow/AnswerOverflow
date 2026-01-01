@@ -27,7 +27,7 @@ export const createChatThread = adminMutation({
 		if (args.repoContext) {
 			await ctx.db.insert("chatThreadMetadata", {
 				threadId,
-				repoContext: args.repoContext,
+				repos: [args.repoContext],
 			});
 		}
 
@@ -42,6 +42,37 @@ export const sendMessage = adminMutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
+		const { messageId } = await saveMessage(ctx, components.agent, {
+			threadId: args.threadId,
+			prompt: args.prompt,
+		});
+
+		await ctx.scheduler.runAfter(0, internal.chat.actions.generateResponse, {
+			threadId: args.threadId,
+			promptMessageId: messageId,
+		});
+
+		return null;
+	},
+});
+
+export const sendMessageToNewThread = adminMutation({
+	args: {
+		threadId: v.string(),
+		prompt: v.string(),
+		repoContext: v.optional(vRepoContext),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		await createThread(ctx, components.agent, { threadId: args.threadId });
+
+		if (args.repoContext) {
+			await ctx.db.insert("chatThreadMetadata", {
+				threadId: args.threadId,
+				repos: [args.repoContext],
+			});
+		}
+
 		const { messageId } = await saveMessage(ctx, components.agent, {
 			threadId: args.threadId,
 			prompt: args.prompt,
