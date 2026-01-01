@@ -16,74 +16,38 @@ export const vRepoContext = v.object({
 	filePath: v.optional(v.string()),
 });
 
-export const createChatThread = adminMutation({
+export const sendMessage = adminMutation({
 	args: {
+		threadId: v.optional(v.string()),
+		prompt: v.string(),
 		repoContext: v.optional(vRepoContext),
 	},
 	returns: v.string(),
 	handler: async (ctx, args) => {
-		const threadId = await createThread(ctx, components.agent, {});
+		let threadId = args.threadId;
 
-		if (args.repoContext) {
-			await ctx.db.insert("chatThreadMetadata", {
-				threadId,
-				repos: [args.repoContext],
-			});
+		if (!threadId) {
+			threadId = await createThread(ctx, components.agent, {});
+
+			if (args.repoContext) {
+				await ctx.db.insert("chatThreadMetadata", {
+					threadId,
+					repos: [args.repoContext],
+				});
+			}
 		}
+
+		const { messageId } = await saveMessage(ctx, components.agent, {
+			threadId,
+			prompt: args.prompt,
+		});
+
+		await ctx.scheduler.runAfter(0, internal.chat.actions.generateResponse, {
+			threadId,
+			promptMessageId: messageId,
+		});
 
 		return threadId;
-	},
-});
-
-export const sendMessage = adminMutation({
-	args: {
-		threadId: v.string(),
-		prompt: v.string(),
-	},
-	returns: v.null(),
-	handler: async (ctx, args) => {
-		const { messageId } = await saveMessage(ctx, components.agent, {
-			threadId: args.threadId,
-			prompt: args.prompt,
-		});
-
-		await ctx.scheduler.runAfter(0, internal.chat.actions.generateResponse, {
-			threadId: args.threadId,
-			promptMessageId: messageId,
-		});
-
-		return null;
-	},
-});
-
-export const sendMessageToNewThread = adminMutation({
-	args: {
-		threadId: v.string(),
-		prompt: v.string(),
-		repoContext: v.optional(vRepoContext),
-	},
-	returns: v.null(),
-	handler: async (ctx, args) => {
-		await createThread(ctx, components.agent, { threadId: args.threadId });
-
-		if (args.repoContext) {
-			await ctx.db.insert("chatThreadMetadata", {
-				threadId: args.threadId,
-				repos: [args.repoContext],
-			});
-		}
-
-		const { messageId } = await saveMessage(ctx, components.agent, {
-			threadId: args.threadId,
-			prompt: args.prompt,
-		});
-
-		await ctx.scheduler.runAfter(0, internal.chat.actions.generateResponse, {
-			threadId: args.threadId,
-			promptMessageId: messageId,
-		});
-
-		return null;
 	},
 });
 

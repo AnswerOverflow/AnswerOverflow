@@ -30,9 +30,10 @@ import {
 	ToolInput,
 	ToolOutput,
 } from "@packages/ui/components/ai-elements/tool";
-import { Loader } from "@packages/ui/components/ai-elements/loader";
+
 import { api } from "@packages/database/convex/_generated/api";
 import { useMutation } from "convex/react";
+import { optimisticallySendMessage } from "@packages/agent/react";
 import { Bot, CopyIcon, RefreshCcwIcon } from "lucide-react";
 import { memo, useRef } from "react";
 import { useCallback, useState } from "react";
@@ -67,6 +68,24 @@ const SmoothMessageResponse = memo(function SmoothMessageResponse({
 
 	return <MessageResponse>{displayText}</MessageResponse>;
 });
+
+function ThinkingIndicator() {
+	return (
+		<Message from="assistant">
+			<MessageContent>
+				<div className="flex items-center gap-1">
+					<span className="animate-[pulse_1s_ease-in-out_infinite]">.</span>
+					<span className="animate-[pulse_1s_ease-in-out_0.2s_infinite]">
+						.
+					</span>
+					<span className="animate-[pulse_1s_ease-in-out_0.4s_infinite]">
+						.
+					</span>
+				</div>
+			</MessageContent>
+		</Message>
+	);
+}
 
 function ToolPart({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
 	const toolName = getToolName(part);
@@ -162,10 +181,18 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 		}
 	};
 
-	const createThread = useMutation(api.chat.mutations.createChatThread);
-	const sendMessage = useMutation(api.chat.mutations.sendMessage);
+	const sendMessageMutation = useMutation(
+		api.chat.mutations.sendMessage,
+	).withOptimisticUpdate((store, args) => {
+		if (args.threadId) {
+			optimisticallySendMessage(api.chat.mutations.listMessages)(store, {
+				threadId: args.threadId,
+				prompt: args.prompt,
+			});
+		}
+	});
 
-	const { results: messages, status } = useUIMessages(
+	const { results: messages } = useUIMessages(
 		api.chat.mutations.listMessages,
 		threadId ? { threadId } : "skip",
 		{ initialNumItems: 50, stream: true },
@@ -178,28 +205,29 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 
 			setInput("");
 
-			let currentThreadId = threadId;
-			if (!currentThreadId) {
-				currentThreadId = await createThread({
-					repoContext: primaryRepo
-						? {
-								owner: primaryRepo.owner,
-								repo: primaryRepo.repo,
-								filePath: primaryRepo.filePath,
-							}
-						: undefined,
-				});
-				setThreadId(currentThreadId);
-			}
+			const returnedThreadId = await sendMessageMutation({
+				threadId: threadId ?? undefined,
+				prompt: text,
+				repoContext: primaryRepo
+					? {
+							owner: primaryRepo.owner,
+							repo: primaryRepo.repo,
+							filePath: primaryRepo.filePath,
+						}
+					: undefined,
+			});
 
-			await sendMessage({ threadId: currentThreadId, prompt: text });
+			if (!threadId) {
+				setThreadId(returnedThreadId);
+			}
 		},
-		[threadId, createThread, primaryRepo, sendMessage],
+		[threadId, primaryRepo, sendMessageMutation],
 	);
 
-	const isLoading = status === "LoadingFirstPage";
-	const hasMessages = messages.length > 0;
-	const lastMessageId = messages.at(-1)?.id;
+	const lastMessage = messages.at(-1);
+	const lastMessageId = lastMessage?.id;
+	const isWaitingForResponse =
+		lastMessage?.role === "user" && lastMessage?.status !== "pending";
 
 	const title = primaryRepo
 		? repos.length === 1
@@ -246,24 +274,14 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 					) : (
 						<Conversation instance={stickToBottomInstance}>
 							<ConversationContent>
-								{isLoading ? (
-									<div className="flex h-full items-center justify-center">
-										<Loader size={32} />
-									</div>
-								) : !hasMessages ? (
-									<div className="flex h-full flex-col items-center justify-center gap-3 text-center text-muted-foreground">
-										<Bot className="size-12 opacity-50" />
-										<p>Send a message to start chatting!</p>
-									</div>
-								) : (
-									messages.map((message) => (
-										<MessageParts
-											key={message.key}
-											message={message}
-											isLastMessage={message.id === lastMessageId}
-										/>
-									))
-								)}
+								{messages.map((message) => (
+									<MessageParts
+										key={message.key}
+										message={message}
+										isLastMessage={message.id === lastMessageId}
+									/>
+								))}
+								{isWaitingForResponse && <ThinkingIndicator />}
 							</ConversationContent>
 							<ConversationScrollButton />
 						</Conversation>
