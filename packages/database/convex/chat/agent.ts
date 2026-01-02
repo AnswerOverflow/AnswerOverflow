@@ -1,7 +1,7 @@
 import { Agent } from "@packages/agent";
 import { gateway } from "ai";
 import { components } from "../_generated/api";
-import { getModelById, type ModelId, defaultModelId } from "../shared/models";
+import { defaultModelId, getModelById, type ModelId } from "../shared/models";
 
 function createInstructions(modelName: string) {
 	return `You are AnswerOverflow's AI assistant, helping users find answers from Discord community discussions.

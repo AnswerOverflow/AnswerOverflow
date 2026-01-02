@@ -15,6 +15,14 @@ export const models = [
 		gatewayId: "zai/glm-4.7",
 	},
 	{
+		id: "glm-4.6",
+		name: "GLM-4.6",
+		chef: "ZAI",
+		chefSlug: "zai",
+		providers: ["cerebras", "zai"],
+		gatewayId: "zai/glm-4.6",
+	},
+	{
 		id: "minimax-m2",
 		name: "MiniMax M2",
 		chef: "MiniMax",
@@ -74,16 +82,7 @@ export const modelIds = models.map((m) => m.id) as unknown as [
 export const modelIdSet = new Set<string>(modelIds);
 export const defaultModelId: ModelId = "glm-4.7";
 
-export const vModelId = v.union(
-	v.literal("glm-4.7"),
-	v.literal("minimax-m2"),
-	v.literal("gpt-4o"),
-	v.literal("gpt-4o-mini"),
-	v.literal("claude-opus-4-20250514"),
-	v.literal("claude-sonnet-4-20250514"),
-	v.literal("gemini-2.5-flash"),
-);
-
+export const vModelId = v.string();
 export function getModelById(id: string): Model | undefined {
 	return models.find((m) => m.id === id);
 }

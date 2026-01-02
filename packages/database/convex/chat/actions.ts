@@ -5,8 +5,8 @@ import { createSandboxTool, createVirtualBash } from "@packages/ai/sandbox";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction } from "../client";
+import { defaultModelId, getModelById, vModelId } from "../shared/models";
 import { createChatAgent, createRepoInstructions } from "./agent";
-import { vModelId, defaultModelId, getModelById } from "../shared/models";
 
 export const generateResponse = internalAction({
 	args: {
@@ -68,6 +68,11 @@ export const generateResponse = internalAction({
 						...agent.options.tools,
 						...mcpTools,
 						sandbox: sandboxTool,
+					},
+					providerOptions: {
+						gateway: {
+							order: ["cerebras"],
+						},
 					},
 				},
 				{ saveStreamDeltas: true },

@@ -273,7 +273,7 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 		: "Send a message...";
 
 	return (
-		<div className="relative flex h-[calc(100dvh-var(--navbar-height))] w-full flex-col overflow-hidden">
+		<div className="flex h-[calc(100dvh-var(--navbar-height))] w-full flex-col overflow-hidden">
 			<div
 				ref={setScrollRef}
 				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
@@ -314,8 +314,8 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 				</div>
 			</div>
 
-			<div className="absolute w-full bottom-0 rounded-b-none z-10">
-				<div className="grid shrink-0 gap-2 sm:gap-4 pt-2 sm:pt-4 ">
+			<div className="shrink-0 w-full rounded-b-none z-10 bg-background">
+				<div className="grid shrink-0 gap-2 sm:gap-4 pt-2 sm:pt-4">
 					<div className="w-full px-2 sm:px-4 max-w-4xl mx-auto">
 						<PromptInput onSubmit={handleSubmit}>
 							<PromptInputBody>

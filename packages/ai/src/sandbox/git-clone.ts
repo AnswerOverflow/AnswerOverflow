@@ -1,5 +1,5 @@
-import { defineCommand } from "just-bash";
 import { createGunzip } from "node:zlib";
+import { defineCommand } from "just-bash";
 import { isBinaryFile } from "./binary-extensions";
 
 export type GitCredentialProvider = (
@@ -212,7 +212,7 @@ export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
 			let skippedBinary = 0;
 			let skippedError = 0;
 
-			const prefixPattern = new RegExp(`^${repoName}-[^/]+/`);
+			const prefixPattern = new RegExp(`^${repoName}-[^/]+/`, "i");
 
 			for (const [filePath, content] of files) {
 				const match = filePath.match(prefixPattern);
