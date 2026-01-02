@@ -1,4 +1,9 @@
+import type { GatewayModelId } from "ai";
 import { v } from "convex/values";
+
+type ModelSchema = Record<string, string | string[]> & {
+	gatewayId: GatewayModelId;
+};
 
 export const models = [
 	{
@@ -50,14 +55,14 @@ export const models = [
 		gatewayId: "anthropic/claude-sonnet-4-20250514",
 	},
 	{
-		id: "gemini-2.0-flash-exp",
-		name: "Gemini 2.0 Flash",
+		id: "gemini-2.5-flash",
+		name: "Gemini 2.5 Flash",
 		chef: "Google",
 		chefSlug: "google",
 		providers: ["google"],
-		gatewayId: "google/gemini-2.0-flash-exp",
+		gatewayId: "google/gemini-2.5-flash",
 	},
-] as const;
+] satisfies ModelSchema[];
 
 export type Model = (typeof models)[number];
 export type ModelId = Model["id"];
@@ -76,7 +81,7 @@ export const vModelId = v.union(
 	v.literal("gpt-4o-mini"),
 	v.literal("claude-opus-4-20250514"),
 	v.literal("claude-sonnet-4-20250514"),
-	v.literal("gemini-2.0-flash-exp"),
+	v.literal("gemini-2.5-flash"),
 );
 
 export function getModelById(id: string): Model | undefined {

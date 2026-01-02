@@ -7,6 +7,10 @@ export type GitCredentialProvider = (
 	repo: string,
 ) => Promise<string | null>;
 
+const MAX_DECOMPRESSED_SIZE = 500 * 1024 * 1024;
+const MAX_FILE_COUNT = 50000;
+const MAX_SINGLE_FILE_SIZE = 10 * 1024 * 1024;
+
 export interface GitCloneCommandOptions {
 	credentialProvider?: GitCredentialProvider;
 	allowedHosts?: Array<string>;
@@ -28,9 +32,22 @@ async function streamDownloadAndDecompress(
 
 	const gunzip = createGunzip();
 	const chunks: Array<Buffer> = [];
+	let totalSize = 0;
 
 	return new Promise((resolve, reject) => {
-		gunzip.on("data", (chunk) => chunks.push(chunk));
+		gunzip.on("data", (chunk) => {
+			totalSize += chunk.length;
+			if (totalSize > MAX_DECOMPRESSED_SIZE) {
+				gunzip.destroy();
+				reject(
+					new Error(
+						`Decompressed size exceeds limit of ${MAX_DECOMPRESSED_SIZE / 1024 / 1024}MB`,
+					),
+				);
+				return;
+			}
+			chunks.push(chunk);
+		});
 		gunzip.on("end", () => resolve(new Uint8Array(Buffer.concat(chunks))));
 		gunzip.on("error", reject);
 
@@ -53,6 +70,10 @@ function parseTar(data: Uint8Array): Map<string, Uint8Array> {
 	let offset = 0;
 
 	while (offset < data.length - 512) {
+		if (files.size >= MAX_FILE_COUNT) {
+			throw new Error(`File count exceeds limit of ${MAX_FILE_COUNT}`);
+		}
+
 		const header = data.slice(offset, offset + 512);
 		if (header.every((b) => b === 0)) break;
 
@@ -69,6 +90,16 @@ function parseTar(data: Uint8Array): Map<string, Uint8Array> {
 		offset += 512;
 
 		if (typeFlag === 48 || typeFlag === 0) {
+			if (size > MAX_SINGLE_FILE_SIZE) {
+				offset += Math.ceil(size / 512) * 512;
+				continue;
+			}
+
+			if (name.includes("..") || name.startsWith("/")) {
+				offset += Math.ceil(size / 512) * 512;
+				continue;
+			}
+
 			files.set(name, data.slice(offset, offset + size));
 		}
 
