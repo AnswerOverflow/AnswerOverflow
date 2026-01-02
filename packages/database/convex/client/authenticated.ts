@@ -12,6 +12,18 @@ import { createDataAccessCache } from "../shared/dataAccess";
 import { DISCORD_PERMISSIONS, hasPermission } from "../shared/shared";
 import { mutation } from "../triggers";
 
+function validateBackendAccessToken(token: string | undefined): void {
+	const expectedToken = process.env.BACKEND_ACCESS_TOKEN;
+
+	if (!expectedToken) {
+		throw new Error("BACKEND_ACCESS_TOKEN is not configured");
+	}
+
+	if (token !== expectedToken) {
+		throw new Error("Invalid BACKEND_ACCESS_TOKEN");
+	}
+}
+
 async function getDiscordAccountIdForWrapper(
 	ctx: QueryCtx | MutationCtx | ActionCtx,
 ): Promise<bigint | null> {
@@ -19,16 +31,31 @@ async function getDiscordAccountIdForWrapper(
 	return account?.accountId ?? null;
 }
 
+async function resolveDiscordAccountId(
+	ctx: QueryCtx | MutationCtx | ActionCtx,
+	args: { backendAccessToken?: string; discordAccountId?: bigint },
+): Promise<bigint> {
+	if (args.backendAccessToken && args.discordAccountId) {
+		validateBackendAccessToken(args.backendAccessToken);
+		return args.discordAccountId;
+	}
+
+	const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
+
+	if (!discordAccountId) {
+		throw new Error("Not authenticated or Discord account not linked");
+	}
+
+	return discordAccountId;
+}
+
 export const authenticatedQuery = customQuery(query, {
 	args: {
+		backendAccessToken: v.optional(v.string()),
 		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
-		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
-
-		if (!discordAccountId) {
-			throw new Error("Not authenticated or Discord account not linked");
-		}
+		const discordAccountId = await resolveDiscordAccountId(ctx, args);
 
 		const cache = createDataAccessCache(ctx);
 		return {
@@ -43,14 +70,11 @@ export const authenticatedQuery = customQuery(query, {
 
 export const authenticatedMutation = customMutation(mutation, {
 	args: {
+		backendAccessToken: v.optional(v.string()),
 		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
-		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
-
-		if (!discordAccountId) {
-			throw new Error("Not authenticated or Discord account not linked");
-		}
+		const discordAccountId = await resolveDiscordAccountId(ctx, args);
 
 		const cache = createDataAccessCache(ctx);
 		return {
@@ -65,14 +89,11 @@ export const authenticatedMutation = customMutation(mutation, {
 
 export const authenticatedAction = customAction(action, {
 	args: {
+		backendAccessToken: v.optional(v.string()),
 		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
-		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
-
-		if (!discordAccountId) {
-			throw new Error("Not authenticated or Discord account not linked");
-		}
+		const discordAccountId = await resolveDiscordAccountId(ctx, args);
 
 		return {
 			ctx,
@@ -84,24 +105,21 @@ export const authenticatedAction = customAction(action, {
 	},
 });
 
-function getBackendAccessToken(): string {
+function getBackendAccessTokenEnv(): string {
 	const token = process.env.BACKEND_ACCESS_TOKEN;
 	return token ?? "";
 }
 
 export const manageGuildAction = customAction(action, {
 	args: {
+		backendAccessToken: v.optional(v.string()),
 		discordAccountId: v.optional(v.int64()),
 		serverId: v.int64(),
 	},
 	input: async (ctx, args) => {
-		const discordAccountId = await getDiscordAccountIdForWrapper(ctx);
+		const discordAccountId = await resolveDiscordAccountId(ctx, args);
 
-		if (!discordAccountId) {
-			throw new Error("Not authenticated or Discord account not linked");
-		}
-
-		const backendAccessToken = getBackendAccessToken();
+		const backendAccessToken = getBackendAccessTokenEnv();
 
 		const settings = await ctx.runQuery(
 			api.private.user_server_settings.findUserServerSettingsById,

@@ -25,6 +25,7 @@ export type ConvexClientShared = Pick<
 
 export type WrappedUnifiedClient = Readonly<{
 	client: ConvexClientShared;
+	createAuthenticatedClient: (token: string) => ConvexClientShared;
 	use: <A>(
 		fn: (
 			client: ConvexClientShared,

@@ -3,8 +3,8 @@
 /**
  * Codegen script to extract function types from Convex API
  *
- * This script analyzes the private and public modules to determine which functions
- * are queries, mutations, or actions, and generates a runtime mapping.
+ * This script analyzes the private, public, and authenticated modules to determine
+ * which functions are queries, mutations, or actions, and generates a runtime mapping.
  */
 
 import { readdir, readFile } from "node:fs/promises";
@@ -17,6 +17,7 @@ const __dirname = dirname(__filename);
 const PACKAGE_ROOT = join(__dirname, "..");
 const PRIVATE_DIR = join(PACKAGE_ROOT, "convex/private");
 const PUBLIC_DIR = join(PACKAGE_ROOT, "convex/public");
+const AUTHENTICATED_DIR = join(PACKAGE_ROOT, "convex/authenticated");
 const OUTPUT_FILE = join(PACKAGE_ROOT, "src/generated/function-types.ts");
 
 interface FunctionInfo {
@@ -24,60 +25,78 @@ interface FunctionInfo {
 	type: "query" | "mutation" | "action";
 }
 
+type DirectoryType = "private" | "public" | "authenticated";
+
 async function extractFunctionsFromFile(
 	filePath: string,
 	namespace: string,
-	isPublic: boolean,
+	directoryType: DirectoryType,
 ): Promise<FunctionInfo[]> {
 	const content = await readFile(filePath, "utf-8");
 	const functions: FunctionInfo[] = [];
 
-	const queryPattern = isPublic ? "publicQuery" : "privateQuery";
-	const mutationPattern = isPublic ? "publicMutation" : "privateMutation";
-	const actionPattern = isPublic ? "publicAction" : "privateAction";
+	let queryPatterns: string[];
+	let mutationPatterns: string[];
+	let actionPatterns: string[];
 
-	const queryRegex = new RegExp(
-		`export\\s+(?:const|function)\\s+(\\w+)\\s*=\\s*${queryPattern}`,
-	);
-	const mutationRegex = new RegExp(
-		`export\\s+(?:const|function)\\s+(\\w+)\\s*=\\s*${mutationPattern}`,
-	);
-	const actionRegex = new RegExp(
-		`export\\s+(?:const|function)\\s+(\\w+)\\s*=\\s*${actionPattern}`,
-	);
-
-	const queryMatches = [
-		...content.matchAll(new RegExp(queryRegex.source, "g")),
-	];
-	const mutationMatches = [
-		...content.matchAll(new RegExp(mutationRegex.source, "g")),
-	];
-	const actionMatches = [
-		...content.matchAll(new RegExp(actionRegex.source, "g")),
-	];
-
-	for (const match of queryMatches) {
-		const funcName = match[1];
-		functions.push({
-			path: namespace ? `${namespace}.${funcName}` : funcName,
-			type: "query",
-		});
+	if (directoryType === "authenticated") {
+		queryPatterns = ["authenticatedQuery", "guildManagerQuery"];
+		mutationPatterns = ["authenticatedMutation", "guildManagerMutation"];
+		actionPatterns = [
+			"authenticatedAction",
+			"guildManagerAction",
+			"manageGuildAction",
+		];
+	} else if (directoryType === "public") {
+		queryPatterns = ["publicQuery"];
+		mutationPatterns = ["publicMutation"];
+		actionPatterns = ["publicAction"];
+	} else {
+		queryPatterns = ["privateQuery"];
+		mutationPatterns = ["privateMutation"];
+		actionPatterns = ["privateAction"];
 	}
 
-	for (const match of mutationMatches) {
-		const funcName = match[1];
-		functions.push({
-			path: namespace ? `${namespace}.${funcName}` : funcName,
-			type: "mutation",
-		});
+	for (const pattern of queryPatterns) {
+		const regex = new RegExp(
+			`export\\s+(?:const|function)\\s+(\\w+)\\s*=\\s*${pattern}`,
+			"g",
+		);
+		for (const match of content.matchAll(regex)) {
+			const funcName = match[1];
+			functions.push({
+				path: namespace ? `${namespace}.${funcName}` : funcName,
+				type: "query",
+			});
+		}
 	}
 
-	for (const match of actionMatches) {
-		const funcName = match[1];
-		functions.push({
-			path: namespace ? `${namespace}.${funcName}` : funcName,
-			type: "action",
-		});
+	for (const pattern of mutationPatterns) {
+		const regex = new RegExp(
+			`export\\s+(?:const|function)\\s+(\\w+)\\s*=\\s*${pattern}`,
+			"g",
+		);
+		for (const match of content.matchAll(regex)) {
+			const funcName = match[1];
+			functions.push({
+				path: namespace ? `${namespace}.${funcName}` : funcName,
+				type: "mutation",
+			});
+		}
+	}
+
+	for (const pattern of actionPatterns) {
+		const regex = new RegExp(
+			`export\\s+(?:const|function)\\s+(\\w+)\\s*=\\s*${pattern}`,
+			"g",
+		);
+		for (const match of content.matchAll(regex)) {
+			const funcName = match[1];
+			functions.push({
+				path: namespace ? `${namespace}.${funcName}` : funcName,
+				type: "action",
+			});
+		}
 	}
 
 	return functions;
@@ -85,7 +104,7 @@ async function extractFunctionsFromFile(
 
 async function scanDirectory(
 	dir: string,
-	isPublic: boolean,
+	directoryType: DirectoryType,
 	allFunctions: FunctionInfo[],
 	namespaces: Set<string>,
 	namespaceToFunctions: Map<string, FunctionInfo[]>,
@@ -107,7 +126,7 @@ async function scanDirectory(
 		const functions = await extractFunctionsFromFile(
 			filePath,
 			namespace,
-			isPublic,
+			directoryType,
 		);
 		allFunctions.push(...functions);
 
@@ -117,25 +136,39 @@ async function scanDirectory(
 }
 
 async function generateFunctionTypes(): Promise<void> {
-	const allFunctions: FunctionInfo[] = [];
-	const namespaces = new Set<string>();
+	const privateAndPublicFunctions: FunctionInfo[] = [];
+	const authenticatedFunctions: FunctionInfo[] = [];
+	const privatePublicNamespaces = new Set<string>();
+	const authenticatedNamespaces = new Set<string>();
 	const namespaceToFunctions = new Map<string, FunctionInfo[]>();
+	const authenticatedNamespaceToFunctions = new Map<string, FunctionInfo[]>();
 
 	await scanDirectory(
 		PRIVATE_DIR,
-		false,
-		allFunctions,
-		namespaces,
+		"private",
+		privateAndPublicFunctions,
+		privatePublicNamespaces,
 		namespaceToFunctions,
 	);
 	await scanDirectory(
 		PUBLIC_DIR,
-		true,
-		allFunctions,
-		namespaces,
+		"public",
+		privateAndPublicFunctions,
+		privatePublicNamespaces,
 		namespaceToFunctions,
 	);
+	await scanDirectory(
+		AUTHENTICATED_DIR,
+		"authenticated",
+		authenticatedFunctions,
+		authenticatedNamespaces,
+		authenticatedNamespaceToFunctions,
+	);
 
+	const allFunctions = [
+		...privateAndPublicFunctions,
+		...authenticatedFunctions,
+	];
 	allFunctions.sort((a, b) => a.path.localeCompare(b.path));
 
 	const uniqueFunctions = new Map<string, FunctionInfo>();
@@ -149,11 +182,32 @@ async function generateFunctionTypes(): Promise<void> {
 		.map((f) => `  "${f.path}": "${f.type}"`)
 		.join(",\n");
 
-	const namespaceArray = Array.from(namespaces).sort();
+	const privatePublicNamespaceArray = Array.from(
+		privatePublicNamespaces,
+	).sort();
+	const authenticatedNamespaceArray = Array.from(
+		authenticatedNamespaces,
+	).sort();
+	const allNamespaces = [
+		...new Set([
+			...privatePublicNamespaceArray,
+			...authenticatedNamespaceArray,
+		]),
+	].sort();
 
-	const namespaceStructureEntries = namespaceArray
+	const namespaceStructureEntries = privatePublicNamespaceArray
 		.map((ns) => {
 			const functions = namespaceToFunctions.get(ns) || [];
+			const functionNames = [
+				...new Set(functions.map((f) => f.path.split(".")[1])),
+			].sort();
+			return `  "${ns}": ${JSON.stringify(functionNames)}`;
+		})
+		.join(",\n");
+
+	const authenticatedNamespaceStructureEntries = authenticatedNamespaceArray
+		.map((ns) => {
+			const functions = authenticatedNamespaceToFunctions.get(ns) || [];
 			const functionNames = [
 				...new Set(functions.map((f) => f.path.split(".")[1])),
 			].sort();
@@ -168,10 +222,14 @@ export const FUNCTION_TYPE_MAP = {
 ${typeMapEntries}
 } as const;
 
-export const NAMESPACES = ${JSON.stringify(namespaceArray)} as const;
+export const NAMESPACES = ${JSON.stringify(allNamespaces)} as const;
 
 export const NAMESPACE_STRUCTURE = {
 ${namespaceStructureEntries}
+} as const;
+
+export const AUTHENTICATED_NAMESPACE_STRUCTURE = {
+${authenticatedNamespaceStructureEntries}
 } as const;
 
 export type FunctionPath = keyof typeof FUNCTION_TYPE_MAP;
@@ -185,14 +243,22 @@ export function isNamespace(key: string): key is keyof typeof NAMESPACE_STRUCTUR
 	return key in NAMESPACE_STRUCTURE;
 }
 
+export function isAuthenticatedNamespace(key: string): key is keyof typeof AUTHENTICATED_NAMESPACE_STRUCTURE {
+	return key in AUTHENTICATED_NAMESPACE_STRUCTURE;
+}
+
 export function getNamespaceFunctions(namespace: keyof typeof NAMESPACE_STRUCTURE): readonly string[] {
 	return NAMESPACE_STRUCTURE[namespace];
+}
+
+export function getAuthenticatedNamespaceFunctions(namespace: keyof typeof AUTHENTICATED_NAMESPACE_STRUCTURE): readonly string[] {
+	return AUTHENTICATED_NAMESPACE_STRUCTURE[namespace];
 }
 `;
 
 	await Bun.write(OUTPUT_FILE, output);
 	console.log(
-		`Generated ${allFunctions.length} function mappings and ${namespaces.size} namespaces in ${OUTPUT_FILE}`,
+		`Generated ${allFunctions.length} function mappings (${privateAndPublicFunctions.length} private/public, ${authenticatedFunctions.length} authenticated) and ${allNamespaces.length} namespaces in ${OUTPUT_FILE}`,
 	);
 }
 

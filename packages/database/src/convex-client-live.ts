@@ -49,12 +49,30 @@ const createWebSocketClient = (convexUrl: string): ConvexClientWithClose => {
 	};
 };
 
+const noopUnsubscribe = Object.assign(() => {}, {
+	unsubscribe: () => {},
+	getCurrentValue: () => undefined,
+});
+
 const createHttpClient = (convexUrl: string): ConvexClientShared => {
 	const client = new ConvexHttpClient(convexUrl);
-	const noopUnsubscribe = Object.assign(() => {}, {
-		unsubscribe: () => {},
-		getCurrentValue: () => undefined,
-	});
+	return {
+		query: client.query.bind(client),
+		mutation: <Mutation extends FunctionReference<"mutation">>(
+			mutation: Mutation,
+			args: Parameters<ConvexClient["mutation"]>[1],
+		) => client.mutation(mutation, args),
+		action: client.action.bind(client),
+		onUpdate: () => noopUnsubscribe,
+	};
+};
+
+const createAuthenticatedHttpClient = (
+	convexUrl: string,
+	token: string,
+): ConvexClientShared => {
+	const client = new ConvexHttpClient(convexUrl);
+	client.setAuth(token);
 	return {
 		query: client.query.bind(client),
 		mutation: <Mutation extends FunctionReference<"mutation">>(
@@ -70,6 +88,9 @@ const createLiveService = Effect.gen(function* () {
 	const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL!;
 	const wsClientRef = yield* Ref.make(createWebSocketClient(convexUrl));
 	const httpClient = createHttpClient(convexUrl);
+
+	const createAuthenticatedClient = (token: string): ConvexClientShared =>
+		createAuthenticatedHttpClient(convexUrl, token);
 
 	const recreateWsClient = Effect.gen(function* () {
 		const oldClient = yield* Ref.get(wsClientRef);
@@ -133,6 +154,7 @@ const createLiveService = Effect.gen(function* () {
 	return {
 		use,
 		wsClientRef,
+		createAuthenticatedClient,
 	};
 });
 
@@ -152,6 +174,7 @@ const ConvexClientLiveSharedLayer = Layer.effectContext(
 		});
 		const unifiedService: WrappedUnifiedClient = {
 			client: clientProxy,
+			createAuthenticatedClient: service.createAuthenticatedClient,
 			use: service.use,
 		};
 		return Context.make(ConvexClientLive, service).pipe(

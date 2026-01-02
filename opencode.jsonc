@@ -322,6 +322,15 @@
 			"enabled": true,
 			"command": ["npx", "-y", "playwriter"]
 		}
+		// "chrome-devtools": {
+		// 	"type": "local",
+		// 	"enabled": true,
+		// 	"command": [
+		// 		"npx",
+		// 		"-y",
+		// 		"chrome-devtools-mcp@latest"
+		// 	]
+		// }
 	},
 	"tools": {
 		"posthog_*": false,

@@ -28,7 +28,11 @@ import { ConvexClientUnified, ConvexError } from "./convex-unified-client";
 
 export { ConvexError } from "./convex-unified-client";
 
-import { FUNCTION_TYPE_MAP, isNamespace } from "./generated/function-types";
+import {
+	FUNCTION_TYPE_MAP,
+	isAuthenticatedNamespace,
+	isNamespace,
+} from "./generated/function-types";
 import type { LiveData } from "./live-data";
 import { createWatchQueryToLiveData } from "./watch-query-cached";
 
@@ -47,6 +51,21 @@ type IsEmptyArgs<Args> = Omit<Args, InternalArgs> extends Record<string, never>
 type QueryOptions = {
 	subscribe?: boolean;
 };
+
+export type DiscordBotAuth = {
+	discordAccountId: bigint;
+	token?: never;
+};
+
+export type TokenAuth = {
+	token: string;
+	discordAccountId?: never;
+};
+
+export type AuthenticatedQueryOptions = QueryOptions &
+	(DiscordBotAuth | TokenAuth);
+
+export type AuthenticatedMutationOptions = DiscordBotAuth | TokenAuth;
 
 type QueryReturnType<
 	Ref extends FunctionReference<"query", any>,
@@ -76,11 +95,41 @@ type FunctionRefToFunction<Ref extends FunctionReference<any, any>> =
 					args: OmitInternalArgs<FunctionArgs<Ref>>,
 				) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>;
 
+type AuthenticatedFunctionRefToFunction<
+	Ref extends FunctionReference<any, any>,
+> = Ref extends FunctionReference<"query", any>
+	? IsEmptyArgs<FunctionArgs<Ref>> extends true
+		? <Opts extends AuthenticatedQueryOptions>(
+				args: OmitInternalArgs<FunctionArgs<Ref>> | Record<string, never>,
+				options: Opts,
+			) => Effect.Effect<QueryReturnType<Ref, Opts>, ConvexError>
+		: <Opts extends AuthenticatedQueryOptions>(
+				args: OmitInternalArgs<FunctionArgs<Ref>>,
+				options: Opts,
+			) => Effect.Effect<QueryReturnType<Ref, Opts>, ConvexError>
+	: IsEmptyArgs<FunctionArgs<Ref>> extends true
+		? (
+				args: OmitInternalArgs<FunctionArgs<Ref>> | Record<string, never>,
+				options: AuthenticatedMutationOptions,
+			) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>
+		: (
+				args: OmitInternalArgs<FunctionArgs<Ref>>,
+				options: AuthenticatedMutationOptions,
+			) => Effect.Effect<FunctionReturnType<Ref>, ConvexError>;
+
 type TransformToFunctions<T> = {
 	[K in keyof T]: T[K] extends FunctionReference<any, any>
 		? FunctionRefToFunction<T[K]>
 		: T[K] extends Record<string, any>
 			? TransformToFunctions<T[K]>
+			: T[K];
+};
+
+type TransformToAuthenticatedFunctions<T> = {
+	[K in keyof T]: T[K] extends FunctionReference<any, any>
+		? AuthenticatedFunctionRefToFunction<T[K]>
+		: T[K] extends Record<string, any>
+			? TransformToAuthenticatedFunctions<T[K]>
 			: T[K];
 };
 
@@ -313,7 +362,133 @@ export const service = Effect.gen(function* () {
 
 	const privateProxy = createProxy(api.private, [], false);
 	const publicProxy = createProxy(api.public, [], true);
-	const authenticatedProxy = createProxy(api.authenticated, [], false);
+
+	const createAuthenticatedProxy = <T extends Record<string, any>>(
+		target: T,
+		namespacePath: string[],
+	): TransformToAuthenticatedFunctions<T> => {
+		return new Proxy(target, {
+			get(innerTarget, prop: string | symbol) {
+				if (
+					typeof prop !== "string" ||
+					prop.startsWith("_") ||
+					prop === "constructor"
+				) {
+					return Reflect.get(innerTarget, prop);
+				}
+
+				const value = Reflect.get(innerTarget, prop);
+				if (value === undefined) {
+					return undefined;
+				}
+
+				if (isAuthenticatedNamespace(prop)) {
+					return createAuthenticatedProxy(value, [
+						...namespacePath,
+						prop,
+					]) as TransformToAuthenticatedFunctions<T>[typeof prop];
+				}
+
+				const functionPath = buildFunctionPath(namespacePath, prop);
+				const funcType =
+					FUNCTION_TYPE_MAP[functionPath as keyof typeof FUNCTION_TYPE_MAP];
+
+				if (!funcType) {
+					throw new Error(
+						`Function ${functionPath} not found in FUNCTION_TYPE_MAP. Run codegen to update.`,
+					);
+				}
+
+				const funcRef = value as FunctionReference<any, any>;
+
+				if (funcType === "query") {
+					const wrappedFunction = ((
+						args?: any,
+						options: AuthenticatedQueryOptions = { subscribe: true },
+					) => {
+						const { subscribe, discordAccountId, token } = options;
+
+						let client: { query: any; mutation: any; action: any };
+						let fullArgs: Record<string, unknown>;
+
+						if (discordAccountId !== undefined) {
+							client = convexClient.client;
+							fullArgs = {
+								...(args ?? {}),
+								backendAccessToken,
+								discordAccountId,
+							};
+						} else if (token !== undefined) {
+							client = convexClient.createAuthenticatedClient(token);
+							fullArgs = { ...(args ?? {}) };
+						} else {
+							throw new Error(
+								"Must provide either discordAccountId or token for authenticated calls",
+							);
+						}
+
+						const cacheKey = createQueryCacheKey(
+							getFunctionName(funcRef),
+							fullArgs,
+						);
+
+						if (subscribe === true) {
+							return Effect.gen(function* () {
+								const getQuery = () => funcRef;
+								const liveData = yield* watchQueryToLiveData(
+									getQuery,
+									fullArgs,
+								);
+								return liveData?.data;
+							});
+						}
+
+						return callClientMethod("query", funcRef, client, fullArgs);
+					}) as TransformToAuthenticatedFunctions<T>[typeof prop];
+
+					return wrappedFunction;
+				}
+
+				const wrappedFunction = ((
+					args?: any,
+					options: AuthenticatedMutationOptions = {},
+				) => {
+					const { discordAccountId, token } = options;
+
+					let client: { query: any; mutation: any; action: any };
+					let fullArgs: Record<string, unknown>;
+
+					if (discordAccountId !== undefined) {
+						client = convexClient.client;
+						fullArgs = {
+							...(args ?? {}),
+							backendAccessToken,
+							discordAccountId,
+						};
+					} else if (token !== undefined) {
+						client = convexClient.createAuthenticatedClient(token);
+						fullArgs = { ...(args ?? {}) };
+					} else {
+						throw new Error(
+							"Must provide either discordAccountId or token for authenticated calls",
+						);
+					}
+
+					return callClientMethod(funcType, funcRef, client, fullArgs);
+				}) as TransformToAuthenticatedFunctions<T>[typeof prop];
+
+				return wrappedFunction;
+			},
+			ownKeys(innerTarget) {
+				return Reflect.ownKeys(innerTarget);
+			},
+			getOwnPropertyDescriptor(innerTarget, prop) {
+				return Reflect.getOwnPropertyDescriptor(innerTarget, prop);
+			},
+		}) as TransformToAuthenticatedFunctions<T>;
+	};
+
+	const authenticatedProxy = createAuthenticatedProxy(api.authenticated, []);
 
 	const getQueryMetricsByKey = (cacheKey: string) => {
 		const state = Ref.get(metricsRef).pipe(Effect.runSync);

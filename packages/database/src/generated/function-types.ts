@@ -19,6 +19,22 @@ export const FUNCTION_TYPE_MAP = {
   "channels.getServerPageThreads": "query",
   "channels.updateChannelSettings": "mutation",
   "channels.upsertChannel": "mutation",
+  "dashboard_mutations.generateBotCustomizationUploadUrl": "mutation",
+  "dashboard_mutations.updateBotCustomization": "mutation",
+  "dashboard_mutations.updateChannelSettingsFlags": "mutation",
+  "dashboard_mutations.updateChannelSolutionTag": "mutation",
+  "dashboard_mutations.updateCustomDomain": "mutation",
+  "dashboard_mutations.updateServerPreferencesFlags": "mutation",
+  "dashboard_queries.getDashboardData": "query",
+  "dashboard_queries.getIndexedMessageCount": "query",
+  "dashboard_queries.getUserServersForDropdown": "query",
+  "dashboard.getPageViewsForServer": "action",
+  "dashboard.getQuestionsAndAnswers": "action",
+  "dashboard.getServerInvitesClicked": "action",
+  "dashboard.getTopPagesForServer": "action",
+  "dashboard.getTopQuestionSolversForServer": "action",
+  "dashboard.getUserServers": "action",
+  "dashboard.trackBotAddClick": "action",
   "discord_accounts.deleteDiscordAccount": "mutation",
   "discord_accounts.findManyDiscordAccountsByIds": "query",
   "discord_accounts.getUserPageHeaderData": "query",
@@ -26,7 +42,9 @@ export const FUNCTION_TYPE_MAP = {
   "discord_accounts.upsertDiscordAccount": "mutation",
   "discord_accounts.upsertManyDiscordAccounts": "mutation",
   "github.createGitHubIssueFromDiscord": "action",
+  "github.getAccessibleRepos": "action",
   "github.getAccessibleReposByDiscordId": "action",
+  "github.getGitHubAccount": "query",
   "github.getGitHubIssueByRepoAndNumber": "query",
   "github.updateGitHubIssueStatus": "mutation",
   "ignored_discord_accounts.deleteIgnoredDiscordAccount": "mutation",
@@ -43,6 +61,8 @@ export const FUNCTION_TYPE_MAP = {
   "messages.updateEmbedStorageId": "mutation",
   "messages.upsertManyMessages": "mutation",
   "messages.upsertMessage": "mutation",
+  "onboarding_action.getRecommendedConfiguration": "action",
+  "onboarding.applyRecommendedConfiguration": "mutation",
   "search.getCachedSimilarThreads": "action",
   "search.getRecentAnnouncements": "query",
   "search.getRecentThreads": "query",
@@ -68,6 +88,12 @@ export const FUNCTION_TYPE_MAP = {
   "servers.upsertServer": "mutation",
   "sitemap.collectThreadsForServer": "action",
   "sitemap.getServersForSitemap": "action",
+  "stripe.createBillingPortalSession": "action",
+  "stripe.createCheckoutSession": "action",
+  "stripe.getSubscriptionInfo": "action",
+  "stripe.syncAfterCheckout": "action",
+  "threads_action.generateThreadSummary": "action",
+  "threads.getThreadsForServer": "query",
   "threadTags.getTagsForThread": "query",
   "threadTags.getTagsForThreads": "query",
   "threadTags.getThreadIdsByTags": "query",
@@ -76,10 +102,12 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.findUserServerSettingsById": "query",
   "user_server_settings.upsertManyBotUserServerSettings": "mutation",
   "user_server_settings.upsertManyUserServerSettings": "mutation",
-  "user_server_settings.upsertUserServerSettings": "mutation"
+  "user_server_settings.upsertUserServerSettings": "mutation",
+  "vercel_domains.addDomain": "action",
+  "vercel_domains.getDomainStatus": "action"
 } as const;
 
-export const NAMESPACES = ["attachments","cache","channels","counts","discord_accounts","github","ignored_discord_accounts","messages","search","server_preferences","servers","sitemap","threadTags","user_server_settings"] as const;
+export const NAMESPACES = ["admin","attachments","cache","channels","counts","dashboard","dashboard_mutations","dashboard_queries","discord_accounts","discord_token","github","ignored_discord_accounts","messages","onboarding","onboarding_action","search","server_preferences","servers","sitemap","stripe","stripe_actions","threadTags","threads","threads_action","user_server_settings","vercel_domains"] as const;
 
 export const NAMESPACE_STRUCTURE = {
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
@@ -98,6 +126,22 @@ export const NAMESPACE_STRUCTURE = {
   "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
 } as const;
 
+export const AUTHENTICATED_NAMESPACE_STRUCTURE = {
+  "admin": [],
+  "dashboard": ["getPageViewsForServer","getQuestionsAndAnswers","getServerInvitesClicked","getTopPagesForServer","getTopQuestionSolversForServer","getUserServers","trackBotAddClick"],
+  "dashboard_mutations": ["generateBotCustomizationUploadUrl","updateBotCustomization","updateChannelSettingsFlags","updateChannelSolutionTag","updateCustomDomain","updateServerPreferencesFlags"],
+  "dashboard_queries": ["getDashboardData","getIndexedMessageCount","getUserServersForDropdown"],
+  "discord_token": [],
+  "github": ["getAccessibleRepos","getGitHubAccount"],
+  "onboarding": ["applyRecommendedConfiguration"],
+  "onboarding_action": ["getRecommendedConfiguration"],
+  "stripe": ["createBillingPortalSession","createCheckoutSession","getSubscriptionInfo","syncAfterCheckout"],
+  "stripe_actions": [],
+  "threads": ["getThreadsForServer"],
+  "threads_action": ["generateThreadSummary"],
+  "vercel_domains": ["addDomain","getDomainStatus"]
+} as const;
+
 export type FunctionPath = keyof typeof FUNCTION_TYPE_MAP;
 export type FunctionType = typeof FUNCTION_TYPE_MAP[FunctionPath];
 
@@ -109,6 +153,14 @@ export function isNamespace(key: string): key is keyof typeof NAMESPACE_STRUCTUR
 	return key in NAMESPACE_STRUCTURE;
 }
 
+export function isAuthenticatedNamespace(key: string): key is keyof typeof AUTHENTICATED_NAMESPACE_STRUCTURE {
+	return key in AUTHENTICATED_NAMESPACE_STRUCTURE;
+}
+
 export function getNamespaceFunctions(namespace: keyof typeof NAMESPACE_STRUCTURE): readonly string[] {
 	return NAMESPACE_STRUCTURE[namespace];
+}
+
+export function getAuthenticatedNamespaceFunctions(namespace: keyof typeof AUTHENTICATED_NAMESPACE_STRUCTURE): readonly string[] {
+	return AUTHENTICATED_NAMESPACE_STRUCTURE[namespace];
 }

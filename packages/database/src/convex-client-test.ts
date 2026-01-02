@@ -138,9 +138,13 @@ const createTestService = Effect.gen(function* () {
 		) as Effect.Effect<Awaited<A>, ConvexError>;
 	};
 
+	const createAuthenticatedClient = (_token: string): ConvexClientShared =>
+		adaptedClient;
+
 	return {
 		use,
 		client: adaptedClient,
+		createAuthenticatedClient,
 		getQueryCallCount: testClient.getQueryCallCount,
 		resetQueryCallCounts: testClient.resetQueryCallCounts,
 	};
@@ -156,6 +160,7 @@ const ConvexClientTestSharedLayer = Layer.effectContext(
 		const service = yield* createTestService;
 		const unifiedService: WrappedUnifiedClient = {
 			client: service.client,
+			createAuthenticatedClient: service.createAuthenticatedClient,
 			use: service.use,
 		};
 		return Context.make(ConvexClientTest, service).pipe(
