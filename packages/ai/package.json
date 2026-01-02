@@ -17,13 +17,13 @@
 		"test:sandbox": "bun run --silent with-env bun run scripts/test-sandbox.ts",
 		"test:sandbox:security": "bun run --silent with-env bun run scripts/stress-test-sandbox.ts",
 		"test:sdk:basic": "bun run --silent with-env bun run scripts/test-sdk-basic.ts",
-		"test:sdk:events": "bun run --silent with-env bun run scripts/test-sdk-events.ts"
+		"test:sdk:events": "bun run --silent with-env bun run scripts/test-sdk-events.ts",
+		"test:clone": "bun run scripts/test-clone.ts"
 	},
 	"dependencies": {
+		"@opencode-ai/sdk": "^1.0.219",
 		"ai": "catalog:",
 		"just-bash": "^1.2.5",
-		"@opencode-ai/sdk": "^1.0.219",
-		"isomorphic-git": "^1.36.1",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

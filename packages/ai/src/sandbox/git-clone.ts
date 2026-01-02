@@ -1,6 +1,5 @@
 import { defineCommand } from "just-bash";
-import git from "isomorphic-git";
-import http from "isomorphic-git/http/web";
+import { createGunzip } from "node:zlib";
 import { isBinaryFile } from "./binary-extensions";
 
 export type GitCredentialProvider = (
@@ -13,137 +12,70 @@ export interface GitCloneCommandOptions {
 	allowedHosts?: Array<string>;
 }
 
-interface JustBashFS {
-	readFile(
-		path: string,
-		options?: { encoding?: string } | string,
-	): Promise<string>;
-	readFileBuffer(path: string): Promise<Uint8Array>;
-	writeFile(
-		path: string,
-		content: string | Uint8Array,
-		options?: { encoding?: string } | string,
-	): Promise<void>;
-	exists(path: string): Promise<boolean>;
-	stat(path: string): Promise<{
-		isFile: boolean;
-		isDirectory: boolean;
-		isSymbolicLink: boolean;
-		mode: number;
-		size: number;
-		mtime: Date;
-	}>;
-	lstat(path: string): Promise<{
-		isFile: boolean;
-		isDirectory: boolean;
-		isSymbolicLink: boolean;
-		mode: number;
-		size: number;
-		mtime: Date;
-	}>;
-	mkdir(path: string, options?: { recursive?: boolean }): Promise<void>;
-	readdir(path: string): Promise<Array<string>>;
-	rm(
-		path: string,
-		options?: { recursive?: boolean; force?: boolean },
-	): Promise<void>;
-	chmod(path: string, mode: number): Promise<void>;
-	symlink(target: string, linkPath: string): Promise<void>;
-	readlink(path: string): Promise<string>;
+async function streamDownloadAndDecompress(
+	url: string,
+	token: string | null,
+): Promise<Uint8Array> {
+	const headers: Record<string, string> = {};
+	if (token) {
+		headers["Authorization"] = `token ${token}`;
+	}
+
+	const response = await fetch(url, { headers });
+	if (!response.ok) {
+		throw new Error(`Failed to fetch archive: ${response.status}`);
+	}
+
+	const gunzip = createGunzip();
+	const chunks: Array<Buffer> = [];
+
+	return new Promise((resolve, reject) => {
+		gunzip.on("data", (chunk) => chunks.push(chunk));
+		gunzip.on("end", () => resolve(new Uint8Array(Buffer.concat(chunks))));
+		gunzip.on("error", reject);
+
+		const reader = response.body!.getReader();
+		(async () => {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) {
+					gunzip.end();
+					break;
+				}
+				gunzip.write(value);
+			}
+		})().catch(reject);
+	});
 }
 
-function createIsomorphicFSAdapter(bashFs: JustBashFS) {
-	return {
-		promises: {
-			readFile: async (
-				path: string,
-				options?: { encoding?: string } | string,
-			) => {
-				const encoding =
-					typeof options === "string" ? options : options?.encoding;
-				if (encoding === "utf8" || encoding === "utf-8") {
-					return bashFs.readFile(path, { encoding: "utf8" });
-				}
-				return bashFs.readFileBuffer(path);
-			},
-			writeFile: async (
-				path: string,
-				data: string | Uint8Array,
-				options?: { encoding?: string } | string,
-			) => {
-				await bashFs.writeFile(path, data, options);
-			},
-			mkdir: async (path: string, options?: { recursive?: boolean }) => {
-				await bashFs.mkdir(path, options);
-			},
-			rmdir: async (path: string) => {
-				try {
-					await bashFs.rm(path, { recursive: true });
-				} catch {
-					// Ignore errors - directory may not exist
-				}
-			},
-			unlink: async (path: string) => {
-				try {
-					await bashFs.rm(path);
-				} catch {
-					// Ignore errors - file may not exist
-				}
-			},
-			stat: async (path: string) => {
-				const exists = await bashFs.exists(path);
-				if (!exists) {
-					const err = new Error(
-						`ENOENT: no such file or directory, stat '${path}'`,
-					);
-					(err as NodeJS.ErrnoException).code = "ENOENT";
-					throw err;
-				}
-				const s = await bashFs.stat(path);
-				return {
-					isFile: () => s.isFile,
-					isDirectory: () => s.isDirectory,
-					isSymbolicLink: () => s.isSymbolicLink,
-					mode: s.mode,
-					size: s.size,
-					mtimeMs: s.mtime.getTime(),
-					type: s.isFile ? "file" : s.isDirectory ? "dir" : "unknown",
-				};
-			},
-			lstat: async (path: string) => {
-				const exists = await bashFs.exists(path);
-				if (!exists) {
-					const err = new Error(
-						`ENOENT: no such file or directory, lstat '${path}'`,
-					);
-					(err as NodeJS.ErrnoException).code = "ENOENT";
-					throw err;
-				}
-				const s = await bashFs.lstat(path);
-				return {
-					isFile: () => s.isFile,
-					isDirectory: () => s.isDirectory,
-					isSymbolicLink: () => s.isSymbolicLink,
-					mode: s.mode,
-					size: s.size,
-					mtimeMs: s.mtime.getTime(),
-					type: s.isFile ? "file" : s.isDirectory ? "dir" : "unknown",
-				};
-			},
-			readdir: async (path: string) => {
-				return bashFs.readdir(path);
-			},
-			readlink: async (path: string) => {
-				return bashFs.readlink(path);
-			},
-			symlink: async (target: string, path: string) => {
-				await bashFs.symlink(target, path);
-			},
-			chmod: async (path: string, mode: number) => {
-				await bashFs.chmod(path, mode);
-			},
-		},
-	};
+function parseTar(data: Uint8Array): Map<string, Uint8Array> {
+	const files = new Map<string, Uint8Array>();
+	let offset = 0;
+
+	while (offset < data.length - 512) {
+		const header = data.slice(offset, offset + 512);
+		if (header.every((b) => b === 0)) break;
+
+		const nameBytes = header.slice(0, 100);
+		const nullIdx = nameBytes.indexOf(0);
+		const name = new TextDecoder().decode(
+			nullIdx >= 0 ? nameBytes.slice(0, nullIdx) : nameBytes,
+		);
+
+		const sizeStr = new TextDecoder().decode(header.slice(124, 136)).trim();
+		const size = parseInt(sizeStr, 8) || 0;
+		const typeFlag = header[156];
+
+		offset += 512;
+
+		if (typeFlag === 48 || typeFlag === 0) {
+			files.set(name, data.slice(offset, offset + size));
+		}
+
+		offset += Math.ceil(size / 512) * 512;
+	}
+
+	return files;
 }
 
 export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
@@ -191,11 +123,14 @@ export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
 		const repoName = urlParts[urlParts.length - 1] || "repo";
 		const owner = urlParts[urlParts.length - 2] || "";
 
-		const depthIndex = args.indexOf("--depth");
-		const depth =
-			depthIndex !== -1 ? Number.parseInt(args[depthIndex + 1] ?? "1", 10) : 1;
+		const branchIndex = args.indexOf("-b");
+		const branch =
+			branchIndex !== -1 && args[branchIndex + 1]
+				? args[branchIndex + 1]
+				: "HEAD";
 
 		let targetDir: string | undefined;
+		const depthIndex = args.indexOf("--depth");
 		for (let i = 0; i < args.length; i++) {
 			const arg = args[i];
 			if (arg === undefined) continue;
@@ -203,6 +138,7 @@ export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
 			if (arg === "clone") continue;
 			if (allowedHosts.some((host) => arg.includes(host))) continue;
 			if (depthIndex !== -1 && i === depthIndex + 1) continue;
+			if (branchIndex !== -1 && i === branchIndex + 1) continue;
 			targetDir = arg;
 			break;
 		}
@@ -230,75 +166,67 @@ export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
 				token = await credentialProvider(owner, repoName);
 			}
 
-			const tempDir = "/.git-clone-temp-" + Date.now();
-			const fs = createIsomorphicFSAdapter(ctx.fs);
+			const archiveUrl =
+				branch === "HEAD"
+					? `https://github.com/${owner}/${repoName}/archive/HEAD.tar.gz`
+					: `https://github.com/${owner}/${repoName}/archive/refs/heads/${branch}.tar.gz`;
 
-			await ctx.fs.mkdir(tempDir, { recursive: true });
-
-			await git.clone({
-				fs,
-				http,
-				dir: tempDir,
-				url: repoUrl,
-				depth,
-				singleBranch: true,
-				onAuth: token
-					? () => ({ username: "x-access-token", password: token })
-					: undefined,
-			});
+			const tarData = await streamDownloadAndDecompress(archiveUrl, token);
+			const files = parseTar(tarData);
 
 			await ctx.fs.mkdir(targetPath, { recursive: true });
 
-			let copied = 0;
+			const dirsToCreate = new Set<string>();
+			const filesToWrite: Array<{ path: string; content: string }> = [];
 			let skippedBinary = 0;
 			let skippedError = 0;
 
-			async function copyDir(srcDir: string, destDir: string) {
-				const items = await ctx.fs.readdir(srcDir);
-				for (const item of items) {
-					if (item === ".git") continue;
+			const prefixPattern = new RegExp(`^${repoName}-[^/]+/`);
 
-					const srcPath = srcDir + "/" + item;
-					const destPath = destDir + "/" + item;
+			for (const [filePath, content] of files) {
+				const match = filePath.match(prefixPattern);
+				if (!match) continue;
 
-					try {
-						const stat = await ctx.fs.stat(srcPath);
-						if (stat.isDirectory) {
-							await ctx.fs.mkdir(destPath, { recursive: true });
-							await copyDir(srcPath, destPath);
-						} else if (stat.isFile) {
-							if (isBinaryFile(item)) {
-								skippedBinary++;
-								continue;
-							}
-							try {
-								const content = await ctx.fs.readFile(srcPath, {
-									encoding: "utf8",
-								});
-								await ctx.fs.writeFile(destPath, content);
-								copied++;
-							} catch {
-								skippedError++;
-							}
-						}
-					} catch {
-						skippedError++;
-					}
+				const relativePath = filePath.slice(match[0].length);
+				if (!relativePath) continue;
+
+				const fullPath = `${targetPath}/${relativePath}`;
+
+				if (isBinaryFile(relativePath)) {
+					skippedBinary++;
+					continue;
+				}
+
+				const dir = fullPath.substring(0, fullPath.lastIndexOf("/"));
+				dirsToCreate.add(dir);
+
+				try {
+					const text = new TextDecoder().decode(content);
+					filesToWrite.push({ path: fullPath, content: text });
+				} catch {
+					skippedError++;
 				}
 			}
 
-			await copyDir(tempDir, targetPath);
+			const sortedDirs = [...dirsToCreate].sort((a, b) => a.length - b.length);
+			for (const dir of sortedDirs) {
+				await ctx.fs.mkdir(dir, { recursive: true });
+			}
 
-			try {
-				await ctx.fs.rm(tempDir, { recursive: true, force: true });
-			} catch {}
+			const BATCH_SIZE = 500;
+			for (let i = 0; i < filesToWrite.length; i += BATCH_SIZE) {
+				const batch = filesToWrite.slice(i, i + BATCH_SIZE);
+				await Promise.all(
+					batch.map(({ path, content }) => ctx.fs.writeFile(path, content)),
+				);
+			}
 
 			return {
 				stdout:
 					"Cloning into '" +
 					targetPath +
 					"'...\nCopied " +
-					copied +
+					filesToWrite.length +
 					" text files.\nSkipped " +
 					skippedBinary +
 					" binary files (by extension).\nSkipped " +
