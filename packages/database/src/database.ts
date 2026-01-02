@@ -404,6 +404,7 @@ export const service = Effect.gen(function* () {
 				if (funcType === "query") {
 					const wrappedFunction = ((
 						args?: any,
+						// @ts-expect-error
 						options: AuthenticatedQueryOptions = { subscribe: true },
 					) => {
 						const { subscribe, discordAccountId, token } = options;
@@ -451,6 +452,7 @@ export const service = Effect.gen(function* () {
 
 				const wrappedFunction = ((
 					args?: any,
+					// @ts-expect-error
 					options: AuthenticatedMutationOptions = {},
 				) => {
 					const { discordAccountId, token } = options;

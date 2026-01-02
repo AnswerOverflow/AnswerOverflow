@@ -1,7 +1,7 @@
 import { PostHogCaptureClientLayer } from "@packages/database/analytics/server";
 import { type Database, DatabaseHttpLayer } from "@packages/database/database";
 import type { Storage } from "@packages/database/storage";
-import { Layer, ManagedRuntime } from "effect";
+import { type Effect, Layer, ManagedRuntime } from "effect";
 import { BotLayers } from "../bot";
 import { PlatformLayer, sharedMemoMap } from "./atom-runtime";
 import { DiscordClientLayer } from "./discord-client-service";

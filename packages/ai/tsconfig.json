@@ -5,6 +5,6 @@
 		"noEmit": true,
 		"allowImportingTsExtensions": true
 	},
-	"include": ["./src/**/*", "./scripts/**/*"],
+	"include": ["./src/**/*"],
 	"exclude": ["node_modules", "dist"]
 }
