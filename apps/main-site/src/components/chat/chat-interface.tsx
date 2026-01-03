@@ -119,14 +119,16 @@ function ModelSelector({
 										>
 											<ModelSelectorLogo provider={m.chefSlug} />
 											<ModelSelectorName>{m.name}</ModelSelectorName>
-											<ModelSelectorLogoGroup>
+											{/* SHowing providers isn't relevant to user */}
+											{/* <Mod{" "}
+								elSelectorLogoGroup>
 												{m.providers.map((provider) => (
 													<ModelSelectorLogo
 														key={provider}
 														provider={provider}
 													/>
 												))}
-											</ModelSelectorLogoGroup>
+											</ModelSelectorLogoGroup> */}
 											{selectedModel === m.id ? (
 												<CheckIcon className="ml-auto size-4" />
 											) : (
@@ -166,6 +168,13 @@ const SmoothMessageResponse = memo(function SmoothMessageResponse({
 	return <MessageResponse>{displayText}</MessageResponse>;
 });
 
+type AgentStatus =
+	| "idle"
+	| "cloning_repo"
+	| "thinking"
+	| "responding"
+	| "error";
+
 function ThinkingIndicator() {
 	return (
 		<Message from="assistant">
@@ -182,6 +191,42 @@ function ThinkingIndicator() {
 			</MessageContent>
 		</Message>
 	);
+}
+
+function AgentStatusIndicator({
+	status,
+	error,
+	repoName,
+}: {
+	status: AgentStatus;
+	error?: string | null;
+	repoName?: string | null;
+}) {
+	if (status === "cloning_repo") {
+		return (
+			<Message from="assistant">
+				<MessageContent>
+					<span className="text-sm text-muted-foreground">
+						{repoName ? `Cloning ${repoName}...` : "Cloning repository..."}
+					</span>
+				</MessageContent>
+			</Message>
+		);
+	}
+
+	if (status === "error") {
+		return (
+			<Message from="assistant">
+				<MessageContent>
+					<span className="text-sm text-destructive">
+						{error ?? "An error occurred"}
+					</span>
+				</MessageContent>
+			</Message>
+		);
+	}
+
+	return <ThinkingIndicator />;
 }
 
 function ToolPart({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
@@ -381,8 +426,12 @@ export function ChatInterface({
 
 	const lastMessage = messages.at(-1);
 	const lastMessageId = lastMessage?.id;
-	const isWaitingForResponse =
-		lastMessage?.role === "user" && lastMessage?.status !== "pending";
+	const agentStatus = threadMetadata?.agentStatus ?? "idle";
+	const agentError = threadMetadata?.agentError ?? null;
+	const isAgentWorking = agentStatus !== "idle" && agentStatus !== "error";
+	const repoName = threadMetadata?.repos?.[0]
+		? `${threadMetadata.repos[0].owner}/${threadMetadata.repos[0].repo}`
+		: null;
 
 	const title = threadMetadata?.title
 		? threadMetadata.title
@@ -458,7 +507,16 @@ export function ChatInterface({
 										isLastMessage={message.id === lastMessageId}
 									/>
 								))}
-								{isWaitingForResponse && <ThinkingIndicator />}
+								{isAgentWorking && (
+									<AgentStatusIndicator
+										status={agentStatus}
+										error={agentError}
+										repoName={repoName}
+									/>
+								)}
+								{agentStatus === "error" && (
+									<AgentStatusIndicator status="error" error={agentError} />
+								)}
 							</ConversationContent>
 							<ConversationScrollButton />
 						</Conversation>

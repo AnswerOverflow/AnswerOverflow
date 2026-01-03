@@ -190,6 +190,8 @@ export const getChatThreadMetadata = authenticatedQuery({
 			title: thread.title ?? null,
 			repos: metadata?.repos ?? null,
 			modelId: metadata?.modelId ?? null,
+			agentStatus: metadata?.agentStatus ?? "idle",
+			agentError: metadata?.agentError ?? null,
 		};
 	},
 });

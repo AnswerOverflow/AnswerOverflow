@@ -1,11 +1,16 @@
 import type { GatewayModelId } from "ai";
 import { v } from "convex/values";
 
-type ModelSchema = Record<string, string | string[]> & {
+type ModelSchema = {
+	id: string;
+	name: string;
+	chef: string;
+	chefSlug: string;
+	providers: string[];
 	gatewayId: GatewayModelId;
 };
 
-export const models = [
+export const models: ModelSchema[] = [
 	{
 		id: "glm-4.7",
 		name: "GLM-4.7",
@@ -31,36 +36,36 @@ export const models = [
 		gatewayId: "minimax/minimax-m2",
 	},
 	{
-		id: "gpt-4o",
-		name: "GPT-4o",
+		id: "gpt-5.2",
+		name: "GPT-5.2",
 		chef: "OpenAI",
 		chefSlug: "openai",
 		providers: ["openai", "azure"],
-		gatewayId: "openai/gpt-4o",
+		gatewayId: "openai/gpt-5.2",
 	},
 	{
-		id: "gpt-4o-mini",
-		name: "GPT-4o Mini",
+		id: "gpt-5.1-thinking",
+		name: "GPT-5.1 Thinking",
 		chef: "OpenAI",
 		chefSlug: "openai",
 		providers: ["openai", "azure"],
-		gatewayId: "openai/gpt-4o-mini",
+		gatewayId: "openai/gpt-5.2-thinking",
 	},
+	// {
+	// 	id: "claude-opus-4.5",
+	// 	name: "Claude 4.5 Opus",
+	// 	chef: "Anthropic",
+	// 	chefSlug: "anthropic",
+	// 	providers: ["anthropic", "azure", "google", "amazon-bedrock"],
+	// 	gatewayId: "anthropic/claude-opus-4.5",
+	// },
 	{
-		id: "claude-opus-4-20250514",
-		name: "Claude 4 Opus",
+		id: "claude-sonnet-4.5",
+		name: "Claude 4.5 Sonnet",
 		chef: "Anthropic",
 		chefSlug: "anthropic",
 		providers: ["anthropic", "azure", "google", "amazon-bedrock"],
-		gatewayId: "anthropic/claude-opus-4-20250514",
-	},
-	{
-		id: "claude-sonnet-4-20250514",
-		name: "Claude 4 Sonnet",
-		chef: "Anthropic",
-		chefSlug: "anthropic",
-		providers: ["anthropic", "azure", "google", "amazon-bedrock"],
-		gatewayId: "anthropic/claude-sonnet-4-20250514",
+		gatewayId: "anthropic/claude-sonnet-4.5",
 	},
 	{
 		id: "gemini-2.5-flash",

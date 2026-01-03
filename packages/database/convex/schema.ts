@@ -250,10 +250,20 @@ const RepoContextSchema = Schema.Struct({
 	filePath: Schema.optional(Schema.String),
 });
 
+const AgentStatusSchema = Schema.Literal(
+	"idle",
+	"cloning_repo",
+	"thinking",
+	"responding",
+	"error",
+);
+
 const ChatThreadMetadataSchema = Schema.Struct({
 	threadId: Schema.String,
 	repos: Schema.optional(Schema.Array(RepoContextSchema).pipe(Schema.mutable)),
 	modelId: Schema.optional(Schema.String),
+	agentStatus: Schema.optional(AgentStatusSchema),
+	agentError: Schema.optional(Schema.String),
 });
 
 export const confectSchema = defineSchema({
@@ -388,3 +398,4 @@ export type UserServerSettings = Schema.Schema.Type<
 export type GitHubIssue = Schema.Schema.Type<typeof GitHubIssueSchema>;
 export type Embed = Schema.Schema.Type<typeof EmbedSchema>;
 export type ForumTag = Schema.Schema.Type<typeof ForumTagSchema>;
+export type AgentStatus = Schema.Schema.Type<typeof AgentStatusSchema>;

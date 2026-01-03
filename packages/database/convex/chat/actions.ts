@@ -38,6 +38,14 @@ export const generateResponse = internalAction({
 		});
 
 		const repos = threadMetadata?.repos ?? [];
+
+		if (repos.length > 0) {
+			await ctx.runMutation(internal.chat.queries.updateAgentStatus, {
+				threadId: args.threadId,
+				status: "cloning_repo",
+			});
+		}
+
 		for (const repo of repos) {
 			const clonePath =
 				repos.length === 1 ? "/repo" : `/repos/${repo.owner}/${repo.repo}`;
@@ -49,40 +57,50 @@ export const generateResponse = internalAction({
 		const workdir = repos.length === 1 ? "/repo" : "/repos";
 		const sandboxTools = createSandboxTools({ virtualBash, workdir });
 
-		try {
-			const mcpTools = await mcpClient.tools();
+		await ctx.runMutation(internal.chat.queries.updateAgentStatus, {
+			threadId: args.threadId,
+			status: "thinking",
+		});
 
-			const model = getModelById(modelId);
-			const modelName = model?.name ?? "Unknown Model";
+		const mcpTools = await mcpClient.tools();
 
-			const systemOverride =
-				repos.length > 0 ? createRepoInstructions(repos, modelName) : undefined;
+		const model = getModelById(modelId);
+		const modelName = model?.name ?? "Unknown Model";
 
-			const agent = createChatAgent(modelId);
+		const systemOverride =
+			repos.length > 0 ? createRepoInstructions(repos, modelName) : undefined;
 
-			await agent.streamText(
-				ctx,
-				{ threadId: args.threadId },
-				{
-					promptMessageId: args.promptMessageId,
-					system: systemOverride,
-					tools: {
-						...agent.options.tools,
-						...mcpTools,
-						...sandboxTools,
-					},
-					providerOptions: {
-						gateway: {
-							order: ["cerebras"],
-						},
+		const agent = createChatAgent(modelId);
+
+		await ctx.runMutation(internal.chat.queries.updateAgentStatus, {
+			threadId: args.threadId,
+			status: "responding",
+		});
+
+		await agent.streamText(
+			ctx,
+			{ threadId: args.threadId },
+			{
+				promptMessageId: args.promptMessageId,
+				system: systemOverride,
+				tools: {
+					...agent.options.tools,
+					...mcpTools,
+					...sandboxTools,
+				},
+				providerOptions: {
+					gateway: {
+						order: ["cerebras"],
 					},
 				},
-				{ saveStreamDeltas: true },
-			);
-		} finally {
-			await mcpClient.close();
-		}
+			},
+			{ saveStreamDeltas: true },
+		);
 
+		await ctx.runMutation(internal.chat.queries.updateAgentStatus, {
+			threadId: args.threadId,
+			status: "idle",
+		});
 		const threadInfo = await ctx.runQuery(internal.chat.queries.getThreadInfo, {
 			threadId: args.threadId,
 		});
