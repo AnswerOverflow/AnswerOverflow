@@ -52,7 +52,6 @@ export function Providers({
 						attribute="class"
 						defaultTheme="system"
 						enableSystem
-						disableTransitionOnChange
 						enableColorScheme
 					>
 						<ConvexClientProvider tenant={tenant}>

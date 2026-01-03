@@ -8,6 +8,31 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Fix for Shiki theme variables */
+.dark [style*="--shiki-dark"] {
+	color: var(--shiki-dark) !important;
+	background-color: transparent !important;
+}
+
+[style*="--shiki-light"] {
+	color: var(--shiki-light) !important;
+	background-color: transparent !important;
+}
+
+.dark [style*="--shiki-light"] {
+	color: var(--shiki-dark) !important;
+	background-color: transparent !important;
+}
+
+/* Ensure code block containers use theme background */
+[data-streamdown="code-block-body"] {
+	background-color: var(--background) !important;
+}
+
+.dark [data-streamdown="code-block-body"] {
+	background-color: var(--background) !important;
+}
+
 :root {
 	--navbar-height: 4rem;
 	--blurple: oklch(0.553 0.215 269.716);
@@ -44,6 +69,12 @@
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
+	
+	/* Shiki theme variables */
+	--shiki-light: #24292e;
+	--shiki-light-bg: #ffffff;
+	--shiki-dark: #e1e4e8;
+	--shiki-dark-bg: #0d1117;
 }
 
 .dark {

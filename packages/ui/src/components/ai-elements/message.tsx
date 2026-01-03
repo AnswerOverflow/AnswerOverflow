@@ -313,6 +313,7 @@ export const MessageResponse = memo(
 				"size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
 				className,
 			)}
+			shikiTheme={["github-light", "github-dark"]}
 			{...props}
 		/>
 	),

@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"type": "module",
 	"exports": {
+		"./tools": "./src/tools/index.ts",
 		"./sandbox": "./src/sandbox/index.ts",
 		"./sandbox/virtual-bash": "./src/sandbox/virtual-bash.ts",
 		"./sandbox/git-clone": "./src/sandbox/git-clone.ts",

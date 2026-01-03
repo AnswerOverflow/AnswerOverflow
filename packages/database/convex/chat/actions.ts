@@ -1,7 +1,7 @@
 "use node";
 
 import { createMCPClient } from "@ai-sdk/mcp";
-import { createSandboxTool, createVirtualBash } from "@packages/ai/sandbox";
+import { createSandboxTools, createVirtualBash } from "@packages/ai/tools";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction } from "../client";
@@ -45,7 +45,8 @@ export const generateResponse = internalAction({
 			);
 		}
 
-		const sandboxTool = createSandboxTool({ virtualBash });
+		const workdir = repos.length === 1 ? "/repo" : "/repos";
+		const sandboxTools = createSandboxTools({ virtualBash, workdir });
 
 		try {
 			const mcpTools = await mcpClient.tools();
@@ -67,7 +68,7 @@ export const generateResponse = internalAction({
 					tools: {
 						...agent.options.tools,
 						...mcpTools,
-						sandbox: sandboxTool,
+						...sandboxTools,
 					},
 					providerOptions: {
 						gateway: {
