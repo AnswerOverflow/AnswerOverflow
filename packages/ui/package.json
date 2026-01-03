@@ -115,6 +115,7 @@
 		"./components/answer-overflow-logo": "./src/components/answer-overflow-logo.tsx",
 		"./components/ai-elements/*": "./src/components/ai-elements/*.tsx",
 		"./hooks/*": "./src/hooks/*.ts",
+		"./hooks/use-scroll-container": "./src/hooks/use-scroll-container.tsx",
 		"./utils/*": "./src/utils/*.ts",
 		"./icons/index": "./src/icons/index.tsx",
 		"./components/code": "./src/components/code.tsx",

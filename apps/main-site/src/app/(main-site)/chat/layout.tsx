@@ -1,11 +1,16 @@
-"use client";
-
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
+import { FeaturedReposProvider } from "@/components/chat/featured-repos-provider";
+import { getFeaturedRepos } from "@/lib/github";
 
-export default function ChatLayout({
+export default async function ChatLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	return <ChatSidebar>{children}</ChatSidebar>;
+	const featuredRepos = await getFeaturedRepos();
+	return (
+		<FeaturedReposProvider repos={featuredRepos}>
+			<ChatSidebar>{children}</ChatSidebar>
+		</FeaturedReposProvider>
+	);
 }

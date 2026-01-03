@@ -21,6 +21,12 @@ import { CheckIcon, GitFork, Loader2, Star } from "lucide-react";
 import Image from "next/image";
 import { useDeferredValue, useState } from "react";
 import type { GitHubRepo } from "./chat-interface";
+import { useFeaturedRepos } from "./featured-repos-provider";
+
+type GitHubRepoSelectorProps = {
+	selectedRepo: GitHubRepo | null;
+	onSelectRepo: (repo: GitHubRepo | null) => void;
+};
 
 type GitHubSearchRepo = {
 	id: number;
@@ -33,15 +39,11 @@ type GitHubSearchRepo = {
 	language: string | null;
 };
 
-type GitHubRepoSelectorProps = {
-	selectedRepo: GitHubRepo | null;
-	onSelectRepo: (repo: GitHubRepo | null) => void;
-};
-
 export function GitHubRepoSelector({
 	selectedRepo,
 	onSelectRepo,
 }: GitHubRepoSelectorProps) {
+	const initialFeaturedRepos = useFeaturedRepos();
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
 	const deferredSearch = useDeferredValue(search);
@@ -73,7 +75,9 @@ export function GitHubRepoSelector({
 			}
 			return [];
 		},
-		enabled: open && !selectedRepo?.owner,
+		initialData:
+			initialFeaturedRepos.length > 0 ? initialFeaturedRepos : undefined,
+		enabled: open && !selectedRepo?.owner && initialFeaturedRepos.length === 0,
 		staleTime: 1000 * 60 * 5,
 	});
 
@@ -112,7 +116,7 @@ export function GitHubRepoSelector({
 	const isLoading =
 		searchReposQuery.isLoading ||
 		orgReposQuery.isLoading ||
-		featuredReposQuery.isLoading;
+		(featuredReposQuery.isLoading && initialFeaturedRepos.length === 0);
 
 	const getDisplayRepos = () => {
 		if (search.trim()) {
@@ -162,7 +166,10 @@ export function GitHubRepoSelector({
 					)}
 				</PromptInputButton>
 			</PopoverTrigger>
-			<PopoverContent className="w-[400px] p-0" align="start">
+			<PopoverContent
+				className="w-[min(400px,calc(100vw-2rem))] p-0"
+				align="start"
+			>
 				<Command shouldFilter={false}>
 					<CommandInput
 						placeholder="Search GitHub repositories..."

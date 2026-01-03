@@ -1,9 +1,11 @@
 "use client";
 
 import type * as React from "react";
+import { useEffect } from "react";
 import { cn } from "../../lib/utils";
 import { useHideOnScroll } from "../../hooks/use-hide-on-scroll";
 import { useIsMobile } from "../../hooks/use-mobile";
+import { useScrollContainer } from "../../hooks/use-scroll-container";
 import { useIsImpersonating } from "../impersonation-banner";
 
 export interface NavbarBaseProps {
@@ -19,7 +21,12 @@ export function NavbarBase({
 }: NavbarBaseProps) {
 	const isImpersonating = useIsImpersonating();
 	const isMobile = useIsMobile();
-	const isHidden = useHideOnScroll(isMobile);
+	const { scrollContainer, setIsNavbarHidden } = useScrollContainer();
+	const isHidden = useHideOnScroll(isMobile, scrollContainer);
+
+	useEffect(() => {
+		setIsNavbarHidden(isHidden);
+	}, [isHidden, setIsNavbarHidden]);
 
 	return (
 		<header

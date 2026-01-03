@@ -13,7 +13,7 @@ export const Conversation = ({ className, ...props }: ConversationProps) => (
 	<StickToBottom
 		className={cn("relative flex-1", className)}
 		initial="instant"
-		resize="instant"
+		resize={false}
 		role="log"
 		{...props}
 	/>

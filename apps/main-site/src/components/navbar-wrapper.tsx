@@ -5,21 +5,29 @@ import {
 	MainSiteFooter,
 } from "@packages/ui/components/footer";
 import { MainSiteNavbar } from "@packages/ui/components/navbar";
+import {
+	ScrollContainerProvider,
+	useIsNavbarHidden,
+} from "@packages/ui/hooks/use-scroll-container";
+import { cn } from "@packages/ui/lib/utils";
 import { usePathname } from "next/navigation";
 
-export function NavbarWrapper({ children }: { children: React.ReactNode }) {
+function NavbarContent({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
-	const isDashboard = pathname?.startsWith("/dashboard");
 	const isChat = pathname?.startsWith("/chat");
-
-	if (isDashboard) {
-		return <>{children}</>;
-	}
+	const isNavbarHidden = useIsNavbarHidden();
 
 	return (
 		<>
 			<MainSiteNavbar />
-			<div className="pt-navbar">{children}</div>
+			<div
+				className={cn(
+					"transition-[padding-top] duration-300",
+					isNavbarHidden ? "pt-0" : "pt-navbar",
+				)}
+			>
+				{children}
+			</div>
 			{!isChat && (
 				<>
 					<div className="sm:hidden">
@@ -29,5 +37,20 @@ export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 				</>
 			)}
 		</>
+	);
+}
+
+export function NavbarWrapper({ children }: { children: React.ReactNode }) {
+	const pathname = usePathname();
+	const isDashboard = pathname?.startsWith("/dashboard");
+
+	if (isDashboard) {
+		return <>{children}</>;
+	}
+
+	return (
+		<ScrollContainerProvider>
+			<NavbarContent>{children}</NavbarContent>
+		</ScrollContainerProvider>
 	);
 }

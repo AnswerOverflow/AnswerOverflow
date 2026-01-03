@@ -68,6 +68,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
+import { useScrollContainer } from "@packages/ui/hooks/use-scroll-container";
 import { useChatSidebar } from "./chat-sidebar";
 import { GitHubRepoSelector } from "./github-repo-selector";
 
@@ -196,6 +197,7 @@ export function ChatInterface({
 }: ChatInterfaceProps) {
 	const router = useRouter();
 	const { setMobileSidebarOpen } = useChatSidebar();
+	const { setScrollContainer: setNavbarScrollContainer } = useScrollContainer();
 	const initialRepo = repos[0] ?? null;
 	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
 		initialRepo,
@@ -214,7 +216,7 @@ export function ChatInterface({
 	);
 	const stickToBottomInstance = useStickToBottom({
 		initial: "instant",
-		resize: "instant",
+		resize: false,
 	});
 
 	useEffect(() => {
@@ -255,6 +257,7 @@ export function ChatInterface({
 
 	const setScrollRef = (element: HTMLDivElement | null) => {
 		setScrollContainer(element);
+		setNavbarScrollContainer(element);
 		if (element && stickToBottomInstance.scrollRef) {
 			stickToBottomInstance.scrollRef(element);
 		}
