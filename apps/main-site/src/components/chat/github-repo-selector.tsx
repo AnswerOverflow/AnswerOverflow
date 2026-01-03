@@ -49,6 +49,8 @@ export function GitHubRepoSelector({
 	const searchReposAction = useAction(api.authenticated.github.searchRepos);
 	const getOrgReposAction = useAction(api.authenticated.github.getOrgRepos);
 
+	const getFeaturedAction = useAction(api.authenticated.github.getFeatured);
+
 	const orgReposQuery = useQuery({
 		queryKey: ["github-org-repos", selectedRepo?.owner],
 		queryFn: async () => {
@@ -60,6 +62,19 @@ export function GitHubRepoSelector({
 			return [];
 		},
 		enabled: open && !!selectedRepo?.owner,
+	});
+
+	const featuredReposQuery = useQuery({
+		queryKey: ["github-featured-repos"],
+		queryFn: async () => {
+			const result = await getFeaturedAction({});
+			if (result.success) {
+				return result.repos;
+			}
+			return [];
+		},
+		enabled: open && !selectedRepo?.owner,
+		staleTime: 1000 * 60 * 5,
 	});
 
 	const searchReposQuery = useQuery({
@@ -94,15 +109,35 @@ export function GitHubRepoSelector({
 		return count.toString();
 	};
 
-	const isLoading = searchReposQuery.isLoading || orgReposQuery.isLoading;
-	const displayRepos = search.trim()
-		? (searchReposQuery.data ?? [])
-		: (orgReposQuery.data ?? []);
-	const showOrgReposSection =
-		!search.trim() && (orgReposQuery.data?.length ?? 0) > 0;
+	const isLoading =
+		searchReposQuery.isLoading ||
+		orgReposQuery.isLoading ||
+		featuredReposQuery.isLoading;
+
+	const getDisplayRepos = () => {
+		if (search.trim()) {
+			return searchReposQuery.data ?? [];
+		}
+		if (selectedRepo?.owner) {
+			return orgReposQuery.data ?? [];
+		}
+		return featuredReposQuery.data ?? [];
+	};
+
+	const displayRepos = getDisplayRepos();
+
+	const getHeading = () => {
+		if (search.trim()) {
+			return "Search results";
+		}
+		if (selectedRepo?.owner) {
+			return `Popular repos from ${selectedRepo.owner}`;
+		}
+		return "Popular repositories";
+	};
 
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover open={open} onOpenChange={setOpen} modal>
 			<PopoverTrigger asChild>
 				<PromptInputButton size="sm">
 					{selectedRepo ? (
@@ -127,7 +162,7 @@ export function GitHubRepoSelector({
 					)}
 				</PromptInputButton>
 			</PopoverTrigger>
-			<PopoverContent className="w-[400px] p-0" align="start" modal={true}>
+			<PopoverContent className="w-[400px] p-0" align="start">
 				<Command shouldFilter={false}>
 					<CommandInput
 						placeholder="Search GitHub repositories..."
@@ -140,21 +175,9 @@ export function GitHubRepoSelector({
 								<Loader2 className="size-4 animate-spin text-muted-foreground" />
 							</div>
 						) : displayRepos.length === 0 ? (
-							<CommandEmpty>
-								{search.trim()
-									? "No repositories found."
-									: selectedRepo
-										? `No repositories found for ${selectedRepo.owner}`
-										: "Type to search repositories..."}
-							</CommandEmpty>
+							<CommandEmpty>No repositories found.</CommandEmpty>
 						) : (
-							<CommandGroup
-								heading={
-									showOrgReposSection
-										? `Popular repos from ${selectedRepo?.owner}`
-										: "Search results"
-								}
-							>
+							<CommandGroup heading={getHeading()}>
 								{displayRepos.map((repo) => (
 									<CommandItem
 										key={repo.id}

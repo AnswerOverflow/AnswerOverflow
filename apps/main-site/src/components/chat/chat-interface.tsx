@@ -62,8 +62,9 @@ import {
 	isToolUIPart,
 	type ToolUIPart,
 } from "ai";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Bot, CheckIcon, CopyIcon, Menu, RefreshCcwIcon } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
@@ -203,14 +204,21 @@ export function ChatInterface({
 		initialThreadId ?? null,
 	);
 	const [input, setInput] = useState("");
-	const [model, setModel] = useState(defaultModelId);
+	const [modelOverride, setModelOverride] = useState<string | null>(null);
 	const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
-	const selectedModelData = models.find((m) => m.id === model);
 	const stickToBottomInstance = useStickToBottom({
 		initial: "instant",
 		resize: "instant",
 	});
+
+	const threadMetadata = useQuery(
+		api.chat.mutations.getChatThreadMetadata,
+		initialThreadId ? { threadId: initialThreadId } : "skip",
+	);
+
+	const model = modelOverride ?? threadMetadata?.modelId ?? defaultModelId;
+	const selectedModelData = models.find((m) => m.id === model);
 
 	const setScrollRef = (element: HTMLDivElement | null) => {
 		scrollContainerRef.current = element;
@@ -302,13 +310,24 @@ export function ChatInterface({
 					{!threadId ? (
 						<div className="flex flex-1 flex-col items-center justify-center gap-6">
 							<div className="flex flex-col items-center gap-4 text-center">
-								<div className="flex size-16 items-center justify-center rounded-full bg-muted">
-									<Bot className="size-8 text-muted-foreground" />
-								</div>
+								{selectedRepo ? (
+									<Image
+										src={`https://github.com/${selectedRepo.owner}.png?size=128`}
+										alt={selectedRepo.owner}
+										width={64}
+										height={64}
+										className="rounded-full"
+										unoptimized
+									/>
+								) : (
+									<div className="flex size-16 items-center justify-center rounded-full bg-muted">
+										<Bot className="size-8 text-muted-foreground" />
+									</div>
+								)}
 								<div className="space-y-2">
 									<h1 className="text-2xl font-semibold">{title}</h1>
 									<p className="text-muted-foreground">{description}</p>
-									{repos.length === 0 && (
+									{!selectedRepo && (
 										<p className="text-sm text-muted-foreground">
 											Try: "What time is it?" or "Roll 2d20"
 										</p>
@@ -388,7 +407,7 @@ export function ChatInterface({
 																	<CommandItem
 																		key={m.id}
 																		onSelect={() => {
-																			setModel(m.id);
+																			setModelOverride(m.id);
 																			setModelSelectorOpen(false);
 																		}}
 																		value={m.id}
