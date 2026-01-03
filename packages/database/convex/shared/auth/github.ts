@@ -471,3 +471,63 @@ export async function createGitHubIssue(
 		title: data.title,
 	};
 }
+
+export type GitHubSearchRepo = {
+	id: number;
+	name: string;
+	fullName: string;
+	owner: string;
+	private: boolean;
+	description: string | null;
+	stargazersCount: number;
+	language: string | null;
+};
+
+export async function searchGitHubRepositories(
+	octokit: Octokit,
+	query: string,
+	org?: string,
+): Promise<Array<GitHubSearchRepo>> {
+	const searchQuery = org ? `${query} org:${org}` : query;
+
+	const { data } = await octokit.rest.search.repos({
+		q: searchQuery,
+		per_page: 20,
+		sort: "stars",
+		order: "desc",
+	});
+
+	return data.items.map((repo) => ({
+		id: repo.id,
+		name: repo.name,
+		fullName: repo.full_name,
+		owner: repo.owner?.login ?? "",
+		private: repo.private ?? false,
+		description: repo.description,
+		stargazersCount: repo.stargazers_count ?? 0,
+		language: repo.language,
+	}));
+}
+
+export async function getOrgPopularRepos(
+	octokit: Octokit,
+	org: string,
+): Promise<Array<GitHubSearchRepo>> {
+	const { data } = await octokit.rest.search.repos({
+		q: `org:${org}`,
+		per_page: 20,
+		sort: "stars",
+		order: "desc",
+	});
+
+	return data.items.map((repo) => ({
+		id: repo.id,
+		name: repo.name,
+		fullName: repo.full_name,
+		owner: repo.owner?.login ?? "",
+		private: repo.private ?? false,
+		description: repo.description,
+		stargazersCount: repo.stargazers_count ?? 0,
+		language: repo.language,
+	}));
+}

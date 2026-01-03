@@ -8,6 +8,7 @@ import { api } from "../_generated/api";
 import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
 import { action, query } from "../_generated/server";
 import { getDiscordAccountWithToken } from "../shared/auth";
+import { authComponent } from "../shared/betterAuth";
 import { createDataAccessCache } from "../shared/dataAccess";
 import { DISCORD_PERMISSIONS, hasPermission } from "../shared/shared";
 import { mutation } from "../triggers";
@@ -22,6 +23,16 @@ function validateBackendAccessToken(token: string | undefined): void {
 	if (token !== expectedToken) {
 		throw new Error("Invalid BACKEND_ACCESS_TOKEN");
 	}
+}
+
+async function getAuthUserId(
+	ctx: QueryCtx | MutationCtx | ActionCtx,
+): Promise<string> {
+	const user = await authComponent.getAuthUser(ctx);
+	if (!user) {
+		throw new Error("Not authenticated");
+	}
+	return user._id;
 }
 
 async function getDiscordAccountIdForWrapper(
@@ -55,6 +66,7 @@ export const authenticatedQuery = customQuery(query, {
 		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
+		const userId = await getAuthUserId(ctx);
 		const discordAccountId = await resolveDiscordAccountId(ctx, args);
 
 		const cache = createDataAccessCache(ctx);
@@ -62,6 +74,7 @@ export const authenticatedQuery = customQuery(query, {
 			ctx: { ...ctx, cache },
 			args: {
 				...args,
+				userId,
 				discordAccountId,
 			},
 		};
@@ -74,6 +87,7 @@ export const authenticatedMutation = customMutation(mutation, {
 		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
+		const userId = await getAuthUserId(ctx);
 		const discordAccountId = await resolveDiscordAccountId(ctx, args);
 
 		const cache = createDataAccessCache(ctx);
@@ -81,6 +95,7 @@ export const authenticatedMutation = customMutation(mutation, {
 			ctx: { ...ctx, cache },
 			args: {
 				...args,
+				userId,
 				discordAccountId,
 			},
 		};
@@ -93,12 +108,14 @@ export const authenticatedAction = customAction(action, {
 		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
+		const userId = await getAuthUserId(ctx);
 		const discordAccountId = await resolveDiscordAccountId(ctx, args);
 
 		return {
 			ctx,
 			args: {
 				...args,
+				userId,
 				discordAccountId,
 			},
 		};

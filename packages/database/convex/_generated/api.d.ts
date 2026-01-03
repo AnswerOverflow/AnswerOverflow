@@ -39,6 +39,7 @@ import type * as confect from "../confect.js";
 import type * as http from "../http.js";
 import type * as internal_rateLimiter from "../internal/rateLimiter.js";
 import type * as migrations_index from "../migrations/index.js";
+import type * as private_agent_wrappers from "../private/agent_wrappers.js";
 import type * as private_attachments from "../private/attachments.js";
 import type * as private_cache from "../private/cache.js";
 import type * as private_channels from "../private/channels.js";
@@ -129,6 +130,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "internal/rateLimiter": typeof internal_rateLimiter;
   "migrations/index": typeof migrations_index;
+  "private/agent_wrappers": typeof private_agent_wrappers;
   "private/attachments": typeof private_attachments;
   "private/cache": typeof private_cache;
   "private/channels": typeof private_channels;

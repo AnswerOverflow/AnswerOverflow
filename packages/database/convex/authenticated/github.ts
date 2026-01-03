@@ -1,3 +1,4 @@
+import { v } from "convex/values";
 import { authenticatedAction, authenticatedQuery } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import {
@@ -5,6 +6,8 @@ import {
 	fetchGitHubInstallationRepos,
 	GitHubErrorCodes,
 	getGitHubAccountByUserId,
+	getOrgPopularRepos,
+	searchGitHubRepositories,
 } from "../shared/github";
 
 export const getGitHubAccount = authenticatedQuery({
@@ -72,6 +75,95 @@ export const getAccessibleRepos = authenticatedAction({
 			return {
 				success: false as const,
 				error: error instanceof Error ? error.message : "Failed to fetch repos",
+				code: GitHubErrorCodes.FETCH_FAILED,
+			};
+		}
+	},
+});
+
+export const searchRepos = authenticatedAction({
+	args: {
+		query: v.string(),
+		org: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const account = await getGitHubAccountByUserId(ctx, args.userId);
+
+		if (!account) {
+			return {
+				success: false as const,
+				error: "GitHub account not linked",
+				code: GitHubErrorCodes.NOT_LINKED,
+			};
+		}
+
+		const octokitResult = await createOctokitClient(ctx, account);
+		if (!octokitResult.success) {
+			return {
+				success: false as const,
+				error: octokitResult.error,
+				code: octokitResult.code,
+			};
+		}
+
+		try {
+			const repos = await searchGitHubRepositories(
+				octokitResult.octokit,
+				args.query,
+				args.org,
+			);
+
+			return {
+				success: true as const,
+				repos,
+			};
+		} catch (error) {
+			return {
+				success: false as const,
+				error:
+					error instanceof Error ? error.message : "Failed to search repos",
+				code: GitHubErrorCodes.FETCH_FAILED,
+			};
+		}
+	},
+});
+
+export const getOrgRepos = authenticatedAction({
+	args: {
+		org: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const account = await getGitHubAccountByUserId(ctx, args.userId);
+
+		if (!account) {
+			return {
+				success: false as const,
+				error: "GitHub account not linked",
+				code: GitHubErrorCodes.NOT_LINKED,
+			};
+		}
+
+		const octokitResult = await createOctokitClient(ctx, account);
+		if (!octokitResult.success) {
+			return {
+				success: false as const,
+				error: octokitResult.error,
+				code: octokitResult.code,
+			};
+		}
+
+		try {
+			const repos = await getOrgPopularRepos(octokitResult.octokit, args.org);
+
+			return {
+				success: true as const,
+				repos,
+			};
+		} catch (error) {
+			return {
+				success: false as const,
+				error:
+					error instanceof Error ? error.message : "Failed to get org repos",
 				code: GitHubErrorCodes.FETCH_FAILED,
 			};
 		}

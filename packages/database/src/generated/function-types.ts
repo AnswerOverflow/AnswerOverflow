@@ -2,6 +2,19 @@
 // DO NOT EDIT MANUALLY
 
 export const FUNCTION_TYPE_MAP = {
+  "agent_wrappers.abortStream": "mutation",
+  "agent_wrappers.addMessages": "mutation",
+  "agent_wrappers.addStreamDelta": "mutation",
+  "agent_wrappers.createStream": "mutation",
+  "agent_wrappers.createThread": "mutation",
+  "agent_wrappers.finalizeMessage": "mutation",
+  "agent_wrappers.finishStream": "mutation",
+  "agent_wrappers.getMessageSearchFields": "query",
+  "agent_wrappers.getThread": "query",
+  "agent_wrappers.listMessagesByThreadId": "query",
+  "agent_wrappers.listStreamDeltas": "query",
+  "agent_wrappers.listStreams": "query",
+  "agent_wrappers.searchMessages": "action",
   "attachments.updateAttachmentStorageId": "mutation",
   "attachments.uploadAttachmentFromUrl": "action",
   "attachments.uploadEmbedImageFromUrl": "action",
@@ -46,6 +59,8 @@ export const FUNCTION_TYPE_MAP = {
   "github.getAccessibleReposByDiscordId": "action",
   "github.getGitHubAccount": "query",
   "github.getGitHubIssueByRepoAndNumber": "query",
+  "github.getOrgRepos": "action",
+  "github.searchRepos": "action",
   "github.updateGitHubIssueStatus": "mutation",
   "ignored_discord_accounts.deleteIgnoredDiscordAccount": "mutation",
   "ignored_discord_accounts.findIgnoredDiscordAccountById": "query",
@@ -107,9 +122,10 @@ export const FUNCTION_TYPE_MAP = {
   "vercel_domains.getDomainStatus": "action"
 } as const;
 
-export const NAMESPACES = ["admin","attachments","cache","channels","counts","dashboard","dashboard_mutations","dashboard_queries","discord_accounts","discord_token","github","ignored_discord_accounts","messages","onboarding","onboarding_action","search","server_preferences","servers","sitemap","stripe","stripe_actions","threadTags","threads","threads_action","user_server_settings","vercel_domains"] as const;
+export const NAMESPACES = ["admin","agent_wrappers","attachments","cache","channels","counts","dashboard","dashboard_mutations","dashboard_queries","discord_accounts","discord_token","github","ignored_discord_accounts","messages","onboarding","onboarding_action","search","server_preferences","servers","sitemap","stripe","stripe_actions","threadTags","threads","threads_action","user_server_settings","vercel_domains"] as const;
 
 export const NAMESPACE_STRUCTURE = {
+  "agent_wrappers": ["abortStream","addMessages","addStreamDelta","createStream","createThread","finalizeMessage","finishStream","getMessageSearchFields","getThread","listMessagesByThreadId","listStreamDeltas","listStreams","searchMessages"],
   "attachments": ["updateAttachmentStorageId","uploadAttachmentFromUrl","uploadEmbedImageFromUrl"],
   "cache": ["findDiscordOAuthAccountByDiscordId","invalidateUserGuildsCache"],
   "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelSettingsWithIndexingEnabled","findChannelsByDiscordIds","findManyChannelsByDiscordIds","getChannelPageMessages","getChannelPageThreads","getCommunityPageHeaderData","getServerPageThreads","updateChannelSettings","upsertChannel"],
@@ -132,7 +148,7 @@ export const AUTHENTICATED_NAMESPACE_STRUCTURE = {
   "dashboard_mutations": ["generateBotCustomizationUploadUrl","updateBotCustomization","updateChannelSettingsFlags","updateChannelSolutionTag","updateCustomDomain","updateServerPreferencesFlags"],
   "dashboard_queries": ["getDashboardData","getIndexedMessageCount","getUserServersForDropdown"],
   "discord_token": [],
-  "github": ["getAccessibleRepos","getGitHubAccount"],
+  "github": ["getAccessibleRepos","getGitHubAccount","getOrgRepos","searchRepos"],
   "onboarding": ["applyRecommendedConfiguration"],
   "onboarding_action": ["getRecommendedConfiguration"],
   "stripe": ["createBillingPortalSession","createCheckoutSession","getSubscriptionInfo","syncAfterCheckout"],

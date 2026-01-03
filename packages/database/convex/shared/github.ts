@@ -17,10 +17,12 @@ export {
 	createGitHubIssue,
 	createOctokitClient,
 	fetchGitHubInstallationRepos,
+	getOrgPopularRepos,
 	GitHubErrorCodes,
 	getBetterAuthUserIdByDiscordId,
 	getGitHubAccountByDiscordId,
 	getGitHubAccountByUserId,
+	searchGitHubRepositories,
 	validateIssueTitleAndBody,
 	validateRepoOwnerAndName,
 } from "./auth/github";

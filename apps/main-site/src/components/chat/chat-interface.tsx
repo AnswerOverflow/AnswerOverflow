@@ -42,6 +42,7 @@ import {
 	ToolInput,
 	ToolOutput,
 } from "@packages/ui/components/ai-elements/tool";
+import { Button } from "@packages/ui/components/button";
 import {
 	Command,
 	CommandEmpty,
@@ -62,10 +63,12 @@ import {
 	type ToolUIPart,
 } from "ai";
 import { useMutation } from "convex/react";
-import { Bot, CheckIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
-import Image from "next/image";
+import { Bot, CheckIcon, CopyIcon, Menu, RefreshCcwIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { memo, useCallback, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
+import { useChatSidebar } from "./chat-sidebar";
+import { GitHubRepoSelector } from "./github-repo-selector";
 
 export type GitHubRepo = {
 	owner: string;
@@ -183,11 +186,22 @@ function MessageParts({
 
 type ChatInterfaceProps = {
 	repos?: GitHubRepo[];
+	initialThreadId?: string;
 };
 
-export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
-	const primaryRepo = repos[0];
-	const [threadId, setThreadId] = useState<string | null>(null);
+export function ChatInterface({
+	repos = [],
+	initialThreadId,
+}: ChatInterfaceProps) {
+	const router = useRouter();
+	const { setMobileSidebarOpen } = useChatSidebar();
+	const initialRepo = repos[0] ?? null;
+	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
+		initialRepo,
+	);
+	const [threadId, setThreadId] = useState<string | null>(
+		initialThreadId ?? null,
+	);
 	const [input, setInput] = useState("");
 	const [model, setModel] = useState(defaultModelId);
 	const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
@@ -232,11 +246,11 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 			const returnedThreadId = await sendMessageMutation({
 				threadId: threadId ?? undefined,
 				prompt: text,
-				repoContext: primaryRepo
+				repoContext: selectedRepo
 					? {
-							owner: primaryRepo.owner,
-							repo: primaryRepo.repo,
-							filePath: primaryRepo.filePath,
+							owner: selectedRepo.owner,
+							repo: selectedRepo.repo,
+							filePath: selectedRepo.filePath,
 						}
 					: undefined,
 				modelId: model,
@@ -244,9 +258,10 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 
 			if (!threadId) {
 				setThreadId(returnedThreadId);
+				router.push(`/chat/t/${returnedThreadId}`);
 			}
 		},
-		[threadId, primaryRepo, sendMessageMutation, model],
+		[threadId, selectedRepo, sendMessageMutation, model, router],
 	);
 
 	const lastMessage = messages.at(-1);
@@ -254,26 +269,31 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 	const isWaitingForResponse =
 		lastMessage?.role === "user" && lastMessage?.status !== "pending";
 
-	const title = primaryRepo
-		? repos.length === 1
-			? `Chat with ${primaryRepo.owner}/${primaryRepo.repo}`
-			: `Chat with ${repos.length} repositories`
+	const title = selectedRepo
+		? `Chat with ${selectedRepo.owner}/${selectedRepo.repo}`
 		: "Agent Chat";
 
-	const description = primaryRepo
-		? repos.length === 1
-			? `Ask questions about the ${primaryRepo.owner}/${primaryRepo.repo} codebase`
-			: `Ask questions about ${repos.length} codebases`
+	const description = selectedRepo
+		? `Ask questions about the ${selectedRepo.owner}/${selectedRepo.repo} codebase`
 		: "Test the Convex Agent with streaming, tool calls, and MCP integration.";
 
-	const placeholder = primaryRepo
-		? repos.length === 1
-			? `Ask about ${primaryRepo.owner}/${primaryRepo.repo}...`
-			: "Ask about the codebases..."
+	const placeholder = selectedRepo
+		? `Ask about ${selectedRepo.owner}/${selectedRepo.repo}...`
 		: "Send a message...";
 
 	return (
 		<div className="flex h-[calc(100dvh-var(--navbar-height))] w-full flex-col overflow-hidden">
+			<div className="lg:hidden flex items-center gap-2 px-4 py-2 border-b shrink-0">
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={() => setMobileSidebarOpen(true)}
+				>
+					<Menu className="size-5" />
+					<span className="sr-only">Open sidebar</span>
+				</Button>
+				<span className="text-sm font-medium truncate">{title}</span>
+			</div>
 			<div
 				ref={setScrollRef}
 				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
@@ -327,21 +347,10 @@ export function ChatInterface({ repos = [] }: ChatInterfaceProps) {
 							</PromptInputBody>
 							<PromptInputFooter>
 								<PromptInputTools>
-									{primaryRepo && (
-										<PromptInputButton>
-											<Image
-												src={`https://github.com/${primaryRepo.owner}.png?size=40`}
-												alt={primaryRepo.owner}
-												width={16}
-												height={16}
-												className="rounded-full"
-												unoptimized
-											/>
-											<span>
-												{primaryRepo.owner}/{primaryRepo.repo}
-											</span>
-										</PromptInputButton>
-									)}
+									<GitHubRepoSelector
+										selectedRepo={selectedRepo}
+										onSelectRepo={setSelectedRepo}
+									/>
 									<Popover
 										open={modelSelectorOpen}
 										onOpenChange={setModelSelectorOpen}

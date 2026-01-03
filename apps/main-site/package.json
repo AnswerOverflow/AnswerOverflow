@@ -38,6 +38,7 @@
 		"better-auth": "catalog:",
 		"botid": "^1.5.10",
 		"convex": "catalog:",
+		"date-fns": "^4.1.0",
 		"dayjs": "^1.11.18",
 		"discord-api-types": "^0.38.24",
 		"effect": "catalog:",
