@@ -51,26 +51,97 @@ import {
 	CommandItem,
 	CommandList,
 } from "@packages/ui/components/command";
+import { useSession } from "@packages/ui/components/convex-client-provider";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@packages/ui/components/popover";
 import {
+	useIsNavbarHidden,
+	useScrollContainer,
+} from "@packages/ui/hooks/use-scroll-container";
+import {
 	type DynamicToolUIPart,
 	getToolName,
 	isToolUIPart,
 	type ToolUIPart,
 } from "ai";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { Bot, CheckIcon, CopyIcon, Menu, RefreshCcwIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
-import { useScrollContainer } from "@packages/ui/hooks/use-scroll-container";
+import { useAuthenticatedQuery } from "@/lib/use-authenticated-query";
 import { useChatSidebar } from "./chat-sidebar";
 import { GitHubRepoSelector } from "./github-repo-selector";
+
+function ModelSelector({
+	selectedModel,
+	onSelectModel,
+}: {
+	selectedModel: string;
+	onSelectModel: (modelId: string) => void;
+}) {
+	const [open, setOpen] = useState(false);
+	const selectedModelData = models.find((m) => m.id === selectedModel);
+
+	return (
+		<Popover open={open} onOpenChange={setOpen}>
+			<PopoverTrigger asChild>
+				<PromptInputButton>
+					{selectedModelData?.chefSlug && (
+						<ModelSelectorLogo provider={selectedModelData.chefSlug} />
+					)}
+					{selectedModelData?.name && (
+						<ModelSelectorName>{selectedModelData.name}</ModelSelectorName>
+					)}
+				</PromptInputButton>
+			</PopoverTrigger>
+			<PopoverContent className="w-[300px] p-0" align="start">
+				<Command>
+					<CommandInput placeholder="Search models..." />
+					<CommandList>
+						<CommandEmpty>No models found.</CommandEmpty>
+						{["ZAI", "MiniMax", "OpenAI", "Anthropic", "Google"].map((chef) => (
+							<CommandGroup heading={chef} key={chef}>
+								{models
+									.filter((m) => m.chef === chef)
+									.map((m) => (
+										<CommandItem
+											key={m.id}
+											onSelect={() => {
+												onSelectModel(m.id);
+												setOpen(false);
+											}}
+											value={m.id}
+										>
+											<ModelSelectorLogo provider={m.chefSlug} />
+											<ModelSelectorName>{m.name}</ModelSelectorName>
+											<ModelSelectorLogoGroup>
+												{m.providers.map((provider) => (
+													<ModelSelectorLogo
+														key={provider}
+														provider={provider}
+													/>
+												))}
+											</ModelSelectorLogoGroup>
+											{selectedModel === m.id ? (
+												<CheckIcon className="ml-auto size-4" />
+											) : (
+												<div className="ml-auto size-4" />
+											)}
+										</CommandItem>
+									))}
+							</CommandGroup>
+						))}
+					</CommandList>
+				</Command>
+			</PopoverContent>
+		</Popover>
+	);
+}
 
 export type GitHubRepo = {
 	owner: string;
@@ -196,8 +267,11 @@ export function ChatInterface({
 	initialThreadId,
 }: ChatInterfaceProps) {
 	const router = useRouter();
+	const session = useSession({ allowAnonymous: false });
+	const isAuthenticated = !!session?.data;
 	const { setMobileSidebarOpen } = useChatSidebar();
 	const { setScrollContainer: setNavbarScrollContainer } = useScrollContainer();
+	const isNavbarHidden = useIsNavbarHidden();
 	const initialRepo = repos[0] ?? null;
 	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
 		initialRepo,
@@ -207,7 +281,6 @@ export function ChatInterface({
 	);
 	const [input, setInput] = useState("");
 	const [modelOverride, setModelOverride] = useState<string | null>(null);
-	const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 	const [isInputVisible, setIsInputVisible] = useState(true);
 	const [isNearBottom, setIsNearBottom] = useState(true);
 	const lastScrollTopRef = useRef(0);
@@ -216,7 +289,6 @@ export function ChatInterface({
 	);
 	const stickToBottomInstance = useStickToBottom({
 		initial: "instant",
-		resize: false,
 	});
 
 	useEffect(() => {
@@ -247,13 +319,12 @@ export function ChatInterface({
 		return () => scrollContainer.removeEventListener("scroll", handleScroll);
 	}, [scrollContainer]);
 
-	const threadMetadata = useQuery(
+	const threadMetadata = useAuthenticatedQuery(
 		api.chat.mutations.getChatThreadMetadata,
 		initialThreadId ? { threadId: initialThreadId } : "skip",
 	);
 
 	const model = modelOverride ?? threadMetadata?.modelId ?? defaultModelId;
-	const selectedModelData = models.find((m) => m.id === model);
 
 	const setScrollRef = (element: HTMLDivElement | null) => {
 		setScrollContainer(element);
@@ -276,7 +347,7 @@ export function ChatInterface({
 
 	const { results: messages } = useUIMessages(
 		api.chat.mutations.listMessages,
-		threadId ? { threadId } : "skip",
+		threadId && isAuthenticated ? { threadId } : "skip",
 		{ initialNumItems: 50, stream: true },
 	);
 
@@ -328,7 +399,9 @@ export function ChatInterface({
 		: "Send a message...";
 
 	return (
-		<div className="relative flex h-[calc(100dvh-var(--navbar-height))] w-full flex-col overflow-hidden">
+		<div
+			className={`relative flex w-full flex-col overflow-hidden ${isNavbarHidden ? "h-dvh" : "h-[calc(100dvh-var(--navbar-height))]"}`}
+		>
 			<div className="lg:hidden flex items-center gap-2 px-4 py-2 border-b shrink-0">
 				<Button
 					variant="ghost"
@@ -407,73 +480,10 @@ export function ChatInterface({
 										selectedRepo={selectedRepo}
 										onSelectRepo={setSelectedRepo}
 									/>
-									<Popover
-										open={modelSelectorOpen}
-										onOpenChange={setModelSelectorOpen}
-									>
-										<PopoverTrigger asChild>
-											<PromptInputButton>
-												{selectedModelData?.chefSlug && (
-													<ModelSelectorLogo
-														provider={selectedModelData.chefSlug}
-													/>
-												)}
-												{selectedModelData?.name && (
-													<ModelSelectorName>
-														{selectedModelData.name}
-													</ModelSelectorName>
-												)}
-											</PromptInputButton>
-										</PopoverTrigger>
-										<PopoverContent className="w-[300px] p-0" align="start">
-											<Command>
-												<CommandInput placeholder="Search models..." />
-												<CommandList>
-													<CommandEmpty>No models found.</CommandEmpty>
-													{[
-														"ZAI",
-														"MiniMax",
-														"OpenAI",
-														"Anthropic",
-														"Google",
-													].map((chef) => (
-														<CommandGroup heading={chef} key={chef}>
-															{models
-																.filter((m) => m.chef === chef)
-																.map((m) => (
-																	<CommandItem
-																		key={m.id}
-																		onSelect={() => {
-																			setModelOverride(m.id);
-																			setModelSelectorOpen(false);
-																		}}
-																		value={m.id}
-																	>
-																		<ModelSelectorLogo provider={m.chefSlug} />
-																		<ModelSelectorName>
-																			{m.name}
-																		</ModelSelectorName>
-																		<ModelSelectorLogoGroup>
-																			{m.providers.map((provider) => (
-																				<ModelSelectorLogo
-																					key={provider}
-																					provider={provider}
-																				/>
-																			))}
-																		</ModelSelectorLogoGroup>
-																		{model === m.id ? (
-																			<CheckIcon className="ml-auto size-4" />
-																		) : (
-																			<div className="ml-auto size-4" />
-																		)}
-																	</CommandItem>
-																))}
-														</CommandGroup>
-													))}
-												</CommandList>
-											</Command>
-										</PopoverContent>
-									</Popover>
+									<ModelSelector
+										selectedModel={model}
+										onSelectModel={setModelOverride}
+									/>
 								</PromptInputTools>
 								<PromptInputSubmit disabled={!input.trim()} />
 							</PromptInputFooter>
@@ -503,73 +513,10 @@ export function ChatInterface({
 										selectedRepo={selectedRepo}
 										onSelectRepo={setSelectedRepo}
 									/>
-									<Popover
-										open={modelSelectorOpen}
-										onOpenChange={setModelSelectorOpen}
-									>
-										<PopoverTrigger asChild>
-											<PromptInputButton>
-												{selectedModelData?.chefSlug && (
-													<ModelSelectorLogo
-														provider={selectedModelData.chefSlug}
-													/>
-												)}
-												{selectedModelData?.name && (
-													<ModelSelectorName>
-														{selectedModelData.name}
-													</ModelSelectorName>
-												)}
-											</PromptInputButton>
-										</PopoverTrigger>
-										<PopoverContent className="w-[300px] p-0" align="start">
-											<Command>
-												<CommandInput placeholder="Search models..." />
-												<CommandList>
-													<CommandEmpty>No models found.</CommandEmpty>
-													{[
-														"ZAI",
-														"MiniMax",
-														"OpenAI",
-														"Anthropic",
-														"Google",
-													].map((chef) => (
-														<CommandGroup heading={chef} key={chef}>
-															{models
-																.filter((m) => m.chef === chef)
-																.map((m) => (
-																	<CommandItem
-																		key={m.id}
-																		onSelect={() => {
-																			setModelOverride(m.id);
-																			setModelSelectorOpen(false);
-																		}}
-																		value={m.id}
-																	>
-																		<ModelSelectorLogo provider={m.chefSlug} />
-																		<ModelSelectorName>
-																			{m.name}
-																		</ModelSelectorName>
-																		<ModelSelectorLogoGroup>
-																			{m.providers.map((provider) => (
-																				<ModelSelectorLogo
-																					key={provider}
-																					provider={provider}
-																				/>
-																			))}
-																		</ModelSelectorLogoGroup>
-																		{model === m.id ? (
-																			<CheckIcon className="ml-auto size-4" />
-																		) : (
-																			<div className="ml-auto size-4" />
-																		)}
-																	</CommandItem>
-																))}
-														</CommandGroup>
-													))}
-												</CommandList>
-											</Command>
-										</PopoverContent>
-									</Popover>
+									<ModelSelector
+										selectedModel={model}
+										onSelectModel={setModelOverride}
+									/>
 								</PromptInputTools>
 								<PromptInputSubmit disabled={!input.trim()} />
 							</PromptInputFooter>

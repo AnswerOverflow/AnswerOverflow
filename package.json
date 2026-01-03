@@ -35,6 +35,7 @@
 		"@typescript/native-preview": "^7.0.0-dev.20260102.1",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.6",
+		"octokit": "^5.0.5",
 		"sharp": "^0.34.5",
 		"turbo": "^2.6.1",
 		"typescript": "catalog:"

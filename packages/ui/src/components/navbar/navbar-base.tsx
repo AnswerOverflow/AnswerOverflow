@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { useEffect } from "react";
+import { useCallback } from "react";
 import { cn } from "../../lib/utils";
 import { useHideOnScroll } from "../../hooks/use-hide-on-scroll";
 import { useIsMobile } from "../../hooks/use-mobile";
@@ -22,11 +22,11 @@ export function NavbarBase({
 	const isImpersonating = useIsImpersonating();
 	const isMobile = useIsMobile();
 	const { scrollContainer, setIsNavbarHidden } = useScrollContainer();
-	const isHidden = useHideOnScroll(isMobile, scrollContainer);
-
-	useEffect(() => {
-		setIsNavbarHidden(isHidden);
-	}, [isHidden, setIsNavbarHidden]);
+	const onHiddenChange = useCallback(
+		(hidden: boolean) => setIsNavbarHidden(hidden),
+		[setIsNavbarHidden],
+	);
+	const isHidden = useHideOnScroll(isMobile, scrollContainer, onHiddenChange);
 
 	return (
 		<header

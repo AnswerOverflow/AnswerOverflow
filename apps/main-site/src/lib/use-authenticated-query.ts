@@ -5,8 +5,11 @@ import type { FunctionReference } from "convex/server";
 export function useAuthenticatedQuery<
 	Query extends FunctionReference<"query">,
 	Args extends Query["_args"],
->(query: Query, args: Args): Query["_returnType"] | undefined {
+>(query: Query, args: Args | "skip"): Query["_returnType"] | undefined {
 	const session = useSession({ allowAnonymous: false });
 
-	return useStableQuery(query, session?.data ? args : ("skip" as const));
+	return useStableQuery(
+		query,
+		session?.data && args !== "skip" ? args : ("skip" as const),
+	);
 }

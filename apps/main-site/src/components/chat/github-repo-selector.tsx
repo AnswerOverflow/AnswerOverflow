@@ -19,7 +19,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { CheckIcon, GitFork, Loader2, Star } from "lucide-react";
 import Image from "next/image";
-import { useDeferredValue, useState } from "react";
+import { useState } from "react";
+import { useDebounce } from "use-debounce";
 import type { GitHubRepo } from "./chat-interface";
 import { useFeaturedRepos } from "./featured-repos-provider";
 
@@ -46,7 +47,7 @@ export function GitHubRepoSelector({
 	const initialFeaturedRepos = useFeaturedRepos();
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
-	const deferredSearch = useDeferredValue(search);
+	const [debouncedSearch] = useDebounce(search, 300);
 
 	const searchReposAction = useAction(api.authenticated.github.searchRepos);
 	const getOrgReposAction = useAction(api.authenticated.github.getOrgRepos);
@@ -82,11 +83,11 @@ export function GitHubRepoSelector({
 	});
 
 	const searchReposQuery = useQuery({
-		queryKey: ["github-search-repos", deferredSearch, selectedRepo?.owner],
+		queryKey: ["github-search-repos", debouncedSearch, selectedRepo?.owner],
 		queryFn: async () => {
-			if (!deferredSearch.trim()) return [];
+			if (!debouncedSearch.trim()) return [];
 			const result = await searchReposAction({
-				query: deferredSearch,
+				query: debouncedSearch,
 				org: selectedRepo?.owner,
 			});
 			if (result.success) {
@@ -94,7 +95,9 @@ export function GitHubRepoSelector({
 			}
 			return [];
 		},
-		enabled: open && !!deferredSearch.trim(),
+		enabled: open && !!debouncedSearch.trim(),
+		staleTime: 1000 * 60 * 2,
+		placeholderData: (prev) => prev,
 	});
 
 	const handleSelect = (repo: GitHubSearchRepo) => {
@@ -113,10 +116,15 @@ export function GitHubRepoSelector({
 		return count.toString();
 	};
 
-	const isLoading =
-		searchReposQuery.isLoading ||
+	const isDebouncing = search !== debouncedSearch;
+	const hasSearchData =
+		searchReposQuery.data && searchReposQuery.data.length > 0;
+	const isInitialLoading =
+		(isDebouncing && !hasSearchData) ||
+		(searchReposQuery.isLoading && !hasSearchData) ||
 		orgReposQuery.isLoading ||
 		(featuredReposQuery.isLoading && initialFeaturedRepos.length === 0);
+	const isRefetching = searchReposQuery.isFetching && hasSearchData;
 
 	const getDisplayRepos = () => {
 		if (search.trim()) {
@@ -171,13 +179,20 @@ export function GitHubRepoSelector({
 				align="start"
 			>
 				<Command shouldFilter={false}>
-					<CommandInput
-						placeholder="Search GitHub repositories..."
-						value={search}
-						onValueChange={setSearch}
-					/>
+					<div className="relative">
+						<CommandInput
+							placeholder="Search GitHub repositories..."
+							value={search}
+							onValueChange={setSearch}
+						/>
+						{isRefetching && (
+							<div className="absolute right-3 top-1/2 -translate-y-1/2">
+								<Loader2 className="size-3 animate-spin text-muted-foreground" />
+							</div>
+						)}
+					</div>
 					<CommandList>
-						{isLoading ? (
+						{isInitialLoading ? (
 							<div className="flex items-center justify-center py-6">
 								<Loader2 className="size-4 animate-spin text-muted-foreground" />
 							</div>
