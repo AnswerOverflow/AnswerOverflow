@@ -1,6 +1,8 @@
 "use client";
 
 import { cn } from "../../lib/utils";
+import { useHideOnScroll } from "../../hooks/use-hide-on-scroll";
+import { useIsMobile } from "../../hooks/use-mobile";
 import { useIsImpersonating } from "../impersonation-banner";
 import { Link } from "../link";
 import { ServerIcon } from "../server-icon";
@@ -17,12 +19,15 @@ export type TenantNavbarProps = {
 
 export function TenantNavbar({ showBorder = true, server }: TenantNavbarProps) {
 	const isImpersonating = useIsImpersonating();
+	const isMobile = useIsMobile();
+	const isHidden = useHideOnScroll(isMobile);
 
 	return (
 		<header
 			className={cn(
-				"fixed left-0 z-40 h-navbar w-full bg-background/95 backdrop-blur-sm px-4",
+				"fixed left-0 z-40 h-navbar w-full bg-background/95 backdrop-blur-sm px-4 transition-transform duration-300",
 				showBorder && "border-b border-border",
+				isHidden && "-translate-y-full",
 			)}
 			style={{ top: isImpersonating ? "40px" : "0" }}
 		>
