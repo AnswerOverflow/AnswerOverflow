@@ -208,14 +208,15 @@ export function ChatInterface({
 	const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 	const [isInputVisible, setIsInputVisible] = useState(true);
 	const lastScrollTopRef = useRef(0);
-	const scrollContainerRef = useRef<HTMLDivElement>(null);
+	const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(
+		null,
+	);
 	const stickToBottomInstance = useStickToBottom({
 		initial: "instant",
 		resize: "instant",
 	});
 
 	useEffect(() => {
-		const scrollContainer = scrollContainerRef.current;
 		if (!scrollContainer) return;
 
 		const handleScroll = () => {
@@ -237,7 +238,7 @@ export function ChatInterface({
 
 		scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
 		return () => scrollContainer.removeEventListener("scroll", handleScroll);
-	}, []);
+	}, [scrollContainer]);
 
 	const threadMetadata = useQuery(
 		api.chat.mutations.getChatThreadMetadata,
@@ -248,7 +249,7 @@ export function ChatInterface({
 	const selectedModelData = models.find((m) => m.id === model);
 
 	const setScrollRef = (element: HTMLDivElement | null) => {
-		scrollContainerRef.current = element;
+		setScrollContainer(element);
 		if (element && stickToBottomInstance.scrollRef) {
 			stickToBottomInstance.scrollRef(element);
 		}
@@ -317,7 +318,7 @@ export function ChatInterface({
 		: "Send a message...";
 
 	return (
-		<div className="flex h-[calc(100dvh-var(--navbar-height))] w-full flex-col overflow-hidden">
+		<div className="relative flex h-[calc(100dvh-var(--navbar-height))] w-full flex-col overflow-hidden">
 			<div className="lg:hidden flex items-center gap-2 px-4 py-2 border-b shrink-0">
 				<Button
 					variant="ghost"
@@ -381,12 +382,12 @@ export function ChatInterface({
 			</div>
 
 			<div
-				className={`shrink-0 w-full rounded-b-none z-10 bg-background transition-transform duration-300 ${
+				className={`absolute bottom-0 left-0 right-0 w-full rounded-b-none z-10 bg-background transition-transform duration-300 ${
 					isInputVisible ? "translate-y-0" : "translate-y-full"
 				}`}
 			>
-				<div className="grid shrink-0 gap-2 sm:gap-4 pt-2 sm:pt-4">
-					<div className="w-full px-2 sm:px-4 max-w-4xl mx-auto">
+				<div className="grid shrink-0 gap-2 ">
+					<div className="w-full  max-w-4xl mx-auto">
 						<PromptInput onSubmit={handleSubmit}>
 							<PromptInputBody>
 								<PromptInputTextarea
