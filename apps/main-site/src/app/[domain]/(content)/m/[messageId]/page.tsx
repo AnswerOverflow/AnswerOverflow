@@ -11,26 +11,26 @@ import {
 	type MessagePageHeaderData,
 	RepliesSection,
 	RepliesSkeleton,
-} from "../../../../components/message-page";
+} from "../../../../../components/message-page";
 import {
 	fetchMessagePageHeaderData,
 	fetchMessagePageReplies,
 	generateMessagePageMetadata,
-} from "../../../../components/message-page-loader";
+} from "../../../../../components/message-page-loader";
 import {
 	RecentAnnouncements,
 	RecentAnnouncementsSkeleton,
-} from "../../../../components/recent-announcements";
+} from "../../../../../components/recent-announcements";
 import {
 	SimilarThreads,
 	SimilarThreadsSkeleton,
-} from "../../../../components/similar-threads";
+} from "../../../../../components/similar-threads";
 import {
 	ThreadTags,
 	ThreadTagsSkeleton,
-} from "../../../../components/thread-tags";
-import { runtime } from "../../../../lib/runtime";
-import { getTenantData } from "../../../../lib/tenant";
+} from "../../../../../components/thread-tags";
+import { runtime } from "../../../../../lib/runtime";
+import { getTenantData } from "../../../../../lib/tenant";
 
 type Props = {
 	params: Promise<{ domain: string; messageId: string }>;

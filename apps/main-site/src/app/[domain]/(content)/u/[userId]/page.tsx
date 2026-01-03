@@ -9,8 +9,8 @@ import { notFound, redirect } from "next/navigation";
 import {
 	fetchUserPageHeaderData,
 	UserPageLoader,
-} from "../../../../components/user-page-loader";
-import { runtime } from "../../../../lib/runtime";
+} from "../../../../../components/user-page-loader";
+import { runtime } from "../../../../../lib/runtime";
 
 type Props = {
 	params: Promise<{ domain: string; userId: string }>;

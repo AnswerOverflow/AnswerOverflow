@@ -6,12 +6,12 @@ import { notFound, redirect } from "next/navigation";
 import {
 	fetchMessagePageReplies,
 	type MessagePageReplies,
-} from "../../../../../components/message-page-loader";
+} from "../../../../../../components/message-page-loader";
 import {
 	buildMessageMarkdown,
 	createMarkdownResponse,
-} from "../../../../../lib/message-markdown";
-import { runtime } from "../../../../../lib/runtime";
+} from "../../../../../../lib/message-markdown";
+import { runtime } from "../../../../../../lib/runtime";
 
 type RouteParams = {
 	params: Promise<{ domain: string; messageId: string }>;

@@ -1,7 +1,7 @@
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
-import { runtime } from "../../../lib/runtime";
+import { runtime } from "../../../../lib/runtime";
 
 type Props = {
 	params: Promise<{ domain: string }>;

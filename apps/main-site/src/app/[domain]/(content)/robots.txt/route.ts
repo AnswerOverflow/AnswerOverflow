@@ -1,7 +1,7 @@
 import { Database } from "@packages/database/database";
 import { normalizeSubpath } from "@packages/ui/utils/links";
 import { Effect } from "effect";
-import { runtime } from "../../../lib/runtime";
+import { runtime } from "../../../../lib/runtime";
 
 export async function GET(
 	_req: Request,

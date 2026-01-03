@@ -3,7 +3,7 @@ import { normalizeSubpath } from "@packages/ui/utils/links";
 import { Sitemap } from "@packages/ui/utils/sitemap";
 import { getDate } from "@packages/ui/utils/snowflake";
 import { Array as Arr, Effect } from "effect";
-import { runtime } from "../../../lib/runtime";
+import { runtime } from "../../../../lib/runtime";
 
 export const maxDuration = 300;
 

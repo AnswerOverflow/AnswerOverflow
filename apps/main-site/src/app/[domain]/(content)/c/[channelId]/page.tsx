@@ -8,8 +8,8 @@ import {
 	ChannelPageLoader,
 	fetchChannelPageHeaderData,
 	generateChannelPageMetadata,
-} from "../../../../components/channel-page-loader";
-import { getTenantData } from "../../../../lib/tenant";
+} from "../../../../../components/channel-page-loader";
+import { getTenantData } from "../../../../../lib/tenant";
 
 type Props = {
 	params: Promise<{ domain: string; channelId: string }>;
