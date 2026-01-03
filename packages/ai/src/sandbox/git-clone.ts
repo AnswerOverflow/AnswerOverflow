@@ -22,7 +22,7 @@ async function streamDownloadAndDecompress(
 ): Promise<Uint8Array> {
 	const headers: Record<string, string> = {};
 	if (token) {
-		headers["Authorization"] = `token ${token}`;
+		headers.Authorization = `token ${token}`;
 	}
 
 	const response = await fetch(url, { headers });
@@ -180,7 +180,7 @@ export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
 
 		const targetPath = targetDir.startsWith("/")
 			? targetDir
-			: ctx.cwd + "/" + targetDir;
+			: `${ctx.cwd}/${targetDir}`;
 
 		if (targetPath.includes("..")) {
 			return {
@@ -276,7 +276,7 @@ export function createGitCloneCommand(options: GitCloneCommandOptions = {}) {
 			}
 			return {
 				stdout: "",
-				stderr: "Failed to clone: " + errorMsg,
+				stderr: `Failed to clone: ${errorMsg}`,
 				exitCode: 1,
 			};
 		}

@@ -4,8 +4,8 @@ import { authComponent } from "../shared/betterAuth";
 import {
 	createOctokitClient,
 	fetchGitHubInstallationRepos,
-	getFeaturedRepos,
 	GitHubErrorCodes,
+	getFeaturedRepos,
 	getGitHubAccountByUserId,
 	getOrgPopularRepos,
 	searchGitHubRepositories,

@@ -83,7 +83,7 @@ Usage:
 			const lines = content.split("\n");
 			const raw = lines.slice(offset, offset + limit).map((line) => {
 				return line.length > MAX_LINE_LENGTH
-					? line.substring(0, MAX_LINE_LENGTH) + "..."
+					? `${line.substring(0, MAX_LINE_LENGTH)}...`
 					: line;
 			});
 			const formattedContent = raw.map((line, index) => {
@@ -241,7 +241,7 @@ function createSandboxGrepTool(virtualBash: VirtualBash, workdir: string) {
 					output.push(`${filePath}:`);
 				}
 				const truncatedText =
-					lineText.length > 200 ? lineText.substring(0, 200) + "..." : lineText;
+					lineText.length > 200 ? `${lineText.substring(0, 200)}...` : lineText;
 				output.push(`  Line ${lineNum}: ${truncatedText}`);
 			}
 
@@ -380,7 +380,7 @@ Usage:
 }
 
 const MAX_OUTPUT_LENGTH = 30_000;
-const DEFAULT_TIMEOUT = 2 * 60 * 1000;
+const _DEFAULT_TIMEOUT = 2 * 60 * 1000;
 
 function createSandboxBashTool(virtualBash: VirtualBash, workdir: string) {
 	const bashInputSchema = z.object({

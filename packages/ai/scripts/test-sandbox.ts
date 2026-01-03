@@ -24,10 +24,10 @@ async function main() {
 		"git clone --depth 1 https://github.com/godotengine/godot.git /repo",
 	);
 	const cloneTime = ((Date.now() - startTime) / 1000).toFixed(2);
-	console.log("Exit Code: " + cloneResult.exitCode);
-	console.log("Clone time: " + cloneTime + "s");
-	console.log("Stdout: " + cloneResult.stdout);
-	if (cloneResult.stderr) console.log("Stderr: " + cloneResult.stderr);
+	console.log(`Exit Code: ${cloneResult.exitCode}`);
+	console.log(`Clone time: ${cloneTime}s`);
+	console.log(`Stdout: ${cloneResult.stdout}`);
+	if (cloneResult.stderr) console.log(`Stderr: ${cloneResult.stderr}`);
 
 	console.log("\n=== Verification: Virtual FS Check ===");
 	console.log("Checking if /repo exists in REAL filesystem: ");
@@ -41,7 +41,7 @@ async function main() {
 	const virtualFsCheck = await virtualBash.exec("ls /repo | head -5");
 	if (virtualFsCheck.exitCode === 0) {
 		console.log("/repo EXISTS in virtual filesystem ✓");
-		console.log("First 5 items:\n" + virtualFsCheck.stdout);
+		console.log(`First 5 items:\n${virtualFsCheck.stdout}`);
 	} else {
 		console.log("ERROR: /repo not found in virtual filesystem");
 	}
@@ -54,7 +54,7 @@ async function main() {
 		toolDescription:
 			"Execute commands in a virtualized bash environment. The repository has been cloned to /repo. Use this tool to explore files, run commands like ls, cat, head, tail, grep, find, etc. This is an IN-MEMORY virtual filesystem - it does NOT access the real disk. Use this tool for ALL file operations.",
 	});
-	console.log("Virtual Bash MCP server running at: " + mcpServer.url);
+	console.log(`Virtual Bash MCP server running at: ${mcpServer.url}`);
 
 	console.log("\n=== Step 3: Starting OpenCode Session ===");
 
@@ -82,7 +82,7 @@ async function main() {
 		},
 	});
 
-	console.log("OpenCode server running at: " + opcodeServer.url);
+	console.log(`OpenCode server running at: ${opcodeServer.url}`);
 	console.log("Built-in file tools DISABLED, using virtual_bash MCP tool");
 
 	try {
@@ -91,7 +91,7 @@ async function main() {
 		});
 
 		const sessionId = session.data!.id;
-		console.log("Created session: " + sessionId);
+		console.log(`Created session: ${sessionId}`);
 
 		console.log("\n=== Step 4: Subscribing to Events ===");
 		const eventResult = await client.event.subscribe();
@@ -146,7 +146,7 @@ The Godot game engine repository has been cloned to /repo. Please use the virtua
 Remember: Use the virtual_bash tool for ALL operations.`;
 
 		console.log("\n=== Step 5: Sending Prompt to OpenCode ===");
-		console.log("Prompt:", prompt.substring(0, 100) + "...\n");
+		console.log("Prompt:", `${prompt.substring(0, 100)}...\n`);
 
 		await client.session.prompt({
 			path: { id: sessionId },
@@ -172,8 +172,8 @@ Remember: Use the virtual_bash tool for ALL operations.`;
 		clearTimeout(timeout);
 
 		console.log("\n\n=== Session Complete ===");
-		console.log("Session ID: " + sessionId);
-		console.log("Response length: " + assistantResponse.length + " chars");
+		console.log(`Session ID: ${sessionId}`);
+		console.log(`Response length: ${assistantResponse.length} chars`);
 	} finally {
 		console.log("\nShutting down servers...");
 		mcpServer.stop();

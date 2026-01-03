@@ -7,7 +7,7 @@ import {
 	CollapsibleTrigger,
 } from "@packages/ui/components/collapsible";
 import { cn } from "@packages/ui/lib/utils";
-import type { ToolUIPart, DynamicToolUIPart } from "ai";
+import type { DynamicToolUIPart, ToolUIPart } from "ai";
 import {
 	CheckCircleIcon,
 	ChevronDownIcon,

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { createOpencode, createOpencodeClient } from "@opencode-ai/sdk";
+import { createOpencode } from "@opencode-ai/sdk";
 
 async function testBasicSDK() {
 	console.log("=== OpenCode SDK Basic Test ===\n");

@@ -21,8 +21,8 @@ import type { ContextMenuCommandInteraction } from "discord.js";
 import { ButtonStyle, ComponentType, MessageFlags } from "discord.js";
 import { Cause, Data, Duration, Effect, Layer, Metric } from "effect";
 import { Suspense, useState } from "react";
-import { Discord } from "../core/discord-service";
 import { atomRuntime } from "../core/atom-runtime";
+import { Discord } from "../core/discord-service";
 import { commandExecuted } from "../metrics";
 import {
 	catchAllDefectWithReport,

@@ -1,6 +1,6 @@
 import { withSentryConfig } from "@sentry/nextjs";
-import { withBotId } from "botid/next/config";
 import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
+import { withBotId } from "botid/next/config";
 import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
 

@@ -2,10 +2,10 @@
 
 import {
 	createContext,
-	useContext,
-	useState,
 	type Dispatch,
 	type SetStateAction,
+	useContext,
+	useState,
 } from "react";
 
 type ScrollContainerContextValue = {

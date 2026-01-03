@@ -2,10 +2,10 @@
 
 import type * as React from "react";
 import { useCallback } from "react";
-import { cn } from "../../lib/utils";
 import { useHideOnScroll } from "../../hooks/use-hide-on-scroll";
 import { useIsMobile } from "../../hooks/use-mobile";
 import { useScrollContainer } from "../../hooks/use-scroll-container";
+import { cn } from "../../lib/utils";
 import { useIsImpersonating } from "../impersonation-banner";
 
 export interface NavbarBaseProps {

@@ -428,7 +428,7 @@ export const service = Effect.gen(function* () {
 							);
 						}
 
-						const cacheKey = createQueryCacheKey(
+						const _cacheKey = createQueryCacheKey(
 							getFunctionName(funcRef),
 							fullArgs,
 						);

@@ -1,10 +1,10 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import {
 	ChatInterface,
 	type GitHubRepo,
 } from "@/components/chat/chat-interface";
-import { useParams } from "next/navigation";
 
 export default function RepoChatPage() {
 	const params = useParams<{

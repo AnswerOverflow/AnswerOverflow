@@ -1,7 +1,7 @@
 "use client";
 
-import type { GitHubSearchRepo } from "@/lib/github";
 import { createContext, useContext } from "react";
+import type { GitHubSearchRepo } from "@/lib/github";
 
 const FeaturedReposContext = createContext<Array<GitHubSearchRepo>>([]);
 

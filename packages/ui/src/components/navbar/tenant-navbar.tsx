@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "../../lib/utils";
 import { useHideOnScroll } from "../../hooks/use-hide-on-scroll";
 import { useIsMobile } from "../../hooks/use-mobile";
+import { cn } from "../../lib/utils";
 import { useIsImpersonating } from "../impersonation-banner";
 import { Link } from "../link";
 import { ServerIcon } from "../server-icon";

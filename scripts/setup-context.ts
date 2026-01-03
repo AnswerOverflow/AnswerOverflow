@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 
-import { $ } from "bun";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { $ } from "bun";
 
 const CONTEXT_DIR = join(import.meta.dir, "..", ".context");
 
@@ -56,7 +56,7 @@ async function main() {
 		try {
 			await $`git clone --depth 1 ${repo.url} ${repoPath}`.quiet();
 			console.log(`✓ ${repo.name}`);
-		} catch (error) {
+		} catch (_error) {
 			console.error(`✗ ${repo.name} - failed to clone`);
 		}
 	}

@@ -1,6 +1,5 @@
 "use client";
 
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import { Badge } from "@packages/ui/components/badge";
 import {
 	Collapsible,
@@ -8,6 +7,7 @@ import {
 	CollapsibleTrigger,
 } from "@packages/ui/components/collapsible";
 import { cn } from "@packages/ui/lib/utils";
+import { useControllableState } from "@radix-ui/react-use-controllable-state";
 import {
 	BrainIcon,
 	ChevronDownIcon,

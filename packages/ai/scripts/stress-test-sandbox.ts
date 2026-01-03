@@ -8,7 +8,7 @@ const virtualBash = createVirtualBash({
 });
 
 async function runTest(
-	name: string,
+	_name: string,
 	command: string,
 	expectSuccess = true,
 ): Promise<{ passed: boolean; details: string }> {
@@ -295,7 +295,7 @@ async function main() {
 		},
 		{
 			name: "Large echo",
-			cmd: "echo " + "a".repeat(10000),
+			cmd: `echo ${"a".repeat(10000)}`,
 			expectSuccess: true,
 		},
 		{
@@ -431,7 +431,7 @@ async function main() {
 		if (!result.passed) console.log(`     Details: ${result.details}`);
 	}
 
-	console.log("\n" + "=".repeat(60));
+	console.log(`\n${"=".repeat(60)}`);
 	console.log("SUMMARY");
 	console.log("=".repeat(60));
 
@@ -452,7 +452,7 @@ async function main() {
 		}
 	}
 
-	console.log("\n" + "=".repeat(60));
+	console.log(`\n${"=".repeat(60)}`);
 	console.log("SECURITY ANALYSIS");
 	console.log("=".repeat(60));
 
@@ -470,7 +470,7 @@ async function main() {
 	const passwdResult = results.find(
 		(r) => r.name === "Read /etc/passwd with cat",
 	);
-	if (passwdResult && passwdResult.details.includes("root:")) {
+	if (passwdResult?.details.includes("root:")) {
 		criticalIssues.push("🚨 CRITICAL: /etc/passwd is readable!");
 	}
 
@@ -490,7 +490,7 @@ async function main() {
 		}
 	}
 
-	console.log("\n" + "=".repeat(60));
+	console.log(`\n${"=".repeat(60)}`);
 	console.log("ENVIRONMENT VARIABLE CHECK");
 	console.log("=".repeat(60));
 	const envCheck = await virtualBash.exec("env");
