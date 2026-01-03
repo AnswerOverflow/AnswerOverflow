@@ -32,7 +32,9 @@ export function MainSiteNavbar() {
 				<Search className="h-5 w-5" />
 				<span className="sr-only">Search</span>
 			</LinkButton>
-			<FeedbackButton />
+			<div className="hidden md:block">
+				<FeedbackButton />
+			</div>
 			{!session?.user && (
 				<LinkButton
 					className="hidden md:block"
