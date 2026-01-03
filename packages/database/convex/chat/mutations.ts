@@ -118,12 +118,12 @@ export const listMessages = authenticatedQuery({
 
 export const listThreads = authenticatedQuery({
 	args: {
-		paginationOpts: v.optional(paginationOptsValidator),
+		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
 		return ctx.runQuery(components.agent.threads.listThreadsByUserId, {
 			userId: args.userId,
-			paginationOpts: args.paginationOpts ?? { cursor: null, numItems: 50 },
+			paginationOpts: args.paginationOpts,
 			order: "desc",
 		});
 	},

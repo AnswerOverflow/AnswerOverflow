@@ -14,7 +14,7 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { usePaginatedQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, MessageSquare, MessageSquarePlus } from "lucide-react";
+import { Loader2, Menu, MessageSquare, MessageSquarePlus } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useState } from "react";
 
