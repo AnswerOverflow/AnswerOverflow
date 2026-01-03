@@ -207,6 +207,7 @@ export function ChatInterface({
 	const [modelOverride, setModelOverride] = useState<string | null>(null);
 	const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
 	const [isInputVisible, setIsInputVisible] = useState(true);
+	const [isNearBottom, setIsNearBottom] = useState(true);
 	const lastScrollTopRef = useRef(0);
 	const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(
 		null,
@@ -223,9 +224,11 @@ export function ChatInterface({
 			const currentScrollTop = scrollContainer.scrollTop;
 			const maxScrollTop =
 				scrollContainer.scrollHeight - scrollContainer.clientHeight;
-			const isAtBottom = currentScrollTop >= maxScrollTop - 10;
+			const nearBottom = currentScrollTop >= maxScrollTop - 400;
 
-			if (isAtBottom) {
+			setIsNearBottom(nearBottom);
+
+			if (nearBottom) {
 				setIsInputVisible(true);
 			} else if (currentScrollTop > lastScrollTopRef.current) {
 				setIsInputVisible(false);
@@ -235,6 +238,8 @@ export function ChatInterface({
 
 			lastScrollTopRef.current = currentScrollTop;
 		};
+
+		handleScroll();
 
 		scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
 		return () => scrollContainer.removeEventListener("scroll", handleScroll);
@@ -334,7 +339,9 @@ export function ChatInterface({
 				ref={setScrollRef}
 				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
 			>
-				<div className="max-w-4xl mx-auto w-full flex flex-col flex-1  sm:px-6 pt-6 pb-32">
+				<div
+					className={`max-w-4xl mx-auto w-full flex flex-col flex-1 sm:px-6 pt-6 ${isNearBottom ? "pb-4" : "pb-32"}`}
+				>
 					{!threadId ? (
 						<div className="flex flex-1 flex-col items-center justify-center gap-6">
 							<div className="flex flex-col items-center gap-4 text-center">
@@ -379,15 +386,104 @@ export function ChatInterface({
 						</Conversation>
 					)}
 				</div>
+				{isNearBottom && (
+					<div className="w-full max-w-4xl mx-auto px-2 sm:px-6 pb-4 lg:hidden">
+						<PromptInput onSubmit={handleSubmit}>
+							<PromptInputBody>
+								<PromptInputTextarea
+									value={input}
+									onChange={(e) => setInput(e.target.value)}
+									placeholder={placeholder}
+								/>
+							</PromptInputBody>
+							<PromptInputFooter>
+								<PromptInputTools>
+									<GitHubRepoSelector
+										selectedRepo={selectedRepo}
+										onSelectRepo={setSelectedRepo}
+									/>
+									<Popover
+										open={modelSelectorOpen}
+										onOpenChange={setModelSelectorOpen}
+									>
+										<PopoverTrigger asChild>
+											<PromptInputButton>
+												{selectedModelData?.chefSlug && (
+													<ModelSelectorLogo
+														provider={selectedModelData.chefSlug}
+													/>
+												)}
+												{selectedModelData?.name && (
+													<ModelSelectorName>
+														{selectedModelData.name}
+													</ModelSelectorName>
+												)}
+											</PromptInputButton>
+										</PopoverTrigger>
+										<PopoverContent className="w-[300px] p-0" align="start">
+											<Command>
+												<CommandInput placeholder="Search models..." />
+												<CommandList>
+													<CommandEmpty>No models found.</CommandEmpty>
+													{[
+														"ZAI",
+														"MiniMax",
+														"OpenAI",
+														"Anthropic",
+														"Google",
+													].map((chef) => (
+														<CommandGroup heading={chef} key={chef}>
+															{models
+																.filter((m) => m.chef === chef)
+																.map((m) => (
+																	<CommandItem
+																		key={m.id}
+																		onSelect={() => {
+																			setModelOverride(m.id);
+																			setModelSelectorOpen(false);
+																		}}
+																		value={m.id}
+																	>
+																		<ModelSelectorLogo provider={m.chefSlug} />
+																		<ModelSelectorName>
+																			{m.name}
+																		</ModelSelectorName>
+																		<ModelSelectorLogoGroup>
+																			{m.providers.map((provider) => (
+																				<ModelSelectorLogo
+																					key={provider}
+																					provider={provider}
+																				/>
+																			))}
+																		</ModelSelectorLogoGroup>
+																		{model === m.id ? (
+																			<CheckIcon className="ml-auto size-4" />
+																		) : (
+																			<div className="ml-auto size-4" />
+																		)}
+																	</CommandItem>
+																))}
+														</CommandGroup>
+													))}
+												</CommandList>
+											</Command>
+										</PopoverContent>
+									</Popover>
+								</PromptInputTools>
+								<PromptInputSubmit disabled={!input.trim()} />
+							</PromptInputFooter>
+						</PromptInput>
+					</div>
+				)}
 			</div>
 
 			<div
 				className={`absolute bottom-0 left-0 right-0 w-full rounded-b-none z-10 transition-transform duration-500 lg:translate-y-0 ${
-					isInputVisible ? "translate-y-0" : "translate-y-full"
+					isNearBottom || !isInputVisible ? "translate-y-full" : "translate-y-0"
 				}`}
 			>
-				<div className="grid shrink-0 gap-2 ">
-					<div className="w-full  max-w-4xl mx-auto">
+				<div className="grid shrink-0 gap-2">
+					<div className="w-full max-w-4xl mx-auto px-2 sm:px-4">
 						<PromptInput onSubmit={handleSubmit}>
 							<PromptInputBody>
 								<PromptInputTextarea
