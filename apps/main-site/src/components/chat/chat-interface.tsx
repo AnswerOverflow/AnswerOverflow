@@ -66,7 +66,7 @@ import { useMutation, useQuery } from "convex/react";
 import { Bot, CheckIcon, CopyIcon, Menu, RefreshCcwIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { memo, useCallback, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { useChatSidebar } from "./chat-sidebar";
 import { GitHubRepoSelector } from "./github-repo-selector";
@@ -206,11 +206,38 @@ export function ChatInterface({
 	const [input, setInput] = useState("");
 	const [modelOverride, setModelOverride] = useState<string | null>(null);
 	const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
+	const [isInputVisible, setIsInputVisible] = useState(true);
+	const lastScrollTopRef = useRef(0);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const stickToBottomInstance = useStickToBottom({
 		initial: "instant",
 		resize: "instant",
 	});
+
+	useEffect(() => {
+		const scrollContainer = scrollContainerRef.current;
+		if (!scrollContainer) return;
+
+		const handleScroll = () => {
+			const currentScrollTop = scrollContainer.scrollTop;
+			const maxScrollTop =
+				scrollContainer.scrollHeight - scrollContainer.clientHeight;
+			const isAtBottom = currentScrollTop >= maxScrollTop - 10;
+
+			if (isAtBottom) {
+				setIsInputVisible(true);
+			} else if (currentScrollTop > lastScrollTopRef.current) {
+				setIsInputVisible(false);
+			} else if (currentScrollTop < lastScrollTopRef.current) {
+				setIsInputVisible(true);
+			}
+
+			lastScrollTopRef.current = currentScrollTop;
+		};
+
+		scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+		return () => scrollContainer.removeEventListener("scroll", handleScroll);
+	}, []);
 
 	const threadMetadata = useQuery(
 		api.chat.mutations.getChatThreadMetadata,
@@ -353,7 +380,11 @@ export function ChatInterface({
 				</div>
 			</div>
 
-			<div className="shrink-0 w-full rounded-b-none z-10 bg-background">
+			<div
+				className={`shrink-0 w-full rounded-b-none z-10 bg-background transition-transform duration-300 ${
+					isInputVisible ? "translate-y-0" : "translate-y-full"
+				}`}
+			>
 				<div className="grid shrink-0 gap-2 sm:gap-4 pt-2 sm:pt-4">
 					<div className="w-full px-2 sm:px-4 max-w-4xl mx-auto">
 						<PromptInput onSubmit={handleSubmit}>
