@@ -310,9 +310,11 @@ export function ChatInterface({
 	const isWaitingForResponse =
 		lastMessage?.role === "user" && lastMessage?.status !== "pending";
 
-	const title = selectedRepo
-		? `Chat with ${selectedRepo.owner}/${selectedRepo.repo}`
-		: "Agent Chat";
+	const title = threadMetadata?.title
+		? threadMetadata.title
+		: selectedRepo
+			? `Chat with ${selectedRepo.owner}/${selectedRepo.repo}`
+			: "Agent Chat";
 
 	const description = selectedRepo
 		? `Ask questions about the ${selectedRepo.owner}/${selectedRepo.repo} codebase`
@@ -340,7 +342,7 @@ export function ChatInterface({
 				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
 			>
 				<div
-					className={`max-w-4xl mx-auto w-full flex flex-col flex-1 sm:px-6 pt-6 lg:pb-32 ${isNearBottom ? "pb-4" : "pb-32"}`}
+					className={`max-w-4xl mx-auto w-full flex flex-col flex-1 sm:px-6 pt-6 lg:pb-32 ${isNearBottom ? "" : "pb-32"}`}
 				>
 					{!threadId ? (
 						<div className="flex flex-1 flex-col items-center justify-center gap-6">
@@ -387,7 +389,7 @@ export function ChatInterface({
 					)}
 				</div>
 				{isNearBottom && (
-					<div className="w-full max-w-4xl mx-auto px-2 sm:px-6 pb-4 lg:hidden">
+					<div className="w-full max-w-4xl mx-auto px-2 sm:px-6  lg:hidden">
 						<PromptInput onSubmit={handleSubmit}>
 							<PromptInputBody>
 								<PromptInputTextarea

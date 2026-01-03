@@ -173,21 +173,23 @@ export const getChatThreadMetadata = authenticatedQuery({
 		threadId: v.string(),
 	},
 	handler: async (ctx, args) => {
-		await verifyThreadOwnership(ctx, args.threadId, args.userId);
+		const thread = await getThreadMetadata(ctx, components.agent, {
+			threadId: args.threadId,
+		});
+		if (thread.userId !== args.userId) {
+			throw new Error("You do not have permission to access this thread");
+		}
 
 		const metadata = await ctx.db
 			.query("chatThreadMetadata")
 			.withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
 			.first();
 
-		if (!metadata) {
-			return null;
-		}
-
 		return {
-			threadId: metadata.threadId,
-			repos: metadata.repos,
-			modelId: metadata.modelId,
+			threadId: args.threadId,
+			title: thread.title ?? null,
+			repos: metadata?.repos ?? null,
+			modelId: metadata?.modelId ?? null,
 		};
 	},
 });
