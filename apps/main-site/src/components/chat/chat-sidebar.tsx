@@ -194,7 +194,7 @@ export function ChatSidebar({ children }: { children: React.ReactNode }) {
 					</SheetContent>
 				</Sheet>
 
-				<div className="lg:ml-[280px] flex-1">{children}</div>
+				<div className="lg:ml-[280px] flex-1 overflow-hidden">{children}</div>
 			</div>
 		</ChatSidebarContext.Provider>
 	);

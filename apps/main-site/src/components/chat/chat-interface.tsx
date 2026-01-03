@@ -334,7 +334,7 @@ export function ChatInterface({
 				ref={setScrollRef}
 				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
 			>
-				<div className="max-w-4xl mx-auto w-full flex flex-col flex-1 px-4 sm:px-6 pt-6 pb-4">
+				<div className="max-w-4xl mx-auto w-full flex flex-col flex-1  sm:px-6 pt-6 pb-32">
 					{!threadId ? (
 						<div className="flex flex-1 flex-col items-center justify-center gap-6">
 							<div className="flex flex-col items-center gap-4 text-center">
