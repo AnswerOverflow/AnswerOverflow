@@ -7,7 +7,7 @@
 		"postinstall": "fumadocs-mdx",
 		"with-env": "bun run --env-file=../../.env --",
 		"with-env:prod": "bun run --env-file=../../.env.production --",
-		"dev": "NODE_ENV=development bun with-env next dev --turbo",
+		"dev": "NODE_ENV=development bun with-env next dev --turbo ${REMOTE_DEV:+-H 0.0.0.0}",
 		"dev:prod": "NODE_ENV=development bun with-env:prod next dev --turbo",
 		"build": "bun with-env next build",
 		"start": "bun with-env next start",
