@@ -382,7 +382,7 @@ export function ChatInterface({
 			</div>
 
 			<div
-				className={`absolute bottom-0 left-0 right-0 w-full rounded-b-none z-10 bg-background transition-transform duration-300 ${
+				className={`absolute bottom-0 left-0 right-0 w-full rounded-b-none z-10 transition-transform duration-500 lg:translate-y-0 ${
 					isInputVisible ? "translate-y-0" : "translate-y-full"
 				}`}
 			>
