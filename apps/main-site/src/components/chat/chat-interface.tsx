@@ -66,7 +66,7 @@ import { useMutation, useQuery } from "convex/react";
 import { Bot, CheckIcon, CopyIcon, Menu, RefreshCcwIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { memo, useCallback, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { useChatSidebar } from "./chat-sidebar";
 import { GitHubRepoSelector } from "./github-repo-selector";
@@ -206,11 +206,44 @@ export function ChatInterface({
 	const [input, setInput] = useState("");
 	const [modelOverride, setModelOverride] = useState<string | null>(null);
 	const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
-	const scrollContainerRef = useRef<HTMLDivElement>(null);
+	const [isInputVisible, setIsInputVisible] = useState(true);
+	const [isNearBottom, setIsNearBottom] = useState(true);
+	const lastScrollTopRef = useRef(0);
+	const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(
+		null,
+	);
 	const stickToBottomInstance = useStickToBottom({
 		initial: "instant",
 		resize: "instant",
 	});
+
+	useEffect(() => {
+		if (!scrollContainer) return;
+
+		const handleScroll = () => {
+			const currentScrollTop = scrollContainer.scrollTop;
+			const maxScrollTop =
+				scrollContainer.scrollHeight - scrollContainer.clientHeight;
+			const nearBottom = currentScrollTop >= maxScrollTop - 400;
+
+			setIsNearBottom(nearBottom);
+
+			if (nearBottom) {
+				setIsInputVisible(true);
+			} else if (currentScrollTop > lastScrollTopRef.current) {
+				setIsInputVisible(false);
+			} else if (currentScrollTop < lastScrollTopRef.current) {
+				setIsInputVisible(true);
+			}
+
+			lastScrollTopRef.current = currentScrollTop;
+		};
+
+		handleScroll();
+
+		scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+		return () => scrollContainer.removeEventListener("scroll", handleScroll);
+	}, [scrollContainer]);
 
 	const threadMetadata = useQuery(
 		api.chat.mutations.getChatThreadMetadata,
@@ -221,7 +254,7 @@ export function ChatInterface({
 	const selectedModelData = models.find((m) => m.id === model);
 
 	const setScrollRef = (element: HTMLDivElement | null) => {
-		scrollContainerRef.current = element;
+		setScrollContainer(element);
 		if (element && stickToBottomInstance.scrollRef) {
 			stickToBottomInstance.scrollRef(element);
 		}
@@ -277,9 +310,11 @@ export function ChatInterface({
 	const isWaitingForResponse =
 		lastMessage?.role === "user" && lastMessage?.status !== "pending";
 
-	const title = selectedRepo
-		? `Chat with ${selectedRepo.owner}/${selectedRepo.repo}`
-		: "Agent Chat";
+	const title = threadMetadata?.title
+		? threadMetadata.title
+		: selectedRepo
+			? `Chat with ${selectedRepo.owner}/${selectedRepo.repo}`
+			: "Agent Chat";
 
 	const description = selectedRepo
 		? `Ask questions about the ${selectedRepo.owner}/${selectedRepo.repo} codebase`
@@ -290,7 +325,7 @@ export function ChatInterface({
 		: "Send a message...";
 
 	return (
-		<div className="flex h-[calc(100dvh-var(--navbar-height))] w-full flex-col overflow-hidden">
+		<div className="relative flex h-[calc(100dvh-var(--navbar-height))] w-full flex-col overflow-hidden">
 			<div className="lg:hidden flex items-center gap-2 px-4 py-2 border-b shrink-0">
 				<Button
 					variant="ghost"
@@ -306,7 +341,9 @@ export function ChatInterface({
 				ref={setScrollRef}
 				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
 			>
-				<div className="max-w-4xl mx-auto w-full flex flex-col flex-1 px-4 sm:px-6 pt-6 pb-4">
+				<div
+					className={`max-w-4xl mx-auto w-full flex flex-col flex-1 sm:px-6 pt-6 lg:pb-32 ${isNearBottom ? "" : "pb-32"}`}
+				>
 					{!threadId ? (
 						<div className="flex flex-1 flex-col items-center justify-center gap-6">
 							<div className="flex flex-col items-center gap-4 text-center">
@@ -351,11 +388,104 @@ export function ChatInterface({
 						</Conversation>
 					)}
 				</div>
+				{isNearBottom && (
+					<div className="w-full max-w-4xl mx-auto px-2 sm:px-6  lg:hidden">
+						<PromptInput onSubmit={handleSubmit}>
+							<PromptInputBody>
+								<PromptInputTextarea
+									value={input}
+									onChange={(e) => setInput(e.target.value)}
+									placeholder={placeholder}
+								/>
+							</PromptInputBody>
+							<PromptInputFooter>
+								<PromptInputTools>
+									<GitHubRepoSelector
+										selectedRepo={selectedRepo}
+										onSelectRepo={setSelectedRepo}
+									/>
+									<Popover
+										open={modelSelectorOpen}
+										onOpenChange={setModelSelectorOpen}
+									>
+										<PopoverTrigger asChild>
+											<PromptInputButton>
+												{selectedModelData?.chefSlug && (
+													<ModelSelectorLogo
+														provider={selectedModelData.chefSlug}
+													/>
+												)}
+												{selectedModelData?.name && (
+													<ModelSelectorName>
+														{selectedModelData.name}
+													</ModelSelectorName>
+												)}
+											</PromptInputButton>
+										</PopoverTrigger>
+										<PopoverContent className="w-[300px] p-0" align="start">
+											<Command>
+												<CommandInput placeholder="Search models..." />
+												<CommandList>
+													<CommandEmpty>No models found.</CommandEmpty>
+													{[
+														"ZAI",
+														"MiniMax",
+														"OpenAI",
+														"Anthropic",
+														"Google",
+													].map((chef) => (
+														<CommandGroup heading={chef} key={chef}>
+															{models
+																.filter((m) => m.chef === chef)
+																.map((m) => (
+																	<CommandItem
+																		key={m.id}
+																		onSelect={() => {
+																			setModelOverride(m.id);
+																			setModelSelectorOpen(false);
+																		}}
+																		value={m.id}
+																	>
+																		<ModelSelectorLogo provider={m.chefSlug} />
+																		<ModelSelectorName>
+																			{m.name}
+																		</ModelSelectorName>
+																		<ModelSelectorLogoGroup>
+																			{m.providers.map((provider) => (
+																				<ModelSelectorLogo
+																					key={provider}
+																					provider={provider}
+																				/>
+																			))}
+																		</ModelSelectorLogoGroup>
+																		{model === m.id ? (
+																			<CheckIcon className="ml-auto size-4" />
+																		) : (
+																			<div className="ml-auto size-4" />
+																		)}
+																	</CommandItem>
+																))}
+														</CommandGroup>
+													))}
+												</CommandList>
+											</Command>
+										</PopoverContent>
+									</Popover>
+								</PromptInputTools>
+								<PromptInputSubmit disabled={!input.trim()} />
+							</PromptInputFooter>
+						</PromptInput>
+					</div>
+				)}
 			</div>
 
-			<div className="shrink-0 w-full rounded-b-none z-10 bg-background">
-				<div className="grid shrink-0 gap-2 sm:gap-4 pt-2 sm:pt-4">
-					<div className="w-full px-2 sm:px-4 max-w-4xl mx-auto">
+			<div
+				className={`absolute bottom-0 left-0 right-0 w-full rounded-b-none z-10 transition-transform duration-500 lg:translate-y-0 ${
+					isNearBottom || !isInputVisible ? "translate-y-full" : "translate-y-0"
+				}`}
+			>
+				<div className="grid shrink-0 gap-2">
+					<div className="w-full max-w-4xl mx-auto px-2 sm:px-4">
 						<PromptInput onSubmit={handleSubmit}>
 							<PromptInputBody>
 								<PromptInputTextarea
