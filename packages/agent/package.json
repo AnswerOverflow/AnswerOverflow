@@ -3,6 +3,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"with-env": "bun run --env-file=../../.env",
 		"typecheck": "tsgo --noEmit",
 		"test": "vitest run --typecheck",
 		"test:watch": "vitest --typecheck --clearScreen false"
@@ -13,7 +14,9 @@
 		"./validators": "./src/validators.ts",
 		"./react": "./src/react/index.ts",
 		"./test": "./src/test.ts",
-		"./convex.config": "./src/component/convex.config.ts"
+		"./convex.config": "./src/component/convex.config.ts",
+		"./args": "./src/component/args.ts",
+		"./http": "./src/http/index.ts"
 	},
 	"dependencies": {
 		"@ai-sdk/provider-utils": "catalog:",
