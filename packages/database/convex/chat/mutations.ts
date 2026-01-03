@@ -17,6 +17,7 @@ import {
 	type QueryCtx,
 } from "../client";
 import { defaultModelId, vModelId } from "../shared/models";
+import { rateLimiter } from "../shared/rateLimiter";
 
 export const vRepoContext = v.object({
 	owner: v.string(),
@@ -44,9 +45,19 @@ export const sendMessage = authenticatedMutation({
 	},
 	returns: v.string(),
 	handler: async (ctx, args) => {
+		const userId = args.userId;
+
+		const rateLimit = await rateLimiter.limit(ctx, "chatMessage", {
+			key: userId,
+		});
+		if (!rateLimit.ok) {
+			throw new Error(
+				`Rate limit exceeded. Try again in ${Math.ceil((rateLimit.retryAfter ?? 0) / 1000)} seconds.`,
+			);
+		}
+
 		let threadId = args.threadId;
 		const modelId = args.modelId ?? defaultModelId;
-		const userId = args.userId;
 
 		if (threadId) {
 			const existingThreadId = threadId;
