@@ -27,6 +27,7 @@ const ALLOWED_TENANT_PATHS = [
 const TRUSTED_ORIGINS = [
 	"https://www.answeroverflow.com",
 	"http://localhost:3000",
+	"http://local.rhys.dev:3000",
 ];
 
 export const authComponent = createClient<DataModel, typeof authSchema>(

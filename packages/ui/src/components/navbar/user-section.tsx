@@ -149,7 +149,8 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 		await authClient.signOut();
 
 		const isDevAuth =
-			window.location.href.includes("localhost") &&
+			(window.location.href.includes("localhost") ||
+				window.location.href.includes("local.rhys.dev")) &&
 			process.env.NEXT_PUBLIC_CONVEX_URL?.includes("api.answeroverflow.com");
 
 		if (isDevAuth) {

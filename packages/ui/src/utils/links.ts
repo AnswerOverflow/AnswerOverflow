@@ -86,6 +86,7 @@ export function isOnMainSite(host: string | null | undefined) {
 		normalizedHost === bareMainHost ||
 		normalizedHost === "localhost" ||
 		normalizedHost === "127.0.0.1" ||
+		normalizedHost === "local.rhys.dev" ||
 		normalizedHost?.endsWith(".vercel.app") ||
 		normalizedHost?.includes("ngrok-free.app") ||
 		normalizedHost === "new.answeroverflow.com"
