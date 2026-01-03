@@ -531,3 +531,25 @@ export async function getOrgPopularRepos(
 		language: repo.language,
 	}));
 }
+
+export async function getFeaturedRepos(
+	octokit: Octokit,
+): Promise<Array<GitHubSearchRepo>> {
+	const { data } = await octokit.rest.search.repos({
+		q: "stars:>50000",
+		per_page: 20,
+		sort: "stars",
+		order: "desc",
+	});
+
+	return data.items.map((repo) => ({
+		id: repo.id,
+		name: repo.name,
+		fullName: repo.full_name,
+		owner: repo.owner?.login ?? "",
+		private: repo.private ?? false,
+		description: repo.description,
+		stargazersCount: repo.stargazers_count ?? 0,
+		language: repo.language,
+	}));
+}

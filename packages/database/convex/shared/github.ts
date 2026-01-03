@@ -17,6 +17,7 @@ export {
 	createGitHubIssue,
 	createOctokitClient,
 	fetchGitHubInstallationRepos,
+	getFeaturedRepos,
 	getOrgPopularRepos,
 	GitHubErrorCodes,
 	getBetterAuthUserIdByDiscordId,

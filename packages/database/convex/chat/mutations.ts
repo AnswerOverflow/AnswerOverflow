@@ -49,16 +49,30 @@ export const sendMessage = authenticatedMutation({
 		const userId = args.userId;
 
 		if (threadId) {
-			await verifyThreadOwnership(ctx, threadId, userId);
+			const existingThreadId = threadId;
+			await verifyThreadOwnership(ctx, existingThreadId, userId);
+
+			const existingMetadata = await ctx.db
+				.query("chatThreadMetadata")
+				.withIndex("by_threadId", (q) => q.eq("threadId", existingThreadId))
+				.first();
+
+			if (existingMetadata) {
+				await ctx.db.patch(existingMetadata._id, { modelId });
+			} else {
+				await ctx.db.insert("chatThreadMetadata", {
+					threadId: existingThreadId,
+					modelId,
+				});
+			}
 		} else {
 			threadId = await createThread(ctx, components.agent, { userId });
 
-			if (args.repoContext) {
-				await ctx.db.insert("chatThreadMetadata", {
-					threadId,
-					repos: [args.repoContext],
-				});
-			}
+			await ctx.db.insert("chatThreadMetadata", {
+				threadId,
+				repos: args.repoContext ? [args.repoContext] : undefined,
+				modelId,
+			});
 		}
 
 		const { messageId } = await saveMessage(ctx, components.agent, {
@@ -140,5 +154,29 @@ export const updateThreadTitle = authenticatedMutation({
 			threadId: args.threadId,
 			patch: { title: args.title },
 		});
+	},
+});
+
+export const getChatThreadMetadata = authenticatedQuery({
+	args: {
+		threadId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		await verifyThreadOwnership(ctx, args.threadId, args.userId);
+
+		const metadata = await ctx.db
+			.query("chatThreadMetadata")
+			.withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+			.first();
+
+		if (!metadata) {
+			return null;
+		}
+
+		return {
+			threadId: metadata.threadId,
+			repos: metadata.repos,
+			modelId: metadata.modelId,
+		};
 	},
 });
