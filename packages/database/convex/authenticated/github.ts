@@ -4,6 +4,7 @@ import { authComponent } from "../shared/betterAuth";
 import {
 	createOctokitClient,
 	fetchGitHubInstallationRepos,
+	getFeaturedRepos,
 	GitHubErrorCodes,
 	getGitHubAccountByUserId,
 	getOrgPopularRepos,
@@ -164,6 +165,48 @@ export const getOrgRepos = authenticatedAction({
 				success: false as const,
 				error:
 					error instanceof Error ? error.message : "Failed to get org repos",
+				code: GitHubErrorCodes.FETCH_FAILED,
+			};
+		}
+	},
+});
+
+export const getFeatured = authenticatedAction({
+	args: {},
+	handler: async (ctx, args) => {
+		const account = await getGitHubAccountByUserId(ctx, args.userId);
+
+		if (!account) {
+			return {
+				success: false as const,
+				error: "GitHub account not linked",
+				code: GitHubErrorCodes.NOT_LINKED,
+			};
+		}
+
+		const octokitResult = await createOctokitClient(ctx, account);
+		if (!octokitResult.success) {
+			return {
+				success: false as const,
+				error: octokitResult.error,
+				code: octokitResult.code,
+			};
+		}
+
+		try {
+			const repos = await getFeaturedRepos(octokitResult.octokit);
+
+			return {
+				success: true as const,
+				repos,
+			};
+		} catch (error) {
+			return {
+				success: false as const,
+				error:
+					error instanceof Error
+						? error.message
+						: "Failed to get featured repos",
 				code: GitHubErrorCodes.FETCH_FAILED,
 			};
 		}
