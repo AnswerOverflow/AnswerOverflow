@@ -41,7 +41,7 @@ export function useChatSidebar() {
 
 function ThreadList({ onThreadClick }: { onThreadClick?: () => void }) {
 	const pathname = usePathname();
-	const session = useSession({ allowAnonymous: false });
+	const session = useSession({ allowAnonymous: true });
 	const isAuthenticated = !!session?.data;
 	const isLoading = session.isPending;
 
@@ -59,17 +59,6 @@ function ThreadList({ onThreadClick }: { onThreadClick?: () => void }) {
 		return (
 			<div className="flex items-center justify-center py-8">
 				<Loader2 className="size-4 animate-spin text-muted-foreground" />
-			</div>
-		);
-	}
-
-	if (!isAuthenticated) {
-		return (
-			<div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-				<MessageSquare className="size-8 text-muted-foreground mb-2" />
-				<p className="text-sm text-muted-foreground">
-					Sign in to see your chats
-				</p>
 			</div>
 		);
 	}

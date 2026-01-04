@@ -11,11 +11,12 @@ import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
 import {
 	type ActionCtx,
-	authenticatedMutation,
-	authenticatedQuery,
 	type MutationCtx,
 	type QueryCtx,
+	anonOrAuthenticatedMutation,
+	anonOrAuthenticatedQuery,
 } from "../client";
+import { authComponent } from "../shared/betterAuth";
 import { defaultModelId, vModelId } from "../shared/models";
 import { rateLimiter } from "../shared/rateLimiter";
 
@@ -36,7 +37,7 @@ async function verifyThreadOwnership(
 	}
 }
 
-export const sendMessage = authenticatedMutation({
+export const sendMessage = anonOrAuthenticatedMutation({
 	args: {
 		threadId: v.optional(v.string()),
 		prompt: v.string(),
@@ -46,8 +47,11 @@ export const sendMessage = authenticatedMutation({
 	returns: v.string(),
 	handler: async (ctx, args) => {
 		const userId = args.userId;
+		const user = await authComponent.getAuthUser(ctx);
+		const isAnonymous = user?.isAnonymous ?? false;
 
-		const rateLimit = await rateLimiter.limit(ctx, "chatMessage", {
+		const rateLimitName = isAnonymous ? "chatMessageAnon" : "chatMessage";
+		const rateLimit = await rateLimiter.limit(ctx, rateLimitName, {
 			key: userId,
 		});
 		if (!rateLimit.ok) {
@@ -108,7 +112,7 @@ export const sendMessage = authenticatedMutation({
 	},
 });
 
-export const listMessages = authenticatedQuery({
+export const listMessages = anonOrAuthenticatedQuery({
 	args: {
 		threadId: v.string(),
 		paginationOpts: paginationOptsValidator,
@@ -122,7 +126,7 @@ export const listMessages = authenticatedQuery({
 	},
 });
 
-export const listThreads = authenticatedQuery({
+export const listThreads = anonOrAuthenticatedQuery({
 	args: {
 		paginationOpts: paginationOptsValidator,
 	},
@@ -156,7 +160,7 @@ export const listThreads = authenticatedQuery({
 	},
 });
 
-export const deleteThread = authenticatedMutation({
+export const deleteThread = anonOrAuthenticatedMutation({
 	args: {
 		threadId: v.string(),
 	},
@@ -180,7 +184,7 @@ export const deleteThread = authenticatedMutation({
 	},
 });
 
-export const updateThreadTitle = authenticatedMutation({
+export const updateThreadTitle = anonOrAuthenticatedMutation({
 	args: {
 		threadId: v.string(),
 		title: v.string(),
@@ -195,7 +199,7 @@ export const updateThreadTitle = authenticatedMutation({
 	},
 });
 
-export const getChatThreadMetadata = authenticatedQuery({
+export const getChatThreadMetadata = anonOrAuthenticatedQuery({
 	args: {
 		threadId: v.string(),
 	},

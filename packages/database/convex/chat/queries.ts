@@ -111,3 +111,30 @@ export const updateAgentStatus = internalMutation({
 		return null;
 	},
 });
+
+export const migrateThreadsToNewUser = internalMutation({
+	args: {
+		fromUserId: v.string(),
+		toUserId: v.string(),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const threads = await ctx.runQuery(
+			components.agent.threads.listThreadsByUserId,
+			{
+				userId: args.fromUserId,
+				paginationOpts: { cursor: null, numItems: 1000 },
+				order: "desc",
+			},
+		);
+
+		for (const thread of threads.page) {
+			await ctx.runMutation(components.agent.threads.updateThread, {
+				threadId: thread._id,
+				patch: { userId: args.toUserId },
+			});
+		}
+
+		return null;
+	},
+});

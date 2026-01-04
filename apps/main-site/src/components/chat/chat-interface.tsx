@@ -293,7 +293,7 @@ export function ChatInterface({
 	threadId: initialThreadId,
 	initialRepo,
 }: ChatInterfaceProps) {
-	const session = useSession({ allowAnonymous: false });
+	const session = useSession({ allowAnonymous: true });
 	const isAuthenticated = !!session?.data;
 	const { setMobileSidebarOpen } = useChatSidebar();
 	const isNavbarHidden = useIsNavbarHidden();
@@ -315,6 +315,7 @@ export function ChatInterface({
 	const threadMetadata = useAuthenticatedQuery(
 		api.chat.mutations.getChatThreadMetadata,
 		currentThreadId ? { threadId: currentThreadId } : "skip",
+		{ allowAnonymous: true },
 	);
 
 	const { results: messages } = useUIMessages(
@@ -392,6 +393,16 @@ export function ChatInterface({
 	};
 
 	const lastMessageId = messages.at(-1)?.id;
+
+	if (session.isPending) {
+		return (
+			<div
+				className={`relative flex w-full flex-col items-center justify-center overflow-hidden ${isNavbarHidden ? "h-dvh" : "h-[calc(100dvh-var(--navbar-height))]"}`}
+			>
+				<Loader2 className="size-8 animate-spin text-muted-foreground" />
+			</div>
+		);
+	}
 
 	return (
 		<div

@@ -3,6 +3,7 @@ import { convex, crossDomain } from "@convex-dev/better-auth/plugins";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { admin, anonymous, apiKey } from "better-auth/plugins";
+import type { GenericActionCtx } from "convex/server";
 import { components, internal } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
@@ -159,6 +160,16 @@ export const createAuthOptions = (
 			}),
 			anonymous({
 				disableDeleteAnonymousUser: true,
+				onLinkAccount: async ({ anonymousUser, newUser }) => {
+					const actionCtx = ctx as GenericActionCtx<DataModel>;
+					await actionCtx.runMutation(
+						internal.chat.queries.migrateThreadsToNewUser,
+						{
+							fromUserId: anonymousUser.user.id,
+							toUserId: newUser.user.id,
+						},
+					);
+				},
 			}),
 			admin({
 				impersonationSessionDuration: 60 * 60,
