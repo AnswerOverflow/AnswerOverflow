@@ -1,6 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import aggregate from "@convex-dev/aggregate/test";
 import { convexTest } from "@packages/convex-test";
 import type {
 	FunctionArgs,
@@ -63,6 +64,10 @@ async function buildModules(): Promise<Record<string, () => Promise<unknown>>> {
 const createTestService = Effect.gen(function* () {
 	const modules = yield* Effect.promise(buildModules);
 	const testClient = convexTest(schema, modules);
+
+	aggregate.register(testClient, "rootChannelMessageCounts");
+	aggregate.register(testClient, "threadMessageCounts");
+	aggregate.register(testClient, "threadCounts");
 
 	const adaptedClient: ConvexClientShared = {
 		query: <Query extends FunctionReference<"query">>(
