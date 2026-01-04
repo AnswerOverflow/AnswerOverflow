@@ -14,6 +14,7 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       pr: ${{ steps.release.outputs.pr }}
+      pr_number: ${{ steps.release.outputs.prs && fromJSON(steps.release.outputs.prs)[0].number || '' }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
@@ -21,9 +22,9 @@ jobs:
         with:
           release-type: node
 
-  ai-summary:
+  ai-release-notes:
     needs: release-please
-    if: needs.release-please.outputs.pr
+    if: needs.release-please.outputs.pr_number != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,41 +44,55 @@ jobs:
         run: |
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           if [ -z "$LAST_TAG" ]; then
-            COMMITS=$(git log --oneline -50)
+            COMMITS=$(git log --pretty=format:"%h %s" -50)
           else
-            COMMITS=$(git log --oneline ${LAST_TAG}..HEAD)
+            COMMITS=$(git log --pretty=format:"%h %s" ${LAST_TAG}..HEAD)
           fi
           echo "commits<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Generate AI summary
-        id: summary
+      - name: Generate AI release notes
+        id: notes
         env:
           OPENCODE_AUTH: ${{ secrets.OPENCODE_AUTH }}
         run: |
-          SUMMARY=$(opencode run "Write a brief, friendly release summary (2-4 sentences) for these commits. Focus on user-facing changes. No bullet points, just a short paragraph:
+          cat << 'PROMPT' > /tmp/prompt.txt
+          Generate release notes for these commits. Format like this example:
 
-          ${{ steps.commits.outputs.commits }}" --model anthropic/claude-opus-4-5 2>/dev/null || echo "")
+          This release improves the chat experience with better loading states and adds Discord integration prompts.
+
+          ## Chat
+          - Improved loading indicators and pending message handling
+          - Better state management for chat interface
+
+          ## Integrations  
+          - Added CTA to connect Discord account
+
+          ## Bug Fixes
+          - Fixed memory issues with large repository extraction
+
+          Rules:
+          - Start with 1-2 sentence summary
+          - Group changes into logical categories (use ## headers)
+          - Each item should be a single line starting with -
+          - Focus on user-facing changes, skip internal refactors
+          - Be concise, no fluff
+          - Skip commits that are just "fix linting" or similar noise
+
+          Commits:
+          PROMPT
+          echo "${{ steps.commits.outputs.commits }}" >> /tmp/prompt.txt
+
+          NOTES=$(opencode run "$(cat /tmp/prompt.txt)" --model anthropic/claude-opus-4-5 2>/dev/null || echo "")
           
-          echo "summary<<EOF" >> $GITHUB_OUTPUT
-          echo "$SUMMARY" >> $GITHUB_OUTPUT
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Update PR with AI summary
-        if: steps.summary.outputs.summary != ''
+      - name: Update PR body
+        if: steps.notes.outputs.notes != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR_NUMBER=$(echo '${{ needs.release-please.outputs.pr }}' | jq -r '.number')
-          CURRENT_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
-          
-          NEW_BODY="## Summary
-
-          ${{ steps.summary.outputs.summary }}
-
-          ---
-
-          $CURRENT_BODY"
-          
-          gh pr edit $PR_NUMBER --body "$NEW_BODY"
+          gh pr edit ${{ needs.release-please.outputs.pr_number }} --body "${{ steps.notes.outputs.notes }}"
