@@ -140,14 +140,12 @@ export function UserPostsList({
 	serverId,
 	initialData,
 	nextCursor,
-	currentCursor,
 	basePath,
 }: {
 	userId: bigint;
 	serverId?: string;
 	initialData?: UserPosts;
 	nextCursor?: string | null;
-	currentCursor?: string | null;
 	basePath: string;
 }) {
 	const serverIdBigInt = serverId ? BigInt(serverId) : undefined;

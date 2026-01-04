@@ -57,15 +57,6 @@ const GITHUB_APP_INSTALL_URL =
 	process.env.NEXT_PUBLIC_GITHUB_APP_INSTALL_URL ??
 	"https://github.com/apps/answer-overflow-dev/installations/new";
 
-type GitHubRepo = {
-	id: number;
-	name: string;
-	fullName: string;
-	owner: string;
-	private: boolean;
-	installationId: number;
-};
-
 function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 	const [isLinking, setIsLinking] = useState(false);
 	const [open, setOpen] = useState(false);

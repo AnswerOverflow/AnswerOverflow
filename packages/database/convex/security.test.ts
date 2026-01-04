@@ -1,7 +1,6 @@
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
-import { api } from "./_generated/api";
 import { ConvexClientTest } from "../src/convex-client-test";
 import { Database } from "../src/database";
 import { DatabaseTestLayer } from "../src/database-test";
@@ -12,6 +11,7 @@ import {
 	enableChannelIndexing,
 	makeMessagesPublic,
 } from "../src/test/fixtures";
+import { api } from "./_generated/api";
 
 const ADMINISTRATOR = 0x8;
 const MANAGE_GUILD = 0x20;

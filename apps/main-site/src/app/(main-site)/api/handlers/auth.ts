@@ -1,7 +1,7 @@
+import type { IncomingHttpHeaders } from "node:http";
 import { convexBetterAuthNextJs } from "@convex-dev/better-auth/nextjs";
 import { checkBotId } from "botid/server";
 import type { Context } from "elysia";
-import type { IncomingHttpHeaders } from "node:http";
 
 const { handler } = convexBetterAuthNextJs({
 	convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL ?? "",

@@ -85,11 +85,6 @@ function LoadingCard() {
 	);
 }
 
-interface ErrorBoundaryProps {
-	children: React.ReactNode;
-	fallback: React.ReactNode;
-}
-
 function ErrorBoundaryFallback({
 	error,
 	onRetry,

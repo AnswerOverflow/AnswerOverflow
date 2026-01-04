@@ -353,12 +353,10 @@ export function ServerThreadsList({
 	serverDiscordId,
 	initialData,
 	nextCursor,
-	currentCursor,
 }: {
 	serverDiscordId: bigint;
 	initialData?: ServerPageThreads;
 	nextCursor?: string | null;
-	currentCursor?: string | null;
 }) {
 	return (
 		<>
@@ -409,12 +407,10 @@ export function ThreadsList({
 	channelDiscordId,
 	initialData,
 	nextCursor,
-	currentCursor,
 }: {
 	channelDiscordId: bigint;
 	initialData?: ChannelPageThreads;
 	nextCursor?: string | null;
-	currentCursor?: string | null;
 }) {
 	const [selectedTagIds] = useQueryState(
 		"tags",
@@ -473,12 +469,10 @@ export function MessagesList({
 	channelDiscordId,
 	initialData,
 	nextCursor,
-	currentCursor,
 }: {
 	channelDiscordId: bigint;
 	initialData?: ChannelPageMessages;
 	nextCursor?: string | null;
-	currentCursor?: string | null;
 }) {
 	return (
 		<>

@@ -55,11 +55,9 @@ export function HomePageSkeleton() {
 export function HomePageClient({
 	initialData,
 	nextCursor,
-	currentCursor,
 }: {
 	initialData?: RecentThreadsResult;
 	nextCursor?: string | null;
-	currentCursor?: string | null;
 }) {
 	const [searchQuery, setSearchQuery] = useQueryState("q", {
 		defaultValue: "",

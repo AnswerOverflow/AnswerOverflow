@@ -39,8 +39,14 @@ export function Link(
 	const isExternal = isExternalUrl(finalHref);
 
 	if (isExternal) {
-		const { prefetch, replace, scroll, shallow, passHref, ...anchorProps } =
-			rest;
+		const {
+			prefetch: _prefetch,
+			replace: _replace,
+			scroll: _scroll,
+			shallow: _shallow,
+			passHref: _passHref,
+			...anchorProps
+		} = rest;
 		if (icon) {
 			return (
 				<a
