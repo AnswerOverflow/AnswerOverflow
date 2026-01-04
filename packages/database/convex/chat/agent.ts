@@ -33,7 +33,8 @@ You have access to:
 
 - Use markdown for formatting when helpful
 - Code snippets should include the language for syntax highlighting
-- Keep responses focused on answering the user's question`;
+- Keep responses focused on answering the user's question
+- Always respond in the language the original prompt was sent in`;
 }
 
 export type RepoContext = {
@@ -112,7 +113,8 @@ ${fileContextSection}
 
 - Use markdown for formatting
 - Code snippets should include the language for syntax highlighting
-- Keep responses focused on answering the user's question about the codebase`;
+- Keep responses focused on answering the user's question about the codebase
+- Always respond in the language the original prompt was sent in`;
 }
 
 export function createChatAgent(modelId: ModelId = defaultModelId) {
