@@ -44,3 +44,23 @@ export const createOtelTestLayer = (
 		),
 		shutdownTimeout,
 	}));
+
+class NoopSpanProcessor {
+	onStart(): void {}
+	onEnd(): void {}
+	shutdown(): Promise<void> {
+		return Promise.resolve();
+	}
+	forceFlush(): Promise<void> {
+		return Promise.resolve();
+	}
+}
+
+export const createNoopOtelTestLayer = (
+	serviceName: ServiceName,
+): LayerType.Layer<Resource.Resource> =>
+	NodeSdk.layer(() => ({
+		resource: { serviceName },
+		spanProcessor: new NoopSpanProcessor(),
+		shutdownTimeout: Duration.millis(0),
+	}));

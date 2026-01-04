@@ -60,15 +60,29 @@ async function resolveDiscordAccountId(
 	return discordAccountId;
 }
 
+type AuthArgs = { backendAccessToken?: string; discordAccountId?: bigint };
+
+async function resolveAuthentication(
+	ctx: QueryCtx | MutationCtx | ActionCtx,
+	args: AuthArgs,
+): Promise<{ userId: string | undefined; discordAccountId: bigint }> {
+	if (args.backendAccessToken && args.discordAccountId) {
+		validateBackendAccessToken(args.backendAccessToken);
+		return { userId: undefined, discordAccountId: args.discordAccountId };
+	}
+
+	const userId = await getAuthUserId(ctx);
+	const discordAccountId = await resolveDiscordAccountId(ctx, args);
+	return { userId, discordAccountId };
+}
+
 export const authenticatedQuery = customQuery(query, {
 	args: {
 		backendAccessToken: v.optional(v.string()),
 		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
-		const userId = await getAuthUserId(ctx);
-		const discordAccountId = await resolveDiscordAccountId(ctx, args);
-
+		const { userId, discordAccountId } = await resolveAuthentication(ctx, args);
 		const cache = createDataAccessCache(ctx);
 		return {
 			ctx: { ...ctx, cache },
@@ -87,9 +101,7 @@ export const authenticatedMutation = customMutation(mutation, {
 		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
-		const userId = await getAuthUserId(ctx);
-		const discordAccountId = await resolveDiscordAccountId(ctx, args);
-
+		const { userId, discordAccountId } = await resolveAuthentication(ctx, args);
 		const cache = createDataAccessCache(ctx);
 		return {
 			ctx: { ...ctx, cache },
@@ -108,9 +120,7 @@ export const authenticatedAction = customAction(action, {
 		discordAccountId: v.optional(v.int64()),
 	},
 	input: async (ctx, args) => {
-		const userId = await getAuthUserId(ctx);
-		const discordAccountId = await resolveDiscordAccountId(ctx, args);
-
+		const { userId, discordAccountId } = await resolveAuthentication(ctx, args);
 		return {
 			ctx,
 			args: {
