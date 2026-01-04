@@ -13,7 +13,7 @@
 		"start": "bun with-env next start",
 		"typecheck": "tsgo --noEmit",
 		"typecheck:slow": "tsc --noEmit",
-		"clean": "rm -rf node_modules .next"
+		"clean": "rm -rf node_modules .next .turbo"
 	},
 	"dependencies": {
 		"@convex-dev/better-auth": "catalog:",

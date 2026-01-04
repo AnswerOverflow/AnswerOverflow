@@ -7,7 +7,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"clean": "rm -rf node_modules",
+		"clean": "rm -rf node_modules .turbo",
 		"typecheck": "echo \"No types to check\""
 	},
 	"devDependencies": {
