@@ -101,14 +101,6 @@ export const generateResponse = internalAction({
 			threadId: args.threadId,
 			status: "idle",
 		});
-		const threadInfo = await ctx.runQuery(internal.chat.queries.getThreadInfo, {
-			threadId: args.threadId,
-		});
-		if (!threadInfo?.title) {
-			await ctx.scheduler.runAfter(0, internal.chat.actions.generateTitle, {
-				threadId: args.threadId,
-			});
-		}
 
 		return null;
 	},

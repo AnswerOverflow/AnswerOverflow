@@ -28,6 +28,7 @@ import { useFeaturedRepos } from "./featured-repos-provider";
 type GitHubRepoSelectorProps = {
 	selectedRepo: GitHubRepo | null;
 	onSelectRepo: (repo: GitHubRepo | null) => void;
+	compact?: boolean;
 };
 
 type GitHubSearchRepo = {
@@ -44,6 +45,7 @@ type GitHubSearchRepo = {
 export function GitHubRepoSelector({
 	selectedRepo,
 	onSelectRepo,
+	compact = false,
 }: GitHubRepoSelectorProps) {
 	const initialFeaturedRepos = useFeaturedRepos();
 	const [open, setOpen] = useState(false);
@@ -152,7 +154,7 @@ export function GitHubRepoSelector({
 	return (
 		<Popover open={open} onOpenChange={setOpen} modal>
 			<PopoverTrigger asChild>
-				<PromptInputButton size="sm">
+				<PromptInputButton size={compact ? "icon-sm" : "sm"}>
 					{selectedRepo ? (
 						<>
 							<Image
@@ -163,14 +165,16 @@ export function GitHubRepoSelector({
 								className="rounded-full"
 								unoptimized
 							/>
-							<span>
-								{selectedRepo.owner}/{selectedRepo.repo}
-							</span>
+							{!compact && (
+								<span className="truncate max-w-[150px]">
+									{selectedRepo.owner}/{selectedRepo.repo}
+								</span>
+							)}
 						</>
 					) : (
 						<>
 							<GitFork className="size-4" />
-							<span>Select repo</span>
+							{!compact && <span>Select repo</span>}
 						</>
 					)}
 				</PromptInputButton>

@@ -69,6 +69,7 @@ import {
 	CopyIcon,
 	Loader2,
 	Menu,
+	PlusIcon,
 	RefreshCcwIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -88,9 +89,11 @@ export type GitHubRepo = {
 function ModelSelector({
 	selectedModel,
 	onSelectModel,
+	compact = false,
 }: {
 	selectedModel: string;
 	onSelectModel: (modelId: string) => void;
+	compact?: boolean;
 }) {
 	const [open, setOpen] = useState(false);
 	const selectedModelData = models.find((m) => m.id === selectedModel);
@@ -98,11 +101,11 @@ function ModelSelector({
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<PromptInputButton>
+				<PromptInputButton size={compact ? "icon-sm" : undefined}>
 					{selectedModelData?.chefSlug && (
 						<ModelSelectorLogo provider={selectedModelData.chefSlug} />
 					)}
-					{selectedModelData?.name && (
+					{!compact && selectedModelData?.name && (
 						<ModelSelectorName>{selectedModelData.name}</ModelSelectorName>
 					)}
 				</PromptInputButton>
@@ -402,11 +405,24 @@ export function ChatInterface({
 				>
 					<Menu className="size-5" />
 				</Button>
-				<span className="text-sm font-medium truncate">{title}</span>
+				<span className="text-sm font-medium truncate flex-1">{title}</span>
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={() => {
+						setCurrentThreadId(undefined);
+						setSelectedRepo(null);
+						setOptimisticUserMessage(null);
+						setInput("");
+						window.history.pushState(null, "", "/chat");
+					}}
+				>
+					<PlusIcon className="size-5" />
+				</Button>
 			</div>
 
 			<div ref={stickToBottom.scrollRef} className="flex-1 overflow-y-auto">
-				<div className="max-w-4xl mx-auto w-full flex flex-col flex-1 sm:px-6 pt-6 pb-32">
+				<div className="max-w-4xl mx-auto w-full flex flex-col min-h-full sm:px-6 pt-6 lg:pb-32">
 					{showEmptyState ? (
 						<div className="flex flex-1 flex-col items-center justify-center min-h-[50vh]">
 							{effectiveRepo && (
@@ -430,7 +446,7 @@ export function ChatInterface({
 							)}
 						</div>
 					) : (
-						<Conversation instance={stickToBottom}>
+						<Conversation instance={stickToBottom} className="flex-1">
 							<ConversationContent>
 								{optimisticUserMessage && messages.length === 0 && (
 									<Message from="user">
@@ -462,10 +478,36 @@ export function ChatInterface({
 							<ConversationScrollButton />
 						</Conversation>
 					)}
+					<div className="lg:hidden max-w-4xl mx-auto w-full px-2 sm:px-4">
+						<PromptInput onSubmit={handleSubmit}>
+							<PromptInputBody>
+								<PromptInputTextarea
+									value={input}
+									onChange={(e) => setInput(e.target.value)}
+									placeholder={placeholder}
+								/>
+							</PromptInputBody>
+							<PromptInputFooter>
+								<PromptInputTools>
+									<GitHubRepoSelector
+										selectedRepo={effectiveRepo}
+										onSelectRepo={setSelectedRepo}
+										compact
+									/>
+									<ModelSelector
+										selectedModel={model}
+										onSelectModel={setModelOverride}
+										compact
+									/>
+								</PromptInputTools>
+								<PromptInputSubmit disabled={!input.trim()} />
+							</PromptInputFooter>
+						</PromptInput>
+					</div>
 				</div>
 			</div>
 
-			<div className="absolute bottom-0 left-0 right-0">
+			<div className="hidden lg:block absolute bottom-0 left-0 right-0">
 				<div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
 					<PromptInput onSubmit={handleSubmit}>
 						<PromptInputBody>

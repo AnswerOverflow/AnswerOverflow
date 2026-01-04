@@ -14,7 +14,13 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { usePaginatedQuery } from "convex/react";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, Menu, MessageSquare, MessageSquarePlus } from "lucide-react";
+import {
+	GitBranch,
+	Loader2,
+	Menu,
+	MessageSquare,
+	MessageSquarePlus,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useState } from "react";
 
@@ -90,6 +96,8 @@ function ThreadList({ onThreadClick }: { onThreadClick?: () => void }) {
 					addSuffix: true,
 				});
 
+				const repos = thread.repos ?? [];
+
 				return (
 					<Link
 						key={thread._id}
@@ -105,6 +113,14 @@ function ThreadList({ onThreadClick }: { onThreadClick?: () => void }) {
 						<MessageSquare className="size-4 mt-0.5 shrink-0" />
 						<div className="flex-1 min-w-0">
 							<div className="truncate font-medium">{title}</div>
+							{repos.length > 0 && (
+								<div className="flex items-center gap-1 mt-0.5">
+									<GitBranch className="size-3 shrink-0 text-muted-foreground" />
+									<span className="text-xs text-muted-foreground truncate">
+										{repos.map((r) => `${r.owner}/${r.repo}`).join(", ")}
+									</span>
+								</div>
+							)}
 							<div className="text-xs text-muted-foreground">{timeAgo}</div>
 						</div>
 					</Link>

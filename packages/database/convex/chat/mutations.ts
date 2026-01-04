@@ -98,6 +98,12 @@ export const sendMessage = authenticatedMutation({
 			modelId,
 		});
 
+		if (!args.threadId) {
+			await ctx.scheduler.runAfter(0, internal.chat.actions.generateTitle, {
+				threadId,
+			});
+		}
+
 		return threadId;
 	},
 });
@@ -121,11 +127,32 @@ export const listThreads = authenticatedQuery({
 		paginationOpts: paginationOptsValidator,
 	},
 	handler: async (ctx, args) => {
-		return ctx.runQuery(components.agent.threads.listThreadsByUserId, {
-			userId: args.userId,
-			paginationOpts: args.paginationOpts,
-			order: "desc",
-		});
+		const threads = await ctx.runQuery(
+			components.agent.threads.listThreadsByUserId,
+			{
+				userId: args.userId,
+				paginationOpts: args.paginationOpts,
+				order: "desc",
+			},
+		);
+
+		const threadsWithMetadata = await Promise.all(
+			threads.page.map(async (thread) => {
+				const metadata = await ctx.db
+					.query("chatThreadMetadata")
+					.withIndex("by_threadId", (q) => q.eq("threadId", thread._id))
+					.first();
+				return {
+					...thread,
+					repos: metadata?.repos ?? null,
+				};
+			}),
+		);
+
+		return {
+			...threads,
+			page: threadsWithMetadata,
+		};
 	},
 });
 
