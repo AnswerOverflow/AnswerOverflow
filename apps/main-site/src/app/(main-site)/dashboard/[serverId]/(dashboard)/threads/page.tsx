@@ -10,7 +10,6 @@ import {
 	CardTitle,
 } from "@packages/ui/components/card";
 import { useSession } from "@packages/ui/components/convex-client-provider";
-import { DiscordMessage } from "@packages/ui/components/discord-message";
 import { EmptyStateCard } from "@packages/ui/components/empty";
 import { Input } from "@packages/ui/components/input";
 import {
@@ -30,7 +29,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { useCachedPaginatedQuery } from "@packages/ui/hooks/use-cached-paginated-query";
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 import { cn } from "@packages/ui/lib/utils";
-import { useAction } from "convex/react";
+import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import {
 	ArrowDownAZ,
@@ -39,16 +38,19 @@ import {
 	CheckCircle2,
 	ExternalLink,
 	Hash,
-	Loader2,
 	MessageSquare,
 	Search,
-	Sparkles,
 	Tag,
 	X,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+	MessageContent,
+	MessageContentSkeleton,
+	type MessagePageHeaderData,
+} from "@/components/message-page";
 
 const SORT_OPTIONS = ["newest", "oldest"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
@@ -195,45 +197,86 @@ function ThreadCard({
 	);
 }
 
-function ThreadDetailPanel({
-	item,
+function ThreadDetailHeader({
+	headerData,
 	onClose,
 	showBackButton = false,
-	serverId,
 }: {
-	item: ThreadItem;
+	headerData: MessagePageHeaderData;
 	onClose: () => void;
 	showBackButton?: boolean;
-	serverId: string;
 }) {
-	const { thread, message, parentChannel, tags } = item;
-	const createdAt = snowflakeToDate(thread.id);
-	const status = getThreadStatus(thread, message);
+	const { thread, firstMessage, solutionMessage, channel } = headerData;
+	const createdAt = thread ? snowflakeToDate(thread.id) : null;
 
-	const [summary, setSummary] = useState<string | null>(null);
-	const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+	const discordUrl = thread
+		? `https://discord.com/channels/${headerData.server.discordId}/${thread.id}`
+		: firstMessage
+			? `https://discord.com/channels/${headerData.server.discordId}/${firstMessage.message.channelId}/${firstMessage.message.id}`
+			: null;
 
-	const generateSummary = useAction(
-		api.authenticated.threads_action.generateThreadSummary,
+	const title = thread?.name ?? firstMessage?.message.content?.slice(0, 100);
+
+	return (
+		<div className="flex items-start justify-between p-4 border-b shrink-0">
+			{showBackButton && (
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={onClose}
+					className="mr-2 shrink-0"
+				>
+					<ArrowLeft className="size-4" />
+				</Button>
+			)}
+			<div className="space-y-1 min-w-0 flex-1">
+				<h2 className="font-semibold text-lg line-clamp-2">{title}</h2>
+				<div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
+					<span className="flex items-center gap-1">
+						<Hash className="size-3.5" />
+						{channel.name}
+					</span>
+					{createdAt && <span>{formatRelativeTime(createdAt)}</span>}
+					{headerData.replyCount > 0 && (
+						<span className="flex items-center gap-1">
+							<MessageSquare className="size-3.5" />
+							{headerData.replyCount}{" "}
+							{headerData.replyCount === 1 ? "reply" : "replies"}
+						</span>
+					)}
+					{solutionMessage && (
+						<Badge variant="default" className="text-xs gap-1">
+							<CheckCircle2 className="size-3" />
+							Solved
+						</Badge>
+					)}
+				</div>
+			</div>
+			<div className="flex items-center gap-1 ml-2 shrink-0">
+				{discordUrl && (
+					<Button variant="ghost" size="icon" asChild>
+						<a href={discordUrl} target="_blank" rel="noopener noreferrer">
+							<ExternalLink className="size-4" />
+						</a>
+					</Button>
+				)}
+				{!showBackButton && (
+					<Button variant="ghost" size="icon" onClick={onClose}>
+						<X className="size-4" />
+					</Button>
+				)}
+			</div>
+		</div>
 	);
+}
 
-	const handleGenerateSummary = async () => {
-		setIsGeneratingSummary(true);
-		try {
-			const result = await generateSummary({
-				serverId: BigInt(serverId),
-				threadId: thread.id,
-			});
-			setSummary(result.summary);
-		} catch (error) {
-			console.error("Failed to generate summary:", error);
-		} finally {
-			setIsGeneratingSummary(false);
-		}
-	};
-
-	const discordUrl = `https://discord.com/channels/${thread.serverId}/${thread.id}`;
-
+function ThreadDetailPanelSkeleton({
+	onClose,
+	showBackButton = false,
+}: {
+	onClose: () => void;
+	showBackButton?: boolean;
+}) {
 	return (
 		<div className="h-full flex flex-col">
 			<div className="flex items-start justify-between p-4 border-b shrink-0">
@@ -247,99 +290,89 @@ function ThreadDetailPanel({
 						<ArrowLeft className="size-4" />
 					</Button>
 				)}
-				<div className="space-y-1 min-w-0 flex-1">
-					<h2 className="font-semibold text-lg line-clamp-2">{thread.name}</h2>
-					<div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground">
-						{parentChannel && (
-							<span className="flex items-center gap-1">
-								<Hash className="size-3.5" />
-								{parentChannel.name}
-							</span>
-						)}
-						<span>{formatRelativeTime(createdAt)}</span>
-						<Badge
-							variant={status.variant}
-							className={cn("text-xs", status.icon && "gap-1")}
-						>
-							{status.icon && <status.icon className="size-3" />}
-							{status.label}
-						</Badge>
+				<div className="space-y-2 min-w-0 flex-1">
+					<Skeleton className="h-6 w-3/4" />
+					<div className="flex items-center gap-2">
+						<Skeleton className="h-4 w-24" />
+						<Skeleton className="h-4 w-16" />
 					</div>
-					{tags.length > 0 && (
-						<div className="flex flex-wrap gap-1 pt-1">
-							{tags.map((tag) => (
-								<Badge
-									key={tag.id.toString()}
-									variant="outline"
-									className="text-xs"
-								>
-									{tag.name}
-								</Badge>
-							))}
-						</div>
-					)}
 				</div>
-				<div className="flex items-center gap-1 ml-2 shrink-0">
-					<Button variant="ghost" size="icon" asChild>
-						<a href={discordUrl} target="_blank" rel="noopener noreferrer">
-							<ExternalLink className="size-4" />
-						</a>
+				{!showBackButton && (
+					<Button variant="ghost" size="icon" onClick={onClose}>
+						<X className="size-4" />
 					</Button>
+				)}
+			</div>
+			<div className="p-4">
+				<MessageContentSkeleton />
+			</div>
+		</div>
+	);
+}
+
+function ThreadDetailPanel({
+	threadId,
+	onClose,
+	showBackButton = false,
+}: {
+	threadId: bigint;
+	onClose: () => void;
+	showBackButton?: boolean;
+}) {
+	const headerData = useQuery(api.public.messages.getMessagePageHeaderData, {
+		messageId: threadId,
+	});
+
+	if (headerData === undefined) {
+		return (
+			<ThreadDetailPanelSkeleton
+				onClose={onClose}
+				showBackButton={showBackButton}
+			/>
+		);
+	}
+
+	if (headerData === null) {
+		return (
+			<div className="h-full flex flex-col">
+				<div className="flex items-start justify-between p-4 border-b shrink-0">
+					{showBackButton && (
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={onClose}
+							className="mr-2 shrink-0"
+						>
+							<ArrowLeft className="size-4" />
+						</Button>
+					)}
+					<div className="flex-1" />
 					{!showBackButton && (
 						<Button variant="ghost" size="icon" onClick={onClose}>
 							<X className="size-4" />
 						</Button>
 					)}
 				</div>
-			</div>
-
-			<ScrollArea className="flex-1">
-				<div className="p-4 space-y-4">
-					<div className="rounded-lg border bg-muted/30 p-4 space-y-3">
-						<div className="flex items-center justify-between">
-							<h3 className="text-sm font-medium flex items-center gap-2">
-								<Sparkles className="size-4 text-primary" />
-								AI Summary
-							</h3>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={handleGenerateSummary}
-								disabled={isGeneratingSummary}
-							>
-								{isGeneratingSummary ? (
-									<>
-										<Loader2 className="size-4 mr-2 animate-spin" />
-										Generating...
-									</>
-								) : summary ? (
-									"Regenerate"
-								) : (
-									"Generate Summary"
-								)}
-							</Button>
-						</div>
-						{summary ? (
-							<p className="text-sm text-muted-foreground">{summary}</p>
-						) : (
-							<p className="text-sm text-muted-foreground italic">
-								Click "Generate Summary" to create an AI-powered summary of this
-								thread.
-							</p>
-						)}
+				<div className="flex-1 flex items-center justify-center text-muted-foreground">
+					<div className="text-center space-y-2">
+						<MessageSquare className="size-12 mx-auto opacity-50" />
+						<p>Thread not found or not indexed</p>
 					</div>
+				</div>
+			</div>
+		);
+	}
 
-					{message ? (
-						<div className="rounded-lg border bg-card overflow-hidden">
-							<div className="p-4">
-								<DiscordMessage enrichedMessage={message} showCard={false} />
-							</div>
-						</div>
-					) : (
-						<div className="text-center text-muted-foreground py-8">
-							No message content available
-						</div>
-					)}
+	return (
+		<div className="h-full flex flex-col">
+			<ThreadDetailHeader
+				headerData={headerData}
+				onClose={onClose}
+				showBackButton={showBackButton}
+			/>
+			<ScrollArea className="flex-1">
+				<div className="p-4">
+					<MessageContent headerData={headerData} showTitle={false} />
 				</div>
 			</ScrollArea>
 		</div>
@@ -499,15 +532,6 @@ export default function ThreadsPage() {
 		return filtered;
 	}, [results, searchQuery, statusFilter, channelFilter, tagFilter]);
 
-	const selectedThread = useMemo(() => {
-		if (!selectedThreadId || !filteredThreads.length) return null;
-		return (
-			filteredThreads.find(
-				(item) => item.thread.id.toString() === selectedThreadId,
-			) ?? null
-		);
-	}, [selectedThreadId, filteredThreads]);
-
 	if (isLoadingFirstPage) {
 		return null;
 	}
@@ -653,12 +677,11 @@ export default function ThreadsPage() {
 				/>
 			) : isMobile ? (
 				<div className="flex-1 border rounded-lg overflow-hidden min-h-0">
-					{selectedThread ? (
+					{selectedThreadId ? (
 						<ThreadDetailPanel
-							item={selectedThread}
+							threadId={BigInt(selectedThreadId)}
 							onClose={() => setSelectedThreadId(null)}
 							showBackButton
-							serverId={serverId}
 						/>
 					) : (
 						<ScrollArea className="h-full">
@@ -710,11 +733,10 @@ export default function ThreadsPage() {
 						</ResizablePanel>
 						<ResizableHandle withHandle />
 						<ResizablePanel defaultSize={60} minSize={30}>
-							{selectedThread ? (
+							{selectedThreadId ? (
 								<ThreadDetailPanel
-									item={selectedThread}
+									threadId={BigInt(selectedThreadId)}
 									onClose={() => setSelectedThreadId(null)}
-									serverId={serverId}
 								/>
 							) : (
 								<ThreadDetailEmpty />

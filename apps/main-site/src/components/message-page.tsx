@@ -13,6 +13,7 @@ import { MessageResultPageProvider } from "@packages/ui/components/message-resul
 import { Separator } from "@packages/ui/components/separator";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { useTenant } from "@packages/ui/components/tenant-context";
 import { ThinMessage } from "@packages/ui/components/thin-message";
 import { TimeAgo } from "@packages/ui/components/time-ago";
@@ -54,7 +55,7 @@ export function RepliesSkeleton() {
 	);
 }
 
-function ReplyMessageSkeleton() {
+export function ReplyMessageSkeleton() {
 	return (
 		<div className="p-2">
 			<div className="flex flex-row min-w-0">
@@ -77,7 +78,7 @@ function ReplyMessageSkeleton() {
 	);
 }
 
-function ReplyMessage(props: {
+export function ReplyMessage(props: {
 	message: EnrichedMessage;
 	solutionMessageId: bigint | undefined;
 	firstMessageAuthorId?: bigint;
@@ -112,7 +113,112 @@ function ReplyMessage(props: {
 	);
 }
 
-const HIDDEN_AUTHOR_IDS = [958907348389339146n];
+export const HIDDEN_AUTHOR_IDS = [958907348389339146n];
+
+export function MessageContentSkeleton() {
+	return (
+		<div className="space-y-4">
+			<div className="flex items-center gap-2">
+				<Skeleton className="h-10 w-10 rounded-full" />
+				<div className="space-y-2">
+					<Skeleton className="h-4 w-32" />
+					<Skeleton className="h-3 w-24" />
+				</div>
+			</div>
+			<Skeleton className="h-6 w-3/4" />
+			<Skeleton className="h-24 w-full" />
+			<Skeleton className="h-16 w-full" />
+			<Skeleton className="h-16 w-full" />
+		</div>
+	);
+}
+
+export function MessageContent(props: {
+	headerData: MessagePageHeaderData;
+	showTitle?: boolean;
+}) {
+	const { headerData, showTitle = true } = props;
+	const firstMessage = headerData.firstMessage;
+	const solutionMessage = headerData.solutionMessage;
+	const solutionMessageId = solutionMessage?.message.id;
+	const rootMessageDeleted = firstMessage === null;
+
+	const title =
+		headerData.thread?.name ?? firstMessage?.message.content?.slice(0, 100);
+
+	const queryChannelId = headerData.threadId ?? headerData.channelId;
+	const afterMessageId =
+		headerData.threadId ?? headerData.firstMessage?.message.id;
+
+	const filterMessages = (messages: MessagePageReplies["page"]) =>
+		messages.filter(
+			(m) =>
+				!HIDDEN_AUTHOR_IDS.includes(m.message.authorId) &&
+				m.message.id !== firstMessage?.message.id,
+		);
+
+	return (
+		<div className="space-y-4">
+			{showTitle &&
+				headerData.channel.type !== ChannelType.GuildAnnouncement && (
+					<h2 className="text-xl font-semibold">{title}</h2>
+				)}
+			<div>
+				{rootMessageDeleted ? (
+					<div className="text-muted-foreground italic">
+						Original message was deleted
+					</div>
+				) : (
+					firstMessage && (
+						<MessageBody message={firstMessage} loadingStyle="eager" />
+					)
+				)}
+				{solutionMessage && (
+					<div className="mt-6 w-full rounded-xl border border-green-500/30 bg-green-500/5 dark:bg-green-500/10 p-4">
+						<div className="flex items-center gap-1.5 mb-3">
+							<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
+							<span className="text-sm font-medium text-green-600 dark:text-green-500">
+								Solution
+							</span>
+						</div>
+						<MessageBody message={solutionMessage} collapseContent={true} />
+						<div className="mt-3">
+							<JumpToSolution id={solutionMessageId?.toString() ?? ""} />
+						</div>
+					</div>
+				)}
+			</div>
+			<Separator className="my-4" />
+			{afterMessageId && (
+				<ConvexInfiniteList
+					query={api.public.messages.getMessages}
+					queryArgs={{
+						channelId: queryChannelId,
+						after: afterMessageId,
+					}}
+					pageSize={50}
+					initialLoaderCount={3}
+					loader={<ReplyMessageSkeleton />}
+					filterResults={filterMessages}
+					emptyState={
+						<div className="text-center py-8 text-muted-foreground">
+							No replies yet
+						</div>
+					}
+					renderItem={(message) => (
+						<ReplyMessage
+							key={message.message.id.toString()}
+							message={message}
+							solutionMessageId={solutionMessageId}
+							firstMessageAuthorId={firstMessage?.author?.id}
+							isLast={false}
+						/>
+					)}
+				/>
+			)}
+		</div>
+	);
+}
 
 export function RepliesSection(props: {
 	channelId: bigint;
