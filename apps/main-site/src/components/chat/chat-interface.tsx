@@ -22,7 +22,6 @@ import {
 } from "@packages/ui/components/ai-elements/message";
 import {
 	ModelSelectorLogo,
-	ModelSelectorLogoGroup,
 	ModelSelectorName,
 } from "@packages/ui/components/ai-elements/model-selector";
 import {
@@ -57,17 +56,14 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@packages/ui/components/popover";
-import {
-	useIsNavbarHidden,
-	useScrollContainer,
-} from "@packages/ui/hooks/use-scroll-container";
+import { useIsNavbarHidden } from "@packages/ui/hooks/use-scroll-container";
 import {
 	type DynamicToolUIPart,
 	getToolName,
 	isToolUIPart,
 	type ToolUIPart,
 } from "ai";
-import { useAction, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import {
 	CheckIcon,
 	CopyIcon,
@@ -75,15 +71,19 @@ import {
 	Menu,
 	RefreshCcwIcon,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+
+import { memo, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { useAuthenticatedQuery } from "@/lib/use-authenticated-query";
 import { useChatSidebar } from "./chat-sidebar";
-import { DiscordInviteCTA } from "./discord-invite-cta";
 import { GitHubRepoSelector } from "./github-repo-selector";
+
+export type GitHubRepo = {
+	owner: string;
+	repo: string;
+	filePath?: string;
+};
 
 function ModelSelector({
 	selectedModel,
@@ -127,16 +127,6 @@ function ModelSelector({
 										>
 											<ModelSelectorLogo provider={m.chefSlug} />
 											<ModelSelectorName>{m.name}</ModelSelectorName>
-											{/* SHowing providers isn't relevant to user */}
-											{/* <Mod{" "}
-								elSelectorLogoGroup>
-												{m.providers.map((provider) => (
-													<ModelSelectorLogo
-														key={provider}
-														provider={provider}
-													/>
-												))}
-											</ModelSelectorLogoGroup> */}
 											{selectedModel === m.id ? (
 												<CheckIcon className="ml-auto size-4" />
 											) : (
@@ -153,12 +143,6 @@ function ModelSelector({
 	);
 }
 
-export type GitHubRepo = {
-	owner: string;
-	repo: string;
-	filePath?: string;
-};
-
 const SmoothMessageResponse = memo(function SmoothMessageResponse({
 	text,
 	isStreaming,
@@ -171,9 +155,7 @@ const SmoothMessageResponse = memo(function SmoothMessageResponse({
 		charsPerSec: 500,
 	});
 
-	const displayText = isStreaming ? smoothText : text;
-
-	return <MessageResponse>{displayText}</MessageResponse>;
+	return <MessageResponse>{isStreaming ? smoothText : text}</MessageResponse>;
 });
 
 type AgentStatus =
@@ -182,24 +164,6 @@ type AgentStatus =
 	| "thinking"
 	| "responding"
 	| "error";
-
-function ThinkingIndicator() {
-	return (
-		<Message from="assistant">
-			<MessageContent>
-				<div className="flex items-center gap-1">
-					<span className="animate-[pulse_1s_ease-in-out_infinite]">.</span>
-					<span className="animate-[pulse_1s_ease-in-out_0.2s_infinite]">
-						.
-					</span>
-					<span className="animate-[pulse_1s_ease-in-out_0.4s_infinite]">
-						.
-					</span>
-				</div>
-			</MessageContent>
-		</Message>
-	);
-}
 
 function AgentStatusIndicator({
 	status,
@@ -235,15 +199,31 @@ function AgentStatusIndicator({
 		);
 	}
 
-	return <ThinkingIndicator />;
+	return (
+		<Message from="assistant">
+			<MessageContent>
+				<div className="flex items-center gap-1">
+					<span className="animate-[pulse_1s_ease-in-out_infinite]">.</span>
+					<span className="animate-[pulse_1s_ease-in-out_0.2s_infinite]">
+						.
+					</span>
+					<span className="animate-[pulse_1s_ease-in-out_0.4s_infinite]">
+						.
+					</span>
+				</div>
+			</MessageContent>
+		</Message>
+	);
 }
 
 function ToolPart({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
-	const toolName = getToolName(part);
-
 	return (
 		<Tool>
-			<ToolHeader title={toolName} type={part.type} state={part.state} />
+			<ToolHeader
+				title={getToolName(part)}
+				type={part.type}
+				state={part.state}
+			/>
 			<ToolContent>
 				<ToolInput input={part.input} />
 				<ToolOutput output={part.output} errorText={part.errorText} />
@@ -255,11 +235,9 @@ function ToolPart({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
 function MessageParts({
 	message,
 	isLastMessage,
-	onRegenerate,
 }: {
 	message: UIMessage;
 	isLastMessage: boolean;
-	onRegenerate?: () => void;
 }) {
 	const isStreaming = message.status === "streaming";
 
@@ -272,151 +250,77 @@ function MessageParts({
 					return <ToolPart key={key} part={part} />;
 				}
 
-				switch (part.type) {
-					case "text":
-						return (
-							<Message key={key} from={message.role}>
-								<MessageContent>
-									<SmoothMessageResponse
-										text={part.text}
-										isStreaming={isStreaming && isLastMessage}
-									/>
-								</MessageContent>
-								{message.role === "assistant" &&
-									isLastMessage &&
-									!isStreaming && (
-										<MessageActions>
-											{onRegenerate && (
-												<MessageAction onClick={onRegenerate} tooltip="Retry">
-													<RefreshCcwIcon className="size-3" />
-												</MessageAction>
-											)}
-											<MessageAction
-												onClick={() => navigator.clipboard.writeText(part.text)}
-												tooltip="Copy"
-											>
-												<CopyIcon className="size-3" />
-											</MessageAction>
-										</MessageActions>
-									)}
-							</Message>
-						);
-					case "reasoning":
-						return null;
-					default:
-						return null;
+				if (part.type === "text") {
+					return (
+						<Message key={key} from={message.role}>
+							<MessageContent>
+								<SmoothMessageResponse
+									text={part.text}
+									isStreaming={isStreaming && isLastMessage}
+								/>
+							</MessageContent>
+							{message.role === "assistant" &&
+								isLastMessage &&
+								!isStreaming && (
+									<MessageActions>
+										<MessageAction
+											onClick={() => navigator.clipboard.writeText(part.text)}
+											tooltip="Copy"
+										>
+											<CopyIcon className="size-3" />
+										</MessageAction>
+									</MessageActions>
+								)}
+						</Message>
+					);
 				}
+
+				return null;
 			})}
 		</>
 	);
 }
 
 type ChatInterfaceProps = {
-	repos?: GitHubRepo[];
-	initialThreadId?: string;
+	threadId?: string;
+	initialRepo?: GitHubRepo;
 };
 
 export function ChatInterface({
-	repos = [],
-	initialThreadId,
+	threadId: initialThreadId,
+	initialRepo,
 }: ChatInterfaceProps) {
-	const router = useRouter();
 	const session = useSession({ allowAnonymous: false });
 	const isAuthenticated = !!session?.data;
 	const { setMobileSidebarOpen } = useChatSidebar();
-	const { setScrollContainer: setNavbarScrollContainer } = useScrollContainer();
 	const isNavbarHidden = useIsNavbarHidden();
-	const initialRepo = repos[0] ?? null;
-	const [userSelectedRepo, setUserSelectedRepo] = useState<GitHubRepo | null>(
-		initialRepo,
-	);
-	const [threadId, setThreadId] = useState<string | null>(
-		initialThreadId ?? null,
-	);
+
 	const [input, setInput] = useState("");
-	const [modelOverride, setModelOverride] = useState<string | null>(null);
-	const [pendingMessage, setPendingMessage] = useState<string | null>(null);
-	const [isInputVisible, setIsInputVisible] = useState(true);
-	const [isNearBottom, setIsNearBottom] = useState(true);
-	const lastScrollTopRef = useRef(0);
-	const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(
-		null,
+	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
+		initialRepo ?? null,
 	);
-	const stickToBottomInstance = useStickToBottom({
-		initial: "instant",
-	});
+	const [modelOverride, setModelOverride] = useState<string | null>(null);
+	const [optimisticUserMessage, setOptimisticUserMessage] = useState<
+		string | null
+	>(null);
+	const [currentThreadId, setCurrentThreadId] = useState<string | undefined>(
+		initialThreadId,
+	);
 
-	useEffect(() => {
-		if (!scrollContainer) return;
-
-		const handleScroll = () => {
-			const currentScrollTop = scrollContainer.scrollTop;
-			const maxScrollTop =
-				scrollContainer.scrollHeight - scrollContainer.clientHeight;
-			const nearBottom = currentScrollTop >= maxScrollTop - 400;
-
-			setIsNearBottom(nearBottom);
-
-			if (nearBottom) {
-				setIsInputVisible(true);
-			} else if (currentScrollTop > lastScrollTopRef.current) {
-				setIsInputVisible(false);
-			} else if (currentScrollTop < lastScrollTopRef.current) {
-				setIsInputVisible(true);
-			}
-
-			lastScrollTopRef.current = currentScrollTop;
-		};
-
-		handleScroll();
-
-		scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-		return () => scrollContainer.removeEventListener("scroll", handleScroll);
-	}, [scrollContainer]);
+	const stickToBottom = useStickToBottom({ initial: "instant" });
 
 	const threadMetadata = useAuthenticatedQuery(
 		api.chat.mutations.getChatThreadMetadata,
-		initialThreadId ? { threadId: initialThreadId } : "skip",
+		currentThreadId ? { threadId: currentThreadId } : "skip",
 	);
 
-	const threadRepo = threadMetadata?.repos?.[0];
-	const selectedRepo: GitHubRepo | null =
-		userSelectedRepo ??
-		(threadRepo
-			? {
-					owner: threadRepo.owner,
-					repo: threadRepo.repo,
-					filePath: threadRepo.filePath ?? undefined,
-				}
-			: null);
-
-	const getDiscordInviteInfo = useAction(
-		api.public.github.getDiscordInviteInfo,
+	const { results: messages } = useUIMessages(
+		api.chat.mutations.listMessages,
+		currentThreadId && isAuthenticated ? { threadId: currentThreadId } : "skip",
+		{ initialNumItems: 50, stream: true },
 	);
-	const discordInviteQuery = useQuery({
-		queryKey: ["discord-invite-info", selectedRepo?.owner, selectedRepo?.repo],
-		queryFn: async () => {
-			if (!selectedRepo) return null;
-			return getDiscordInviteInfo({
-				owner: selectedRepo.owner,
-				repo: selectedRepo.repo,
-			});
-		},
-		enabled: !!selectedRepo,
-		staleTime: 1000 * 60 * 60,
-	});
 
-	const model = modelOverride ?? threadMetadata?.modelId ?? defaultModelId;
-
-	const setScrollRef = (element: HTMLDivElement | null) => {
-		setScrollContainer(element);
-		setNavbarScrollContainer(element);
-		if (element && stickToBottomInstance.scrollRef) {
-			stickToBottomInstance.scrollRef(element);
-		}
-	};
-
-	const sendMessageMutation = useMutation(
+	const sendMessage = useMutation(
 		api.chat.mutations.sendMessage,
 	).withOptimisticUpdate((store, args) => {
 		if (args.threadId) {
@@ -427,67 +331,64 @@ export function ChatInterface({
 		}
 	});
 
-	const { results: messages } = useUIMessages(
-		api.chat.mutations.listMessages,
-		threadId && isAuthenticated ? { threadId } : "skip",
-		{ initialNumItems: 50, stream: true },
-	);
+	const repoFromThread = threadMetadata?.repos?.[0];
+	const effectiveRepo =
+		selectedRepo ??
+		(repoFromThread
+			? {
+					owner: repoFromThread.owner,
+					repo: repoFromThread.repo,
+					filePath: repoFromThread.filePath ?? undefined,
+				}
+			: null);
 
-	const handleSubmit = useCallback(
-		async (message: PromptInputMessage) => {
-			const text = message.text?.trim();
-			if (!text) return;
-
-			setInput("");
-
-			if (!threadId) {
-				setPendingMessage(text);
-			}
-
-			const returnedThreadId = await sendMessageMutation({
-				threadId: threadId ?? undefined,
-				prompt: text,
-				repoContext: selectedRepo
-					? {
-							owner: selectedRepo.owner,
-							repo: selectedRepo.repo,
-							filePath: selectedRepo.filePath,
-						}
-					: undefined,
-				modelId: model,
-			});
-
-			if (!threadId) {
-				setPendingMessage(null);
-				setThreadId(returnedThreadId);
-				router.push(`/chat/t/${returnedThreadId}`);
-			}
-		},
-		[threadId, selectedRepo, sendMessageMutation, model, router],
-	);
-
-	const lastMessage = messages.at(-1);
-	const lastMessageId = lastMessage?.id;
+	const model = modelOverride ?? threadMetadata?.modelId ?? defaultModelId;
 	const agentStatus = threadMetadata?.agentStatus ?? "idle";
 	const agentError = threadMetadata?.agentError ?? null;
 	const isAgentWorking = agentStatus !== "idle" && agentStatus !== "error";
-	const repoName = threadMetadata?.repos?.[0]
-		? `${threadMetadata.repos[0].owner}/${threadMetadata.repos[0].repo}`
-		: null;
 
-	const title = threadMetadata?.title
-		? threadMetadata.title
-		: selectedRepo
-			? `Chat with ${selectedRepo.owner}/${selectedRepo.repo}`
-			: null;
-
-	const description = selectedRepo
-		? `Ask questions about the ${selectedRepo.owner}/${selectedRepo.repo} codebase`
-		: null;
-
-	const placeholder = selectedRepo
-		? `Ask about ${selectedRepo.owner}/${selectedRepo.repo}...`
+	const title =
+		threadMetadata?.title ??
+		(effectiveRepo
+			? `Chat with ${effectiveRepo.owner}/${effectiveRepo.repo}`
+			: null);
+	const placeholder = effectiveRepo
+		? `Ask about ${effectiveRepo.owner}/${effectiveRepo.repo}...`
 		: "Send a message...";
+
+	const hasMessages = messages.length > 0 || optimisticUserMessage;
+	const showEmptyState = !currentThreadId && !hasMessages;
+
+	const handleSubmit = async (message: PromptInputMessage) => {
+		const text = message.text?.trim();
+		if (!text) return;
+
+		setInput("");
+
+		if (!currentThreadId) {
+			setOptimisticUserMessage(text);
+		}
+
+		const newThreadId = await sendMessage({
+			threadId: currentThreadId,
+			prompt: text,
+			repoContext: effectiveRepo
+				? {
+						owner: effectiveRepo.owner,
+						repo: effectiveRepo.repo,
+						filePath: effectiveRepo.filePath,
+					}
+				: undefined,
+			modelId: model,
+		});
+
+		if (!currentThreadId && newThreadId) {
+			setCurrentThreadId(newThreadId);
+			window.history.pushState(null, "", `/chat/t/${newThreadId}`);
+		}
+	};
+
+	const lastMessageId = messages.at(-1)?.id;
 
 	return (
 		<div
@@ -500,24 +401,19 @@ export function ChatInterface({
 					onClick={() => setMobileSidebarOpen(true)}
 				>
 					<Menu className="size-5" />
-					<span className="sr-only">Open sidebar</span>
 				</Button>
 				<span className="text-sm font-medium truncate">{title}</span>
 			</div>
-			<div
-				ref={setScrollRef}
-				className="relative flex flex-1 w-full flex-col overflow-y-auto overflow-x-hidden min-h-0"
-			>
-				<div
-					className={`max-w-4xl mx-auto w-full flex flex-col flex-1 sm:px-6 pt-6 lg:pb-32 ${isNearBottom ? "" : "pb-32"}`}
-				>
-					{!threadId && !pendingMessage ? (
-						<div className="flex flex-1 flex-col items-center justify-center gap-6">
-							{selectedRepo && (
+
+			<div ref={stickToBottom.scrollRef} className="flex-1 overflow-y-auto">
+				<div className="max-w-4xl mx-auto w-full flex flex-col flex-1 sm:px-6 pt-6 pb-32">
+					{showEmptyState ? (
+						<div className="flex flex-1 flex-col items-center justify-center min-h-[50vh]">
+							{effectiveRepo && (
 								<div className="flex flex-col items-center gap-4 text-center">
 									<Image
-										src={`https://github.com/${selectedRepo.owner}.png?size=128`}
-										alt={selectedRepo.owner}
+										src={`https://github.com/${effectiveRepo.owner}.png?size=128`}
+										alt={effectiveRepo.owner}
 										width={64}
 										height={64}
 										className="rounded-full"
@@ -525,18 +421,21 @@ export function ChatInterface({
 									/>
 									<div className="space-y-2">
 										<h1 className="text-2xl font-semibold">{title}</h1>
-										<p className="text-muted-foreground">{description}</p>
+										<p className="text-muted-foreground">
+											Ask questions about the {effectiveRepo.owner}/
+											{effectiveRepo.repo} codebase
+										</p>
 									</div>
 								</div>
 							)}
 						</div>
 					) : (
-						<Conversation instance={stickToBottomInstance}>
+						<Conversation instance={stickToBottom}>
 							<ConversationContent>
-								{pendingMessage && !threadId && (
+								{optimisticUserMessage && messages.length === 0 && (
 									<Message from="user">
 										<MessageContent>
-											<MessageResponse>{pendingMessage}</MessageResponse>
+											<MessageResponse>{optimisticUserMessage}</MessageResponse>
 										</MessageContent>
 									</Message>
 								)}
@@ -547,115 +446,49 @@ export function ChatInterface({
 										isLastMessage={message.id === lastMessageId}
 									/>
 								))}
-								{(isAgentWorking || pendingMessage) && (
+								{(isAgentWorking ||
+									(optimisticUserMessage && messages.length === 0)) && (
 									<AgentStatusIndicator
 										status={agentStatus === "idle" ? "thinking" : agentStatus}
 										error={agentError}
-										repoName={repoName}
+										repoName={
+											effectiveRepo
+												? `${effectiveRepo.owner}/${effectiveRepo.repo}`
+												: null
+										}
 									/>
-								)}
-								{agentStatus === "error" && (
-									<AgentStatusIndicator status="error" error={agentError} />
 								)}
 							</ConversationContent>
 							<ConversationScrollButton />
 						</Conversation>
 					)}
 				</div>
-				{isNearBottom && (
-					<div className="w-full max-w-4xl mx-auto px-2 sm:px-6 lg:hidden">
-						{selectedRepo &&
-							discordInviteQuery.data?.hasDiscordInvite &&
-							!discordInviteQuery.data.isOnAnswerOverflow && (
-								<DiscordInviteCTA
-									repoOwner={selectedRepo.owner}
-									repoName={selectedRepo.repo}
-									discordInviteCode={discordInviteQuery.data.inviteCodes[0]}
-								/>
-							)}
-						<PromptInput
-							onSubmit={handleSubmit}
-							className={`[&_[data-slot=input-group]]:border-2 ${
-								selectedRepo &&
-								discordInviteQuery.data?.hasDiscordInvite &&
-								!discordInviteQuery.data.isOnAnswerOverflow
-									? "[&_[data-slot=input-group]]:rounded-t-none"
-									: ""
-							}`}
-						>
-							<PromptInputBody>
-								<PromptInputTextarea
-									value={input}
-									onChange={(e) => setInput(e.target.value)}
-									placeholder={placeholder}
-								/>
-							</PromptInputBody>
-							<PromptInputFooter>
-								<PromptInputTools>
-									<GitHubRepoSelector
-										selectedRepo={selectedRepo}
-										onSelectRepo={setUserSelectedRepo}
-									/>
-									<ModelSelector
-										selectedModel={model}
-										onSelectModel={setModelOverride}
-									/>
-								</PromptInputTools>
-								<PromptInputSubmit disabled={!input.trim()} />
-							</PromptInputFooter>
-						</PromptInput>
-					</div>
-				)}
 			</div>
 
-			<div
-				className={`absolute bottom-0 left-0 right-0 w-full rounded-b-none z-10 transition-transform duration-500 lg:translate-y-0 ${
-					isNearBottom || !isInputVisible ? "translate-y-full" : "translate-y-0"
-				}`}
-			>
-				<div className="grid shrink-0 gap-2">
-					<div className="w-full max-w-4xl mx-auto px-2 sm:px-4">
-						{selectedRepo &&
-							discordInviteQuery.data?.hasDiscordInvite &&
-							!discordInviteQuery.data.isOnAnswerOverflow && (
-								<DiscordInviteCTA
-									repoOwner={selectedRepo.owner}
-									repoName={selectedRepo.repo}
-									discordInviteCode={discordInviteQuery.data.inviteCodes[0]}
+			<div className="absolute bottom-0 left-0 right-0">
+				<div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
+					<PromptInput onSubmit={handleSubmit}>
+						<PromptInputBody>
+							<PromptInputTextarea
+								value={input}
+								onChange={(e) => setInput(e.target.value)}
+								placeholder={placeholder}
+							/>
+						</PromptInputBody>
+						<PromptInputFooter>
+							<PromptInputTools>
+								<GitHubRepoSelector
+									selectedRepo={effectiveRepo}
+									onSelectRepo={setSelectedRepo}
 								/>
-							)}
-						<PromptInput
-							onSubmit={handleSubmit}
-							className={`[&_[data-slot=input-group]]:border-2 ${
-								selectedRepo &&
-								discordInviteQuery.data?.hasDiscordInvite &&
-								!discordInviteQuery.data.isOnAnswerOverflow
-									? "[&_[data-slot=input-group]]:rounded-t-none"
-									: ""
-							}`}
-						>
-							<PromptInputBody>
-								<PromptInputTextarea
-									value={input}
-									onChange={(e) => setInput(e.target.value)}
-									placeholder={placeholder}
+								<ModelSelector
+									selectedModel={model}
+									onSelectModel={setModelOverride}
 								/>
-							</PromptInputBody>
-							<PromptInputFooter>
-								<PromptInputTools>
-									<GitHubRepoSelector
-										selectedRepo={selectedRepo}
-										onSelectRepo={setUserSelectedRepo}
-									/>
-									<ModelSelector
-										selectedModel={model}
-										onSelectModel={setModelOverride}
-									/>
-								</PromptInputTools>
-								<PromptInputSubmit disabled={!input.trim()} />
-							</PromptInputFooter>
-						</PromptInput>
-					</div>
+							</PromptInputTools>
+							<PromptInputSubmit disabled={!input.trim()} />
+						</PromptInputFooter>
+					</PromptInput>
 				</div>
 			</div>
 		</div>

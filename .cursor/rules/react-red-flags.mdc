@@ -32,3 +32,30 @@ useMemo does not fix bugs, it just makes them happen less often
 divs are not interactive elements and adding onClick requires implementing keyboard control, screen reader announcement, etc
 
 This is almost never the right move, and anyone capable of doing it right (the new tweet button) isn't going to be swayed by this tweet
+
+🚩 useEffect to sync state
+
+Using useEffect to sync state from props or other state is a code smell. Prefer derived state instead.
+
+❌ Bad - useEffect to sync state:
+```tsx
+const [selectedItem, setSelectedItem] = useState(null);
+
+useEffect(() => {
+  if (data?.defaultItem && !selectedItem) {
+    setSelectedItem(data.defaultItem);
+  }
+}, [data?.defaultItem, selectedItem]);
+```
+
+✅ Good - Derived state:
+```tsx
+const [userSelectedItem, setUserSelectedItem] = useState(null);
+const selectedItem = userSelectedItem ?? data?.defaultItem ?? null;
+```
+
+Benefits of derived state:
+- No extra render from the useEffect setState
+- Clearer data flow - easy to see where the value comes from
+- No stale closure bugs
+- Works correctly on first render (useEffect runs after render)
