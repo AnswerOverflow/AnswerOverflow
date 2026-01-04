@@ -3,6 +3,8 @@ import type {
 	ModalSubmitInteraction,
 } from "discord.js";
 import {
+	ActionRowBuilder,
+	ButtonBuilder,
 	EmbedBuilder,
 	LabelBuilder,
 	MessageFlags,
@@ -15,6 +17,7 @@ import { Console, Effect, Layer, Metric } from "effect";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import { commandExecuted } from "../metrics";
+import { makeDmReplyButton } from "../utils/discord-components";
 import { catchAllWithReport } from "../utils/error-reporting";
 
 const BUG_REPORT_MODAL_ID = "bug-report-modal";
@@ -145,10 +148,15 @@ export const handleBugReportModalSubmit = Effect.fn("bug_report_modal_submit")(
 			embed.setThumbnail(interaction.user.avatarURL());
 		}
 
+		const replyButton = makeDmReplyButton(interaction.user.id);
+		const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			replyButton,
+		);
+
 		yield* Effect.tryPromise({
 			try: async () => {
 				const superUser = await interaction.client.users.fetch(SUPER_USER_ID);
-				await superUser.send({ embeds: [embed] });
+				await superUser.send({ embeds: [embed], components: [actionRow] });
 			},
 			catch: (error) => error,
 		}).pipe(
