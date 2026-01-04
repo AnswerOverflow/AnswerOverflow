@@ -58,7 +58,7 @@ jobs:
         run: |
           SUMMARY=$(opencode run "Write a brief, friendly release summary (2-4 sentences) for these commits. Focus on user-facing changes. No bullet points, just a short paragraph:
 
-          ${{ steps.commits.outputs.commits }}" --model anthropic/claude-sonnet-4-20250514 2>/dev/null || echo "")
+          ${{ steps.commits.outputs.commits }}" --model anthropic/claude-opus-4-5 2>/dev/null || echo "")
           
           echo "summary<<EOF" >> $GITHUB_OUTPUT
           echo "$SUMMARY" >> $GITHUB_OUTPUT
