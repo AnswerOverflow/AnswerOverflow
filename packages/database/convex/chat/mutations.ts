@@ -11,10 +11,10 @@ import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
 import {
 	type ActionCtx,
-	authenticatedMutation,
-	authenticatedQuery,
 	type MutationCtx,
 	type QueryCtx,
+	userAuthenticatedMutation,
+	userAuthenticatedQuery,
 } from "../client";
 import { defaultModelId, vModelId } from "../shared/models";
 import { rateLimiter } from "../shared/rateLimiter";
@@ -36,7 +36,7 @@ async function verifyThreadOwnership(
 	}
 }
 
-export const sendMessage = authenticatedMutation({
+export const sendMessage = userAuthenticatedMutation({
 	args: {
 		threadId: v.optional(v.string()),
 		prompt: v.string(),
@@ -108,7 +108,7 @@ export const sendMessage = authenticatedMutation({
 	},
 });
 
-export const listMessages = authenticatedQuery({
+export const listMessages = userAuthenticatedQuery({
 	args: {
 		threadId: v.string(),
 		paginationOpts: paginationOptsValidator,
@@ -122,7 +122,7 @@ export const listMessages = authenticatedQuery({
 	},
 });
 
-export const listThreads = authenticatedQuery({
+export const listThreads = userAuthenticatedQuery({
 	args: {
 		paginationOpts: paginationOptsValidator,
 	},
@@ -156,7 +156,7 @@ export const listThreads = authenticatedQuery({
 	},
 });
 
-export const deleteThread = authenticatedMutation({
+export const deleteThread = userAuthenticatedMutation({
 	args: {
 		threadId: v.string(),
 	},
@@ -180,7 +180,7 @@ export const deleteThread = authenticatedMutation({
 	},
 });
 
-export const updateThreadTitle = authenticatedMutation({
+export const updateThreadTitle = userAuthenticatedMutation({
 	args: {
 		threadId: v.string(),
 		title: v.string(),
@@ -195,7 +195,7 @@ export const updateThreadTitle = authenticatedMutation({
 	},
 });
 
-export const getChatThreadMetadata = authenticatedQuery({
+export const getChatThreadMetadata = userAuthenticatedQuery({
 	args: {
 		threadId: v.string(),
 	},

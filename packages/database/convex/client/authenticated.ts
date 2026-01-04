@@ -137,6 +137,41 @@ function getBackendAccessTokenEnv(): string {
 	return token ?? "";
 }
 
+export const userAuthenticatedQuery = customQuery(query, {
+	args: {},
+	input: async (ctx) => {
+		const userId = await getAuthUserId(ctx);
+		const cache = createDataAccessCache(ctx);
+		return {
+			ctx: { ...ctx, cache },
+			args: { userId },
+		};
+	},
+});
+
+export const userAuthenticatedMutation = customMutation(mutation, {
+	args: {},
+	input: async (ctx) => {
+		const userId = await getAuthUserId(ctx);
+		const cache = createDataAccessCache(ctx);
+		return {
+			ctx: { ...ctx, cache },
+			args: { userId },
+		};
+	},
+});
+
+export const userAuthenticatedAction = customAction(action, {
+	args: {},
+	input: async (ctx) => {
+		const userId = await getAuthUserId(ctx);
+		return {
+			ctx,
+			args: { userId },
+		};
+	},
+});
+
 export const manageGuildAction = customAction(action, {
 	args: {
 		backendAccessToken: v.optional(v.string()),

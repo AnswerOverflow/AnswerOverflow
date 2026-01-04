@@ -14,6 +14,10 @@ initBotId({
 			path: "/api/auth/anonymous-session",
 			method: "GET",
 		},
+		{
+			path: "/api/auth/sign-in/anonymous",
+			method: "POST",
+		},
 	],
 });
 

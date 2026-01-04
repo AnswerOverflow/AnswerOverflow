@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { authenticatedAction, authenticatedQuery } from "../client";
+import { userAuthenticatedAction, userAuthenticatedQuery } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import {
 	createOctokitClient,
@@ -11,7 +11,7 @@ import {
 	searchGitHubRepositories,
 } from "../shared/github";
 
-export const getGitHubAccount = authenticatedQuery({
+export const getGitHubAccount = userAuthenticatedQuery({
 	args: {},
 	handler: async (ctx) => {
 		const user = await authComponent.getAuthUser(ctx);
@@ -31,7 +31,7 @@ export const getGitHubAccount = authenticatedQuery({
 	},
 });
 
-export const getAccessibleRepos = authenticatedAction({
+export const getAccessibleRepos = userAuthenticatedAction({
 	args: {},
 	handler: async (ctx) => {
 		const user = await authComponent.getAuthUser(ctx);
@@ -82,7 +82,7 @@ export const getAccessibleRepos = authenticatedAction({
 	},
 });
 
-export const searchRepos = authenticatedAction({
+export const searchRepos = userAuthenticatedAction({
 	args: {
 		query: v.string(),
 		org: v.optional(v.string()),
@@ -129,7 +129,7 @@ export const searchRepos = authenticatedAction({
 	},
 });
 
-export const getOrgRepos = authenticatedAction({
+export const getOrgRepos = userAuthenticatedAction({
 	args: {
 		org: v.string(),
 	},
@@ -171,7 +171,7 @@ export const getOrgRepos = authenticatedAction({
 	},
 });
 
-export const getFeatured = authenticatedAction({
+export const getFeatured = userAuthenticatedAction({
 	args: {},
 	handler: async (ctx, args) => {
 		const account = await getGitHubAccountByUserId(ctx, args.userId);
