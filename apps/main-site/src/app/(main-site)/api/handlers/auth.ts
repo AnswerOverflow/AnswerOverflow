@@ -1,23 +1,32 @@
 import { convexBetterAuthNextJs } from "@convex-dev/better-auth/nextjs";
 import { checkBotId } from "botid/server";
 import type { Context } from "elysia";
+import type { IncomingHttpHeaders } from "node:http";
 
 const { handler } = convexBetterAuthNextJs({
 	convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL ?? "",
 	convexSiteUrl: process.env.NEXT_PUBLIC_CONVEX_SITE_URL ?? "",
 });
 
-async function checkForBot(): Promise<Response | null> {
-	const verification = await checkBotId();
+function getHeadersFromRequest(request: Request): IncomingHttpHeaders {
+	const headers: IncomingHttpHeaders = {};
+	request.headers.forEach((value, key) => {
+		headers[key.toLowerCase()] = value;
+	});
+	return headers;
+}
 
-	if (verification.isBot) {
-		return new Response(JSON.stringify({ error: "Access denied" }), {
-			status: 403,
-			headers: { "Content-Type": "application/json" },
+async function checkForBot(request: Request): Promise<boolean> {
+	try {
+		const verification = await checkBotId({
+			advancedOptions: {
+				headers: getHeadersFromRequest(request),
+			},
 		});
+		return verification.isBot;
+	} catch {
+		return false;
 	}
-
-	return null;
 }
 
 export async function handleAuth(c: Context) {
@@ -33,12 +42,18 @@ export async function handleAuth(c: Context) {
 		return Response.redirect(new URL("/dashboard/settings", url.origin));
 	}
 
-	if (
+	const isAnonRoute =
 		url.pathname === "/api/auth/anonymous-session" ||
-		url.pathname === "/api/auth/sign-in/anonymous"
-	) {
-		const botResponse = await checkForBot();
-		if (botResponse) return botResponse;
+		url.pathname === "/api/auth/sign-in/anonymous";
+
+	if (isAnonRoute) {
+		const isBot = await checkForBot(c.request);
+		if (isBot) {
+			return new Response(JSON.stringify({ error: "Access denied" }), {
+				status: 403,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
 	}
 
 	if (method === "GET") {
