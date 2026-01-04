@@ -137,7 +137,7 @@ function getBackendAccessTokenEnv(): string {
 	return token ?? "";
 }
 
-export const userAuthenticatedQuery = customQuery(query, {
+export const anonOrAuthenticatedQuery = customQuery(query, {
 	args: {},
 	input: async (ctx) => {
 		const userId = await getAuthUserId(ctx);
@@ -149,7 +149,7 @@ export const userAuthenticatedQuery = customQuery(query, {
 	},
 });
 
-export const userAuthenticatedMutation = customMutation(mutation, {
+export const anonOrAuthenticatedMutation = customMutation(mutation, {
 	args: {},
 	input: async (ctx) => {
 		const userId = await getAuthUserId(ctx);
@@ -161,7 +161,7 @@ export const userAuthenticatedMutation = customMutation(mutation, {
 	},
 });
 
-export const userAuthenticatedAction = customAction(action, {
+export const anonOrAuthenticatedAction = customAction(action, {
 	args: {},
 	input: async (ctx) => {
 		const userId = await getAuthUserId(ctx);
