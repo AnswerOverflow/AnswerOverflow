@@ -101,6 +101,7 @@ export const createForumThreadWithReplies = () =>
 			authorId: author.id,
 			serverId: server.discordId,
 			channelId: thread.id,
+			parentChannelId: forum.id,
 		};
 
 		let nextMessageId = thread.id + 1n;
@@ -137,6 +138,7 @@ export const createTextChannelThreadWithReplies = () =>
 			authorId: author.id,
 			serverId: server.discordId,
 			channelId: thread.id,
+			parentChannelId: textChannel.id,
 		};
 
 		let nextMessageId = thread.id + 1n;
