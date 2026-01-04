@@ -56,6 +56,7 @@ import type * as private_user_server_settings from "../private/user_server_setti
 import type * as public_channels from "../public/channels.js";
 import type * as public_custom_functions from "../public/custom_functions.js";
 import type * as public_discord_accounts from "../public/discord_accounts.js";
+import type * as public_github from "../public/github.js";
 import type * as public_messages from "../public/messages.js";
 import type * as public_search from "../public/search.js";
 import type * as public_servers from "../public/servers.js";
@@ -147,6 +148,7 @@ declare const fullApi: ApiFromModules<{
   "public/channels": typeof public_channels;
   "public/custom_functions": typeof public_custom_functions;
   "public/discord_accounts": typeof public_discord_accounts;
+  "public/github": typeof public_github;
   "public/messages": typeof public_messages;
   "public/search": typeof public_search;
   "public/servers": typeof public_servers;

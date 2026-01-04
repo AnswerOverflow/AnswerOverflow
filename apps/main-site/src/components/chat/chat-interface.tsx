@@ -67,14 +67,16 @@ import {
 	isToolUIPart,
 	type ToolUIPart,
 } from "ai";
-import { useMutation } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { Bot, CheckIcon, CopyIcon, Menu, RefreshCcwIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { useAuthenticatedQuery } from "@/lib/use-authenticated-query";
 import { useChatSidebar } from "./chat-sidebar";
+import { DiscordInviteCTA } from "./discord-invite-cta";
 import { GitHubRepoSelector } from "./github-repo-selector";
 
 function ModelSelector({
@@ -369,6 +371,22 @@ export function ChatInterface({
 		initialThreadId ? { threadId: initialThreadId } : "skip",
 	);
 
+	const getDiscordInviteInfo = useAction(
+		api.public.github.getDiscordInviteInfo,
+	);
+	const discordInviteQuery = useQuery({
+		queryKey: ["discord-invite-info", selectedRepo?.owner, selectedRepo?.repo],
+		queryFn: async () => {
+			if (!selectedRepo) return null;
+			return getDiscordInviteInfo({
+				owner: selectedRepo.owner,
+				repo: selectedRepo.repo,
+			});
+		},
+		enabled: !!selectedRepo,
+		staleTime: 1000 * 60 * 60,
+	});
+
 	const model = modelOverride ?? threadMetadata?.modelId ?? defaultModelId;
 
 	const setScrollRef = (element: HTMLDivElement | null) => {
@@ -523,8 +541,26 @@ export function ChatInterface({
 					)}
 				</div>
 				{isNearBottom && (
-					<div className="w-full max-w-4xl mx-auto px-2 sm:px-6  lg:hidden">
-						<PromptInput onSubmit={handleSubmit}>
+					<div className="w-full max-w-4xl mx-auto px-2 sm:px-6 lg:hidden">
+						{selectedRepo &&
+							discordInviteQuery.data?.hasDiscordInvite &&
+							!discordInviteQuery.data.isOnAnswerOverflow && (
+								<DiscordInviteCTA
+									repoOwner={selectedRepo.owner}
+									repoName={selectedRepo.repo}
+									discordInviteCode={discordInviteQuery.data.inviteCodes[0]}
+								/>
+							)}
+						<PromptInput
+							onSubmit={handleSubmit}
+							className={`[&_[data-slot=input-group]]:border-2 ${
+								selectedRepo &&
+								discordInviteQuery.data?.hasDiscordInvite &&
+								!discordInviteQuery.data.isOnAnswerOverflow
+									? "[&_[data-slot=input-group]]:rounded-t-none"
+									: ""
+							}`}
+						>
 							<PromptInputBody>
 								<PromptInputTextarea
 									value={input}
@@ -557,7 +593,25 @@ export function ChatInterface({
 			>
 				<div className="grid shrink-0 gap-2">
 					<div className="w-full max-w-4xl mx-auto px-2 sm:px-4">
-						<PromptInput onSubmit={handleSubmit}>
+						{selectedRepo &&
+							discordInviteQuery.data?.hasDiscordInvite &&
+							!discordInviteQuery.data.isOnAnswerOverflow && (
+								<DiscordInviteCTA
+									repoOwner={selectedRepo.owner}
+									repoName={selectedRepo.repo}
+									discordInviteCode={discordInviteQuery.data.inviteCodes[0]}
+								/>
+							)}
+						<PromptInput
+							onSubmit={handleSubmit}
+							className={`[&_[data-slot=input-group]]:border-2 ${
+								selectedRepo &&
+								discordInviteQuery.data?.hasDiscordInvite &&
+								!discordInviteQuery.data.isOnAnswerOverflow
+									? "[&_[data-slot=input-group]]:rounded-t-none"
+									: ""
+							}`}
+						>
 							<PromptInputBody>
 								<PromptInputTextarea
 									value={input}

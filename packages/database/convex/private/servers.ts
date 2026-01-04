@@ -239,6 +239,15 @@ export const getServerByDiscordId = privateQuery({
 	},
 });
 
+export const getServerByDiscordIdInternal = internalQuery({
+	args: {
+		discordId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		return getOneFrom(ctx.db, "servers", "by_discordId", args.discordId);
+	},
+});
+
 export const getServerByDomain = privateQuery({
 	args: {
 		domain: v.string(),
