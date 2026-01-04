@@ -15,6 +15,10 @@ const globalCommands = [
 		.setType(ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild),
 	new ContextMenuCommandBuilder()
+		.setName("✅ Mark Solution & Archive")
+		.setType(ApplicationCommandType.Message)
+		.setContexts(InteractionContextType.Guild),
+	new ContextMenuCommandBuilder()
 		.setName("Quick Action")
 		.setType(ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild),

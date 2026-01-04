@@ -34,7 +34,10 @@ class MarkSolutionResponseBuildError extends Data.TaggedError(
 }> {}
 
 export const handleMarkSolutionCommand = Effect.fn("mark_solution_command")(
-	function* (interaction: ContextMenuCommandInteraction) {
+	function* (
+		interaction: ContextMenuCommandInteraction,
+		options: { archiveOnComplete: boolean; ephemeral: boolean },
+	) {
 		yield* Effect.annotateCurrentSpan({
 			"discord.guild_id": interaction.guildId ?? "unknown",
 			"discord.channel_id": interaction.channelId ?? "unknown",
@@ -273,17 +276,28 @@ export const handleMarkSolutionCommand = Effect.fn("mark_solution_command")(
 			catch: (cause) => new MarkSolutionResponseBuildError({ cause }),
 		}).pipe(Effect.withSpan("build_response"));
 
-		yield* discord
-			.callClient(() => interaction.deleteReply())
-			.pipe(Effect.withSpan("delete_reply"));
-		yield* discord
-			.callClient(() =>
-				interaction.followUp({
-					embeds: [embed],
-					components: components ? [components] : undefined,
-				}),
-			)
-			.pipe(Effect.withSpan("send_followup"));
+		if (options.ephemeral) {
+			yield* discord
+				.callClient(() =>
+					interaction.editReply({
+						embeds: [embed],
+						components: components ? [components] : undefined,
+					}),
+				)
+				.pipe(Effect.withSpan("edit_reply_ephemeral"));
+		} else {
+			yield* discord
+				.callClient(() => interaction.deleteReply())
+				.pipe(Effect.withSpan("delete_reply"));
+			yield* discord
+				.callClient(() =>
+					interaction.followUp({
+						embeds: [embed],
+						components: components ? [components] : undefined,
+					}),
+				)
+				.pipe(Effect.withSpan("send_followup"));
+		}
 
 		yield* Effect.forkDaemon(
 			Effect.gen(function* () {
@@ -360,6 +374,14 @@ export const handleMarkSolutionCommand = Effect.fn("mark_solution_command")(
 				yield* catchAllSilentWithReport(
 					trackMarkSolutionCommandUsed(guildMember, "Success"),
 				);
+
+				if (options.archiveOnComplete) {
+					yield* catchAllSilentWithReport(
+						discord
+							.callClient(async () => thread.setArchived(true))
+							.pipe(Effect.withSpan("archive_thread")),
+					);
+				}
 			}).pipe(Effect.withSpan("post_response_tasks")),
 		);
 	},
@@ -371,13 +393,18 @@ export const MarkSolutionCommandHandlerLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("interactionCreate", (interaction) =>
 			Effect.gen(function* () {
-				if (
+				const isMarkSolution =
 					interaction.isContextMenuCommand() &&
-					interaction.commandName === "✅ Mark Solution"
-				) {
-					const commandWithTimeout = handleMarkSolutionCommand(
-						interaction,
-					).pipe(
+					interaction.commandName === "✅ Mark Solution";
+				const isMarkSolutionAndArchive =
+					interaction.isContextMenuCommand() &&
+					interaction.commandName === "✅ Mark Solution & Archive";
+
+				if (isMarkSolution || isMarkSolutionAndArchive) {
+					const commandWithTimeout = handleMarkSolutionCommand(interaction, {
+						archiveOnComplete: isMarkSolutionAndArchive,
+						ephemeral: isMarkSolutionAndArchive,
+					}).pipe(
 						Effect.timeoutFail({
 							duration: Duration.seconds(25),
 							onTimeout: () =>
