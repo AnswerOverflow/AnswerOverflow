@@ -11,7 +11,6 @@ import {
 import { ConvexClientProvider, useSession } from "./convex-client-provider";
 import { HydrationProvider } from "./hydration-context";
 import { ImpersonationBanner } from "./impersonation-banner";
-import { SignInIfAnon } from "./sign-in-if-anon";
 import { type Tenant, TenantProvider } from "./tenant-context";
 import { VercelToolbar } from "./vercel-toolbar";
 
@@ -55,7 +54,6 @@ export function Providers({
 						enableColorScheme
 					>
 						<ConvexClientProvider tenant={tenant}>
-							<SignInIfAnon />
 							<IdentifyUser />
 							<ImpersonationBanner />
 							<VercelToolbar />
