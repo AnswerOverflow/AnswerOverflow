@@ -5,7 +5,7 @@ import type {
 } from "discord.js";
 import {
 	ActionRowBuilder,
-	ButtonBuilder,
+	type ButtonBuilder,
 	EmbedBuilder,
 	LabelBuilder,
 	MessageFlags,

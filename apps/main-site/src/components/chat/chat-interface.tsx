@@ -64,14 +64,7 @@ import {
 	type ToolUIPart,
 } from "ai";
 import { useMutation } from "convex/react";
-import {
-	CheckIcon,
-	CopyIcon,
-	Loader2,
-	Menu,
-	PlusIcon,
-	RefreshCcwIcon,
-} from "lucide-react";
+import { CheckIcon, CopyIcon, Loader2, Menu, PlusIcon } from "lucide-react";
 import Image from "next/image";
 
 import { memo, useState } from "react";

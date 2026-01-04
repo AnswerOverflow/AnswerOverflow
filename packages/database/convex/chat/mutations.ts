@@ -11,10 +11,10 @@ import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
 import {
 	type ActionCtx,
-	type MutationCtx,
-	type QueryCtx,
 	anonOrAuthenticatedMutation,
 	anonOrAuthenticatedQuery,
+	type MutationCtx,
+	type QueryCtx,
 } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import { defaultModelId, vModelId } from "../shared/models";
