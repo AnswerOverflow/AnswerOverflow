@@ -36,15 +36,6 @@ import {
 } from "convex/values";
 import { compareValues } from "./compare.js";
 
-// Type definition for Vite's import.meta.glob
-declare global {
-	interface ImportMeta {
-		glob<M = Record<string, () => Promise<unknown>>>(
-			pattern: string,
-		): Record<string, () => Promise<M>>;
-	}
-}
-
 type FilterJson =
 	| { $eq: [FilterJson, FilterJson] }
 	| { $field: string }
