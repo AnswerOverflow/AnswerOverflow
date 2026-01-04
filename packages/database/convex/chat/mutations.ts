@@ -16,6 +16,7 @@ import {
 	anonOrAuthenticatedMutation,
 	anonOrAuthenticatedQuery,
 } from "../client";
+import { authComponent } from "../shared/betterAuth";
 import { defaultModelId, vModelId } from "../shared/models";
 import { rateLimiter } from "../shared/rateLimiter";
 
@@ -46,8 +47,11 @@ export const sendMessage = anonOrAuthenticatedMutation({
 	returns: v.string(),
 	handler: async (ctx, args) => {
 		const userId = args.userId;
+		const user = await authComponent.getAuthUser(ctx);
+		const isAnonymous = user?.isAnonymous ?? false;
 
-		const rateLimit = await rateLimiter.limit(ctx, "chatMessage", {
+		const rateLimitName = isAnonymous ? "chatMessageAnon" : "chatMessage";
+		const rateLimit = await rateLimiter.limit(ctx, rateLimitName, {
 			key: userId,
 		});
 		if (!rateLimit.ok) {
