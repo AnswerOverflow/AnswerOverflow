@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      pr: ${{ steps.release.outputs.pr }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: node
+
+  ai-summary:
+    needs: release-please
+    if: needs.release-please.outputs.pr
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install OpenCode
+        run: npm install -g opencode-ai
+
+      - name: Get commits since last release
+        id: commits
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            COMMITS=$(git log --oneline -50)
+          else
+            COMMITS=$(git log --oneline ${LAST_TAG}..HEAD)
+          fi
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate AI summary
+        id: summary
+        env:
+          OPENCODE_AUTH: ${{ secrets.OPENCODE_AUTH }}
+        run: |
+          SUMMARY=$(opencode run "Write a brief, friendly release summary (2-4 sentences) for these commits. Focus on user-facing changes. No bullet points, just a short paragraph:
+
+          ${{ steps.commits.outputs.commits }}" --model anthropic/claude-sonnet-4-20250514 2>/dev/null || echo "")
+          
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update PR with AI summary
+        if: steps.summary.outputs.summary != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(echo '${{ needs.release-please.outputs.pr }}' | jq -r '.number')
+          CURRENT_BODY=$(gh pr view $PR_NUMBER --json body -q .body)
+          
+          NEW_BODY="## Summary
+
+          ${{ steps.summary.outputs.summary }}
+
+          ---
+
+          $CURRENT_BODY"
+          
+          gh pr edit $PR_NUMBER --body "$NEW_BODY"
