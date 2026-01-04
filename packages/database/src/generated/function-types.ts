@@ -133,7 +133,7 @@ export const NAMESPACE_STRUCTURE = {
   "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelSettingsWithIndexingEnabled","findChannelsByDiscordIds","findManyChannelsByDiscordIds","getChannelPageMessages","getChannelPageThreads","getCommunityPageHeaderData","getServerPageThreads","updateChannelSettings","upsertChannel"],
   "counts": [],
   "discord_accounts": ["deleteDiscordAccount","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount","upsertManyDiscordAccounts"],
-  "github": ["createGitHubIssueFromDiscord","getAccessibleReposByDiscordId","getDiscordInviteInfo","getGitHubIssueByRepoAndNumber","updateGitHubIssueStatus"],
+  "github": ["createGitHubIssueFromDiscord","getAccessibleReposByDiscordId","getDiscordInviteInfo","getFeatured","getGitHubIssueByRepoAndNumber","getOrgRepos","searchRepos","updateGitHubIssueStatus"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","markMessageAsSolution","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],
   "search": ["getCachedSimilarThreads","getRecentAnnouncements","getRecentThreads","getSimilarThreads","publicSearch"],

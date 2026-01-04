@@ -68,7 +68,13 @@ import {
 	type ToolUIPart,
 } from "ai";
 import { useAction, useMutation } from "convex/react";
-import { Bot, CheckIcon, CopyIcon, Menu, RefreshCcwIcon } from "lucide-react";
+import {
+	CheckIcon,
+	CopyIcon,
+	Loader2,
+	Menu,
+	RefreshCcwIcon,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -208,7 +214,8 @@ function AgentStatusIndicator({
 		return (
 			<Message from="assistant">
 				<MessageContent>
-					<span className="text-sm text-muted-foreground">
+					<span className="flex items-center gap-2 text-sm text-muted-foreground">
+						<Loader2 className="size-3 animate-spin" />
 						{repoName ? `Cloning ${repoName}...` : "Cloning repository..."}
 					</span>
 				</MessageContent>
@@ -320,7 +327,7 @@ export function ChatInterface({
 	const { setScrollContainer: setNavbarScrollContainer } = useScrollContainer();
 	const isNavbarHidden = useIsNavbarHidden();
 	const initialRepo = repos[0] ?? null;
-	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
+	const [userSelectedRepo, setUserSelectedRepo] = useState<GitHubRepo | null>(
 		initialRepo,
 	);
 	const [threadId, setThreadId] = useState<string | null>(
@@ -328,6 +335,7 @@ export function ChatInterface({
 	);
 	const [input, setInput] = useState("");
 	const [modelOverride, setModelOverride] = useState<string | null>(null);
+	const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 	const [isInputVisible, setIsInputVisible] = useState(true);
 	const [isNearBottom, setIsNearBottom] = useState(true);
 	const lastScrollTopRef = useRef(0);
@@ -370,6 +378,17 @@ export function ChatInterface({
 		api.chat.mutations.getChatThreadMetadata,
 		initialThreadId ? { threadId: initialThreadId } : "skip",
 	);
+
+	const threadRepo = threadMetadata?.repos?.[0];
+	const selectedRepo: GitHubRepo | null =
+		userSelectedRepo ??
+		(threadRepo
+			? {
+					owner: threadRepo.owner,
+					repo: threadRepo.repo,
+					filePath: threadRepo.filePath ?? undefined,
+				}
+			: null);
 
 	const getDiscordInviteInfo = useAction(
 		api.public.github.getDiscordInviteInfo,
@@ -421,6 +440,10 @@ export function ChatInterface({
 
 			setInput("");
 
+			if (!threadId) {
+				setPendingMessage(text);
+			}
+
 			const returnedThreadId = await sendMessageMutation({
 				threadId: threadId ?? undefined,
 				prompt: text,
@@ -435,6 +458,7 @@ export function ChatInterface({
 			});
 
 			if (!threadId) {
+				setPendingMessage(null);
 				setThreadId(returnedThreadId);
 				router.push(`/chat/t/${returnedThreadId}`);
 			}
@@ -455,11 +479,11 @@ export function ChatInterface({
 		? threadMetadata.title
 		: selectedRepo
 			? `Chat with ${selectedRepo.owner}/${selectedRepo.repo}`
-			: "Agent Chat";
+			: null;
 
 	const description = selectedRepo
 		? `Ask questions about the ${selectedRepo.owner}/${selectedRepo.repo} codebase`
-		: "Test the Convex Agent with streaming, tool calls, and MCP integration.";
+		: null;
 
 	const placeholder = selectedRepo
 		? `Ask about ${selectedRepo.owner}/${selectedRepo.repo}...`
@@ -487,10 +511,10 @@ export function ChatInterface({
 				<div
 					className={`max-w-4xl mx-auto w-full flex flex-col flex-1 sm:px-6 pt-6 lg:pb-32 ${isNearBottom ? "" : "pb-32"}`}
 				>
-					{!threadId ? (
+					{!threadId && !pendingMessage ? (
 						<div className="flex flex-1 flex-col items-center justify-center gap-6">
-							<div className="flex flex-col items-center gap-4 text-center">
-								{selectedRepo ? (
+							{selectedRepo && (
+								<div className="flex flex-col items-center gap-4 text-center">
 									<Image
 										src={`https://github.com/${selectedRepo.owner}.png?size=128`}
 										alt={selectedRepo.owner}
@@ -499,25 +523,23 @@ export function ChatInterface({
 										className="rounded-full"
 										unoptimized
 									/>
-								) : (
-									<div className="flex size-16 items-center justify-center rounded-full bg-muted">
-										<Bot className="size-8 text-muted-foreground" />
+									<div className="space-y-2">
+										<h1 className="text-2xl font-semibold">{title}</h1>
+										<p className="text-muted-foreground">{description}</p>
 									</div>
-								)}
-								<div className="space-y-2">
-									<h1 className="text-2xl font-semibold">{title}</h1>
-									<p className="text-muted-foreground">{description}</p>
-									{!selectedRepo && (
-										<p className="text-sm text-muted-foreground">
-											Try: "What time is it?" or "Roll 2d20"
-										</p>
-									)}
 								</div>
-							</div>
+							)}
 						</div>
 					) : (
 						<Conversation instance={stickToBottomInstance}>
 							<ConversationContent>
+								{pendingMessage && !threadId && (
+									<Message from="user">
+										<MessageContent>
+											<MessageResponse>{pendingMessage}</MessageResponse>
+										</MessageContent>
+									</Message>
+								)}
 								{messages.map((message) => (
 									<MessageParts
 										key={message.key}
@@ -525,9 +547,9 @@ export function ChatInterface({
 										isLastMessage={message.id === lastMessageId}
 									/>
 								))}
-								{isAgentWorking && (
+								{(isAgentWorking || pendingMessage) && (
 									<AgentStatusIndicator
-										status={agentStatus}
+										status={agentStatus === "idle" ? "thinking" : agentStatus}
 										error={agentError}
 										repoName={repoName}
 									/>
@@ -572,7 +594,7 @@ export function ChatInterface({
 								<PromptInputTools>
 									<GitHubRepoSelector
 										selectedRepo={selectedRepo}
-										onSelectRepo={setSelectedRepo}
+										onSelectRepo={setUserSelectedRepo}
 									/>
 									<ModelSelector
 										selectedModel={model}
@@ -623,7 +645,7 @@ export function ChatInterface({
 								<PromptInputTools>
 									<GitHubRepoSelector
 										selectedRepo={selectedRepo}
-										onSelectRepo={setSelectedRepo}
+										onSelectRepo={setUserSelectedRepo}
 									/>
 									<ModelSelector
 										selectedModel={model}

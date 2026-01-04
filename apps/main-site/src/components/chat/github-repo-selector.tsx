@@ -15,6 +15,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@packages/ui/components/popover";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { CheckIcon, GitFork, Loader2, Star } from "lucide-react";
@@ -34,7 +35,7 @@ type GitHubSearchRepo = {
 	name: string;
 	fullName: string;
 	owner: string;
-	private: boolean;
+	private: false;
 	description: string | null;
 	stargazersCount: number;
 	language: string | null;
@@ -49,10 +50,10 @@ export function GitHubRepoSelector({
 	const [search, setSearch] = useState("");
 	const [debouncedSearch] = useDebounce(search, 300);
 
-	const searchReposAction = useAction(api.authenticated.github.searchRepos);
-	const getOrgReposAction = useAction(api.authenticated.github.getOrgRepos);
+	const searchReposAction = useAction(api.public.github.searchRepos);
+	const getOrgReposAction = useAction(api.public.github.getOrgRepos);
 
-	const getFeaturedAction = useAction(api.authenticated.github.getFeatured);
+	const getFeaturedAction = useAction(api.public.github.getFeatured);
 
 	const orgReposQuery = useQuery({
 		queryKey: ["github-org-repos", selectedRepo?.owner],
@@ -64,7 +65,7 @@ export function GitHubRepoSelector({
 			}
 			return [];
 		},
-		enabled: open && !!selectedRepo?.owner,
+		enabled: !!selectedRepo?.owner,
 	});
 
 	const featuredReposQuery = useQuery({
@@ -193,8 +194,11 @@ export function GitHubRepoSelector({
 					</div>
 					<CommandList>
 						{isInitialLoading ? (
-							<div className="flex items-center justify-center py-6">
-								<Loader2 className="size-4 animate-spin text-muted-foreground" />
+							<div className="flex flex-col gap-2 p-2">
+								<Skeleton className="h-[72px] w-full" />
+								<Skeleton className="h-[72px] w-full" />
+								<Skeleton className="h-[72px] w-full" />
+								<Skeleton className="h-[72px] w-full" />
 							</div>
 						) : displayRepos.length === 0 ? (
 							<CommandEmpty>No repositories found.</CommandEmpty>
@@ -216,16 +220,9 @@ export function GitHubRepoSelector({
 											unoptimized
 										/>
 										<div className="flex flex-col flex-1 min-w-0">
-											<div className="flex items-center gap-2">
-												<span className="font-medium truncate">
-													{repo.fullName}
-												</span>
-												{repo.private && (
-													<span className="text-xs bg-muted px-1.5 py-0.5 rounded">
-														Private
-													</span>
-												)}
-											</div>
+											<span className="font-medium truncate">
+												{repo.fullName}
+											</span>
 											{repo.description && (
 												<span className="text-xs text-muted-foreground truncate">
 													{repo.description}

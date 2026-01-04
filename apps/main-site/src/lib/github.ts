@@ -5,7 +5,7 @@ export type GitHubSearchRepo = {
 	name: string;
 	fullName: string;
 	owner: string;
-	private: boolean;
+	private: false;
 	description: string | null;
 	stargazersCount: number;
 	language: string | null;
@@ -40,16 +40,18 @@ async function fetchFeaturedReposInternal(): Promise<Array<GitHubSearchRepo>> {
 		}>;
 	};
 
-	return data.items.map((repo) => ({
-		id: repo.id,
-		name: repo.name,
-		fullName: repo.full_name,
-		owner: repo.owner?.login ?? "",
-		private: repo.private ?? false,
-		description: repo.description,
-		stargazersCount: repo.stargazers_count ?? 0,
-		language: repo.language,
-	}));
+	return data.items
+		.filter((repo) => !repo.private)
+		.map((repo) => ({
+			id: repo.id,
+			name: repo.name,
+			fullName: repo.full_name,
+			owner: repo.owner?.login ?? "",
+			private: false as const,
+			description: repo.description,
+			stargazersCount: repo.stargazers_count ?? 0,
+			language: repo.language,
+		}));
 }
 
 export const getFeaturedRepos = unstable_cache(
