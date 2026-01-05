@@ -1,7 +1,7 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { ChannelType } from "discord-api-types/v10";
 import { guildManagerQuery } from "../client/guildManager";
-import { isThreadType } from "../shared/channels";
 import {
 	channelWithSystemFieldsValidator,
 	enrichedMessageValidator,
@@ -37,14 +37,17 @@ export const getThreadsForServer = guildManagerQuery({
 		const paginatedResult = await ctx.db
 			.query("channels")
 			.withIndex("by_serverId_and_id", (q) => q.eq("serverId", args.serverId))
+			.filter((q) =>
+				q.or(
+					q.eq(q.field("type"), ChannelType.PublicThread),
+					q.eq(q.field("type"), ChannelType.PrivateThread),
+					q.eq(q.field("type"), ChannelType.AnnouncementThread),
+				),
+			)
 			.order(order)
 			.paginate(args.paginationOpts);
 
-		const threads = paginatedResult.page.filter((channel) =>
-			isThreadType(channel.type),
-		);
-
-		const page = await enrichThreads(ctx, threads);
+		const page = await enrichThreads(ctx, paginatedResult.page);
 
 		return {
 			page,
