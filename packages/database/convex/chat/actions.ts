@@ -93,6 +93,7 @@ export const generateResponse = internalAction({
 						order: ["cerebras"],
 					},
 				},
+				temperature: 0.4,
 			},
 			{ saveStreamDeltas: true },
 		);
