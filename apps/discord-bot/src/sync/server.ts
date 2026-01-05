@@ -283,7 +283,36 @@ export function syncGuild(guild: Guild) {
 			return isAllowedRootChannelType(channel.type);
 		});
 
-		yield* Effect.forEach(rootChannels, (channel) => syncChannel(channel));
+		yield* Effect.forEach(rootChannels, (channel) => syncChannel(channel), {
+			concurrency: 10,
+		});
+
+		if (preferences?.addedByUserId) {
+			yield* database.private.user_server_settings
+				.upsertUserServerSettings({
+					settings: {
+						serverId: BigInt(guild.id),
+						userId: preferences.addedByUserId,
+						permissions: 0x8,
+						canPubliclyDisplayMessages: false,
+						messageIndexingDisabled: false,
+						apiCallsUsed: 0,
+					},
+				})
+				.pipe(
+					Effect.tap(() =>
+						Console.log(
+							`Synced user server settings for user ${preferences.addedByUserId} who added bot to ${guild.name}`,
+						),
+					),
+					catchAllWithReport((error) =>
+						Console.warn(
+							`Failed to sync user server settings for user ${preferences.addedByUserId}:`,
+							error,
+						),
+					),
+				);
+		}
 	}).pipe(
 		Effect.withSpan("sync.guild"),
 		catchAllWithReport((error) =>
@@ -438,23 +467,26 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					yield* Console.log(
 						`Marking ${serversToMarkAsKicked.length} servers as kicked`,
 					);
-					yield* Effect.forEach(serversToMarkAsKicked, (server) =>
-						Effect.gen(function* () {
-							yield* database.private.servers.updateServer({
-								serverId: server.discordId,
-								server: {
-									kickedTime: Date.now(),
-								},
-							});
-							yield* Console.log(`Marked server ${server.name} as kicked`);
-						}).pipe(
-							catchAllWithReport((error) =>
-								Console.error(
-									`Error marking server ${server.discordId} as kicked:`,
-									error,
+					yield* Effect.forEach(
+						serversToMarkAsKicked,
+						(server) =>
+							Effect.gen(function* () {
+								yield* database.private.servers.updateServer({
+									serverId: server.discordId,
+									server: {
+										kickedTime: Date.now(),
+									},
+								});
+								yield* Console.log(`Marked server ${server.name} as kicked`);
+							}).pipe(
+								catchAllWithReport((error) =>
+									Console.error(
+										`Error marking server ${server.discordId} as kicked:`,
+										error,
+									),
 								),
 							),
-						),
+						{ concurrency: 10 },
 					);
 				}
 			}).pipe(Effect.withSpan("event.client_ready")),

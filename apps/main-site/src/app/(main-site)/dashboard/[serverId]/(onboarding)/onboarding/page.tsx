@@ -15,7 +15,8 @@ import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import * as Sentry from "@sentry/nextjs";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
-import { useAction, useQuery } from "convex/react";
+import { useAction } from "convex/react";
+import { useQueryWithStatus } from "@packages/ui/hooks/use-query-with-status";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthClient } from "../../../../../../lib/auth-client";
@@ -50,9 +51,9 @@ export default function OnboardingPage() {
 
 	const selectedServer = servers?.find((s) => s.discordId === serverId);
 
-	const serverFromDb = useQuery(
+	const { data: serverFromDb } = useQueryWithStatus(
 		api.authenticated.dashboard_queries.getUserServersForDropdown,
-		isWaitingForBot && session?.user ? {} : "skip",
+		session?.user ? {} : "skip",
 	);
 	const serverWithBot = serverFromDb?.find(
 		(s) => s.discordId.toString() === serverId && s.hasBot && s.aoServerId,
@@ -74,7 +75,7 @@ export default function OnboardingPage() {
 			return;
 		}
 
-		if (selectedServer?.hasBot && selectedServer.aoServerId) {
+		if (serverWithBot) {
 			router.push(`/dashboard/${serverId}/onboarding/configure`);
 			return;
 		}
@@ -82,7 +83,7 @@ export default function OnboardingPage() {
 		if (step === "auth" && serverId) {
 			setStep("install");
 		}
-	}, [session, isSessionPending, serverId, step, router, selectedServer]);
+	}, [session, isSessionPending, serverId, step, router, serverWithBot]);
 
 	useEffect(() => {
 		if (isWaitingForBot && serverWithBot) {
