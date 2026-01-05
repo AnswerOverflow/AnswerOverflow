@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { Button } from "@packages/ui/components/button";
 import {
 	Dialog,
@@ -25,6 +26,7 @@ export function DiscordInviteCTA({
 	repoName,
 	discordInviteCode,
 }: DiscordInviteCTAProps) {
+	const posthog = usePostHog();
 	const [modalOpen, setModalOpen] = useState(false);
 	const [copied, setCopied] = useState(false);
 	const [inviteMessage, setInviteMessage] = useState(DEFAULT_INVITE_MESSAGE);
@@ -33,10 +35,30 @@ export function DiscordInviteCTA({
 		? `https://discord.gg/${discordInviteCode}`
 		: null;
 
+	const handleCtaClick = () => {
+		trackEvent("Chat Discord CTA Click", { repoOwner, repoName }, posthog);
+		setModalOpen(true);
+	};
+
 	const handleCopy = async () => {
+		trackEvent(
+			"Chat Discord CTA Copy Message",
+			{ repoOwner, repoName },
+			posthog,
+		);
 		await navigator.clipboard.writeText(inviteMessage);
 		setCopied(true);
 		setTimeout(() => setCopied(false), 2000);
+	};
+
+	const handleJoinDiscord = () => {
+		if (discordInviteCode) {
+			trackEvent(
+				"Chat Discord CTA Join",
+				{ repoOwner, repoName, inviteCode: discordInviteCode },
+				posthog,
+			);
+		}
 	};
 
 	return (
@@ -51,7 +73,7 @@ export function DiscordInviteCTA({
 					size="sm"
 					variant="ghost"
 					className="h-6 shrink-0 px-2 text-xs"
-					onClick={() => setModalOpen(true)}
+					onClick={handleCtaClick}
 				>
 					Learn more
 				</Button>
@@ -97,6 +119,7 @@ export function DiscordInviteCTA({
 										href={discordLink}
 										target="_blank"
 										rel="noopener noreferrer"
+										onClick={handleJoinDiscord}
 									>
 										<MessageCircle className="size-4 mr-2" />
 										Join Discord

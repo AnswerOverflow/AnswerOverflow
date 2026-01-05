@@ -80,6 +80,7 @@ import Image from "next/image";
 
 import { memo, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
+import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { useAuthenticatedQuery } from "@/lib/use-authenticated-query";
 import { useChatSidebar } from "./chat-sidebar";
 import { DiscordInviteCTA } from "./discord-invite-cta";
@@ -147,10 +148,12 @@ function RateLimitWarning({
 function ModelSelector({
 	selectedModel,
 	onSelectModel,
+	onModelChange,
 	compact = false,
 }: {
 	selectedModel: string;
 	onSelectModel: (modelId: string) => void;
+	onModelChange?: (modelId: string, previousModelId: string) => void;
 	compact?: boolean;
 }) {
 	const [open, setOpen] = useState(false);
@@ -181,6 +184,9 @@ function ModelSelector({
 										<CommandItem
 											key={m.id}
 											onSelect={() => {
+												if (m.id !== selectedModel) {
+													onModelChange?.(m.id, selectedModel);
+												}
 												onSelectModel(m.id);
 												setOpen(false);
 											}}
@@ -296,9 +302,13 @@ function ToolPart({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
 function MessageParts({
 	message,
 	isLastMessage,
+	threadId,
+	onCopyMessage,
 }: {
 	message: UIMessage;
 	isLastMessage: boolean;
+	threadId: string | null;
+	onCopyMessage: (threadId: string | null) => void;
 }) {
 	const isStreaming = message.status === "streaming";
 
@@ -325,7 +335,10 @@ function MessageParts({
 								!isStreaming && (
 									<MessageActions>
 										<MessageAction
-											onClick={() => navigator.clipboard.writeText(part.text)}
+											onClick={() => {
+												navigator.clipboard.writeText(part.text);
+												onCopyMessage(threadId);
+											}}
 											tooltip="Copy"
 										>
 											<CopyIcon className="size-3" />
@@ -356,6 +369,7 @@ export function ChatInterface({
 	const { setMobileSidebarOpen } = useChatSidebar();
 	const isNavbarHidden = useIsNavbarHidden();
 	const authClient = useAuthClient();
+	const posthog = usePostHog();
 
 	const [input, setInput] = useState("");
 	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
@@ -378,6 +392,11 @@ export function ChatInterface({
 	);
 
 	const handleSignIn = async () => {
+		trackEvent(
+			"Chat Sign In Click",
+			{ location: "rate_limit_warning" },
+			posthog,
+		);
 		await authClient.signIn.social({
 			provider: "discord",
 			callbackURL: window.location.href,
@@ -466,9 +485,22 @@ export function ChatInterface({
 
 		setInput("");
 
-		if (!currentThreadId) {
+		const isNewThread = !currentThreadId;
+		if (isNewThread) {
 			setOptimisticUserMessage(text);
 		}
+
+		trackEvent(
+			"Chat Message Sent",
+			{
+				threadId: currentThreadId ?? null,
+				repoOwner: effectiveRepo?.owner ?? null,
+				repoName: effectiveRepo?.repo ?? null,
+				modelId: model,
+				isNewThread,
+			},
+			posthog,
+		);
 
 		const newThreadId = await sendMessage({
 			threadId: currentThreadId,
@@ -483,13 +515,21 @@ export function ChatInterface({
 			modelId: model,
 		});
 
-		if (!currentThreadId && newThreadId) {
+		if (isNewThread && newThreadId) {
 			setCurrentThreadId(newThreadId);
 			window.history.pushState(null, "", `/chat/t/${newThreadId}`);
 		}
 	};
 
 	const lastMessageId = messages.at(-1)?.id;
+
+	const handleCopyMessage = (threadId: string | null) => {
+		trackEvent("Chat Copy Message Click", { threadId }, posthog);
+	};
+
+	const handleModelChange = (modelId: string, previousModelId: string) => {
+		trackEvent("Chat Model Changed", { modelId, previousModelId }, posthog);
+	};
 
 	if (session.isPending) {
 		return (
@@ -574,6 +614,8 @@ export function ChatInterface({
 										key={message.key}
 										message={message}
 										isLastMessage={message.id === lastMessageId}
+										threadId={currentThreadId ?? null}
+										onCopyMessage={handleCopyMessage}
 									/>
 								))}
 								{(isAgentWorking ||
@@ -634,6 +676,7 @@ export function ChatInterface({
 									<ModelSelector
 										selectedModel={model}
 										onSelectModel={setModelOverride}
+										onModelChange={handleModelChange}
 										compact
 									/>
 								</PromptInputTools>
@@ -688,6 +731,7 @@ export function ChatInterface({
 								<ModelSelector
 									selectedModel={model}
 									onSelectModel={setModelOverride}
+									onModelChange={handleModelChange}
 								/>
 							</PromptInputTools>
 							<PromptInputSubmit

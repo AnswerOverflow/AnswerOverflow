@@ -62,6 +62,44 @@ export type ClientEvents = {
 		feedback: string;
 		page: string;
 	};
+	"Chat Message Sent": {
+		threadId: string | null;
+		repoOwner: string | null;
+		repoName: string | null;
+		modelId: string;
+		isNewThread: boolean;
+	};
+	"Chat Model Changed": {
+		modelId: string;
+		previousModelId: string | null;
+	};
+	"Chat Repo Selected": {
+		repoOwner: string;
+		repoName: string;
+	};
+	"Chat Thread Selected": {
+		threadId: string;
+	};
+	"Chat New Thread Click": Record<string, never>;
+	"Chat Discord CTA Click": {
+		repoOwner: string;
+		repoName: string;
+	};
+	"Chat Discord CTA Copy Message": {
+		repoOwner: string;
+		repoName: string;
+	};
+	"Chat Discord CTA Join": {
+		repoOwner: string;
+		repoName: string;
+		inviteCode: string;
+	};
+	"Chat Sign In Click": {
+		location: "rate_limit_warning";
+	};
+	"Chat Copy Message Click": {
+		threadId: string | null;
+	};
 };
 
 export type ClientEventName = keyof ClientEvents;

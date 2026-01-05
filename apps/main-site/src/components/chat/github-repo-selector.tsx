@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { PromptInputButton } from "@packages/ui/components/ai-elements/prompt-input";
 import {
 	Command,
@@ -47,6 +48,7 @@ export function GitHubRepoSelector({
 	onSelectRepo,
 	compact = false,
 }: GitHubRepoSelectorProps) {
+	const posthog = usePostHog();
 	const initialFeaturedRepos = useFeaturedRepos();
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
@@ -104,6 +106,11 @@ export function GitHubRepoSelector({
 	});
 
 	const handleSelect = (repo: GitHubSearchRepo) => {
+		trackEvent(
+			"Chat Repo Selected",
+			{ repoOwner: repo.owner, repoName: repo.name },
+			posthog,
+		);
 		onSelectRepo({
 			owner: repo.owner,
 			repo: repo.name,

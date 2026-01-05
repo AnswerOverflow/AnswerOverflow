@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo";
 import { Button } from "@packages/ui/components/button";
 import { useSession } from "@packages/ui/components/convex-client-provider";
@@ -41,6 +42,7 @@ export function useChatSidebar() {
 
 function ThreadList({ onThreadClick }: { onThreadClick?: () => void }) {
 	const pathname = usePathname();
+	const posthog = usePostHog();
 	const session = useSession({ allowAnonymous: true });
 	const isAuthenticated = !!session?.data;
 	const isLoading = session.isPending;
@@ -87,11 +89,16 @@ function ThreadList({ onThreadClick }: { onThreadClick?: () => void }) {
 
 				const repos = thread.repos ?? [];
 
+				const handleThreadClick = () => {
+					trackEvent("Chat Thread Selected", { threadId: thread._id }, posthog);
+					onThreadClick?.();
+				};
+
 				return (
 					<Link
 						key={thread._id}
 						href={threadPath}
-						onClick={onThreadClick}
+						onClick={handleThreadClick}
 						className={cn(
 							"group flex items-start gap-3 rounded-md px-3 py-2 text-sm transition-colors",
 							isActive
@@ -141,12 +148,18 @@ function SidebarHeader() {
 }
 
 function SidebarContent({ onThreadClick }: { onThreadClick?: () => void }) {
+	const posthog = usePostHog();
+
+	const handleNewChatClick = () => {
+		trackEvent("Chat New Thread Click", {}, posthog);
+	};
+
 	return (
 		<div className="flex flex-col h-full">
 			<SidebarHeader />
 			<div className="p-4">
 				<Button asChild className="w-full" variant="outline">
-					<Link href="/chat">
+					<Link href="/chat" onClick={handleNewChatClick}>
 						<MessageSquarePlus className="size-4 mr-2" />
 						New chat
 					</Link>
