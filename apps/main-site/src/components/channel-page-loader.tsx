@@ -235,7 +235,6 @@ async function ServerThreadsLoader(props: {
 			serverDiscordId={props.serverDiscordId}
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
-			currentCursor={props.cursor}
 		/>
 	);
 }
@@ -254,7 +253,6 @@ async function ChannelThreadsLoader(props: {
 			channelDiscordId={props.channelDiscordId}
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
-			currentCursor={props.cursor}
 		/>
 	);
 }
@@ -273,7 +271,6 @@ async function ChannelMessagesLoader(props: {
 			channelDiscordId={props.channelDiscordId}
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
-			currentCursor={props.cursor}
 		/>
 	);
 }

@@ -30,7 +30,6 @@ async function HomePageLoader({ cursor }: { cursor: string | null }) {
 		<HomePageClient
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
-			currentCursor={cursor}
 		/>
 	);
 }
