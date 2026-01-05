@@ -6,5 +6,5 @@ import { ChatInterface } from "@/components/chat/chat-interface";
 export default function ThreadPage() {
 	const params = useParams<{ threadId: string }>();
 
-	return <ChatInterface threadId={params.threadId} />;
+	return <ChatInterface key={params.threadId} threadId={params.threadId} />;
 }
