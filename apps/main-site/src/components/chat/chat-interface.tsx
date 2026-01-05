@@ -50,27 +50,39 @@ import {
 	CommandItem,
 	CommandList,
 } from "@packages/ui/components/command";
-import { useSession } from "@packages/ui/components/convex-client-provider";
+import {
+	useAuthClient,
+	useSession,
+} from "@packages/ui/components/convex-client-provider";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@packages/ui/components/popover";
 import { useIsNavbarHidden } from "@packages/ui/hooks/use-scroll-container";
+import { useQuery } from "@tanstack/react-query";
 import {
 	type DynamicToolUIPart,
 	getToolName,
 	isToolUIPart,
 	type ToolUIPart,
 } from "ai";
-import { useMutation } from "convex/react";
-import { CheckIcon, CopyIcon, Loader2, Menu, PlusIcon } from "lucide-react";
+import { useAction, useMutation } from "convex/react";
+import {
+	AlertCircleIcon,
+	CheckIcon,
+	CopyIcon,
+	Loader2,
+	Menu,
+	PlusIcon,
+} from "lucide-react";
 import Image from "next/image";
 
 import { memo, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { useAuthenticatedQuery } from "@/lib/use-authenticated-query";
 import { useChatSidebar } from "./chat-sidebar";
+import { DiscordInviteCTA } from "./discord-invite-cta";
 import { GitHubRepoSelector } from "./github-repo-selector";
 
 export type GitHubRepo = {
@@ -78,6 +90,59 @@ export type GitHubRepo = {
 	repo: string;
 	filePath?: string;
 };
+
+function formatTimeUntilReset(resetsAt: number): string {
+	const now = Date.now();
+	const msRemaining = resetsAt - now;
+
+	if (msRemaining <= 0) return "now";
+
+	const minutes = Math.ceil(msRemaining / 60000);
+	if (minutes < 60) {
+		return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+	}
+
+	const hours = Math.floor(minutes / 60);
+	const remainingMinutes = minutes % 60;
+	if (remainingMinutes === 0) {
+		return `${hours} hour${hours === 1 ? "" : "s"}`;
+	}
+	return `${hours}h ${remainingMinutes}m`;
+}
+
+function RateLimitWarning({
+	remaining,
+	resetsAt,
+	isAnonymous,
+	onSignIn,
+}: {
+	remaining: number;
+	resetsAt: number | null;
+	isAnonymous: boolean;
+	onSignIn: () => void;
+}) {
+	const message =
+		remaining === 0
+			? `Out of messages.${resetsAt ? ` Resets in ${formatTimeUntilReset(resetsAt)}.` : ""}`
+			: `${remaining} message${remaining === 1 ? "" : "s"} remaining.${resetsAt ? ` Resets in ${formatTimeUntilReset(resetsAt)}.` : ""}`;
+
+	return (
+		<div className="flex items-center gap-2 rounded-t-md border-2 border-b-0 border-border bg-secondary px-3 py-1.5">
+			<AlertCircleIcon className="size-3.5 shrink-0 text-muted-foreground" />
+			<span className="flex-1 text-xs text-muted-foreground">{message}</span>
+			{isAnonymous && (
+				<Button
+					size="sm"
+					variant="ghost"
+					className="h-6 shrink-0 px-2 text-xs"
+					onClick={onSignIn}
+				>
+					Sign in for more
+				</Button>
+			)}
+		</div>
+	);
+}
 
 function ModelSelector({
 	selectedModel,
@@ -290,6 +355,7 @@ export function ChatInterface({
 	const isAuthenticated = !!session?.data;
 	const { setMobileSidebarOpen } = useChatSidebar();
 	const isNavbarHidden = useIsNavbarHidden();
+	const authClient = useAuthClient();
 
 	const [input, setInput] = useState("");
 	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
@@ -304,6 +370,19 @@ export function ChatInterface({
 	);
 
 	const stickToBottom = useStickToBottom({ initial: "instant" });
+
+	const rateLimitStatus = useAuthenticatedQuery(
+		api.chat.mutations.getChatRateLimitStatus,
+		{},
+		{ allowAnonymous: true },
+	);
+
+	const handleSignIn = async () => {
+		await authClient.signIn.social({
+			provider: "discord",
+			callbackURL: window.location.href,
+		});
+	};
 
 	const threadMetadata = useAuthenticatedQuery(
 		api.chat.mutations.getChatThreadMetadata,
@@ -338,6 +417,31 @@ export function ChatInterface({
 					filePath: repoFromThread.filePath ?? undefined,
 				}
 			: null);
+
+	const getDiscordInviteInfo = useAction(
+		api.public.github.getDiscordInviteInfo,
+	);
+	const discordInviteQuery = useQuery({
+		queryKey: [
+			"discord-invite-info",
+			effectiveRepo?.owner,
+			effectiveRepo?.repo,
+		],
+		queryFn: async () => {
+			if (!effectiveRepo) return null;
+			return getDiscordInviteInfo({
+				owner: effectiveRepo.owner,
+				repo: effectiveRepo.repo,
+			});
+		},
+		enabled: !!effectiveRepo,
+		staleTime: 1000 * 60 * 60,
+	});
+
+	const showDiscordCta =
+		effectiveRepo &&
+		discordInviteQuery.data?.hasDiscordInvite &&
+		!discordInviteQuery.data.isOnAnswerOverflow;
 
 	const model = modelOverride ?? threadMetadata?.modelId ?? defaultModelId;
 	const agentStatus = threadMetadata?.agentStatus ?? "idle";
@@ -426,7 +530,13 @@ export function ChatInterface({
 			</div>
 
 			<div ref={stickToBottom.scrollRef} className="flex-1 overflow-y-auto">
-				<div className="max-w-4xl mx-auto w-full flex flex-col min-h-full sm:px-6 pt-6 lg:pb-32">
+				<div
+					className={`max-w-4xl mx-auto w-full flex flex-col min-h-full sm:px-6 pt-6 ${
+						showDiscordCta || (rateLimitStatus && rateLimitStatus.remaining < 3)
+							? "lg:pb-40"
+							: "lg:pb-32"
+					}`}
+				>
 					{showEmptyState ? (
 						<div className="flex flex-1 flex-col items-center justify-center min-h-[50vh]">
 							{effectiveRepo && (
@@ -483,7 +593,30 @@ export function ChatInterface({
 						</Conversation>
 					)}
 					<div className="lg:hidden max-w-4xl mx-auto w-full px-2 sm:px-4">
-						<PromptInput onSubmit={handleSubmit}>
+						{showDiscordCta && (
+							<DiscordInviteCTA
+								repoOwner={effectiveRepo.owner}
+								repoName={effectiveRepo.repo}
+								discordInviteCode={discordInviteQuery.data?.inviteCodes[0]}
+							/>
+						)}
+						{rateLimitStatus &&
+							rateLimitStatus.remaining < 3 &&
+							!showDiscordCta && (
+								<RateLimitWarning
+									remaining={rateLimitStatus.remaining}
+									resetsAt={rateLimitStatus.resetsAt}
+									isAnonymous={rateLimitStatus.isAnonymous}
+									onSignIn={handleSignIn}
+								/>
+							)}
+						<PromptInput
+							onSubmit={handleSubmit}
+							attachedTop={
+								showDiscordCta ||
+								(rateLimitStatus && rateLimitStatus.remaining < 3)
+							}
+						>
 							<PromptInputBody>
 								<PromptInputTextarea
 									value={input}
@@ -504,7 +637,9 @@ export function ChatInterface({
 										compact
 									/>
 								</PromptInputTools>
-								<PromptInputSubmit disabled={!input.trim()} />
+								<PromptInputSubmit
+									disabled={!input.trim() || rateLimitStatus?.remaining === 0}
+								/>
 							</PromptInputFooter>
 						</PromptInput>
 					</div>
@@ -513,7 +648,30 @@ export function ChatInterface({
 
 			<div className="hidden lg:block absolute bottom-0 left-0 right-0">
 				<div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
-					<PromptInput onSubmit={handleSubmit}>
+					{showDiscordCta && (
+						<DiscordInviteCTA
+							repoOwner={effectiveRepo.owner}
+							repoName={effectiveRepo.repo}
+							discordInviteCode={discordInviteQuery.data?.inviteCodes[0]}
+						/>
+					)}
+					{rateLimitStatus &&
+						rateLimitStatus.remaining < 3 &&
+						!showDiscordCta && (
+							<RateLimitWarning
+								remaining={rateLimitStatus.remaining}
+								resetsAt={rateLimitStatus.resetsAt}
+								isAnonymous={rateLimitStatus.isAnonymous}
+								onSignIn={handleSignIn}
+							/>
+						)}
+					<PromptInput
+						onSubmit={handleSubmit}
+						attachedTop={
+							showDiscordCta ||
+							(rateLimitStatus && rateLimitStatus.remaining < 3)
+						}
+					>
 						<PromptInputBody>
 							<PromptInputTextarea
 								value={input}
@@ -532,7 +690,9 @@ export function ChatInterface({
 									onSelectModel={setModelOverride}
 								/>
 							</PromptInputTools>
-							<PromptInputSubmit disabled={!input.trim()} />
+							<PromptInputSubmit
+								disabled={!input.trim() || rateLimitStatus?.remaining === 0}
+							/>
 						</PromptInputFooter>
 					</PromptInput>
 				</div>

@@ -6,6 +6,7 @@ import {
 	syncStreams,
 	vStreamArgs,
 } from "@packages/agent";
+import { calculateRateLimit } from "@convex-dev/rate-limiter";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
@@ -18,7 +19,11 @@ import {
 } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import { defaultModelId, vModelId } from "../shared/models";
-import { rateLimiter } from "../shared/rateLimiter";
+import {
+	CHAT_MESSAGE_ANON_CONFIG,
+	CHAT_MESSAGE_CONFIG,
+	rateLimiter,
+} from "../shared/rateLimiter";
 
 export const vRepoContext = v.object({
 	owner: v.string(),
@@ -223,6 +228,37 @@ export const getChatThreadMetadata = anonOrAuthenticatedQuery({
 			modelId: metadata?.modelId ?? null,
 			agentStatus: metadata?.agentStatus ?? "idle",
 			agentError: metadata?.agentError ?? null,
+		};
+	},
+});
+
+export const getChatRateLimitStatus = anonOrAuthenticatedQuery({
+	args: {},
+	handler: async (ctx, args) => {
+		const user = await authComponent.getAuthUser(ctx);
+		const isAnonymous = user?.isAnonymous ?? false;
+
+		const config = isAnonymous ? CHAT_MESSAGE_ANON_CONFIG : CHAT_MESSAGE_CONFIG;
+		const rateLimitName = isAnonymous ? "chatMessageAnon" : "chatMessage";
+
+		const { value, ts } = await rateLimiter.getValue(ctx, rateLimitName, {
+			key: args.userId,
+		});
+
+		const now = Date.now();
+		const calculated = calculateRateLimit({ value, ts }, config, now, 0);
+
+		const remaining = Math.max(0, Math.floor(calculated.value));
+
+		let resetsAt: number | null = null;
+		if (remaining === 0 && calculated.retryAfter) {
+			resetsAt = now + calculated.retryAfter;
+		}
+
+		return {
+			remaining,
+			isAnonymous,
+			resetsAt,
 		};
 	},
 });

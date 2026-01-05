@@ -453,6 +453,8 @@ export type PromptInputProps = Omit<
 		message: PromptInputMessage,
 		event: FormEvent<HTMLFormElement>,
 	) => void | Promise<void>;
+	// When true, removes top border radius (for attaching headers like CTAs)
+	attachedTop?: boolean;
 };
 
 export const PromptInput = ({
@@ -465,6 +467,7 @@ export const PromptInput = ({
 	maxFileSize,
 	onError,
 	onSubmit,
+	attachedTop,
 	children,
 	...props
 }: PromptInputProps) => {
@@ -789,7 +792,12 @@ export const PromptInput = ({
 				ref={formRef}
 				{...props}
 			>
-				<InputGroup className="rounded-b-none border-b-0 overflow-hidden">
+				<InputGroup
+					className={cn(
+						"rounded-b-none border-b-0 overflow-hidden",
+						attachedTop && "rounded-t-none border-t-0",
+					)}
+				>
 					{children}
 				</InputGroup>
 			</form>
