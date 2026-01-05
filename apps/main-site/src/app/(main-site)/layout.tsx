@@ -1,6 +1,7 @@
 import { Providers } from "@packages/ui/components/providers";
 import type { Metadata } from "next";
 import { NavbarWrapper } from "@/components/navbar-wrapper";
+import { getGitHubStars } from "@/lib/github";
 
 export const metadata: Metadata = {
 	title: "Answer Overflow - Discord Content Discovery",
@@ -34,14 +35,16 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function MainSiteLayout({
+export default async function MainSiteLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
+	const githubStars = await getGitHubStars();
+
 	return (
 		<Providers tenant={null}>
-			<NavbarWrapper>{children}</NavbarWrapper>
+			<NavbarWrapper githubStars={githubStars}>{children}</NavbarWrapper>
 		</Providers>
 	);
 }

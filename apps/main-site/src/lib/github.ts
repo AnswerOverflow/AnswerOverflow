@@ -61,3 +61,31 @@ export const getFeaturedRepos = unstable_cache(
 		revalidate: 60 * 60 * 24,
 	},
 );
+
+async function fetchGitHubStarsInternal(): Promise<number | null> {
+	const response = await fetch(
+		"https://api.github.com/repos/AnswerOverflow/AnswerOverflow",
+		{
+			headers: {
+				Accept: "application/vnd.github+json",
+				"X-GitHub-Api-Version": "2022-11-28",
+			},
+		},
+	);
+
+	if (!response.ok) {
+		console.error("Failed to fetch GitHub stars:", response.statusText);
+		return null;
+	}
+
+	const data = (await response.json()) as { stargazers_count?: number };
+	return data.stargazers_count ?? null;
+}
+
+export const getGitHubStars = unstable_cache(
+	fetchGitHubStarsInternal,
+	["github-stars"],
+	{
+		revalidate: 60 * 60,
+	},
+);

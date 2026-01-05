@@ -6,10 +6,15 @@ import { useSession } from "../convex-client-provider";
 import { Link } from "../link";
 import { LinkButton } from "../link-button";
 import { FeedbackButton } from "./feedback-button";
+import { GitHubStarButton } from "./github-star-button";
 import { NavbarBase } from "./navbar-base";
 import { UserSection } from "./user-section";
 
-export function MainSiteNavbar() {
+export function MainSiteNavbar({
+	githubStars,
+}: {
+	githubStars?: number | null;
+}) {
 	const { data: session } = useSession({ allowAnonymous: false });
 
 	const leftContent = (
@@ -32,6 +37,9 @@ export function MainSiteNavbar() {
 				<Search className="h-5 w-5" />
 				<span className="sr-only">Search</span>
 			</LinkButton>
+			<div className="hidden md:block">
+				<GitHubStarButton starCount={githubStars ?? null} />
+			</div>
 			<div className="hidden md:block">
 				<FeedbackButton />
 			</div>

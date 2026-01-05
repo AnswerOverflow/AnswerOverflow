@@ -12,14 +12,20 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { usePathname } from "next/navigation";
 
-function NavbarContent({ children }: { children: React.ReactNode }) {
+function NavbarContent({
+	children,
+	githubStars,
+}: {
+	children: React.ReactNode;
+	githubStars?: number | null;
+}) {
 	const pathname = usePathname();
 	const isChat = pathname?.startsWith("/chat");
 	const isNavbarHidden = useIsNavbarHidden();
 
 	return (
 		<>
-			<MainSiteNavbar />
+			<MainSiteNavbar githubStars={githubStars} />
 			<div
 				className={cn(
 					"transition-[padding-top] duration-300",
@@ -40,7 +46,13 @@ function NavbarContent({ children }: { children: React.ReactNode }) {
 	);
 }
 
-export function NavbarWrapper({ children }: { children: React.ReactNode }) {
+export function NavbarWrapper({
+	children,
+	githubStars,
+}: {
+	children: React.ReactNode;
+	githubStars?: number | null;
+}) {
 	const pathname = usePathname();
 	const isDashboard = pathname?.startsWith("/dashboard");
 
@@ -50,7 +62,7 @@ export function NavbarWrapper({ children }: { children: React.ReactNode }) {
 
 	return (
 		<ScrollContainerProvider>
-			<NavbarContent>{children}</NavbarContent>
+			<NavbarContent githubStars={githubStars}>{children}</NavbarContent>
 		</ScrollContainerProvider>
 	);
 }
