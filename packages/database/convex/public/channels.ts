@@ -3,6 +3,7 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
+import { ChannelType } from "discord-api-types/v10";
 import { Array as Arr, Predicate } from "effect";
 import type { DataModel } from "../_generated/dataModel";
 import { enrichMessage } from "../shared/dataAccess";
@@ -231,6 +232,13 @@ export const getServerPageThreads = publicQuery({
 		const paginatedResult = await ctx.db
 			.query("channels")
 			.withIndex("by_serverId", (q) => q.eq("serverId", server.discordId))
+			.filter((q) =>
+				q.or(
+					q.eq(q.field("type"), ChannelType.PublicThread),
+					q.eq(q.field("type"), ChannelType.PrivateThread),
+					q.eq(q.field("type"), ChannelType.AnnouncementThread),
+				),
+			)
 			.order("desc")
 			.paginate(args.paginationOpts);
 
