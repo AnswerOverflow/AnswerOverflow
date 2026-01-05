@@ -970,6 +970,12 @@ export async function enrichMessageForDisplay(
 				name: anonymized.name,
 				avatar: anonymized.avatar ?? undefined,
 			};
+		} else if (message.webhookId && message.metadata?.webhookName) {
+			authorData = {
+				id: author.id,
+				name: message.metadata.webhookName,
+				avatar: message.metadata.webhookAvatar ?? author.avatar,
+			};
 		} else {
 			authorData = {
 				id: author.id,

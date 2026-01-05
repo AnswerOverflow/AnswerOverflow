@@ -181,6 +181,11 @@ const StickerSchema = Schema.Struct({
 	formatType: Schema.Number, // 1=PNG, 2=APNG, 3=Lottie, 4=GIF
 });
 
+const MessageMetadataSchema = Schema.Struct({
+	webhookName: Schema.optional(Schema.String),
+	webhookAvatar: Schema.optional(Schema.String),
+});
+
 const MessageSchema = Schema.Struct({
 	id: Schema.BigIntFromSelf, // Discord snowflake ID
 	authorId: Schema.BigIntFromSelf, // Discord account ID
@@ -201,6 +206,7 @@ const MessageSchema = Schema.Struct({
 	tts: Schema.optional(Schema.Boolean),
 	embeds: Schema.optional(Schema.Array(EmbedSchema).pipe(Schema.mutable)),
 	stickers: Schema.optional(Schema.Array(StickerSchema).pipe(Schema.mutable)),
+	metadata: Schema.optional(MessageMetadataSchema),
 });
 
 const AttachmentSchema = Schema.Struct({

@@ -237,6 +237,13 @@ export async function toAOMessage(
 		? (message.channel.parentId ?? undefined)
 		: undefined;
 
+	const metadata = message.webhookId
+		? {
+				webhookName: message.author.displayName ?? message.author.username,
+				webhookAvatar: message.author.avatar ?? undefined,
+			}
+		: undefined;
+
 	const convertedMessage: BaseMessageWithRelations = {
 		id: BigInt(message.id),
 		authorId: BigInt(message.author.id),
@@ -263,6 +270,7 @@ export async function toAOMessage(
 		stickers: stickers.length > 0 ? stickers : undefined,
 		attachments: attachments.length > 0 ? attachments : undefined,
 		reactions: reactions.length > 0 ? reactions : undefined,
+		metadata,
 	};
 
 	return convertedMessage;
@@ -290,6 +298,7 @@ export function toUpsertMessageArgs(data: BaseMessageWithRelations) {
 			tts: data.tts,
 			embeds: data.embeds,
 			stickers: data.stickers,
+			metadata: data.metadata,
 		},
 		attachments: data.attachments,
 		reactions: data.reactions,

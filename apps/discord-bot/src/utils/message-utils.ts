@@ -1,8 +1,6 @@
 import type { Message } from "discord.js";
 
-export function isHumanMessage(message: Message): boolean {
-	if (message.author.bot) return false;
-	if (message.author.system) return false;
+export function isHumanMessage(_message: Message): boolean {
 	return true;
 }
 
