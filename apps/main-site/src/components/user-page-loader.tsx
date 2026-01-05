@@ -73,7 +73,6 @@ async function PostsLoader(props: {
 			serverId={props.serverId}
 			initialData={posts}
 			nextCursor={posts.isDone ? null : posts.continueCursor}
-			currentCursor={props.cursor}
 			basePath={props.basePath}
 		/>
 	);

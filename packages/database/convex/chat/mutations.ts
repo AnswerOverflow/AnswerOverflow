@@ -1,3 +1,4 @@
+import { calculateRateLimit } from "@convex-dev/rate-limiter";
 import {
 	createThread,
 	getThreadMetadata,
@@ -6,7 +7,6 @@ import {
 	syncStreams,
 	vStreamArgs,
 } from "@packages/agent";
-import { calculateRateLimit } from "@convex-dev/rate-limiter";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { components, internal } from "../_generated/api";
