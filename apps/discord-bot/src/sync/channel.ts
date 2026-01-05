@@ -167,12 +167,28 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 				if (!isAllowedThreadChannel(newThread)) {
 					return;
 				}
+				if (!newThread.parentId) {
+					return;
+				}
 				yield* Effect.annotateCurrentSpan({
 					"discord.thread_id": newThread.id,
 					"discord.thread_name": newThread.name,
 					"discord.parent_channel_id": newThread.parentId,
 					"discord.guild_id": newThread.guild.id,
 				});
+
+				const parentChannelLiveData =
+					yield* database.private.channels.findChannelByDiscordId({
+						discordId: BigInt(newThread.parentId),
+					});
+				const parentChannel = parentChannelLiveData;
+				if (!parentChannel) {
+					return;
+				}
+				if (!parentChannel.flags?.indexingEnabled) {
+					return;
+				}
+
 				yield* syncChannel(newThread);
 			}).pipe(
 				Effect.withSpan("event.thread_update"),
