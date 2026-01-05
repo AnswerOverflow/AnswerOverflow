@@ -8,6 +8,7 @@ import {
 } from "@packages/agent/react";
 import { api } from "@packages/database/convex/_generated/api";
 import { defaultModelId, models } from "@packages/database/models";
+import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import {
 	Conversation,
 	ConversationContent,
@@ -77,10 +78,8 @@ import {
 	PlusIcon,
 } from "lucide-react";
 import Image from "next/image";
-
 import { memo, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
-import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { useAuthenticatedQuery } from "@/lib/use-authenticated-query";
 import { useChatSidebar } from "./chat-sidebar";
 import { DiscordInviteCTA } from "./discord-invite-cta";

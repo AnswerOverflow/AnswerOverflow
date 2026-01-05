@@ -59,9 +59,9 @@ export function DiscordMessage({
 		...message,
 		attachments,
 		embeds: message.embeds,
-		metadata: metadata ?? null,
-		poll: poll ?? null,
-		snapshot: snapshot ?? null,
+		metadata: metadata ?? undefined,
+		poll: poll ?? undefined,
+		snapshot: snapshot ?? undefined,
 		user: author ? { isIgnored: false } : null,
 		isIgnored: false,
 	};

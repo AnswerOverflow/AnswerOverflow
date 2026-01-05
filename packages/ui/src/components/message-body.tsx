@@ -15,9 +15,11 @@ export function MessageBody(props: {
 		...message.message,
 		attachments: message.attachments,
 		embeds: message.message.embeds,
-		metadata: message.metadata ?? null,
-		poll: null,
-		snapshot: null,
+		metadata: message.metadata
+			? { ...message.message.metadata, ...message.metadata }
+			: message.message.metadata,
+		poll: undefined,
+		snapshot: undefined,
 		user: message.author ? { isIgnored: false } : null,
 		isIgnored: false,
 	};

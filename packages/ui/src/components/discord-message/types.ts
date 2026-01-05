@@ -6,6 +6,8 @@ import type {
 } from "@packages/database/convex/schema";
 
 export type MessageMetadata = {
+	webhookName?: string;
+	webhookAvatar?: string;
 	channels?: Record<
 		string,
 		{
