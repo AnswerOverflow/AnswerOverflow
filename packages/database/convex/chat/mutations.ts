@@ -18,7 +18,7 @@ import {
 	type QueryCtx,
 } from "../client";
 import { authComponent } from "../shared/betterAuth";
-import { defaultModelId, vModelId } from "../shared/models";
+import { defaultModelId, getModelById, vModelId } from "../shared/models";
 import {
 	CHAT_MESSAGE_ANON_CONFIG,
 	CHAT_MESSAGE_CONFIG,
@@ -55,6 +55,15 @@ export const sendMessage = anonOrAuthenticatedMutation({
 		const user = await authComponent.getAuthUser(ctx);
 		const isAnonymous = user?.isAnonymous ?? false;
 
+		const modelId = args.modelId ?? defaultModelId;
+		const model = getModelById(modelId);
+
+		if (model?.requiresSignIn && isAnonymous) {
+			throw new Error(
+				`${model.name} requires you to be signed in. Please sign in to use this model.`,
+			);
+		}
+
 		const rateLimitName = isAnonymous ? "chatMessageAnon" : "chatMessage";
 		const rateLimit = await rateLimiter.limit(ctx, rateLimitName, {
 			key: userId,
@@ -66,7 +75,6 @@ export const sendMessage = anonOrAuthenticatedMutation({
 		}
 
 		let threadId = args.threadId;
-		const modelId = args.modelId ?? defaultModelId;
 
 		if (threadId) {
 			const existingThreadId = threadId;

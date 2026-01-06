@@ -8,6 +8,7 @@ type ModelSchema = {
 	chefSlug: string;
 	providers: string[];
 	gatewayId: GatewayModelId;
+	requiresSignIn?: boolean;
 };
 
 export const models: ModelSchema[] = [
@@ -66,6 +67,7 @@ export const models: ModelSchema[] = [
 		chefSlug: "anthropic",
 		providers: ["anthropic", "azure", "google", "amazon-bedrock"],
 		gatewayId: "anthropic/claude-sonnet-4.5",
+		requiresSignIn: true,
 	},
 	{
 		id: "gemini-2.5-flash",
@@ -87,7 +89,7 @@ export const modelIds = models.map((m) => m.id) as unknown as [
 export const modelIdSet = new Set<string>(modelIds);
 export const defaultModelId: ModelId = "glm-4.7";
 
-export const vModelId = v.string();
+export const vModelId = v.union(...modelIds.map((id) => v.literal(id)));
 export function getModelById(id: string): Model | undefined {
 	return models.find((m) => m.id === id);
 }

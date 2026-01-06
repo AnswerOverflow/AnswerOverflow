@@ -7,7 +7,11 @@ import {
 	useUIMessages,
 } from "@packages/agent/react";
 import { api } from "@packages/database/convex/_generated/api";
-import { defaultModelId, models } from "@packages/database/models";
+import {
+	defaultModelId,
+	getModelById,
+	models,
+} from "@packages/database/models";
 import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import {
 	Conversation,
@@ -74,6 +78,7 @@ import {
 	CheckIcon,
 	CopyIcon,
 	Loader2,
+	LockIcon,
 	Menu,
 	PlusIcon,
 } from "lucide-react";
@@ -140,6 +145,31 @@ function RateLimitWarning({
 					Sign in for more
 				</Button>
 			)}
+		</div>
+	);
+}
+
+function SignInRequiredWarning({
+	modelName,
+	onSignIn,
+}: {
+	modelName: string;
+	onSignIn: () => void;
+}) {
+	return (
+		<div className="flex items-center gap-2 rounded-t-md border-2 border-b-0 border-border bg-secondary px-3 py-1.5">
+			<LockIcon className="size-3.5 shrink-0 text-muted-foreground" />
+			<span className="flex-1 text-xs text-muted-foreground">
+				Sign in to use {modelName}
+			</span>
+			<Button
+				size="sm"
+				variant="ghost"
+				className="h-6 shrink-0 px-2 text-xs"
+				onClick={onSignIn}
+			>
+				Sign in
+			</Button>
 		</div>
 	);
 }
@@ -462,6 +492,10 @@ export function ChatInterface({
 		!discordInviteQuery.data.isOnAnswerOverflow;
 
 	const model = modelOverride ?? threadMetadata?.modelId ?? defaultModelId;
+	const selectedModelData = getModelById(model);
+	const isAnonymous = rateLimitStatus?.isAnonymous ?? false;
+	const selectedModelRequiresSignIn =
+		selectedModelData?.requiresSignIn && isAnonymous;
 	const agentStatus = threadMetadata?.agentStatus ?? "idle";
 	const agentError = threadMetadata?.agentError ?? null;
 	const isAgentWorking = agentStatus !== "idle" && agentStatus !== "error";
@@ -641,9 +675,16 @@ export function ChatInterface({
 								discordInviteCode={discordInviteQuery.data?.inviteCodes[0]}
 							/>
 						)}
+						{selectedModelRequiresSignIn && !showDiscordCta && (
+							<SignInRequiredWarning
+								modelName={selectedModelData?.name ?? "this model"}
+								onSignIn={handleSignIn}
+							/>
+						)}
 						{rateLimitStatus &&
 							rateLimitStatus.remaining < 3 &&
-							!showDiscordCta && (
+							!showDiscordCta &&
+							!selectedModelRequiresSignIn && (
 								<RateLimitWarning
 									remaining={rateLimitStatus.remaining}
 									resetsAt={rateLimitStatus.resetsAt}
@@ -655,6 +696,7 @@ export function ChatInterface({
 							onSubmit={handleSubmit}
 							attachedTop={
 								showDiscordCta ||
+								selectedModelRequiresSignIn ||
 								(rateLimitStatus && rateLimitStatus.remaining < 3)
 							}
 						>
@@ -680,8 +722,16 @@ export function ChatInterface({
 									/>
 								</PromptInputTools>
 								<PromptInputSubmit
-									disabled={!input.trim() || rateLimitStatus?.remaining === 0}
-								/>
+									disabled={
+										!input.trim() ||
+										rateLimitStatus?.remaining === 0 ||
+										selectedModelRequiresSignIn
+									}
+								>
+									{selectedModelRequiresSignIn ? (
+										<LockIcon className="size-4" />
+									) : undefined}
+								</PromptInputSubmit>
 							</PromptInputFooter>
 						</PromptInput>
 					</div>
@@ -697,9 +747,16 @@ export function ChatInterface({
 							discordInviteCode={discordInviteQuery.data?.inviteCodes[0]}
 						/>
 					)}
+					{selectedModelRequiresSignIn && !showDiscordCta && (
+						<SignInRequiredWarning
+							modelName={selectedModelData?.name ?? "this model"}
+							onSignIn={handleSignIn}
+						/>
+					)}
 					{rateLimitStatus &&
 						rateLimitStatus.remaining < 3 &&
-						!showDiscordCta && (
+						!showDiscordCta &&
+						!selectedModelRequiresSignIn && (
 							<RateLimitWarning
 								remaining={rateLimitStatus.remaining}
 								resetsAt={rateLimitStatus.resetsAt}
@@ -711,6 +768,7 @@ export function ChatInterface({
 						onSubmit={handleSubmit}
 						attachedTop={
 							showDiscordCta ||
+							selectedModelRequiresSignIn ||
 							(rateLimitStatus && rateLimitStatus.remaining < 3)
 						}
 					>
@@ -734,8 +792,16 @@ export function ChatInterface({
 								/>
 							</PromptInputTools>
 							<PromptInputSubmit
-								disabled={!input.trim() || rateLimitStatus?.remaining === 0}
-							/>
+								disabled={
+									!input.trim() ||
+									rateLimitStatus?.remaining === 0 ||
+									selectedModelRequiresSignIn
+								}
+							>
+								{selectedModelRequiresSignIn ? (
+									<LockIcon className="size-4" />
+								) : undefined}
+							</PromptInputSubmit>
 						</PromptInputFooter>
 					</PromptInput>
 				</div>
