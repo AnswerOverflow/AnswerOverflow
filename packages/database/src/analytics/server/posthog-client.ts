@@ -61,6 +61,7 @@ export const makeServerAnalyticsClient = (opts: ServerAnalyticsOptions) =>
 					value: opts.serverId,
 				},
 			},
+			// @ts-expect-error - type is wrong
 			executionOptions,
 		});
 	});
