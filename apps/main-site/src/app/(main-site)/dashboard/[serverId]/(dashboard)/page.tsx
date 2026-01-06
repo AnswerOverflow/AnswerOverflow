@@ -11,6 +11,13 @@ import {
 } from "@packages/ui/components/card";
 import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import { Link } from "@packages/ui/components/link";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@packages/ui/components/select";
 import { Spinner } from "@packages/ui/components/spinner";
 import {
 	Table,
@@ -31,8 +38,29 @@ import {
 	MessagesSquare,
 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
+
+type DatePreset = "7d" | "30d" | "90d" | "all";
+
+const DATE_PRESETS: { value: DatePreset; label: string }[] = [
+	{ value: "7d", label: "Last 7 days" },
+	{ value: "30d", label: "Last 30 days" },
+	{ value: "90d", label: "Last 90 days" },
+	{ value: "all", label: "All time" },
+];
+
+function getDateRangeFromPreset(preset: DatePreset): DateRange | undefined {
+	if (preset === "all") return undefined;
+
+	const now = new Date();
+	const days = preset === "7d" ? 7 : preset === "30d" ? 30 : 90;
+	const from = new Date(now);
+	from.setDate(from.getDate() - days);
+
+	return { from, to: now };
+}
 
 function ChartWrapper(props: {
 	label: React.ReactNode;
@@ -116,14 +144,27 @@ function PageViewsChart(props: { serverId: bigint; dateRange?: DateRange }) {
 	);
 }
 
-function ServerInvitesChart(props: { serverId: bigint }) {
+function ServerInvitesChart(props: {
+	serverId: bigint;
+	dateRange?: DateRange;
+}) {
 	const getServerInvites = useAction(
 		api.authenticated.dashboard.getServerInvitesClicked,
 	);
 
 	const { data, isLoading, error } = useQuery({
-		queryKey: ["server-invites", props.serverId.toString()],
-		queryFn: () => getServerInvites({ serverId: props.serverId }),
+		queryKey: [
+			"server-invites",
+			props.serverId.toString(),
+			props.dateRange?.from?.getTime(),
+			props.dateRange?.to?.getTime(),
+		],
+		queryFn: () =>
+			getServerInvites({
+				serverId: props.serverId,
+				from: props.dateRange?.from?.getTime(),
+				to: props.dateRange?.to?.getTime(),
+			}),
 	});
 
 	const isError = !!error;
@@ -189,14 +230,27 @@ function QuestionsAndAnswersChart(props: {
 	);
 }
 
-function TopQuestionSolversTable(props: { serverId: bigint }) {
+function TopQuestionSolversTable(props: {
+	serverId: bigint;
+	dateRange: DateRange | undefined;
+}) {
 	const getTopQuestionSolvers = useAction(
 		api.authenticated.dashboard.getTopQuestionSolversForServer,
 	);
 
 	const { data, isLoading, error } = useQuery({
-		queryKey: ["top-question-solvers", props.serverId.toString()],
-		queryFn: () => getTopQuestionSolvers({ serverId: props.serverId }),
+		queryKey: [
+			"top-question-solvers",
+			props.serverId.toString(),
+			props.dateRange?.from?.getTime(),
+			props.dateRange?.to?.getTime(),
+		],
+		queryFn: () =>
+			getTopQuestionSolvers({
+				serverId: props.serverId,
+				from: props.dateRange?.from?.getTime(),
+				to: props.dateRange?.to?.getTime(),
+			}),
 	});
 
 	if (isLoading) {
@@ -439,14 +493,27 @@ function IndexedStatsWidget(props: {
 	);
 }
 
-function TopPagesTable(props: { serverId: bigint }) {
+function TopPagesTable(props: {
+	serverId: bigint;
+	dateRange: DateRange | undefined;
+}) {
 	const getTopPages = useAction(
 		api.authenticated.dashboard.getTopPagesForServer,
 	);
 
 	const { data, isLoading, error } = useQuery({
-		queryKey: ["top-pages", props.serverId.toString()],
-		queryFn: () => getTopPages({ serverId: props.serverId }),
+		queryKey: [
+			"top-pages",
+			props.serverId.toString(),
+			props.dateRange?.from?.getTime(),
+			props.dateRange?.to?.getTime(),
+		],
+		queryFn: () =>
+			getTopPages({
+				serverId: props.serverId,
+				from: props.dateRange?.from?.getTime(),
+				to: props.dateRange?.to?.getTime(),
+			}),
 	});
 
 	if (isLoading) {
@@ -541,6 +608,9 @@ function TopPagesTable(props: { serverId: bigint }) {
 }
 
 function DashboardContent({ serverId }: { serverId: bigint }) {
+	const [datePreset, setDatePreset] = useState<DatePreset>("7d");
+	const dateRange = getDateRangeFromPreset(datePreset);
+
 	const dashboardData = useAuthenticatedQuery(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{ serverId },
@@ -563,6 +633,21 @@ function DashboardContent({ serverId }: { serverId: bigint }) {
 					</p>
 				</div>
 				<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+					<Select
+						value={datePreset}
+						onValueChange={(value) => setDatePreset(value as DatePreset)}
+					>
+						<SelectTrigger className="w-[160px]">
+							<SelectValue placeholder="Select time range" />
+						</SelectTrigger>
+						<SelectContent>
+							{DATE_PRESETS.map((preset) => (
+								<SelectItem key={preset.value} value={preset.value}>
+									{preset.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 					<Button asChild variant="outline">
 						<Link
 							href={`/c/${server.discordId}`}
@@ -581,11 +666,11 @@ function DashboardContent({ serverId }: { serverId: bigint }) {
 					serverId={serverId}
 					hasIndexingEnabled={hasIndexingEnabled}
 				/>
-				<PageViewsChart serverId={serverId} />
-				<QuestionsAndAnswersChart serverId={serverId} />
-				<ServerInvitesChart serverId={serverId} />
-				<TopQuestionSolversTable serverId={serverId} />
-				<TopPagesTable serverId={serverId} />
+				<PageViewsChart serverId={serverId} dateRange={dateRange} />
+				<QuestionsAndAnswersChart serverId={serverId} dateRange={dateRange} />
+				<ServerInvitesChart serverId={serverId} dateRange={dateRange} />
+				<TopQuestionSolversTable serverId={serverId} dateRange={dateRange} />
+				<TopPagesTable serverId={serverId} dateRange={dateRange} />
 			</div>
 		</div>
 	);

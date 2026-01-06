@@ -32,6 +32,24 @@ export const makeServerAnalyticsClient = (opts: ServerAnalyticsOptions) =>
 		yield* Effect.void;
 		const apiKey = process.env.POSTHOG_PERSONAL_API_KEY!;
 		const projectId = process.env.POSTHOG_PROJECT_ID!;
+
+		const isAllTime = !opts.from;
+
+		const executionOptions: Record<string, unknown> = {
+			type: "line",
+			interval: isAllTime ? "week" : "day",
+		};
+
+		if (opts.from) {
+			executionOptions.date_from = opts.from.toISOString().split("T")[0];
+		} else {
+			executionOptions.date_from = "all";
+		}
+
+		if (opts.to) {
+			executionOptions.date_to = opts.to.toISOString().split("T")[0];
+		}
+
 		return new PostHogQueryClient({
 			events,
 			apiKey,
@@ -43,13 +61,7 @@ export const makeServerAnalyticsClient = (opts: ServerAnalyticsOptions) =>
 					value: opts.serverId,
 				},
 			},
-			executionOptions: {
-				type: "line",
-				// @ts-expect-error
-				date_to: opts.to?.toISOString().split("T")[0]!,
-				// @ts-expect-error
-				date_from: opts.from?.toISOString().split("T")[0]!,
-			},
+			executionOptions,
 		});
 	});
 

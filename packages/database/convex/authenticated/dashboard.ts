@@ -395,11 +395,29 @@ export const getUserServers = authenticatedAction({
 });
 
 export const getTopQuestionSolversForServer = guildManagerAction({
-	args: {},
+	args: {
+		from: v.optional(v.number()),
+		to: v.optional(v.number()),
+	},
 	handler: async (ctx, args) => {
-		const analyticsData = await getTopQuestionSolversCache().fetch(ctx, {
-			serverId: args.serverId.toString(),
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopQuestionSolversForServer();
 		});
+
+		const analyticsData = await Effect.runPromise(
+			program.pipe(
+				Effect.provide(
+					ServerAnalyticsLayer({
+						serverId: args.serverId.toString(),
+						from: args.from ? new Date(args.from) : undefined,
+						to: args.to ? new Date(args.to) : undefined,
+					}),
+				),
+				Effect.timeout("30 seconds"),
+				Effect.catchAll(() => Effect.succeed(null)),
+			),
+		);
 
 		if (!analyticsData || Object.keys(analyticsData).length === 0) return {};
 
@@ -446,7 +464,11 @@ export const getPageViewsForServer = guildManagerAction({
 			return yield* analytics.server.getPageViewsForServer();
 		}).pipe(
 			Effect.provide(
-				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
+				ServerAnalyticsLayer({
+					serverId: args.serverId.toString(),
+					from: args.from ? new Date(args.from) : undefined,
+					to: args.to ? new Date(args.to) : undefined,
+				}),
 			),
 		);
 
@@ -455,14 +477,21 @@ export const getPageViewsForServer = guildManagerAction({
 });
 
 export const getServerInvitesClicked = guildManagerAction({
-	args: {},
+	args: {
+		from: v.optional(v.number()),
+		to: v.optional(v.number()),
+	},
 	handler: async (_ctx, args) => {
 		const program = Effect.gen(function* () {
 			const analytics = yield* Analytics;
 			return yield* analytics.server.getServerInvitesClicked();
 		}).pipe(
 			Effect.provide(
-				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
+				ServerAnalyticsLayer({
+					serverId: args.serverId.toString(),
+					from: args.from ? new Date(args.from) : undefined,
+					to: args.to ? new Date(args.to) : undefined,
+				}),
 			),
 		);
 
@@ -481,7 +510,11 @@ export const getQuestionsAndAnswers = guildManagerAction({
 			return yield* analytics.server.getQuestionsAndAnswers();
 		}).pipe(
 			Effect.provide(
-				ServerAnalyticsLayer({ serverId: args.serverId.toString() }),
+				ServerAnalyticsLayer({
+					serverId: args.serverId.toString(),
+					from: args.from ? new Date(args.from) : undefined,
+					to: args.to ? new Date(args.to) : undefined,
+				}),
 			),
 		);
 
@@ -490,11 +523,29 @@ export const getQuestionsAndAnswers = guildManagerAction({
 });
 
 export const getTopPagesForServer = guildManagerAction({
-	args: {},
+	args: {
+		from: v.optional(v.number()),
+		to: v.optional(v.number()),
+	},
 	handler: async (ctx, args) => {
-		const analyticsData = await getTopPagesCache().fetch(ctx, {
-			serverId: args.serverId.toString(),
+		const program = Effect.gen(function* () {
+			const analytics = yield* Analytics;
+			return yield* analytics.server.getTopPages();
 		});
+
+		const analyticsData = await Effect.runPromise(
+			program.pipe(
+				Effect.provide(
+					ServerAnalyticsLayer({
+						serverId: args.serverId.toString(),
+						from: args.from ? new Date(args.from) : undefined,
+						to: args.to ? new Date(args.to) : undefined,
+					}),
+				),
+				Effect.timeout("30 seconds"),
+				Effect.catchAll(() => Effect.succeed(null)),
+			),
+		);
 
 		if (!analyticsData || Object.keys(analyticsData).length === 0) return {};
 

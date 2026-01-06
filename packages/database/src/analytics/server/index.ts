@@ -45,7 +45,6 @@ export const service = Effect.gen(function* () {
 					})
 					.execute({
 						type: "table",
-						date_from: "All time",
 						breakdown_hide_other_aggregation: true,
 						breakdown: "Question Solver Id",
 					}),
@@ -64,7 +63,6 @@ export const service = Effect.gen(function* () {
 					.execute({
 						type: "table",
 						breakdown_hide_other_aggregation: true,
-						refresh: true,
 						breakdown: "Message Id",
 					}),
 			);

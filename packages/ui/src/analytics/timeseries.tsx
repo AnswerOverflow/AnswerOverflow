@@ -19,7 +19,11 @@ import {
 	ChartTooltipContent,
 } from "../components/chart";
 import type { Chart, TimeSeriesChartTypes } from "./types";
-import { generateChartConfig, toShadcnTimeseriesData } from "./utils";
+import {
+	formatDateLabel,
+	generateChartConfig,
+	toShadcnTimeseriesData,
+} from "./utils";
 
 export type TimeSeriesChartProps<
 	Labels extends string,
@@ -65,7 +69,7 @@ export function LineChart<
 					tickLine={false}
 					tickMargin={10}
 					axisLine={false}
-					tickFormatter={(value) => value.slice(0, 6)}
+					tickFormatter={formatDateLabel}
 				/>
 				<YAxis tickLine={false} axisLine={false} />
 				<ChartTooltip
@@ -130,7 +134,7 @@ export function BarChart<
 					tickLine={false}
 					tickMargin={10}
 					axisLine={false}
-					tickFormatter={(value) => value.slice(0, 6)}
+					tickFormatter={formatDateLabel}
 				/>
 				<YAxis tickLine={false} axisLine={false} />
 				<ChartTooltip
@@ -193,7 +197,7 @@ export function AreaChart<
 					tickLine={false}
 					tickMargin={10}
 					axisLine={false}
-					tickFormatter={(value) => value.slice(0, 6)}
+					tickFormatter={formatDateLabel}
 				/>
 				<YAxis tickLine={false} axisLine={false} />
 				<ChartTooltip

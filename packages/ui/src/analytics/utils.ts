@@ -1,6 +1,17 @@
 import type { ChartConfig } from "../components/chart";
 import type { ChartData } from "./types";
 
+export function formatDateLabel(value: string): string {
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) {
+		return value.slice(0, 10);
+	}
+	return date.toLocaleDateString("en-US", {
+		month: "short",
+		day: "numeric",
+	});
+}
+
 export function isChartData(
 	data: ChartData | Record<string, ChartData> | undefined,
 ): data is ChartData {
