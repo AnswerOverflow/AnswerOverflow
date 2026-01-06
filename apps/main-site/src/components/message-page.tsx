@@ -88,7 +88,10 @@ export function ReplyMessage(props: {
 
 	if (message.message.id === solutionMessageId) {
 		return (
-			<div id={`solution-${message.message.id}`}>
+			<div
+				id={`solution-${message.message.id}`}
+				className="rounded-md transition-colors duration-500"
+			>
 				<div className="flex items-center gap-1.5 mb-2">
 					<CheckCircle2 className="size-4 text-green-600 dark:text-green-500" />
 					<span className="text-sm font-medium text-green-600 dark:text-green-500">
@@ -103,7 +106,10 @@ export function ReplyMessage(props: {
 	}
 
 	return (
-		<div className="p-2" id={`message-${message.message.id}`}>
+		<div
+			className="p-2 rounded-md transition-colors duration-500"
+			id={`message-${message.message.id}`}
+		>
 			<ThinMessage
 				message={message}
 				op={message.author?.id === firstMessageAuthorId}

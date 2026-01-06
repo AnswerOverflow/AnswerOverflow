@@ -5,6 +5,7 @@ import { cn } from "../../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { makeUserIconLink } from "../discord-avatar";
 import { Link } from "../link";
+import { useMessageResultPageContext } from "../message-result-page-context";
 
 export type ReplyBarProps = {
 	reference: EnrichedMessageReference;
@@ -13,6 +14,7 @@ export type ReplyBarProps = {
 
 export function ReplyBar({ reference, className }: ReplyBarProps) {
 	const refMessage = reference.message;
+	const { scrollToMessage } = useMessageResultPageContext();
 
 	if (!refMessage) {
 		return (
@@ -38,6 +40,14 @@ export function ReplyBar({ reference, className }: ReplyBarProps) {
 	const truncatedContent =
 		content.length > 80 ? `${content.slice(0, 80)}...` : content;
 	const hasAttachments = refMessage.attachments.length > 0;
+
+	const handleReplyClick = (e: React.MouseEvent) => {
+		const messageId = refMessage.message.id.toString();
+		const scrolled = scrollToMessage(messageId);
+		if (scrolled) {
+			e.preventDefault();
+		}
+	};
 
 	return (
 		<div
@@ -76,7 +86,8 @@ export function ReplyBar({ reference, className }: ReplyBarProps) {
 				<span className="font-medium flex-shrink-0">Unknown User</span>
 			)}
 			<Link
-				href={`/m/${refMessage.message.id.toString()}`}
+				href={`/m/${refMessage.message.id.toString()}?focus=${refMessage.message.id.toString()}`}
+				onClick={handleReplyClick}
 				className="truncate hover:text-foreground transition-colors"
 			>
 				{truncatedContent || (

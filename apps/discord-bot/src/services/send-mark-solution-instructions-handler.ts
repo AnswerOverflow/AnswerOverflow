@@ -71,6 +71,12 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 					return;
 				}
 
+				const excludedTagIds = ["1456027795842011240", "1456027945692041501"];
+				const threadTags = "appliedTags" in thread ? thread.appliedTags : [];
+				if (threadTags.some((tagId) => excludedTagIds.includes(tagId))) {
+					return;
+				}
+
 				yield* handleSendMarkSolutionInstructions(
 					thread,
 					newlyCreated,
