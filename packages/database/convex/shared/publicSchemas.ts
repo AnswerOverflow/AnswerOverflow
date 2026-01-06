@@ -118,6 +118,11 @@ const stickerFields = {
 	formatType: v.number(),
 };
 
+const messageMetadataFields = {
+	webhookName: v.optional(v.string()),
+	webhookAvatar: v.optional(v.string()),
+};
+
 const messageFields = {
 	id: v.int64(),
 	authorId: v.int64(),
@@ -138,6 +143,7 @@ const messageFields = {
 	tts: v.optional(v.boolean()),
 	embeds: v.optional(v.array(v.object(embedFields))),
 	stickers: v.optional(v.array(v.object(stickerFields))),
+	metadata: v.optional(v.object(messageMetadataFields)),
 };
 
 const attachmentFields = {
