@@ -44,15 +44,15 @@ export function ServerCard({ server }: ServerCardProps) {
 
 			{/* Title and CTA section */}
 			<div className="flex w-full flex-row items-center justify-between align-bottom px-4">
-				<div className="flex flex-col pr-4 text-left">
-					<span className="text-base font-bold text-black dark:text-neutral-300">
+				<div className="flex min-w-0 flex-col pr-4 text-left">
+					<span className="truncate text-base font-bold text-black dark:text-neutral-300">
 						{server.name}
 					</span>
 					<span className="text-base text-neutral-600 dark:text-neutral-400">
 						{server.highestRole}
 					</span>
 				</div>
-				<div className="ml-auto">
+				<div className="ml-auto flex-shrink-0">
 					{server.hasBot ? (
 						<Button asChild>
 							<Link href={`/dashboard/${server.discordId.toString()}`}>
