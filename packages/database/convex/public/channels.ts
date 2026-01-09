@@ -198,7 +198,7 @@ export const getServerPageThreads = publicQuery({
 			"by_discordId",
 			args.serverDiscordId,
 		);
-		if (!server) {
+		if (!server || server.kickedTime) {
 			return { page: [], isDone: true, continueCursor: "" };
 		}
 
@@ -285,7 +285,7 @@ async function getServerHeaderData(
 		serverDiscordId,
 	);
 
-	if (!server) return null;
+	if (!server || server.kickedTime) return null;
 
 	const [indexedSettings, serverPreferences] = await Promise.all([
 		ctx.db
