@@ -178,7 +178,7 @@ export async function getInternalLinksMetadata(
 				getOneFrom(ctx.db, "channelSettings", "by_channelId", link.channelId),
 			]);
 
-			if (!server || !channel) {
+			if (!server || !channel || server.kickedTime) {
 				return undefined;
 			}
 

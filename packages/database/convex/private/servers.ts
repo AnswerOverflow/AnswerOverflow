@@ -235,7 +235,16 @@ export const getServerByDiscordId = privateQuery({
 		discordId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		return getOneFrom(ctx.db, "servers", "by_discordId", args.discordId);
+		const server = await getOneFrom(
+			ctx.db,
+			"servers",
+			"by_discordId",
+			args.discordId,
+		);
+		if (!server || server.kickedTime) {
+			return null;
+		}
+		return server;
 	},
 });
 
@@ -270,7 +279,7 @@ export const getServerByDomain = privateQuery({
 			preferences.serverId,
 			"discordId",
 		);
-		if (!server) {
+		if (!server || server.kickedTime) {
 			return null;
 		}
 		return {
@@ -290,7 +299,7 @@ export const findManyServersById = privateQuery({
 		const servers = [];
 		for (const id of args.ids) {
 			const server = await ctx.db.get(id);
-			if (server) {
+			if (server && !server.kickedTime) {
 				servers.push(server);
 			}
 		}
@@ -307,7 +316,10 @@ export const findManyServersByDiscordId = privateQuery({
 		const servers = await asyncMap(args.discordIds, (discordId) =>
 			getOneFrom(ctx.db, "servers", "by_discordId", discordId),
 		);
-		return Arr.filter(servers, Predicate.isNotNullable);
+		return Arr.filter(
+			servers,
+			(s): s is NonNullable<typeof s> => s != null && !s.kickedTime,
+		);
 	},
 });
 
@@ -322,7 +334,7 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 			"by_discordId",
 			args.discordId,
 		);
-		if (!server) {
+		if (!server || server.kickedTime) {
 			return null;
 		}
 

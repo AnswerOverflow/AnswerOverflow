@@ -30,7 +30,7 @@ export const getServerByDomain = publicQuery({
 			preferences.serverId,
 			"discordId",
 		);
-		if (!server) {
+		if (!server || server.kickedTime) {
 			return null;
 		}
 		return {
@@ -84,7 +84,7 @@ export const getServerByDiscordIdWithChannels = publicQuery({
 			"by_discordId",
 			args.discordId,
 		);
-		if (!server) {
+		if (!server || server.kickedTime) {
 			return null;
 		}
 

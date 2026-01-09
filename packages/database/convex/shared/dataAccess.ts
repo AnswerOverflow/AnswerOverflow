@@ -69,9 +69,17 @@ export function createDataAccessCache(ctx: QueryCtx) {
 			),
 
 		getServer: (serverId: bigint) =>
-			cache.get(`server:${serverId}`, () =>
-				getOneFrom(ctx.db, "servers", "by_discordId", serverId, "discordId"),
-			),
+			cache.get(`server:${serverId}`, async () => {
+				const server = await getOneFrom(
+					ctx.db,
+					"servers",
+					"by_discordId",
+					serverId,
+					"discordId",
+				);
+				if (!server || server.kickedTime) return null;
+				return server;
+			}),
 
 		getDiscordAccount: (accountId: bigint) =>
 			cache.get(`discordAccount:${accountId}`, () =>
