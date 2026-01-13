@@ -32,19 +32,22 @@ const STATIC_TRUSTED_ORIGINS = [
 	"https://local.rhys.dev",
 ];
 
-const TRUSTED_ORIGINS = (origin: string) => {
-	if (STATIC_TRUSTED_ORIGINS.includes(origin)) {
-		return true;
-	}
-	try {
-		const url = new URL(origin);
-		if (url.hostname.endsWith(".answeroverflow.dev")) {
-			return true;
+const getTrustedOrigins = (request?: Request): string[] => {
+	const origins = [...STATIC_TRUSTED_ORIGINS];
+	if (request) {
+		const origin = request.headers.get("origin");
+		if (origin) {
+			try {
+				const url = new URL(origin);
+				if (url.hostname.endsWith(".answeroverflow.dev")) {
+					origins.push(origin);
+				}
+			} catch {
+				// Invalid URL
+			}
 		}
-	} catch {
-		// Invalid URL
 	}
-	return false;
+	return origins;
 };
 
 export const authComponent = createClient<DataModel, typeof authSchema>(
@@ -64,7 +67,7 @@ export const createAuthOptions = (
 		logger: {
 			disabled: optionsOnly,
 		},
-		trustedOrigins: TRUSTED_ORIGINS,
+		trustedOrigins: getTrustedOrigins,
 		advanced: {
 			disableCSRFCheck: true,
 		},
