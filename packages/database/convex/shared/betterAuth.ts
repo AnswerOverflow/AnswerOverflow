@@ -25,12 +25,30 @@ const ALLOWED_TENANT_PATHS = [
 	"/get-session",
 ];
 
-const TRUSTED_ORIGINS = [
+const STATIC_TRUSTED_ORIGINS = [
 	"https://www.answeroverflow.com",
 	"http://localhost:3000",
 	"https://ao.tail5665af.ts.net",
 	"https://local.rhys.dev",
 ];
+
+const getTrustedOrigins = (request?: Request): string[] => {
+	const origins = [...STATIC_TRUSTED_ORIGINS];
+	if (request) {
+		const origin = request.headers.get("origin");
+		if (origin) {
+			try {
+				const url = new URL(origin);
+				if (url.hostname.endsWith(".answeroverflow.dev")) {
+					origins.push(origin);
+				}
+			} catch {
+				// Invalid URL
+			}
+		}
+	}
+	return origins;
+};
 
 export const authComponent = createClient<DataModel, typeof authSchema>(
 	components.betterAuth,
@@ -49,7 +67,7 @@ export const createAuthOptions = (
 		logger: {
 			disabled: optionsOnly,
 		},
-		trustedOrigins: TRUSTED_ORIGINS,
+		trustedOrigins: getTrustedOrigins,
 		advanced: {
 			disableCSRFCheck: true,
 		},
@@ -92,6 +110,10 @@ export const createAuthOptions = (
 					}
 
 					if (domain === "localhost") {
+						return;
+					}
+
+					if (domain.endsWith(".answeroverflow.dev")) {
 						return;
 					}
 

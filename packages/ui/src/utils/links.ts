@@ -88,6 +88,7 @@ export function isOnMainSite(host: string | null | undefined) {
 		normalizedHost === "127.0.0.1" ||
 		normalizedHost === "ao.tail5665af.ts.net" ||
 		normalizedHost?.endsWith(".vercel.app") ||
+		normalizedHost?.endsWith(".answeroverflow.dev") ||
 		normalizedHost?.includes("ngrok-free.app") ||
 		normalizedHost === "new.answeroverflow.com"
 	);
