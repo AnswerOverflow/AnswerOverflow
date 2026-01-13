@@ -82,17 +82,21 @@ export type ClientEvents = {
 	};
 	"Chat New Thread Click": Record<string, never>;
 	"Chat Discord CTA Click": {
-		repoOwner: string;
-		repoName: string;
+		repoOwner?: string;
+		repoName?: string;
+		serverName?: string;
 	};
 	"Chat Discord CTA Copy Message": {
-		repoOwner: string;
-		repoName: string;
+		repoOwner?: string;
+		repoName?: string;
+		serverName?: string;
 	};
 	"Chat Discord CTA Join": {
-		repoOwner: string;
-		repoName: string;
-		inviteCode: string;
+		repoOwner?: string;
+		repoName?: string;
+		inviteCode?: string;
+		serverName?: string;
+		inviteUrl?: string;
 	};
 	"Chat Sign In Click": {
 		location: "rate_limit_warning";

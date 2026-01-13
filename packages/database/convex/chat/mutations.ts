@@ -24,6 +24,7 @@ import {
 	CHAT_MESSAGE_CONFIG,
 	rateLimiter,
 } from "../shared/rateLimiter";
+import { resolveServerContext } from "./shared";
 
 export const vRepoContext = v.object({
 	owner: v.string(),
@@ -47,6 +48,7 @@ export const sendMessage = anonOrAuthenticatedMutation({
 		threadId: v.optional(v.string()),
 		prompt: v.string(),
 		repoContext: v.optional(vRepoContext),
+		serverDiscordId: v.optional(v.string()),
 		modelId: v.optional(vModelId),
 	},
 	returns: v.string(),
@@ -85,12 +87,16 @@ export const sendMessage = anonOrAuthenticatedMutation({
 				.withIndex("by_threadId", (q) => q.eq("threadId", existingThreadId))
 				.first();
 
+			const metadataPatch = args.serverDiscordId
+				? { modelId, serverDiscordId: args.serverDiscordId }
+				: { modelId };
+
 			if (existingMetadata) {
-				await ctx.db.patch(existingMetadata._id, { modelId });
+				await ctx.db.patch(existingMetadata._id, metadataPatch);
 			} else {
 				await ctx.db.insert("chatThreadMetadata", {
 					threadId: existingThreadId,
-					modelId,
+					...metadataPatch,
 				});
 			}
 		} else {
@@ -99,6 +105,7 @@ export const sendMessage = anonOrAuthenticatedMutation({
 			await ctx.db.insert("chatThreadMetadata", {
 				threadId,
 				repos: args.repoContext ? [args.repoContext] : undefined,
+				serverDiscordId: args.serverDiscordId,
 				modelId,
 			});
 		}
@@ -229,10 +236,16 @@ export const getChatThreadMetadata = anonOrAuthenticatedQuery({
 			.withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
 			.first();
 
+		const serverContext = await resolveServerContext(
+			ctx,
+			metadata?.serverDiscordId,
+		);
+
 		return {
 			threadId: args.threadId,
 			title: thread.title ?? null,
 			repos: metadata?.repos ?? null,
+			serverContext,
 			modelId: metadata?.modelId ?? null,
 			agentStatus: metadata?.agentStatus ?? "idle",
 			agentError: metadata?.agentError ?? null,

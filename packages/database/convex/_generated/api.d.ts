@@ -28,6 +28,7 @@ import type * as chat_actions from "../chat/actions.js";
 import type * as chat_agent from "../chat/agent.js";
 import type * as chat_mutations from "../chat/mutations.js";
 import type * as chat_queries from "../chat/queries.js";
+import type * as chat_shared from "../chat/shared.js";
 import type * as client_admin from "../client/admin.js";
 import type * as client_apiKey from "../client/apiKey.js";
 import type * as client_authenticated from "../client/authenticated.js";
@@ -120,6 +121,7 @@ declare const fullApi: ApiFromModules<{
   "chat/agent": typeof chat_agent;
   "chat/mutations": typeof chat_mutations;
   "chat/queries": typeof chat_queries;
+  "chat/shared": typeof chat_shared;
   "client/admin": typeof client_admin;
   "client/apiKey": typeof client_apiKey;
   "client/authenticated": typeof client_authenticated;

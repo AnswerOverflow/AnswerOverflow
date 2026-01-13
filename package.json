@@ -31,11 +31,14 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.4",
+		"@types/better-sqlite3": "^7.6.13",
 		"@types/bytes": "^3.1.5",
 		"@typescript/native-preview": "^7.0.0-dev.20260102.1",
+		"better-sqlite3": "^12.6.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.6",
 		"octokit": "^5.0.5",
+		"playwright": "^1.57.0",
 		"sharp": "^0.34.5",
 		"turbo": "^2.6.1",
 		"typescript": "catalog:"

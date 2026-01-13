@@ -46,6 +46,7 @@ import {
 	ToolInput,
 	ToolOutput,
 } from "@packages/ui/components/ai-elements/tool";
+
 import { Button } from "@packages/ui/components/button";
 import {
 	Command,
@@ -55,6 +56,7 @@ import {
 	CommandItem,
 	CommandList,
 } from "@packages/ui/components/command";
+
 import {
 	useAuthClient,
 	useSession,
@@ -74,9 +76,9 @@ import {
 } from "ai";
 import { useAction, useMutation } from "convex/react";
 import {
-	AlertCircleIcon,
+	AlertCircle as AlertCircleIcon,
 	CheckIcon,
-	CopyIcon,
+	Copy as CopyIcon,
 	Loader2,
 	LockIcon,
 	Menu,
@@ -85,9 +87,11 @@ import {
 import Image from "next/image";
 import { memo, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
+import type { DiscordServerContext } from "@/lib/discord-server-types";
 import { useAuthenticatedQuery } from "@/lib/use-authenticated-query";
 import { useChatSidebar } from "./chat-sidebar";
 import { DiscordInviteCTA } from "./discord-invite-cta";
+import { DiscordServerSelector } from "./discord-server-selector";
 import { GitHubRepoSelector } from "./github-repo-selector";
 
 export type GitHubRepo = {
@@ -404,6 +408,9 @@ export function ChatInterface({
 	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
 		initialRepo ?? null,
 	);
+	const [serverOverride, setServerOverride] = useState<
+		DiscordServerContext | null | undefined
+	>(undefined);
 	const [modelOverride, setModelOverride] = useState<string | null>(null);
 	const [optimisticUserMessage, setOptimisticUserMessage] = useState<
 		string | null
@@ -456,6 +463,7 @@ export function ChatInterface({
 	});
 
 	const repoFromThread = threadMetadata?.repos?.[0];
+	const serverFromThread = threadMetadata?.serverContext ?? null;
 	const effectiveRepo =
 		selectedRepo ??
 		(repoFromThread
@@ -465,6 +473,8 @@ export function ChatInterface({
 					filePath: repoFromThread.filePath ?? undefined,
 				}
 			: null);
+	const effectiveServerContext =
+		serverOverride === undefined ? (serverFromThread ?? null) : serverOverride;
 
 	const getDiscordInviteInfo = useAction(
 		api.public.github.getDiscordInviteInfo,
@@ -490,6 +500,11 @@ export function ChatInterface({
 		effectiveRepo &&
 		discordInviteQuery.data?.hasDiscordInvite &&
 		!discordInviteQuery.data.isOnAnswerOverflow;
+	const serverInviteUrl =
+		effectiveServerContext && !effectiveServerContext.hasBot
+			? ((effectiveServerContext as { invite?: string }).invite ?? null)
+			: null;
+	const showServerInviteWarning = serverInviteUrl !== null;
 
 	const model = modelOverride ?? threadMetadata?.modelId ?? defaultModelId;
 	const selectedModelData = getModelById(model);
@@ -504,10 +519,14 @@ export function ChatInterface({
 		threadMetadata?.title ??
 		(effectiveRepo
 			? `Chat with ${effectiveRepo.owner}/${effectiveRepo.repo}`
-			: null);
+			: effectiveServerContext
+				? `Chat with ${effectiveServerContext.name}`
+				: null);
 	const placeholder = effectiveRepo
 		? `Ask about ${effectiveRepo.owner}/${effectiveRepo.repo}...`
-		: "Send a message...";
+		: effectiveServerContext
+			? `Ask about ${effectiveServerContext.name}...`
+			: "Send a message...";
 
 	const hasMessages = messages.length > 0 || optimisticUserMessage;
 	const showEmptyState = !currentThreadId && !hasMessages;
@@ -545,6 +564,7 @@ export function ChatInterface({
 						filePath: effectiveRepo.filePath,
 					}
 				: undefined,
+			serverDiscordId: effectiveServerContext?.discordId,
 			modelId: model,
 		});
 
@@ -593,6 +613,7 @@ export function ChatInterface({
 					onClick={() => {
 						setCurrentThreadId(undefined);
 						setSelectedRepo(null);
+						setServerOverride(null);
 						setOptimisticUserMessage(null);
 						setInput("");
 						window.history.pushState(null, "", "/chat");
@@ -668,7 +689,16 @@ export function ChatInterface({
 						</Conversation>
 					)}
 					<div className="lg:hidden max-w-4xl mx-auto w-full px-2 sm:px-4">
-						{showDiscordCta && (
+						{showServerInviteWarning &&
+							effectiveServerContext &&
+							serverInviteUrl && (
+								<DiscordInviteCTA
+									variant="server"
+									serverName={effectiveServerContext.name}
+									discordInviteUrl={serverInviteUrl}
+								/>
+							)}
+						{showDiscordCta && effectiveRepo && (
 							<DiscordInviteCTA
 								repoOwner={effectiveRepo.owner}
 								repoName={effectiveRepo.repo}
@@ -695,6 +725,7 @@ export function ChatInterface({
 						<PromptInput
 							onSubmit={handleSubmit}
 							attachedTop={
+								showServerInviteWarning ||
 								showDiscordCta ||
 								selectedModelRequiresSignIn ||
 								(rateLimitStatus && rateLimitStatus.remaining < 3)
@@ -709,6 +740,12 @@ export function ChatInterface({
 							</PromptInputBody>
 							<PromptInputFooter>
 								<PromptInputTools>
+									<DiscordServerSelector
+										selectedServer={effectiveServerContext}
+										onSelectServer={setServerOverride}
+										compact
+									/>
+
 									<GitHubRepoSelector
 										selectedRepo={effectiveRepo}
 										onSelectRepo={setSelectedRepo}
@@ -721,6 +758,7 @@ export function ChatInterface({
 										compact
 									/>
 								</PromptInputTools>
+
 								<PromptInputSubmit
 									disabled={
 										!input.trim() ||
@@ -740,7 +778,16 @@ export function ChatInterface({
 
 			<div className="hidden lg:block absolute bottom-0 left-0 right-0">
 				<div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
-					{showDiscordCta && (
+					{showServerInviteWarning &&
+						effectiveServerContext &&
+						serverInviteUrl && (
+							<DiscordInviteCTA
+								variant="server"
+								serverName={effectiveServerContext.name}
+								discordInviteUrl={serverInviteUrl}
+							/>
+						)}
+					{showDiscordCta && effectiveRepo && (
 						<DiscordInviteCTA
 							repoOwner={effectiveRepo.owner}
 							repoName={effectiveRepo.repo}
@@ -767,6 +814,7 @@ export function ChatInterface({
 					<PromptInput
 						onSubmit={handleSubmit}
 						attachedTop={
+							showServerInviteWarning ||
 							showDiscordCta ||
 							selectedModelRequiresSignIn ||
 							(rateLimitStatus && rateLimitStatus.remaining < 3)
@@ -781,6 +829,11 @@ export function ChatInterface({
 						</PromptInputBody>
 						<PromptInputFooter>
 							<PromptInputTools>
+								<DiscordServerSelector
+									selectedServer={effectiveServerContext}
+									onSelectServer={setServerOverride}
+								/>
+
 								<GitHubRepoSelector
 									selectedRepo={effectiveRepo}
 									onSelectRepo={setSelectedRepo}
@@ -791,6 +844,7 @@ export function ChatInterface({
 									onModelChange={handleModelChange}
 								/>
 							</PromptInputTools>
+
 							<PromptInputSubmit
 								disabled={
 									!input.trim() ||

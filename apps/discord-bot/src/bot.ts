@@ -7,7 +7,7 @@ import { FeedbackCommandHandlerLayer } from "./commands/feedback";
 import { IndexCommandHandlerLayer } from "./commands/index-command";
 import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
 import { LeaveCommandHandlerLayer } from "./commands/leave-command";
-import { ManageAccountCommandHandlerLayer } from "./commands/manage-account";
+import { ManageAccountReacordLayer } from "./commands/manage-account-reacord";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
 import { ReacordStressTestLayer } from "./commands/reacord-stress-test/index";
 import { SitemapCommandHandlerLayer } from "./commands/sitemap-command";
@@ -46,7 +46,7 @@ export const BotLayers = Layer.mergeAll(
 	ForumGuidelinesConsentHandlerLayer,
 	ReadTheRulesConsentHandlerLayer,
 	LeaderboardCommandHandlerLayer,
-	ManageAccountCommandHandlerLayer,
+	ManageAccountReacordLayer,
 	MarkSolutionCommandHandlerLayer,
 	QuickActionCommandHandlerLayer,
 	ChannelSettingsCommandHandlerLayer,

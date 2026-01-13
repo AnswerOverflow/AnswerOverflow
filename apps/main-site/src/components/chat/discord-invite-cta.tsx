@@ -13,37 +13,74 @@ import { Textarea } from "@packages/ui/components/textarea";
 import { CheckIcon, CopyIcon, MessageCircle } from "lucide-react";
 import { useState } from "react";
 
-type DiscordInviteCTAProps = {
-	repoOwner: string;
-	repoName: string;
-	discordInviteCode?: string;
-};
+type DiscordInviteCTAProps =
+	| {
+			variant?: "repo";
+			repoOwner: string;
+			repoName: string;
+			discordInviteCode?: string;
+	  }
+	| {
+			variant: "server";
+			serverName: string;
+			discordInviteUrl?: string;
+	  };
 
-const DEFAULT_INVITE_MESSAGE = `Hey! Have you guys thought about adding Answer Overflow to this server? It makes Discord conversations searchable on Google so people can find answers without asking the same questions. Check it out: https://answeroverflow.com/about`;
+const DEFAULT_REPO_MESSAGE = `Hey! Have you guys thought about adding Answer Overflow to this server? It makes Discord conversations searchable on Google so people can find answers without asking the same questions. Check it out: https://answeroverflow.com/about`;
 
-export function DiscordInviteCTA({
-	repoOwner,
-	repoName,
-	discordInviteCode,
-}: DiscordInviteCTAProps) {
+const getServerMessage = (serverName: string) =>
+	`Hey! I've been using Answer Overflow's AI chat to find answers from our Discord. It's really helpful, but our server (${serverName}) isn't indexed yet.
+
+Could we add Answer Overflow? It makes our Discord discussions searchable on Google and lets the AI assistant find answers from our community.
+
+Here's how to add it: https://answeroverflow.com/about`;
+
+export function DiscordInviteCTA(props: DiscordInviteCTAProps) {
 	const posthog = usePostHog();
 	const [modalOpen, setModalOpen] = useState(false);
 	const [copied, setCopied] = useState(false);
-	const [inviteMessage, setInviteMessage] = useState(DEFAULT_INVITE_MESSAGE);
 
-	const discordLink = discordInviteCode
-		? `https://discord.gg/${discordInviteCode}`
-		: null;
+	const isServer = props.variant === "server";
+	const defaultMessage = isServer
+		? getServerMessage(props.serverName)
+		: DEFAULT_REPO_MESSAGE;
+	const [inviteMessage, setInviteMessage] = useState(defaultMessage);
+
+	const discordLink = isServer
+		? props.discordInviteUrl
+		: props.discordInviteCode
+			? `https://discord.gg/${props.discordInviteCode}`
+			: null;
+
+	const bannerText = isServer
+		? `${props.serverName} isn't indexed yet. Ask the mods to add Answer Overflow.`
+		: "Get better answers by inviting them to index their Discord with Answer Overflow";
+
+	const title = isServer
+		? `Add Answer Overflow to ${props.serverName}`
+		: `Improve results for ${props.repoOwner}/${props.repoName}`;
+
+	const description = isServer
+		? "Copy this message and send it to the server admins to request Answer Overflow integration"
+		: "Ask the admins of their Discord server to add Answer Overflow to get content from Discord being used in the chat";
 
 	const handleCtaClick = () => {
-		trackEvent("Chat Discord CTA Click", { repoOwner, repoName }, posthog);
+		trackEvent(
+			"Chat Discord CTA Click",
+			isServer
+				? { serverName: props.serverName }
+				: { repoOwner: props.repoOwner, repoName: props.repoName },
+			posthog,
+		);
 		setModalOpen(true);
 	};
 
 	const handleCopy = async () => {
 		trackEvent(
 			"Chat Discord CTA Copy Message",
-			{ repoOwner, repoName },
+			isServer
+				? { serverName: props.serverName }
+				: { repoOwner: props.repoOwner, repoName: props.repoName },
 			posthog,
 		);
 		await navigator.clipboard.writeText(inviteMessage);
@@ -52,10 +89,16 @@ export function DiscordInviteCTA({
 	};
 
 	const handleJoinDiscord = () => {
-		if (discordInviteCode) {
+		if (discordLink) {
 			trackEvent(
 				"Chat Discord CTA Join",
-				{ repoOwner, repoName, inviteCode: discordInviteCode },
+				isServer
+					? { serverName: props.serverName, inviteUrl: props.discordInviteUrl }
+					: {
+							repoOwner: props.repoOwner,
+							repoName: props.repoName,
+							inviteCode: props.discordInviteCode,
+						},
 				posthog,
 			);
 		}
@@ -66,8 +109,7 @@ export function DiscordInviteCTA({
 			<div className="flex items-center gap-2 rounded-t-md border-2 border-b-0 bg-secondary px-3 py-1.5">
 				<MessageCircle className="size-3.5 shrink-0 text-muted-foreground" />
 				<span className="flex-1 truncate text-xs text-muted-foreground">
-					Get better answers by inviting them to index their Discord with Answer
-					Overflow
+					{bannerText}
 				</span>
 				<Button
 					size="sm"
@@ -75,20 +117,15 @@ export function DiscordInviteCTA({
 					className="h-6 shrink-0 px-2 text-xs"
 					onClick={handleCtaClick}
 				>
-					Learn more
+					{isServer ? "Copy instructions" : "Learn more"}
 				</Button>
 			</div>
 
 			<Dialog open={modalOpen} onOpenChange={setModalOpen}>
 				<DialogContent className="sm:max-w-md">
 					<DialogHeader>
-						<DialogTitle>
-							Improve results for {repoOwner}/{repoName}
-						</DialogTitle>
-						<DialogDescription>
-							Ask the admins of their Discord server to add Answer Overflow to
-							get content from Discord being used in the chat
-						</DialogDescription>
+						<DialogTitle>{title}</DialogTitle>
+						<DialogDescription>{description}</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4">
 						<div className="space-y-2">
@@ -122,14 +159,14 @@ export function DiscordInviteCTA({
 										onClick={handleJoinDiscord}
 									>
 										<MessageCircle className="size-4 mr-2" />
-										Join Discord
+										{isServer ? "Open Discord" : "Join Discord"}
 									</a>
 								</Button>
-							) : (
+							) : !isServer ? (
 								<p className="text-sm text-muted-foreground">
 									Find their Discord invite in the project README
 								</p>
-							)}
+							) : null}
 						</div>
 					</div>
 				</DialogContent>

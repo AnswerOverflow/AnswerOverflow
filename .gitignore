@@ -59,3 +59,7 @@ personal-notes/
 
 # Local development context repos (cloned via `bun run setup:context`)
 .context/
+
+
+scripts/scraping/
+bun-sqlite.d.ts

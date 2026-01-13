@@ -2,6 +2,7 @@ import { getThreadMetadata as getAgentThreadMetadata } from "@packages/agent";
 import { v } from "convex/values";
 import { components } from "../_generated/api";
 import { internalMutation, internalQuery } from "../client";
+import { resolveServerContext } from "./shared";
 
 export const getThreadMetadata = internalQuery({
 	args: {
@@ -17,9 +18,15 @@ export const getThreadMetadata = internalQuery({
 			return null;
 		}
 
+		const serverContext = await resolveServerContext(
+			ctx,
+			metadata.serverDiscordId,
+		);
+
 		return {
 			threadId: metadata.threadId,
 			repos: metadata.repos,
+			serverContext,
 		};
 	},
 });

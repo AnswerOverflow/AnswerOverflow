@@ -267,6 +267,7 @@ const AgentStatusSchema = Schema.Literal(
 const ChatThreadMetadataSchema = Schema.Struct({
 	threadId: Schema.String,
 	repos: Schema.optional(Schema.Array(RepoContextSchema).pipe(Schema.mutable)),
+	serverDiscordId: Schema.optional(Schema.String),
 	modelId: Schema.optional(Schema.String),
 	agentStatus: Schema.optional(AgentStatusSchema),
 	agentError: Schema.optional(Schema.String),

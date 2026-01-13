@@ -1,10 +1,12 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import { ChatInterface } from "@/components/chat/chat-interface";
 
-export default function ThreadPage() {
-	const params = useParams<{ threadId: string }>();
+type ThreadPageProps = {
+	params: Promise<{
+		threadId: string;
+	}>;
+};
 
-	return <ChatInterface key={params.threadId} threadId={params.threadId} />;
+export default async function ThreadPage({ params }: ThreadPageProps) {
+	const { threadId } = await params;
+	return <ChatInterface key={threadId} threadId={threadId} />;
 }

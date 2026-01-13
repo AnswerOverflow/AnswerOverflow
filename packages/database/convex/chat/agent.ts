@@ -43,12 +43,30 @@ export type RepoContext = {
 	filePath?: string;
 };
 
+export type ServerContext = {
+	discordId: string;
+	name: string;
+	hasBot: boolean;
+	iconUrl?: string;
+};
+
 export function createRepoInstructions(
 	repos: RepoContext[],
 	modelName: string,
+	serverContext?: ServerContext,
 ): string {
+	const serverContextSection = serverContext
+		? `
+
+# Discord Server Context
+
+The user wants answers from **${serverContext.name}**.
+Server ID: ${serverContext.discordId}
+${serverContext.hasBot ? "Answer Overflow is indexed for this server." : "Answer Overflow is not indexed for this server yet. Searches may return no results; if that happens, suggest inviting the bot so the server can be indexed."}`
+		: "";
+
 	if (repos.length === 0) {
-		return createInstructions(modelName);
+		return `${createInstructions(modelName)}${serverContextSection}`;
 	}
 
 	const isSingleRepo = repos.length === 1;
@@ -100,7 +118,7 @@ You have access to a **Sandbox** to explore these repositories:
 - Use bash commands: ls, cat, grep, find, head, tail, etc.
 - Navigate efficiently - don't dump entire files unless necessary
 - Reference file paths with line numbers when citing code
-${fileContextSection}
+${fileContextSection}${serverContextSection}
 # Guidelines
 
 - Be concise and direct. Avoid unnecessary filler.

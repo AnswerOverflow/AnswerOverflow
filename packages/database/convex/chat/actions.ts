@@ -38,6 +38,7 @@ export const generateResponse = internalAction({
 		});
 
 		const repos = threadMetadata?.repos ?? [];
+		const serverContext = threadMetadata?.serverContext;
 
 		if (repos.length > 0) {
 			await ctx.runMutation(internal.chat.queries.updateAgentStatus, {
@@ -67,8 +68,11 @@ export const generateResponse = internalAction({
 		const model = getModelById(modelId);
 		const modelName = model?.name ?? "Unknown Model";
 
-		const systemOverride =
-			repos.length > 0 ? createRepoInstructions(repos, modelName) : undefined;
+		const systemOverride = createRepoInstructions(
+			repos,
+			modelName,
+			serverContext ?? undefined,
+		);
 
 		const agent = createChatAgent(modelId);
 

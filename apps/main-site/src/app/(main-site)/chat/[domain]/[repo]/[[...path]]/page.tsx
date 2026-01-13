@@ -1,21 +1,21 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import { ChatInterface } from "@/components/chat/chat-interface";
 
-export default function RepoChatPage() {
-	const params = useParams<{
+type RepoChatPageProps = {
+	params: Promise<{
 		domain: string;
 		repo: string;
 		path?: string[];
-	}>();
+	}>;
+};
 
+export default async function RepoChatPage({ params }: RepoChatPageProps) {
+	const { domain, repo, path } = await params;
 	return (
 		<ChatInterface
 			initialRepo={{
-				owner: params.domain,
-				repo: params.repo,
-				filePath: params.path?.join("/"),
+				owner: domain,
+				repo: repo,
+				filePath: path?.join("/"),
 			}}
 		/>
 	);
