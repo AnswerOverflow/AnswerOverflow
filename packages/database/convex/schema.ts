@@ -37,6 +37,8 @@ const ServerPreferencesSchema = Schema.Struct({
 	readTheRulesConsentEnabled: Schema.optional(Schema.Boolean),
 	considerAllMessagesPublicEnabled: Schema.optional(Schema.Boolean),
 	anonymizeMessagesEnabled: Schema.optional(Schema.Boolean),
+	archiveOnMarkSolution: Schema.optional(Schema.Boolean),
+	lockOnMarkSolution: Schema.optional(Schema.Boolean),
 	customDomain: Schema.optional(Schema.String),
 	subpath: Schema.optional(Schema.String),
 	addedByUserId: Schema.optional(Schema.BigIntFromSelf),

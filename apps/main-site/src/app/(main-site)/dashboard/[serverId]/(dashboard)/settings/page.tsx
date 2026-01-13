@@ -31,7 +31,9 @@ function ToggleServerFlag({
 	flagKey:
 		| "readTheRulesConsentEnabled"
 		| "considerAllMessagesPublicEnabled"
-		| "anonymizeMessagesEnabled";
+		| "anonymizeMessagesEnabled"
+		| "archiveOnMarkSolution"
+		| "lockOnMarkSolution";
 	checked: boolean;
 	onChange: (checked: boolean) => void;
 	disabled?: boolean;
@@ -103,7 +105,9 @@ export default function SettingsPage() {
 		flagKey:
 			| "readTheRulesConsentEnabled"
 			| "considerAllMessagesPublicEnabled"
-			| "anonymizeMessagesEnabled",
+			| "anonymizeMessagesEnabled"
+			| "archiveOnMarkSolution"
+			| "lockOnMarkSolution",
 		checked: boolean,
 	) => {
 		try {
@@ -169,6 +173,35 @@ export default function SettingsPage() {
 				checked={preferences.readTheRulesConsentEnabled ?? false}
 				onChange={(checked) =>
 					handleServerToggle("readTheRulesConsentEnabled", checked)
+				}
+			/>
+			<ToggleServerFlag
+				title="Archive on Mark Solution"
+				description={
+					<>
+						Automatically archive threads when a solution is marked. This helps
+						keep your channels organized by closing resolved questions.
+					</>
+				}
+				flagKey="archiveOnMarkSolution"
+				checked={preferences.archiveOnMarkSolution ?? false}
+				onChange={(checked) =>
+					handleServerToggle("archiveOnMarkSolution", checked)
+				}
+			/>
+			<ToggleServerFlag
+				title="Lock on Mark Solution"
+				description={
+					<>
+						Automatically lock threads when a solution is marked, preventing
+						further replies. Useful for reducing necroposting on resolved
+						questions.
+					</>
+				}
+				flagKey="lockOnMarkSolution"
+				checked={preferences.lockOnMarkSolution ?? false}
+				onChange={(checked) =>
+					handleServerToggle("lockOnMarkSolution", checked)
 				}
 			/>
 			<TierAccessOnly

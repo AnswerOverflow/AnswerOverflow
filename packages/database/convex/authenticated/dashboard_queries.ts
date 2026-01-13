@@ -91,6 +91,8 @@ export const getDashboardData = guildManagerQuery({
 						preferences?.considerAllMessagesPublicEnabled ?? false,
 					anonymizeMessagesEnabled:
 						preferences?.anonymizeMessagesEnabled ?? false,
+					archiveOnMarkSolution: preferences?.archiveOnMarkSolution ?? false,
+					lockOnMarkSolution: preferences?.lockOnMarkSolution ?? false,
 				},
 				botCustomization: {
 					nickname: preferences?.botNickname ?? null,

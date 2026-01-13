@@ -17,6 +17,8 @@ export const updateServerPreferencesFlags = guildManagerMutation({
 			readTheRulesConsentEnabled: v.optional(v.boolean()),
 			considerAllMessagesPublicEnabled: v.optional(v.boolean()),
 			anonymizeMessagesEnabled: v.optional(v.boolean()),
+			archiveOnMarkSolution: v.optional(v.boolean()),
+			lockOnMarkSolution: v.optional(v.boolean()),
 		}),
 	},
 	handler: async (ctx, args) => {

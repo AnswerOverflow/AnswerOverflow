@@ -375,7 +375,19 @@ export const handleMarkSolutionCommand = Effect.fn("mark_solution_command")(
 					trackMarkSolutionCommandUsed(guildMember, "Success"),
 				);
 
-				if (options.archiveOnComplete) {
+				const shouldLock = serverPreferences?.lockOnMarkSolution;
+				const shouldArchive =
+					options.archiveOnComplete || serverPreferences?.archiveOnMarkSolution;
+
+				if (shouldLock) {
+					yield* catchAllSilentWithReport(
+						discord
+							.callClient(async () => thread.setLocked(true))
+							.pipe(Effect.withSpan("lock_thread")),
+					);
+				}
+
+				if (shouldArchive) {
 					yield* catchAllSilentWithReport(
 						discord
 							.callClient(async () => thread.setArchived(true))
