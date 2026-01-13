@@ -536,7 +536,7 @@ export function MessagePage(props: {
 						{repliesSlot}
 					</main>
 
-					<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:self-start md:w-[400px] [@media(min-height:800px)]:sticky [@media(min-height:800px)]:top-[calc(var(--navbar-height)+1rem)]">
+					<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:self-start md:w-[400px] md:sticky md:top-[calc(var(--navbar-height)+1rem)]">
 						<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block overflow-hidden">
 							{headerData.server.banner && (
 								<img
