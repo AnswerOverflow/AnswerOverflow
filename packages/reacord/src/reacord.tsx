@@ -5,6 +5,7 @@ import type {
 	CommandInteraction,
 	Interaction,
 	ModalSubmitInteraction,
+	SendableChannels,
 	StringSelectMenuInteraction,
 	UserSelectMenuInteraction,
 } from "discord.js";
@@ -13,8 +14,11 @@ import type { ReactNode } from "react";
 import type { ReacordInstance } from "./instance";
 import { InstanceProvider } from "./instance-context";
 import { reconciler } from "./internal/reconciler";
+import { DiscordApiError } from "./internal/errors";
 import {
 	createInteractionReplyRenderer,
+	createMessageRenderer,
+	type DiscordMessageOptions,
 	type Renderer,
 } from "./internal/renderer";
 
@@ -35,6 +39,10 @@ export class Reacord extends Context.Tag("Reacord")<
 	{
 		reply: (
 			interaction: CommandInteraction,
+			content: ReactNode,
+		) => Effect.Effect<ReacordInstance>;
+		send: (
+			channel: SendableChannels,
 			content: ReactNode,
 		) => Effect.Effect<ReacordInstance>;
 		cleanup: () => void;
@@ -218,6 +226,22 @@ export function makeReacord(
 		reply: (interaction: CommandInteraction, content: ReactNode) =>
 			Effect.sync(() => {
 				const renderer = createInteractionReplyRenderer(interaction, runEffect);
+				return createInstance(renderer, content);
+			}),
+		send: (channel: SendableChannels, content: ReactNode) =>
+			Effect.sync(() => {
+				const renderer = createMessageRenderer(
+					(options: DiscordMessageOptions) =>
+						Effect.tryPromise({
+							try: async () => {
+								const message = await channel.send(options);
+								return message;
+							},
+							catch: (cause) =>
+								new DiscordApiError({ operation: "send", cause }),
+						}),
+					runEffect,
+				);
 				return createInstance(renderer, content);
 			}),
 		cleanup: () => {

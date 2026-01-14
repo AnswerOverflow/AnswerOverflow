@@ -74,6 +74,12 @@ const guildCommands = [
 					...REACORD_STRESS_TEST_SCENARIOS.map((s) => ({ name: s, value: s })),
 				),
 		),
+	new SlashCommandBuilder()
+		.setName("v2-components-demo")
+		.setDescription(
+			"Send a demo message showcasing all Discord V2 components (Rhys only)",
+		)
+		.setContexts(InteractionContextType.Guild),
 ] as const;
 
 const registerCommandsEffect = Effect.fn("register_commands")(function* () {

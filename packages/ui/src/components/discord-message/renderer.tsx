@@ -1,6 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
+import { ComponentType } from "discord-api-types/v10";
 import { parse } from "discord-markdown-parser";
 import { CornerUpRight } from "lucide-react";
 import type React from "react";
@@ -18,6 +19,16 @@ import type {
 	MessageWithMetadata,
 	SingleASTNode,
 } from "./types";
+import { V2Components } from "./v2-components";
+
+const V2_COMPONENT_TYPES = new Set([
+	ComponentType.Section,
+	ComponentType.TextDisplay,
+	ComponentType.MediaGallery,
+	ComponentType.File,
+	ComponentType.Separator,
+	ComponentType.Container,
+]);
 
 function renderASTNode(
 	node: SingleASTNode | SingleASTNode[],
@@ -272,6 +283,21 @@ export function DiscordUIMessage({
 		if (!msg) {
 			return null;
 		}
+		const hasV2Components =
+			msg.components &&
+			msg.components.length > 0 &&
+			msg.components.some((c) => V2_COMPONENT_TYPES.has(c.type));
+
+		if (hasV2Components) {
+			return (
+				<>
+					<DiscordMarkdown message={msg}>{msg.content}</DiscordMarkdown>
+					<V2Components components={msg.components} />
+					<Attachments attachments={msg.attachments ?? []} />
+				</>
+			);
+		}
+
 		return (
 			<>
 				<DiscordMarkdown message={msg}>{msg.content}</DiscordMarkdown>

@@ -10,6 +10,7 @@ import { LeaveCommandHandlerLayer } from "./commands/leave-command";
 import { ManageAccountReacordLayer } from "./commands/manage-account-reacord";
 import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
 import { ReacordStressTestLayer } from "./commands/reacord-stress-test/index";
+import { V2ComponentsDemoCommandHandlerLayer } from "./commands/v2-components-demo";
 import { SitemapCommandHandlerLayer } from "./commands/sitemap-command";
 import { Discord } from "./core/discord-service";
 import { ConsentButtonHandlerLayer } from "./interactions/consent-button";
@@ -62,6 +63,7 @@ export const BotLayers = Layer.mergeAll(
 	BotIdentitySyncHandlerLayer,
 	ConvertToGitHubIssueReacordLayer,
 	ReacordStressTestLayer,
+	V2ComponentsDemoCommandHandlerLayer,
 	SitemapHandlerLayer,
 	SitemapCommandHandlerLayer,
 );

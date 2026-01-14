@@ -15,6 +15,7 @@ export function MessageBody(props: {
 		...message.message,
 		attachments: message.attachments,
 		embeds: message.message.embeds,
+		components: message.message.components,
 		metadata: message.metadata
 			? { ...message.message.metadata, ...message.metadata }
 			: message.message.metadata,

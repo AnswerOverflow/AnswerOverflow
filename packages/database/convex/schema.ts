@@ -4,6 +4,7 @@ import {
 	defineTable,
 	Id,
 } from "@packages/confect/server";
+import { ComponentType } from "discord-api-types/v10";
 import { Schema } from "effect";
 
 const ForumTagSchema = Schema.Struct({
@@ -188,6 +189,145 @@ const MessageMetadataSchema = Schema.Struct({
 	webhookAvatar: Schema.optional(Schema.String),
 });
 
+const ComponentMediaSchema = Schema.Struct({
+	url: Schema.String,
+});
+
+const ComponentButtonSchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.Button),
+	style: Schema.Number,
+	label: Schema.optional(Schema.String),
+	emoji: Schema.optional(Schema.String),
+	customId: Schema.optional(Schema.String),
+	url: Schema.optional(Schema.String),
+	disabled: Schema.optional(Schema.Boolean),
+});
+
+const ComponentThumbnailSchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.Thumbnail),
+	media: ComponentMediaSchema,
+	description: Schema.optional(Schema.String),
+	spoiler: Schema.optional(Schema.Boolean),
+});
+
+const ComponentTextDisplaySchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.TextDisplay),
+	content: Schema.String,
+	id: Schema.optional(Schema.Number),
+});
+
+const ComponentSeparatorSchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.Separator),
+	divider: Schema.optional(Schema.Boolean),
+	spacing: Schema.optional(Schema.Number),
+});
+
+const ComponentMediaGalleryItemSchema = Schema.Struct({
+	media: ComponentMediaSchema,
+	description: Schema.optional(Schema.String),
+	spoiler: Schema.optional(Schema.Boolean),
+});
+
+const ComponentMediaGallerySchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.MediaGallery),
+	items: Schema.Array(ComponentMediaGalleryItemSchema).pipe(Schema.mutable),
+});
+
+const ComponentFileSchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.File),
+	file: ComponentMediaSchema,
+	spoiler: Schema.optional(Schema.Boolean),
+});
+
+const ComponentSectionSchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.Section),
+	components: Schema.Array(ComponentTextDisplaySchema).pipe(Schema.mutable),
+	accessory: Schema.optional(
+		Schema.Union(ComponentThumbnailSchema, ComponentButtonSchema),
+	),
+});
+
+const ComponentSelectOptionSchema = Schema.Struct({
+	label: Schema.String,
+	value: Schema.String,
+	description: Schema.optional(Schema.String),
+	emoji: Schema.optional(Schema.String),
+	default: Schema.optional(Schema.Boolean),
+});
+
+const ComponentSelectSchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.StringSelect),
+	customId: Schema.String,
+	placeholder: Schema.optional(Schema.String),
+	minValues: Schema.optional(Schema.Number),
+	maxValues: Schema.optional(Schema.Number),
+	disabled: Schema.optional(Schema.Boolean),
+	options: Schema.Array(ComponentSelectOptionSchema).pipe(Schema.mutable),
+});
+
+const ComponentUserSelectSchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.UserSelect),
+	customId: Schema.String,
+	placeholder: Schema.optional(Schema.String),
+	minValues: Schema.optional(Schema.Number),
+	maxValues: Schema.optional(Schema.Number),
+	disabled: Schema.optional(Schema.Boolean),
+});
+
+const ActionRowItemSchema = Schema.Union(
+	ComponentButtonSchema,
+	ComponentSelectSchema,
+	ComponentUserSelectSchema,
+);
+
+const ComponentActionRowSchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.ActionRow),
+	components: Schema.Array(ActionRowItemSchema).pipe(Schema.mutable),
+});
+
+const ContainerChildSchema: Schema.Schema<ContainerChild> = Schema.Union(
+	ComponentTextDisplaySchema,
+	ComponentSectionSchema,
+	ComponentSeparatorSchema,
+	ComponentMediaGallerySchema,
+	ComponentFileSchema,
+	ComponentActionRowSchema,
+);
+
+type ContainerChild =
+	| Schema.Schema.Type<typeof ComponentTextDisplaySchema>
+	| Schema.Schema.Type<typeof ComponentSectionSchema>
+	| Schema.Schema.Type<typeof ComponentSeparatorSchema>
+	| Schema.Schema.Type<typeof ComponentMediaGallerySchema>
+	| Schema.Schema.Type<typeof ComponentFileSchema>
+	| Schema.Schema.Type<typeof ComponentActionRowSchema>;
+
+const ComponentContainerSchema = Schema.Struct({
+	type: Schema.Literal(ComponentType.Container),
+	accentColor: Schema.optional(Schema.Number),
+	spoiler: Schema.optional(Schema.Boolean),
+	components: Schema.Array(ContainerChildSchema).pipe(Schema.mutable),
+});
+
+const MessageComponentSchema: Schema.Schema<MessageComponent> = Schema.Union(
+	ComponentTextDisplaySchema,
+	ComponentContainerSchema,
+	ComponentSectionSchema,
+	ComponentSeparatorSchema,
+	ComponentMediaGallerySchema,
+	ComponentFileSchema,
+	ComponentActionRowSchema,
+);
+
+type MessageComponent =
+	| Schema.Schema.Type<typeof ComponentTextDisplaySchema>
+	| Schema.Schema.Type<typeof ComponentContainerSchema>
+	| Schema.Schema.Type<typeof ComponentSectionSchema>
+	| Schema.Schema.Type<typeof ComponentSeparatorSchema>
+	| Schema.Schema.Type<typeof ComponentMediaGallerySchema>
+	| Schema.Schema.Type<typeof ComponentFileSchema>
+	| Schema.Schema.Type<typeof ComponentActionRowSchema>;
+
 const MessageSchema = Schema.Struct({
 	id: Schema.BigIntFromSelf, // Discord snowflake ID
 	authorId: Schema.BigIntFromSelf, // Discord account ID
@@ -208,6 +348,9 @@ const MessageSchema = Schema.Struct({
 	tts: Schema.optional(Schema.Boolean),
 	embeds: Schema.optional(Schema.Array(EmbedSchema).pipe(Schema.mutable)),
 	stickers: Schema.optional(Schema.Array(StickerSchema).pipe(Schema.mutable)),
+	components: Schema.optional(
+		Schema.Array(MessageComponentSchema).pipe(Schema.mutable),
+	),
 	metadata: Schema.optional(MessageMetadataSchema),
 });
 
@@ -408,3 +551,21 @@ export type GitHubIssue = Schema.Schema.Type<typeof GitHubIssueSchema>;
 export type Embed = Schema.Schema.Type<typeof EmbedSchema>;
 export type ForumTag = Schema.Schema.Type<typeof ForumTagSchema>;
 export type AgentStatus = Schema.Schema.Type<typeof AgentStatusSchema>;
+export type ComponentButton = Schema.Schema.Type<typeof ComponentButtonSchema>;
+export type ComponentThumbnail = Schema.Schema.Type<
+	typeof ComponentThumbnailSchema
+>;
+export type ComponentTextDisplay = Schema.Schema.Type<
+	typeof ComponentTextDisplaySchema
+>;
+export type ComponentStringSelect = Schema.Schema.Type<
+	typeof ComponentSelectSchema
+>;
+export type ComponentUserSelect = Schema.Schema.Type<
+	typeof ComponentUserSelectSchema
+>;
+export type ComponentActionRow = Schema.Schema.Type<
+	typeof ComponentActionRowSchema
+>;
+export type ActionRowItem = Schema.Schema.Type<typeof ActionRowItemSchema>;
+export type { MessageComponent, ContainerChild };

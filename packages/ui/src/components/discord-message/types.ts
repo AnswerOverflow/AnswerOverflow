@@ -2,6 +2,7 @@ import type {
 	Attachment,
 	Embed,
 	Message,
+	MessageComponent,
 	Sticker,
 } from "@packages/database/convex/schema";
 
@@ -47,6 +48,7 @@ export type MessageWithMetadata = Message & {
 	attachments?: Attachment[];
 	embeds?: Embed[];
 	stickers?: Sticker[];
+	components?: MessageComponent[];
 	snapshot?: MessageSnapshot | null;
 	poll?: Poll | null;
 	user?: {
@@ -64,6 +66,7 @@ export type MessageSnapshot = {
 	attachments: Attachment[];
 	embeds: Embed[];
 	stickers?: Sticker[];
+	components?: MessageComponent[];
 	flags: number;
 	forwardedInMessageId: string;
 	metadata: MessageMetadata | null;

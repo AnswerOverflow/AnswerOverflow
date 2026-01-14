@@ -146,7 +146,7 @@ type DiscordActionRow = {
 	}>;
 };
 
-type DiscordMessageOptions = {
+export type DiscordMessageOptions = {
 	flags: number;
 	components: DiscordV2Component[];
 	files?: Array<{
@@ -930,6 +930,19 @@ export function createInteractionReplyRenderer(
 	return new Renderer({
 		type: "interaction",
 		interaction,
+		runEffect,
+	});
+}
+
+export function createMessageRenderer(
+	createMessage: (
+		options: DiscordMessageOptions,
+	) => Effect.Effect<Message, DiscordApiError>,
+	runEffect?: RunEffect,
+) {
+	return new Renderer({
+		type: "message",
+		createMessage,
 		runEffect,
 	});
 }

@@ -23,6 +23,7 @@ import { encodeCursor } from "@packages/ui/utils/cursor";
 import {
 	ChannelType,
 	getDiscordURLForMessage,
+	MessageType,
 } from "@packages/ui/utils/discord";
 import {
 	getServerCustomUrl,
@@ -120,6 +121,7 @@ export function ReplyMessage(props: {
 }
 
 export const HIDDEN_AUTHOR_IDS = [958907348389339146n];
+const HIDDEN_MESSAGE_TYPES = [MessageType.ThreadStarterMessage];
 
 export function MessageContentSkeleton() {
 	return (
@@ -160,6 +162,7 @@ export function MessageContent(props: {
 		messages.filter(
 			(m) =>
 				!HIDDEN_AUTHOR_IDS.includes(m.message.authorId) &&
+				!HIDDEN_MESSAGE_TYPES.includes(m.message.type ?? 0) &&
 				m.message.id !== firstMessage?.message.id,
 		);
 
@@ -252,6 +255,7 @@ export function RepliesSection(props: {
 		messages.filter(
 			(m) =>
 				!HIDDEN_AUTHOR_IDS.includes(m.message.authorId) &&
+				!HIDDEN_MESSAGE_TYPES.includes(m.message.type ?? 0) &&
 				m.message.id !== firstMessage?.message.id,
 		);
 

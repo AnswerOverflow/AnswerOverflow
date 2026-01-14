@@ -1,24 +1,45 @@
 import type {
+	ActionRowItem,
 	Channel as AOChannel,
+	ComponentActionRow,
+	ComponentButton,
+	ComponentTextDisplay,
+	ComponentThumbnail,
+	ContainerChild,
 	DiscordAccount as AODiscordAccount,
 	Emoji as AOEmoji,
 	ForumTag as AOForumTag,
+	MessageComponent,
 	Sticker as AOSticker,
 } from "@packages/database/convex/schema";
 import type { DatabaseAttachment } from "@packages/database/convex/shared/shared";
 import type { BaseMessageWithRelations } from "@packages/database/database";
 import {
+	type ActionRow,
 	type AnyThreadChannel,
+	type ButtonComponent,
 	type Channel,
 	ChannelType,
+	ComponentType,
+	type ContainerComponent,
+	type FileComponent,
 	type ForumChannel,
 	type GuildBasedChannel,
 	type GuildChannel,
+	type MediaGalleryComponent,
 	type Message,
+	type MessageActionRowComponent,
 	type NewsChannel,
 	type PublicThreadChannel,
+	type SectionComponent,
+	type SeparatorComponent,
+	type StringSelectMenuComponent,
 	type TextChannel,
+	type TextDisplayComponent,
+	type ThumbnailComponent,
+	type TopLevelComponent,
 	type User,
+	type UserSelectMenuComponent,
 } from "discord.js";
 import { Effect } from "effect";
 import { Discord } from "../core/discord-service";
@@ -112,6 +133,232 @@ export function toAOChannel(
 			availableTags,
 		} satisfies AOChannel;
 	});
+}
+
+function convertMessageComponents(
+	components: TopLevelComponent[],
+): MessageComponent[] | undefined {
+	if (components.length === 0) return undefined;
+
+	const converted: MessageComponent[] = [];
+	for (const component of components) {
+		const result = convertTopLevelComponent(component);
+		if (result) converted.push(result);
+	}
+	return converted.length > 0 ? converted : undefined;
+}
+
+function convertTopLevelComponent(
+	component: TopLevelComponent,
+): MessageComponent | null {
+	switch (component.type) {
+		case ComponentType.TextDisplay:
+			return convertTextDisplay(component);
+		case ComponentType.Container:
+			return convertContainer(component);
+		case ComponentType.Section:
+			return convertSection(component);
+		case ComponentType.Separator:
+			return convertSeparator(component);
+		case ComponentType.MediaGallery:
+			return convertMediaGallery(component);
+		case ComponentType.File:
+			return convertFile(component);
+		case ComponentType.ActionRow:
+			return convertActionRow(component);
+		default:
+			return null;
+	}
+}
+
+function convertTextDisplay(
+	component: TextDisplayComponent,
+): ComponentTextDisplay {
+	return {
+		type: ComponentType.TextDisplay,
+		content: component.content,
+		id: component.id ?? undefined,
+	};
+}
+
+function convertContainer(component: ContainerComponent): MessageComponent {
+	return {
+		type: ComponentType.Container,
+		accentColor: component.accentColor ?? undefined,
+		spoiler: component.spoiler ?? undefined,
+		components: component.components
+			.map(convertContainerChild)
+			.filter((c): c is ContainerChild => c !== null),
+	};
+}
+
+function convertSection(component: SectionComponent): MessageComponent {
+	return {
+		type: ComponentType.Section,
+		components: component.components.map(convertTextDisplay),
+		accessory: component.accessory
+			? convertAccessory(component.accessory)
+			: undefined,
+	};
+}
+
+function convertSeparator(component: SeparatorComponent): MessageComponent {
+	return {
+		type: ComponentType.Separator,
+		divider: component.divider ?? undefined,
+		spacing: component.spacing ?? undefined,
+	};
+}
+
+function convertMediaGallery(
+	component: MediaGalleryComponent,
+): MessageComponent {
+	return {
+		type: ComponentType.MediaGallery,
+		items: component.items.map((item) => ({
+			media: { url: item.media.url },
+			description: item.description ?? undefined,
+			spoiler: item.spoiler ?? undefined,
+		})),
+	};
+}
+
+function convertFile(component: FileComponent): MessageComponent {
+	return {
+		type: ComponentType.File,
+		file: { url: component.file.url },
+		spoiler: component.spoiler ?? undefined,
+	};
+}
+
+type ContainerChildComponent =
+	| TextDisplayComponent
+	| SectionComponent
+	| SeparatorComponent
+	| MediaGalleryComponent
+	| FileComponent
+	| ActionRow<MessageActionRowComponent>;
+
+function convertContainerChild(
+	component: ContainerChildComponent,
+): ContainerChild | null {
+	switch (component.type) {
+		case ComponentType.TextDisplay:
+			return convertTextDisplay(component);
+		case ComponentType.Section:
+			return {
+				type: ComponentType.Section,
+				components: component.components.map(convertTextDisplay),
+				accessory: component.accessory
+					? convertAccessory(component.accessory)
+					: undefined,
+			};
+		case ComponentType.Separator:
+			return {
+				type: ComponentType.Separator,
+				divider: component.divider ?? undefined,
+				spacing: component.spacing ?? undefined,
+			};
+		case ComponentType.MediaGallery:
+			return {
+				type: ComponentType.MediaGallery,
+				items: component.items.map((item) => ({
+					media: { url: item.media.url },
+					description: item.description ?? undefined,
+					spoiler: item.spoiler ?? undefined,
+				})),
+			};
+		case ComponentType.File:
+			return {
+				type: ComponentType.File,
+				file: { url: component.file.url },
+				spoiler: component.spoiler ?? undefined,
+			};
+		case ComponentType.ActionRow:
+			return convertActionRow(component);
+		default:
+			return null;
+	}
+}
+
+function convertAccessory(
+	component: ThumbnailComponent | ButtonComponent,
+): ComponentThumbnail | ComponentButton {
+	if (component.type === ComponentType.Thumbnail) {
+		return {
+			type: ComponentType.Thumbnail,
+			media: { url: component.media.url },
+			description: component.description ?? undefined,
+			spoiler: component.spoiler ?? undefined,
+		};
+	}
+	return convertButton(component);
+}
+
+function convertButton(component: ButtonComponent): ComponentButton {
+	return {
+		type: ComponentType.Button,
+		style: component.style,
+		label: component.label ?? undefined,
+		emoji: component.emoji?.name ?? undefined,
+		customId: component.customId ?? undefined,
+		url: component.url ?? undefined,
+		disabled: component.disabled ?? undefined,
+	};
+}
+
+function convertActionRow(
+	component: ActionRow<MessageActionRowComponent>,
+): ComponentActionRow | null {
+	const components: ActionRowItem[] = [];
+
+	for (const item of component.components) {
+		switch (item.type) {
+			case ComponentType.Button:
+				components.push(convertButton(item));
+				break;
+			case ComponentType.StringSelect:
+				components.push(convertStringSelect(item));
+				break;
+			case ComponentType.UserSelect:
+				components.push(convertUserSelect(item));
+				break;
+		}
+	}
+
+	if (components.length === 0) return null;
+	return { type: ComponentType.ActionRow, components };
+}
+
+function convertStringSelect(
+	component: StringSelectMenuComponent,
+): ActionRowItem {
+	return {
+		type: ComponentType.StringSelect,
+		customId: component.customId,
+		placeholder: component.placeholder ?? undefined,
+		minValues: component.minValues ?? undefined,
+		maxValues: component.maxValues ?? undefined,
+		disabled: component.disabled ?? undefined,
+		options: component.options.map((opt) => ({
+			label: opt.label,
+			value: opt.value,
+			description: opt.description ?? undefined,
+			emoji: opt.emoji?.name ?? undefined,
+			default: opt.default ?? undefined,
+		})),
+	};
+}
+
+function convertUserSelect(component: UserSelectMenuComponent): ActionRowItem {
+	return {
+		type: ComponentType.UserSelect,
+		customId: component.customId,
+		placeholder: component.placeholder ?? undefined,
+		minValues: component.minValues ?? undefined,
+		maxValues: component.maxValues ?? undefined,
+		disabled: component.disabled ?? undefined,
+	};
 }
 
 export async function toAOMessage(
@@ -244,6 +491,8 @@ export async function toAOMessage(
 			}
 		: undefined;
 
+	const components = convertMessageComponents(message.components);
+
 	const convertedMessage: BaseMessageWithRelations = {
 		id: BigInt(message.id),
 		authorId: BigInt(message.author.id),
@@ -268,6 +517,7 @@ export async function toAOMessage(
 		tts: message.tts ?? false,
 		embeds: embeds.length > 0 ? embeds : undefined,
 		stickers: stickers.length > 0 ? stickers : undefined,
+		components,
 		attachments: attachments.length > 0 ? attachments : undefined,
 		reactions: reactions.length > 0 ? reactions : undefined,
 		metadata,
@@ -298,6 +548,7 @@ export function toUpsertMessageArgs(data: BaseMessageWithRelations) {
 			tts: data.tts,
 			embeds: data.embeds,
 			stickers: data.stickers,
+			components: data.components,
 			metadata: data.metadata,
 		},
 		attachments: data.attachments,
