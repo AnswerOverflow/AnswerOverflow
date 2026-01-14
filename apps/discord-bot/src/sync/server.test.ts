@@ -6,10 +6,8 @@ import { Discord } from "../core/discord-service";
 import { TestLayer } from "../core/layers";
 import { ServerParityLayer, syncGuild } from "./server";
 
-const TestLayerWithParity = Layer.mergeAll(
-	TestLayer,
-	ServerParityLayer.pipe(Layer.provide(TestLayer)),
-);
+const makeTestLayerWithParity = () =>
+	Layer.mergeAll(TestLayer, ServerParityLayer.pipe(Layer.provide(TestLayer)));
 
 it.scoped("guild-parity: syncs data on guild join", () =>
 	Effect.gen(function* () {
@@ -113,5 +111,5 @@ it.scoped("guild-parity: runs first on guildCreate", () =>
 		);
 		expect(serverLiveData).not.toBeNull();
 		expect(serverLiveData?.discordId).toBe(BigInt(guild.id));
-	}).pipe(Effect.provide(TestLayerWithParity)),
+	}).pipe(Effect.provide(makeTestLayerWithParity())),
 );
