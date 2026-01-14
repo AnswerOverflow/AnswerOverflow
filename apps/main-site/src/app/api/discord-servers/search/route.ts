@@ -1,6 +1,6 @@
 import { Database } from "@packages/database/database";
 import { Array as Arr, Effect, Order, pipe } from "effect";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { searchCommunityServers } from "@/lib/community-servers";
 import type { DiscordServerContext } from "@/lib/discord-server-types";
 import { runtime } from "@/lib/runtime";

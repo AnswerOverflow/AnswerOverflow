@@ -289,14 +289,14 @@ export const fetchTopPages = internalAction({
 	},
 });
 
-const getTopQuestionSolversCache = () =>
+const _getTopQuestionSolversCache = () =>
 	new ActionCache(components.actionCache, {
 		action: internal.authenticated.dashboard.fetchTopQuestionSolvers,
 		name: "topQuestionSolvers",
 		ttl: 3600 * 1000, // 1 hour - analytics data doesn't need real-time updates
 	});
 
-const getTopPagesCache = () =>
+const _getTopPagesCache = () =>
 	new ActionCache(components.actionCache, {
 		action: internal.authenticated.dashboard.fetchTopPages,
 		name: "topPages",

@@ -2,6 +2,7 @@ import { PostHogCaptureClientLayer } from "@packages/database/analytics/server/c
 import { Database } from "@packages/database/database";
 import {
 	ActionRow,
+	Atom,
 	Button,
 	Container,
 	Reacord,
@@ -11,7 +12,6 @@ import {
 	useAtomValue,
 	useInstance,
 } from "@packages/reacord";
-import { Atom } from "@packages/reacord";
 import type { ChatInputCommandInteraction, GuildMember } from "discord.js";
 import { MessageFlags } from "discord.js";
 import { Data, Duration, Effect, Layer, Metric } from "effect";

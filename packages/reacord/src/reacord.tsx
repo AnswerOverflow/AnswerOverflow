@@ -13,8 +13,8 @@ import { Context, Effect, Layer, Runtime } from "effect";
 import type { ReactNode } from "react";
 import type { ReacordInstance } from "./instance";
 import { InstanceProvider } from "./instance-context";
-import { reconciler } from "./internal/reconciler";
 import { DiscordApiError } from "./internal/errors";
+import { reconciler } from "./internal/reconciler";
 import {
 	createInteractionReplyRenderer,
 	createMessageRenderer,

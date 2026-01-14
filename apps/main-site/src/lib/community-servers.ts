@@ -1,9 +1,9 @@
 import "server-only";
 
-import Database from "better-sqlite3";
-import { Array as Arr, Option } from "effect";
 import fs from "node:fs";
 import path from "node:path";
+import Database from "better-sqlite3";
+import { Array as Arr, Option } from "effect";
 import { cache } from "react";
 import type { CommunityServer } from "./discord-server-types";
 
