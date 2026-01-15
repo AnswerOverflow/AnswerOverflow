@@ -123,6 +123,128 @@ const messageMetadataFields = {
 	webhookAvatar: v.optional(v.string()),
 };
 
+const componentMediaValidator = v.object({
+	url: v.string(),
+});
+
+const componentButtonValidator = v.object({
+	type: v.literal(2),
+	style: v.number(),
+	label: v.optional(v.string()),
+	emoji: v.optional(v.string()),
+	customId: v.optional(v.string()),
+	url: v.optional(v.string()),
+	disabled: v.optional(v.boolean()),
+});
+
+const componentThumbnailValidator = v.object({
+	type: v.literal(11),
+	media: componentMediaValidator,
+	description: v.optional(v.string()),
+	spoiler: v.optional(v.boolean()),
+});
+
+const componentTextDisplayValidator = v.object({
+	type: v.literal(10),
+	content: v.string(),
+	id: v.optional(v.number()),
+});
+
+const componentSeparatorValidator = v.object({
+	type: v.literal(14),
+	divider: v.optional(v.boolean()),
+	spacing: v.optional(v.number()),
+});
+
+const componentMediaGalleryItemValidator = v.object({
+	media: componentMediaValidator,
+	description: v.optional(v.string()),
+	spoiler: v.optional(v.boolean()),
+});
+
+const componentMediaGalleryValidator = v.object({
+	type: v.literal(12),
+	items: v.array(componentMediaGalleryItemValidator),
+});
+
+const componentFileValidator = v.object({
+	type: v.literal(13),
+	file: componentMediaValidator,
+	spoiler: v.optional(v.boolean()),
+});
+
+const componentSectionValidator = v.object({
+	type: v.literal(9),
+	components: v.array(componentTextDisplayValidator),
+	accessory: v.optional(
+		v.union(componentThumbnailValidator, componentButtonValidator),
+	),
+});
+
+const componentSelectOptionValidator = v.object({
+	label: v.string(),
+	value: v.string(),
+	description: v.optional(v.string()),
+	emoji: v.optional(v.string()),
+	default: v.optional(v.boolean()),
+});
+
+const componentSelectValidator = v.object({
+	type: v.literal(3),
+	customId: v.string(),
+	placeholder: v.optional(v.string()),
+	minValues: v.optional(v.number()),
+	maxValues: v.optional(v.number()),
+	disabled: v.optional(v.boolean()),
+	options: v.array(componentSelectOptionValidator),
+});
+
+const componentUserSelectValidator = v.object({
+	type: v.literal(5),
+	customId: v.string(),
+	placeholder: v.optional(v.string()),
+	minValues: v.optional(v.number()),
+	maxValues: v.optional(v.number()),
+	disabled: v.optional(v.boolean()),
+});
+
+const actionRowItemValidator = v.union(
+	componentButtonValidator,
+	componentSelectValidator,
+	componentUserSelectValidator,
+);
+
+const componentActionRowValidator = v.object({
+	type: v.literal(1),
+	components: v.array(actionRowItemValidator),
+});
+
+const containerChildValidator = v.union(
+	componentTextDisplayValidator,
+	componentSectionValidator,
+	componentSeparatorValidator,
+	componentMediaGalleryValidator,
+	componentFileValidator,
+	componentActionRowValidator,
+);
+
+const componentContainerValidator = v.object({
+	type: v.literal(17),
+	accentColor: v.optional(v.number()),
+	spoiler: v.optional(v.boolean()),
+	components: v.array(containerChildValidator),
+});
+
+const messageComponentValidator = v.union(
+	componentTextDisplayValidator,
+	componentContainerValidator,
+	componentSectionValidator,
+	componentSeparatorValidator,
+	componentMediaGalleryValidator,
+	componentFileValidator,
+	componentActionRowValidator,
+);
+
 const messageFields = {
 	id: v.int64(),
 	authorId: v.int64(),
@@ -143,6 +265,7 @@ const messageFields = {
 	tts: v.optional(v.boolean()),
 	embeds: v.optional(v.array(v.object(embedFields))),
 	stickers: v.optional(v.array(v.object(stickerFields))),
+	components: v.optional(v.array(messageComponentValidator)),
 	metadata: v.optional(v.object(messageMetadataFields)),
 };
 
