@@ -1,5 +1,6 @@
 import type { GenericValidator } from "convex/values";
 import { v } from "convex/values";
+import { ComponentType } from "discord-api-types/v10";
 import { emojiSchema } from "../schema";
 
 export const paginatedValidator = <T extends GenericValidator>(
@@ -128,7 +129,7 @@ const componentMediaValidator = v.object({
 });
 
 const componentButtonValidator = v.object({
-	type: v.literal(2),
+	type: v.literal(ComponentType.Button),
 	style: v.number(),
 	label: v.optional(v.string()),
 	emoji: v.optional(v.string()),
@@ -138,20 +139,20 @@ const componentButtonValidator = v.object({
 });
 
 const componentThumbnailValidator = v.object({
-	type: v.literal(11),
+	type: v.literal(ComponentType.Thumbnail),
 	media: componentMediaValidator,
 	description: v.optional(v.string()),
 	spoiler: v.optional(v.boolean()),
 });
 
 const componentTextDisplayValidator = v.object({
-	type: v.literal(10),
+	type: v.literal(ComponentType.TextDisplay),
 	content: v.string(),
 	id: v.optional(v.number()),
 });
 
 const componentSeparatorValidator = v.object({
-	type: v.literal(14),
+	type: v.literal(ComponentType.Separator),
 	divider: v.optional(v.boolean()),
 	spacing: v.optional(v.number()),
 });
@@ -163,18 +164,18 @@ const componentMediaGalleryItemValidator = v.object({
 });
 
 const componentMediaGalleryValidator = v.object({
-	type: v.literal(12),
+	type: v.literal(ComponentType.MediaGallery),
 	items: v.array(componentMediaGalleryItemValidator),
 });
 
 const componentFileValidator = v.object({
-	type: v.literal(13),
+	type: v.literal(ComponentType.File),
 	file: componentMediaValidator,
 	spoiler: v.optional(v.boolean()),
 });
 
 const componentSectionValidator = v.object({
-	type: v.literal(9),
+	type: v.literal(ComponentType.Section),
 	components: v.array(componentTextDisplayValidator),
 	accessory: v.optional(
 		v.union(componentThumbnailValidator, componentButtonValidator),
@@ -190,7 +191,7 @@ const componentSelectOptionValidator = v.object({
 });
 
 const componentSelectValidator = v.object({
-	type: v.literal(3),
+	type: v.literal(ComponentType.StringSelect),
 	customId: v.string(),
 	placeholder: v.optional(v.string()),
 	minValues: v.optional(v.number()),
@@ -200,7 +201,7 @@ const componentSelectValidator = v.object({
 });
 
 const componentUserSelectValidator = v.object({
-	type: v.literal(5),
+	type: v.literal(ComponentType.UserSelect),
 	customId: v.string(),
 	placeholder: v.optional(v.string()),
 	minValues: v.optional(v.number()),
@@ -215,7 +216,7 @@ const actionRowItemValidator = v.union(
 );
 
 const componentActionRowValidator = v.object({
-	type: v.literal(1),
+	type: v.literal(ComponentType.ActionRow),
 	components: v.array(actionRowItemValidator),
 });
 
@@ -229,7 +230,7 @@ const containerChildValidator = v.union(
 );
 
 const componentContainerValidator = v.object({
-	type: v.literal(17),
+	type: v.literal(ComponentType.Container),
 	accentColor: v.optional(v.number()),
 	spoiler: v.optional(v.boolean()),
 	components: v.array(containerChildValidator),
