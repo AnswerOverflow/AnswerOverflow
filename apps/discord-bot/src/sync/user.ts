@@ -1,6 +1,7 @@
 import type { DiscordAccount } from "@packages/database/convex/schema";
 import { Database } from "@packages/database/database";
-import { Console, Duration, Effect, Layer, Metric } from "effect";
+import type { PartialUser, User } from "discord.js";
+import { Console, Data, Duration, Effect, Equal, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed, syncOperations } from "../metrics";
 import { trackUserJoinedServer, trackUserLeftServer } from "../utils/analytics";
@@ -15,6 +16,16 @@ const BATCH_CONFIG = {
 	maxBatchSize: process.env.NODE_ENV === "production" ? 10 : 1,
 	maxWait: Duration.millis(3000),
 } as const;
+
+function hasRelevantChanges(
+	oldUser: User | PartialUser,
+	newUser: User,
+): boolean {
+	if (oldUser.partial) return true;
+	const oldAccount = Data.struct(toAODiscordAccount(oldUser));
+	const newAccount = Data.struct(toAODiscordAccount(newUser));
+	return !Equal.equals(oldAccount, newAccount);
+}
 
 const invalidateUserGuildsCacheForMember = (
 	database: Effect.Effect.Success<typeof Database>,
@@ -72,15 +83,19 @@ export const UserParityLayer = Layer.scopedDiscard(
 
 		yield* Effect.logInfo("User parity batched queue initialized");
 
-		yield* discord.client.on("userUpdate", (_oldUser, newUser) =>
+		yield* discord.client.on("userUpdate", (oldUser, newUser) =>
 			Effect.gen(function* () {
 				yield* Effect.annotateCurrentSpan({
 					"discord.user_id": newUser.id,
 					"discord.username": newUser.username,
 				});
 				yield* Metric.increment(eventsProcessed);
-				yield* Metric.increment(syncOperations);
 
+				if (!hasRelevantChanges(oldUser, newUser)) {
+					return;
+				}
+
+				yield* Metric.increment(syncOperations);
 				yield* accountQueue.offer(toAODiscordAccount(newUser));
 			}).pipe(
 				Effect.withSpan("event.user_update"),
