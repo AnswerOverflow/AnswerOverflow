@@ -1,13 +1,20 @@
+import type { DiscordAccount } from "@packages/database/convex/schema";
 import { Database } from "@packages/database/database";
-import { Console, Effect, Layer, Metric } from "effect";
+import { Console, Duration, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed, syncOperations } from "../metrics";
 import { trackUserJoinedServer, trackUserLeftServer } from "../utils/analytics";
+import { createBatchedQueue } from "../utils/batched-queue";
 import { toAODiscordAccount } from "../utils/conversions";
 import {
 	catchAllSilentWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
+
+const BATCH_CONFIG = {
+	maxBatchSize: process.env.NODE_ENV === "production" ? 10 : 1,
+	maxWait: Duration.millis(3000),
+} as const;
 
 const invalidateUserGuildsCacheForMember = (
 	database: Effect.Effect.Success<typeof Database>,
@@ -41,6 +48,30 @@ export const UserParityLayer = Layer.scopedDiscard(
 		const discord = yield* Discord;
 		const database = yield* Database;
 
+		const accountQueue = yield* createBatchedQueue<
+			DiscordAccount,
+			unknown,
+			Database
+		>({
+			process: (batch) =>
+				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"batch.size": batch.length.toString(),
+						"batch.type": "user_update_accounts",
+					});
+					yield* Effect.logDebug(
+						`Processing user update account batch of ${batch.length} items`,
+					);
+					yield* database.private.discord_accounts.upsertManyDiscordAccounts({
+						accounts: batch,
+					});
+				}).pipe(Effect.withSpan("sync.user_update_account_batch")),
+			maxBatchSize: BATCH_CONFIG.maxBatchSize,
+			maxWait: BATCH_CONFIG.maxWait,
+		});
+
+		yield* Effect.logInfo("User parity batched queue initialized");
+
 		yield* discord.client.on("userUpdate", (_oldUser, newUser) =>
 			Effect.gen(function* () {
 				yield* Effect.annotateCurrentSpan({
@@ -50,9 +81,7 @@ export const UserParityLayer = Layer.scopedDiscard(
 				yield* Metric.increment(eventsProcessed);
 				yield* Metric.increment(syncOperations);
 
-				yield* database.private.discord_accounts.upsertDiscordAccount({
-					account: toAODiscordAccount(newUser),
-				});
+				yield* accountQueue.offer(toAODiscordAccount(newUser));
 			}).pipe(
 				Effect.withSpan("event.user_update"),
 				catchAllWithReport((error) =>
