@@ -10,7 +10,6 @@ import {
 	catchAllSilentWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
-import { isHumanMessage } from "../utils/message-utils";
 
 export const handleForumGuidelinesConsent = Effect.fn(
 	"event.forum_guidelines_consent",
@@ -25,10 +24,6 @@ export const handleForumGuidelinesConsent = Effect.fn(
 	const database = yield* Database;
 
 	if (message.channel.isDMBased() || message.channel.isVoiceBased()) {
-		return;
-	}
-
-	if (!isHumanMessage(message)) {
 		return;
 	}
 

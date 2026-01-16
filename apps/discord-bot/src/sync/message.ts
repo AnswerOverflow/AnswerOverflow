@@ -19,7 +19,6 @@ import {
 	toUpsertMessageArgs,
 } from "../utils/conversions";
 import { catchAllWithReport } from "../utils/error-reporting";
-import { isHumanMessage } from "../utils/message-utils";
 
 const BATCH_CONFIG = {
 	maxBatchSize: process.env.NODE_ENV === "production" ? 3 : 1,
@@ -96,10 +95,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					newMessage.channel.isDMBased() ||
 					newMessage.channel.isVoiceBased()
 				) {
-					return;
-				}
-
-				if (!isHumanMessage(newMessage)) {
 					return;
 				}
 
@@ -254,10 +249,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 		yield* discord.client.on("messageCreate", (message) =>
 			Effect.gen(function* () {
 				if (message.channel.isDMBased() || message.channel.isVoiceBased()) {
-					return;
-				}
-
-				if (!isHumanMessage(message)) {
 					return;
 				}
 
