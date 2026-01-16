@@ -1,18 +1,25 @@
+import type { Channel } from "@packages/database/convex/schema";
 import { Database } from "@packages/database/database";
 import type {
 	AnyThreadChannel,
 	GuildBasedChannel,
 	GuildChannel,
 } from "discord.js";
-import { Console, Effect, Layer, Metric } from "effect";
+import { Console, Duration, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { syncOperations } from "../metrics";
+import { createBatchedQueue } from "../utils/batched-queue";
 import {
 	isAllowedRootChannel,
 	isAllowedThreadChannel,
 	toAOChannel,
 } from "../utils/conversions";
 import { catchAllWithReport } from "../utils/error-reporting";
+
+const BATCH_CONFIG = {
+	maxBatchSize: process.env.NODE_ENV === "production" ? 20 : 1,
+	maxWait: Duration.millis(3000),
+} as const;
 
 export function syncChannel(
 	channel: GuildBasedChannel | GuildChannel | AnyThreadChannel,
@@ -49,10 +56,94 @@ export function syncChannel(
 	);
 }
 
+export function syncManyChannels(
+	channels: Array<GuildBasedChannel | GuildChannel | AnyThreadChannel>,
+) {
+	return Effect.gen(function* () {
+		if (channels.length === 0) return;
+
+		yield* Effect.annotateCurrentSpan({
+			"batch.size": channels.length.toString(),
+			"batch.type": "channel_sync",
+		});
+
+		const database = yield* Database;
+
+		const channelDataResults = yield* Effect.forEach(
+			channels,
+			(channel) =>
+				toAOChannel(channel).pipe(
+					Effect.map((data) => ({ channel, data })),
+					Effect.catchAll(() => Effect.succeed(null)),
+				),
+			{ concurrency: "unbounded" },
+		);
+
+		const validChannels = channelDataResults.filter(
+			(r): r is NonNullable<typeof r> => r !== null,
+		);
+
+		if (validChannels.length === 0) return;
+
+		yield* database.private.channels.upsertManyChannels({
+			channels: validChannels.map((c) => c.data),
+		});
+
+		yield* Metric.incrementBy(syncOperations, validChannels.length);
+
+		const threads = validChannels.filter(
+			(c) => c.channel.isThread() && c.channel.parentId,
+		);
+
+		if (threads.length > 0) {
+			yield* Effect.forEach(
+				threads,
+				({ channel }) => {
+					if (!channel.isThread() || !channel.parentId) return Effect.void;
+					const appliedTags = channel.appliedTags;
+					return database.private.threadTags.syncThreadTags({
+						threadId: BigInt(channel.id),
+						parentChannelId: BigInt(channel.parentId),
+						tagIds: appliedTags.map((tagId) => BigInt(tagId)),
+					});
+				},
+				{ concurrency: 5 },
+			);
+		}
+	}).pipe(
+		Effect.withSpan("sync.channel_batch"),
+		catchAllWithReport((error) =>
+			Console.warn(`Failed to sync channel batch:`, error),
+		),
+	);
+}
+
 export const ChannelParityLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 		const database = yield* Database;
+
+		const channelQueue = yield* createBatchedQueue<
+			GuildBasedChannel | GuildChannel | AnyThreadChannel,
+			unknown,
+			Database | Discord
+		>({
+			process: (batch) =>
+				Effect.gen(function* () {
+					yield* Effect.annotateCurrentSpan({
+						"batch.size": batch.length.toString(),
+						"batch.type": "channel_upsert",
+					});
+					yield* Effect.logDebug(
+						`Processing channel batch of ${batch.length} items`,
+					);
+					yield* syncManyChannels(batch);
+				}).pipe(Effect.withSpan("sync.channel_batch_queue")),
+			maxBatchSize: BATCH_CONFIG.maxBatchSize,
+			maxWait: BATCH_CONFIG.maxWait,
+		});
+
+		yield* Effect.logInfo("Channel parity batched queue initialized");
 
 		yield* discord.client.on("channelCreate", (channel) =>
 			Effect.gen(function* () {
@@ -64,7 +155,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					"discord.channel_name": channel.name,
 					"discord.guild_id": channel.guildId,
 				});
-				yield* syncChannel(channel);
+				yield* channelQueue.offer(channel);
 			}).pipe(
 				Effect.withSpan("event.channel_create"),
 				catchAllWithReport((error) =>
@@ -113,7 +204,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					);
 					return;
 				}
-				yield* syncChannel(thread);
+				yield* channelQueue.offer(thread);
 			}).pipe(
 				Effect.withSpan("event.thread_create"),
 				catchAllWithReport((error) =>
@@ -132,7 +223,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					"discord.channel_name": newChannel.name,
 					"discord.guild_id": newChannel.guildId,
 				});
-				yield* syncChannel(newChannel);
+				yield* channelQueue.offer(newChannel);
 			}).pipe(
 				Effect.withSpan("event.channel_update"),
 				catchAllWithReport((error) =>
@@ -189,7 +280,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* syncChannel(newThread);
+				yield* channelQueue.offer(newThread);
 			}).pipe(
 				Effect.withSpan("event.thread_update"),
 				catchAllWithReport((error) =>
@@ -243,7 +334,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 					"discord.channel_id": invite.channel.id,
 					"discord.guild_id": invite.channel.guildId,
 				});
-				yield* syncChannel(invite.channel);
+				yield* channelQueue.offer(invite.channel);
 			}).pipe(
 				Effect.withSpan("event.invite_delete"),
 				catchAllWithReport((error) =>

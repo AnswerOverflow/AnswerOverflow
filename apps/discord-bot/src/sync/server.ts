@@ -25,7 +25,7 @@ import {
 	catchAllSilentWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
-import { syncChannel } from "./channel";
+import { syncManyChannels } from "./channel";
 
 function makeGuildEmbed(guild: Guild, joined: boolean) {
 	const numberOfForumChannels = (
@@ -283,9 +283,7 @@ export function syncGuild(guild: Guild) {
 			return isAllowedRootChannelType(channel.type);
 		});
 
-		yield* Effect.forEach(rootChannels, (channel) => syncChannel(channel), {
-			concurrency: 10,
-		});
+		yield* syncManyChannels(rootChannels);
 
 		if (preferences?.addedByUserId) {
 			yield* database.private.user_server_settings

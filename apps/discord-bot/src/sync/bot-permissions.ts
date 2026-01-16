@@ -2,7 +2,7 @@ import { Console, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed, syncOperations } from "../metrics";
 import { catchAllWithReport } from "../utils/error-reporting";
-import { syncChannel } from "./channel";
+import { syncManyChannels } from "./channel";
 
 export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
@@ -32,13 +32,7 @@ export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 					`Bot permissions updated in guild ${newMember.guild.id}, syncing all channels`,
 				);
 
-				yield* Effect.forEach(
-					newMember.guild.channels.cache.values(),
-					(channel) => syncChannel(channel),
-					{
-						concurrency: 5,
-					},
-				);
+				yield* syncManyChannels([...newMember.guild.channels.cache.values()]);
 			}).pipe(
 				Effect.withSpan("event.bot_member_update"),
 				catchAllWithReport((error) =>
@@ -84,13 +78,7 @@ export const BotPermissionsSyncLayer = Layer.scopedDiscard(
 					`Bot role ${newRole.id} updated in guild ${newRole.guild.id}, syncing all channels`,
 				);
 
-				yield* Effect.forEach(
-					newRole.guild.channels.cache.values(),
-					(channel) => syncChannel(channel),
-					{
-						concurrency: 5,
-					},
-				);
+				yield* syncManyChannels([...newRole.guild.channels.cache.values()]);
 			}).pipe(
 				Effect.withSpan("event.bot_role_update"),
 				catchAllWithReport((error) =>

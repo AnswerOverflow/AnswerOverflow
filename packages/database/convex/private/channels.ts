@@ -125,6 +125,36 @@ export const upsertChannel = privateMutation({
 	},
 });
 
+export const upsertManyChannels = privateMutation({
+	args: {
+		channels: v.array(channelSchema),
+	},
+	handler: async (ctx, args) => {
+		if (args.channels.length === 0) return [];
+
+		const results: Channel[] = [];
+
+		for (const channel of args.channels) {
+			const existing = await getOneFrom(
+				ctx.db,
+				"channels",
+				"by_discordChannelId",
+				channel.id,
+				"id",
+			);
+
+			if (existing) {
+				await ctx.db.patch(existing._id, channel);
+			} else {
+				await ctx.db.insert("channels", channel);
+			}
+			results.push(channel);
+		}
+
+		return results;
+	},
+});
+
 export const deleteChannel = privateMutation({
 	args: {
 		id: v.int64(),
