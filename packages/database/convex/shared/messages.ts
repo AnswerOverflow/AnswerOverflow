@@ -200,7 +200,11 @@ export async function upsertMessageInternalLogic(
 	);
 
 	if (existing) {
-		await ctx.db.replace(existing._id, messageData);
+		const preservedData = {
+			...messageData,
+			questionId: existing.questionId,
+		};
+		await ctx.db.replace(existing._id, preservedData);
 	} else {
 		await ctx.db.insert("messages", messageData);
 	}
@@ -476,10 +480,18 @@ async function processMessageInput(
 		messageData.id,
 	);
 
+	const preservedMessageData = existingMessage
+		? { ...messageData, questionId: existingMessage.questionId }
+		: messageData;
+
 	return {
 		messageToWrite: existingMessage
-			? { type: "update" as const, id: existingMessage._id, data: messageData }
-			: { type: "insert" as const, data: messageData },
+			? {
+					type: "update" as const,
+					id: existingMessage._id,
+					data: preservedMessageData,
+				}
+			: { type: "insert" as const, data: preservedMessageData },
 
 		attachmentsToDelete: attachmentsDiff.toDelete,
 		attachmentsToInsert: attachmentsDiff.toInsert,
