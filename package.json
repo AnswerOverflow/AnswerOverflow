@@ -112,5 +112,6 @@
 		"*": [
 			"biome format --write"
 		]
-	}
+	},
+	"version": "1.0.0"
 }
