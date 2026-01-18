@@ -475,6 +475,7 @@ export function ChatInterface({
 			: null);
 	const effectiveServerContext =
 		serverOverride === undefined ? (serverFromThread ?? null) : serverOverride;
+	const serverInviteUrl = serverOverride?.invite;
 
 	const getDiscordInviteInfo = useAction(
 		api.public.github.getDiscordInviteInfo,
@@ -500,11 +501,8 @@ export function ChatInterface({
 		effectiveRepo &&
 		discordInviteQuery.data?.hasDiscordInvite &&
 		!discordInviteQuery.data.isOnAnswerOverflow;
-	const serverInviteUrl =
-		effectiveServerContext && !effectiveServerContext.hasBot
-			? ((effectiveServerContext as { invite?: string }).invite ?? null)
-			: null;
-	const showServerInviteWarning = serverInviteUrl !== null;
+	const serverNotIndexed =
+		effectiveServerContext !== null && !effectiveServerContext.hasBot;
 
 	const model = modelOverride ?? threadMetadata?.modelId ?? defaultModelId;
 	const selectedModelData = getModelById(model);
@@ -689,15 +687,13 @@ export function ChatInterface({
 						</Conversation>
 					)}
 					<div className="lg:hidden max-w-4xl mx-auto w-full px-2 sm:px-4">
-						{showServerInviteWarning &&
-							effectiveServerContext &&
-							serverInviteUrl && (
-								<DiscordInviteCTA
-									variant="server"
-									serverName={effectiveServerContext.name}
-									discordInviteUrl={serverInviteUrl}
-								/>
-							)}
+						{serverNotIndexed && effectiveServerContext && (
+							<DiscordInviteCTA
+								variant="server"
+								serverName={effectiveServerContext.name}
+								discordInviteUrl={serverInviteUrl}
+							/>
+						)}
 						{showDiscordCta && effectiveRepo && (
 							<DiscordInviteCTA
 								repoOwner={effectiveRepo.owner}
@@ -725,7 +721,7 @@ export function ChatInterface({
 						<PromptInput
 							onSubmit={handleSubmit}
 							attachedTop={
-								showServerInviteWarning ||
+								serverNotIndexed ||
 								showDiscordCta ||
 								selectedModelRequiresSignIn ||
 								(rateLimitStatus && rateLimitStatus.remaining < 3)
@@ -751,19 +747,14 @@ export function ChatInterface({
 										onSelectRepo={setSelectedRepo}
 										compact
 									/>
-									<ModelSelector
-										selectedModel={model}
-										onSelectModel={setModelOverride}
-										onModelChange={handleModelChange}
-										compact
-									/>
 								</PromptInputTools>
 
 								<PromptInputSubmit
 									disabled={
 										!input.trim() ||
 										rateLimitStatus?.remaining === 0 ||
-										selectedModelRequiresSignIn
+										selectedModelRequiresSignIn ||
+										serverNotIndexed
 									}
 								>
 									{selectedModelRequiresSignIn ? (
@@ -778,15 +769,13 @@ export function ChatInterface({
 
 			<div className="hidden lg:block absolute bottom-0 left-0 right-0">
 				<div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
-					{showServerInviteWarning &&
-						effectiveServerContext &&
-						serverInviteUrl && (
-							<DiscordInviteCTA
-								variant="server"
-								serverName={effectiveServerContext.name}
-								discordInviteUrl={serverInviteUrl}
-							/>
-						)}
+					{serverNotIndexed && effectiveServerContext && (
+						<DiscordInviteCTA
+							variant="server"
+							serverName={effectiveServerContext.name}
+							discordInviteUrl={serverInviteUrl}
+						/>
+					)}
 					{showDiscordCta && effectiveRepo && (
 						<DiscordInviteCTA
 							repoOwner={effectiveRepo.owner}
@@ -814,7 +803,7 @@ export function ChatInterface({
 					<PromptInput
 						onSubmit={handleSubmit}
 						attachedTop={
-							showServerInviteWarning ||
+							serverNotIndexed ||
 							showDiscordCta ||
 							selectedModelRequiresSignIn ||
 							(rateLimitStatus && rateLimitStatus.remaining < 3)
@@ -838,18 +827,14 @@ export function ChatInterface({
 									selectedRepo={effectiveRepo}
 									onSelectRepo={setSelectedRepo}
 								/>
-								<ModelSelector
-									selectedModel={model}
-									onSelectModel={setModelOverride}
-									onModelChange={handleModelChange}
-								/>
 							</PromptInputTools>
 
 							<PromptInputSubmit
 								disabled={
 									!input.trim() ||
 									rateLimitStatus?.remaining === 0 ||
-									selectedModelRequiresSignIn
+									selectedModelRequiresSignIn ||
+									serverNotIndexed
 								}
 							>
 								{selectedModelRequiresSignIn ? (

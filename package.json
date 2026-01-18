@@ -102,10 +102,12 @@
 	},
 	"dependencies": {
 		"@better-auth/stripe": "^1.4.7",
+		"@tanstack/react-virtual": "^3.13.18",
 		"ai": "^6.0.6",
 		"jsdom": "^27.3.0",
 		"main-site": "^7.4.2",
 		"react-tweet": "^3.3.0",
+		"react-window": "^2.2.5",
 		"stripe": "^20.1.0"
 	},
 	"lint-staged": {

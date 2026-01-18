@@ -4,7 +4,6 @@ import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 import { Array as Arr, Option } from "effect";
-import { cache } from "react";
 import type { CommunityServer } from "./discord-server-types";
 
 type CommunityServerRow = {
@@ -36,7 +35,7 @@ const rowToServer = (row: CommunityServerRow): CommunityServer => ({
 	description: row.description ?? undefined,
 });
 
-export const getCommunityServers = cache((): CommunityServer[] => {
+export function getCommunityServers(): CommunityServer[] {
 	const dbPath = getDbPath();
 	if (!dbPath) {
 		return [];
@@ -50,7 +49,7 @@ export const getCommunityServers = cache((): CommunityServer[] => {
 	db.close();
 
 	return Arr.map(rows, rowToServer);
-});
+}
 
 export const searchCommunityServers = (
 	query: string,

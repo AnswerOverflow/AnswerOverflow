@@ -10,6 +10,8 @@ import {
 	DialogTitle,
 } from "@packages/ui/components/dialog";
 import { Textarea } from "@packages/ui/components/textarea";
+import { DiscordIcon } from "@packages/ui/icons/index";
+
 import { CheckIcon, CopyIcon, MessageCircle } from "lucide-react";
 import { useState } from "react";
 
@@ -29,11 +31,11 @@ type DiscordInviteCTAProps =
 const DEFAULT_REPO_MESSAGE = `Hey! Have you guys thought about adding Answer Overflow to this server? It makes Discord conversations searchable on Google so people can find answers without asking the same questions. Check it out: https://answeroverflow.com/about`;
 
 const getServerMessage = (serverName: string) =>
-	`Hey! I've been using Answer Overflow's AI chat to find answers from our Discord. It's really helpful, but our server (${serverName}) isn't indexed yet.
+	`Hey! Have you considered adding Answer Overflow to ${serverName}?
 
-Could we add Answer Overflow? It makes our Discord discussions searchable on Google and lets the AI assistant find answers from our community.
+It makes the content of channels you pick accessible outside of Discord. Otherwise Discord servers are a bit of a black hole of information, but this makes it so people are able to find that content and join the server.
 
-Here's how to add it: https://answeroverflow.com/about`;
+They've got an about page to learn more & it's free to use: https://answeroverflow.com/about`;
 
 export function DiscordInviteCTA(props: DiscordInviteCTAProps) {
 	const posthog = usePostHog();
@@ -117,7 +119,7 @@ export function DiscordInviteCTA(props: DiscordInviteCTAProps) {
 					className="h-6 shrink-0 px-2 text-xs"
 					onClick={handleCtaClick}
 				>
-					{isServer ? "Copy instructions" : "Learn more"}
+					{isServer ? "Invite server" : "Learn more"}
 				</Button>
 			</div>
 
@@ -151,15 +153,18 @@ export function DiscordInviteCTA(props: DiscordInviteCTAProps) {
 						</div>
 						<div className="space-y-2">
 							{discordLink ? (
-								<Button asChild className="w-full">
+								<Button
+									asChild
+									className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white"
+								>
 									<a
 										href={discordLink}
 										target="_blank"
 										rel="noopener noreferrer"
 										onClick={handleJoinDiscord}
 									>
-										<MessageCircle className="size-4 mr-2" />
-										{isServer ? "Open Discord" : "Join Discord"}
+										<DiscordIcon className="size-4 mr-2" />
+										Join Discord
 									</a>
 								</Button>
 							) : !isServer ? (
