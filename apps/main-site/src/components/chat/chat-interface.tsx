@@ -399,7 +399,7 @@ export function ChatInterface({
 }: ChatInterfaceProps) {
 	const session = useSession({ allowAnonymous: true });
 	const isAuthenticated = !!session?.data;
-	const { setMobileSidebarOpen } = useChatSidebar();
+	const { setMobileSidebarOpen, setStartNewChat } = useChatSidebar();
 	const isNavbarHidden = useIsNavbarHidden();
 	const authClient = useAuthClient();
 	const posthog = usePostHog();
@@ -420,6 +420,18 @@ export function ChatInterface({
 	);
 
 	const stickToBottom = useStickToBottom({ initial: "instant" });
+
+	const startNewChat = () => {
+		setCurrentThreadId(undefined);
+		setSelectedRepo(null);
+		setServerOverride(null);
+		setOptimisticUserMessage(null);
+		setInput("");
+		setModelOverride(null);
+		window.history.pushState(null, "", "/chat");
+	};
+
+	setStartNewChat(startNewChat);
 
 	const rateLimitStatus = useAuthenticatedQuery(
 		api.chat.mutations.getChatRateLimitStatus,
@@ -605,18 +617,7 @@ export function ChatInterface({
 					<Menu className="size-5" />
 				</Button>
 				<span className="text-sm font-medium truncate flex-1">{title}</span>
-				<Button
-					variant="ghost"
-					size="icon"
-					onClick={() => {
-						setCurrentThreadId(undefined);
-						setSelectedRepo(null);
-						setServerOverride(null);
-						setOptimisticUserMessage(null);
-						setInput("");
-						window.history.pushState(null, "", "/chat");
-					}}
-				>
+				<Button variant="ghost" size="icon" onClick={startNewChat}>
 					<PlusIcon className="size-5" />
 				</Button>
 			</div>

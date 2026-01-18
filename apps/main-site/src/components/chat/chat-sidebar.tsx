@@ -23,11 +23,19 @@ import {
 	MessageSquarePlus,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useState } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useRef,
+	useState,
+} from "react";
 
 type ChatSidebarContextValue = {
 	mobileSidebarOpen: boolean;
 	setMobileSidebarOpen: (open: boolean) => void;
+	startNewChat: () => void;
+	setStartNewChat: (fn: () => void) => void;
 };
 
 const ChatSidebarContext = createContext<ChatSidebarContextValue | null>(null);
@@ -149,20 +157,25 @@ function SidebarHeader() {
 
 function SidebarContent({ onThreadClick }: { onThreadClick?: () => void }) {
 	const posthog = usePostHog();
+	const { startNewChat } = useChatSidebar();
 
 	const handleNewChatClick = () => {
 		trackEvent("Chat New Thread Click", {}, posthog);
+		onThreadClick?.();
+		startNewChat();
 	};
 
 	return (
 		<div className="flex flex-col h-full">
 			<SidebarHeader />
 			<div className="p-4">
-				<Button asChild className="w-full" variant="outline">
-					<Link href="/chat" onClick={handleNewChatClick}>
-						<MessageSquarePlus className="size-4 mr-2" />
-						New chat
-					</Link>
+				<Button
+					className="w-full"
+					variant="outline"
+					onClick={handleNewChatClick}
+				>
+					<MessageSquarePlus className="size-4 mr-2" />
+					New chat
 				</Button>
 			</div>
 			<div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -193,10 +206,24 @@ export function ChatSidebarToggle() {
 
 export function ChatSidebar({ children }: { children: React.ReactNode }) {
 	const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+	const startNewChatRef = useRef<() => void>(() => {});
+
+	const startNewChat = useCallback(() => {
+		startNewChatRef.current();
+	}, []);
+
+	const setStartNewChat = useCallback((fn: () => void) => {
+		startNewChatRef.current = fn;
+	}, []);
 
 	return (
 		<ChatSidebarContext.Provider
-			value={{ mobileSidebarOpen, setMobileSidebarOpen }}
+			value={{
+				mobileSidebarOpen,
+				setMobileSidebarOpen,
+				startNewChat,
+				setStartNewChat,
+			}}
 		>
 			<div className="relative flex w-full">
 				<aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-50 w-[280px] flex-col border-r bg-background">
