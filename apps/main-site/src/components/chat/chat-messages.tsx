@@ -24,9 +24,13 @@ export function ChatMessages({
 	const lastMessageKey = lastMessage?.key;
 
 	const lastMessageIsUser = lastMessage?.role === "user";
-	const lastAssistantHasText =
+	const lastAssistantHasContent =
 		lastMessage?.role === "assistant" &&
-		lastMessage.parts.some((p) => p.type === "text" && p.text.length > 0);
+		lastMessage.parts.some(
+			(p) =>
+				(p.type === "text" && p.text.length > 0) ||
+				p.type === "tool-invocation",
+		);
 
 	const showOptimisticMessage =
 		chat.optimisticUserMessage && chat.messages.length === 0;
@@ -34,7 +38,7 @@ export function ChatMessages({
 	const showIndicator =
 		chat.agentStatus === "thinking" ||
 		chat.agentStatus === "cloning_repo" ||
-		(chat.agentStatus === "responding" && !lastAssistantHasText) ||
+		(chat.agentStatus === "responding" && !lastAssistantHasContent) ||
 		showOptimisticMessage ||
 		lastMessageIsUser;
 
