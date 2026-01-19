@@ -54,6 +54,8 @@ You have access to:
 
 **IMPORTANT**: Search results return both \`threadId\` and \`messageId\`. The \`messageId\` is the actual matched message which may be a reply. Use \`<message-card>\` with the \`messageId\` to show the specific answer, not \`<thread-card>\` with the \`threadId\`.
 
+**VISUALS**: If your response would benefit from showing a visual (screenshot, example, etc.), check message attachments for images and use \`<message-card>\` to embed those messages. The card will render the image.
+
 ## Example Workflow
 
 1. Search returns results with \`threadId\` and \`messageId\`
