@@ -51,7 +51,8 @@ function createSearchResultFormatter(
 	return function toEnhancedSearchResult(result: SearchResult) {
 		const { message, channel, server, thread } = result;
 		const threadId = thread?.id ?? message.message.id;
-		const messageTimestamp = snowflakeToTimestamp(message.message.id);
+		const messageId = message.message.id;
+		const messageTimestamp = snowflakeToTimestamp(messageId);
 
 		const firstSolution = message.solutions[0];
 		const solutionTimestamp = firstSolution
@@ -60,6 +61,7 @@ function createSearchResultFormatter(
 
 		const base = {
 			threadId: threadId.toString(),
+			messageId: messageId.toString(),
 			threadTitle: thread?.name,
 			serverName: server.name,
 			channelName: channel.name,
@@ -71,6 +73,7 @@ function createSearchResultFormatter(
 			},
 			solution: firstSolution
 				? {
+						messageId: firstSolution.id.toString(),
 						content: firstSolution.content,
 						timestamp: solutionTimestamp?.toISOString() ?? null,
 					}

@@ -147,23 +147,28 @@ export function DiscordServerSelector({
 		<Popover open={open} onOpenChange={setOpen} modal>
 			<PopoverTrigger asChild>
 				<PromptInputButton size={compact ? "icon-sm" : "sm"}>
-					{selectedServer?.iconUrl ? (
-						<Avatar className="size-5">
-							<AvatarImage
-								src={selectedServer.iconUrl}
-								alt={selectedServer.name}
-							/>
-							<AvatarFallback className="text-[10px]">
-								{getInitials(selectedServer.name)}
-							</AvatarFallback>
-						</Avatar>
+					{selectedServer ? (
+						<>
+							<Avatar className="size-5">
+								<AvatarImage
+									src={selectedServer.iconUrl}
+									alt={selectedServer.name}
+								/>
+								<AvatarFallback className="text-[10px]">
+									{getInitials(selectedServer.name)}
+								</AvatarFallback>
+							</Avatar>
+							{!compact && (
+								<span className="truncate max-w-[150px]">
+									{selectedServer.name}
+								</span>
+							)}
+						</>
 					) : (
-						<MessageCircle className="size-4" />
-					)}
-					{!compact && (
-						<span className="truncate max-w-[150px]">
-							{selectedServer ? selectedServer.name : "Select server"}
-						</span>
+						<>
+							<MessageCircle className="size-4" />
+							{!compact && <span>Select server</span>}
+						</>
 					)}
 				</PromptInputButton>
 			</PopoverTrigger>

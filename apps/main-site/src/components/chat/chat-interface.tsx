@@ -50,7 +50,11 @@ function ChatInterfaceContent() {
 								showWarningBanner ? "lg:pb-40" : "lg:pb-32"
 							}`}
 						>
-							<ChatEmptyState repo={chat.effectiveRepo} title={chat.title} />
+							<ChatEmptyState
+								repo={chat.effectiveRepo}
+								server={chat.effectiveServerContext}
+								title={chat.title}
+							/>
 						</div>
 					</div>
 				) : (
