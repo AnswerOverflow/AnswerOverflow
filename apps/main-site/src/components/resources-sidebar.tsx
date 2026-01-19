@@ -120,7 +120,6 @@ export function ProviderSelector({
 					<Code
 						code={config.content}
 						language={config.type === "json" ? "json" : "bash"}
-						hideWrap
 						onCopy={handleInstallCopy}
 					/>
 				</div>
