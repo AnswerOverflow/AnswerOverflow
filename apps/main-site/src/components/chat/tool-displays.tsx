@@ -39,7 +39,7 @@ type Output<K extends keyof AnswerOverflowTools> = InferToolOutput<
 
 type ToolConfig = {
 	icon: LucideIcon;
-	summary: (i: Input) => string;
+	summary: (i: Input, o?: unknown) => string;
 	getResult: (o: unknown) => string | null;
 };
 
@@ -50,24 +50,24 @@ const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
 
 function objectTool<T>(
 	icon: LucideIcon,
-	summary: (i: Input) => string,
+	summary: (i: Input, o?: T) => string,
 	result: (o: T) => string | null,
 ): ToolConfig {
 	return {
 		icon,
-		summary,
+		summary: (i, o) => summary(i, o as T | undefined),
 		getResult: (o) => (typeof o === "object" && o ? result(o as T) : null),
 	};
 }
 
 function stringTool(
 	icon: LucideIcon,
-	summary: (i: Input) => string,
+	summary: (i: Input, o?: string) => string,
 	result: (o: string) => string | null,
 ): ToolConfig {
 	return {
 		icon,
-		summary,
+		summary: (i, o) => summary(i, typeof o === "string" ? o : undefined),
 		getResult: (o) => (typeof o === "string" ? result(o) : null),
 	};
 }
@@ -88,7 +88,10 @@ const tools: Record<string, ToolConfig> = {
 	),
 	get_thread_messages: objectTool<Output<"get_thread_messages">>(
 		MessageSquareIcon,
-		(i) => (i.title ? `Reading thread "${i.title}"` : "Reading thread..."),
+		(_i, o) =>
+			o && "title" in o && o.title
+				? `Reading "${truncate(o.title, 40)}"`
+				: "Reading thread...",
 		(o) => ("error" in o ? null : plural(o.messages.length, "message")),
 	),
 	find_similar_threads: objectTool<Output<"find_similar_threads">>(
@@ -208,7 +211,7 @@ export function ToolDisplay({
 					<Icon className="size-3.5" />
 				</span>
 				<span className="flex-1 truncate text-muted-foreground">
-					{config.summary((input ?? {}) as Input)}
+					{config.summary((input ?? {}) as Input, output)}
 				</span>
 				<span className="flex items-center gap-1.5">
 					{resultSummary && (
