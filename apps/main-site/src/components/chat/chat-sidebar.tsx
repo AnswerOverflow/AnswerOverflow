@@ -23,19 +23,11 @@ import {
 	MessageSquarePlus,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useRef,
-	useState,
-} from "react";
+import { createContext, useContext, useState } from "react";
 
 type ChatSidebarContextValue = {
 	mobileSidebarOpen: boolean;
 	setMobileSidebarOpen: (open: boolean) => void;
-	startNewChat: () => void;
-	setStartNewChat: (fn: () => void) => void;
 };
 
 const ChatSidebarContext = createContext<ChatSidebarContextValue | null>(null);
@@ -157,25 +149,24 @@ function SidebarHeader() {
 
 function SidebarContent({ onThreadClick }: { onThreadClick?: () => void }) {
 	const posthog = usePostHog();
-	const { startNewChat } = useChatSidebar();
 
-	const handleNewChatClick = () => {
+	const handleNewChatClick = (e: React.MouseEvent) => {
 		trackEvent("Chat New Thread Click", {}, posthog);
 		onThreadClick?.();
-		startNewChat();
+
+		e.preventDefault();
+		window.location.href = "/chat";
 	};
 
 	return (
 		<div className="flex flex-col h-full">
 			<SidebarHeader />
 			<div className="p-4">
-				<Button
-					className="w-full"
-					variant="outline"
-					onClick={handleNewChatClick}
-				>
-					<MessageSquarePlus className="size-4 mr-2" />
-					New chat
+				<Button className="w-full" variant="outline" asChild>
+					<Link href="/chat" onClick={handleNewChatClick}>
+						<MessageSquarePlus className="size-4 mr-2" />
+						New chat
+					</Link>
 				</Button>
 			</div>
 			<div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -206,23 +197,12 @@ export function ChatSidebarToggle() {
 
 export function ChatSidebar({ children }: { children: React.ReactNode }) {
 	const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-	const startNewChatRef = useRef<() => void>(() => {});
-
-	const startNewChat = useCallback(() => {
-		startNewChatRef.current();
-	}, []);
-
-	const setStartNewChat = useCallback((fn: () => void) => {
-		startNewChatRef.current = fn;
-	}, []);
 
 	return (
 		<ChatSidebarContext.Provider
 			value={{
 				mobileSidebarOpen,
 				setMobileSidebarOpen,
-				startNewChat,
-				setStartNewChat,
 			}}
 		>
 			<div className="relative flex w-full">

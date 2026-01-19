@@ -23,8 +23,8 @@ import { CheckIcon, GitFork, Loader2, Star } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
-import type { GitHubRepo } from "./chat-interface";
 import { useFeaturedRepos } from "./featured-repos-provider";
+import type { GitHubRepo } from "./types";
 
 type GitHubRepoSelectorProps = {
 	selectedRepo: GitHubRepo | null;
