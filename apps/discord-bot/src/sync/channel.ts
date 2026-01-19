@@ -1,4 +1,3 @@
-import type { Channel } from "@packages/database/convex/schema";
 import { Database } from "@packages/database/database";
 import type {
 	AnyThreadChannel,

@@ -179,7 +179,7 @@ function SignInRequiredWarning({
 	);
 }
 
-function ModelSelector({
+function _ModelSelector({
 	selectedModel,
 	onSelectModel,
 	onModelChange,
@@ -608,7 +608,7 @@ export function ChatInterface({
 		trackEvent("Chat Copy Message Click", { threadId }, posthog);
 	};
 
-	const handleModelChange = (modelId: string, previousModelId: string) => {
+	const _handleModelChange = (modelId: string, previousModelId: string) => {
 		trackEvent("Chat Model Changed", { modelId, previousModelId }, posthog);
 	};
 

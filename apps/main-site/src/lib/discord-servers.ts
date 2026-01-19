@@ -1,7 +1,7 @@
 import "server-only";
 
 import { Database } from "@packages/database/database";
-import { Array as Arr, Effect, Order, pipe } from "effect";
+import { Array as Arr, Effect, pipe } from "effect";
 import { getCommunityServers } from "./community-servers";
 import type { DiscordServerContext } from "./discord-server-types";
 import { runtime } from "./runtime";
