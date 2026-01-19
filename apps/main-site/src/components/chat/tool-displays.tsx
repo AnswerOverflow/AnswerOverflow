@@ -79,12 +79,12 @@ const tools: Record<string, ToolConfig> = {
 			i.query
 				? `Searching: "${truncate(i.query, 50)}"${i.serverId ? " in server" : ""}`
 				: "Searching...",
-		(o) => plural(o.results.length, "result"),
+		(o) => (o.results ? plural(o.results.length, "result") : null),
 	),
 	search_servers: objectTool<Output<"search_servers">>(
 		ServerIcon,
 		(i) => (i.query ? `Finding servers: "${i.query}"` : "Listing servers"),
-		(o) => plural(o.servers.length, "server"),
+		(o) => (o.servers ? plural(o.servers.length, "server") : null),
 	),
 	get_thread_messages: objectTool<Output<"get_thread_messages">>(
 		MessageSquareIcon,
@@ -92,7 +92,12 @@ const tools: Record<string, ToolConfig> = {
 			o && "title" in o && o.title
 				? `Reading "${truncate(o.title, 40)}"`
 				: "Reading thread...",
-		(o) => ("error" in o ? null : plural(o.messages.length, "message")),
+		(o) =>
+			"error" in o
+				? null
+				: o.messages
+					? plural(o.messages.length, "message")
+					: null,
 	),
 	find_similar_threads: objectTool<Output<"find_similar_threads">>(
 		FileSearchIcon,
@@ -100,7 +105,7 @@ const tools: Record<string, ToolConfig> = {
 			i.query
 				? `Finding similar: "${truncate(i.query, 50)}"`
 				: "Finding similar...",
-		(o) => plural(o.threads.length, "thread"),
+		(o) => (o.threads ? plural(o.threads.length, "thread") : null),
 	),
 	read: stringTool(
 		FileIcon,
