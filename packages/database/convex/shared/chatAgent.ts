@@ -67,11 +67,14 @@ When you find useful Discord content, embed it directly - don't just summarize:
 Here's a crosshair that works well for the Operator:
 
 <message-card id="1234567890123456789"></message-card>
+<message-card id="1234567890123456791"></message-card>
 
 This works because it uses a simple dot design.
 \`\`\`
 
 The card shows the full message with author, content, and any images.
+
+You may need to and should render multiple cards to show the relevant parts of the conversation, i.e if images are separated from text
 
 ## Card Formatting Rules
 
