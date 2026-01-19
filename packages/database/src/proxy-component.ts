@@ -1,4 +1,5 @@
-import type { api } from "@packages/database/convex/_generated/api";
+import type { AgentComponent } from "@packages/agent";
+import type { api } from "../convex/_generated/api";
 
 type WrapperApi = typeof api.private.agent_wrappers;
 
@@ -18,7 +19,7 @@ const COMPONENT_TO_WRAPPER_MAP: Record<string, keyof WrapperApi> = {
 	"streams.listDeltas": "listStreamDeltas",
 };
 
-export function createProxyComponent(wrapperApi: WrapperApi) {
+export function createProxyComponent(wrapperApi: WrapperApi): AgentComponent {
 	const handler: ProxyHandler<{ __path__: string[] }> = {
 		get(target, prop) {
 			if (typeof prop !== "string") return undefined;
@@ -36,5 +37,8 @@ export function createProxyComponent(wrapperApi: WrapperApi) {
 		},
 	};
 
-	return new Proxy({ __path__: [] as string[] }, handler);
+	return new Proxy(
+		{ __path__: [] as string[] },
+		handler,
+	) as unknown as AgentComponent;
 }

@@ -13,6 +13,7 @@ import {
 	listStreamsArgs,
 	searchMessagesArgs,
 } from "@packages/agent/args";
+import { v } from "convex/values";
 import { components } from "../_generated/api";
 import { privateAction, privateMutation, privateQuery } from "../client";
 
@@ -104,5 +105,36 @@ export const listStreamDeltas = privateQuery({
 	args: listStreamDeltasArgs,
 	handler: async (ctx, args) => {
 		return ctx.runQuery(components.agent.streams.listDeltas, args);
+	},
+});
+
+const vAgentStatus = v.union(
+	v.literal("idle"),
+	v.literal("cloning_repo"),
+	v.literal("thinking"),
+	v.literal("responding"),
+	v.literal("error"),
+);
+
+export const updateAgentStatus = privateMutation({
+	args: {
+		threadId: v.string(),
+		status: vAgentStatus,
+		error: v.optional(v.string()),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const metadata = await ctx.db
+			.query("chatThreadMetadata")
+			.withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+			.first();
+
+		if (metadata) {
+			await ctx.db.patch(metadata._id, {
+				agentStatus: args.status,
+				agentError: args.error,
+			});
+		}
+		return null;
 	},
 });

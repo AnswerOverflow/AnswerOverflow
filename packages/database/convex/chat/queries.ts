@@ -88,37 +88,6 @@ export const updateThreadTitle = internalMutation({
 	},
 });
 
-const vAgentStatus = v.union(
-	v.literal("idle"),
-	v.literal("cloning_repo"),
-	v.literal("thinking"),
-	v.literal("responding"),
-	v.literal("error"),
-);
-
-export const updateAgentStatus = internalMutation({
-	args: {
-		threadId: v.string(),
-		status: vAgentStatus,
-		error: v.optional(v.string()),
-	},
-	returns: v.null(),
-	handler: async (ctx, args) => {
-		const metadata = await ctx.db
-			.query("chatThreadMetadata")
-			.withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
-			.first();
-
-		if (metadata) {
-			await ctx.db.patch(metadata._id, {
-				agentStatus: args.status,
-				agentError: args.error,
-			});
-		}
-		return null;
-	},
-});
-
 export const migrateThreadsToNewUser = internalMutation({
 	args: {
 		fromUserId: v.string(),

@@ -1,14 +1,15 @@
 import { ConvexHttpClient } from "convex/browser";
+import type { ActionCtx } from "../client/types";
 
 export interface HttpContextConfig {
 	convexUrl: string;
 	backendAccessToken: string;
 }
 
-export function createHttpContext(config: HttpContextConfig) {
+export function createHttpContext(config: HttpContextConfig): ActionCtx {
 	const client = new ConvexHttpClient(config.convexUrl);
 
-	return {
+	const ctx = {
 		runQuery: <Args extends Record<string, unknown>, Result>(
 			query: { _type: "query" },
 			args: Args,
@@ -38,7 +39,28 @@ export function createHttpContext(config: HttpContextConfig) {
 				backendAccessToken: config.backendAccessToken,
 			} as never);
 		},
+
+		auth: {
+			getUserIdentity: async () => null,
+		},
+
+		storage: {
+			get: async () => null,
+			getUrl: async () => null,
+			getMetadata: async () => null,
+			store: async () => {
+				throw new Error("Storage store not supported in HTTP context");
+			},
+			generateUploadUrl: async () => {
+				throw new Error("Storage uploads not supported in HTTP context");
+			},
+			delete: async () => {
+				throw new Error("Storage deletes not supported in HTTP context");
+			},
+		},
 	};
+
+	return ctx as unknown as ActionCtx;
 }
 
 export type HttpContext = ReturnType<typeof createHttpContext>;

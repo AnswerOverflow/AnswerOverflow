@@ -1,7 +1,6 @@
-import { Agent } from "@packages/agent";
+import { Agent, type AgentComponent } from "@packages/agent";
 import { gateway } from "ai";
-import { components } from "../_generated/api";
-import { defaultModelId, getModelById, type ModelId } from "../shared/models";
+import { defaultModelId, getModelById, type ModelId } from "./models";
 
 function createInstructions(modelName: string) {
 	return `You are AnswerOverflow's AI assistant, helping users find answers from Discord community discussions.
@@ -135,12 +134,15 @@ ${fileContextSection}${serverContextSection}
 - Always respond in the language the original prompt was sent in`;
 }
 
-export function createChatAgent(modelId: ModelId = defaultModelId) {
+export function createChatAgent(
+	component: AgentComponent,
+	modelId: ModelId = defaultModelId,
+) {
 	const model = getModelById(modelId);
 	const gatewayId = model?.gatewayId ?? "anthropic/claude-sonnet-4-20250514";
 	const modelName = model?.name ?? "Unknown Model";
 
-	return new Agent(components.agent, {
+	return new Agent(component, {
 		name: "AnswerOverflow Assistant",
 		languageModel: gateway(gatewayId),
 		instructions: createInstructions(modelName),

@@ -98,7 +98,9 @@
 		"import-in-the-middle": "^2.0.0",
 		"require-in-the-middle": "^8.0.1",
 		"effect": "^3.19.8",
-		"@effect/platform": "^0.93.6"
+		"@effect/platform": "^0.93.6",
+		"@ai-sdk/provider-utils": "4.0.2",
+		"@ai-sdk/provider": "3.0.1"
 	},
 	"dependencies": {
 		"@better-auth/stripe": "^1.4.7",

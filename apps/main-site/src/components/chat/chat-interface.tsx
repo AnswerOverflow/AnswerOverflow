@@ -88,6 +88,7 @@ import Image from "next/image";
 import { memo, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import type { DiscordServerContext } from "@/lib/discord-server-types";
+import { streamChat } from "@/lib/server/chat";
 import { useAuthenticatedQuery } from "@/lib/use-authenticated-query";
 import { useChatSidebar } from "./chat-sidebar";
 import { DiscordInviteCTA } from "./discord-invite-cta";
@@ -457,9 +458,11 @@ export function ChatInterface({
 		{ allowAnonymous: true },
 	);
 
+	const uiMessagesArgs =
+		currentThreadId && isAuthenticated ? { threadId: currentThreadId } : "skip";
 	const { results: messages } = useUIMessages(
 		api.chat.mutations.listMessages,
-		currentThreadId && isAuthenticated ? { threadId: currentThreadId } : "skip",
+		uiMessagesArgs,
 		{ initialNumItems: 50, stream: true },
 	);
 
@@ -564,7 +567,7 @@ export function ChatInterface({
 			posthog,
 		);
 
-		const newThreadId = await sendMessage({
+		const { threadId, messageId } = await sendMessage({
 			threadId: currentThreadId,
 			prompt: text,
 			repoContext: effectiveRepo
@@ -578,10 +581,25 @@ export function ChatInterface({
 			modelId: model,
 		});
 
-		if (isNewThread && newThreadId) {
-			setCurrentThreadId(newThreadId);
-			window.history.pushState(null, "", `/chat/t/${newThreadId}`);
+		if (isNewThread && threadId) {
+			setCurrentThreadId(threadId);
+			window.history.pushState(null, "", `/chat/t/${threadId}`);
 		}
+		await streamChat({
+			threadId: threadId,
+			repos: effectiveRepo
+				? [
+						{
+							owner: effectiveRepo.owner,
+							repo: effectiveRepo.repo,
+							filePath: effectiveRepo.filePath,
+						},
+					]
+				: [],
+			serverContext: effectiveServerContext,
+			promptMessageId: messageId,
+			modelId: model,
+		});
 	};
 
 	const lastMessageId = messages.at(-1)?.id;

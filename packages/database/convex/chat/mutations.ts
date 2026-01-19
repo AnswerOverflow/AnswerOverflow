@@ -51,7 +51,6 @@ export const sendMessage = anonOrAuthenticatedMutation({
 		serverDiscordId: v.optional(v.string()),
 		modelId: v.optional(vModelId),
 	},
-	returns: v.string(),
 	handler: async (ctx, args) => {
 		const userId = args.userId;
 		const user = await authComponent.getAuthUser(ctx);
@@ -116,11 +115,10 @@ export const sendMessage = anonOrAuthenticatedMutation({
 			prompt: args.prompt,
 		});
 
-		await ctx.scheduler.runAfter(0, internal.chat.actions.generateResponse, {
-			threadId,
-			promptMessageId: messageId,
-			modelId,
-		});
+		// const threadMetadata = await ctx.runQuery(
+		// 	internal.chat.queries.getThreadMetadata,
+		// 	{ threadId: threadId },
+		// );
 
 		if (!args.threadId) {
 			await ctx.scheduler.runAfter(0, internal.chat.actions.generateTitle, {
@@ -128,7 +126,7 @@ export const sendMessage = anonOrAuthenticatedMutation({
 			});
 		}
 
-		return threadId;
+		return { threadId, messageId };
 	},
 });
 
@@ -141,7 +139,10 @@ export const listMessages = anonOrAuthenticatedQuery({
 	handler: async (ctx, args) => {
 		await verifyThreadOwnership(ctx, args.threadId, args.userId);
 		const paginated = await listUIMessages(ctx, components.agent, args);
-		const streams = await syncStreams(ctx, components.agent, args);
+		const streams = await syncStreams(ctx, components.agent, {
+			...args,
+			includeStatuses: ["streaming", "finished"],
+		});
 		return { ...paginated, streams };
 	},
 });
