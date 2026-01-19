@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { Database } from "@packages/database/database";
+import { tool } from "ai";
 import { Effect } from "effect";
 import { z } from "zod";
 import { runtime } from "@/lib/runtime";
@@ -509,4 +510,160 @@ export function registerFindSimilarThreadsTool(
 			},
 		);
 	}
+}
+
+export function createAnswerOverflowTools(config: ToolRegistrationConfig) {
+	const { buildUrl, serverId, includeServerInfo } = config;
+
+	return {
+		search_answeroverflow: tool({
+			description: `Search for answers on Answer Overflow - a searchable archive of Discord help channels.
+
+Use this to find solutions to programming questions, library-specific issues, and community discussions.
+
+Tips for effective searching:
+- Use specific error messages or function names
+- Filter by serverId to search within a specific community
+- Use search_servers first to discover available communities and their IDs`,
+			parameters: z.object({
+				query: z
+					.string()
+					.describe(
+						"The search query - can be error messages, function names, concepts, etc.",
+					),
+				serverId: z
+					.string()
+					.optional()
+					.describe(
+						"Filter results to a specific Discord server. Use search_servers to find server IDs.",
+					),
+				limit: z
+					.number()
+					.min(1)
+					.max(25)
+					.default(10)
+					.optional()
+					.describe("Maximum number of results to return (1-25, default 10)"),
+			}),
+			execute: async ({ query, serverId: overrideServerId, limit }) => {
+				const result = await searchAnswerOverflow(
+					{ query, serverId: overrideServerId ?? serverId, limit },
+					buildUrl,
+					includeServerInfo,
+				);
+				return result.content.map((c) => c.text).join("\n");
+			},
+		}),
+
+		search_servers: tool({
+			description: `Search for Discord servers indexed on Answer Overflow by name.
+
+Use this to discover communities and get their server IDs for filtered searching.
+Results are sorted by member count (largest first).`,
+			parameters: z.object({
+				query: z
+					.string()
+					.optional()
+					.describe(
+						"Search query to filter servers by name. Leave empty to list all servers.",
+					),
+				limit: z
+					.number()
+					.min(1)
+					.max(100)
+					.default(25)
+					.optional()
+					.describe("Maximum number of servers to return (1-100, default 25)"),
+			}),
+			execute: async ({ query, limit }) => {
+				const result = await searchServers({ query, limit });
+				return result.content.map((c) => c.text).join("\n");
+			},
+		}),
+
+		get_thread_messages: tool({
+			description: `Get all messages in a thread, not just the first message and solution.
+
+Use this when you need to see the full conversation, follow-up questions, and all responses in a thread.`,
+			parameters: z.object({
+				threadId: z
+					.string()
+					.describe(
+						"The thread ID (which is also the channel ID for the thread)",
+					),
+				limit: z
+					.number()
+					.min(1)
+					.max(100)
+					.default(50)
+					.optional()
+					.describe("Maximum number of messages to return (1-100, default 50)"),
+			}),
+			execute: async ({ threadId, limit }) => {
+				const result = await getThreadMessages(
+					{ threadId, limit, serverId },
+					buildUrl,
+					includeServerInfo,
+				);
+				return result.content.map((c) => c.text).join("\n");
+			},
+		}),
+
+		find_similar_threads: serverId
+			? tool({
+					description: `Find threads similar to a given search query, useful for finding related discussions.
+
+This searches both thread titles and message content to find relevant conversations.`,
+					parameters: z.object({
+						query: z
+							.string()
+							.describe("The search query to find similar threads for"),
+						limit: z
+							.number()
+							.min(1)
+							.max(10)
+							.default(5)
+							.optional()
+							.describe(
+								"Maximum number of similar threads to return (1-10, default 5)",
+							),
+					}),
+					execute: async ({ query, limit }) => {
+						const result = await findSimilarThreads(
+							{ query, serverId: serverId, limit },
+							buildUrl,
+							includeServerInfo,
+						);
+						return result.content.map((c) => c.text).join("\n");
+					},
+				})
+			: tool({
+					description: `Find threads similar to a given search query, useful for finding related discussions.
+
+This searches both thread titles and message content to find relevant conversations.`,
+					parameters: z.object({
+						query: z
+							.string()
+							.describe("The search query to find similar threads for"),
+						serverId: z.string().describe("The server ID to search within"),
+						limit: z
+							.number()
+							.min(1)
+							.max(10)
+							.default(5)
+							.optional()
+							.describe(
+								"Maximum number of similar threads to return (1-10, default 5)",
+							),
+					}),
+					execute: async ({ query, serverId: targetServerId, limit }) => {
+						const result = await findSimilarThreads(
+							{ query, serverId: targetServerId, limit },
+							buildUrl,
+							includeServerInfo,
+						);
+						return result.content.map((c) => c.text).join("\n");
+					},
+				}),
+	};
 }

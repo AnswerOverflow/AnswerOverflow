@@ -186,10 +186,14 @@ export function dedupeMessages<
 		if (!isSameMessage) {
 			return [...msgs, msg];
 		}
-		if (
-			(last.status === "pending" || last.status === "streaming") &&
-			msg.status !== "pending"
-		) {
+		// Prefer streaming messages over non-streaming duplicates for real-time updates
+		if (msg.status === "streaming") {
+			return [...msgs.slice(0, -1), msg];
+		}
+		if (last.status === "streaming") {
+			return msgs;
+		}
+		if (last.status === "pending" && msg.status !== "pending") {
 			return [...msgs.slice(0, -1), msg];
 		}
 		return msgs;

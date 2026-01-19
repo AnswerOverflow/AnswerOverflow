@@ -208,24 +208,29 @@ export function useChatState({
 
 		if (isNewThread && threadId) {
 			setCurrentThreadId(threadId);
+			setOptimisticUserMessage(null);
 			window.history.pushState(null, "", `/chat/t/${threadId}`);
 		}
 
-		await streamChat({
-			threadId: threadId,
-			repos: effectiveRepo
-				? [
-						{
-							owner: effectiveRepo.owner,
-							repo: effectiveRepo.repo,
-							filePath: effectiveRepo.filePath,
-						},
-					]
-				: [],
-			serverContext: effectiveServerContext,
-			promptMessageId: messageId,
-			modelId: model,
-		});
+		try {
+			await streamChat({
+				threadId: threadId,
+				repos: effectiveRepo
+					? [
+							{
+								owner: effectiveRepo.owner,
+								repo: effectiveRepo.repo,
+								filePath: effectiveRepo.filePath,
+							},
+						]
+					: [],
+				serverContext: effectiveServerContext,
+				promptMessageId: messageId,
+				modelId: model,
+			});
+		} catch (error) {
+			console.error("streamChat error:", error);
+		}
 	};
 
 	const handleCopyMessage = (threadId: string | null) => {

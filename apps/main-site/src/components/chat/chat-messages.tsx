@@ -11,47 +11,57 @@ import {
 	MessageResponse,
 } from "@packages/ui/components/ai-elements/message";
 import { AgentStatusIndicator } from "./chat-agent-status";
+import { ChatPromptInput } from "./chat-prompt-input";
 import { useChatContext } from "./chat-state-provider";
 import { MessageParts } from "./message-parts";
 
-export function ChatMessages() {
+export function ChatMessages({
+	showWarningBanner,
+}: {
+	showWarningBanner: boolean;
+}) {
 	const chat = useChatContext();
-	const lastMessageId = chat.messages.at(-1)?.id;
 	const lastMessage = chat.messages.at(-1);
+	const lastMessageKey = lastMessage?.key;
 
-	const hasAssistantMessageWithText = chat.messages.some(
-		(m) =>
-			m.role === "assistant" &&
-			m.parts.some((p) => p.type === "text" && p.text.length > 0),
-	);
+	const lastMessageIsUser = lastMessage?.role === "user";
+	const lastAssistantHasText =
+		lastMessage?.role === "assistant" &&
+		lastMessage.parts.some((p) => p.type === "text" && p.text.length > 0);
 
-	const waitingForResponse = !hasAssistantMessageWithText;
+	const showOptimisticMessage =
+		chat.optimisticUserMessage && chat.messages.length === 0;
 
 	const showIndicator =
 		chat.agentStatus === "thinking" ||
 		chat.agentStatus === "cloning_repo" ||
-		(chat.agentStatus === "responding" && waitingForResponse) ||
-		(chat.optimisticUserMessage && waitingForResponse);
+		(chat.agentStatus === "responding" && !lastAssistantHasText) ||
+		showOptimisticMessage ||
+		(lastMessageIsUser && chat.agentStatus !== "idle");
 
 	return (
-		<Conversation instance={chat.stickToBottom} className="flex-1">
-			<ConversationContent>
-				{chat.optimisticUserMessage && chat.messages.length === 0 && (
+		<Conversation
+			instance={chat.stickToBottom}
+			className={`h-full ${showWarningBanner ? "lg:pb-40" : "lg:pb-32"}`}
+		>
+			<ConversationContent className="max-w-4xl mx-auto w-full sm:px-6 pt-6">
+				{chat.messages.map((message) => (
+					<MessageParts
+						key={message.key}
+						message={message}
+						isLastMessage={message.key === lastMessageKey}
+						threadId={chat.currentThreadId ?? null}
+						onCopyMessage={chat.handleCopyMessage}
+						agentStatus={chat.agentStatus}
+					/>
+				))}
+				{showOptimisticMessage && chat.optimisticUserMessage && (
 					<Message from="user">
 						<MessageContent>
 							<MessageResponse>{chat.optimisticUserMessage}</MessageResponse>
 						</MessageContent>
 					</Message>
 				)}
-				{chat.messages.map((message) => (
-					<MessageParts
-						key={message.key}
-						message={message}
-						isLastMessage={message.id === lastMessageId}
-						threadId={chat.currentThreadId ?? null}
-						onCopyMessage={chat.handleCopyMessage}
-					/>
-				))}
 				{showIndicator && (
 					<AgentStatusIndicator
 						status={chat.agentStatus === "idle" ? "thinking" : chat.agentStatus}
@@ -63,6 +73,9 @@ export function ChatMessages() {
 						}
 					/>
 				)}
+				<div className="lg:hidden px-2 sm:px-4">
+					<ChatPromptInput compact />
+				</div>
 			</ConversationContent>
 			<ConversationScrollButton />
 		</Conversation>

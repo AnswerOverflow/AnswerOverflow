@@ -1,5 +1,4 @@
 "use server";
-import { createMCPClient } from "@ai-sdk/mcp";
 
 import { createHttpContext } from "@packages/agent/http";
 import { createSandboxTools, createVirtualBash } from "@packages/ai/tools";
@@ -14,6 +13,7 @@ import { Database } from "@packages/database/database";
 import { defaultModelId, getModelById } from "@packages/database/models";
 import { createProxyComponent } from "@packages/database/proxy-component";
 import { Effect } from "effect";
+import { createAnswerOverflowTools } from "../mcp/tools";
 import { runtime } from "../runtime";
 
 export async function streamChat(args: {
@@ -33,13 +33,6 @@ export async function streamChat(args: {
 
 	const modelId = args.modelId ?? defaultModelId;
 
-	const mcpClient = await createMCPClient({
-		transport: {
-			type: "http",
-			url: "https://www.answeroverflow.com/mcp",
-		},
-	});
-
 	const virtualBash = createVirtualBash({
 		gitClone: {
 			credentialProvider: async () => process.env.GITHUB_TOKEN ?? null,
@@ -51,7 +44,11 @@ export async function streamChat(args: {
 	const serverContext = args.serverContext;
 	const workdir = repos.length === 1 ? "/repo" : "/repos";
 	const sandboxTools = createSandboxTools({ virtualBash, workdir });
-	const mcpTools = await mcpClient.tools();
+	const answerOverflowTools = createAnswerOverflowTools({
+		buildUrl: (path) => `https://www.answeroverflow.com${path}`,
+		serverId: serverContext?.discordId,
+		includeServerInfo: !serverContext,
+	});
 	const model = getModelById(modelId);
 	const modelName = model?.name ?? "Unknown Model";
 	const systemOverride = createRepoInstructions(
@@ -93,26 +90,31 @@ export async function streamChat(args: {
 			status: "responding",
 		});
 	}).pipe(runtime.runPromise);
-	await agent.streamText(
-		ctx,
-		{ threadId: args.threadId },
-		{
-			promptMessageId: args.promptMessageId,
-			system: systemOverride,
-			tools: {
-				...agent.options.tools,
-				...mcpTools,
-				...sandboxTools,
-			},
-			providerOptions: {
-				gateway: {
-					order: ["cerebras"],
+	try {
+		await agent.streamText(
+			ctx,
+			{ threadId: args.threadId },
+			{
+				promptMessageId: args.promptMessageId,
+				system: systemOverride,
+				tools: {
+					...agent.options.tools,
+					...answerOverflowTools,
+					...sandboxTools,
 				},
+				providerOptions: {
+					gateway: {
+						order: ["cerebras"],
+					},
+				},
+				temperature: 0.4,
 			},
-			temperature: 0.4,
-		},
-		{ saveStreamDeltas: { throttleMs: 250, returnImmediately: false } },
-	);
+			{ saveStreamDeltas: { throttleMs: 250, returnImmediately: false } },
+		);
+	} catch (streamError) {
+		console.error("[streamChat] agent.streamText failed:", streamError);
+		throw streamError;
+	}
 	await Effect.gen(function* () {
 		const database = yield* Database;
 		yield* database.private.agent_wrappers.updateAgentStatus({

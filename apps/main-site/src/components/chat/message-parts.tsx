@@ -23,9 +23,8 @@ import {
 	type ToolUIPart,
 } from "ai";
 import { Copy as CopyIcon } from "lucide-react";
-import { memo } from "react";
 
-export const SmoothMessageResponse = memo(function SmoothMessageResponse({
+export function SmoothMessageResponse({
 	text,
 	isStreaming,
 }: {
@@ -38,7 +37,7 @@ export const SmoothMessageResponse = memo(function SmoothMessageResponse({
 	});
 
 	return <MessageResponse>{isStreaming ? smoothText : text}</MessageResponse>;
-});
+}
 
 export function ToolPart({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
 	return (
@@ -61,24 +60,34 @@ export function MessageParts({
 	isLastMessage,
 	threadId,
 	onCopyMessage,
+	agentStatus,
 }: {
 	message: UIMessage;
 	isLastMessage: boolean;
 	threadId: string | null;
 	onCopyMessage: (threadId: string | null) => void;
+	agentStatus?: string;
 }) {
-	const isStreaming = message.status === "streaming";
+	const isStreaming =
+		message.status === "streaming" ||
+		(isLastMessage &&
+			message.role === "assistant" &&
+			agentStatus === "responding");
 
 	return (
 		<>
 			{message.parts.map((part, i) => {
-				const key = `${message.id}-${i}`;
+				// Use message.key (stable across optimistic -> real transition) instead of message.id
+				const key = `${message.key}-${i}`;
 
 				if (isToolUIPart(part)) {
 					return <ToolPart key={key} part={part} />;
 				}
 
 				if (part.type === "text") {
+					if (message.role === "user" && !part.text) {
+						return null;
+					}
 					return (
 						<Message key={key} from={message.role}>
 							<MessageContent>
