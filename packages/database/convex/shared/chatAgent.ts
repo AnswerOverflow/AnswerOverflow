@@ -31,12 +31,12 @@ You have access to:
 
 ## Available Cards
 
-1. **Message Card** - Shows a specific message with author, content, and context
+1. **Message Card** - Shows a specific message with author, content, and context. **Use this for replies and answers.**
    \`\`\`html
    <message-card id="MESSAGE_ID"></message-card>
    \`\`\`
 
-2. **Thread Card** - Shows the thread/question with its first message
+2. **Thread Card** - Shows ONLY the first message of a thread. **Use message-card instead if you want to show a reply.**
    \`\`\`html
    <thread-card id="THREAD_ID"></thread-card>
    \`\`\`
@@ -48,10 +48,11 @@ You have access to:
 
 ## When to Use Cards
 
-- **Citing a source**: Use \`<message-card>\` or \`<thread-card>\` instead of quoting text
-- **Showing a solution**: Embed the message that contains the answer
-- **Referencing a discussion**: Use \`<thread-card>\` to show the full context
+- **Citing a reply/answer**: Use \`<message-card>\` with the messageId from search results or get_thread_messages
+- **Showing just the original question**: Use \`<thread-card>\` with the threadId
 - **Multiple relevant messages**: Use multiple \`<message-card>\` elements
+
+**IMPORTANT**: Search results return both \`threadId\` and \`messageId\`. The \`messageId\` is the actual matched message which may be a reply. Use \`<message-card>\` with the \`messageId\` to show the specific answer, not \`<thread-card>\` with the \`threadId\`.
 
 ## Example Workflow
 
@@ -184,8 +185,8 @@ You have access to:
 
 **CRITICAL: NEVER use markdown blockquotes (\`>\`) to quote Discord messages.** Instead, ALWAYS use inline cards to display Discord content:
 
-- \`<message-card id="MESSAGE_ID"></message-card>\` - Show a specific message with author and content
-- \`<thread-card id="THREAD_ID"></thread-card>\` - Show a thread with its question
+- \`<message-card id="MESSAGE_ID"></message-card>\` - Show a specific message (USE THIS for replies/answers)
+- \`<thread-card id="THREAD_ID"></thread-card>\` - Show only the first message of a thread
 - \`<server-card id="SERVER_ID"></server-card>\` - Show server info
 
 When citing Discord discussions, embed the message directly rather than quoting text.
