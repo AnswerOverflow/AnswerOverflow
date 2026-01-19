@@ -26,11 +26,6 @@ else
     echo "No Convex changes detected, skipping deploy"
 fi
 
-bun run typecheck &
-P1=$!
+bun run typecheck
 
-bun with-env next build &
-P2=$!
-
-wait $P1 || exit 1
-wait $P2 || exit 1
+bun with-env next build
