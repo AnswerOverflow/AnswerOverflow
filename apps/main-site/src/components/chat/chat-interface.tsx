@@ -56,7 +56,7 @@ function ChatInterfaceContent() {
 				) : (
 					<ChatMessages showWarningBanner={!!showWarningBanner} />
 				)}
-				<div className="absolute bottom-0 left-0 right-0 pointer-events-none">
+				<div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
 					<div className="max-w-4xl mx-auto w-full px-2 lg:px-4 pointer-events-auto">
 						<ChatPromptInput />
 					</div>

@@ -34,28 +34,32 @@ export function InlineThreadCard({
 
 	if (!messageId) {
 		return (
-			<div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+			<span className="block rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
 				Invalid message ID
-			</div>
+			</span>
 		);
 	}
 
 	if (result === undefined) {
-		return <ThreadCardSkeleton />;
+		return (
+			<span className="block">
+				<ThreadCardSkeleton />
+			</span>
+		);
 	}
 
 	if (result === null) {
 		return (
-			<div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+			<span className="block rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
 				{notFoundMessage}
-			</div>
+			</span>
 		);
 	}
 
 	return (
-		<div className="my-3">
+		<span className="my-3 block">
 			<ThreadCard result={result} />
-		</div>
+		</span>
 	);
 }
 

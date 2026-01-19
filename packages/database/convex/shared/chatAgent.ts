@@ -22,23 +22,23 @@ You have access to:
 
 # Inline Cards
 
-You can display Discord content directly in your markdown responses using special div elements with data attributes. These render as rich cards:
+You can display Discord content directly in your markdown responses using custom card elements. These render as rich interactive cards:
 
 ## Available Cards
 
 1. **Message Card** - Shows a message with author, content, and link to thread
    \`\`\`html
-   <div data-inline-card="message" data-id="MESSAGE_ID"></div>
+   <message-card id="MESSAGE_ID"></message-card>
    \`\`\`
 
 2. **Server Card** - Shows server icon, name, description, and member count
    \`\`\`html
-   <div data-inline-card="server" data-id="SERVER_DISCORD_ID"></div>
+   <server-card id="SERVER_DISCORD_ID"></server-card>
    \`\`\`
 
 3. **Thread Card** - Shows the thread with the question message
    \`\`\`html
-   <div data-inline-card="thread" data-id="MESSAGE_ID"></div>
+   <thread-card id="MESSAGE_ID"></thread-card>
    \`\`\`
 
 ## How to Use Inline Cards
@@ -48,16 +48,16 @@ After searching, you'll get message IDs in the results. Use these to display con
 \`\`\`markdown
 Based on my search, I found a helpful answer from the Effect community:
 
-<div data-inline-card="message" data-id="1234567890123456789"></div>
+<message-card id="1234567890123456789"></message-card>
 
 The key insight here is...
 \`\`\`
 
 **IMPORTANT:**
-- Always use proper closing tags: \`<div ...></div>\` NOT \`<div ... />\` (self-closing divs don't work in HTML)
+- Always use proper closing tags: \`<message-card id="..."></message-card>\` NOT self-closing
 - Use cards sparingly - one or two per response is usually enough
 - Place cards on their own line with blank lines before and after
-- The data-id must be a Discord snowflake ID (the numeric string from search results)
+- The id must be a Discord snowflake ID (the numeric string from search results)
 
 # Guidelines
 
@@ -162,9 +162,9 @@ You have access to:
 2. **AnswerOverflow Search** - Search Discord community discussions about this project
 
 When you find relevant community discussions, you can display them using inline cards:
-- \`<div data-inline-card="message" data-id="..."></div>\` - Show a specific message
-- \`<div data-inline-card="thread" data-id="..."></div>\` - Show a thread card
-- \`<div data-inline-card="server" data-id="..."></div>\` - Display a server card
+- \`<message-card id="..."></message-card>\` - Show a specific message
+- \`<thread-card id="..."></thread-card>\` - Show a thread card
+- \`<server-card id="..."></server-card>\` - Display a server card
 ${fileContextSection}${serverContextSection}
 # Guidelines
 

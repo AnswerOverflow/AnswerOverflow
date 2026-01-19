@@ -25,17 +25,22 @@ import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import { defaultRehypePlugins, Streamdown } from "streamdown";
 import type { PluggableList } from "unified";
 
-const sanitizeSchemaWithDataAttrs = {
+const inlineCardTags = ["message-card", "thread-card", "server-card"] as const;
+
+const sanitizeSchemaWithInlineCards = {
 	...defaultSchema,
+	tagNames: [...(defaultSchema.tagNames ?? []), ...inlineCardTags],
 	attributes: {
 		...defaultSchema.attributes,
-		"*": [...(defaultSchema.attributes?.["*"] || []), "data*"],
+		"message-card": ["id"],
+		"thread-card": ["id"],
+		"server-card": ["id"],
 	},
 };
 
-const rehypePluginsWithDataAttrs: PluggableList = [
+const rehypePluginsWithInlineCards: PluggableList = [
 	defaultRehypePlugins.raw!,
-	[rehypeSanitize, sanitizeSchemaWithDataAttrs],
+	[rehypeSanitize, sanitizeSchemaWithInlineCards],
 	defaultRehypePlugins.harden!,
 ];
 
@@ -330,7 +335,7 @@ export const MessageResponse = memo(
 				className,
 			)}
 			shikiTheme={["github-light", "github-dark"]}
-			rehypePlugins={rehypePlugins ?? rehypePluginsWithDataAttrs}
+			rehypePlugins={rehypePlugins ?? rehypePluginsWithInlineCards}
 			{...props}
 		/>
 	),
