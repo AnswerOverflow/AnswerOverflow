@@ -50,6 +50,7 @@ export async function streamChat(args: {
 		serverId: serverContext?.discordId,
 		includeServerInfo: !serverContext,
 	});
+
 	const model = getModelById(modelId);
 	const modelName = model?.name ?? "Unknown Model";
 	const systemOverride = createRepoInstructions(

@@ -21,7 +21,23 @@ import {
 } from "lucide-react";
 import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
 import { createContext, memo, useContext, useEffect, useState } from "react";
-import { Streamdown } from "streamdown";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import { defaultRehypePlugins, Streamdown } from "streamdown";
+import type { PluggableList } from "unified";
+
+const sanitizeSchemaWithDataAttrs = {
+	...defaultSchema,
+	attributes: {
+		...defaultSchema.attributes,
+		"*": [...(defaultSchema.attributes?.["*"] || []), "data*"],
+	},
+};
+
+const rehypePluginsWithDataAttrs: PluggableList = [
+	defaultRehypePlugins.raw!,
+	[rehypeSanitize, sanitizeSchemaWithDataAttrs],
+	defaultRehypePlugins.harden!,
+];
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
 	from: UIMessage["role"];
@@ -307,13 +323,14 @@ export const MessageBranchPage = ({
 export type MessageResponseProps = ComponentProps<typeof Streamdown>;
 
 export const MessageResponse = memo(
-	({ className, ...props }: MessageResponseProps) => (
+	({ className, rehypePlugins, ...props }: MessageResponseProps) => (
 		<Streamdown
 			className={cn(
 				"size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
 				className,
 			)}
 			shikiTheme={["github-light", "github-dark"]}
+			rehypePlugins={rehypePlugins ?? rehypePluginsWithDataAttrs}
 			{...props}
 		/>
 	),

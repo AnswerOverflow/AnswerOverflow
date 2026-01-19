@@ -99,3 +99,27 @@ export function getDiscordURLForMessage(message: MessageWithServerAndChannel) {
 	const messageId = message.id.toString();
 	return `https://discord.com/channels/${serverId}/${channelId}/${messageId}`;
 }
+
+export function getDiscordServerIconUrl(
+	discordId: bigint,
+	icon: string,
+	size: number = 64,
+) {
+	return `https://cdn.discordapp.com/icons/${discordId}/${icon}.webp?size=${size}`;
+}
+
+export function getDiscordServerBannerUrl(
+	discordId: bigint,
+	banner: string,
+	size: number = 480,
+) {
+	return `https://cdn.discordapp.com/banners/${discordId}/${banner}.webp?size=${size}`;
+}
+
+export function getDiscordAvatarUrl(
+	userId: bigint,
+	avatar: string,
+	size: number = 64,
+) {
+	return `https://cdn.discordapp.com/avatars/${userId}/${avatar}.webp?size=${size}`;
+}

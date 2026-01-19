@@ -1,9 +1,65 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import type { Doc } from "../_generated/dataModel";
 import { threadMessageCounts } from "../private/counts";
-import { enrichMessage, enrichMessages } from "../shared/dataAccess";
+import {
+	enrichMessage,
+	enrichMessages,
+	type QueryCtxWithCache,
+	type SearchResult,
+} from "../shared/dataAccess";
 import { getThreadStartMessage } from "../shared/messages";
 import { publicQuery } from "./custom_functions";
+
+type MessageContext = {
+	targetMessage: Doc<"messages"> | null;
+	thread: Doc<"channels"> | null;
+	rootMessage: Doc<"messages"> | null;
+	channelId: bigint | null;
+	serverId: bigint | null;
+};
+
+async function resolveMessageContext(
+	ctx: QueryCtxWithCache,
+	messageId: bigint,
+): Promise<MessageContext> {
+	const targetMessage = await ctx.cache.getMessage(messageId);
+
+	const thread = await (async () => {
+		if (targetMessage?.parentChannelId) {
+			return ctx.cache.getChannel(targetMessage.channelId);
+		}
+		if (targetMessage?.childThreadId) {
+			return ctx.cache.getChannel(targetMessage.childThreadId);
+		}
+		return ctx.cache.getChannel(messageId);
+	})();
+
+	const rootMessage = await (async () => {
+		if (targetMessage) {
+			return targetMessage;
+		}
+		if (thread?.parentId) {
+			return ctx.cache.getMessage(thread.id);
+		}
+		return getThreadStartMessage(ctx, messageId);
+	})();
+
+	const channelId =
+		thread?.parentId ??
+		rootMessage?.parentChannelId ??
+		rootMessage?.channelId ??
+		null;
+	const serverId = rootMessage?.serverId ?? thread?.serverId ?? null;
+
+	return {
+		targetMessage,
+		thread,
+		rootMessage,
+		channelId,
+		serverId,
+	};
+}
 
 export const getMessages = publicQuery({
 	args: {
@@ -37,36 +93,9 @@ export const getMessagePageHeaderData = publicQuery({
 		messageId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		const targetMessage = await ctx.cache.getMessage(args.messageId);
+		const { thread, rootMessage, channelId, serverId } =
+			await resolveMessageContext(ctx, args.messageId);
 
-		const getThread = async () => {
-			if (targetMessage?.parentChannelId) {
-				return ctx.cache.getChannel(targetMessage.channelId);
-			}
-			if (targetMessage?.childThreadId) {
-				return ctx.cache.getChannel(targetMessage.childThreadId);
-			}
-			return ctx.cache.getChannel(args.messageId);
-		};
-
-		const thread = await getThread();
-
-		const getRootMessage = async () => {
-			if (targetMessage) {
-				return targetMessage;
-			}
-			if (thread?.parentId) {
-				return ctx.cache.getMessage(thread.id);
-			}
-			return getThreadStartMessage(ctx, args.messageId);
-		};
-
-		const rootMessage = await getRootMessage();
-		const channelId =
-			thread?.parentId ??
-			rootMessage?.parentChannelId ??
-			rootMessage?.channelId;
-		const serverId = rootMessage?.serverId ?? thread?.serverId;
 		if (!channelId || !serverId) {
 			return null;
 		}
@@ -137,6 +166,48 @@ export const getMessagePageHeaderData = publicQuery({
 				availableTags: channel.availableTags,
 			},
 			thread,
+		};
+	},
+});
+
+export const getMessageAsSearchResult = publicQuery({
+	args: {
+		messageId: v.int64(),
+	},
+	handler: async (ctx, args): Promise<SearchResult | null> => {
+		const { thread, rootMessage, channelId, serverId } =
+			await resolveMessageContext(ctx, args.messageId);
+
+		if (!channelId || !serverId) {
+			return null;
+		}
+
+		const [channel, server] = await Promise.all([
+			ctx.cache.getChannel(channelId),
+			ctx.cache.getServer(serverId),
+		]);
+
+		if (!channel || !server || server.kickedTime) {
+			return null;
+		}
+
+		const channelSettings = await ctx.cache.getChannelSettings(channelId);
+		if (!channelSettings?.indexingEnabled) {
+			return null;
+		}
+
+		const enrichedMessage = rootMessage
+			? await enrichMessage(ctx, rootMessage)
+			: null;
+		if (!enrichedMessage) {
+			return null;
+		}
+
+		return {
+			message: enrichedMessage,
+			channel,
+			server,
+			thread: thread?.parentId ? thread : null,
 		};
 	},
 });
