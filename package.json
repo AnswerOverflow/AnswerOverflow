@@ -91,7 +91,8 @@
 		"discord-markdown-parser@1.2.0": "patches/discord-markdown-parser@1.2.0.patch",
 		"convex-helpers@0.1.104": "patches/convex-helpers@0.1.104.patch",
 		"@convex-dev/better-auth@0.10.9": "patches/@convex-dev%2Fbetter-auth@0.10.9.patch",
-		"@mintlify/cli@4.0.859": "patches/@mintlify+cli@4.0.859.patch"
+		"@mintlify/cli@4.0.859": "patches/@mintlify+cli@4.0.859.patch",
+		"ai@6.0.39": "patches/ai@6.0.39.patch"
 	},
 	"overrides": {
 		"@modelcontextprotocol/sdk": "1.17.5",

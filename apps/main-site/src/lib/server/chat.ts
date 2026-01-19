@@ -1,5 +1,6 @@
 "use server";
 
+import { stepCountIs } from "@packages/agent";
 import { createHttpContext } from "@packages/agent/http";
 import { createSandboxTools, createVirtualBash } from "@packages/ai/tools";
 import { api } from "@packages/database/convex/_generated/api";
@@ -102,6 +103,7 @@ export async function streamChat(args: {
 					...answerOverflowTools,
 					...sandboxTools,
 				},
+				stopWhen: stepCountIs(150),
 				providerOptions: {
 					gateway: {
 						order: ["cerebras"],

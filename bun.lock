@@ -451,6 +451,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "ai@6.0.39": "patches/ai@6.0.39.patch",
+  },
   "overrides": {
     "@ai-sdk/provider": "3.0.1",
     "@ai-sdk/provider-utils": "4.0.2",

@@ -1,0 +1,196 @@
+diff --git a/dist/index.js b/dist/index.js
+index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c461d98f490 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -5619,12 +5619,27 @@ function runToolsTransformation({
+   const toolCallsByToolCallId = /* @__PURE__ */ new Map();
+   let canClose = false;
+   let finishChunk = void 0;
++  let isClosed = false;
++  function safeEnqueue(value) {
++    if (isClosed) return;
++    try {
++      toolResultsStreamController.enqueue(value);
++    } catch (e) {
++      if (e instanceof TypeError && e.message.includes("Controller is already closed")) {
++        isClosed = true;
++        return;
++      }
++      throw e;
++    }
++  }
+   function attemptClose() {
++    if (isClosed) return;
+     if (canClose && outstandingToolResults.size === 0) {
++      isClosed = true;
+       if (finishChunk != null) {
+-        toolResultsStreamController.enqueue(finishChunk);
++        try { toolResultsStreamController.enqueue(finishChunk); } catch (e) {}
+       }
+-      toolResultsStreamController.close();
++      try { toolResultsStreamController.close(); } catch (e) {}
+     }
+   }
+   const forwardStream = new TransformStream({
+@@ -5671,7 +5686,7 @@ function runToolsTransformation({
+         case "tool-approval-request": {
+           const toolCall = toolCallsByToolCallId.get(chunk.toolCallId);
+           if (toolCall == null) {
+-            toolResultsStreamController.enqueue({
++            safeEnqueue({
+               type: "error",
+               error: new ToolCallNotFoundForApprovalError({
+                 toolCallId: chunk.toolCallId,
+@@ -5699,7 +5714,7 @@ function runToolsTransformation({
+             toolCallsByToolCallId.set(toolCall.toolCallId, toolCall);
+             controller.enqueue(toolCall);
+             if (toolCall.invalid) {
+-              toolResultsStreamController.enqueue({
++              safeEnqueue({
+                 type: "tool-error",
+                 toolCallId: toolCall.toolCallId,
+                 toolName: toolCall.toolName,
+@@ -5729,7 +5744,7 @@ function runToolsTransformation({
+               messages,
+               experimental_context
+             })) {
+-              toolResultsStreamController.enqueue({
++              safeEnqueue({
+                 type: "tool-approval-request",
+                 approvalId: generateId2(),
+                 toolCall
+@@ -5749,29 +5764,30 @@ function runToolsTransformation({
+                 abortSignal,
+                 experimental_context,
+                 onPreliminaryToolResult: (result) => {
+-                  toolResultsStreamController.enqueue(result);
++                  safeEnqueue(result);
+                 }
+               }).then((result) => {
+-                toolResultsStreamController.enqueue(result);
++                safeEnqueue(result);
++                outstandingToolResults.delete(toolExecutionId);
++                attemptClose();
+               }).catch((error) => {
+-                toolResultsStreamController.enqueue({
++                safeEnqueue({
+                   type: "error",
+                   error
+                 });
+-              }).finally(() => {
+                 outstandingToolResults.delete(toolExecutionId);
+                 attemptClose();
+               });
+             }
+           } catch (error) {
+-            toolResultsStreamController.enqueue({ type: "error", error });
++            safeEnqueue({ type: "error", error });
+           }
+           break;
+         }
+         case "tool-result": {
+           const toolName = chunk.toolName;
+           if (chunk.isError) {
+-            toolResultsStreamController.enqueue({
++            safeEnqueue({
+               type: "tool-error",
+               toolCallId: chunk.toolCallId,
+               toolName,
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 1767a643a3818a205227982120d5e40d799f26e0..ca9b617bdddcbcba98948a91a6e0628c2bb92d16 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -5545,12 +5545,27 @@ function runToolsTransformation({
+   const toolCallsByToolCallId = /* @__PURE__ */ new Map();
+   let canClose = false;
+   let finishChunk = void 0;
++  let isClosed = false;
++  function safeEnqueue(value) {
++    if (isClosed) return;
++    try {
++      toolResultsStreamController.enqueue(value);
++    } catch (e) {
++      if (e instanceof TypeError && e.message.includes("Controller is already closed")) {
++        isClosed = true;
++        return;
++      }
++      throw e;
++    }
++  }
+   function attemptClose() {
++    if (isClosed) return;
+     if (canClose && outstandingToolResults.size === 0) {
++      isClosed = true;
+       if (finishChunk != null) {
+-        toolResultsStreamController.enqueue(finishChunk);
++        try { toolResultsStreamController.enqueue(finishChunk); } catch (e) {}
+       }
+-      toolResultsStreamController.close();
++      try { toolResultsStreamController.close(); } catch (e) {}
+     }
+   }
+   const forwardStream = new TransformStream({
+@@ -5597,7 +5612,7 @@ function runToolsTransformation({
+         case "tool-approval-request": {
+           const toolCall = toolCallsByToolCallId.get(chunk.toolCallId);
+           if (toolCall == null) {
+-            toolResultsStreamController.enqueue({
++            safeEnqueue({
+               type: "error",
+               error: new ToolCallNotFoundForApprovalError({
+                 toolCallId: chunk.toolCallId,
+@@ -5625,7 +5640,7 @@ function runToolsTransformation({
+             toolCallsByToolCallId.set(toolCall.toolCallId, toolCall);
+             controller.enqueue(toolCall);
+             if (toolCall.invalid) {
+-              toolResultsStreamController.enqueue({
++              safeEnqueue({
+                 type: "tool-error",
+                 toolCallId: toolCall.toolCallId,
+                 toolName: toolCall.toolName,
+@@ -5655,7 +5670,7 @@ function runToolsTransformation({
+               messages,
+               experimental_context
+             })) {
+-              toolResultsStreamController.enqueue({
++              safeEnqueue({
+                 type: "tool-approval-request",
+                 approvalId: generateId2(),
+                 toolCall
+@@ -5675,29 +5690,30 @@ function runToolsTransformation({
+                 abortSignal,
+                 experimental_context,
+                 onPreliminaryToolResult: (result) => {
+-                  toolResultsStreamController.enqueue(result);
++                  safeEnqueue(result);
+                 }
+               }).then((result) => {
+-                toolResultsStreamController.enqueue(result);
++                safeEnqueue(result);
++                outstandingToolResults.delete(toolExecutionId);
++                attemptClose();
+               }).catch((error) => {
+-                toolResultsStreamController.enqueue({
++                safeEnqueue({
+                   type: "error",
+                   error
+                 });
+-              }).finally(() => {
+                 outstandingToolResults.delete(toolExecutionId);
+                 attemptClose();
+               });
+             }
+           } catch (error) {
+-            toolResultsStreamController.enqueue({ type: "error", error });
++            safeEnqueue({ type: "error", error });
+           }
+           break;
+         }
+         case "tool-result": {
+           const toolName = chunk.toolName;
+           if (chunk.isError) {
+-            toolResultsStreamController.enqueue({
++            safeEnqueue({
+               type: "tool-error",
+               toolCallId: chunk.toolCallId,
+               toolName,
