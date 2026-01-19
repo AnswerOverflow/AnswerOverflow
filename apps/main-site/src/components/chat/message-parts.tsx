@@ -9,21 +9,10 @@ import {
 	MessageContent,
 	MessageResponse,
 } from "@packages/ui/components/ai-elements/message";
-import {
-	Tool,
-	ToolContent,
-	ToolHeader,
-	ToolInput,
-	ToolOutput,
-} from "@packages/ui/components/ai-elements/tool";
-import {
-	type DynamicToolUIPart,
-	getToolName,
-	isToolUIPart,
-	type ToolUIPart,
-} from "ai";
+import { isToolUIPart } from "ai";
 import { Copy as CopyIcon } from "lucide-react";
 import { inlineCardComponents } from "./embeds";
+import { ToolPartDisplay } from "./tool-displays";
 
 export function SmoothMessageResponse({
 	text,
@@ -41,20 +30,6 @@ export function SmoothMessageResponse({
 		<MessageResponse components={inlineCardComponents}>
 			{isStreaming ? smoothText : text}
 		</MessageResponse>
-	);
-}
-
-export function ToolPart({ part }: { part: ToolUIPart | DynamicToolUIPart }) {
-	const toolName = getToolName(part);
-
-	return (
-		<Tool>
-			<ToolHeader title={toolName} type={part.type} state={part.state} />
-			<ToolContent>
-				<ToolInput input={part.input} />
-				<ToolOutput output={part.output} errorText={part.errorText} />
-			</ToolContent>
-		</Tool>
 	);
 }
 
@@ -83,7 +58,7 @@ export function MessageParts({
 				const key = `${message.key}-${i}`;
 
 				if (isToolUIPart(part)) {
-					return <ToolPart key={key} part={part} />;
+					return <ToolPartDisplay key={key} part={part} />;
 				}
 
 				if (part.type === "text") {

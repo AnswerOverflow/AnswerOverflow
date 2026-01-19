@@ -1,12 +1,14 @@
 diff --git a/dist/index.js b/dist/index.js
-index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c461d98f490 100644
+index 17b568d2dccf01138bc158d955009cbaa894158f..c3be94a2e3be69013e2ce5efc57f6cd1b82a97d8 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -5619,12 +5619,27 @@ function runToolsTransformation({
+@@ -5619,12 +5619,29 @@ function runToolsTransformation({
    const toolCallsByToolCallId = /* @__PURE__ */ new Map();
    let canClose = false;
    let finishChunk = void 0;
 +  let isClosed = false;
++  let toolsStarted = 0;
++  let toolsCompleted = 0;
 +  function safeEnqueue(value) {
 +    if (isClosed) return;
 +    try {
@@ -20,8 +22,9 @@ index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c46
 +    }
 +  }
    function attemptClose() {
+-    if (canClose && outstandingToolResults.size === 0) {
 +    if (isClosed) return;
-     if (canClose && outstandingToolResults.size === 0) {
++    if (canClose && toolsStarted === toolsCompleted) {
 +      isClosed = true;
        if (finishChunk != null) {
 -        toolResultsStreamController.enqueue(finishChunk);
@@ -32,7 +35,7 @@ index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c46
      }
    }
    const forwardStream = new TransformStream({
-@@ -5671,7 +5686,7 @@ function runToolsTransformation({
+@@ -5671,7 +5688,7 @@ function runToolsTransformation({
          case "tool-approval-request": {
            const toolCall = toolCallsByToolCallId.get(chunk.toolCallId);
            if (toolCall == null) {
@@ -41,7 +44,7 @@ index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c46
                type: "error",
                error: new ToolCallNotFoundForApprovalError({
                  toolCallId: chunk.toolCallId,
-@@ -5699,7 +5714,7 @@ function runToolsTransformation({
+@@ -5699,7 +5716,7 @@ function runToolsTransformation({
              toolCallsByToolCallId.set(toolCall.toolCallId, toolCall);
              controller.enqueue(toolCall);
              if (toolCall.invalid) {
@@ -50,7 +53,7 @@ index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c46
                  type: "tool-error",
                  toolCallId: toolCall.toolCallId,
                  toolName: toolCall.toolName,
-@@ -5729,7 +5744,7 @@ function runToolsTransformation({
+@@ -5729,7 +5746,7 @@ function runToolsTransformation({
                messages,
                experimental_context
              })) {
@@ -59,7 +62,17 @@ index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c46
                  type: "tool-approval-request",
                  approvalId: generateId2(),
                  toolCall
-@@ -5749,29 +5764,30 @@ function runToolsTransformation({
+@@ -5738,8 +5755,7 @@ function runToolsTransformation({
+             }
+             toolInputs.set(toolCall.toolCallId, toolCall.input);
+             if (tool2.execute != null && toolCall.providerExecuted !== true) {
+-              const toolExecutionId = generateId2();
+-              outstandingToolResults.add(toolExecutionId);
++              toolsStarted++;
+               executeToolCall({
+                 toolCall,
+                 tools,
+@@ -5749,29 +5765,30 @@ function runToolsTransformation({
                  abortSignal,
                  experimental_context,
                  onPreliminaryToolResult: (result) => {
@@ -69,7 +82,7 @@ index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c46
                }).then((result) => {
 -                toolResultsStreamController.enqueue(result);
 +                safeEnqueue(result);
-+                outstandingToolResults.delete(toolExecutionId);
++                toolsCompleted++;
 +                attemptClose();
                }).catch((error) => {
 -                toolResultsStreamController.enqueue({
@@ -78,7 +91,8 @@ index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c46
                    error
                  });
 -              }).finally(() => {
-                 outstandingToolResults.delete(toolExecutionId);
+-                outstandingToolResults.delete(toolExecutionId);
++                toolsCompleted++;
                  attemptClose();
                });
              }
@@ -97,14 +111,16 @@ index 17b568d2dccf01138bc158d955009cbaa894158f..df698b883ecaccdad7d3f5fb92354c46
                toolCallId: chunk.toolCallId,
                toolName,
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 1767a643a3818a205227982120d5e40d799f26e0..ca9b617bdddcbcba98948a91a6e0628c2bb92d16 100644
+index 1767a643a3818a205227982120d5e40d799f26e0..d53fb91d34bf535ec0fca93caa7f77595e51cc47 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -5545,12 +5545,27 @@ function runToolsTransformation({
+@@ -5545,12 +5545,29 @@ function runToolsTransformation({
    const toolCallsByToolCallId = /* @__PURE__ */ new Map();
    let canClose = false;
    let finishChunk = void 0;
 +  let isClosed = false;
++  let toolsStarted = 0;
++  let toolsCompleted = 0;
 +  function safeEnqueue(value) {
 +    if (isClosed) return;
 +    try {
@@ -118,8 +134,9 @@ index 1767a643a3818a205227982120d5e40d799f26e0..ca9b617bdddcbcba98948a91a6e0628c
 +    }
 +  }
    function attemptClose() {
+-    if (canClose && outstandingToolResults.size === 0) {
 +    if (isClosed) return;
-     if (canClose && outstandingToolResults.size === 0) {
++    if (canClose && toolsStarted === toolsCompleted) {
 +      isClosed = true;
        if (finishChunk != null) {
 -        toolResultsStreamController.enqueue(finishChunk);
@@ -130,7 +147,7 @@ index 1767a643a3818a205227982120d5e40d799f26e0..ca9b617bdddcbcba98948a91a6e0628c
      }
    }
    const forwardStream = new TransformStream({
-@@ -5597,7 +5612,7 @@ function runToolsTransformation({
+@@ -5597,7 +5614,7 @@ function runToolsTransformation({
          case "tool-approval-request": {
            const toolCall = toolCallsByToolCallId.get(chunk.toolCallId);
            if (toolCall == null) {
@@ -139,7 +156,7 @@ index 1767a643a3818a205227982120d5e40d799f26e0..ca9b617bdddcbcba98948a91a6e0628c
                type: "error",
                error: new ToolCallNotFoundForApprovalError({
                  toolCallId: chunk.toolCallId,
-@@ -5625,7 +5640,7 @@ function runToolsTransformation({
+@@ -5625,7 +5642,7 @@ function runToolsTransformation({
              toolCallsByToolCallId.set(toolCall.toolCallId, toolCall);
              controller.enqueue(toolCall);
              if (toolCall.invalid) {
@@ -148,7 +165,7 @@ index 1767a643a3818a205227982120d5e40d799f26e0..ca9b617bdddcbcba98948a91a6e0628c
                  type: "tool-error",
                  toolCallId: toolCall.toolCallId,
                  toolName: toolCall.toolName,
-@@ -5655,7 +5670,7 @@ function runToolsTransformation({
+@@ -5655,7 +5672,7 @@ function runToolsTransformation({
                messages,
                experimental_context
              })) {
@@ -157,7 +174,17 @@ index 1767a643a3818a205227982120d5e40d799f26e0..ca9b617bdddcbcba98948a91a6e0628c
                  type: "tool-approval-request",
                  approvalId: generateId2(),
                  toolCall
-@@ -5675,29 +5690,30 @@ function runToolsTransformation({
+@@ -5664,8 +5681,7 @@ function runToolsTransformation({
+             }
+             toolInputs.set(toolCall.toolCallId, toolCall.input);
+             if (tool2.execute != null && toolCall.providerExecuted !== true) {
+-              const toolExecutionId = generateId2();
+-              outstandingToolResults.add(toolExecutionId);
++              toolsStarted++;
+               executeToolCall({
+                 toolCall,
+                 tools,
+@@ -5675,29 +5691,30 @@ function runToolsTransformation({
                  abortSignal,
                  experimental_context,
                  onPreliminaryToolResult: (result) => {
@@ -167,7 +194,7 @@ index 1767a643a3818a205227982120d5e40d799f26e0..ca9b617bdddcbcba98948a91a6e0628c
                }).then((result) => {
 -                toolResultsStreamController.enqueue(result);
 +                safeEnqueue(result);
-+                outstandingToolResults.delete(toolExecutionId);
++                toolsCompleted++;
 +                attemptClose();
                }).catch((error) => {
 -                toolResultsStreamController.enqueue({
@@ -176,7 +203,8 @@ index 1767a643a3818a205227982120d5e40d799f26e0..ca9b617bdddcbcba98948a91a6e0628c
                    error
                  });
 -              }).finally(() => {
-                 outstandingToolResults.delete(toolExecutionId);
+-                outstandingToolResults.delete(toolExecutionId);
++                toolsCompleted++;
                  attemptClose();
                });
              }
