@@ -36,7 +36,7 @@ export function ChatMessages({
 		chat.agentStatus === "cloning_repo" ||
 		(chat.agentStatus === "responding" && !lastAssistantHasText) ||
 		showOptimisticMessage ||
-		(lastMessageIsUser && chat.agentStatus !== "idle");
+		lastMessageIsUser;
 
 	return (
 		<Conversation instance={chat.stickToBottom} className="h-full">
