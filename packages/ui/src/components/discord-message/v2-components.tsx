@@ -34,7 +34,7 @@ function Separator({
 }) {
 	const spacingClass = spacing === 1 ? "my-2" : spacing === 2 ? "my-4" : "my-3";
 	if (divider) {
-		return <hr className={`border-neutral-700/50 ${spacingClass}`} />;
+		return <hr className={`border-border ${spacingClass}`} />;
 	}
 	return <div className={spacingClass} />;
 }
@@ -74,13 +74,13 @@ function ButtonComponent({
 		[ButtonStyle.Primary]:
 			"bg-[#5865F2] text-white hover:bg-[#4752C4] disabled:opacity-50",
 		[ButtonStyle.Secondary]:
-			"bg-neutral-600 text-white hover:bg-neutral-500 disabled:opacity-50",
+			"bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50",
 		[ButtonStyle.Success]:
 			"bg-[#57F287] text-black hover:bg-[#3BA55C] disabled:opacity-50",
 		[ButtonStyle.Danger]:
 			"bg-[#ED4245] text-white hover:bg-[#C03537] disabled:opacity-50",
 		[ButtonStyle.Link]:
-			"bg-neutral-600 text-white hover:bg-neutral-500 disabled:opacity-50",
+			"bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50",
 	};
 
 	const className = `${baseClasses} ${styleClasses[style] ?? styleClasses[ButtonStyle.Secondary]}`;
@@ -205,11 +205,11 @@ function FileComponent({ file }: { file: { url: string }; spoiler?: boolean }) {
 			href={file.url}
 			target="_blank"
 			rel="noopener noreferrer"
-			className="flex items-center gap-3 rounded bg-neutral-800/50 p-3 transition-colors hover:bg-neutral-700/50"
+			className="flex items-center gap-3 rounded bg-secondary/50 p-3 transition-colors hover:bg-secondary/80"
 		>
-			<File className="size-8 text-neutral-400" />
+			<File className="size-8 text-muted-foreground" />
 			<div className="min-w-0 flex-1">
-				<p className="truncate text-sm text-blue-400 hover:underline">
+				<p className="truncate text-sm text-primary hover:underline">
 					{filename}
 				</p>
 			</div>
@@ -240,7 +240,7 @@ function ActionRow({ components }: { components: ActionRowItem[] }) {
 						<select
 							key={idx}
 							disabled={comp.disabled}
-							className="rounded bg-neutral-700 px-3 py-1.5 text-sm text-white"
+							className="rounded bg-secondary px-3 py-1.5 text-sm text-foreground"
 						>
 							<option>{comp.placeholder ?? "Select..."}</option>
 						</select>
@@ -283,7 +283,7 @@ function Container({
 }) {
 	return (
 		<div
-			className="rounded-lg border-l-4 bg-neutral-900/50 p-4"
+			className="rounded-lg border-l-4 bg-secondary/30 p-4"
 			style={{
 				borderLeftColor: accentColor ? numberToHex(accentColor) : "#5865F2",
 			}}
