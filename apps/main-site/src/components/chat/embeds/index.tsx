@@ -38,7 +38,7 @@ class InlineCardErrorBoundary extends Component<
 	render() {
 		if (this.state.hasError) {
 			return (
-				<span className="block rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+				<span className="block w-full rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
 					Failed to load {this.props.cardType} (ID: {this.props.id})
 					{this.state.error && (
 						<span className="mt-1 block text-xs opacity-75">
@@ -57,7 +57,7 @@ function MessageCard({ id: rawId }: CardProps) {
 	const id = parseId(rawId);
 	if (!id) {
 		return (
-			<span className="block rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+			<span className="block w-full rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
 				Missing message ID
 			</span>
 		);
@@ -74,7 +74,7 @@ function ThreadCard({ id: rawId }: CardProps) {
 	const id = parseId(rawId);
 	if (!id) {
 		return (
-			<span className="block rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+			<span className="block w-full rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
 				Missing thread ID
 			</span>
 		);
@@ -91,7 +91,7 @@ function ServerCard({ id: rawId }: CardProps) {
 	const id = parseId(rawId);
 	if (!id) {
 		return (
-			<span className="block rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+			<span className="block w-full rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
 				Missing server ID
 			</span>
 		);

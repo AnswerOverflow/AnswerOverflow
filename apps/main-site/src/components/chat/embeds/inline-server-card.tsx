@@ -30,7 +30,7 @@ export function InlineServerCard({ id }: InlineServerCardProps) {
 
 	if (!discordId) {
 		return (
-			<span className="block rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+			<span className="block w-full rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
 				Invalid server ID
 			</span>
 		);
@@ -38,7 +38,7 @@ export function InlineServerCard({ id }: InlineServerCardProps) {
 
 	if (serverData === undefined) {
 		return (
-			<span className="block">
+			<span className="block w-full">
 				<ServerCardSkeleton />
 			</span>
 		);
@@ -46,14 +46,14 @@ export function InlineServerCard({ id }: InlineServerCardProps) {
 
 	if (serverData === null) {
 		return (
-			<span className="block rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+			<span className="block w-full rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
 				Server not found or is not indexed on Answer Overflow
 			</span>
 		);
 	}
 
 	return (
-		<span className="my-3 block">
+		<span className="my-3 block w-full">
 			<ServerCard server={serverData.server} />
 		</span>
 	);

@@ -75,6 +75,11 @@ export function useChatState({
 		{ initialNumItems: 50, stream: true },
 	);
 
+	const effectiveOptimisticMessage =
+		optimisticUserMessage && messages.length === 0
+			? optimisticUserMessage
+			: null;
+
 	const sendMessage = useMutation(
 		api.chat.mutations.sendMessage,
 	).withOptimisticUpdate((store, args) => {
@@ -155,7 +160,7 @@ export function useChatState({
 			? `Ask about ${effectiveServerContext.name}...`
 			: "Send a message...";
 
-	const hasMessages = messages.length > 0 || optimisticUserMessage;
+	const hasMessages = messages.length > 0 || effectiveOptimisticMessage;
 	const showEmptyState = !currentThreadId && !hasMessages;
 
 	const handleSignIn = async () => {
@@ -208,7 +213,6 @@ export function useChatState({
 
 		if (isNewThread && threadId) {
 			setCurrentThreadId(threadId);
-			setOptimisticUserMessage(null);
 			window.history.pushState(null, "", `/chat/t/${threadId}`);
 		}
 
@@ -269,7 +273,7 @@ export function useChatState({
 		modelOverride,
 		setModelOverride,
 		currentThreadId,
-		optimisticUserMessage,
+		optimisticUserMessage: effectiveOptimisticMessage,
 
 		messages,
 		threadMetadata,

@@ -175,7 +175,7 @@ export const getMessageAsSearchResult = publicQuery({
 		messageId: v.int64(),
 	},
 	handler: async (ctx, args): Promise<SearchResult | null> => {
-		const { thread, rootMessage, channelId, serverId } =
+		const { thread, targetMessage, rootMessage, channelId, serverId } =
 			await resolveMessageContext(ctx, args.messageId);
 
 		if (!channelId || !serverId) {
@@ -196,8 +196,9 @@ export const getMessageAsSearchResult = publicQuery({
 			return null;
 		}
 
-		const enrichedMessage = rootMessage
-			? await enrichMessage(ctx, rootMessage)
+		const messageToEnrich = targetMessage ?? rootMessage;
+		const enrichedMessage = messageToEnrich
+			? await enrichMessage(ctx, messageToEnrich)
 			: null;
 		if (!enrichedMessage) {
 			return null;

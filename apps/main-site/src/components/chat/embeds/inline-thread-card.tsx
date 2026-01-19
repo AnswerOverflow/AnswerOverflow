@@ -34,7 +34,7 @@ export function InlineThreadCard({
 
 	if (!messageId) {
 		return (
-			<span className="block rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+			<span className="block w-full rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
 				Invalid message ID
 			</span>
 		);
@@ -42,7 +42,7 @@ export function InlineThreadCard({
 
 	if (result === undefined) {
 		return (
-			<span className="block">
+			<span className="block w-full">
 				<ThreadCardSkeleton />
 			</span>
 		);
@@ -50,14 +50,14 @@ export function InlineThreadCard({
 
 	if (result === null) {
 		return (
-			<span className="block rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+			<span className="block w-full rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
 				{notFoundMessage}
 			</span>
 		);
 	}
 
 	return (
-		<span className="my-3 block">
+		<span className="my-3 block w-full">
 			<ThreadCard result={result} />
 		</span>
 	);
