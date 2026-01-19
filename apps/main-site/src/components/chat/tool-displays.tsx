@@ -77,7 +77,7 @@ const tools: Record<string, ToolConfig> = {
 		SearchIcon,
 		(i) =>
 			i.query
-				? `Searching: "${i.query}"${i.serverId ? " in server" : ""}`
+				? `Searching: "${truncate(i.query, 50)}"${i.serverId ? " in server" : ""}`
 				: "Searching...",
 		(o) => plural(o.results.length, "result"),
 	),
@@ -88,15 +88,15 @@ const tools: Record<string, ToolConfig> = {
 	),
 	get_thread_messages: objectTool<Output<"get_thread_messages">>(
 		MessageSquareIcon,
-		(i) =>
-			i.threadId
-				? `Loading thread ${i.threadId.slice(-6)}...`
-				: "Loading thread...",
+		(i) => (i.title ? `Reading thread "${i.title}"` : "Reading thread..."),
 		(o) => ("error" in o ? null : plural(o.messages.length, "message")),
 	),
 	find_similar_threads: objectTool<Output<"find_similar_threads">>(
 		FileSearchIcon,
-		(i) => (i.query ? `Finding similar: "${i.query}"` : "Finding similar..."),
+		(i) =>
+			i.query
+				? `Finding similar: "${truncate(i.query, 50)}"`
+				: "Finding similar...",
 		(o) => plural(o.threads.length, "thread"),
 	),
 	read: stringTool(
