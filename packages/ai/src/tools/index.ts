@@ -10,6 +10,12 @@ export {
 } from "../sandbox/virtual-bash";
 export {
 	createSandboxTools,
+	type SandboxBashInput,
+	type SandboxEditInput,
+	type SandboxGlobInput,
+	type SandboxGrepInput,
+	type SandboxReadInput,
 	type SandboxTools,
 	type SandboxToolsOptions,
+	type SandboxWriteInput,
 } from "./sandbox-tools";

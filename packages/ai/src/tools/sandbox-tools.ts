@@ -1,4 +1,4 @@
-import { tool } from "ai";
+import { type InferToolInput, tool } from "ai";
 import { z } from "zod";
 import type { VirtualBash } from "../sandbox/virtual-bash";
 
@@ -33,18 +33,6 @@ const DEFAULT_READ_LIMIT = 2000;
 const MAX_LINE_LENGTH = 2000;
 
 function createSandboxReadTool(virtualBash: VirtualBash, workdir: string) {
-	const readInputSchema = z.object({
-		filePath: z.string().describe("The path to the file to read"),
-		offset: z
-			.number()
-			.optional()
-			.describe("The line number to start reading from (0-based)"),
-		limit: z
-			.number()
-			.optional()
-			.describe("The number of lines to read (defaults to 2000)"),
-	});
-
 	return tool({
 		type: "function",
 		description: `Reads a file from the virtual filesystem.
@@ -56,7 +44,17 @@ Usage:
 - Any lines longer than 2000 characters will be truncated
 - Results are returned using cat -n format, with line numbers starting at 1
 - This operates on an IN-MEMORY virtual filesystem, not the real disk.`,
-		inputSchema: readInputSchema,
+		inputSchema: z.object({
+			filePath: z.string().describe("The path to the file to read"),
+			offset: z
+				.number()
+				.optional()
+				.describe("The line number to start reading from (0-based)"),
+			limit: z
+				.number()
+				.optional()
+				.describe("The number of lines to read (defaults to 2000)"),
+		}),
 		execute: async (input) => {
 			const filepath = input.filePath.startsWith("/")
 				? input.filePath
@@ -110,16 +108,6 @@ Usage:
 }
 
 function createSandboxGlobTool(virtualBash: VirtualBash, workdir: string) {
-	const globInputSchema = z.object({
-		pattern: z.string().describe("The glob pattern to match files against"),
-		path: z
-			.string()
-			.optional()
-			.describe(
-				`The directory to search in. Defaults to ${workdir}. Must be a valid directory path if provided.`,
-			),
-	});
-
 	return tool({
 		type: "function",
 		description: `Fast file pattern matching tool for the virtual filesystem.
@@ -127,7 +115,10 @@ function createSandboxGlobTool(virtualBash: VirtualBash, workdir: string) {
 - Returns matching file paths
 - Use this tool when you need to find files by name patterns
 - This operates on an IN-MEMORY virtual filesystem, not the real disk.`,
-		inputSchema: globInputSchema,
+		inputSchema: z.object({
+			pattern: z.string().describe("The glob pattern to match files against"),
+			path: z.string().optional().describe("The directory to search in."),
+		}),
 		execute: async (input) => {
 			const searchPath = input.path ?? workdir;
 			const pattern = input.pattern;
@@ -173,20 +164,6 @@ function createSandboxGlobTool(virtualBash: VirtualBash, workdir: string) {
 }
 
 function createSandboxGrepTool(virtualBash: VirtualBash, workdir: string) {
-	const grepInputSchema = z.object({
-		pattern: z
-			.string()
-			.describe("The regex pattern to search for in file contents"),
-		path: z
-			.string()
-			.optional()
-			.describe(`The directory to search in. Defaults to ${workdir}.`),
-		include: z
-			.string()
-			.optional()
-			.describe('File pattern to include in the search (e.g. "*.js", "*.ts")'),
-	});
-
 	return tool({
 		type: "function",
 		description: `Fast content search tool for the virtual filesystem.
@@ -195,7 +172,18 @@ function createSandboxGrepTool(virtualBash: VirtualBash, workdir: string) {
 - Filter files by pattern with the include parameter
 - Returns file paths and line numbers with matches
 - This operates on an IN-MEMORY virtual filesystem, not the real disk.`,
-		inputSchema: grepInputSchema,
+		inputSchema: z.object({
+			pattern: z
+				.string()
+				.describe("The regex pattern to search for in file contents"),
+			path: z.string().optional().describe("The directory to search in."),
+			include: z
+				.string()
+				.optional()
+				.describe(
+					'File pattern to include in the search (e.g. "*.js", "*.ts")',
+				),
+		}),
 		execute: async (input) => {
 			if (!input.pattern) {
 				return "pattern is required";
@@ -258,11 +246,6 @@ function createSandboxGrepTool(virtualBash: VirtualBash, workdir: string) {
 }
 
 function createSandboxWriteTool(virtualBash: VirtualBash, workdir: string) {
-	const writeInputSchema = z.object({
-		content: z.string().describe("The content to write to the file"),
-		filePath: z.string().describe("The path to the file to write"),
-	});
-
 	return tool({
 		type: "function",
 		description: `Writes a file to the virtual filesystem.
@@ -271,7 +254,10 @@ Usage:
 - This tool will overwrite the existing file if there is one at the provided path.
 - If this is an existing file, you should use the Read tool first to read the file's contents.
 - This operates on an IN-MEMORY virtual filesystem, not the real disk.`,
-		inputSchema: writeInputSchema,
+		inputSchema: z.object({
+			content: z.string().describe("The content to write to the file"),
+			filePath: z.string().describe("The path to the file to write"),
+		}),
 		execute: async (input) => {
 			const filepath = input.filePath.startsWith("/")
 				? input.filePath
@@ -300,20 +286,6 @@ Usage:
 }
 
 function createSandboxEditTool(virtualBash: VirtualBash, workdir: string) {
-	const editInputSchema = z.object({
-		filePath: z.string().describe("The path to the file to modify"),
-		oldString: z.string().describe("The text to replace"),
-		newString: z
-			.string()
-			.describe(
-				"The text to replace it with (must be different from oldString)",
-			),
-		replaceAll: z
-			.boolean()
-			.optional()
-			.describe("Replace all occurrences of oldString (default false)"),
-	});
-
 	return tool({
 		type: "function",
 		description: `Performs string replacements in files on the virtual filesystem.
@@ -323,7 +295,19 @@ Usage:
 - The edit will FAIL if oldString is not found in the file.
 - Use replaceAll to replace all occurrences of oldString.
 - This operates on an IN-MEMORY virtual filesystem, not the real disk.`,
-		inputSchema: editInputSchema,
+		inputSchema: z.object({
+			filePath: z.string().describe("The path to the file to modify"),
+			oldString: z.string().describe("The text to replace"),
+			newString: z
+				.string()
+				.describe(
+					"The text to replace it with (must be different from oldString)",
+				),
+			replaceAll: z
+				.boolean()
+				.optional()
+				.describe("Replace all occurrences of oldString (default false)"),
+		}),
 		execute: async (input) => {
 			if (input.oldString === input.newString) {
 				return "oldString and newString must be different";
@@ -380,18 +364,8 @@ Usage:
 }
 
 const MAX_OUTPUT_LENGTH = 30_000;
-const _DEFAULT_TIMEOUT = 2 * 60 * 1000;
 
 function createSandboxBashTool(virtualBash: VirtualBash, workdir: string) {
-	const bashInputSchema = z.object({
-		command: z.string().describe("The command to execute"),
-		description: z
-			.string()
-			.describe(
-				"Clear, concise description of what this command does in 5-10 words.",
-			),
-	});
-
 	return tool({
 		type: "function",
 		description: `Executes commands in the sandboxed bash environment with a virtual filesystem.
@@ -410,7 +384,14 @@ Examples:
 - find . -name "*.ts"
 - grep -r "function" src/
 - git clone https://github.com/user/repo /repo`,
-		inputSchema: bashInputSchema,
+		inputSchema: z.object({
+			command: z.string().describe("The command to execute"),
+			description: z
+				.string()
+				.describe(
+					"Clear, concise description of what this command does in 5-10 words.",
+				),
+		}),
 		execute: async (input) => {
 			const fullCommand = `cd "${workdir}" && ${input.command}`;
 			const result = await virtualBash.exec(fullCommand);
@@ -434,3 +415,17 @@ Examples:
 		},
 	});
 }
+
+export type SandboxReadTool = ReturnType<typeof createSandboxReadTool>;
+export type SandboxGlobTool = ReturnType<typeof createSandboxGlobTool>;
+export type SandboxGrepTool = ReturnType<typeof createSandboxGrepTool>;
+export type SandboxWriteTool = ReturnType<typeof createSandboxWriteTool>;
+export type SandboxEditTool = ReturnType<typeof createSandboxEditTool>;
+export type SandboxBashTool = ReturnType<typeof createSandboxBashTool>;
+
+export type SandboxReadInput = InferToolInput<SandboxReadTool>;
+export type SandboxGlobInput = InferToolInput<SandboxGlobTool>;
+export type SandboxGrepInput = InferToolInput<SandboxGrepTool>;
+export type SandboxWriteInput = InferToolInput<SandboxWriteTool>;
+export type SandboxEditInput = InferToolInput<SandboxEditTool>;
+export type SandboxBashInput = InferToolInput<SandboxBashTool>;

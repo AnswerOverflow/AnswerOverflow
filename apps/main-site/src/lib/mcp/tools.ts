@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { Database } from "@packages/database/database";
-import { tool } from "ai";
+import { type InferToolInput, type InferToolOutput, tool } from "ai";
 import { Effect } from "effect";
 import { z } from "zod";
 import { runtime } from "@/lib/runtime";
@@ -116,7 +116,7 @@ export type SearchParams = {
 	limit?: number;
 };
 
-export async function searchAnswerOverflow(
+export async function searchAnswerOverflowCore(
 	params: SearchParams,
 	buildUrl: UrlBuilder,
 	includeServerInfo: boolean,
@@ -148,14 +148,23 @@ export async function searchAnswerOverflow(
 		includeServerInfo,
 	);
 
-	const resultsCount = results.page.length;
-	const hasNoResults = resultsCount === 0;
-
-	const response = {
+	return {
 		results: results.page.map(toEnhancedSearchResult),
 		hasMore: !results.isDone,
-		totalReturned: resultsCount,
+		totalReturned: results.page.length,
 	};
+}
+
+export async function searchAnswerOverflow(
+	params: SearchParams,
+	buildUrl: UrlBuilder,
+	includeServerInfo: boolean,
+) {
+	const response = await searchAnswerOverflowCore(
+		params,
+		buildUrl,
+		includeServerInfo,
+	);
 
 	const content: Array<{ type: "text"; text: string }> = [
 		{
@@ -164,7 +173,7 @@ export async function searchAnswerOverflow(
 		},
 	];
 
-	if (hasNoResults) {
+	if (response.totalReturned === 0) {
 		content.push({
 			type: "text" as const,
 			text: `No results found. 
@@ -178,7 +187,7 @@ export async function searchAnswerOverflow(
 	return { content };
 }
 
-export async function searchServers(params: {
+export async function searchServersCore(params: {
 	query?: string;
 	limit?: number;
 }) {
@@ -205,25 +214,29 @@ export async function searchServers(params: {
 	).pipe(runtime.runPromise);
 
 	return {
+		servers: servers.map((s) => ({
+			id: s.discordId.toString(),
+			name: s.name,
+			description: s.description,
+			memberCount: s.approximateMemberCount,
+			icon: s.icon
+				? `https://cdn.discordapp.com/icons/${s.discordId}/${s.icon}.png`
+				: null,
+		})),
+		totalReturned: servers.length,
+	};
+}
+
+export async function searchServers(params: {
+	query?: string;
+	limit?: number;
+}) {
+	const response = await searchServersCore(params);
+	return {
 		content: [
 			{
 				type: "text" as const,
-				text: JSON.stringify(
-					{
-						servers: servers.map((s) => ({
-							id: s.discordId,
-							name: s.name,
-							description: s.description,
-							memberCount: s.approximateMemberCount,
-							icon: s.icon
-								? `https://cdn.discordapp.com/icons/${s.discordId}/${s.icon}.png`
-								: null,
-						})),
-						totalReturned: servers.length,
-					},
-					null,
-					2,
-				),
+				text: JSON.stringify(response, null, 2),
 			},
 		],
 	};
@@ -235,7 +248,7 @@ export type GetThreadMessagesParams = {
 	serverId?: string;
 };
 
-export async function getThreadMessages(
+export async function getThreadMessagesCore(
 	params: GetThreadMessagesParams,
 	buildUrl: UrlBuilder,
 	includeServerId: boolean,
@@ -284,14 +297,7 @@ export async function getThreadMessages(
 	).pipe(runtime.runPromise);
 
 	if (!result) {
-		return {
-			content: [
-				{
-					type: "text" as const,
-					text: JSON.stringify({ error: "Thread not found", threadId }),
-				},
-			],
-		};
+		return { error: "Thread not found" as const, threadId };
 	}
 
 	const firstMessage = result.headerData.firstMessage;
@@ -312,7 +318,7 @@ export async function getThreadMessages(
 			}
 		: { name: result.headerData.server.name };
 
-	const response = {
+	return {
 		threadId: (
 			result.headerData.threadId ?? result.headerData.canonicalId
 		).toString(),
@@ -323,7 +329,18 @@ export async function getThreadMessages(
 		totalMessages: allMessages.length,
 		hasMore: result.hasMore,
 	};
+}
 
+export async function getThreadMessages(
+	params: GetThreadMessagesParams,
+	buildUrl: UrlBuilder,
+	includeServerId: boolean,
+) {
+	const response = await getThreadMessagesCore(
+		params,
+		buildUrl,
+		includeServerId,
+	);
 	return {
 		content: [
 			{
@@ -340,7 +357,7 @@ export type FindSimilarThreadsParams = {
 	limit?: number;
 };
 
-export async function findSimilarThreads(
+export async function findSimilarThreadsCore(
 	params: FindSimilarThreadsParams,
 	buildUrl: UrlBuilder,
 	includeServerName: boolean,
@@ -366,38 +383,45 @@ export async function findSimilarThreads(
 	).pipe(runtime.runPromise);
 
 	return {
+		threads: results.map((r) => {
+			const base = {
+				threadId: (r.thread?.id ?? r.message.message.id).toString(),
+				title: r.thread?.name ?? null,
+				content:
+					r.message.message.content.slice(0, 300) +
+					(r.message.message.content.length > 300 ? "..." : ""),
+				author: r.message.author?.name ?? null,
+				timestamp: snowflakeToTimestamp(r.message.message.id).toISOString(),
+				hasSolution: r.message.solutions.length > 0,
+				channelName: r.channel.name,
+				url: buildUrl(`/m/${r.thread?.id ?? r.message.message.id}`),
+			};
+
+			if (includeServerName) {
+				return { ...base, serverName: r.server.name };
+			}
+
+			return base;
+		}),
+		totalReturned: results.length,
+	};
+}
+
+export async function findSimilarThreads(
+	params: FindSimilarThreadsParams,
+	buildUrl: UrlBuilder,
+	includeServerName: boolean,
+) {
+	const response = await findSimilarThreadsCore(
+		params,
+		buildUrl,
+		includeServerName,
+	);
+	return {
 		content: [
 			{
 				type: "text" as const,
-				text: JSON.stringify(
-					{
-						threads: results.map((r) => {
-							const base = {
-								threadId: (r.thread?.id ?? r.message.message.id).toString(),
-								title: r.thread?.name ?? null,
-								content:
-									r.message.message.content.slice(0, 300) +
-									(r.message.message.content.length > 300 ? "..." : ""),
-								author: r.message.author?.name ?? null,
-								timestamp: snowflakeToTimestamp(
-									r.message.message.id,
-								).toISOString(),
-								hasSolution: r.message.solutions.length > 0,
-								channelName: r.channel.name,
-								url: buildUrl(`/m/${r.thread?.id ?? r.message.message.id}`),
-							};
-
-							if (includeServerName) {
-								return { ...base, serverName: r.server.name };
-							}
-
-							return base;
-						}),
-						totalReturned: results.length,
-					},
-					null,
-					2,
-				),
+				text: JSON.stringify(response, null, 2),
 			},
 		],
 	};
@@ -512,79 +536,6 @@ export function registerFindSimilarThreadsTool(
 	}
 }
 
-const searchAnswerOverflowSchema = z.object({
-	query: z
-		.string()
-		.describe(
-			"The search query - can be error messages, function names, concepts, etc.",
-		),
-	serverId: z
-		.string()
-		.optional()
-		.describe(
-			"Filter results to a specific Discord server. Use search_servers to find server IDs.",
-		),
-	limit: z
-		.number()
-		.min(1)
-		.max(25)
-		.default(10)
-		.optional()
-		.describe("Maximum number of results to return (1-25, default 10)"),
-});
-
-const searchServersSchema = z.object({
-	query: z
-		.string()
-		.optional()
-		.describe(
-			"Search query to filter servers by name. Leave empty to list all servers.",
-		),
-	limit: z
-		.number()
-		.min(1)
-		.max(100)
-		.default(25)
-		.optional()
-		.describe("Maximum number of servers to return (1-100, default 25)"),
-});
-
-const getThreadMessagesSchema = z.object({
-	threadId: z
-		.string()
-		.describe("The thread ID (which is also the channel ID for the thread)"),
-	limit: z
-		.number()
-		.min(1)
-		.max(100)
-		.default(50)
-		.optional()
-		.describe("Maximum number of messages to return (1-100, default 50)"),
-});
-
-const findSimilarThreadsWithServerIdSchema = z.object({
-	query: z.string().describe("The search query to find similar threads for"),
-	limit: z
-		.number()
-		.min(1)
-		.max(10)
-		.default(5)
-		.optional()
-		.describe("Maximum number of similar threads to return (1-10, default 5)"),
-});
-
-const findSimilarThreadsWithoutServerIdSchema = z.object({
-	query: z.string().describe("The search query to find similar threads for"),
-	serverId: z.string().describe("The server ID to search within"),
-	limit: z
-		.number()
-		.min(1)
-		.max(10)
-		.default(5)
-		.optional()
-		.describe("Maximum number of similar threads to return (1-10, default 5)"),
-});
-
 export function createAnswerOverflowTools(config: ToolRegistrationConfig) {
 	const { buildUrl, serverId, includeServerInfo } = config;
 
@@ -599,9 +550,28 @@ Tips for effective searching:
 - Use specific error messages or function names
 - Filter by serverId to search within a specific community
 - Use search_servers first to discover available communities and their IDs`,
-			inputSchema: searchAnswerOverflowSchema,
-			execute: async (input) => {
-				const result = await searchAnswerOverflow(
+			inputSchema: z.object({
+				query: z
+					.string()
+					.describe(
+						"The search query - can be error messages, function names, concepts, etc.",
+					),
+				serverId: z
+					.string()
+					.optional()
+					.describe(
+						"Filter results to a specific Discord server. Use search_servers to find server IDs.",
+					),
+				limit: z
+					.number()
+					.min(1)
+					.max(25)
+					.default(10)
+					.optional()
+					.describe("Maximum number of results to return (1-25, default 10)"),
+			}),
+			execute: async (input) =>
+				searchAnswerOverflowCore(
 					{
 						query: input.query,
 						serverId: input.serverId ?? serverId,
@@ -609,9 +579,7 @@ Tips for effective searching:
 					},
 					buildUrl,
 					includeServerInfo,
-				);
-				return result.content.map((c) => c.text).join("\n");
-			},
+				),
 		}),
 
 		search_servers: tool({
@@ -620,14 +588,26 @@ Tips for effective searching:
 
 Use this to discover communities and get their server IDs for filtered searching.
 Results are sorted by member count (largest first).`,
-			inputSchema: searchServersSchema,
-			execute: async (input) => {
-				const result = await searchServers({
+			inputSchema: z.object({
+				query: z
+					.string()
+					.optional()
+					.describe(
+						"Search query to filter servers by name. Leave empty to list all servers.",
+					),
+				limit: z
+					.number()
+					.min(1)
+					.max(100)
+					.default(25)
+					.optional()
+					.describe("Maximum number of servers to return (1-100, default 25)"),
+			}),
+			execute: async (input) =>
+				searchServersCore({
 					query: input.query,
 					limit: input.limit,
-				});
-				return result.content.map((c) => c.text).join("\n");
-			},
+				}),
 		}),
 
 		get_thread_messages: tool({
@@ -635,15 +615,26 @@ Results are sorted by member count (largest first).`,
 			description: `Get all messages in a thread, not just the first message and solution.
 
 Use this when you need to see the full conversation, follow-up questions, and all responses in a thread.`,
-			inputSchema: getThreadMessagesSchema,
-			execute: async (input) => {
-				const result = await getThreadMessages(
+			inputSchema: z.object({
+				threadId: z
+					.string()
+					.describe(
+						"The thread ID (which is also the channel ID for the thread)",
+					),
+				limit: z
+					.number()
+					.min(1)
+					.max(100)
+					.default(50)
+					.optional()
+					.describe("Maximum number of messages to return (1-100, default 50)"),
+			}),
+			execute: async (input) =>
+				getThreadMessagesCore(
 					{ threadId: input.threadId, limit: input.limit, serverId },
 					buildUrl,
 					includeServerInfo,
-				);
-				return result.content.map((c) => c.text).join("\n");
-			},
+				),
 		}),
 
 		find_similar_threads: serverId
@@ -652,24 +643,49 @@ Use this when you need to see the full conversation, follow-up questions, and al
 					description: `Find threads similar to a given search query, useful for finding related discussions.
 
 This searches both thread titles and message content to find relevant conversations.`,
-					inputSchema: findSimilarThreadsWithServerIdSchema,
-					execute: async (input) => {
-						const result = await findSimilarThreads(
+					inputSchema: z.object({
+						query: z
+							.string()
+							.describe("The search query to find similar threads for"),
+						limit: z
+							.number()
+							.min(1)
+							.max(10)
+							.default(5)
+							.optional()
+							.describe(
+								"Maximum number of similar threads to return (1-10, default 5)",
+							),
+					}),
+					execute: async (input) =>
+						findSimilarThreadsCore(
 							{ query: input.query, serverId: serverId, limit: input.limit },
 							buildUrl,
 							includeServerInfo,
-						);
-						return result.content.map((c) => c.text).join("\n");
-					},
+						),
 				})
 			: tool({
 					type: "function",
 					description: `Find threads similar to a given search query, useful for finding related discussions.
 
 This searches both thread titles and message content to find relevant conversations.`,
-					inputSchema: findSimilarThreadsWithoutServerIdSchema,
-					execute: async (input) => {
-						const result = await findSimilarThreads(
+					inputSchema: z.object({
+						query: z
+							.string()
+							.describe("The search query to find similar threads for"),
+						serverId: z.string().describe("The server ID to search within"),
+						limit: z
+							.number()
+							.min(1)
+							.max(10)
+							.default(5)
+							.optional()
+							.describe(
+								"Maximum number of similar threads to return (1-10, default 5)",
+							),
+					}),
+					execute: async (input) =>
+						findSimilarThreadsCore(
 							{
 								query: input.query,
 								serverId: input.serverId,
@@ -677,9 +693,9 @@ This searches both thread titles and message content to find relevant conversati
 							},
 							buildUrl,
 							includeServerInfo,
-						);
-						return result.content.map((c) => c.text).join("\n");
-					},
+						),
 				}),
 	};
 }
+
+export type AnswerOverflowTools = ReturnType<typeof createAnswerOverflowTools>;
