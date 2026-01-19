@@ -104,6 +104,15 @@ export type ClientEvents = {
 	"Chat Copy Message Click": {
 		threadId: string | null;
 	};
+	"Invite Page Copy Message": {
+		serverName: string;
+		guildId: string;
+	};
+	"Invite Page Join Discord": {
+		serverName: string;
+		guildId: string;
+		inviteUrl: string;
+	};
 };
 
 export type ClientEventName = keyof ClientEvents;
