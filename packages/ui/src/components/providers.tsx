@@ -43,7 +43,7 @@ export function Providers({
 	return (
 		<TenantProvider tenant={tenant}>
 			<HydrationProvider>
-				<AnalyticsProvider>
+				<AnalyticsProvider subpath={tenant?.subpath}>
 					<Suspense fallback={null}>
 						<PostHogPageview />
 					</Suspense>

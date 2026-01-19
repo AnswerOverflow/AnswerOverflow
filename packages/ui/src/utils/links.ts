@@ -128,11 +128,12 @@ export function getTenantBaseUrl(tenant: TenantInfo | null): string {
 	return getBaseUrl();
 }
 
-const subpathLookup: Record<string, string> = {
-	"community.migaku.com": "migaku.com/community",
-	"testing.rhys.ltd": "rhys.ltd/idk",
-	"discord.vapi.ai": "vapi.ai/community",
-};
+const subpathLookup: Record<string, { parentDomain: string; subpath: string }> =
+	{
+		"migaku.com": { parentDomain: "migaku.com", subpath: "community" },
+		"rhys.ltd": { parentDomain: "rhys.ltd", subpath: "idk" },
+		"vapi.ai": { parentDomain: "vapi.ai", subpath: "community" },
+	};
 
 export function isLocalDev(): boolean {
 	return process.env.NODE_ENV !== "production";
@@ -149,19 +150,21 @@ export function getTenantUrl(tenant: TenantInfo | null, path: string): string {
 	const subpathTenant = subpathLookup[tenant.customDomain];
 
 	if (isLocalDev()) {
-		const subpath = subpathTenant?.split("/")[1];
-		const pathWithSubpath =
-			subpath && !isApiPath ? `/${subpath}${normalizedPath}` : normalizedPath;
+		const subpath = subpathTenant?.subpath;
+		const pathWithSubpath = subpath
+			? `/${subpath}${normalizedPath}`
+			: normalizedPath;
 		return `http://${tenant.customDomain}.localhost:3000${pathWithSubpath}`;
 	}
 
 	if (subpathTenant) {
-		return `https://${subpathTenant}${normalizedPath}`;
+		return `https://${subpathTenant.parentDomain}/${subpathTenant.subpath}${normalizedPath}`;
 	}
 
 	const subpath = normalizeSubpath(tenant.subpath);
-	const pathWithSubpath =
-		subpath && !isApiPath ? `/${subpath}${normalizedPath}` : normalizedPath;
+	const pathWithSubpath = subpath
+		? `/${subpath}${normalizedPath}`
+		: normalizedPath;
 	return `https://${tenant.customDomain}${pathWithSubpath}`;
 }
 
@@ -171,8 +174,9 @@ export function getTenantCanonicalUrl(
 ): string {
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
-	if (subpathLookup[tenant?.customDomain ?? ""]) {
-		return `https://${subpathLookup[tenant?.customDomain ?? ""]}${normalizedPath}`;
+	const subpathTenant = subpathLookup[tenant?.customDomain ?? ""];
+	if (subpathTenant) {
+		return `https://${subpathTenant.parentDomain}/${subpathTenant.subpath}${normalizedPath}`;
 	}
 
 	const baseUrl = getTenantBaseUrl(tenant);
