@@ -11,7 +11,6 @@ import {
 	MessageResponse,
 } from "@packages/ui/components/ai-elements/message";
 import { AgentStatusIndicator } from "./chat-agent-status";
-import { ChatPromptInput } from "./chat-prompt-input";
 import { useChatContext } from "./chat-state-provider";
 import { MessageParts } from "./message-parts";
 
@@ -40,11 +39,10 @@ export function ChatMessages({
 		(lastMessageIsUser && chat.agentStatus !== "idle");
 
 	return (
-		<Conversation
-			instance={chat.stickToBottom}
-			className={`h-full ${showWarningBanner ? "lg:pb-40" : "lg:pb-32"}`}
-		>
-			<ConversationContent className="max-w-4xl mx-auto w-full sm:px-6 pt-6">
+		<Conversation instance={chat.stickToBottom} className="h-full">
+			<ConversationContent
+				className={`max-w-4xl mx-auto w-full sm:px-6 pt-6 pb-16 ${showWarningBanner ? "lg:pb-40" : "lg:pb-32"}`}
+			>
 				{chat.messages.map((message) => (
 					<MessageParts
 						key={message.key}
@@ -73,11 +71,8 @@ export function ChatMessages({
 						}
 					/>
 				)}
-				<div className="lg:hidden px-2 sm:px-4">
-					<ChatPromptInput compact />
-				</div>
 			</ConversationContent>
-			<ConversationScrollButton />
+			<ConversationScrollButton className="bottom-20 lg:bottom-36" />
 		</Conversation>
 	);
 }

@@ -42,28 +42,24 @@ function ChatInterfaceContent() {
 		>
 			<ChatHeaderMobile title={chat.title} />
 
-			<div className="flex-1 overflow-hidden">
+			<div className="flex-1 overflow-hidden relative">
 				{chat.showEmptyState ? (
 					<div className="h-full overflow-y-auto">
 						<div
-							className={`max-w-4xl mx-auto w-full flex flex-col min-h-full sm:px-6 pt-6 ${
+							className={`max-w-4xl mx-auto w-full flex flex-col min-h-full sm:px-6 pt-6 pb-16 ${
 								showWarningBanner ? "lg:pb-40" : "lg:pb-32"
 							}`}
 						>
 							<ChatEmptyState repo={chat.effectiveRepo} title={chat.title} />
-							<div className="lg:hidden px-2 sm:px-4">
-								<ChatPromptInput compact />
-							</div>
 						</div>
 					</div>
 				) : (
 					<ChatMessages showWarningBanner={!!showWarningBanner} />
 				)}
-			</div>
-
-			<div className="hidden lg:block absolute bottom-0 left-0 right-0">
-				<div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
-					<ChatPromptInput />
+				<div className="absolute bottom-0 left-0 right-0 pointer-events-none">
+					<div className="max-w-4xl mx-auto w-full px-2 lg:px-4 pointer-events-auto">
+						<ChatPromptInput />
+					</div>
 				</div>
 			</div>
 		</div>

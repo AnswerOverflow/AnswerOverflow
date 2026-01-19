@@ -16,7 +16,7 @@ import { DiscordInviteCTA } from "./discord-invite-cta";
 import { DiscordServerSelector } from "./discord-server-selector";
 import { GitHubRepoSelector } from "./github-repo-selector";
 
-export function ChatPromptInput({ compact = false }: { compact?: boolean }) {
+export function ChatPromptInput() {
 	const chat = useChatContext();
 
 	const handleSubmit = (message: PromptInputMessage) => {
@@ -78,12 +78,10 @@ export function ChatPromptInput({ compact = false }: { compact?: boolean }) {
 						<DiscordServerSelector
 							selectedServer={chat.effectiveServerContext}
 							onSelectServer={chat.setServerOverride}
-							compact={compact}
 						/>
 						<GitHubRepoSelector
 							selectedRepo={chat.effectiveRepo}
 							onSelectRepo={chat.setSelectedRepo}
-							compact={compact}
 						/>
 					</PromptInputTools>
 					<PromptInputSubmit disabled={chat.isSubmitDisabled}>
