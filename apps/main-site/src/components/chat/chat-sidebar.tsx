@@ -13,7 +13,7 @@ import {
 	SheetTitle,
 } from "@packages/ui/components/sheet";
 import { cn } from "@packages/ui/lib/utils";
-import { usePaginatedQuery } from "convex/react";
+import { usePaginatedQuery } from "convex-helpers/react/cache/hooks";
 import { formatDistanceToNow } from "date-fns";
 import {
 	GitBranch,

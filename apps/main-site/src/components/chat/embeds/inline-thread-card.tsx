@@ -42,7 +42,7 @@ export function InlineThreadCard({
 
 	if (result === undefined) {
 		return (
-			<span className="block w-full">
+			<span className="my-3 block w-full">
 				<ThreadCardSkeleton />
 			</span>
 		);

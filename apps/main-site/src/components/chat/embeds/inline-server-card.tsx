@@ -38,7 +38,7 @@ export function InlineServerCard({ id }: InlineServerCardProps) {
 
 	if (serverData === undefined) {
 		return (
-			<span className="block w-full">
+			<span className="my-3 block w-full">
 				<ServerCardSkeleton />
 			</span>
 		);
