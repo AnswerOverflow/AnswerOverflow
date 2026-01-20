@@ -79,7 +79,7 @@ export function CompactStickyFooter({
 	return (
 		<div
 			className={cn(
-				"hidden sm:block fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur-sm transition-transform",
+				"fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur-sm transition-transform",
 				isExpanded ? "shadow-lg" : "",
 				isVisible
 					? "translate-y-0 duration-500"
