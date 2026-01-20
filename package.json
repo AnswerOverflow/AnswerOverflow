@@ -17,6 +17,7 @@
 		"test:metadata": "bun scripts/metadata-tests.ts",
 		"test:metadata:update": "bun scripts/metadata-tests.ts --update-snapshots",
 		"test:metadata:strict": "bun scripts/metadata-tests.ts --strict",
+		"expand-servers": "bun scripts/expand-community-servers.ts",
 		"lint": "biome check .",
 		"lint:fix": "biome check . --write",
 		"fix:safe": "biome check . --write",
