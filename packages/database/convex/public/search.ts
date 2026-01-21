@@ -146,7 +146,12 @@ export const getRecentThreads = publicQuery({
 			.query("messages")
 			.withIndex("by_childThreadId", (q) => q.gt("childThreadId", 0n))
 			// todo maybe bring back in future but is too noisy right now
-			.filter((q) => q.neq(q.field("serverId"), 1012610056921038868n))
+			.filter((q) =>
+				q.and(
+					q.neq(q.field("serverId"), 1012610056921038868n),
+					q.neq(q.field("serverId"), 1457741299041046581n),
+				),
+			)
 			.order("desc")
 			.paginate(args.paginationOpts);
 
