@@ -1,9 +1,6 @@
 "use client";
 
-import {
-	CompactStickyFooter,
-	MainSiteFooter,
-} from "@packages/ui/components/footer";
+import { CompactStickyFooter } from "@packages/ui/components/footer";
 import { MainSiteNavbar } from "@packages/ui/components/navbar";
 import {
 	ScrollContainerProvider,
@@ -34,14 +31,7 @@ function NavbarContent({
 			>
 				{children}
 			</div>
-			{!isChat && (
-				<>
-					<div className="sm:hidden">
-						<MainSiteFooter />
-					</div>
-					<CompactStickyFooter />
-				</>
-			)}
+			{!isChat && <CompactStickyFooter />}
 		</>
 	);
 }
