@@ -19,7 +19,7 @@ import {
 	trackServerJoin,
 	trackServerLeave,
 } from "../utils/analytics";
-import { isAllowedRootChannelType } from "../utils/conversions";
+import { isAllowedRootOrCategoryChannel } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
 import {
 	catchAllSilentWithReport,
@@ -279,11 +279,11 @@ export function syncGuild(guild: Guild) {
 		}
 
 		const channels = Arr.fromIterable(guild.channels.cache.values());
-		const rootChannels = channels.filter((channel) => {
-			return isAllowedRootChannelType(channel.type);
-		});
 
-		yield* syncManyChannels(rootChannels);
+		const syncableChannels = channels.filter((channel) =>
+			isAllowedRootOrCategoryChannel(channel),
+		);
+		yield* syncManyChannels(syncableChannels);
 
 		if (preferences?.addedByUserId) {
 			yield* database.private.user_server_settings
@@ -437,6 +437,14 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				);
 				const guilds = yield* discord.getGuilds();
 				const activeServerIds = new Set(guilds.map((guild) => guild.id));
+
+				if (process.env.NODE_ENV !== "production") {
+					yield* Console.log("Dev mode: resyncing all guilds...");
+					yield* Effect.forEach(guilds, (guild) => syncGuild(guild), {
+						concurrency: 5,
+					});
+					yield* Console.log("Dev mode: guild resync complete");
+				}
 
 				yield* Effect.annotateCurrentSpan({
 					"servers.total": serverCount.toString(),

@@ -10,6 +10,7 @@ import { syncOperations } from "../metrics";
 import { createBatchedQueue } from "../utils/batched-queue";
 import {
 	isAllowedRootChannel,
+	isAllowedRootOrCategoryChannel,
 	isAllowedThreadChannel,
 	toAOChannel,
 } from "../utils/conversions";
@@ -146,7 +147,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("channelCreate", (channel) =>
 			Effect.gen(function* () {
-				if (!isAllowedRootChannel(channel)) {
+				if (!isAllowedRootOrCategoryChannel(channel)) {
 					return;
 				}
 				yield* Effect.annotateCurrentSpan({
@@ -214,7 +215,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("channelUpdate", (_oldChannel, newChannel) =>
 			Effect.gen(function* () {
-				if (!isAllowedRootChannel(newChannel)) {
+				if (!isAllowedRootOrCategoryChannel(newChannel)) {
 					return;
 				}
 				yield* Effect.annotateCurrentSpan({
@@ -233,7 +234,7 @@ export const ChannelParityLayer = Layer.scopedDiscard(
 
 		yield* discord.client.on("channelDelete", (channel) =>
 			Effect.gen(function* () {
-				if (!isAllowedRootChannel(channel)) {
+				if (!isAllowedRootOrCategoryChannel(channel)) {
 					return;
 				}
 				yield* Effect.annotateCurrentSpan({

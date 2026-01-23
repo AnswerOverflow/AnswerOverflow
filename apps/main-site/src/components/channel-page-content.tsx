@@ -105,26 +105,45 @@ function ChannelLink({
 	);
 }
 
-function ChannelsSidebar({
+function GroupedChannelList({
 	channels,
+	categories,
 	selectedChannelId,
 	serverDiscordId,
 	tenantMode,
+	onChannelClick,
 }: {
 	channels: CommunityPageHeaderData["channels"];
+	categories: CommunityPageHeaderData["categories"];
 	selectedChannelId: bigint | null;
 	serverDiscordId: bigint;
 	tenantMode: boolean;
+	onChannelClick?: () => void;
 }) {
+	const categoryMap = new Map(categories.map((cat) => [cat.id, cat]));
+
+	const uncategorizedChannels = channels.filter((c) => !c.categoryId);
+	const categorizedChannels = channels.filter((c) => c.categoryId);
+
+	const channelsByCategory = new Map<bigint, typeof channels>();
+	for (const channel of categorizedChannels) {
+		if (!channel.categoryId) continue;
+		const existing = channelsByCategory.get(channel.categoryId) ?? [];
+		existing.push(channel);
+		channelsByCategory.set(channel.categoryId, existing);
+	}
+
+	const sortedCategoryIds = [...channelsByCategory.keys()].sort((a, b) => {
+		const catA = categoryMap.get(a);
+		const catB = categoryMap.get(b);
+		return (catA?.position ?? 0) - (catB?.position ?? 0);
+	});
+
 	return (
-		<aside className="w-52 shrink-0">
-			<div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
-				<ResourcesSidebar className="mb-4 px-2" />
-				<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
-					Channels
-				</div>
-				<nav className="space-y-0.5">
-					{channels.map((channel) => {
+		<nav className="space-y-3">
+			{uncategorizedChannels.length > 0 && (
+				<div className="space-y-0.5">
+					{uncategorizedChannels.map((channel) => {
 						const isSelected = channel.id === selectedChannelId;
 						return (
 							<ChannelLink
@@ -137,10 +156,78 @@ function ChannelsSidebar({
 									serverDiscordId,
 									tenantMode,
 								})}
+								onClick={onChannelClick}
 							/>
 						);
 					})}
-				</nav>
+				</div>
+			)}
+			{sortedCategoryIds.map((categoryId) => {
+				const category = categoryMap.get(categoryId);
+				const categoryChannels = channelsByCategory.get(categoryId) ?? [];
+				if (categoryChannels.length === 0) return null;
+
+				return (
+					<div key={categoryId.toString()}>
+						<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-1">
+							{category?.name ?? "Unknown"}
+						</div>
+						<div className="space-y-0.5">
+							{categoryChannels.map((channel) => {
+								const isSelected = channel.id === selectedChannelId;
+								return (
+									<ChannelLink
+										key={channel.id.toString()}
+										channel={channel}
+										isSelected={isSelected}
+										href={getChannelHref({
+											channelId: channel.id,
+											isSelected,
+											serverDiscordId,
+											tenantMode,
+										})}
+										onClick={onChannelClick}
+									/>
+								);
+							})}
+						</div>
+					</div>
+				);
+			})}
+		</nav>
+	);
+}
+
+function ChannelsSidebar({
+	channels,
+	categories,
+	selectedChannelId,
+	serverDiscordId,
+	tenantMode,
+}: {
+	channels: CommunityPageHeaderData["channels"];
+	categories: CommunityPageHeaderData["categories"];
+	selectedChannelId: bigint | null;
+	serverDiscordId: bigint;
+	tenantMode: boolean;
+}) {
+	const hasCategories = categories.length > 0;
+	return (
+		<aside className="w-52 shrink-0">
+			<div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
+				<ResourcesSidebar className="mb-4 px-2" />
+				{!hasCategories && (
+					<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
+						Channels
+					</div>
+				)}
+				<GroupedChannelList
+					channels={channels}
+					categories={categories}
+					selectedChannelId={selectedChannelId}
+					serverDiscordId={serverDiscordId}
+					tenantMode={tenantMode}
+				/>
 			</div>
 		</aside>
 	);
@@ -148,16 +235,19 @@ function ChannelsSidebar({
 
 function MobileChannelSheet({
 	channels,
+	categories,
 	selectedChannelId,
 	serverDiscordId,
 	tenantMode,
 }: {
 	channels: CommunityPageHeaderData["channels"];
+	categories: CommunityPageHeaderData["categories"];
 	selectedChannelId: bigint | null;
 	serverDiscordId: bigint;
 	tenantMode: boolean;
 }) {
 	const [open, setOpen] = useState(false);
+	const hasCategories = categories.length > 0;
 
 	const selectedChannel = selectedChannelId
 		? channels.find((c) => c.id === selectedChannelId)
@@ -183,28 +273,19 @@ function MobileChannelSheet({
 				</SheetHeader>
 				<div className="p-2">
 					<ResourcesSidebar className="mb-4 px-2" />
-					<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
-						Channels
-					</div>
-					<nav className="space-y-0.5">
-						{channels.map((channel) => {
-							const isSelected = channel.id === selectedChannelId;
-							return (
-								<ChannelLink
-									key={channel.id.toString()}
-									channel={channel}
-									isSelected={isSelected}
-									href={getChannelHref({
-										channelId: channel.id,
-										isSelected,
-										serverDiscordId,
-										tenantMode,
-									})}
-									onClick={() => setOpen(false)}
-								/>
-							);
-						})}
-					</nav>
+					{!hasCategories && (
+						<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
+							Channels
+						</div>
+					)}
+					<GroupedChannelList
+						channels={channels}
+						categories={categories}
+						selectedChannelId={selectedChannelId}
+						serverDiscordId={serverDiscordId}
+						tenantMode={tenantMode}
+						onChannelClick={() => setOpen(false)}
+					/>
 				</div>
 			</SheetContent>
 		</Sheet>
@@ -522,6 +603,7 @@ export function MessagesList({
 type CommunityPageContentProps = {
 	server: CommunityPageHeaderData["server"];
 	channels: CommunityPageHeaderData["channels"];
+	categories: CommunityPageHeaderData["categories"];
 	selectedChannel?: CommunityPageHeaderData["selectedChannel"] | null;
 	children: React.ReactNode;
 };
@@ -529,6 +611,7 @@ type CommunityPageContentProps = {
 export function CommunityPageContent({
 	server,
 	channels,
+	categories,
 	selectedChannel = null,
 	children,
 }: CommunityPageContentProps) {
@@ -620,6 +703,7 @@ export function CommunityPageContent({
 					<div className="hidden lg:block">
 						<ChannelsSidebar
 							channels={channels}
+							categories={categories}
 							selectedChannelId={selectedChannel?.id ?? null}
 							serverDiscordId={server.discordId}
 							tenantMode={tenantMode}
@@ -630,6 +714,7 @@ export function CommunityPageContent({
 						<div className="flex items-center gap-4 mb-4 lg:hidden">
 							<MobileChannelSheet
 								channels={channels}
+								categories={categories}
 								selectedChannelId={selectedChannel?.id ?? null}
 								serverDiscordId={server.discordId}
 								tenantMode={tenantMode}

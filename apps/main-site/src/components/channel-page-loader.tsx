@@ -289,6 +289,7 @@ export async function ServerPageLoader(props: {
 		<ServerPageContent
 			server={headerData.server}
 			channels={headerData.channels}
+			categories={headerData.categories}
 		>
 			<Suspense fallback={<ThreadsSkeleton />}>
 				<ServerThreadsLoader
@@ -322,6 +323,7 @@ export async function ChannelPageLoader(props: {
 		<ChannelPageContent
 			server={headerData.server}
 			channels={headerData.channels}
+			categories={headerData.categories}
 			selectedChannel={headerData.selectedChannel}
 		>
 			<Suspense fallback={<ThreadsSkeleton />}>

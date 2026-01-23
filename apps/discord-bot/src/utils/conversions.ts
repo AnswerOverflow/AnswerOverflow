@@ -18,6 +18,7 @@ import {
 	type ActionRow,
 	type AnyThreadChannel,
 	type ButtonComponent,
+	type CategoryChannel,
 	type Channel,
 	ChannelType,
 	ComponentType,
@@ -69,6 +70,18 @@ export function isAllowedRootChannel(
 	return isAllowedRootChannelType(channel.type);
 }
 
+export function isCategoryChannel(
+	channel: Channel,
+): channel is CategoryChannel {
+	return channel.type === ChannelType.GuildCategory;
+}
+
+export function isAllowedRootOrCategoryChannel(
+	channel: Channel,
+): channel is TextChannel | NewsChannel | ForumChannel | CategoryChannel {
+	return isAllowedRootChannelType(channel.type) || isCategoryChannel(channel);
+}
+
 function isAllowedThreadType(channelType: number): boolean {
 	return ALLOWED_THREAD_TYPES.has(channelType);
 }
@@ -99,12 +112,19 @@ export function toAOChannel(
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 		const isThread = channel.isThread();
-		const parentId =
-			isThread && channel.parentId ? channel.parentId : undefined;
-		const archivedTimestamp =
-			isThread && channel.archiveTimestamp
-				? channel.archiveTimestamp
-				: undefined;
+		const { parentId, categoryId, position, archivedTimestamp } = isThread
+			? {
+					parentId: channel.parentId ?? undefined,
+					categoryId: undefined,
+					position: undefined,
+					archivedTimestamp: channel.archiveTimestamp ?? undefined,
+				}
+			: {
+					parentId: undefined,
+					categoryId: channel.parentId ?? undefined,
+					position: channel.position,
+					archivedTimestamp: undefined,
+				};
 		const botPermissions = yield* discord.getBotPermissionsForChannel(
 			channel.id,
 			channel.guild.id,
@@ -128,6 +148,8 @@ export function toAOChannel(
 			name: channel.name ?? "",
 			type: channel.type,
 			parentId: toBigIntId(parentId),
+			categoryId: toBigIntId(categoryId),
+			position,
 			archivedTimestamp: archivedTimestamp,
 			botPermissions: botPermissions ?? undefined,
 			availableTags,

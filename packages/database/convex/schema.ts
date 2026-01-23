@@ -89,6 +89,8 @@ const ChannelSchema = Schema.Struct({
 	name: Schema.String,
 	type: Schema.Number,
 	parentId: Schema.optional(Schema.BigIntFromSelf),
+	categoryId: Schema.optional(Schema.BigIntFromSelf),
+	position: Schema.optional(Schema.Number),
 	archivedTimestamp: Schema.optional(Schema.Number),
 	availableTags: Schema.optional(
 		Schema.Array(ForumTagSchema).pipe(Schema.mutable),
@@ -109,6 +111,8 @@ const ChannelSettingsSchema = Schema.Struct({
 	inviteCode: Schema.optional(Schema.String),
 	excludeFromSimilarThreads: Schema.optional(Schema.Boolean),
 	purpose: Schema.optional(ChannelPurposeSchema),
+	displayOrder: Schema.optional(Schema.Number),
+	displayCategoryId: Schema.optional(Schema.BigIntFromSelf),
 });
 
 const EmbedFooterSchema = Schema.Struct({

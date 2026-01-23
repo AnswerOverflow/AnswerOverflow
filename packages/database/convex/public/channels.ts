@@ -299,8 +299,24 @@ async function getServerHeaderData(
 
 	const indexedChannelIds = indexedSettings.map((s) => s.channelId);
 
+	const settingsMap = new Map(indexedSettings.map((s) => [s.channelId, s]));
+
 	const allIndexedChannels = await asyncMap(indexedChannelIds, (channelId) =>
 		getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
+	);
+
+	const categoryIds = new Set(
+		Arr.filter(allIndexedChannels, Predicate.isNotNull)
+			.map((c) => c.categoryId)
+			.filter((id): id is bigint => id !== undefined),
+	);
+
+	const categories = await asyncMap([...categoryIds], (categoryId) =>
+		getOneFrom(ctx.db, "channels", "by_discordChannelId", categoryId, "id"),
+	);
+
+	const categoryMap = new Map(
+		Arr.filter(categories, Predicate.isNotNull).map((c) => [c.id, c]),
 	);
 
 	const indexedChannels = Arr.filter(allIndexedChannels, Predicate.isNotNull)
@@ -311,17 +327,40 @@ async function getServerHeaderData(
 				c.type === CHANNEL_TYPE.GuildForum,
 		)
 		.sort((a, b) => {
-			if (a.type === CHANNEL_TYPE.GuildForum) return -1;
-			if (b.type === CHANNEL_TYPE.GuildForum) return 1;
-			if (a.type === CHANNEL_TYPE.GuildAnnouncement) return -1;
-			if (b.type === CHANNEL_TYPE.GuildAnnouncement) return 1;
-			return 0;
+			const settingsA = settingsMap.get(a.id);
+			const settingsB = settingsMap.get(b.id);
+
+			if (
+				settingsA?.displayOrder !== undefined &&
+				settingsB?.displayOrder !== undefined
+			) {
+				return settingsA.displayOrder - settingsB.displayOrder;
+			}
+			if (settingsA?.displayOrder !== undefined) return -1;
+			if (settingsB?.displayOrder !== undefined) return 1;
+
+			const categoryA = a.categoryId ? categoryMap.get(a.categoryId) : null;
+			const categoryB = b.categoryId ? categoryMap.get(b.categoryId) : null;
+			const categoryPosA = categoryA?.position ?? -1;
+			const categoryPosB = categoryB?.position ?? -1;
+
+			if (categoryPosA !== categoryPosB) {
+				return categoryPosA - categoryPosB;
+			}
+
+			const posA = a.position ?? 0;
+			const posB = b.position ?? 0;
+			return posA - posB;
 		});
 
 	const channelInviteCode = indexedSettings.find(
 		(s) => s.inviteCode,
 	)?.inviteCode;
 	const inviteCode = server.vanityInviteCode ?? channelInviteCode;
+
+	const sortedCategories = Arr.filter(categories, Predicate.isNotNull).sort(
+		(a, b) => (a.position ?? 0) - (b.position ?? 0),
+	);
 
 	return {
 		server: {
@@ -331,6 +370,7 @@ async function getServerHeaderData(
 			inviteCode,
 		},
 		channels: indexedChannels,
+		categories: sortedCategories,
 	};
 }
 
