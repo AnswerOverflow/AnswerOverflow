@@ -30,6 +30,11 @@ import {
 	SelectValue,
 } from "@packages/ui/components/select";
 import { Switch } from "@packages/ui/components/switch";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import { useMutation } from "convex/react";
 import { ChannelType } from "discord-api-types/v10";
 import {
@@ -158,6 +163,22 @@ function ChannelPurposeCard({
 	);
 }
 
+function TagDisplay({ tag }: { tag: ForumTag }) {
+	return (
+		<span className="flex items-center gap-2">
+			{tag.emojiName && <span>{tag.emojiName}</span>}
+			{tag.emojiId && !tag.emojiName && (
+				<img
+					src={`https://cdn.discordapp.com/emojis/${tag.emojiId}.webp?size=16`}
+					alt=""
+					className="size-4"
+				/>
+			)}
+			<span>{tag.name}</span>
+		</span>
+	);
+}
+
 function ChooseSolvedTagCard({
 	channel,
 	onUpdate,
@@ -204,19 +225,7 @@ function ChooseSolvedTagCard({
 								{currentTagInvalid ? (
 									<span className="text-muted-foreground">(Unknown tag)</span>
 								) : currentTag ? (
-									<span className="flex items-center gap-2">
-										{currentTag.emojiName && (
-											<span>{currentTag.emojiName}</span>
-										)}
-										{currentTag.emojiId && !currentTag.emojiName && (
-											<img
-												src={`https://cdn.discordapp.com/emojis/${currentTag.emojiId}.webp?size=16`}
-												alt=""
-												className="size-4"
-											/>
-										)}
-										<span>{currentTag.name}</span>
-									</span>
+									<TagDisplay tag={currentTag} />
 								) : (
 									"(No tag)"
 								)}
@@ -226,21 +235,111 @@ function ChooseSolvedTagCard({
 							<SelectItem value="none">(No tag)</SelectItem>
 							{tags.map((tag) => (
 								<SelectItem key={tag.id.toString()} value={tag.id.toString()}>
-									<span className="flex items-center gap-2">
-										{tag.emojiName && <span>{tag.emojiName}</span>}
-										{tag.emojiId && !tag.emojiName && (
-											<img
-												src={`https://cdn.discordapp.com/emojis/${tag.emojiId}.webp?size=16`}
-												alt=""
-												className="size-4"
-											/>
-										)}
-										<span>{tag.name}</span>
-									</span>
+									<TagDisplay tag={tag} />
 								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
+
+function ChooseTagsToRemoveOnSolveCard({
+	channel,
+	onUpdate,
+}: {
+	channel: {
+		id: bigint;
+		flags: {
+			solutionTagId?: bigint;
+			tagsToRemoveOnSolve: bigint[];
+		};
+		availableTags?: ForumTag[];
+	};
+	onUpdate: (tagIds: bigint[]) => Promise<void>;
+}) {
+	const tags = channel.availableTags ?? [];
+	const solutionTagId = channel.flags.solutionTagId;
+	const selectedTagIds = new Set(channel.flags.tagsToRemoveOnSolve);
+
+	const toggleTag = async (tagId: bigint) => {
+		const newSet = new Set(selectedTagIds);
+		if (newSet.has(tagId)) {
+			newSet.delete(tagId);
+		} else {
+			newSet.add(tagId);
+		}
+		await onUpdate(Array.from(newSet));
+	};
+
+	const selectedCount = selectedTagIds.size;
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Tags to Remove on Solve</CardTitle>
+				<CardDescription>
+					Select tags that will be automatically removed when a message is
+					marked as the solution.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				{tags.length === 0 ? (
+					<p className="text-sm text-muted-foreground">
+						No tags available. Tags will appear after the forum channel is
+						synced.
+					</p>
+				) : (
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="outline"
+								className="max-w-[300px] justify-between"
+							>
+								<span className="truncate">
+									{selectedCount === 0
+										? "Select tags to remove..."
+										: `${selectedCount} tag${selectedCount === 1 ? "" : "s"} selected`}
+								</span>
+								<ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent className="w-[280px]">
+							{tags.map((tag) => {
+								const isSolutionTag = solutionTagId === tag.id;
+								const isSelected = selectedTagIds.has(tag.id);
+
+								if (isSolutionTag) {
+									return (
+										<Tooltip key={tag.id.toString()}>
+											<TooltipTrigger asChild>
+												<div className="relative flex cursor-not-allowed select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none opacity-50">
+													<Checkbox checked={false} disabled className="mr-2" />
+													<TagDisplay tag={tag} />
+												</div>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>Remove from Solution Tag first</p>
+											</TooltipContent>
+										</Tooltip>
+									);
+								}
+
+								return (
+									<DropdownMenuCheckboxItem
+										key={tag.id.toString()}
+										checked={isSelected}
+										onCheckedChange={() => toggleTag(tag.id)}
+										onSelect={(e) => e.preventDefault()}
+									>
+										<TagDisplay tag={tag} />
+									</DropdownMenuCheckboxItem>
+								);
+							})}
+						</DropdownMenuContent>
+					</DropdownMenu>
 				)}
 			</CardContent>
 		</Card>
@@ -411,6 +510,35 @@ export default function ChannelsPage() {
 									flags: {
 										...channel.flags,
 										solutionTagId: args.solutionTagId ?? undefined,
+									},
+								}
+							: channel,
+					),
+				},
+			);
+		}
+	});
+
+	const updateTagsToRemoveOnSolve = useMutation(
+		api.authenticated.dashboard_mutations.updateChannelTagsToRemoveOnSolve,
+	).withOptimisticUpdate((localStore, args) => {
+		const currentData = localStore.getQuery(
+			api.authenticated.dashboard_queries.getDashboardData,
+			{ serverId: BigInt(serverId) },
+		);
+		if (currentData !== undefined) {
+			localStore.setQuery(
+				api.authenticated.dashboard_queries.getDashboardData,
+				{ serverId: BigInt(serverId) },
+				{
+					...currentData,
+					channels: currentData.channels.map((channel) =>
+						channel.id === args.channelId
+							? {
+									...channel,
+									flags: {
+										...channel.flags,
+										tagsToRemoveOnSolve: args.tagIds,
 									},
 								}
 							: channel,
@@ -865,6 +993,23 @@ export default function ChannelsPage() {
 															await updateSolutionTag({
 																channelId: channel.id,
 																solutionTagId,
+																serverId: BigInt(serverId),
+															});
+														}}
+													/>
+												)}
+
+											{selectedChannels.length === 1 &&
+												selectedChannels[0] &&
+												selectedChannels[0].type === ChannelType.GuildForum && (
+													<ChooseTagsToRemoveOnSolveCard
+														channel={selectedChannels[0]}
+														onUpdate={async (tagIds) => {
+															const channel = selectedChannels[0];
+															if (!channel) return;
+															await updateTagsToRemoveOnSolve({
+																channelId: channel.id,
+																tagIds,
 																serverId: BigInt(serverId),
 															});
 														}}

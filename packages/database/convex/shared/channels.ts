@@ -29,6 +29,7 @@ export const DEFAULT_CHANNEL_SETTINGS = {
 	autoThreadEnabled: false,
 	forumGuidelinesConsentEnabled: false,
 	solutionTagId: undefined,
+	tagsToRemoveOnSolve: undefined,
 	lastIndexedSnowflake: undefined,
 	inviteCode: undefined,
 	excludeFromSimilarThreads: undefined,
