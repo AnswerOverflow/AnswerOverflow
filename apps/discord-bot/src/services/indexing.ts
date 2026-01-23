@@ -1059,18 +1059,18 @@ export function runIndexingCore() {
 	return Effect.gen(function* () {
 		const discord = yield* Discord;
 		const startTime = yield* Clock.currentTimeMillis;
-		yield* Console.log("=== Starting indexing run ===");
+		yield* Effect.logInfo("=== Starting indexing run ===");
 
 		const guilds = yield* discord.getGuilds();
 		const totalGuilds = guilds.length;
-		yield* Console.log(`Found ${totalGuilds} guilds to index`);
+		yield* Effect.logInfo(`Found ${totalGuilds} guilds to index`);
 
 		yield* Effect.forEach(
 			Arr.map(guilds, (guild, index) => ({ guild, index })),
 			({ guild, index }) =>
 				indexGuild(guild, index, totalGuilds).pipe(
 					catchAllWithReport((error) =>
-						Console.error(
+						Effect.logError(
 							`[${index + 1}/${totalGuilds}] Error indexing guild ${guild.name}:`,
 							error,
 						),
@@ -1084,13 +1084,13 @@ export function runIndexingCore() {
 
 		yield* Metric.update(indexingDuration, duration);
 
-		yield* Console.log(
+		yield* Effect.logInfo(
 			`=== Indexing complete - ${totalGuilds} guilds indexed in ${formatDurationMs(duration)} ===`,
 		);
 	}).pipe(
 		Effect.withSpan("indexing.run_core"),
 		catchAllWithReport((error) =>
-			Console.error("Fatal error during indexing:", error),
+			Effect.logError("Fatal error during indexing:", error),
 		),
 	);
 }
@@ -1098,11 +1098,11 @@ export function runIndexingCore() {
 export function runIndexingForGuild(guild: Guild) {
 	return Effect.gen(function* () {
 		const startTime = yield* Clock.currentTimeMillis;
-		yield* Console.log(`=== Starting indexing for guild: ${guild.name} ===`);
+		yield* Effect.logInfo(`=== Starting indexing for guild: ${guild.name} ===`);
 
 		yield* indexGuild(guild, 0, 1).pipe(
 			catchAllWithReport((error) =>
-				Console.error(`Error indexing guild ${guild.name}:`, error),
+				Effect.logError(`Error indexing guild ${guild.name}:`, error),
 			),
 		);
 
@@ -1111,7 +1111,7 @@ export function runIndexingForGuild(guild: Guild) {
 
 		yield* Metric.update(indexingDuration, duration);
 
-		yield* Console.log(
+		yield* Effect.logInfo(
 			`=== Indexing complete for ${guild.name} in ${formatDurationMs(duration)} ===`,
 		);
 	}).pipe(
@@ -1122,7 +1122,7 @@ export function runIndexingForGuild(guild: Guild) {
 			},
 		}),
 		catchAllWithReport((error) =>
-			Console.error("Fatal error during guild indexing:", error),
+			Effect.logError("Fatal error during guild indexing:", error),
 		),
 	);
 }
@@ -1133,57 +1133,53 @@ function runIndexing() {
 			Effect.as(runIndexingCore(), true),
 		);
 		if (Option.isNone(acquired)) {
-			yield* Console.log(
+			yield* Effect.logInfo(
 				"=== Skipping indexing run - previous run still in progress ===",
 			);
 		}
 	});
 }
 
-export function startIndexingLoop() {
-	return Effect.gen(function* () {
-		yield* Console.log(
-			`Indexing scheduled with cron: ${INDEXING_CONFIG.cronExpression} (${INDEXING_CONFIG.cronTimezone})`,
-		);
+export const startIndexingLoop = Effect.fn("indexing.start_loop")(function* () {
+	yield* Effect.logInfo(
+		`Indexing scheduled with cron: ${INDEXING_CONFIG.cronExpression} (${INDEXING_CONFIG.cronTimezone})`,
+	);
 
-		const schedule = Schedule.cron(
-			INDEXING_CONFIG.cronExpression,
-			INDEXING_CONFIG.cronTimezone,
-		);
+	const schedule = Schedule.cron(
+		INDEXING_CONFIG.cronExpression,
+		INDEXING_CONFIG.cronTimezone,
+	);
 
-		yield* Effect.forkDaemon(
-			Effect.schedule(runIndexing(), schedule).pipe(
-				catchAllCauseWithReport((cause) =>
-					Console.error("Error in scheduled indexing run:", cause),
-				),
+	yield* Effect.forkDaemon(
+		Effect.schedule(runIndexing(), schedule).pipe(
+			catchAllCauseWithReport((cause) =>
+				Effect.logError("Error in scheduled indexing run:", cause),
 			),
-		);
+		),
+	);
 
-		yield* Console.log("Indexing loop started successfully");
-	});
-}
+	yield* Effect.logInfo("Indexing loop started successfully");
+});
 
 export const IndexingHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
 		const discord = yield* Discord;
 
 		yield* discord.client.on("clientReady", () =>
-			Effect.gen(function* () {
-				yield* startIndexingLoop().pipe(
-					catchAllCauseWithReport((cause) =>
-						Console.error("Error starting indexing loop:", cause),
-					),
-				);
-			}),
+			startIndexingLoop().pipe(
+				catchAllCauseWithReport((cause) =>
+					Effect.logError("Error starting indexing loop:", cause),
+				),
+			),
 		);
 
 		yield* Effect.addFinalizer(() =>
 			Effect.gen(function* () {
-				yield* Console.log(
+				yield* Effect.logInfo(
 					"Shutdown requested - waiting for indexing to complete if in progress...",
 				);
 				yield* indexingLock.withPermits(1)(
-					Console.log("Indexing lock released, proceeding with shutdown"),
+					Effect.logInfo("Indexing lock released, proceeding with shutdown"),
 				);
 			}),
 		);

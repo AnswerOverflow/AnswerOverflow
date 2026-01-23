@@ -47,6 +47,15 @@ export class UnknownDiscordError extends Data.TaggedError(
 	}
 }
 
+async function getCachedOrFetch<T>(
+	getFromCache: () => T | undefined,
+	fetchFromApi: () => Promise<T | null>,
+): Promise<T | null> {
+	const cached = getFromCache();
+	if (cached) return cached;
+	return await fetchFromApi();
+}
+
 export const createDiscordService = Effect.gen(function* () {
 	const client = yield* DiscordClient;
 	const token = process.env.DISCORD_TOKEN!;
@@ -207,7 +216,10 @@ export const createDiscordService = Effect.gen(function* () {
 		options: { limit: number; after?: string },
 	) =>
 		use("fetch_channel_messages", async (c) => {
-			const channel = c.channels.cache.get(channelId);
+			const channel = await getCachedOrFetch(
+				() => c.channels.cache.get(channelId),
+				() => c.channels.fetch(channelId),
+			);
 			if (!channel) {
 				throw new Error(`Channel ${channelId} not found`);
 			}
@@ -232,7 +244,10 @@ export const createDiscordService = Effect.gen(function* () {
 
 	const fetchActiveThreads = (forumChannelId: string) =>
 		use("fetch_active_threads", async (c) => {
-			const channel = c.channels.cache.get(forumChannelId);
+			const channel = await getCachedOrFetch(
+				() => c.channels.cache.get(forumChannelId),
+				() => c.channels.fetch(forumChannelId),
+			);
 			if (!channel) {
 				throw new Error(`Channel ${forumChannelId} not found`);
 			}
@@ -252,7 +267,10 @@ export const createDiscordService = Effect.gen(function* () {
 		options: { before?: string },
 	) =>
 		use("fetch_archived_threads", async (c) => {
-			const channel = c.channels.cache.get(forumChannelId);
+			const channel = await getCachedOrFetch(
+				() => c.channels.cache.get(forumChannelId),
+				() => c.channels.fetch(forumChannelId),
+			);
 			if (!channel) {
 				throw new Error(`Channel ${forumChannelId} not found`);
 			}
