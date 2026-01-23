@@ -68,6 +68,7 @@ export const getDashboardData = guildManagerQuery({
 					excludeFromSimilarThreads:
 						settings?.excludeFromSimilarThreads ?? false,
 					solutionTagId: settings?.solutionTagId,
+					purpose: settings?.purpose,
 				},
 			};
 		});

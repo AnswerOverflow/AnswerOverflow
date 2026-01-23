@@ -104,6 +104,60 @@ function ToggleChannelFlag({
 		</Card>
 	);
 }
+type ChannelPurpose = "HELP" | "GENERAL";
+
+function ChannelPurposeCard({
+	value,
+	isMixed,
+	onUpdate,
+}: {
+	value: ChannelPurpose;
+	isMixed?: boolean;
+	onUpdate: (purpose: ChannelPurpose) => Promise<void>;
+}) {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Channel Purpose</CardTitle>
+				<CardDescription>
+					Help channels appear in Quick Action suggestions when redirecting
+					users. General channels are indexed but hidden from Quick Action.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Select
+					value={value}
+					onValueChange={async (val) => {
+						await onUpdate(val as ChannelPurpose);
+					}}
+				>
+					<SelectTrigger className="max-w-[250px]">
+						<SelectValue>
+							{isMixed ? (
+								<span className="text-muted-foreground">(Mixed)</span>
+							) : value === "HELP" ? (
+								"Help Channel"
+							) : (
+								"General Channel"
+							)}
+						</SelectValue>
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="HELP">Help Channel</SelectItem>
+						<SelectItem value="GENERAL">General Channel</SelectItem>
+					</SelectContent>
+				</Select>
+				{isMixed && (
+					<p className="text-muted-foreground text-sm mt-2">
+						Selected channels have different purposes. Selecting a value will
+						set all to the same purpose.
+					</p>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
+
 function ChooseSolvedTagCard({
 	channel,
 	onUpdate,
@@ -413,6 +467,33 @@ export default function ChannelsPage() {
 			return firstValue ?? false;
 		}
 		return "mixed";
+	};
+
+	const getPurposeValue = (): { value: ChannelPurpose; isMixed: boolean } => {
+		if (selectedChannels.length === 0) return { value: "HELP", isMixed: false };
+		const values = selectedChannels.map((c) => c.flags.purpose ?? "HELP");
+		const firstValue = values[0] ?? "HELP";
+		if (values.every((v) => v === firstValue)) {
+			return { value: firstValue, isMixed: false };
+		}
+		return { value: "HELP", isMixed: true };
+	};
+
+	const handlePurposeChange = async (purpose: ChannelPurpose) => {
+		if (selectedChannels.length === 0) return;
+		try {
+			await Promise.all(
+				selectedChannels.map((channel) =>
+					updateChannelSettings({
+						channelId: channel.id,
+						flags: { purpose },
+						serverId: BigInt(serverId),
+					}),
+				),
+			);
+		} catch (error) {
+			console.error("Failed to update channel purpose:", error);
+		}
 	};
 
 	const isFlagDisabled = (flagKey: ChannelFlagKey): boolean => {
@@ -875,6 +956,12 @@ export default function ChannelsPage() {
 														checked,
 													)
 												}
+											/>
+
+											<ChannelPurposeCard
+												value={getPurposeValue().value}
+												isMixed={getPurposeValue().isMixed}
+												onUpdate={handlePurposeChange}
 											/>
 										</div>
 									)}
