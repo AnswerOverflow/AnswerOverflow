@@ -65,6 +65,8 @@ export const getDashboardData = guildManagerQuery({
 					autoThreadEnabled: settings?.autoThreadEnabled ?? false,
 					forumGuidelinesConsentEnabled:
 						settings?.forumGuidelinesConsentEnabled ?? false,
+					excludeFromSimilarThreads:
+						settings?.excludeFromSimilarThreads ?? false,
 					solutionTagId: settings?.solutionTagId,
 				},
 			};

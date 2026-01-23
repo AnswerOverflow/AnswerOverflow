@@ -30,6 +30,8 @@ const PlanSchema = Schema.Literal(
 	"OPEN_SOURCE",
 );
 
+const ChannelPurposeSchema = Schema.Literal("HELP", "GENERAL");
+
 const ServerPreferencesSchema = Schema.Struct({
 	serverId: Schema.BigIntFromSelf,
 	stripeCustomerId: Schema.optional(Schema.String),
@@ -106,6 +108,7 @@ const ChannelSettingsSchema = Schema.Struct({
 	lastIndexedSnowflake: Schema.optional(Schema.BigIntFromSelf),
 	inviteCode: Schema.optional(Schema.String),
 	excludeFromSimilarThreads: Schema.optional(Schema.Boolean),
+	purpose: Schema.optional(ChannelPurposeSchema),
 });
 
 const EmbedFooterSchema = Schema.Struct({
@@ -500,6 +503,7 @@ export {
 	ForumTagSchema,
 	ThreadTagSchema,
 	PlanSchema,
+	ChannelPurposeSchema,
 	ServerPreferencesSchema,
 	ServerSchema,
 	DiscordAccountSchema,
@@ -527,6 +531,7 @@ export const discordAccountSchema = compileSchema(DiscordAccountSchema);
 export const userServerSettingsSchema = compileSchema(UserServerSettingsSchema);
 
 export const planValidator = compileSchema(PlanSchema);
+export const channelPurposeValidator = compileSchema(ChannelPurposeSchema);
 export const githubIssueStatusValidator = compileSchema(
 	GitHubIssueStatusSchema,
 );
@@ -552,6 +557,7 @@ export type GitHubIssue = Schema.Schema.Type<typeof GitHubIssueSchema>;
 export type Embed = Schema.Schema.Type<typeof EmbedSchema>;
 export type ForumTag = Schema.Schema.Type<typeof ForumTagSchema>;
 export type AgentStatus = Schema.Schema.Type<typeof AgentStatusSchema>;
+export type ChannelPurpose = Schema.Schema.Type<typeof ChannelPurposeSchema>;
 export type ComponentButton = Schema.Schema.Type<typeof ComponentButtonSchema>;
 export type ComponentThumbnail = Schema.Schema.Type<
 	typeof ComponentThumbnailSchema

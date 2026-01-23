@@ -109,9 +109,11 @@ export const handleQuickActionCommand = Effect.fn("interaction.quick_action")(
 				serverId: BigInt(interaction.guildId),
 			});
 
-		const indexedChannels = Arr.filter(
+		const helpChannels = Arr.filter(
 			allServerChannels,
-			(channel) => channel.flags.indexingEnabled,
+			(channel) =>
+				channel.flags.indexingEnabled &&
+				(channel.flags.purpose ?? "HELP") === "HELP",
 		);
 
 		const guild = interaction.guild;
@@ -133,7 +135,7 @@ export const handleQuickActionCommand = Effect.fn("interaction.quick_action")(
 
 		const member = authorMember.value;
 
-		const checkChannelAccess = (channel: (typeof indexedChannels)[number]) =>
+		const checkChannelAccess = (channel: (typeof helpChannels)[number]) =>
 			catchAllSucceedNullWithReport(
 				discord.callClient(async () => {
 					const discordChannel = await guild.channels.fetch(
@@ -154,7 +156,7 @@ export const handleQuickActionCommand = Effect.fn("interaction.quick_action")(
 			);
 
 		const channelsTargetAuthorCanSee = yield* Effect.all(
-			Arr.map(indexedChannels, checkChannelAccess),
+			Arr.map(helpChannels, checkChannelAccess),
 			{ concurrency: "unbounded" },
 		);
 

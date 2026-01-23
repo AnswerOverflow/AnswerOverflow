@@ -32,6 +32,7 @@ export const DEFAULT_CHANNEL_SETTINGS = {
 	lastIndexedSnowflake: undefined,
 	inviteCode: undefined,
 	excludeFromSimilarThreads: undefined,
+	purpose: "HELP" as const,
 };
 
 export async function getChannelWithSettings(
