@@ -2,7 +2,7 @@ import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
-import { CHANNEL_TYPE, getIndexedChannelSettingsForServer } from "./channels";
+import { CHANNEL_TYPE } from "./channels";
 import type { QueryCtxWithCache } from "./dataAccess";
 import { getThreadStartMessage } from "./messages";
 
@@ -32,56 +32,34 @@ export async function findSimilarThreads(
 
 	const searchServerId = serverId ?? currentServerId;
 
-	const indexedSettings = await getIndexedChannelSettingsForServer(
-		ctx,
-		searchServerId,
-	);
-	const allowedChannelIds = Arr.filter(
-		indexedSettings,
-		(s) => !s.excludeFromSimilarThreads,
-	).map((s) => s.channelId);
-
-	if (allowedChannelIds.length === 0) {
+	// Only search within the current parent channel to reduce search requests
+	if (!currentParentChannelId) {
 		return [];
 	}
 
-	const fetchLimitPerChannel = Math.max(
-		Math.ceil((limit * 2) / allowedChannelIds.length),
-		3,
-	);
+	const fetchLimit = limit * 2;
 
-	const [threadsByNameResults, messageResultsPerChannel] = await Promise.all([
-		Promise.all(
-			allowedChannelIds.map((parentId) =>
-				ctx.db
-					.query("channels")
-					.withSearchIndex("search_name", (q) =>
-						q
-							.search("name", searchQuery)
-							.eq("type", CHANNEL_TYPE.PublicThread)
-							.eq("serverId", searchServerId)
-							.eq("parentId", parentId),
-					)
-					.take(fetchLimitPerChannel),
-			),
-		),
-		Promise.all(
-			allowedChannelIds.map((parentChannelId) =>
-				ctx.db
-					.query("messages")
-					.withSearchIndex("search_content", (q) =>
-						q
-							.search("content", searchQuery)
-							.eq("serverId", searchServerId)
-							.eq("parentChannelId", parentChannelId),
-					)
-					.take(fetchLimitPerChannel),
-			),
-		),
+	const [threadsByName, messageResults] = await Promise.all([
+		ctx.db
+			.query("channels")
+			.withSearchIndex("search_name", (q) =>
+				q
+					.search("name", searchQuery)
+					.eq("type", CHANNEL_TYPE.PublicThread)
+					.eq("serverId", searchServerId)
+					.eq("parentId", currentParentChannelId),
+			)
+			.take(fetchLimit),
+		ctx.db
+			.query("messages")
+			.withSearchIndex("search_content", (q) =>
+				q
+					.search("content", searchQuery)
+					.eq("serverId", searchServerId)
+					.eq("parentChannelId", currentParentChannelId),
+			)
+			.take(fetchLimit),
 	]);
-
-	const threadsByName = threadsByNameResults.flat();
-	const messageResults = messageResultsPerChannel.flat();
 
 	const threadIdsFromMessages = new Set(
 		Arr.filter(
@@ -160,8 +138,8 @@ export async function findSimilarThreads(
 		return 0;
 	});
 
-	const fetchLimit = Math.ceil(limit * 1.5);
-	const candidateThreadIds = sortedThreadIds.slice(0, fetchLimit);
+	const candidateFetchLimit = Math.ceil(limit * 1.5);
+	const candidateThreadIds = sortedThreadIds.slice(0, candidateFetchLimit);
 
 	const unknownThreadIds = Arr.filter(
 		candidateThreadIds,
