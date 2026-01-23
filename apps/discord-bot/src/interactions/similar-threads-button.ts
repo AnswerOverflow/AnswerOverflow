@@ -148,12 +148,14 @@ export const handleSimilarThreadsButtonInteraction = Effect.fn(
 	}
 
 	const threadName = thread.name;
+	const parentChannelId = thread.parentId;
 
 	let similarThreads = yield* database.public.search.getSimilarThreads(
 		{
 			searchQuery: threadName,
 			currentThreadId: threadId,
 			currentServerId: serverId,
+			currentParentChannelId: parentChannelId ?? undefined,
 			serverId: serverId,
 			limit: 4,
 		},
@@ -192,6 +194,7 @@ export const handleSimilarThreadsButtonInteraction = Effect.fn(
 					searchQuery: contentSnippet,
 					currentThreadId: threadId,
 					currentServerId: serverId,
+					currentParentChannelId: parentChannelId ?? undefined,
 					serverId: serverId,
 					limit: 5,
 				},

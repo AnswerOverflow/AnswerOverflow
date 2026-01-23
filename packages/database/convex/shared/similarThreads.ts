@@ -2,7 +2,7 @@ import { asyncMap } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
 import type { Doc } from "../_generated/dataModel";
-import { CHANNEL_TYPE } from "./channels";
+import { CHANNEL_TYPE, getIndexedChannelSettingsForServer } from "./channels";
 import type { QueryCtxWithCache } from "./dataAccess";
 import { getThreadStartMessage } from "./messages";
 
@@ -12,37 +12,76 @@ export async function findSimilarThreads(
 		searchQuery: string;
 		currentThreadId: bigint;
 		currentServerId: bigint;
+		currentParentChannelId?: bigint;
 		serverId?: bigint;
 		limit: number;
 	},
 ) {
-	const { searchQuery, currentThreadId, currentServerId, serverId, limit } =
-		args;
+	const {
+		searchQuery,
+		currentThreadId,
+		currentServerId,
+		currentParentChannelId,
+		serverId,
+		limit,
+	} = args;
 
 	if (!searchQuery.trim()) {
 		return [];
 	}
 
-	const fetchLimit = Math.ceil(limit * 1.5);
 	const searchServerId = serverId ?? currentServerId;
 
-	const [threadsByName, messageResults] = await Promise.all([
-		ctx.db
-			.query("channels")
-			.withSearchIndex("search_name", (q) =>
-				q
-					.search("name", searchQuery)
-					.eq("type", CHANNEL_TYPE.PublicThread)
-					.eq("serverId", searchServerId),
-			)
-			.take(fetchLimit),
-		ctx.db
-			.query("messages")
-			.withSearchIndex("search_content", (q) =>
-				q.search("content", searchQuery).eq("serverId", searchServerId),
-			)
-			.take(fetchLimit),
+	const indexedSettings = await getIndexedChannelSettingsForServer(
+		ctx,
+		searchServerId,
+	);
+	const allowedChannelIds = Arr.filter(
+		indexedSettings,
+		(s) => !s.excludeFromSimilarThreads,
+	).map((s) => s.channelId);
+
+	if (allowedChannelIds.length === 0) {
+		return [];
+	}
+
+	const fetchLimitPerChannel = Math.max(
+		Math.ceil((limit * 2) / allowedChannelIds.length),
+		3,
+	);
+
+	const [threadsByNameResults, messageResultsPerChannel] = await Promise.all([
+		Promise.all(
+			allowedChannelIds.map((parentId) =>
+				ctx.db
+					.query("channels")
+					.withSearchIndex("search_name", (q) =>
+						q
+							.search("name", searchQuery)
+							.eq("type", CHANNEL_TYPE.PublicThread)
+							.eq("serverId", searchServerId)
+							.eq("parentId", parentId),
+					)
+					.take(fetchLimitPerChannel),
+			),
+		),
+		Promise.all(
+			allowedChannelIds.map((parentChannelId) =>
+				ctx.db
+					.query("messages")
+					.withSearchIndex("search_content", (q) =>
+						q
+							.search("content", searchQuery)
+							.eq("serverId", searchServerId)
+							.eq("parentChannelId", parentChannelId),
+					)
+					.take(fetchLimitPerChannel),
+			),
+		),
 	]);
+
+	const threadsByName = threadsByNameResults.flat();
+	const messageResults = messageResultsPerChannel.flat();
 
 	const threadIdsFromMessages = new Set(
 		Arr.filter(
@@ -71,22 +110,43 @@ export async function findSimilarThreads(
 	allThreadIds.delete(currentThreadId.toString());
 
 	const threadServerMap = new Map<string, bigint>();
+	const threadParentMap = new Map<string, bigint>();
 	const threadsByIdMap = new Map<string, Doc<"channels">>();
 	for (const thread of threadsByName) {
 		const idStr = thread.id.toString();
 		threadServerMap.set(idStr, thread.serverId);
+		if (thread.parentId) {
+			threadParentMap.set(idStr, thread.parentId);
+		}
 		threadsByIdMap.set(idStr, thread);
 	}
 	for (const message of messageResults) {
 		if (message.parentChannelId) {
 			threadServerMap.set(message.channelId.toString(), message.serverId);
+			threadParentMap.set(
+				message.channelId.toString(),
+				message.parentChannelId,
+			);
 		}
 		if (message.childThreadId) {
 			threadServerMap.set(message.childThreadId.toString(), message.serverId);
+			if (message.parentChannelId) {
+				threadParentMap.set(
+					message.childThreadId.toString(),
+					message.parentChannelId,
+				);
+			}
 		}
 	}
 
 	const sortedThreadIds = Array.from(allThreadIds).sort((a, b) => {
+		if (currentParentChannelId) {
+			const aIsSameChannel = threadParentMap.get(a) === currentParentChannelId;
+			const bIsSameChannel = threadParentMap.get(b) === currentParentChannelId;
+			if (aIsSameChannel && !bIsSameChannel) return -1;
+			if (!aIsSameChannel && bIsSameChannel) return 1;
+		}
+
 		const aIsSameServer = threadServerMap.get(a) === currentServerId;
 		const bIsSameServer = threadServerMap.get(b) === currentServerId;
 		if (aIsSameServer && !bIsSameServer) return -1;
@@ -100,6 +160,7 @@ export async function findSimilarThreads(
 		return 0;
 	});
 
+	const fetchLimit = Math.ceil(limit * 1.5);
 	const candidateThreadIds = sortedThreadIds.slice(0, fetchLimit);
 
 	const unknownThreadIds = Arr.filter(

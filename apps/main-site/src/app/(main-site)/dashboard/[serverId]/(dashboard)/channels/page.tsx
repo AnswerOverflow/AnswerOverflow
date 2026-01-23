@@ -45,6 +45,14 @@ import { useQueryState } from "nuqs";
 import React from "react";
 import { useAuthenticatedQuery } from "../../../../../../lib/use-authenticated-query";
 
+type ChannelFlagKey =
+	| "indexingEnabled"
+	| "markSolutionEnabled"
+	| "sendMarkSolutionInstructionsInNewThreads"
+	| "autoThreadEnabled"
+	| "forumGuidelinesConsentEnabled"
+	| "excludeFromSimilarThreads";
+
 function ToggleChannelFlag({
 	title,
 	description,
@@ -57,12 +65,7 @@ function ToggleChannelFlag({
 }: {
 	title: string;
 	description: string;
-	flagKey:
-		| "indexingEnabled"
-		| "markSolutionEnabled"
-		| "sendMarkSolutionInstructionsInNewThreads"
-		| "autoThreadEnabled"
-		| "forumGuidelinesConsentEnabled";
+	flagKey: ChannelFlagKey;
 	checked: boolean;
 	onChange: (checked: boolean) => void;
 	disabled?: boolean;
@@ -402,14 +405,7 @@ export default function ChannelsPage() {
 		}
 	};
 
-	const getFlagValue = (
-		flagKey:
-			| "indexingEnabled"
-			| "markSolutionEnabled"
-			| "sendMarkSolutionInstructionsInNewThreads"
-			| "autoThreadEnabled"
-			| "forumGuidelinesConsentEnabled",
-	): boolean | "mixed" => {
+	const getFlagValue = (flagKey: ChannelFlagKey): boolean | "mixed" => {
 		if (selectedChannels.length === 0) return false;
 		const values = selectedChannels.map((c) => c.flags[flagKey]);
 		const firstValue = values[0];
@@ -419,14 +415,7 @@ export default function ChannelsPage() {
 		return "mixed";
 	};
 
-	const isFlagDisabled = (
-		flagKey:
-			| "indexingEnabled"
-			| "markSolutionEnabled"
-			| "sendMarkSolutionInstructionsInNewThreads"
-			| "autoThreadEnabled"
-			| "forumGuidelinesConsentEnabled",
-	): boolean => {
+	const isFlagDisabled = (flagKey: ChannelFlagKey): boolean => {
 		if (flagKey === "sendMarkSolutionInstructionsInNewThreads") {
 			return getFlagValue("markSolutionEnabled") !== true;
 		}
@@ -460,12 +449,7 @@ export default function ChannelsPage() {
 	};
 
 	const handleChannelToggle = async (
-		flagKey:
-			| "indexingEnabled"
-			| "markSolutionEnabled"
-			| "sendMarkSolutionInstructionsInNewThreads"
-			| "autoThreadEnabled"
-			| "forumGuidelinesConsentEnabled",
+		flagKey: ChannelFlagKey,
 		checked: boolean,
 	) => {
 		if (selectedChannels.length === 0) return;
@@ -874,6 +858,24 @@ export default function ChannelsPage() {
 													}
 												/>
 											)}
+
+											<ToggleChannelFlag
+												title="Exclude from Similar Threads"
+												description="Exclude threads from this channel when showing 'View Similar Threads' results. Useful for showcase or example channels that aren't relevant to help/support questions."
+												flagKey="excludeFromSimilarThreads"
+												checked={
+													getFlagValue("excludeFromSimilarThreads") === true
+												}
+												isMixed={
+													getFlagValue("excludeFromSimilarThreads") === "mixed"
+												}
+												onChange={(checked) =>
+													handleChannelToggle(
+														"excludeFromSimilarThreads",
+														checked,
+													)
+												}
+											/>
 										</div>
 									)}
 								</div>

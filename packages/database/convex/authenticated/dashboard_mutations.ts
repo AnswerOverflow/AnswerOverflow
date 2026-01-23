@@ -78,6 +78,7 @@ export const updateChannelSettingsFlags = guildManagerMutation({
 			sendMarkSolutionInstructionsInNewThreads: v.optional(v.boolean()),
 			autoThreadEnabled: v.optional(v.boolean()),
 			forumGuidelinesConsentEnabled: v.optional(v.boolean()),
+			excludeFromSimilarThreads: v.optional(v.boolean()),
 		}),
 	},
 	handler: async (ctx, args) => {

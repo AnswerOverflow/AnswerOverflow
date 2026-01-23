@@ -173,6 +173,7 @@ export const getSimilarThreads = publicQuery({
 		searchQuery: v.string(),
 		currentThreadId: v.string(),
 		currentServerId: v.string(),
+		currentParentChannelId: v.optional(v.string()),
 		serverId: v.optional(v.string()),
 		limit: v.optional(v.number()),
 	},
@@ -182,6 +183,9 @@ export const getSimilarThreads = publicQuery({
 			searchQuery: args.searchQuery,
 			currentThreadId: BigInt(args.currentThreadId),
 			currentServerId: BigInt(args.currentServerId),
+			currentParentChannelId: args.currentParentChannelId
+				? BigInt(args.currentParentChannelId)
+				: undefined,
 			serverId: args.serverId ? BigInt(args.serverId) : undefined,
 			limit,
 		});
@@ -195,6 +199,7 @@ export const getSimilarThreadsInternal = internalQuery({
 		searchQuery: v.string(),
 		currentThreadId: v.string(),
 		currentServerId: v.string(),
+		currentParentChannelId: v.optional(v.string()),
 		serverId: v.optional(v.string()),
 		limit: v.optional(v.number()),
 	},
@@ -206,6 +211,9 @@ export const getSimilarThreadsInternal = internalQuery({
 			searchQuery: args.searchQuery,
 			currentThreadId: BigInt(args.currentThreadId),
 			currentServerId: BigInt(args.currentServerId),
+			currentParentChannelId: args.currentParentChannelId
+				? BigInt(args.currentParentChannelId)
+				: undefined,
 			serverId: args.serverId ? BigInt(args.serverId) : undefined,
 			limit,
 		});
@@ -222,6 +230,7 @@ export const fetchSimilarThreadsInternal = internalAction({
 		searchQuery: v.string(),
 		currentThreadId: v.string(),
 		currentServerId: v.string(),
+		currentParentChannelId: v.optional(v.string()),
 		serverId: v.optional(v.string()),
 		limit: v.optional(v.number()),
 	},
@@ -245,6 +254,7 @@ export const getCachedSimilarThreads = publicAction({
 		searchQuery: v.string(),
 		currentThreadId: v.string(),
 		currentServerId: v.string(),
+		currentParentChannelId: v.optional(v.string()),
 		serverId: v.optional(v.string()),
 		limit: v.optional(v.number()),
 	},
@@ -253,6 +263,7 @@ export const getCachedSimilarThreads = publicAction({
 			searchQuery: args.searchQuery,
 			currentThreadId: args.currentThreadId,
 			currentServerId: args.currentServerId,
+			currentParentChannelId: args.currentParentChannelId,
 			serverId: args.serverId,
 			limit: args.limit,
 		});

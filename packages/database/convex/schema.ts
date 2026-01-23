@@ -105,6 +105,7 @@ const ChannelSettingsSchema = Schema.Struct({
 	solutionTagId: Schema.optional(Schema.BigIntFromSelf),
 	lastIndexedSnowflake: Schema.optional(Schema.BigIntFromSelf),
 	inviteCode: Schema.optional(Schema.String),
+	excludeFromSimilarThreads: Schema.optional(Schema.Boolean),
 });
 
 const EmbedFooterSchema = Schema.Struct({

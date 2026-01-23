@@ -31,6 +31,7 @@ export const DEFAULT_CHANNEL_SETTINGS = {
 	solutionTagId: undefined,
 	lastIndexedSnowflake: undefined,
 	inviteCode: undefined,
+	excludeFromSimilarThreads: undefined,
 };
 
 export async function getChannelWithSettings(
@@ -156,4 +157,16 @@ export async function getIndexedChannelIdsForServer(
 		.collect();
 
 	return new Set(indexedSettings.map((s) => s.channelId));
+}
+
+export async function getIndexedChannelSettingsForServer(
+	ctx: QueryCtx | MutationCtx,
+	serverId: bigint,
+) {
+	return ctx.db
+		.query("channelSettings")
+		.withIndex("by_serverId_and_indexingEnabled", (q) =>
+			q.eq("serverId", serverId).eq("indexingEnabled", true),
+		)
+		.collect();
 }
