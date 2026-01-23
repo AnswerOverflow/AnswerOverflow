@@ -359,7 +359,7 @@ function List({
 
 function Timestamp({ children }: { children: string }) {
 	return (
-		<span className="rounded bg-neutral-200">
+		<span className="rounded bg-muted px-1">
 			{dayjs.unix(Number(children)).format("MMMM D, YYYY")}
 		</span>
 	);
