@@ -12,6 +12,7 @@ import {
 } from "@packages/ui/components/card";
 import { CustomDomain } from "@packages/ui/components/custom-domain";
 import { Label } from "@packages/ui/components/label";
+import { SponsorUrl } from "@packages/ui/components/sponsor-url";
 import { Switch } from "@packages/ui/components/switch";
 import { useMutation } from "convex/react";
 import { useParams } from "next/navigation";
@@ -203,6 +204,10 @@ export default function SettingsPage() {
 				onChange={(checked) =>
 					handleServerToggle("lockOnMarkSolution", checked)
 				}
+			/>
+			<SponsorUrl
+				defaultUrl={preferences.sponsorUrl}
+				serverId={BigInt(serverId)}
 			/>
 			<TierAccessOnly
 				enabledFor={["PRO", "ENTERPRISE", "ADVANCED", "STARTER", "OPEN_SOURCE"]}

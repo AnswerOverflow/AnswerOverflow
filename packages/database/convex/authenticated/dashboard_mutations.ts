@@ -20,6 +20,7 @@ export const updateServerPreferencesFlags = guildManagerMutation({
 			anonymizeMessagesEnabled: v.optional(v.boolean()),
 			archiveOnMarkSolution: v.optional(v.boolean()),
 			lockOnMarkSolution: v.optional(v.boolean()),
+			sponsorUrl: v.optional(v.union(v.string(), v.null())),
 		}),
 	},
 	handler: async (ctx, args) => {
@@ -27,6 +28,12 @@ export const updateServerPreferencesFlags = guildManagerMutation({
 		if (!server) {
 			throw new Error("Server not found");
 		}
+
+		const flags = {
+			...args.flags,
+			sponsorUrl:
+				args.flags.sponsorUrl === null ? undefined : args.flags.sponsorUrl,
+		};
 
 		let preferences: Awaited<
 			ReturnType<typeof ctx.db.get<"serverPreferences">>
@@ -43,7 +50,7 @@ export const updateServerPreferencesFlags = guildManagerMutation({
 			const preferencesId = await ctx.db.insert("serverPreferences", {
 				serverId: args.serverId,
 				plan: "FREE",
-				...args.flags,
+				...flags,
 			});
 
 			preferences = await getOneFrom(
@@ -58,7 +65,7 @@ export const updateServerPreferencesFlags = guildManagerMutation({
 				preferences = await ctx.db.get(preferencesId);
 			}
 		} else {
-			await ctx.db.patch(preferences._id, args.flags);
+			await ctx.db.patch(preferences._id, flags);
 			preferences = await ctx.db.get(preferences._id);
 		}
 
