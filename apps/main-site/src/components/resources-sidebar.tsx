@@ -21,9 +21,10 @@ import {
 	SelectValue,
 } from "@packages/ui/components/select";
 import { useTenant } from "@packages/ui/components/tenant-context";
+import { TrackLink } from "@packages/ui/components/track-link";
 import { cn } from "@packages/ui/lib/utils";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Heart } from "lucide-react";
 import { parseAsBoolean, useQueryState } from "nuqs";
 import { useState } from "react";
 import { mcpProviders } from "./mcp-install-configs";
@@ -203,7 +204,18 @@ export function MCPServerResource() {
 	);
 }
 
-export function ResourcesSidebar({ className }: { className?: string }) {
+export function ResourcesSidebar({
+	className,
+	sponsorUrl,
+}: {
+	className?: string;
+	sponsorUrl?: string | null;
+}) {
+	const isGitHubSponsor = sponsorUrl?.includes("github.com/sponsors");
+	const sponsorLabel = isGitHubSponsor
+		? "GitHub Sponsor"
+		: "Support the project";
+
 	return (
 		<div className={cn("text-left", className)}>
 			<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide mb-2">
@@ -211,6 +223,23 @@ export function ResourcesSidebar({ className }: { className?: string }) {
 			</div>
 			<nav className="space-y-0.5">
 				<MCPServerResource />
+				{sponsorUrl && (
+					<TrackLink
+						href={sponsorUrl}
+						eventName="Sponsor Link Click"
+						eventData={{
+							url: sponsorUrl,
+							type: isGitHubSponsor ? "github" : "other",
+						}}
+						className={cn(
+							"flex items-center gap-2 py-1.5 rounded text-sm transition-colors w-full",
+							"text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+						)}
+					>
+						<Heart className="size-4 shrink-0 opacity-60" />
+						<span className="truncate">{sponsorLabel}</span>
+					</TrackLink>
+				)}
 			</nav>
 		</div>
 	);

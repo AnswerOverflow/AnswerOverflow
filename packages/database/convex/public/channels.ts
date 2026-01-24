@@ -367,6 +367,7 @@ async function getServerHeaderData(
 			...server,
 			customDomain: serverPreferences?.customDomain,
 			subpath: serverPreferences?.subpath,
+			sponsorUrl: serverPreferences?.sponsorUrl,
 			inviteCode,
 		},
 		channels: indexedChannels,

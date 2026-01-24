@@ -49,6 +49,7 @@ const ServerPreferencesSchema = Schema.Struct({
 	botAvatarStorageId: Schema.optional(Id.Id("_storage")),
 	botBannerStorageId: Schema.optional(Id.Id("_storage")),
 	botBio: Schema.optional(Schema.String),
+	sponsorUrl: Schema.optional(Schema.String),
 });
 
 const ServerSchema = Schema.Struct({

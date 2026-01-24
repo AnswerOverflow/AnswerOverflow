@@ -627,7 +627,10 @@ export function MessagePage(props: {
 										</Link>
 									)}
 								</div>
-								<ResourcesSidebar className="w-full pt-4 border-t" />
+								<ResourcesSidebar
+									className="w-full pt-4 border-t"
+									sponsorUrl={headerData.server.sponsorUrl}
+								/>
 								{recentAnnouncementsSlot}
 							</div>
 						</div>

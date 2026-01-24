@@ -157,6 +157,7 @@ export const getMessagePageHeaderData = publicQuery({
 				customDomain: serverPreferences?.customDomain,
 				subpath: serverPreferences?.subpath,
 				vanityInviteCode: server.vanityInviteCode,
+				sponsorUrl: serverPreferences?.sponsorUrl,
 			},
 			channel: {
 				id: channel.id,

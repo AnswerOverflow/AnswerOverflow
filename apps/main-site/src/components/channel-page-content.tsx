@@ -204,18 +204,20 @@ function ChannelsSidebar({
 	selectedChannelId,
 	serverDiscordId,
 	tenantMode,
+	sponsorUrl,
 }: {
 	channels: CommunityPageHeaderData["channels"];
 	categories: CommunityPageHeaderData["categories"];
 	selectedChannelId: bigint | null;
 	serverDiscordId: bigint;
 	tenantMode: boolean;
+	sponsorUrl?: string | null;
 }) {
 	const hasCategories = categories.length > 0;
 	return (
 		<aside className="w-52 shrink-0">
 			<div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
-				<ResourcesSidebar className="mb-4 px-2" />
+				<ResourcesSidebar className="mb-4 px-2" sponsorUrl={sponsorUrl} />
 				{!hasCategories && (
 					<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
 						Channels
@@ -239,12 +241,14 @@ function MobileChannelSheet({
 	selectedChannelId,
 	serverDiscordId,
 	tenantMode,
+	sponsorUrl,
 }: {
 	channels: CommunityPageHeaderData["channels"];
 	categories: CommunityPageHeaderData["categories"];
 	selectedChannelId: bigint | null;
 	serverDiscordId: bigint;
 	tenantMode: boolean;
+	sponsorUrl?: string | null;
 }) {
 	const [open, setOpen] = useState(false);
 	const hasCategories = categories.length > 0;
@@ -272,7 +276,7 @@ function MobileChannelSheet({
 					<SheetTitle className="text-left">Navigation</SheetTitle>
 				</SheetHeader>
 				<div className="p-2">
-					<ResourcesSidebar className="mb-4 px-2" />
+					<ResourcesSidebar className="mb-4 px-2" sponsorUrl={sponsorUrl} />
 					{!hasCategories && (
 						<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
 							Channels
@@ -606,6 +610,7 @@ type CommunityPageContentProps = {
 	categories: CommunityPageHeaderData["categories"];
 	selectedChannel?: CommunityPageHeaderData["selectedChannel"] | null;
 	children: React.ReactNode;
+	sponsorUrl?: string | null;
 };
 
 export function CommunityPageContent({
@@ -614,6 +619,7 @@ export function CommunityPageContent({
 	categories,
 	selectedChannel = null,
 	children,
+	sponsorUrl,
 }: CommunityPageContentProps) {
 	const tenant = useTenant();
 	const tenantMode = !!tenant;
@@ -707,6 +713,7 @@ export function CommunityPageContent({
 							selectedChannelId={selectedChannel?.id ?? null}
 							serverDiscordId={server.discordId}
 							tenantMode={tenantMode}
+							sponsorUrl={sponsorUrl}
 						/>
 					</div>
 
@@ -718,6 +725,7 @@ export function CommunityPageContent({
 								selectedChannelId={selectedChannel?.id ?? null}
 								serverDiscordId={server.discordId}
 								tenantMode={tenantMode}
+								sponsorUrl={sponsorUrl}
 							/>
 						</div>
 

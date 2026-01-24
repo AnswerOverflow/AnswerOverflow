@@ -113,6 +113,10 @@ export type ClientEvents = {
 		guildId: string;
 		inviteUrl: string;
 	};
+	"Sponsor Link Click": {
+		url: string | null | undefined;
+		type: "github" | "other";
+	};
 };
 
 export type ClientEventName = keyof ClientEvents;

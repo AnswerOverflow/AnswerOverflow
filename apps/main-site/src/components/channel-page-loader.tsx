@@ -290,6 +290,7 @@ export async function ServerPageLoader(props: {
 			server={headerData.server}
 			channels={headerData.channels}
 			categories={headerData.categories}
+			sponsorUrl={headerData.server.sponsorUrl}
 		>
 			<Suspense fallback={<ThreadsSkeleton />}>
 				<ServerThreadsLoader
@@ -325,6 +326,7 @@ export async function ChannelPageLoader(props: {
 			channels={headerData.channels}
 			categories={headerData.categories}
 			selectedChannel={headerData.selectedChannel}
+			sponsorUrl={headerData.server.sponsorUrl}
 		>
 			<Suspense fallback={<ThreadsSkeleton />}>
 				{isAnnouncement ? (
