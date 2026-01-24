@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { literals } from "convex-helpers/validators";
+import { ChannelType } from "discord-api-types/v10";
 import { guildManagerMutation } from "../client/guildManager";
 import { getServerByDiscordId, validateCustomDomain } from "../shared/shared";
 
@@ -213,7 +214,7 @@ export const updateChannelSolutionTag = guildManagerMutation({
 			throw new Error("Channel not found");
 		}
 
-		if (channel.type !== 15) {
+		if (channel.type !== ChannelType.GuildForum) {
 			throw new Error("Solution tags can only be set on forum channels");
 		}
 
@@ -252,6 +253,68 @@ export const updateChannelSolutionTag = guildManagerMutation({
 
 		await ctx.db.patch(settings._id, {
 			solutionTagId: args.solutionTagId ?? undefined,
+			serverId: channel.serverId,
+		});
+
+		return settings._id;
+	},
+});
+
+export const updateChannelTagsToRemoveOnSolve = guildManagerMutation({
+	args: {
+		channelId: v.int64(),
+		tagIds: v.array(v.int64()),
+	},
+	handler: async (ctx, args) => {
+		const channel = await getOneFrom(
+			ctx.db,
+			"channels",
+			"by_discordChannelId",
+			args.channelId,
+			"id",
+		);
+
+		if (!channel) {
+			throw new Error("Channel not found");
+		}
+
+		if (channel.type !== ChannelType.GuildForum) {
+			throw new Error("Tags to remove can only be set on forum channels");
+		}
+
+		for (const tagId of args.tagIds) {
+			const tagExists = channel.availableTags?.some((tag) => tag.id === tagId);
+			if (!tagExists) {
+				throw new Error(
+					`Tag ${tagId} does not exist in this channel's available tags`,
+				);
+			}
+		}
+
+		const settings = await getOneFrom(
+			ctx.db,
+			"channelSettings",
+			"by_channelId",
+			args.channelId,
+			"channelId",
+		);
+
+		if (!settings) {
+			const settingsId = await ctx.db.insert("channelSettings", {
+				channelId: args.channelId,
+				serverId: channel.serverId,
+				indexingEnabled: false,
+				markSolutionEnabled: false,
+				sendMarkSolutionInstructionsInNewThreads: false,
+				autoThreadEnabled: false,
+				forumGuidelinesConsentEnabled: false,
+				tagsToRemoveOnSolve: args.tagIds,
+			});
+			return settingsId;
+		}
+
+		await ctx.db.patch(settings._id, {
+			tagsToRemoveOnSolve: args.tagIds,
 			serverId: channel.serverId,
 		});
 

@@ -107,6 +107,9 @@ const ChannelSettingsSchema = Schema.Struct({
 	autoThreadEnabled: Schema.Boolean,
 	forumGuidelinesConsentEnabled: Schema.Boolean,
 	solutionTagId: Schema.optional(Schema.BigIntFromSelf),
+	tagsToRemoveOnSolve: Schema.optional(
+		Schema.Array(Schema.BigIntFromSelf).pipe(Schema.mutable),
+	),
 	lastIndexedSnowflake: Schema.optional(Schema.BigIntFromSelf),
 	inviteCode: Schema.optional(Schema.String),
 	excludeFromSimilarThreads: Schema.optional(Schema.Boolean),
