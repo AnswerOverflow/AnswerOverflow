@@ -19,6 +19,7 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	initialLoaderCount?: number;
 	loadMoreLoaderCount?: number;
 	emptyState?: ReactNode;
+	footer?: ReactNode;
 	className?: string;
 	itemClassName?: string;
 	initialData?: {
@@ -56,6 +57,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	initialLoaderCount = 5,
 	loadMoreLoaderCount = 3,
 	emptyState,
+	footer,
 	initialData,
 	className,
 	itemClassName = "mb-4",
@@ -111,7 +113,12 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	}
 
 	if (isEmpty && emptyState) {
-		return <>{emptyState}</>;
+		return (
+			<>
+				{emptyState}
+				{footer}
+			</>
+		);
 	}
 
 	if (!hasResults) {
@@ -139,6 +146,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 								loader={loaderElement}
 							/>
 						)}
+						{status === "Exhausted" && footer}
 						<div className="hidden sm:block h-16" aria-hidden="true" />
 					</>
 				),

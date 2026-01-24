@@ -229,6 +229,47 @@ export function MessageContent(props: {
 	);
 }
 
+function JoinDiscordCTA(props: {
+	server: MessagePageHeaderData["server"];
+	channel: MessagePageHeaderData["channel"];
+	hasReplies: boolean;
+}) {
+	const { server, channel, hasReplies } = props;
+
+	return (
+		<div className="mt-4 rounded-lg p-5 flex flex-col items-center text-center">
+			<h3 className="text-base font-semibold mb-1">
+				{hasReplies ? "Continue the conversation" : "No replies yet"}
+			</h3>
+			<p className="text-sm text-muted-foreground mb-4">
+				{hasReplies
+					? "Join the Discord to ask follow-up questions and connect with the community"
+					: "Join the Discord to continue the conversation"}
+			</p>
+			<div className="flex items-start gap-4 rounded-lg bg-[#2b2d31] p-3 max-w-[350px]">
+				<ServerIcon server={server} size={44} className="shrink-0" />
+				<div className="min-w-0 text-left flex-1">
+					<h4 className="text-sm font-semibold text-white">{server.name}</h4>
+					{server.description && (
+						<p className="text-xs text-[#b5bac1]">{server.description}</p>
+					)}
+					{server.approximateMemberCount !== undefined && (
+						<p className="text-xs text-[#b5bac1] mt-1">
+							<FormattedNumber value={server.approximateMemberCount} /> Members
+						</p>
+					)}
+					<ServerInviteJoinButton
+						server={server}
+						channel={channel}
+						location="Message Result Page"
+						className="bg-[#248046] hover:bg-[#1a6334] text-white mt-2 w-full"
+					/>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export function RepliesSection(props: {
 	channelId: bigint;
 	after: bigint;
@@ -281,24 +322,15 @@ export function RepliesSection(props: {
 						loader={<ReplyMessageSkeleton />}
 						initialData={filteredInitialData}
 						filterResults={filterMessages}
-						emptyState={
+						emptyState={<></>}
+						footer={
 							server && channel ? (
-								<div className="flex flex-col gap-4 rounded-md border-2 border-solid border-secondary p-4">
-									<span className="text-lg font-semibold">No replies yet</span>
-									<span className="text-muted-foreground">
-										Be the first to reply to this message
-									</span>
-									<ServerInviteJoinButton
-										server={server}
-										channel={channel}
-										location="Message Result Page"
-									/>
-								</div>
-							) : (
-								<div className="text-center py-12 text-muted-foreground">
-									No replies yet
-								</div>
-							)
+								<JoinDiscordCTA
+									server={server}
+									channel={channel}
+									hasReplies={(filteredInitialData?.page.length ?? 0) > 0}
+								/>
+							) : undefined
 						}
 						renderItem={(message) => (
 							<ReplyMessage
