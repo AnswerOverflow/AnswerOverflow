@@ -38,7 +38,6 @@ export const FUNCTION_TYPE_MAP = {
   "dashboard_mutations.updateBotCustomization": "mutation",
   "dashboard_mutations.updateChannelSettingsFlags": "mutation",
   "dashboard_mutations.updateChannelSolutionTag": "mutation",
-  "dashboard_mutations.updateChannelTagsToRemoveOnSolve": "mutation",
   "dashboard_mutations.updateCustomDomain": "mutation",
   "dashboard_mutations.updateServerPreferencesFlags": "mutation",
   "dashboard_queries.getDashboardData": "query",
@@ -149,7 +148,7 @@ export const NAMESPACE_STRUCTURE = {
 export const AUTHENTICATED_NAMESPACE_STRUCTURE = {
   "admin": [],
   "dashboard": ["getPageViewsForServer","getQuestionsAndAnswers","getServerInvitesClicked","getTopPagesForServer","getTopQuestionSolversForServer","getUserServers","trackBotAddClick"],
-  "dashboard_mutations": ["generateBotCustomizationUploadUrl","updateBotCustomization","updateChannelSettingsFlags","updateChannelSolutionTag","updateChannelTagsToRemoveOnSolve","updateCustomDomain","updateServerPreferencesFlags"],
+  "dashboard_mutations": ["generateBotCustomizationUploadUrl","updateBotCustomization","updateChannelSettingsFlags","updateChannelSolutionTag","updateCustomDomain","updateServerPreferencesFlags"],
   "dashboard_queries": ["getDashboardData","getIndexedMessageCount","getUserServersForDropdown"],
   "discord_token": [],
   "github": [],

@@ -29,8 +29,5 @@ USER bun
 # Set the working directory for the Discord bot
 WORKDIR /usr/src/app/apps/discord-bot
 
-# Expose health check port
-EXPOSE 8080
-
 # Run the Discord bot
 CMD ["bun", "start"]

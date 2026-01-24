@@ -33,7 +33,6 @@
       "name": "@packages/discord-bot",
       "dependencies": {
         "@effect/cluster": "catalog:",
-        "@effect/platform": "catalog:",
         "@effect/platform-node": "catalog:",
         "@packages/database": "workspace:*",
         "@packages/database-utils": "workspace:*",
