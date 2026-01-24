@@ -302,6 +302,8 @@ export const handleMarkSolutionCommand = Effect.fn("mark_solution_command")(
 		yield* Effect.forkDaemon(
 			Effect.gen(function* () {
 				const solutionTagId = channelSettings?.flags?.solutionTagId;
+				const tagsToRemoveOnSolve =
+					channelSettings?.flags?.tagsToRemoveOnSolve ?? [];
 				const PUBG_MOBILE_SERVER_ID = "393088095840370689";
 
 				if (thread.guildId === PUBG_MOBILE_SERVER_ID && solutionTagId) {
@@ -312,17 +314,26 @@ export const handleMarkSolutionCommand = Effect.fn("mark_solution_command")(
 					);
 				} else if (
 					parentChannel.type === ChannelType.GuildForum &&
-					solutionTagId &&
-					thread.appliedTags.length < 5 &&
-					!thread.appliedTags.includes(solutionTagId.toString())
+					(solutionTagId || tagsToRemoveOnSolve.length > 0)
 				) {
+					const tagsToRemoveSet = new Set(
+						tagsToRemoveOnSolve.map((t) => t.toString()),
+					);
+					const newTags = thread.appliedTags.filter(
+						(tag) => !tagsToRemoveSet.has(tag),
+					);
+
+					const solutionTagIdStr = solutionTagId?.toString();
+					if (
+						solutionTagIdStr &&
+						newTags.length < 5 &&
+						!newTags.includes(solutionTagIdStr)
+					) {
+						newTags.push(solutionTagIdStr);
+					}
+
 					yield* catchAllSilentWithReport(
-						discord.callClient(() =>
-							thread.setAppliedTags([
-								...thread.appliedTags,
-								solutionTagId.toString(),
-							]),
-						),
+						discord.callClient(() => thread.setAppliedTags(newTags)),
 					);
 				} else {
 					yield* catchAllSilentWithReport(
