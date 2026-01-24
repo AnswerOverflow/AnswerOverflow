@@ -2,7 +2,11 @@
 
 import { stepCountIs } from "@packages/agent";
 import { createHttpContext } from "@packages/agent/http";
-import { createSandboxTools, createVirtualBash } from "@packages/ai/tools";
+import {
+	createMCPToolsFromServers,
+	createSandboxTools,
+	createVirtualBash,
+} from "@packages/ai/tools";
 import { api } from "@packages/database/convex/_generated/api";
 import {
 	createChatAgent,
@@ -50,6 +54,45 @@ export async function streamChat(args: {
 		serverId: serverContext?.discordId,
 		includeServerInfo: !serverContext,
 	});
+
+	const serverMCPServers = serverContext?.discordId
+		? await Effect.gen(function* () {
+				const database = yield* Database;
+				const serverPreferences =
+					yield* database.private.server_preferences.getServerPreferencesByServerId(
+						{ serverId: BigInt(serverContext.discordId) },
+						{ subscribe: false },
+					);
+				return serverPreferences?.mcpServers ?? [];
+			}).pipe(runtime.runPromise)
+		: [];
+
+	const mcpToolsResult = serverMCPServers.length
+		? await createMCPToolsFromServers(serverMCPServers)
+		: { tools: {}, connections: [] };
+
+	if (mcpToolsResult.connections.length > 0) {
+		const successCount = mcpToolsResult.connections.filter(
+			(c) => !c.error,
+		).length;
+		const failedCount = mcpToolsResult.connections.filter(
+			(c) => c.error,
+		).length;
+		console.log(
+			`[streamChat] MCP servers: ${successCount} connected, ${failedCount} failed`,
+		);
+		for (const conn of mcpToolsResult.connections) {
+			if (conn.error) {
+				console.warn(
+					`[streamChat] MCP "${conn.serverName}" failed: ${conn.error}`,
+				);
+			} else {
+				console.log(
+					`[streamChat] MCP "${conn.serverName}" loaded ${Object.keys(conn.tools).length} tools`,
+				);
+			}
+		}
+	}
 
 	const model = getModelById(modelId);
 	const modelName = model?.name ?? "Unknown Model";
@@ -103,6 +146,7 @@ export async function streamChat(args: {
 					...agent.options.tools,
 					...answerOverflowTools,
 					...sandboxTools,
+					...mcpToolsResult.tools,
 				},
 				stopWhen: stepCountIs(150),
 				providerOptions: {

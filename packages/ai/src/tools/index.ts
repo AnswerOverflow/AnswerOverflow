@@ -9,6 +9,13 @@ export {
 	type VirtualBashResult,
 } from "../sandbox/virtual-bash";
 export {
+	createMCPToolsFromServers,
+	getMCPServerFromToolName,
+	type MCPConnectionResult,
+	type MCPServerConfig,
+	type MCPToolsResult,
+} from "./mcp-tools";
+export {
 	createSandboxTools,
 	type SandboxBashInput,
 	type SandboxEditInput,

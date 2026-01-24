@@ -32,6 +32,11 @@ const PlanSchema = Schema.Literal(
 
 const ChannelPurposeSchema = Schema.Literal("HELP", "GENERAL");
 
+const MCPServerConfigSchema = Schema.Struct({
+	name: Schema.String,
+	url: Schema.String,
+});
+
 const ServerPreferencesSchema = Schema.Struct({
 	serverId: Schema.BigIntFromSelf,
 	stripeCustomerId: Schema.optional(Schema.String),
@@ -49,6 +54,9 @@ const ServerPreferencesSchema = Schema.Struct({
 	botAvatarStorageId: Schema.optional(Id.Id("_storage")),
 	botBannerStorageId: Schema.optional(Id.Id("_storage")),
 	botBio: Schema.optional(Schema.String),
+	mcpServers: Schema.optional(
+		Schema.Array(MCPServerConfigSchema).pipe(Schema.mutable),
+	),
 });
 
 const ServerSchema = Schema.Struct({
@@ -562,6 +570,7 @@ export type Embed = Schema.Schema.Type<typeof EmbedSchema>;
 export type ForumTag = Schema.Schema.Type<typeof ForumTagSchema>;
 export type AgentStatus = Schema.Schema.Type<typeof AgentStatusSchema>;
 export type ChannelPurpose = Schema.Schema.Type<typeof ChannelPurposeSchema>;
+export type MCPServerConfig = Schema.Schema.Type<typeof MCPServerConfigSchema>;
 export type ComponentButton = Schema.Schema.Type<typeof ComponentButtonSchema>;
 export type ComponentThumbnail = Schema.Schema.Type<
 	typeof ComponentThumbnailSchema

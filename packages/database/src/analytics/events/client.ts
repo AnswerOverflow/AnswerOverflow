@@ -113,6 +113,14 @@ export type ClientEvents = {
 		guildId: string;
 		inviteUrl: string;
 	};
+	"Server MCP Config Added": {
+		serverDiscordId: string;
+		mcpServerName: string;
+	};
+	"Server MCP Config Removed": {
+		serverDiscordId: string;
+		mcpServerName: string;
+	};
 };
 
 export type ClientEventName = keyof ClientEvents;

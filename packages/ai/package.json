@@ -22,6 +22,7 @@
 		"test:clone": "bun run scripts/test-clone.ts"
 	},
 	"dependencies": {
+		"@ai-sdk/mcp": "1.0.2",
 		"@opencode-ai/sdk": "^1.0.219",
 		"ai": "catalog:",
 		"just-bash": "^1.2.5",
