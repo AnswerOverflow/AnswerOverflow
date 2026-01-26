@@ -129,6 +129,7 @@ const startHealthCheck = Effect.gen(function* () {
 			process.exit(1);
 		}
 	}).pipe(
+		Effect.withSpan("gateway_health.check"),
 		Effect.catchAllCause((cause) =>
 			Effect.gen(function* () {
 				yield* Console.error("Health check itself failed:", cause);
