@@ -23,6 +23,7 @@ import { SimilarThreadsButtonHandlerLayer } from "./interactions/similar-threads
 import { AutoThreadHandlerLayer } from "./services/auto-thread";
 import { BotIdentitySyncHandlerLayer } from "./services/bot-identity-sync";
 import { DMForwardingHandlerLayer } from "./services/dm-forwarding";
+import { GatewayHealthHandlerLayer } from "./services/gateway-health";
 import { IndexingHandlerLayer } from "./services/indexing";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./services/send-mark-solution-instructions-handler";
 import { SitemapHandlerLayer } from "./services/sitemap";
@@ -66,6 +67,7 @@ export const BotLayers = Layer.mergeAll(
 	V2ComponentsDemoCommandHandlerLayer,
 	SitemapHandlerLayer,
 	SitemapCommandHandlerLayer,
+	GatewayHealthHandlerLayer,
 );
 
 export const program = Effect.gen(function* () {
