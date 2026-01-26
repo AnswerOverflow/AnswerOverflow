@@ -31,11 +31,12 @@ import {
 } from "@packages/ui/utils/server";
 import { getDate } from "@packages/ui/utils/snowflake";
 import type { FunctionReturnType } from "convex/server";
-import { CheckCircle2, ExternalLink, MessageSquare } from "lucide-react";
+import { CheckCircle2, MessageSquare } from "lucide-react";
 import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { JsonLdScript } from "@/components/json-ld-script";
+import { OpenInDiscordLink } from "@/components/open-in-discord-modal";
 import { ResourcesSidebar } from "@/components/resources-sidebar";
 
 export type MessagePageHeaderData = NonNullable<
@@ -616,15 +617,7 @@ export function MessagePage(props: {
 										</div>
 									)}
 									{discordUrl && (
-										<Link
-											href={discordUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="flex flex-row-reverse items-center gap-1 text-sm font-semibold hover:underline"
-										>
-											<ExternalLink size={16} />
-											View on Discord
-										</Link>
+										<OpenInDiscordLink discordUrl={discordUrl} />
 									)}
 								</div>
 								<ResourcesSidebar

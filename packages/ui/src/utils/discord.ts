@@ -100,6 +100,14 @@ export function getDiscordURLForMessage(message: MessageWithServerAndChannel) {
 	return `https://discord.com/channels/${serverId}/${channelId}/${messageId}`;
 }
 
+/**
+ * Converts a Discord web URL (https://discord.com/...) to a deep link URL
+ * that opens in the Discord desktop/mobile app (discord://discord.com/...).
+ */
+export function getDiscordDeepLink(webUrl: string) {
+	return webUrl.replace("https://discord.com", "discord://discord.com");
+}
+
 export function getDiscordServerIconUrl(
 	discordId: bigint,
 	icon: string,
