@@ -58,3 +58,50 @@ export const indexingDuration = Metric.histogram(
 	MetricBoundaries.linear({ start: 100, width: 1000, count: 10 }),
 	"Duration of indexing operations in milliseconds",
 );
+
+export const githubIssuesCreated = Metric.counter(
+	"discord.github_issues.created",
+	{
+		description: "Number of GitHub issues successfully created",
+	},
+);
+
+export const githubIssuesFailed = Metric.counter(
+	"discord.github_issues.failed",
+	{
+		description: "Number of GitHub issue creation failures",
+	},
+);
+
+export const githubIssueAIExtractions = Metric.counter(
+	"discord.github_issues.ai_extractions",
+	{
+		description: "Number of AI issue extraction attempts",
+	},
+);
+
+export const githubIssueAIFallbacks = Metric.counter(
+	"discord.github_issues.ai_fallbacks",
+	{
+		description: "Number of times AI extraction fell back to manual",
+	},
+);
+
+export const githubIssueRateLimits = Metric.counter(
+	"discord.github_issues.rate_limits",
+	{
+		description: "Number of GitHub issue rate limit hits",
+	},
+);
+
+export const githubIssueAIExtractionDuration = Metric.histogram(
+	"discord.github_issues.ai_extraction_duration_ms",
+	MetricBoundaries.linear({ start: 100, width: 500, count: 20 }),
+	"Duration of AI issue extraction in milliseconds",
+);
+
+export const githubIssueCommandDuration = Metric.histogram(
+	"discord.github_issues.command_duration_ms",
+	MetricBoundaries.linear({ start: 100, width: 1000, count: 20 }),
+	"Duration of full GitHub issue command in milliseconds",
+);

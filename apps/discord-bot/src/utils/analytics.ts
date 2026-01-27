@@ -305,3 +305,106 @@ export function trackSimilarThreadSolvedClicked(
 		accountId: member.id,
 	});
 }
+
+export function trackGitHubIssueCommandUsed(input: {
+	userId: string;
+	guildId: string;
+	channelId: string;
+	messageId: string;
+	threadId?: string;
+}) {
+	return track("GitHub Issue Command Used", {
+		user: { id: input.userId },
+		"Server Id": input.guildId,
+		"Channel Id": input.channelId,
+		"Message Id": input.messageId,
+		"Thread Id": input.threadId,
+		accountId: input.userId,
+	});
+}
+
+export function trackGitHubIssueCreated(input: {
+	userId: string;
+	guildId: string;
+	channelId: string;
+	messageId: string;
+	threadId?: string;
+	repoOwner: string;
+	repoName: string;
+	issueNumber: number;
+	issueUrl: string;
+	issuesInBatch: number;
+}) {
+	return track("GitHub Issue Created", {
+		user: { id: input.userId },
+		"Server Id": input.guildId,
+		"Channel Id": input.channelId,
+		"Message Id": input.messageId,
+		"Thread Id": input.threadId,
+		"Repo Owner": input.repoOwner,
+		"Repo Name": input.repoName,
+		"Issue Number": input.issueNumber,
+		"Issue URL": input.issueUrl,
+		"Issues In Batch": input.issuesInBatch,
+		accountId: input.userId,
+	});
+}
+
+export function trackGitHubIssueCreationFailed(input: {
+	userId: string;
+	guildId: string;
+	channelId: string;
+	messageId: string;
+	errorType: string;
+	errorMessage: string;
+	repoOwner?: string;
+	repoName?: string;
+}) {
+	return track("GitHub Issue Creation Failed", {
+		user: { id: input.userId },
+		"Server Id": input.guildId,
+		"Channel Id": input.channelId,
+		"Message Id": input.messageId,
+		"Error Type": input.errorType,
+		"Error Message": input.errorMessage,
+		"Repo Owner": input.repoOwner,
+		"Repo Name": input.repoName,
+		accountId: input.userId,
+	});
+}
+
+export function trackGitHubIssueAIExtraction(input: {
+	userId: string;
+	guildId: string;
+	channelId: string;
+	messageId: string;
+	issuesExtracted: number;
+	usedFallback: boolean;
+	messageLength: number;
+}) {
+	return track("GitHub Issue AI Extraction", {
+		user: { id: input.userId },
+		"Server Id": input.guildId,
+		"Channel Id": input.channelId,
+		"Message Id": input.messageId,
+		"Issues Extracted": input.issuesExtracted,
+		"Used Fallback": input.usedFallback,
+		"Message Length": input.messageLength,
+		accountId: input.userId,
+	});
+}
+
+export function trackGitHubIssueRateLimited(input: {
+	userId: string;
+	guildId: string;
+	rateLimitType: "ai_extraction" | "issue_creation";
+	retryAfterSeconds: number;
+}) {
+	return track("GitHub Issue Rate Limited", {
+		user: { id: input.userId },
+		"Server Id": input.guildId,
+		"Rate Limit Type": input.rateLimitType,
+		"Retry After Seconds": input.retryAfterSeconds,
+		accountId: input.userId,
+	});
+}
