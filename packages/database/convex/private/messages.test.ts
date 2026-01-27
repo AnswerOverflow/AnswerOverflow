@@ -217,6 +217,42 @@ describe("messages", () => {
 				expect(updated?.questionId).toBe(question.id);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
+
+		it.scoped("should clear previous solution when marking a new one", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const fixture = yield* createForumThreadWithReplies();
+				const question = yield* fixture.addRootMessage();
+				const firstAnswer = yield* fixture.addMessage({
+					content: "First answer",
+				});
+				const secondAnswer = yield* fixture.addMessage({
+					content: "Better answer",
+				});
+
+				yield* database.private.messages.markMessageAsSolution({
+					solutionMessageId: firstAnswer.id,
+					questionMessageId: question.id,
+				});
+
+				yield* database.private.messages.markMessageAsSolution({
+					solutionMessageId: secondAnswer.id,
+					questionMessageId: question.id,
+				});
+
+				const oldSolution = yield* database.private.messages.getMessageById(
+					{ id: firstAnswer.id },
+					{ subscribe: false },
+				);
+				expect(oldSolution?.questionId).toBeUndefined();
+
+				const newSolution = yield* database.private.messages.getMessageById(
+					{ id: secondAnswer.id },
+					{ subscribe: false },
+				);
+				expect(newSolution?.questionId).toBe(question.id);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
 	});
 
 	describe("getTopQuestionSolversByServerId", () => {

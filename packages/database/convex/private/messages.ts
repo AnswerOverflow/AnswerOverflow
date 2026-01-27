@@ -387,6 +387,19 @@ export const markMessageAsSolution = privateMutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
+		const existingSolutions = await ctx.db
+			.query("messages")
+			.withIndex("by_questionId", (q) =>
+				q.eq("questionId", args.questionMessageId),
+			)
+			.collect();
+
+		for (const existingSolution of existingSolutions) {
+			await ctx.db.patch(existingSolution._id, {
+				questionId: undefined,
+			});
+		}
+
 		const solutionMessage = await getOneFrom(
 			ctx.db,
 			"messages",
