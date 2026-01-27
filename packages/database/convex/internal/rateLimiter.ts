@@ -40,6 +40,25 @@ export const checkGitHubFetchRepos = internalMutation({
 	},
 });
 
+export const checkAiIssueExtraction = internalMutation({
+	args: {
+		userId: v.string(),
+	},
+	returns: v.object({
+		ok: v.boolean(),
+		retryAfter: v.optional(v.number()),
+	}),
+	handler: async (ctx, args) => {
+		const result = await rateLimiter.limit(ctx, "aiIssueExtraction", {
+			key: args.userId,
+		});
+		return {
+			ok: result.ok,
+			retryAfter: result.retryAfter ?? undefined,
+		};
+	},
+});
+
 export const checkChatMessage = internalMutation({
 	args: {
 		key: v.string(),

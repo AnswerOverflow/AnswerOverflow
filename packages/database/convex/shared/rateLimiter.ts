@@ -28,6 +28,12 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
 		period: MINUTE,
 		capacity: 10,
 	},
+	aiIssueExtraction: {
+		kind: "token bucket",
+		rate: 10,
+		period: MINUTE,
+		capacity: 5,
+	},
 	chatMessage: CHAT_MESSAGE_CONFIG,
 	chatMessageAnon: CHAT_MESSAGE_ANON_CONFIG,
 });

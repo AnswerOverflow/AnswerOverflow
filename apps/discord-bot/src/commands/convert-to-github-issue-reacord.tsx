@@ -74,10 +74,8 @@ const reposAtomFamily = Atom.family((discordUserId: string) =>
 	atomRuntime.atom(
 		Effect.gen(function* () {
 			const database = yield* Database;
-			const reposResult = yield* database.private.github
-				.getAccessibleReposByDiscordId({
-					discordId: BigInt(discordUserId),
-				})
+			const reposResult = yield* database.authenticated.github
+				.getAccessibleRepos({}, { discordAccountId: BigInt(discordUserId) })
 				.pipe(Effect.withSpan("get_accessible_repos"));
 
 			if (!reposResult.success) {
@@ -335,20 +333,22 @@ const createIssueEffect = (input: CreateIssueInput) =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
-		const result = yield* database.private.github
-			.createGitHubIssueFromDiscord({
-				discordId: BigInt(input.discordUserId),
-				repoOwner: input.repo.owner,
-				repoName: input.repo.name,
-				title: input.title,
-				body: input.body,
-				discordServerId: BigInt(input.originalGuildId),
-				discordChannelId: BigInt(input.originalChannelId),
-				discordMessageId: BigInt(input.originalMessageId),
-				discordThreadId: input.originalThreadId
-					? BigInt(input.originalThreadId)
-					: undefined,
-			})
+		const result = yield* database.authenticated.github
+			.createIssue(
+				{
+					repoOwner: input.repo.owner,
+					repoName: input.repo.name,
+					title: input.title,
+					body: input.body,
+					discordServerId: BigInt(input.originalGuildId),
+					discordChannelId: BigInt(input.originalChannelId),
+					discordMessageId: BigInt(input.originalMessageId),
+					discordThreadId: input.originalThreadId
+						? BigInt(input.originalThreadId)
+						: undefined,
+				},
+				{ discordAccountId: BigInt(input.discordUserId) },
+			)
 			.pipe(Effect.withSpan("create_github_issue_api_call"));
 
 		if (!result.success) {
@@ -785,6 +785,22 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 		indexingEnabled,
 		hasPaidPlan,
 	});
+
+	const rateLimitResult = yield* database.private.github
+		.checkAiIssueExtractionRateLimit({
+			discordId: BigInt(interaction.user.id),
+		})
+		.pipe(Effect.withSpan("check_ai_extraction_rate_limit"));
+
+	if (!rateLimitResult.ok) {
+		const retrySeconds = Math.ceil((rateLimitResult.retryAfter ?? 0) / 1000);
+		yield* discord.callClient(() =>
+			interaction.editReply({
+				content: `You're using this too quickly. Please try again in ${retrySeconds} seconds.`,
+			}),
+		);
+		return;
+	}
 
 	const extractedIssues = yield* extractIssuesFromMessage(targetMessage).pipe(
 		Effect.catchAll(() =>
