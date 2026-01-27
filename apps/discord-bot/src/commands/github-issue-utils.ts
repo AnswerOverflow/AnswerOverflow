@@ -48,7 +48,7 @@ export function buildIssueFooter({
 *Created by [Answer Overflow](https://answeroverflow.com/about)*`;
 
 	return `
----
+\n---
 📎 ${viewLink} | 👤 Posted by ${authorMention}${attribution}`;
 }
 
