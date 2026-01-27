@@ -33,9 +33,13 @@ export function proxy(request: NextRequest) {
 	const host = request.headers.get("host") ?? "";
 
 	const acceptHeader = request.headers.get("accept") ?? "";
+	const acceptTypes = acceptHeader.split(",");
+	const plainIndex = acceptTypes.findIndex(
+		(t) => t.includes("text/plain") || t.includes("text/markdown"),
+	);
+	const htmlIndex = acceptTypes.findIndex((t) => t.includes("text/html"));
 	const prefersMarkdown =
-		acceptHeader.includes("text/markdown") ||
-		acceptHeader.includes("text/plain");
+		plainIndex !== -1 && (htmlIndex === -1 || plainIndex < htmlIndex);
 
 	const mdExtensionMatch = pathname.match(/^\/m\/(\d+)\.md$/);
 	if (mdExtensionMatch) {
@@ -49,6 +53,11 @@ export function proxy(request: NextRequest) {
 			url.pathname = `/m/${messageMatch[1]}/markdown`;
 			return NextResponse.rewrite(url);
 		}
+	}
+
+	if (request.method === "GET" && pathname === "/mcp") {
+		url.pathname = "/mcp/setup";
+		return NextResponse.rewrite(url);
 	}
 
 	if (pathname.startsWith("/og")) {
