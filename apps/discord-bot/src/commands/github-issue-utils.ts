@@ -49,7 +49,7 @@ export function buildIssueFooter({
 
 	return `
 ---
-📎 ${viewLink} | 👤 Posted by @${authorMention}${attribution}`;
+📎 ${viewLink} | 👤 Posted by ${authorMention}${attribution}`;
 }
 
 export function buildIssueBody(aiBody: string, footer: string): string {

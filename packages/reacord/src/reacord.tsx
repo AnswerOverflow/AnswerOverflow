@@ -34,6 +34,10 @@ export interface ReacordConfig {
 	maxInstances?: number;
 }
 
+export type SendOptions = {
+	reply?: { messageReference: string };
+};
+
 export class Reacord extends Context.Tag("Reacord")<
 	Reacord,
 	{
@@ -44,6 +48,7 @@ export class Reacord extends Context.Tag("Reacord")<
 		send: (
 			channel: SendableChannels,
 			content: ReactNode,
+			options?: SendOptions,
 		) => Effect.Effect<ReacordInstance>;
 		cleanup: () => void;
 	}
@@ -228,13 +233,20 @@ export function makeReacord(
 				const renderer = createInteractionReplyRenderer(interaction, runEffect);
 				return createInstance(renderer, content);
 			}),
-		send: (channel: SendableChannels, content: ReactNode) =>
+		send: (
+			channel: SendableChannels,
+			content: ReactNode,
+			sendOptions?: SendOptions,
+		) =>
 			Effect.sync(() => {
 				const renderer = createMessageRenderer(
 					(options: DiscordMessageOptions) =>
 						Effect.tryPromise({
 							try: async () => {
-								const message = await channel.send(options);
+								const message = await channel.send({
+									...options,
+									...(sendOptions?.reply ? { reply: sendOptions.reply } : {}),
+								});
 								return message;
 							},
 							catch: (cause) =>

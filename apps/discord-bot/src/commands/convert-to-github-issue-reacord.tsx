@@ -20,8 +20,9 @@ import {
 	useInstance,
 } from "@packages/reacord";
 import type { ContextMenuCommandInteraction } from "discord.js";
-import { MessageFlags } from "discord.js";
-import { Cause, Data, Duration, Effect, Layer, Metric } from "effect";
+import { ChannelType, MessageFlags } from "discord.js";
+import { Cause, Data, Duration, Effect, Layer, Metric, Runtime } from "effect";
+import type { ReactNode } from "react";
 import { Suspense, useState } from "react";
 import { atomRuntime } from "../core/atom-runtime";
 import { Discord } from "../core/discord-service";
@@ -103,6 +104,48 @@ const reposAtomFamily = Atom.family((discordUserId: string) =>
 
 const SEARCH_REPOS_INPUT = "repo-search-query";
 
+type InstallFlowProps = {
+	message: string;
+	linkLabel: string;
+	onRefresh: () => void;
+	onBack?: () => void;
+};
+
+function InstallFlow({
+	message,
+	linkLabel,
+	onRefresh,
+	onBack,
+}: InstallFlowProps) {
+	const [refreshing, setRefreshing] = useState(false);
+
+	if (refreshing) {
+		return <LoadingSelect placeholder="Refreshing repositories..." />;
+	}
+
+	return (
+		<>
+			<Container>
+				<TextDisplay>{message}</TextDisplay>
+			</Container>
+			<ActionRow>
+				<Link url={GITHUB_APP_INSTALL_URL} label={linkLabel} />
+				<Button
+					label="I've installed it"
+					style="success"
+					onClick={() => {
+						setRefreshing(true);
+						onRefresh();
+					}}
+				/>
+				{onBack && (
+					<Button label="Back" style="secondary" onClick={() => onBack()} />
+				)}
+			</ActionRow>
+		</>
+	);
+}
+
 type RepoSelectorProps = {
 	discordUserId: string;
 	selectedRepo: { owner: string; name: string } | null;
@@ -131,23 +174,29 @@ function RepoSelector({
 			const error = failure.value;
 			if (error._tag === "GitHubNotLinkedError") {
 				return (
-					<Link
-						url={GITHUB_APP_INSTALL_URL}
-						label="Connect GitHub to continue"
+					<InstallFlow
+						message="Connect your GitHub account to create issues."
+						linkLabel="Connect GitHub"
+						onRefresh={refreshRepos}
 					/>
 				);
 			}
 			if (error._tag === "GitHubTokenExpiredError") {
 				return (
-					<Link
-						url={GITHUB_APP_INSTALL_URL}
-						label="Reconnect GitHub (session expired)"
+					<InstallFlow
+						message="Your GitHub session has expired. Please reconnect."
+						linkLabel="Reconnect GitHub"
+						onRefresh={refreshRepos}
 					/>
 				);
 			}
 		}
 		return (
-			<Link url={GITHUB_APP_INSTALL_URL} label="Failed to load repositories" />
+			<InstallFlow
+				message="Failed to load repositories. Try installing the GitHub app again."
+				linkLabel="Install GitHub App"
+				onRefresh={refreshRepos}
+			/>
 		);
 	}
 
@@ -155,36 +204,25 @@ function RepoSelector({
 
 	if (repos.length === 0) {
 		return (
-			<Link url={GITHUB_APP_INSTALL_URL} label="Install on a repository" />
+			<InstallFlow
+				message="No repositories found. Install the Answer Overflow GitHub app on a repository to get started."
+				linkLabel="Install on a repository"
+				onRefresh={refreshRepos}
+			/>
 		);
 	}
 
 	if (installingMore) {
 		return (
-			<>
-				<Container>
-					<TextDisplay>
-						Install the Answer Overflow GitHub app on more repositories, then
-						come back and click "I've installed it" to refresh.
-					</TextDisplay>
-				</Container>
-				<ActionRow>
-					<Link url={GITHUB_APP_INSTALL_URL} label="Install Answer Overflow" />
-					<Button
-						label="I've installed it"
-						style="success"
-						onClick={async () => {
-							setInstallingMore(false);
-							refreshRepos();
-						}}
-					/>
-					<Button
-						label="Back"
-						style="secondary"
-						onClick={() => setInstallingMore(false)}
-					/>
-				</ActionRow>
-			</>
+			<InstallFlow
+				message="Install the Answer Overflow GitHub app on more repositories, then come back and click &quot;I've installed it&quot; to refresh."
+				linkLabel="Install Answer Overflow"
+				onRefresh={() => {
+					setInstallingMore(false);
+					refreshRepos();
+				}}
+				onBack={() => setInstallingMore(false)}
+			/>
 		);
 	}
 
@@ -342,6 +380,53 @@ type IssueState = {
 	created: { issueUrl: string; issueNumber: number } | null;
 };
 
+type ChannelContext = {
+	isThread: boolean;
+	isForum: boolean;
+	parentChannelName: string | null;
+	threadId: string | null;
+	channelId: string;
+	messageId: string;
+};
+
+type SendRecapFn = (
+	target: "channel" | "thread",
+	content: ReactNode,
+) => Promise<void>;
+
+type RecapContentProps = {
+	issues: Array<IssueState>;
+	selectedRepo: { owner: string; name: string } | null;
+};
+
+function RecapContent({ issues, selectedRepo }: RecapContentProps) {
+	const totalIssues = issues.length;
+	const lines = issues.map((issue) =>
+		issue.created
+			? `[#${issue.created.issueNumber}](${issue.created.issueUrl}) ${issue.title}`
+			: issue.title,
+	);
+
+	return (
+		<Container accentColor={0x238636}>
+			<TextDisplay>
+				##
+				{totalIssues === 1
+					? " GitHub Issue Created"
+					: ` ${totalIssues} GitHub Issues Created`}
+			</TextDisplay>
+			{selectedRepo && (
+				<TextDisplay>
+					**Repository:** {selectedRepo.owner}/{selectedRepo.name}
+				</TextDisplay>
+			)}
+			{lines.map((line, i) => (
+				<TextDisplay key={i}>{line}</TextDisplay>
+			))}
+		</Container>
+	);
+}
+
 type MultiIssueCreatorProps = {
 	extractedIssues: Array<ExtractedIssue>;
 	footer: string;
@@ -350,6 +435,8 @@ type MultiIssueCreatorProps = {
 	originalGuildId: string;
 	originalThreadId?: string;
 	discordUserId: string;
+	channelContext: ChannelContext;
+	sendRecap: SendRecapFn;
 };
 
 function MultiIssueCreator({
@@ -360,6 +447,8 @@ function MultiIssueCreator({
 	originalGuildId,
 	originalThreadId,
 	discordUserId,
+	channelContext,
+	sendRecap,
 }: MultiIssueCreatorProps) {
 	const [selectedRepo, setSelectedRepo] = useState<{
 		owner: string;
@@ -451,37 +540,50 @@ function MultiIssueCreator({
 	}
 
 	if (allCreated) {
-		const lines = issues.map((issue) =>
-			issue.created
-				? `[#${issue.created.issueNumber}](${issue.created.issueUrl}) ${issue.title}`
-				: issue.title,
+		const recapNode = (
+			<RecapContent issues={issues} selectedRepo={selectedRepo} />
 		);
 
+		const showSendToParent =
+			channelContext.isThread &&
+			!channelContext.isForum &&
+			channelContext.parentChannelName;
+
+		const showReplyInChannel = !channelContext.isThread;
+
 		return (
-			<Container accentColor={0x238636}>
-				<TextDisplay>
-					##
-					{totalIssues === 1
-						? " GitHub Issue Created"
-						: ` ${totalIssues} GitHub Issues Created`}
-				</TextDisplay>
-				{selectedRepo && (
-					<TextDisplay>
-						**Repository:** {selectedRepo.owner}/{selectedRepo.name}
-					</TextDisplay>
-				)}
-				{lines.map((line, i) => (
-					<TextDisplay key={i}>{line}</TextDisplay>
-				))}
-			</Container>
+			<>
+				{recapNode}
+				<ActionRow>
+					{showSendToParent && (
+						<Button
+							label={`Send to #${channelContext.parentChannelName}`}
+							style="primary"
+							onClick={() => sendRecap("channel", recapNode)}
+						/>
+					)}
+					{showReplyInChannel && (
+						<Button
+							label="Reply in channel"
+							style="primary"
+							onClick={() => sendRecap("channel", recapNode)}
+						/>
+					)}
+					<Button
+						label="Send in thread"
+						style="secondary"
+						onClick={() => sendRecap("thread", recapNode)}
+					/>
+				</ActionRow>
+			</>
 		);
 	}
 
 	if (!currentIssue) return null;
 
 	const bodyPreview =
-		currentIssue.body.length > 500
-			? `${currentIssue.body.slice(0, 497)}...`
+		currentIssue.body.length > 4000
+			? `${currentIssue.body.slice(0, 3997)}...`
 			: currentIssue.body;
 
 	const paginationFooter =
@@ -649,10 +751,14 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 	}
 
 	const channel = targetMessage.channel;
-	const threadId = channel.isThread() ? channel.id : undefined;
-	const parentChannelId = channel.isThread()
-		? channel.parentId
-		: targetMessage.channelId;
+	const isThread = channel.isThread();
+	const threadId = isThread ? channel.id : undefined;
+	const parentChannelId = isThread ? channel.parentId : targetMessage.channelId;
+
+	const isForum = isThread && channel.parent?.type === ChannelType.GuildForum;
+
+	const parentChannelName =
+		isThread && channel.parent && !isForum ? channel.parent.name : null;
 
 	const channelSettings = parentChannelId
 		? yield* database.private.channels
@@ -692,6 +798,53 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 		Effect.withSpan("extract_issues_ai"),
 	);
 
+	const channelContext: ChannelContext = {
+		isThread,
+		isForum,
+		parentChannelName,
+		threadId: threadId ?? null,
+		channelId: targetMessage.channelId,
+		messageId: targetMessage.id,
+	};
+
+	const sendRecap: SendRecapFn = async (target, content) => {
+		const sendToChannel = (
+			ch: Parameters<typeof reacord.send>[0],
+			options?: Parameters<typeof reacord.send>[2],
+		) =>
+			Runtime.runPromise(Runtime.defaultRuntime)(
+				reacord.send(ch, content, options),
+			);
+
+		if (target === "channel") {
+			if (isThread && channel.parent && channel.parent.isSendable()) {
+				await sendToChannel(channel.parent);
+			} else if (!isThread && channel.isSendable()) {
+				await sendToChannel(channel, {
+					reply: { messageReference: targetMessage.id },
+				});
+			}
+		} else if (target === "thread") {
+			if (isThread) {
+				await sendToChannel(channel);
+			} else if ("threads" in channel) {
+				const existingThread = targetMessage.thread;
+				if (existingThread) {
+					await sendToChannel(existingThread);
+				} else {
+					const thread = await channel.threads.create({
+						name: `GitHub Issues — ${extractedIssues[0]?.title ?? "Issues"}`.slice(
+							0,
+							100,
+						),
+						startMessage: targetMessage,
+					});
+					await sendToChannel(thread);
+				}
+			}
+		}
+	};
+
 	yield* reacord.reply(
 		interaction,
 		<MultiIssueCreator
@@ -702,6 +855,8 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 			originalGuildId={targetMessage.guildId ?? ""}
 			originalThreadId={threadId}
 			discordUserId={interaction.user.id}
+			channelContext={channelContext}
+			sendRecap={sendRecap}
 		/>,
 	);
 });
