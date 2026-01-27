@@ -1,5 +1,6 @@
 import { PostHogCaptureClientLayer } from "@packages/database/analytics/server/capture-client";
 import { Database } from "@packages/database/database";
+import { Storage } from "@packages/database/storage";
 import {
 	ActionRow,
 	Atom,
@@ -54,6 +55,7 @@ import {
 	extractIssuesFromMessage,
 } from "./extract-github-issues";
 import {
+	buildAttachmentsSection,
 	buildIssueBody,
 	buildIssueFooter,
 	GITHUB_APP_INSTALL_URL,
@@ -63,6 +65,7 @@ import {
 	generateFallbackTitle,
 	INSTALL_MORE_REPOS_VALUE,
 	makeMainSiteLink,
+	type UploadedAttachment,
 } from "./github-issue-utils";
 
 const COMMAND_NAME = "Create GitHub Issue";
@@ -497,6 +500,7 @@ function RecapContent({ issues, selectedRepo }: RecapContentProps) {
 type MultiIssueCreatorProps = {
 	extractedIssues: Array<ExtractedIssue>;
 	footer: string;
+	attachmentsSection: string;
 	originalMessageId: string;
 	originalChannelId: string;
 	originalGuildId: string;
@@ -509,6 +513,7 @@ type MultiIssueCreatorProps = {
 function MultiIssueCreator({
 	extractedIssues,
 	footer,
+	attachmentsSection,
 	originalMessageId,
 	originalChannelId,
 	originalGuildId,
@@ -526,7 +531,7 @@ function MultiIssueCreator({
 	const [issues, setIssues] = useState<Array<IssueState>>(() =>
 		extractedIssues.map((issue) => ({
 			title: issue.title,
-			body: buildIssueBody(issue.body, footer),
+			body: buildIssueBody(issue.body, attachmentsSection, footer),
 			created: null,
 		})),
 	);
@@ -995,11 +1000,42 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 		}
 	};
 
+	const discordAttachments = [...targetMessage.attachments.values()];
+	let uploadedAttachments: Array<UploadedAttachment> = [];
+
+	if (discordAttachments.length > 0) {
+		const storage = yield* Storage;
+		const cdnDomain = process.env.CDN_DOMAIN ?? "cdn.answeroverflow.com";
+
+		yield* Effect.forEach(
+			discordAttachments,
+			(a) =>
+				storage
+					.uploadFileFromUrl({
+						id: a.id,
+						filename: a.name ?? "attachment",
+						contentType: a.contentType ?? undefined,
+						url: a.url,
+					})
+					.pipe(Effect.catchAll(() => Effect.void)),
+			{ concurrency: 5 },
+		).pipe(Effect.withSpan("upload_github_issue_attachments"));
+
+		uploadedAttachments = discordAttachments.map((a) => ({
+			filename: a.name ?? "attachment",
+			contentType: a.contentType ?? undefined,
+			url: `https://${cdnDomain}/${a.id}/${a.name ?? "attachment"}`,
+		}));
+	}
+
+	const attachmentsSection = buildAttachmentsSection(uploadedAttachments);
+
 	yield* reacord.reply(
 		interaction,
 		<MultiIssueCreator
 			extractedIssues={extractedIssues}
 			footer={footer}
+			attachmentsSection={attachmentsSection}
 			originalMessageId={targetMessage.id}
 			originalChannelId={targetMessage.channelId}
 			originalGuildId={targetMessage.guildId ?? ""}

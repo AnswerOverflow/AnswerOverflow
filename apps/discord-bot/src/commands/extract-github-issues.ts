@@ -43,6 +43,12 @@ export const extractIssuesFromMessage = (message: Message) =>
 						? message.channel.name
 						: null;
 
+				const attachments = [...message.attachments.values()];
+				const attachmentContext =
+					attachments.length > 0
+						? `\n\nAttachments (${attachments.length}):\n${attachments.map((a) => `- ${a.name} (${a.contentType ?? "unknown type"})`).join("\n")}`
+						: "";
+
 				const context = [
 					threadName ? `Thread: "${threadName}"` : null,
 					`Author: ${message.author.username}`,
@@ -67,6 +73,8 @@ For each issue:
   - **Actual Behavior** — What actually happens
   - **Additional Context** — Any relevant URLs, code snippets, or references from the message
 
+If the message has attachments (images, screenshots, logs, etc.), mention them in the relevant section (e.g. "See attached screenshot" or "The attached log file shows..."). Do NOT include markdown image/link syntax for attachments — they will be appended automatically with permanent URLs.
+
 Skip sections that don't apply. Keep the body concise but complete.
 
 If the message contains multiple distinct issues, extract each separately. If it's a single issue, return just one.
@@ -77,7 +85,7 @@ Context:
 ${context}
 
 Message content:
-${message.content}`,
+${message.content}${attachmentContext}`,
 				});
 
 				if (!result.output) {
