@@ -37,7 +37,7 @@ import {
 	PopoverTrigger,
 } from "@packages/ui/components/popover";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAction, useQuery as useConvexQuery } from "convex/react";
+import { useAction } from "convex/react";
 import {
 	ChevronsUpDown,
 	ExternalLink,
@@ -50,6 +50,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuthClient } from "../../../../lib/auth-client";
+import { useAuthenticatedQuery } from "../../../../lib/use-authenticated-query";
 
 type AuthClient = ReturnType<typeof useAuthClient>;
 
@@ -61,7 +62,7 @@ function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 	const [isLinking, setIsLinking] = useState(false);
 	const [open, setOpen] = useState(false);
 
-	const githubAccount = useConvexQuery(
+	const githubAccount = useAuthenticatedQuery(
 		api.authenticated.github.getGitHubAccount,
 		{},
 	);

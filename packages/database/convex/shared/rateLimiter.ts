@@ -18,9 +18,9 @@ export const CHAT_MESSAGE_ANON_CONFIG = {
 export const rateLimiter = new RateLimiter(components.rateLimiter, {
 	githubCreateIssue: {
 		kind: "token bucket",
-		rate: 10,
-		period: MINUTE,
-		capacity: 5,
+		rate: 100,
+		period: MINUTE * 10,
+		capacity: 100,
 	},
 	githubFetchRepos: {
 		kind: "token bucket",
@@ -30,9 +30,9 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
 	},
 	aiIssueExtraction: {
 		kind: "token bucket",
-		rate: 10,
-		period: MINUTE,
-		capacity: 5,
+		rate: 100,
+		period: MINUTE * 10,
+		capacity: 100,
 	},
 	chatMessage: CHAT_MESSAGE_CONFIG,
 	chatMessageAnon: CHAT_MESSAGE_ANON_CONFIG,
