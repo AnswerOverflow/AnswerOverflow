@@ -48,13 +48,13 @@ const globalCommands = [
 		.setName("bug-report")
 		.setDescription("Report a bug with Answer Overflow")
 		.setContexts(InteractionContextType.Guild, InteractionContextType.BotDM),
-] as const;
-
-const guildCommands = [
 	new ContextMenuCommandBuilder()
 		.setName("Create GitHub Issue")
 		.setType(ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild),
+] as const;
+
+const guildCommands = [
 	new SlashCommandBuilder()
 		.setName("debug")
 		.setDescription(

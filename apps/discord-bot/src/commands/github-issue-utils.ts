@@ -44,7 +44,7 @@ export function buildIssueFooter({
 		? ""
 		: `
 
----
+\n---
 *Created by [Answer Overflow](https://answeroverflow.com/about)*`;
 
 	return `
