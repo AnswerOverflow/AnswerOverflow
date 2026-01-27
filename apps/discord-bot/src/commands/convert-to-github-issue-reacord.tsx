@@ -11,14 +11,16 @@ import {
 	Reacord,
 	Result,
 	Select,
+	Separator,
 	TextDisplay,
+	useAtomRefresh,
 	useAtomSet,
 	useAtomSuspense,
 	useAtomValue,
 	useInstance,
 } from "@packages/reacord";
 import type { ContextMenuCommandInteraction } from "discord.js";
-import { ButtonStyle, ComponentType, MessageFlags } from "discord.js";
+import { MessageFlags } from "discord.js";
 import { Cause, Data, Duration, Effect, Layer, Metric } from "effect";
 import { Suspense, useState } from "react";
 import { atomRuntime } from "../core/atom-runtime";
@@ -30,11 +32,17 @@ import {
 	catchAllWithReport,
 } from "../utils/error-reporting";
 import {
+	type ExtractedIssue,
+	extractIssuesFromMessage,
+} from "./extract-github-issues";
+import {
+	buildIssueBody,
+	buildIssueFooter,
 	GITHUB_APP_INSTALL_URL,
 	GitHubIssueTimeoutError,
 	type GitHubRepo,
-	generateIssueBody,
-	generateIssueTitle,
+	generateFallbackBody,
+	generateFallbackTitle,
 	INSTALL_MORE_REPOS_VALUE,
 	makeMainSiteLink,
 } from "./github-issue-utils";
@@ -93,17 +101,26 @@ const reposAtomFamily = Atom.family((discordUserId: string) =>
 	),
 );
 
+const SEARCH_REPOS_INPUT = "repo-search-query";
+
 type RepoSelectorProps = {
 	discordUserId: string;
 	selectedRepo: { owner: string; name: string } | null;
 	setSelectedRepo: (repo: { owner: string; name: string } | null) => void;
+	searchFilter: string;
+	setSearchFilter: (filter: string) => void;
 };
 
 function RepoSelector({
 	discordUserId,
 	selectedRepo,
 	setSelectedRepo,
+	searchFilter,
+	setSearchFilter,
 }: RepoSelectorProps) {
+	const [searching, setSearching] = useState(false);
+	const [installingMore, setInstallingMore] = useState(false);
+	const refreshRepos = useAtomRefresh(reposAtomFamily(discordUserId));
 	const state = useAtomSuspense(reposAtomFamily(discordUserId), {
 		includeFailure: true,
 	});
@@ -134,7 +151,7 @@ function RepoSelector({
 		);
 	}
 
-	const { repos, hasAllReposAccess } = state.value;
+	const { repos } = state.value;
 
 	if (repos.length === 0) {
 		return (
@@ -142,32 +159,98 @@ function RepoSelector({
 		);
 	}
 
+	if (installingMore) {
+		return (
+			<>
+				<Container>
+					<TextDisplay>
+						Install the Answer Overflow GitHub app on more repositories, then
+						come back and click "I've installed it" to refresh.
+					</TextDisplay>
+				</Container>
+				<ActionRow>
+					<Link url={GITHUB_APP_INSTALL_URL} label="Install Answer Overflow" />
+					<Button
+						label="I've installed it"
+						style="success"
+						onClick={async () => {
+							setInstallingMore(false);
+							refreshRepos();
+						}}
+					/>
+					<Button
+						label="Back"
+						style="secondary"
+						onClick={() => setInstallingMore(false)}
+					/>
+				</ActionRow>
+			</>
+		);
+	}
+
+	if (searching) {
+		return (
+			<ActionRow>
+				<ModalButton
+					label="🔍 Type repo name..."
+					style="primary"
+					modalTitle="Search Repositories"
+					fields={[
+						{
+							type: "textInput",
+							id: SEARCH_REPOS_INPUT,
+							label: "Repository name",
+							style: "short",
+							placeholder: "e.g. my-repo or org/repo",
+							defaultValue: searchFilter,
+							required: false,
+							maxLength: 100,
+						},
+					]}
+					onSubmit={(values) => {
+						const query = values.getTextInput(SEARCH_REPOS_INPUT) ?? "";
+						setSearchFilter(query.trim());
+						setSearching(false);
+					}}
+				/>
+				<Button
+					label="Cancel"
+					style="secondary"
+					onClick={() => setSearching(false)}
+				/>
+			</ActionRow>
+		);
+	}
+
+	const lowerFilter = searchFilter.toLowerCase();
+	const sortedRepos = [...repos].sort((a: GitHubRepo, b: GitHubRepo) =>
+		a.fullName.localeCompare(b.fullName),
+	);
+	const filteredRepos = searchFilter
+		? sortedRepos.filter((r: GitHubRepo) =>
+				r.fullName.toLowerCase().includes(lowerFilter),
+			)
+		: sortedRepos;
+
+	const maxRepoOptions = 22;
+	const displayRepos = filteredRepos.slice(0, maxRepoOptions);
+	const placeholder = searchFilter
+		? `Filtered: "${searchFilter}" (${filteredRepos.length} results)`
+		: "Select a repository";
+
 	return (
 		<Select
-			placeholder="Select a repository"
+			placeholder={placeholder}
 			value={
 				selectedRepo ? `${selectedRepo.owner}/${selectedRepo.name}` : undefined
 			}
-			onSelect={async (value, interaction) => {
+			onSelect={(value) => {
 				if (value === INSTALL_MORE_REPOS_VALUE) {
-					await interaction.reply({
-						content:
-							"To add more repositories, install the Answer Overflow app:",
-						components: [
-							{
-								type: ComponentType.ActionRow,
-								components: [
-									{
-										type: ComponentType.Button,
-										style: ButtonStyle.Link,
-										label: "Install Answer Overflow",
-										url: GITHUB_APP_INSTALL_URL,
-									},
-								],
-							},
-						],
-						flags: MessageFlags.Ephemeral,
-					});
+					setInstallingMore(true);
+					return;
+				}
+				if (value === "__search__") {
+					setSearching(true);
 					return;
 				}
 				const [owner, name] = value.split("/");
@@ -176,32 +259,28 @@ function RepoSelector({
 				}
 			}}
 		>
-			{repos.slice(0, 23).map((repo: GitHubRepo) => (
+			<Option
+				value="__search__"
+				label={
+					searchFilter
+						? `🔍 "${searchFilter}" — search again`
+						: "🔍 Search repositories..."
+				}
+			/>
+			{displayRepos.map((repo: GitHubRepo) => (
 				<Option
 					key={repo.fullName}
 					value={repo.fullName}
 					label={repo.fullName}
 				/>
 			))}
-			{!hasAllReposAccess && (
-				<Option
-					value={INSTALL_MORE_REPOS_VALUE}
-					label="+ Install on more repos..."
-				/>
-			)}
+			<Option
+				value={INSTALL_MORE_REPOS_VALUE}
+				label="+ Install on more repos..."
+			/>
 		</Select>
 	);
 }
-
-type GitHubIssueCreatorProps = {
-	initialTitle: string;
-	initialBody: string;
-	originalMessageId: string;
-	originalChannelId: string;
-	originalGuildId: string;
-	originalThreadId?: string;
-	discordUserId: string;
-};
 
 type CreateIssueInput = {
 	repo: { owner: string; name: string };
@@ -250,7 +329,6 @@ const createIssueEffect = (input: CreateIssueInput) =>
 		}
 
 		return {
-			status: "success" as const,
 			issueUrl: result.issue.url,
 			issueNumber: result.issue.number,
 		};
@@ -258,50 +336,88 @@ const createIssueEffect = (input: CreateIssueInput) =>
 
 const createIssueAtom = atomRuntime.fn<CreateIssueInput>()(createIssueEffect);
 
-function GitHubIssueCreator({
-	initialTitle,
-	initialBody,
+type IssueState = {
+	title: string;
+	body: string;
+	created: { issueUrl: string; issueNumber: number } | null;
+};
+
+type MultiIssueCreatorProps = {
+	extractedIssues: Array<ExtractedIssue>;
+	footer: string;
+	originalMessageId: string;
+	originalChannelId: string;
+	originalGuildId: string;
+	originalThreadId?: string;
+	discordUserId: string;
+};
+
+function MultiIssueCreator({
+	extractedIssues,
+	footer,
 	originalMessageId,
 	originalChannelId,
 	originalGuildId,
 	originalThreadId,
 	discordUserId,
-}: GitHubIssueCreatorProps) {
+}: MultiIssueCreatorProps) {
 	const [selectedRepo, setSelectedRepo] = useState<{
 		owner: string;
 		name: string;
 	} | null>(null);
-	const [title, setTitle] = useState(initialTitle);
-	const [body, setBody] = useState(initialBody);
+	const [searchFilter, setSearchFilter] = useState("");
+	const [currentIndex, setCurrentIndex] = useState(0);
+	const [issues, setIssues] = useState<Array<IssueState>>(() =>
+		extractedIssues.map((issue) => ({
+			title: issue.title,
+			body: buildIssueBody(issue.body, footer),
+			created: null,
+		})),
+	);
 
 	const createIssueResult = useAtomValue(createIssueAtom);
 	const triggerCreateIssue = useAtomSet(createIssueAtom);
-
 	const instance = useInstance();
 
-	const handleCreateIssue = (repo: { owner: string; name: string }) => {
-		triggerCreateIssue({
-			repo,
-			title,
-			body,
-			discordUserId,
-			originalGuildId,
-			originalChannelId,
-			originalMessageId,
-			originalThreadId,
-		});
-	};
-
+	const totalIssues = issues.length;
+	const currentIssue = issues[currentIndex];
+	const allCreated = issues.every((i) => i.created !== null);
+	const createdCount = issues.filter((i) => i.created !== null).length;
 	const isCreating =
 		Result.isInitial(createIssueResult) && createIssueResult.waiting;
-	const isSuccess = Result.isSuccess(createIssueResult);
-	const isError = Result.isFailure(createIssueResult);
 
-	const successResult = isSuccess ? createIssueResult.value : null;
+	if (
+		Result.isSuccess(createIssueResult) &&
+		currentIssue &&
+		!currentIssue.created
+	) {
+		const result = createIssueResult.value;
+		setIssues((prev) =>
+			prev.map((issue, i) =>
+				i === currentIndex
+					? {
+							...issue,
+							created: {
+								issueUrl: result.issueUrl,
+								issueNumber: result.issueNumber,
+							},
+						}
+					: issue,
+			),
+		);
+		triggerCreateIssue(Atom.Reset);
 
-	let errorMessage: string | null = null;
+		const nextUncreated = issues.findIndex(
+			(issue, i) => i > currentIndex && !issue.created,
+		);
+		if (nextUncreated !== -1) {
+			setCurrentIndex(nextUncreated);
+		}
+	}
+
 	if (Result.isFailure(createIssueResult)) {
 		const failure = Cause.failureOption(createIssueResult.cause);
+		let errorMessage = "An unexpected error occurred";
 		if (failure._tag === "Some") {
 			const error = failure.value;
 			if (
@@ -309,28 +425,9 @@ function GitHubIssueCreator({
 				error._tag === "GitHubCreateIssueError"
 			) {
 				errorMessage = error.message;
-			} else {
-				errorMessage = "An unexpected error occurred";
 			}
 		}
-	}
 
-	if (isSuccess && successResult && selectedRepo) {
-		return (
-			<Container accentColor={0x238636}>
-				<TextDisplay>
-					## [GitHub Issue Created]({successResult.issueUrl})
-				</TextDisplay>
-				<TextDisplay>
-					**Repository:** {selectedRepo.owner}/{selectedRepo.name}
-				</TextDisplay>
-				<TextDisplay>**Issue:** #{successResult.issueNumber}</TextDisplay>
-				<TextDisplay>**Title:** {title}</TextDisplay>
-			</Container>
-		);
-	}
-
-	if (isError && errorMessage) {
 		return (
 			<>
 				<Container accentColor={0xff0000}>
@@ -341,31 +438,72 @@ function GitHubIssueCreator({
 					<Button
 						label="Try Again"
 						style="primary"
-						onClick={() => {
-							triggerCreateIssue(Atom.Reset);
-						}}
+						onClick={() => triggerCreateIssue(Atom.Reset)}
 					/>
 					<Button
 						label="Dismiss"
 						style="danger"
-						onClick={() => {
-							instance.destroy();
-						}}
+						onClick={() => instance.destroy()}
 					/>
 				</ActionRow>
 			</>
 		);
 	}
 
+	if (allCreated) {
+		const lines = issues.map((issue) =>
+			issue.created
+				? `[#${issue.created.issueNumber}](${issue.created.issueUrl}) ${issue.title}`
+				: issue.title,
+		);
+
+		return (
+			<Container accentColor={0x238636}>
+				<TextDisplay>
+					##
+					{totalIssues === 1
+						? " GitHub Issue Created"
+						: ` ${totalIssues} GitHub Issues Created`}
+				</TextDisplay>
+				{selectedRepo && (
+					<TextDisplay>
+						**Repository:** {selectedRepo.owner}/{selectedRepo.name}
+					</TextDisplay>
+				)}
+				{lines.map((line, i) => (
+					<TextDisplay key={i}>{line}</TextDisplay>
+				))}
+			</Container>
+		);
+	}
+
+	if (!currentIssue) return null;
+
+	const bodyPreview =
+		currentIssue.body.length > 500
+			? `${currentIssue.body.slice(0, 497)}...`
+			: currentIssue.body;
+
+	const paginationFooter =
+		totalIssues > 1
+			? `-# ${currentIndex + 1}/${totalIssues} ${createdCount > 0 ? `· ${createdCount} created` : ""}`
+			: null;
+
 	return (
 		<>
-			<Container accentColor={0x238636}>
-				<TextDisplay>## New GitHub Issue</TextDisplay>
-				<TextDisplay>**Title:** {title || "_No title_"}</TextDisplay>
+			<Container accentColor={currentIssue.created ? 0x238636 : 0x5865f2}>
 				<TextDisplay>
-					**Description Preview:**{" "}
-					{body.length > 200 ? `${body.slice(0, 197)}...` : body}
+					**{currentIssue.title}**
+					{currentIssue.created ? " ✓" : ""}
 				</TextDisplay>
+				<Separator spacing="small" />
+				<TextDisplay>{bodyPreview}</TextDisplay>
+				{paginationFooter && (
+					<>
+						<Separator spacing="small" />
+						<TextDisplay>{paginationFooter}</TextDisplay>
+					</>
+				)}
 			</Container>
 
 			<Suspense
@@ -375,10 +513,30 @@ function GitHubIssueCreator({
 					discordUserId={discordUserId}
 					selectedRepo={selectedRepo}
 					setSelectedRepo={setSelectedRepo}
+					searchFilter={searchFilter}
+					setSearchFilter={setSearchFilter}
 				/>
 			</Suspense>
 
 			<ActionRow>
+				{totalIssues > 1 && (
+					<Button
+						label="◀ Prev"
+						style="secondary"
+						disabled={currentIndex === 0}
+						onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+					/>
+				)}
+				{totalIssues > 1 && (
+					<Button
+						label="Next ▶"
+						style="secondary"
+						disabled={currentIndex === totalIssues - 1}
+						onClick={() =>
+							setCurrentIndex((i) => Math.min(totalIssues - 1, i + 1))
+						}
+					/>
+				)}
 				<ModalButton
 					label="Edit"
 					modalTitle="Edit GitHub Issue"
@@ -388,7 +546,7 @@ function GitHubIssueCreator({
 							id: GITHUB_ISSUE_TITLE_INPUT,
 							label: "Issue Title",
 							style: "short",
-							defaultValue: title,
+							defaultValue: currentIssue.title,
 							maxLength: 256,
 							required: true,
 						},
@@ -397,7 +555,7 @@ function GitHubIssueCreator({
 							id: GITHUB_ISSUE_BODY_INPUT,
 							label: "Issue Body",
 							style: "paragraph",
-							defaultValue: body,
+							defaultValue: currentIssue.body,
 							maxLength: 4000,
 							required: true,
 						},
@@ -405,26 +563,53 @@ function GitHubIssueCreator({
 					onSubmit={(values) => {
 						const newTitle = values.getTextInput(GITHUB_ISSUE_TITLE_INPUT);
 						const newBody = values.getTextInput(GITHUB_ISSUE_BODY_INPUT);
-						if (newTitle) setTitle(newTitle);
-						if (newBody) setBody(newBody);
+						if (newTitle || newBody) {
+							setIssues((prev) =>
+								prev.map((issue, i) =>
+									i === currentIndex
+										? {
+												...issue,
+												...(newTitle ? { title: newTitle } : {}),
+												...(newBody ? { body: newBody } : {}),
+											}
+										: issue,
+								),
+							);
+						}
 					}}
 				/>
+			</ActionRow>
+
+			<ActionRow>
 				<Button
-					label={isCreating ? "Creating..." : "Create Issue"}
+					label={
+						isCreating
+							? "Creating..."
+							: currentIssue.created
+								? "Created ✓"
+								: "Create Issue"
+					}
 					style="success"
-					disabled={!selectedRepo || isCreating}
+					disabled={!selectedRepo || isCreating || !!currentIssue.created}
 					onClick={() => {
 						if (selectedRepo) {
-							handleCreateIssue(selectedRepo);
+							triggerCreateIssue({
+								repo: selectedRepo,
+								title: currentIssue.title,
+								body: currentIssue.body,
+								discordUserId,
+								originalGuildId,
+								originalChannelId,
+								originalMessageId,
+								originalThreadId,
+							});
 						}
 					}}
 				/>
 				<Button
 					label="Dismiss"
 					style="danger"
-					onClick={() => {
-						instance.destroy();
-					}}
+					onClick={() => instance.destroy()}
 				/>
 			</ActionRow>
 		</>
@@ -489,15 +674,29 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 	const indexingEnabled = channelSettings?.flags?.indexingEnabled ?? false;
 	const hasPaidPlan = serverPreferences?.plan !== "FREE";
 
+	const footer = buildIssueFooter({
+		message: targetMessage,
+		indexingEnabled,
+		hasPaidPlan,
+	});
+
+	const extractedIssues = yield* extractIssuesFromMessage(targetMessage).pipe(
+		Effect.catchAll(() =>
+			Effect.succeed([
+				{
+					title: generateFallbackTitle(targetMessage),
+					body: generateFallbackBody(targetMessage),
+				},
+			]),
+		),
+		Effect.withSpan("extract_issues_ai"),
+	);
+
 	yield* reacord.reply(
 		interaction,
-		<GitHubIssueCreator
-			initialTitle={generateIssueTitle(targetMessage)}
-			initialBody={generateIssueBody({
-				message: targetMessage,
-				indexingEnabled,
-				hasPaidPlan,
-			})}
+		<MultiIssueCreator
+			extractedIssues={extractedIssues}
+			footer={footer}
 			originalMessageId={targetMessage.id}
 			originalChannelId={targetMessage.channelId}
 			originalGuildId={targetMessage.guildId ?? ""}

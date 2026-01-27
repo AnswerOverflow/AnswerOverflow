@@ -22,10 +22,6 @@ const globalCommands = [
 		.setName("Quick Action")
 		.setType(ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild),
-	// new ContextMenuCommandBuilder()
-	// 	.setName("Create GitHub Issue")
-	// 	.setType(ApplicationCommandType.Message)
-	// 	.setContexts(InteractionContextType.Guild),
 	new SlashCommandBuilder()
 		.setName("leaderboard")
 		.setDescription("See who has solved the most questions in the server.")
@@ -55,6 +51,10 @@ const globalCommands = [
 ] as const;
 
 const guildCommands = [
+	new ContextMenuCommandBuilder()
+		.setName("Create GitHub Issue")
+		.setType(ApplicationCommandType.Message)
+		.setContexts(InteractionContextType.Guild),
 	new SlashCommandBuilder()
 		.setName("debug")
 		.setDescription(

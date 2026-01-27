@@ -23,7 +23,9 @@
 		"@sentry/node": "^10.30.0",
 		"@sentry/profiling-node": "^10.30.0",
 		"discord.js": "^14.25.1",
+		"ai": "catalog:",
 		"effect": "catalog:",
+		"zod": "catalog:",
 		"posthog-node": "^4.2.0",
 		"react": "^19.1.0"
 	},

@@ -41,10 +41,12 @@
         "@packages/ui": "workspace:*",
         "@sentry/node": "^10.30.0",
         "@sentry/profiling-node": "^10.30.0",
+        "ai": "catalog:",
         "discord.js": "^14.25.1",
         "effect": "catalog:",
         "posthog-node": "^4.2.0",
         "react": "^19.1.0",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@effect/language-service": "catalog:",

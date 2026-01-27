@@ -22,26 +22,19 @@ export class GitHubIssueTimeoutError extends Data.TaggedError(
 export type { GitHubRepo };
 export { makeMainSiteLink };
 
-export type IssueBodyOptions = {
+export type IssueFooterOptions = {
 	message: Message;
-	additionalContext?: string;
-	indexingEnabled?: boolean;
-	hasPaidPlan?: boolean;
+	indexingEnabled: boolean;
+	hasPaidPlan: boolean;
 };
 
-export function generateIssueBody({
+export function buildIssueFooter({
 	message,
-	additionalContext,
 	indexingEnabled,
 	hasPaidPlan,
-}: IssueBodyOptions): string {
+}: IssueFooterOptions): string {
 	const authorMention = message.author.username;
 	const discordLink = `https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id}`;
-
-	const quotedContent = message.content
-		.split("\n")
-		.map((line) => `> ${line}`)
-		.join("\n");
 
 	const viewLink = indexingEnabled
 		? `[View on Answer Overflow](${makeMainSiteLink(`/m/${message.id}`)})`
@@ -54,24 +47,16 @@ export function generateIssueBody({
 ---
 *Created by [Answer Overflow](https://answeroverflow.com/about)*`;
 
-	const footer = `
+	return `
 ---
 📎 ${viewLink} | 👤 Posted by @${authorMention}${attribution}`;
-
-	if (additionalContext) {
-		return `${additionalContext}
-
----
-
-**Original Discord Message:**
-
-${quotedContent}${footer}`;
-	}
-
-	return `${quotedContent}${footer}`;
 }
 
-export function generateIssueTitle(message: Message): string {
+export function buildIssueBody(aiBody: string, footer: string): string {
+	return `${aiBody}${footer}`;
+}
+
+export function generateFallbackTitle(message: Message): string {
 	const channel = message.channel;
 	if (channel.isThread() && channel.name) {
 		return channel.name.slice(0, 80);
@@ -82,4 +67,11 @@ export function generateIssueTitle(message: Message): string {
 		return `${firstLine.slice(0, 77)}...`;
 	}
 	return firstLine || "Issue from Discord";
+}
+
+export function generateFallbackBody(message: Message): string {
+	return message.content
+		.split("\n")
+		.map((line) => `> ${line}`)
+		.join("\n");
 }
