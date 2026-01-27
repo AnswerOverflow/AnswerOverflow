@@ -27,27 +27,36 @@ export class ExtractIssuesError extends Data.TaggedError("ExtractIssuesError")<{
 }> {}
 
 export const extractIssuesFromMessage = (message: Message) =>
-	Effect.tryPromise({
-		try: async () => {
-			const threadName =
-				message.channel.isThread() && message.channel.name
-					? message.channel.name
-					: null;
+	Effect.gen(function* () {
+		yield* Effect.annotateCurrentSpan({
+			"ai.model": "google/gemini-2.0-flash",
+			"ai.message_id": message.id,
+			"ai.message_length": message.content.length,
+			"ai.channel_id": message.channelId,
+			"ai.is_thread": message.channel.isThread(),
+		});
 
-			const context = [
-				threadName ? `Thread: "${threadName}"` : null,
-				`Author: ${message.author.username}`,
-				message.channel.isThread() && message.channel.parent
-					? `Channel: #${message.channel.parent.name}`
-					: null,
-			]
-				.filter(Boolean)
-				.join("\n");
+		const issues: Array<ExtractedIssue> = yield* Effect.tryPromise({
+			try: async () => {
+				const threadName =
+					message.channel.isThread() && message.channel.name
+						? message.channel.name
+						: null;
 
-			const result = await generateText({
-				model: gateway("google/gemini-2.0-flash"),
-				output: Output.object({ schema: ExtractionSchema }),
-				prompt: `You are extracting GitHub issues from a Discord message. Analyze the message and create well-structured GitHub issues.
+				const context = [
+					threadName ? `Thread: "${threadName}"` : null,
+					`Author: ${message.author.username}`,
+					message.channel.isThread() && message.channel.parent
+						? `Channel: #${message.channel.parent.name}`
+						: null,
+				]
+					.filter(Boolean)
+					.join("\n");
+
+				const result = await generateText({
+					model: gateway("google/gemini-2.0-flash"),
+					output: Output.object({ schema: ExtractionSchema }),
+					prompt: `You are extracting GitHub issues from a Discord message. Analyze the message and create well-structured GitHub issues.
 
 For each issue:
 - Title: Clear, concise, actionable (max 80 chars). Use conventional formats like "Fix: ...", "Add: ...", "Bug: ..." when appropriate.
@@ -69,17 +78,25 @@ ${context}
 
 Message content:
 ${message.content}`,
-			});
+				});
 
-			if (!result.output) {
-				throw new Error("AI did not return structured output");
-			}
+				if (!result.output) {
+					throw new Error("AI did not return structured output");
+				}
 
-			return result.output.issues;
-		},
-		catch: (error) =>
-			new ExtractIssuesError({
-				message:
-					error instanceof Error ? error.message : "Failed to extract issues",
-			}),
-	});
+				return result.output.issues;
+			},
+			catch: (error) =>
+				new ExtractIssuesError({
+					message:
+						error instanceof Error ? error.message : "Failed to extract issues",
+				}),
+		}).pipe(Effect.withSpan("ai_generate_text"));
+
+		yield* Effect.annotateCurrentSpan({
+			"ai.issues_count": issues.length,
+			"ai.issue_titles": issues.map((i) => i.title).join("; "),
+		});
+
+		return issues;
+	}).pipe(Effect.withSpan("extract_issues_from_message"));

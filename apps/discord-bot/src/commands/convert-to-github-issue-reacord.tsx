@@ -1,3 +1,4 @@
+import { PostHogCaptureClientLayer } from "@packages/database/analytics/server/capture-client";
 import { Database } from "@packages/database/database";
 import {
 	ActionRow,
@@ -26,7 +27,23 @@ import type { ReactNode } from "react";
 import { Suspense, useState } from "react";
 import { atomRuntime } from "../core/atom-runtime";
 import { Discord } from "../core/discord-service";
-import { commandExecuted } from "../metrics";
+import {
+	commandExecuted,
+	githubIssueAIExtractionDuration,
+	githubIssueAIExtractions,
+	githubIssueAIFallbacks,
+	githubIssueCommandDuration,
+	githubIssueRateLimits,
+	githubIssuesCreated,
+	githubIssuesFailed,
+} from "../metrics";
+import {
+	trackGitHubIssueAIExtraction,
+	trackGitHubIssueCommandUsed,
+	trackGitHubIssueCreated,
+	trackGitHubIssueCreationFailed,
+	trackGitHubIssueRateLimited,
+} from "../utils/analytics";
 import {
 	catchAllDefectWithReport,
 	catchAllSilentWithReport,
@@ -333,6 +350,16 @@ const createIssueEffect = (input: CreateIssueInput) =>
 	Effect.gen(function* () {
 		const database = yield* Database;
 
+		yield* Effect.annotateCurrentSpan({
+			"github.repo_owner": input.repo.owner,
+			"github.repo_name": input.repo.name,
+			"github.issue_title": input.title,
+			"discord.guild_id": input.originalGuildId,
+			"discord.channel_id": input.originalChannelId,
+			"discord.message_id": input.originalMessageId,
+			"discord.user_id": input.discordUserId,
+		});
+
 		const result = yield* database.authenticated.github
 			.createIssue(
 				{
@@ -352,6 +379,25 @@ const createIssueEffect = (input: CreateIssueInput) =>
 			.pipe(Effect.withSpan("create_github_issue_api_call"));
 
 		if (!result.success) {
+			yield* Metric.increment(githubIssuesFailed);
+			yield* Effect.annotateCurrentSpan({
+				"github.error_code": result.code,
+				"github.error_message": result.error,
+			});
+			yield* trackGitHubIssueCreationFailed({
+				userId: input.discordUserId,
+				guildId: input.originalGuildId,
+				channelId: input.originalChannelId,
+				messageId: input.originalMessageId,
+				errorType: result.code,
+				errorMessage: result.error,
+				repoOwner: input.repo.owner,
+				repoName: input.repo.name,
+			}).pipe(
+				Effect.provide(PostHogCaptureClientLayer),
+				Effect.catchAll(() => Effect.void),
+			);
+
 			if (
 				result.code === "NOT_LINKED" ||
 				result.code === "REFRESH_REQUIRED" ||
@@ -366,11 +412,32 @@ const createIssueEffect = (input: CreateIssueInput) =>
 			});
 		}
 
+		yield* Metric.increment(githubIssuesCreated);
+		yield* Effect.annotateCurrentSpan({
+			"github.issue_number": result.issue.number,
+			"github.issue_url": result.issue.url,
+		});
+		yield* trackGitHubIssueCreated({
+			userId: input.discordUserId,
+			guildId: input.originalGuildId,
+			channelId: input.originalChannelId,
+			messageId: input.originalMessageId,
+			threadId: input.originalThreadId,
+			repoOwner: input.repo.owner,
+			repoName: input.repo.name,
+			issueNumber: result.issue.number,
+			issueUrl: result.issue.url,
+			issuesInBatch: 1,
+		}).pipe(
+			Effect.provide(PostHogCaptureClientLayer),
+			Effect.catchAll(() => Effect.void),
+		);
+
 		return {
 			issueUrl: result.issue.url,
 			issueNumber: result.issue.number,
 		};
-	});
+	}).pipe(Effect.withSpan("create_github_issue"));
 
 const createIssueAtom = atomRuntime.fn<CreateIssueInput>()(createIssueEffect);
 
@@ -727,6 +794,7 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 		"discord.user_id": interaction.user.id,
 		"discord.target_message_id": interaction.targetId,
 	});
+	const commandStartTime = Date.now();
 	yield* Metric.increment(commandExecuted("convert_to_github_issue"));
 
 	const discord = yield* Discord;
@@ -736,6 +804,13 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 
 	const database = yield* Database;
 	const reacord = yield* Reacord;
+
+	yield* trackGitHubIssueCommandUsed({
+		userId: interaction.user.id,
+		guildId: interaction.guildId ?? "unknown",
+		channelId: interaction.channelId ?? "unknown",
+		messageId: interaction.targetId,
+	}).pipe(Effect.catchAll(() => Effect.void));
 
 	const targetMessage = yield* discord
 		.callClient(() => interaction.channel?.messages.fetch(interaction.targetId))
@@ -750,6 +825,12 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 		return;
 	}
 
+	yield* Effect.annotateCurrentSpan({
+		"discord.target_message_author": targetMessage.author.id,
+		"discord.target_message_length": targetMessage.content.length,
+		"discord.target_channel_type": targetMessage.channel.type,
+	});
+
 	const channel = targetMessage.channel;
 	const isThread = channel.isThread();
 	const threadId = isThread ? channel.id : undefined;
@@ -759,6 +840,12 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 
 	const parentChannelName =
 		isThread && channel.parent && !isForum ? channel.parent.name : null;
+
+	yield* Effect.annotateCurrentSpan({
+		"discord.is_thread": isThread,
+		"discord.is_forum": isForum,
+		"discord.thread_id": threadId ?? "none",
+	});
 
 	const channelSettings = parentChannelId
 		? yield* database.private.channels
@@ -780,6 +867,11 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 	const indexingEnabled = channelSettings?.flags?.indexingEnabled ?? false;
 	const hasPaidPlan = serverPreferences?.plan !== "FREE";
 
+	yield* Effect.annotateCurrentSpan({
+		"server.indexing_enabled": indexingEnabled,
+		"server.has_paid_plan": hasPaidPlan,
+	});
+
 	const footer = buildIssueFooter({
 		message: targetMessage,
 		indexingEnabled,
@@ -794,6 +886,17 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 
 	if (!rateLimitResult.ok) {
 		const retrySeconds = Math.ceil((rateLimitResult.retryAfter ?? 0) / 1000);
+		yield* Metric.increment(githubIssueRateLimits);
+		yield* Effect.annotateCurrentSpan({
+			"rate_limit.hit": true,
+			"rate_limit.retry_after_seconds": retrySeconds,
+		});
+		yield* trackGitHubIssueRateLimited({
+			userId: interaction.user.id,
+			guildId: interaction.guildId ?? "unknown",
+			rateLimitType: "ai_extraction",
+			retryAfterSeconds: retrySeconds,
+		}).pipe(Effect.catchAll(() => Effect.void));
 		yield* discord.callClient(() =>
 			interaction.editReply({
 				content: `You're using this too quickly. Please try again in ${retrySeconds} seconds.`,
@@ -802,17 +905,48 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 		return;
 	}
 
+	const aiExtractionStartTime = Date.now();
+	yield* Metric.increment(githubIssueAIExtractions);
+	let usedFallback = false;
+
 	const extractedIssues = yield* extractIssuesFromMessage(targetMessage).pipe(
-		Effect.catchAll(() =>
-			Effect.succeed([
+		Effect.catchAll(() => {
+			usedFallback = true;
+			return Effect.succeed([
 				{
 					title: generateFallbackTitle(targetMessage),
 					body: generateFallbackBody(targetMessage),
 				},
-			]),
-		),
+			]);
+		}),
 		Effect.withSpan("extract_issues_ai"),
 	);
+
+	const aiExtractionDuration = Date.now() - aiExtractionStartTime;
+	yield* Metric.update(githubIssueAIExtractionDuration, aiExtractionDuration);
+
+	if (usedFallback) {
+		yield* Metric.increment(githubIssueAIFallbacks);
+	}
+
+	yield* Effect.annotateCurrentSpan({
+		"ai.issues_extracted": extractedIssues.length,
+		"ai.used_fallback": usedFallback,
+		"ai.extraction_duration_ms": aiExtractionDuration,
+	});
+
+	yield* trackGitHubIssueAIExtraction({
+		userId: interaction.user.id,
+		guildId: interaction.guildId ?? "unknown",
+		channelId: interaction.channelId ?? "unknown",
+		messageId: interaction.targetId,
+		issuesExtracted: extractedIssues.length,
+		usedFallback,
+		messageLength: targetMessage.content.length,
+	}).pipe(Effect.catchAll(() => Effect.void));
+
+	const commandDuration = Date.now() - commandStartTime;
+	yield* Metric.update(githubIssueCommandDuration, commandDuration);
 
 	const channelContext: ChannelContext = {
 		isThread,

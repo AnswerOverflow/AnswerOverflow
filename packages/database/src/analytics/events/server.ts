@@ -95,6 +95,53 @@ export type ServerEvents = {
 	> & {
 		"Similar Thread Id": string;
 	};
+
+	"GitHub Issue Command Used": Pick<BaseServerProps, "user" | "accountId"> & {
+		"Server Id": string;
+		"Channel Id": string;
+		"Message Id": string;
+		"Thread Id"?: string;
+	};
+
+	"GitHub Issue Created": Pick<BaseServerProps, "user" | "accountId"> & {
+		"Server Id": string;
+		"Channel Id": string;
+		"Message Id": string;
+		"Thread Id"?: string;
+		"Repo Owner": string;
+		"Repo Name": string;
+		"Issue Number": number;
+		"Issue URL": string;
+		"Issues In Batch": number;
+	};
+
+	"GitHub Issue Creation Failed": Pick<
+		BaseServerProps,
+		"user" | "accountId"
+	> & {
+		"Server Id": string;
+		"Channel Id": string;
+		"Message Id": string;
+		"Error Type": string;
+		"Error Message": string;
+		"Repo Owner"?: string;
+		"Repo Name"?: string;
+	};
+
+	"GitHub Issue AI Extraction": Pick<BaseServerProps, "user" | "accountId"> & {
+		"Server Id": string;
+		"Channel Id": string;
+		"Message Id": string;
+		"Issues Extracted": number;
+		"Used Fallback": boolean;
+		"Message Length": number;
+	};
+
+	"GitHub Issue Rate Limited": Pick<BaseServerProps, "user" | "accountId"> & {
+		"Server Id": string;
+		"Rate Limit Type": "ai_extraction" | "issue_creation";
+		"Retry After Seconds": number;
+	};
 };
 
 export type ServerEventName = keyof ServerEvents;
