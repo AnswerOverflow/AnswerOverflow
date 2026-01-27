@@ -55,7 +55,7 @@ type AuthClient = ReturnType<typeof useAuthClient>;
 
 const GITHUB_APP_INSTALL_URL =
 	process.env.NEXT_PUBLIC_GITHUB_APP_INSTALL_URL ??
-	"https://github.com/apps/answer-overflow-dev/installations/new";
+	"https://github.com/apps/answer-overflow/installations/new";
 
 function GitHubAccountCard({ authClient }: { authClient: AuthClient }) {
 	const [isLinking, setIsLinking] = useState(false);
