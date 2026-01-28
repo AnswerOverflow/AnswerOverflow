@@ -12,7 +12,7 @@ import { Switch } from "@packages/ui/components/switch";
 import { DiscordIcon } from "@packages/ui/icons/index";
 import { getDiscordDeepLink } from "@packages/ui/utils/discord";
 import { ExternalLink, Globe } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 const STORAGE_KEY = "ao-discord-open-preference";
 
@@ -63,13 +63,6 @@ export function OpenInDiscordLink({ discordUrl }: OpenInDiscordModalProps) {
 		},
 		[discordUrl, deepLink],
 	);
-
-	// Sync the remember toggle with localStorage on open
-	useEffect(() => {
-		if (open) {
-			setRememberChoice(getSavedPreference() !== null);
-		}
-	}, [open]);
 
 	const handleOpenBrowser = () => {
 		if (rememberChoice) savePreference("browser");
@@ -124,7 +117,9 @@ export function OpenInDiscordLink({ discordUrl }: OpenInDiscordModalProps) {
 					<label className="flex items-center gap-2 pt-2 cursor-pointer">
 						<Switch
 							checked={rememberChoice}
-							onCheckedChange={setRememberChoice}
+							onCheckedChange={() => {
+								setRememberChoice(rememberChoice);
+							}}
 						/>
 						<span className="text-sm text-muted-foreground">
 							Remember my choice
