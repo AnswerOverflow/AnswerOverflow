@@ -4,6 +4,7 @@ import type {
 	DiscordAccount as AODiscordAccount,
 	Emoji as AOEmoji,
 	ForumTag as AOForumTag,
+	MessageSnapshot as AOMessageSnapshot,
 	Sticker as AOSticker,
 	ComponentActionRow,
 	ComponentButton,
@@ -30,6 +31,8 @@ import {
 	type MediaGalleryComponent,
 	type Message,
 	type MessageActionRowComponent,
+	MessageReferenceType,
+	type MessageSnapshot,
 	type NewsChannel,
 	type PublicThreadChannel,
 	type SectionComponent,
@@ -383,6 +386,105 @@ function convertUserSelect(component: UserSelectMenuComponent): ActionRowItem {
 	};
 }
 
+function convertMessageSnapshot(
+	snapshot: MessageSnapshot,
+): AOMessageSnapshot | undefined {
+	const embeds = snapshot.embeds?.map((embed) => ({
+		title: embed.title ?? undefined,
+		type: undefined,
+		description: embed.description ?? undefined,
+		url: embed.url ?? undefined,
+		timestamp: embed.timestamp
+			? new Date(embed.timestamp).toISOString()
+			: undefined,
+		color: embed.color ?? undefined,
+		footer: embed.footer
+			? {
+					text: embed.footer.text,
+					iconUrl: embed.footer.iconURL ?? undefined,
+					proxyIconUrl: embed.footer.proxyIconURL ?? undefined,
+				}
+			: undefined,
+		image: embed.image
+			? {
+					url: embed.image.url,
+					proxyUrl: embed.image.url ?? undefined,
+					height: embed.image.height ?? undefined,
+					width: embed.image.width ?? undefined,
+				}
+			: undefined,
+		thumbnail: embed.thumbnail
+			? {
+					url: embed.thumbnail.url,
+					proxyUrl: embed.thumbnail.url ?? undefined,
+					height: embed.thumbnail.height ?? undefined,
+					width: embed.thumbnail.width ?? undefined,
+				}
+			: undefined,
+		video: embed.video
+			? {
+					url: embed.video.url,
+					proxyUrl: embed.video.url ?? undefined,
+					height: embed.video.height ?? undefined,
+					width: embed.video.width ?? undefined,
+				}
+			: undefined,
+		provider: embed.provider
+			? {
+					name: embed.provider.name ?? undefined,
+					url: embed.provider.url ?? undefined,
+				}
+			: undefined,
+		author: embed.author
+			? {
+					name: embed.author.name ?? undefined,
+					url: embed.author.url ?? undefined,
+					iconUrl: embed.author.iconURL ?? undefined,
+					proxyIconUrl: embed.author.proxyIconURL ?? undefined,
+				}
+			: undefined,
+		fields: embed.fields.map((field) => ({
+			name: field.name,
+			value: field.value,
+			inline: field.inline ?? false,
+		})),
+	}));
+
+	const stickers = snapshot.stickers?.map((sticker) => ({
+		id: BigInt(sticker.id),
+		name: sticker.name,
+		formatType: sticker.format,
+	}));
+
+	const attachments = snapshot.attachments?.map((attachment) => ({
+		id: BigInt(attachment.id),
+		contentType: attachment.contentType ?? undefined,
+		filename: attachment.name ?? "",
+		width: attachment.width ?? undefined,
+		height: attachment.height ?? undefined,
+		size: attachment.size,
+		description: attachment.description ?? undefined,
+		url: attachment.url,
+	}));
+
+	const components = snapshot.components
+		? convertMessageComponents(snapshot.components)
+		: undefined;
+
+	return {
+		content: snapshot.content ?? "",
+		type: snapshot.type ?? undefined,
+		createdTimestamp: snapshot.createdTimestamp ?? 0,
+		editedTimestamp: snapshot.editedTimestamp ?? undefined,
+		flags: snapshot.flags?.bitfield ?? undefined,
+		embeds: embeds && embeds.length > 0 ? embeds : undefined,
+		stickers: stickers && stickers.length > 0 ? stickers : undefined,
+		attachments:
+			attachments && attachments.length > 0 ? attachments : undefined,
+		components,
+	};
+}
+
 export async function toAOMessage(
 	message: Message,
 	discordServerId: string,
@@ -515,6 +617,14 @@ export async function toAOMessage(
 
 	const components = convertMessageComponents(message.components);
 
+	const isForward = message.reference?.type === MessageReferenceType.Forward;
+	const firstSnapshot = isForward
+		? message.messageSnapshots.first()
+		: undefined;
+	const snapshot = firstSnapshot
+		? convertMessageSnapshot(firstSnapshot)
+		: undefined;
+
 	const convertedMessage: BaseMessageWithRelations = {
 		id: BigInt(message.id),
 		authorId: BigInt(message.author.id),
@@ -540,6 +650,7 @@ export async function toAOMessage(
 		embeds: embeds.length > 0 ? embeds : undefined,
 		stickers: stickers.length > 0 ? stickers : undefined,
 		components,
+		snapshot,
 		attachments: attachments.length > 0 ? attachments : undefined,
 		reactions: reactions.length > 0 ? reactions : undefined,
 		metadata,
@@ -572,6 +683,7 @@ export function toUpsertMessageArgs(data: BaseMessageWithRelations) {
 			stickers: data.stickers,
 			components: data.components,
 			metadata: data.metadata,
+			snapshot: data.snapshot,
 		},
 		attachments: data.attachments,
 		reactions: data.reactions,

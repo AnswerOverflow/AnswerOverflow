@@ -1,10 +1,10 @@
 import type {
-	Attachment,
 	Embed,
 	Message,
 	MessageComponent,
 	Sticker,
 } from "@packages/database/convex/schema";
+import type { DisplayAttachment } from "./attachments";
 
 export type MessageMetadata = {
 	webhookName?: string;
@@ -45,7 +45,7 @@ export type MessageMetadata = {
 
 export type MessageWithMetadata = Message & {
 	metadata?: MessageMetadata | null;
-	attachments?: Attachment[];
+	attachments?: DisplayAttachment[];
 	embeds?: Embed[];
 	stickers?: Sticker[];
 	components?: MessageComponent[];
@@ -58,18 +58,16 @@ export type MessageWithMetadata = Message & {
 };
 
 export type MessageSnapshot = {
-	id: string | null;
 	content: string;
-	type: number;
+	type?: number;
 	createdTimestamp: number;
-	editedTimestamp: number | null;
-	attachments: Attachment[];
-	embeds: Embed[];
+	editedTimestamp?: number;
+	flags?: number;
+	attachments?: DisplayAttachment[];
+	embeds?: Embed[];
 	stickers?: Sticker[];
 	components?: MessageComponent[];
-	flags: number;
-	forwardedInMessageId: string;
-	metadata: MessageMetadata | null;
+	metadata?: MessageMetadata | null;
 };
 
 export type Poll = {

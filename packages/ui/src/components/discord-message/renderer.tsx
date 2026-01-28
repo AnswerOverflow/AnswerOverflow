@@ -319,14 +319,22 @@ export function DiscordUIMessage({
 
 	return (
 		<div>
-			<blockquote className="quote">
-				<div className="space-x-1">
-					<CornerUpRight className="inline-flex size-4" />
-					<span className="text-neutral-700 text-sm">Forwarded</span>
+			<blockquote className="border-l-2 border-muted-foreground/30 pl-3">
+				<div className="flex items-center gap-1 mb-1">
+					<CornerUpRight className="inline-flex size-4 text-muted-foreground" />
+					<span className="text-muted-foreground text-sm">Forwarded</span>
 				</div>
 				<div className="[&_img]:my-0">
 					<MessageContent message={message.snapshot} />
 				</div>
+				{message.referenceId && (
+					<a
+						href={`/m/${message.referenceId.toString()}`}
+						className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors mt-1 inline-block"
+					>
+						Open original
+					</a>
+				)}
 			</blockquote>
 		</div>
 	);

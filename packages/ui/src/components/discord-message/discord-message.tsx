@@ -1,6 +1,6 @@
 "use client";
 
-import type { Attachment, Message } from "@packages/database/convex/schema";
+import type { Message } from "@packages/database/convex/schema";
 import {
 	Avatar,
 	AvatarFallback,
@@ -10,6 +10,7 @@ import { Badge } from "@packages/ui/components/badge";
 import { makeUserIconLink } from "@packages/ui/components/discord-avatar";
 import { Link } from "@packages/ui/components/link";
 import { MessageTimestamp } from "@packages/ui/components/message-timestamp";
+import type { DisplayAttachment } from "./attachments";
 import { DiscordUIMessage } from "./renderer";
 import type { MessageWithMetadata } from "./types";
 
@@ -20,7 +21,7 @@ export type DiscordMessageProps = {
 		name: string;
 		avatar?: string;
 	} | null;
-	attachments?: Attachment[];
+	attachments?: DisplayAttachment[];
 	reactions?: Array<{
 		userId: bigint;
 		emoji: { id: bigint; name: string; animated?: boolean };

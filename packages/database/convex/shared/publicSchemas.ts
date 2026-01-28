@@ -246,6 +246,29 @@ const messageComponentValidator = v.union(
 	componentActionRowValidator,
 );
 
+const snapshotAttachmentFields = {
+	id: v.int64(),
+	contentType: v.optional(v.string()),
+	filename: v.string(),
+	width: v.optional(v.number()),
+	height: v.optional(v.number()),
+	size: v.number(),
+	description: v.optional(v.string()),
+	url: v.string(),
+};
+
+const messageSnapshotValidator = v.object({
+	content: v.string(),
+	type: v.optional(v.number()),
+	createdTimestamp: v.number(),
+	editedTimestamp: v.optional(v.number()),
+	flags: v.optional(v.number()),
+	embeds: v.optional(v.array(v.object(embedFields))),
+	stickers: v.optional(v.array(v.object(stickerFields))),
+	attachments: v.optional(v.array(v.object(snapshotAttachmentFields))),
+	components: v.optional(v.array(messageComponentValidator)),
+});
+
 const messageFields = {
 	id: v.int64(),
 	authorId: v.int64(),
@@ -268,6 +291,7 @@ const messageFields = {
 	stickers: v.optional(v.array(v.object(stickerFields))),
 	components: v.optional(v.array(messageComponentValidator)),
 	metadata: v.optional(v.object(messageMetadataFields)),
+	snapshot: v.optional(messageSnapshotValidator),
 };
 
 const attachmentFields = {

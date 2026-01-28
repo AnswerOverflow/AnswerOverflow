@@ -1,6 +1,9 @@
 "use client";
 
-import type { Attachment } from "@packages/database/convex/schema";
+import type {
+	Attachment,
+	MessageSnapshotAttachment,
+} from "@packages/database/convex/schema";
 import bytes from "bytes";
 import { ArrowUpRight, File } from "lucide-react";
 import { useState } from "react";
@@ -15,7 +18,15 @@ import {
 import { cn } from "../../lib/utils";
 import { isEmbeddableAttachment, isVideoAttachment } from "./utils";
 
-export function Attachments({ attachments }: { attachments: Attachment[] }) {
+export type DisplayAttachment = (Attachment | MessageSnapshotAttachment) & {
+	url: string;
+};
+
+export function Attachments({
+	attachments,
+}: {
+	attachments: DisplayAttachment[];
+}) {
 	if (!attachments?.length) {
 		return null;
 	}
@@ -39,7 +50,7 @@ export function Attachments({ attachments }: { attachments: Attachment[] }) {
 	);
 }
 
-function FileShowcase({ attachment }: { attachment: Attachment }) {
+function FileShowcase({ attachment }: { attachment: DisplayAttachment }) {
 	const { filename, size, url: attachmentUrl } = attachment;
 
 	return (
@@ -78,7 +89,7 @@ function FileShowcase({ attachment }: { attachment: Attachment }) {
 	);
 }
 
-function ImageGallery({ images }: { images: Attachment[] }) {
+function ImageGallery({ images }: { images: DisplayAttachment[] }) {
 	const [lightboxOpen, setLightboxOpen] = useState(false);
 	const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -198,7 +209,7 @@ const BROWSER_SUPPORTED_VIDEO_TYPES = new Set([
 	"video/ogg",
 ]);
 
-function VideoPlayer({ attachment }: { attachment: Attachment }) {
+function VideoPlayer({ attachment }: { attachment: DisplayAttachment }) {
 	const hasDimensions = attachment.width && attachment.height;
 	const aspectRatio = hasDimensions
 		? Number(((attachment.width ?? 0) / (attachment.height ?? 1)).toFixed(4))

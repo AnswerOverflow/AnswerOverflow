@@ -340,6 +340,33 @@ type MessageComponent =
 	| Schema.Schema.Type<typeof ComponentFileSchema>
 	| Schema.Schema.Type<typeof ComponentActionRowSchema>;
 
+const MessageSnapshotAttachmentSchema = Schema.Struct({
+	id: Schema.BigIntFromSelf,
+	contentType: Schema.optional(Schema.String),
+	filename: Schema.String,
+	width: Schema.optional(Schema.Number),
+	height: Schema.optional(Schema.Number),
+	size: Schema.Number,
+	description: Schema.optional(Schema.String),
+	url: Schema.String,
+});
+
+const MessageSnapshotSchema = Schema.Struct({
+	content: Schema.String,
+	type: Schema.optional(Schema.Number),
+	createdTimestamp: Schema.Number,
+	editedTimestamp: Schema.optional(Schema.Number),
+	flags: Schema.optional(Schema.Number),
+	embeds: Schema.optional(Schema.Array(EmbedSchema).pipe(Schema.mutable)),
+	stickers: Schema.optional(Schema.Array(StickerSchema).pipe(Schema.mutable)),
+	attachments: Schema.optional(
+		Schema.Array(MessageSnapshotAttachmentSchema).pipe(Schema.mutable),
+	),
+	components: Schema.optional(
+		Schema.Array(MessageComponentSchema).pipe(Schema.mutable),
+	),
+});
+
 const MessageSchema = Schema.Struct({
 	id: Schema.BigIntFromSelf, // Discord snowflake ID
 	authorId: Schema.BigIntFromSelf, // Discord account ID
@@ -364,6 +391,7 @@ const MessageSchema = Schema.Struct({
 		Schema.Array(MessageComponentSchema).pipe(Schema.mutable),
 	),
 	metadata: Schema.optional(MessageMetadataSchema),
+	snapshot: Schema.optional(MessageSnapshotSchema),
 });
 
 const AttachmentSchema = Schema.Struct({
@@ -522,6 +550,8 @@ export {
 	EmbedSchema,
 	StickerSchema,
 	MessageSchema,
+	MessageSnapshotSchema,
+	MessageSnapshotAttachmentSchema,
 	AttachmentSchema,
 	EmojiSchema,
 	ReactionSchema,
@@ -564,6 +594,10 @@ export type UserServerSettings = Schema.Schema.Type<
 export type GitHubIssue = Schema.Schema.Type<typeof GitHubIssueSchema>;
 export type Embed = Schema.Schema.Type<typeof EmbedSchema>;
 export type ForumTag = Schema.Schema.Type<typeof ForumTagSchema>;
+export type MessageSnapshot = Schema.Schema.Type<typeof MessageSnapshotSchema>;
+export type MessageSnapshotAttachment = Schema.Schema.Type<
+	typeof MessageSnapshotAttachmentSchema
+>;
 export type AgentStatus = Schema.Schema.Type<typeof AgentStatusSchema>;
 export type ChannelPurpose = Schema.Schema.Type<typeof ChannelPurposeSchema>;
 export type ComponentButton = Schema.Schema.Type<typeof ComponentButtonSchema>;

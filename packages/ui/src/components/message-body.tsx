@@ -20,7 +20,7 @@ export function MessageBody(props: {
 			? { ...message.message.metadata, ...message.metadata }
 			: message.message.metadata,
 		poll: undefined,
-		snapshot: undefined,
+		snapshot: message.message.snapshot ?? undefined,
 		user: message.author ? { isIgnored: false } : null,
 		isIgnored: false,
 	};

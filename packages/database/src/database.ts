@@ -24,6 +24,7 @@ import type {
 	Emoji,
 	Message,
 	MessageComponent,
+	MessageSnapshot,
 	Sticker,
 } from "../convex/schema";
 import type { DatabaseAttachment } from "../convex/shared/shared";
@@ -562,4 +563,5 @@ export type BaseMessageWithRelations = Message & {
 	}>;
 	stickers?: Sticker[];
 	components?: MessageComponent[];
+	snapshot?: MessageSnapshot;
 };
