@@ -211,6 +211,14 @@ export const handleExportCommand = Effect.fn("export_command")(function* (
 	}
 
 	const thread = interaction.channel;
+	if (!thread.isThread()) {
+		yield* discord.callClient(() =>
+			interaction.editReply({
+				content: "This command can only be used in a thread.",
+			}),
+		);
+		return;
+	}
 	const threadName = thread.name;
 	const serverName = interaction.guild?.name ?? "Unknown Server";
 	const parentChannel = thread.isThread() ? thread.parent : null;
