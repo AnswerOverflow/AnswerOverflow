@@ -3,6 +3,7 @@ import { BugReportCommandHandlerLayer } from "./commands/bug-report";
 import { ChannelSettingsCommandHandlerLayer } from "./commands/channel-settings";
 import { ConvertToGitHubIssueReacordLayer } from "./commands/convert-to-github-issue-reacord";
 import { DebugCommandHandlerLayer } from "./commands/debug";
+import { ExportCommandHandlerLayer } from "./commands/export";
 import { FeedbackCommandHandlerLayer } from "./commands/feedback";
 import { IndexCommandHandlerLayer } from "./commands/index-command";
 import { LeaderboardCommandHandlerLayer } from "./commands/leaderboard";
@@ -68,6 +69,7 @@ export const BotLayers = Layer.mergeAll(
 	SitemapHandlerLayer,
 	SitemapCommandHandlerLayer,
 	GatewayHealthHandlerLayer,
+	ExportCommandHandlerLayer,
 );
 
 export const program = Effect.gen(function* () {

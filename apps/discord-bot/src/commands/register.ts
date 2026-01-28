@@ -52,6 +52,24 @@ const globalCommands = [
 		.setName("Create GitHub Issue")
 		.setType(ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild),
+	new SlashCommandBuilder()
+		.setName("export")
+		.setDescription("Export this channel or thread's messages as a file")
+		.setContexts(InteractionContextType.Guild)
+		.addStringOption((option) =>
+			option
+				.setName("format")
+				.setDescription("Export format (defaults to markdown)")
+				.addChoices(
+					{ name: "Markdown", value: "markdown" },
+					{ name: "JSON", value: "json" },
+				),
+		)
+		.addBooleanOption((option) =>
+			option
+				.setName("ephemeral")
+				.setDescription("Only show the export to you (defaults to true)"),
+		),
 ] as const;
 
 const guildCommands = [
