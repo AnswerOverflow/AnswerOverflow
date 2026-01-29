@@ -39,6 +39,7 @@ import { FloatingAskInput } from "@/components/floating-ask-input";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { OpenInDiscordLink } from "@/components/open-in-discord-modal";
 import { ResourcesSidebar } from "@/components/resources-sidebar";
+import { ThreadTags } from "@/components/thread-tags";
 
 export type MessagePageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.public.messages.getMessagePageHeaderData>
@@ -362,14 +363,12 @@ export function RepliesSection(props: {
 
 export function MessagePage(props: {
 	headerData: MessagePageHeaderData;
-	threadTagsSlot?: ReactNode;
 	repliesSlot: ReactNode;
 	similarThreadsSlot: ReactNode;
 	recentAnnouncementsSlot?: ReactNode;
 }) {
 	const {
 		headerData,
-		threadTagsSlot,
 		repliesSlot,
 		similarThreadsSlot,
 		recentAnnouncementsSlot,
@@ -539,7 +538,15 @@ export function MessagePage(props: {
 							{headerData.channel.type !== ChannelType.GuildAnnouncement && (
 								<h1 className="text-2xl font-semibold">{title}</h1>
 							)}
-							{threadTagsSlot}
+							{headerData.thread &&
+								headerData.channel.availableTags &&
+								headerData.threadTagIds &&
+								headerData.threadTagIds.length > 0 && (
+									<ThreadTags
+										appliedTagIds={headerData.threadTagIds}
+										availableTags={headerData.channel.availableTags}
+									/>
+								)}
 							<div>
 								{rootMessageDeleted ? (
 									<div className="text-muted-foreground italic">

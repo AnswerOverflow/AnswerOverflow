@@ -1,35 +1,6 @@
-import type { api } from "@packages/database/convex/_generated/api";
 import type { ForumTag } from "@packages/database/convex/schema";
-import { Database } from "@packages/database/database";
 import { Badge } from "@packages/ui/components/badge";
-import { Skeleton } from "@packages/ui/components/skeleton";
-import type { FunctionReturnType } from "convex/server";
-import { Effect, Exit } from "effect";
 import { Tag } from "lucide-react";
-import { runtime } from "@/lib/runtime";
-
-type ThreadTagsProps = {
-	threadId: string;
-	availableTags: ForumTag[];
-};
-
-async function fetchThreadTags(
-	threadId: string,
-): Promise<FunctionReturnType<
-	typeof api.public.threadTags.getTagsForThread
-> | null> {
-	const exit = await Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.public.threadTags.getTagsForThread({
-			threadId,
-		});
-	}).pipe(runtime.runPromiseExit);
-
-	if (Exit.isFailure(exit)) {
-		return null;
-	}
-	return exit.value;
-}
 
 function TagEmoji({ tag }: { tag: ForumTag }) {
 	if (tag.emojiId) {
@@ -56,23 +27,13 @@ function TagBadge({ tag }: { tag: ForumTag }) {
 	);
 }
 
-export function ThreadTagsSkeleton() {
-	return (
-		<div className="flex flex-wrap gap-1.5">
-			<Skeleton className="h-5 w-16 rounded-full" />
-			<Skeleton className="h-5 w-20 rounded-full" />
-		</div>
-	);
-}
-
-function ThreadTagsList({
-	appliedTagIds,
-	availableTags,
-}: {
+export type ThreadTagsProps = {
 	appliedTagIds: bigint[];
 	availableTags: ForumTag[];
-}) {
-	if (appliedTagIds.length === 0) {
+};
+
+export function ThreadTags({ appliedTagIds, availableTags }: ThreadTagsProps) {
+	if (appliedTagIds.length === 0 || availableTags.length === 0) {
 		return null;
 	}
 
@@ -91,24 +52,5 @@ function ThreadTagsList({
 				<TagBadge key={tag.id.toString()} tag={tag} />
 			))}
 		</div>
-	);
-}
-
-export async function ThreadTags({ threadId, availableTags }: ThreadTagsProps) {
-	if (availableTags.length === 0) {
-		return null;
-	}
-
-	const appliedTagIds = await fetchThreadTags(threadId);
-
-	if (appliedTagIds === null || appliedTagIds.length === 0) {
-		return null;
-	}
-
-	return (
-		<ThreadTagsList
-			appliedTagIds={appliedTagIds}
-			availableTags={availableTags}
-		/>
 	);
 }

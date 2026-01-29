@@ -101,10 +101,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	const hasResults = results && results.length > 0;
 
 	const isInitialLoading = isLoadingFirstPage && !initialData;
-	const isEmpty =
-		(status === "Exhausted" ||
-			(initialData?.isDone && initialData.page.length === 0)) &&
-		!hasResults;
+	const isEmpty = status === "Exhausted" && !hasResults;
 
 	if (isInitialLoading) {
 		return (

@@ -125,6 +125,9 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 
 	const results = useQueries(queries);
 
+	const isUsingInitialData =
+		results.page0 === undefined && initialData !== undefined;
+
 	const pageResults = useMemo(() => {
 		const pageData: Array<PageResult | undefined> = [];
 		for (let i = 0; i < pages.length; i++) {
@@ -205,9 +208,10 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 	const status = useMemo(() => {
 		if (isLoadingFirstPage) return "LoadingFirstPage" as const;
 		if (isLoadingMore) return "LoadingMore" as const;
-		if (lastLoadedResult?.isDone) return "Exhausted" as const;
+		if (lastLoadedResult?.isDone && !isUsingInitialData)
+			return "Exhausted" as const;
 		return "CanLoadMore" as const;
-	}, [isLoadingFirstPage, isLoadingMore, lastLoadedResult]);
+	}, [isLoadingFirstPage, isLoadingMore, isUsingInitialData, lastLoadedResult]);
 
 	return {
 		results: allItems,

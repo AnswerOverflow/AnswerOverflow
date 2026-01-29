@@ -1,5 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { getManyFrom } from "convex-helpers/server/relationships";
 import type { Doc } from "../_generated/dataModel";
 import { threadMessageCounts } from "../private/counts";
 import {
@@ -126,18 +127,24 @@ export const getMessagePageHeaderData = publicQuery({
 			return Math.max(0, count - 1);
 		};
 
-		const [enrichedFirst, solutionMessages, replyCount] = await Promise.all([
-			rootMessage ? enrichMessage(ctx, rootMessage) : null,
-			rootMessage
-				? ctx.cache.getSolutionsByQuestionId(rootMessage.id)
-				: Promise.resolve([]),
-			getReplyCount(),
-		]);
+		const [enrichedFirst, solutionMessages, replyCount, threadTagEntries] =
+			await Promise.all([
+				rootMessage ? enrichMessage(ctx, rootMessage) : null,
+				rootMessage
+					? ctx.cache.getSolutionsByQuestionId(rootMessage.id)
+					: Promise.resolve([]),
+				getReplyCount(),
+				thread
+					? getManyFrom(ctx.db, "threadTags", "by_threadId", thread.id)
+					: Promise.resolve([]),
+			]);
 
 		const solutionMsg = solutionMessages[0];
 		const solutionMessage = solutionMsg
 			? await enrichMessages(ctx, [solutionMsg])
 			: [];
+
+		const threadTagIds = threadTagEntries.map((t) => t.tagId);
 
 		return {
 			canonicalId: thread?.id ?? rootMessage?.id ?? args.messageId,
@@ -145,6 +152,7 @@ export const getMessagePageHeaderData = publicQuery({
 			solutionMessage: solutionMessage[0] ?? null,
 			channelId,
 			threadId: thread?.id ?? null,
+			threadTagIds,
 			replyCount,
 			server: {
 				_id: server._id,

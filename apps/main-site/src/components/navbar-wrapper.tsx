@@ -2,11 +2,7 @@
 
 import { CompactStickyFooter } from "@packages/ui/components/footer";
 import { MainSiteNavbar } from "@packages/ui/components/navbar";
-import {
-	ScrollContainerProvider,
-	useIsNavbarHidden,
-} from "@packages/ui/hooks/use-scroll-container";
-import { cn } from "@packages/ui/lib/utils";
+import { ScrollContainerProvider } from "@packages/ui/hooks/use-scroll-container";
 import { usePathname } from "next/navigation";
 
 function NavbarContent({
@@ -18,19 +14,11 @@ function NavbarContent({
 }) {
 	const pathname = usePathname();
 	const isChat = pathname?.startsWith("/chat");
-	const isNavbarHidden = useIsNavbarHidden();
 
 	return (
 		<>
 			<MainSiteNavbar githubStars={githubStars} />
-			<div
-				className={cn(
-					"transition-[padding-top] duration-300",
-					isNavbarHidden ? "pt-0" : "pt-navbar",
-				)}
-			>
-				{children}
-			</div>
+			<div className="pt-navbar">{children}</div>
 			{!isChat && <CompactStickyFooter />}
 		</>
 	);

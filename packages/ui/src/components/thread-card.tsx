@@ -8,7 +8,7 @@ import { ThreadIcon } from "./discord-message/mention";
 import { Link } from "./link";
 import { MessagePreviewCardBody } from "./message-preview-card";
 import { ServerIcon } from "./server-icon";
-import { Skeleton } from "./skeleton";
+import { SkeletonBox, SkeletonWrapper, useIsSkeleton } from "./skeleton";
 
 export type ChannelThreadCardProps = {
 	thread: {
@@ -90,6 +90,7 @@ export type ThreadCardProps = {
 };
 
 export function ThreadCard({ result, hideServer = false }: ThreadCardProps) {
+	const isSkeleton = useIsSkeleton();
 	const ChannelIcon = result.channel
 		? getChannelIcon(result.channel.type)
 		: Hash;
@@ -102,7 +103,7 @@ export function ThreadCard({ result, hideServer = false }: ThreadCardProps) {
 	const hasSolution = result.message.solutions.length > 0;
 	const showServer = result.server && !hideServer;
 
-	return (
+	const content = (
 		<div className="group rounded-xl border border-border bg-card overflow-hidden transition-all hover:border-border/80 hover:shadow-md mb-4">
 			<div className="px-4 py-3 border-b border-border/50 bg-muted/20">
 				<div className="flex items-center gap-2 flex-wrap text-sm">
@@ -170,6 +171,12 @@ export function ThreadCard({ result, hideServer = false }: ThreadCardProps) {
 			/>
 		</div>
 	);
+
+	if (isSkeleton) {
+		return <SkeletonWrapper>{content}</SkeletonWrapper>;
+	}
+
+	return content;
 }
 
 export type MessageCardProps = {
@@ -244,20 +251,20 @@ export const MessageCardSkeleton = ThreadCardSkeleton;
 
 export function ThreadCardSkeleton() {
 	return (
-		<div className="rounded-xl border border-border bg-card overflow-hidden">
+		<div className="rounded-xl border border-border bg-card overflow-hidden mb-4">
 			<div className="px-4 py-3 border-b border-border/50 bg-muted/20">
 				<div className="flex items-center gap-2">
-					<Skeleton className="size-4 rounded shrink-0" />
-					<Skeleton className="h-5 w-48" />
+					<SkeletonBox className="size-4 rounded shrink-0" />
+					<SkeletonBox className="h-5 w-48" />
 				</div>
 			</div>
 			<div className="p-4">
 				<div className="flex items-start gap-3">
-					<Skeleton className="size-10 rounded-full shrink-0" />
+					<SkeletonBox className="size-10 rounded-full shrink-0" />
 					<div className="flex-1 space-y-2">
-						<Skeleton className="h-4 w-32" />
-						<Skeleton className="h-4 w-full" />
-						<Skeleton className="h-4 w-5/6" />
+						<SkeletonBox className="h-4 w-32" />
+						<SkeletonBox className="h-4 w-full" />
+						<SkeletonBox className="h-4 w-5/6" />
 					</div>
 				</div>
 			</div>

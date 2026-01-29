@@ -14,7 +14,7 @@ import {
 } from "../dropdown-menu";
 import { Link } from "../link";
 import { LinkButton } from "../link-button";
-import { Skeleton } from "../skeleton";
+import { Skeleton, SkeletonProvider, useIsSkeleton } from "../skeleton";
 
 function getInitials(name: string) {
 	return name
@@ -110,11 +110,20 @@ function SignInButton({
 	}
 	return (
 		<button
+			type="button"
 			onClick={onSignIn}
 			className="rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
 		>
 			Sign In
 		</button>
+	);
+}
+
+function DashboardButton() {
+	return (
+		<LinkButton variant="outline" href="/dashboard" className="hidden md:flex">
+			Dashboard
+		</LinkButton>
 	);
 }
 
@@ -131,12 +140,7 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 		allowAnonymous: false,
 	});
 	const isOnDashboard = pathname?.startsWith("/dashboard");
-
 	const isAdmin = session?.user?.role === "admin";
-
-	if (isPending) {
-		return <UserSectionSkeleton />;
-	}
 
 	const handleSignIn = async () => {
 		await authClient.signIn.social({
@@ -173,30 +177,62 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 			}
 		: null;
 
-	if (!user && showSignIn) {
-		return <SignInButton onSignIn={handleSignIn} />;
+	return (
+		<SkeletonProvider isLoading={isPending}>
+			<UserSectionContent
+				user={user}
+				showSignIn={showSignIn}
+				isOnDashboard={isOnDashboard ?? false}
+				isAdmin={isAdmin === true}
+				onSignIn={handleSignIn}
+				onSignOut={handleSignOut}
+				impersonateDialogOpen={impersonateDialogOpen}
+				setImpersonateDialogOpen={setImpersonateDialogOpen}
+			/>
+		</SkeletonProvider>
+	);
+}
+
+function UserSectionContent({
+	user,
+	showSignIn,
+	isOnDashboard,
+	isAdmin,
+	onSignIn,
+	onSignOut,
+	impersonateDialogOpen,
+	setImpersonateDialogOpen,
+}: {
+	user: User | null;
+	showSignIn: boolean;
+	isOnDashboard: boolean;
+	isAdmin: boolean;
+	onSignIn: () => void;
+	onSignOut: () => void;
+	impersonateDialogOpen: boolean;
+	setImpersonateDialogOpen: (open: boolean) => void;
+}) {
+	const isSkeleton = useIsSkeleton();
+
+	if (isSkeleton) {
+		return <Skeleton className="h-[38px] w-[82px] rounded-md" />;
 	}
 
 	if (!user) {
+		if (showSignIn) {
+			return <SignInButton onSignIn={onSignIn} />;
+		}
 		return null;
 	}
 
 	return (
 		<>
-			{!isOnDashboard && (
-				<LinkButton
-					variant="outline"
-					href="/dashboard"
-					className="hidden md:flex"
-				>
-					Dashboard
-				</LinkButton>
-			)}
+			{!isOnDashboard && <DashboardButton />}
 			<UserAvatar
 				user={user}
-				onSignOut={handleSignOut}
+				onSignOut={onSignOut}
 				showDashboardLink={!isOnDashboard}
-				isAdmin={isAdmin === true}
+				isAdmin={isAdmin}
 				onOpenImpersonate={() => setImpersonateDialogOpen(true)}
 			/>
 			{isAdmin && (
@@ -210,5 +246,18 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 }
 
 export function UserSectionSkeleton() {
-	return <Skeleton className="size-10 rounded-full" />;
+	return (
+		<SkeletonProvider isLoading={true}>
+			<UserSectionContent
+				user={null}
+				showSignIn={true}
+				isOnDashboard={false}
+				isAdmin={false}
+				onSignIn={() => {}}
+				onSignOut={() => {}}
+				impersonateDialogOpen={false}
+				setImpersonateDialogOpen={() => {}}
+			/>
+		</SkeletonProvider>
+	);
 }
