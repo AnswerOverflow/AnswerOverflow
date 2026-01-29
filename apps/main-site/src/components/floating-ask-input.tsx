@@ -1,8 +1,9 @@
 "use client";
 
+import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { cn } from "@packages/ui/lib/utils";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type FloatingAskInputProps = {
 	serverDiscordId: string;
@@ -21,13 +22,54 @@ export function FloatingAskInput({
 	pageContext,
 }: FloatingAskInputProps) {
 	const router = useRouter();
+	const posthog = usePostHog();
 	const [input, setInput] = useState("");
 	const [isFocused, setIsFocused] = useState(false);
+	const [isAtBottom, setIsAtBottom] = useState(false);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			const scrollTop = window.scrollY;
+			const windowHeight = window.innerHeight;
+			const documentHeight = document.documentElement.scrollHeight;
+			const distanceFromBottom = documentHeight - (scrollTop + windowHeight);
+			setIsAtBottom(distanceFromBottom < 100);
+		};
+
+		window.addEventListener("scroll", handleScroll, { passive: true });
+		handleScroll();
+
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
+
+	const handleFocus = () => {
+		setIsFocused(true);
+		trackEvent(
+			"Floating Ask Input Focus",
+			{
+				serverDiscordId,
+				serverName,
+				messageId: pageContext.messageId,
+			},
+			posthog,
+		);
+	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!input.trim()) return;
+
+		trackEvent(
+			"Floating Ask Input Submit",
+			{
+				serverDiscordId,
+				serverName,
+				messageId: pageContext.messageId,
+				queryLength: input.trim().length,
+			},
+			posthog,
+		);
 
 		const contextPrefix = `Context: I'm looking at discussion ${pageContext.messageId} from ${serverName} (${serverDiscordId})\n\n`;
 
@@ -54,7 +96,12 @@ export function FloatingAskInput({
 	};
 
 	return (
-		<div className="fixed bottom-20 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+		<div
+			className={cn(
+				"fixed left-0 right-0 z-50 flex justify-center px-4 pointer-events-none transition-all duration-500 ease-out",
+				isAtBottom ? "bottom-[-100px]" : "bottom-20",
+			)}
+		>
 			<form onSubmit={handleSubmit} className="pointer-events-auto">
 				<div
 					className={cn(
@@ -68,7 +115,7 @@ export function FloatingAskInput({
 						ref={inputRef}
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
-						onFocus={() => setIsFocused(true)}
+						onFocus={handleFocus}
 						onBlur={() => setIsFocused(false)}
 						onKeyDown={handleKeyDown}
 						placeholder="Ask a question..."
