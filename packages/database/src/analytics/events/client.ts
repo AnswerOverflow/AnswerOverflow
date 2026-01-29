@@ -117,6 +117,13 @@ export type ClientEvents = {
 		url: string | null | undefined;
 		type: "github" | "other";
 	};
+	"Onboarding Feedback Submitted": {
+		serverId: string;
+		serverName: string;
+		referralSource: string | null;
+		referralLink: string | null;
+		feedback: string | null;
+	};
 };
 
 export type ClientEventName = keyof ClientEvents;
