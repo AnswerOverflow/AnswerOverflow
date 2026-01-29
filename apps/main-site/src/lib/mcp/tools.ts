@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
 import { Database } from "@packages/database/database";
-import { type InferToolInput, type InferToolOutput, tool } from "ai";
+import { tool } from "ai";
 import { Effect } from "effect";
 import { z } from "zod";
 import { runtime } from "@/lib/runtime";

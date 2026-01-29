@@ -5,7 +5,7 @@ import { findActiveUserProSubscription } from "../shared/userPlans";
 
 export const getUserSubscription = authenticatedQuery({
 	args: {},
-	handler: async (ctx, args) => {
+	handler: async (ctx, _args) => {
 		const user = await authComponent.getAuthUser(ctx);
 		if (!user) {
 			return { plan: "FREE" as const, subscription: null };

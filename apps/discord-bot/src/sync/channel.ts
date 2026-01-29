@@ -9,7 +9,6 @@ import { Discord } from "../core/discord-service";
 import { syncOperations } from "../metrics";
 import { createBatchedQueue } from "../utils/batched-queue";
 import {
-	isAllowedRootChannel,
 	isAllowedRootOrCategoryChannel,
 	isAllowedThreadChannel,
 	toAOChannel,

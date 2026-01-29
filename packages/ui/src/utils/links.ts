@@ -146,7 +146,7 @@ export function getTenantUrl(tenant: TenantInfo | null, path: string): string {
 	}
 
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-	const isApiPath = normalizedPath.startsWith("/api/");
+	const _isApiPath = normalizedPath.startsWith("/api/");
 	const subpathTenant = subpathLookup[tenant.customDomain];
 
 	if (isLocalDev()) {

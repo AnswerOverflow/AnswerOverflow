@@ -323,6 +323,7 @@ export function RepliesSection(props: {
 						loader={<ReplyMessageSkeleton />}
 						initialData={filteredInitialData}
 						filterResults={filterMessages}
+						// biome-ignore lint/complexity/noUselessFragments: needed for now
 						emptyState={<></>}
 						footer={
 							server && channel ? (
@@ -616,9 +617,7 @@ export function MessagePage(props: {
 											<span className="text-xs">Members</span>
 										</div>
 									)}
-									{discordUrl && (
-										<OpenInDiscordLink discordUrl={discordUrl} />
-									)}
+									{discordUrl && <OpenInDiscordLink discordUrl={discordUrl} />}
 								</div>
 								<ResourcesSidebar
 									className="w-full pt-4 border-t"

@@ -19,7 +19,7 @@ function getSiteUrl(): string {
 
 export const createCheckoutSession = authenticatedAction({
 	args: {},
-	handler: async (ctx, args) => {
+	handler: async (ctx, _args) => {
 		const user = await authComponent.getAuthUser(ctx);
 		if (!user) {
 			throw new Error("Not authenticated");
@@ -57,7 +57,7 @@ export const createCheckoutSession = authenticatedAction({
 
 export const createBillingPortalSession = authenticatedAction({
 	args: {},
-	handler: async (ctx, args) => {
+	handler: async (ctx, _args) => {
 		const user = await authComponent.getAuthUser(ctx);
 		if (!user) {
 			throw new Error("Not authenticated");
@@ -83,7 +83,7 @@ export const createBillingPortalSession = authenticatedAction({
 
 export const syncAfterCheckout = authenticatedAction({
 	args: {},
-	handler: async (ctx, args) => {
+	handler: async (ctx, _args) => {
 		const user = await authComponent.getAuthUser(ctx);
 		if (!user) {
 			throw new Error("Not authenticated");
