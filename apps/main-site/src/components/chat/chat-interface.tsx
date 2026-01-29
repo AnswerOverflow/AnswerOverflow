@@ -1,7 +1,10 @@
 "use client";
 
 import { useIsNavbarHidden } from "@packages/ui/hooks/use-scroll-container";
+import { useUserSubscription } from "@packages/ui/hooks/use-user-subscription";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatHeaderMobile } from "./chat-header-mobile";
@@ -10,6 +13,28 @@ import { ChatPromptInput } from "./chat-prompt-input";
 
 import { ChatStateProvider, useChatContext } from "./chat-state-provider";
 import type { GitHubRepo } from "./types";
+
+function CheckoutSuccessHandler() {
+	const [checkout, setCheckout] = useQueryState(
+		"checkout",
+		parseAsStringLiteral(["success", "canceled"]),
+	);
+	const { syncAfterCheckout } = useUserSubscription();
+
+	useQuery({
+		queryKey: ["checkout-sync", checkout],
+		queryFn: async () => {
+			if (checkout !== "success") return null;
+			await syncAfterCheckout();
+			setCheckout(null);
+			return true;
+		},
+		enabled: checkout === "success",
+		staleTime: Number.POSITIVE_INFINITY,
+	});
+
+	return null;
+}
 
 type ChatInterfaceProps = {
 	threadId?: string;
@@ -82,6 +107,7 @@ export function ChatInterface({
 			initialRepo={initialRepo}
 			stickToBottom={stickToBottom}
 		>
+			<CheckoutSuccessHandler />
 			<ChatInterfaceContent />
 		</ChatStateProvider>
 	);

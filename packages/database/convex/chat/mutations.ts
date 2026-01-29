@@ -1,4 +1,3 @@
-import { calculateRateLimit } from "@convex-dev/rate-limiter";
 import {
 	createThread,
 	getThreadMetadata,
@@ -19,12 +18,8 @@ import {
 } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import { defaultModelId, getModelById, vModelId } from "../shared/models";
-import {
-	CHAT_MESSAGE_ANON_CONFIG,
-	CHAT_MESSAGE_CONFIG,
-	rateLimiter,
-} from "../shared/rateLimiter";
 import { resolveServerContext } from "./shared";
+import { checkAndConsumeMessage } from "./usage";
 
 export const vRepoContext = v.object({
 	owner: v.string(),
@@ -65,14 +60,9 @@ export const sendMessage = anonOrAuthenticatedMutation({
 			);
 		}
 
-		const rateLimitName = isAnonymous ? "chatMessageAnon" : "chatMessage";
-		const rateLimit = await rateLimiter.limit(ctx, rateLimitName, {
-			key: userId,
-		});
-		if (!rateLimit.ok) {
-			throw new Error(
-				`Rate limit exceeded. Try again in ${Math.ceil((rateLimit.retryAfter ?? 0) / 1000)} seconds.`,
-			);
+		const usageResult = await checkAndConsumeMessage(ctx, userId);
+		if (!usageResult.allowed) {
+			throw new Error(usageResult.reason ?? "Message limit exceeded");
 		}
 
 		let threadId = args.threadId;
@@ -250,37 +240,6 @@ export const getChatThreadMetadata = anonOrAuthenticatedQuery({
 			modelId: metadata?.modelId ?? null,
 			agentStatus: metadata?.agentStatus ?? "idle",
 			agentError: metadata?.agentError ?? null,
-		};
-	},
-});
-
-export const getChatRateLimitStatus = anonOrAuthenticatedQuery({
-	args: {},
-	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
-		const isAnonymous = user?.isAnonymous ?? false;
-
-		const config = isAnonymous ? CHAT_MESSAGE_ANON_CONFIG : CHAT_MESSAGE_CONFIG;
-		const rateLimitName = isAnonymous ? "chatMessageAnon" : "chatMessage";
-
-		const { value, ts } = await rateLimiter.getValue(ctx, rateLimitName, {
-			key: args.userId,
-		});
-
-		const now = Date.now();
-		const calculated = calculateRateLimit({ value, ts }, config, now, 0);
-
-		const remaining = Math.max(0, Math.floor(calculated.value));
-
-		let resetsAt: number | null = null;
-		if (remaining === 0 && calculated.retryAfter) {
-			resetsAt = now + calculated.retryAfter;
-		}
-
-		return {
-			remaining,
-			isAnonymous,
-			resetsAt,
 		};
 	},
 });
