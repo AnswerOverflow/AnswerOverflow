@@ -63,17 +63,22 @@ export const createBillingPortalSession = authenticatedAction({
 			throw new Error("Not authenticated");
 		}
 
+		const userProPriceId = USER_PLANS.PRO.priceId;
 		const subscriptions = await ctx.runQuery(
 			components.stripe.public.listSubscriptionsByUserId,
 			{ userId: user._id },
 		);
 
-		if (subscriptions.length === 0) {
+		const userSubscription = subscriptions.find(
+			(s) => s.priceId === userProPriceId,
+		);
+
+		if (!userSubscription) {
 			throw new Error("No subscription found");
 		}
 
 		return stripeClient.createCustomerPortalSession(ctx, {
-			customerId: subscriptions[0]?.stripeCustomerId ?? "",
+			customerId: userSubscription.stripeCustomerId,
 			returnUrl: `${getSiteUrl()}/chat`,
 		});
 	},
