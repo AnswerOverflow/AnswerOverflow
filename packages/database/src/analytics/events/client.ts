@@ -121,6 +121,7 @@ export type ClientEvents = {
 		serverId: string;
 		serverName: string;
 		referralSource: string | null;
+		referralLink: string | null;
 		feedback: string | null;
 	};
 };

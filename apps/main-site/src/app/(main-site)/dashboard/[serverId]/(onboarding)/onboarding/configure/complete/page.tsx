@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { trackEvent } from "@packages/ui/analytics/client/track-event";
+import { trackEvent } from "@packages/ui/analytics/client";
 import { Badge } from "@packages/ui/components/badge";
 import {
 	Empty,
@@ -10,6 +10,7 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@packages/ui/components/empty";
+import { Input } from "@packages/ui/components/input";
 import { Label } from "@packages/ui/components/label";
 import {
 	Select,
@@ -50,6 +51,8 @@ const REFERRAL_SOURCES = [
 	{ value: "github", label: "GitHub" },
 	{ value: "reddit", label: "Reddit" },
 	{ value: "youtube", label: "YouTube" },
+	{ value: "ai-assistant", label: "ChatGPT / AI Assistant" },
+	{ value: "community-member", label: "Community Member Asked to Add" },
 	{ value: "friend", label: "Friend or Colleague" },
 	{ value: "blog", label: "Blog Post or Article" },
 	{ value: "other", label: "Other" },
@@ -180,14 +183,18 @@ export default function CompletePage() {
 				serverSettings,
 			});
 
-			// Track onboarding feedback via PostHog analytics
-			if (onboardingFeedback.referralSource || onboardingFeedback.feedback) {
+			if (
+				onboardingFeedback.referralSource ||
+				onboardingFeedback.referralLink ||
+				onboardingFeedback.feedback
+			) {
 				trackEvent(
 					"Onboarding Feedback Submitted",
 					{
 						serverId,
 						serverName: serverId,
 						referralSource: onboardingFeedback.referralSource,
+						referralLink: onboardingFeedback.referralLink,
 						feedback: onboardingFeedback.feedback,
 					},
 					posthog,
@@ -249,8 +256,25 @@ export default function CompletePage() {
 						</div>
 
 						<div className="space-y-2">
+							<Label htmlFor="referral-link-empty">
+								Link to where you heard about it (optional)
+							</Label>
+							<Input
+								id="referral-link-empty"
+								type="url"
+								placeholder="https://..."
+								value={onboardingFeedback.referralLink ?? ""}
+								onChange={(e) =>
+									setOnboardingFeedback({
+										referralLink: e.target.value || null,
+									})
+								}
+							/>
+						</div>
+
+						<div className="space-y-2">
 							<Label htmlFor="feedback-empty">
-								Any feedback or suggestions? (optional)
+								Any onboarding feedback? (optional)
 							</Label>
 							<Textarea
 								id="feedback-empty"
@@ -384,8 +408,23 @@ export default function CompletePage() {
 					</div>
 
 					<div className="space-y-2">
+						<Label htmlFor="referral-link">
+							Link to where you heard about it (optional)
+						</Label>
+						<Input
+							id="referral-link"
+							type="url"
+							placeholder="https://..."
+							value={onboardingFeedback.referralLink ?? ""}
+							onChange={(e) =>
+								setOnboardingFeedback({ referralLink: e.target.value || null })
+							}
+						/>
+					</div>
+
+					<div className="space-y-2">
 						<Label htmlFor="feedback">
-							Any feedback or suggestions? (optional)
+							Any onboarding feedback? (optional)
 						</Label>
 						<Textarea
 							id="feedback"

@@ -41,6 +41,7 @@ type ServerSettings = RecommendedConfiguration["serverSettings"];
 
 export type OnboardingFeedback = {
 	referralSource: string | null;
+	referralLink: string | null;
 	feedback: string | null;
 };
 
@@ -152,6 +153,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 	const [onboardingFeedback, setOnboardingFeedbackState] =
 		useState<OnboardingFeedback>({
 			referralSource: null,
+			referralLink: null,
 			feedback: null,
 		});
 
