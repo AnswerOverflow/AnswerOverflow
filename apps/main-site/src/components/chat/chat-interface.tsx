@@ -5,6 +5,7 @@ import { useUserSubscription } from "@packages/ui/hooks/use-user-subscription";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { Suspense } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatHeaderMobile } from "./chat-header-mobile";
@@ -14,7 +15,7 @@ import { ChatPromptInput } from "./chat-prompt-input";
 import { ChatStateProvider, useChatContext } from "./chat-state-provider";
 import type { GitHubRepo } from "./types";
 
-function CheckoutSuccessHandler() {
+function CheckoutSuccessHandlerInner() {
 	const [checkout, setCheckout] = useQueryState(
 		"checkout",
 		parseAsStringLiteral(["success", "canceled"]),
@@ -34,6 +35,14 @@ function CheckoutSuccessHandler() {
 	});
 
 	return null;
+}
+
+function CheckoutSuccessHandler() {
+	return (
+		<Suspense fallback={null}>
+			<CheckoutSuccessHandlerInner />
+		</Suspense>
+	);
 }
 
 type ChatInterfaceProps = {
