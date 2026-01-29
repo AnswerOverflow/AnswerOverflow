@@ -144,6 +144,17 @@ export type ClientEvents = {
 	"Chat Subscription Canceled": {
 		plan: "PRO";
 	};
+	"Floating Ask Input Focus": {
+		serverDiscordId: string;
+		serverName: string;
+		messageId: string;
+	};
+	"Floating Ask Input Submit": {
+		serverDiscordId: string;
+		serverName: string;
+		messageId: string;
+		queryLength: number;
+	};
 };
 
 export type ClientEventName = keyof ClientEvents;
