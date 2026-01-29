@@ -6,16 +6,19 @@ import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo
 import { Button } from "@packages/ui/components/button";
 import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
+import { Progress } from "@packages/ui/components/progress";
 import {
 	Sheet,
 	SheetContent,
 	SheetHeader,
 	SheetTitle,
 } from "@packages/ui/components/sheet";
+import { useUserSubscription } from "@packages/ui/hooks/use-user-subscription";
 import { cn } from "@packages/ui/lib/utils";
 import { usePaginatedQuery } from "convex-helpers/react/cache/hooks";
 import { formatDistanceToNow } from "date-fns";
 import {
+	CreditCard,
 	GitBranch,
 	Loader2,
 	Menu,
@@ -147,6 +150,79 @@ function SidebarHeader() {
 	);
 }
 
+function UsageIndicator() {
+	const session = useSession({ allowAnonymous: true });
+	const isAnonymous = !session?.data || session.data.user.isAnonymous;
+	const posthog = usePostHog();
+	const {
+		usageStatus,
+		isPro,
+		messagesRemaining,
+		usagePercentage,
+		startCheckout,
+		openBillingPortal,
+		isCheckoutLoading,
+		isPortalLoading,
+		dailyReset,
+	} = useUserSubscription();
+
+	if (isAnonymous || !usageStatus) {
+		return null;
+	}
+
+	const handleCheckoutClick = () => {
+		trackEvent(
+			"Chat Checkout Started",
+			{ plan: "PRO", priceAmount: 500, currentPlan: isPro ? "PRO" : "FREE" },
+			posthog,
+		);
+		startCheckout();
+	};
+
+	return (
+		<div className="p-4 border-t">
+			<div className="flex items-center justify-between mb-2">
+				<span className="text-xs font-medium text-muted-foreground">
+					{isPro ? "Pro" : "Free"} Plan
+				</span>
+				<span className="text-xs text-muted-foreground">
+					{messagesRemaining} left {dailyReset ? "today" : "this month"}
+				</span>
+			</div>
+			<Progress
+				value={Math.min(100, usagePercentage)}
+				className={cn(
+					"h-1.5 mb-3",
+					usagePercentage > 80 &&
+						"[&>[data-slot=progress-indicator]]:bg-destructive",
+				)}
+			/>
+			{isPro ? (
+				<Button
+					variant="ghost"
+					size="sm"
+					className="w-full text-xs"
+					onClick={() => openBillingPortal()}
+					disabled={isPortalLoading}
+				>
+					<CreditCard className="size-3 mr-1.5" />
+					Manage subscription
+				</Button>
+			) : (
+				<Button
+					variant="outline"
+					size="sm"
+					className="w-full text-xs"
+					onClick={handleCheckoutClick}
+					disabled={isCheckoutLoading}
+				>
+					Get 1,250 messages/mo for $5
+				</Button>
+			)}
+		</div>
+	);
+}
+
 function SidebarContent({ onThreadClick }: { onThreadClick?: () => void }) {
 	const posthog = usePostHog();
 
@@ -175,6 +251,7 @@ function SidebarContent({ onThreadClick }: { onThreadClick?: () => void }) {
 				</div>
 				<ThreadList onThreadClick={onThreadClick} />
 			</div>
+			<UsageIndicator />
 		</div>
 	);
 }

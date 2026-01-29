@@ -1,7 +1,12 @@
 "use client";
 
+import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { useIsNavbarHidden } from "@packages/ui/hooks/use-scroll-container";
+import { useUserSubscription } from "@packages/ui/hooks/use-user-subscription";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { Suspense } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatHeaderMobile } from "./chat-header-mobile";
@@ -10,6 +15,55 @@ import { ChatPromptInput } from "./chat-prompt-input";
 
 import { ChatStateProvider, useChatContext } from "./chat-state-provider";
 import type { GitHubRepo } from "./types";
+
+function CheckoutSuccessHandlerInner() {
+	const [checkout, setCheckout] = useQueryState(
+		"checkout",
+		parseAsStringLiteral(["success", "canceled"]),
+	);
+	const { syncAfterCheckout } = useUserSubscription();
+	const posthog = usePostHog();
+
+	useQuery({
+		queryKey: ["checkout-track", checkout],
+		queryFn: () => {
+			if (checkout === "success") {
+				trackEvent(
+					"Chat Checkout Completed",
+					{ plan: "PRO", priceAmount: 500 },
+					posthog,
+				);
+			} else if (checkout === "canceled") {
+				trackEvent("Chat Checkout Canceled", { plan: "PRO" }, posthog);
+			}
+			return true;
+		},
+		enabled: checkout !== null,
+		staleTime: Number.POSITIVE_INFINITY,
+	});
+
+	useQuery({
+		queryKey: ["checkout-sync", checkout],
+		queryFn: async () => {
+			if (checkout !== "success") return null;
+			await syncAfterCheckout();
+			setCheckout(null);
+			return true;
+		},
+		enabled: checkout === "success",
+		staleTime: Number.POSITIVE_INFINITY,
+	});
+
+	return null;
+}
+
+function CheckoutSuccessHandler() {
+	return (
+		<Suspense fallback={null}>
+			<CheckoutSuccessHandlerInner />
+		</Suspense>
+	);
+}
 
 type ChatInterfaceProps = {
 	threadId?: string;
@@ -82,6 +136,7 @@ export function ChatInterface({
 			initialRepo={initialRepo}
 			stickToBottom={stickToBottom}
 		>
+			<CheckoutSuccessHandler />
 			<ChatInterfaceContent />
 		</ChatStateProvider>
 	);

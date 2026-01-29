@@ -1,11 +1,60 @@
+import { registerRoutes } from "@convex-dev/stripe";
 import { httpRouter } from "convex/server";
-import { internal } from "./_generated/api";
+import type Stripe from "stripe";
+import { components, internal } from "./_generated/api";
 import { httpAction } from "./client";
 import { authComponent, createAuth } from "./shared/betterAuth";
 
 const http = httpRouter();
 
 authComponent.registerRoutes(http, createAuth);
+
+function getSubscriptionPeriod(subscription: Stripe.Subscription) {
+	const item = subscription.items.data[0];
+	return {
+		periodStart: item?.current_period_start ?? 0,
+		periodEnd: item?.current_period_end ?? 0,
+	};
+}
+
+registerRoutes(http, components.stripe, {
+	webhookPath: "/stripe/user-webhook",
+	STRIPE_WEBHOOK_SECRET: process.env.STRIPE_USER_WEBHOOK_SECRET,
+	events: {
+		"customer.subscription.created": async (ctx, event) => {
+			const subscription = event.data.object;
+			const userId = subscription.metadata?.userId;
+			if (userId) {
+				const { periodStart, periodEnd } = getSubscriptionPeriod(subscription);
+				await ctx.runMutation(internal.chat.usage.resetUsageForSubscription, {
+					userId,
+					periodStart,
+					periodEnd,
+				});
+			}
+		},
+		"customer.subscription.updated": async (ctx, event) => {
+			const subscription = event.data.object;
+			const userId = subscription.metadata?.userId;
+			if (!userId) return;
+
+			const { periodStart, periodEnd } = getSubscriptionPeriod(subscription);
+			const previousItem = event.data.previous_attributes?.items?.data?.[0];
+
+			const periodChanged =
+				previousItem?.current_period_end &&
+				previousItem.current_period_end !== periodEnd;
+
+			if (periodChanged) {
+				await ctx.runMutation(internal.chat.usage.resetUsageForSubscription, {
+					userId,
+					periodStart,
+					periodEnd,
+				});
+			}
+		},
+	},
+});
 
 http.route({
 	path: "/stripe/webhook",

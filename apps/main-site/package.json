@@ -30,6 +30,7 @@
 		"@packages/database": "workspace:*",
 		"@packages/observability": "workspace:*",
 		"@packages/ui": "workspace:*",
+		"@posthog/ai": "^7.7.0",
 		"@sentry/nextjs": "^9",
 		"@tanstack/react-query": "catalog:",
 		"@uidotdev/usehooks": "^2.4.1",

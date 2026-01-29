@@ -123,11 +123,15 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.upsertManyBotUserServerSettings": "mutation",
   "user_server_settings.upsertManyUserServerSettings": "mutation",
   "user_server_settings.upsertUserServerSettings": "mutation",
+  "user_subscription_actions.createBillingPortalSession": "action",
+  "user_subscription_actions.createCheckoutSession": "action",
+  "user_subscription_actions.syncAfterCheckout": "action",
+  "user_subscription.getUserSubscription": "query",
   "vercel_domains.addDomain": "action",
   "vercel_domains.getDomainStatus": "action"
 } as const;
 
-export const NAMESPACES = ["admin","agent_wrappers","attachments","cache","channels","counts","dashboard","dashboard_mutations","dashboard_queries","discord_accounts","discord_token","github","ignored_discord_accounts","messages","onboarding","onboarding_action","search","server_preferences","servers","sitemap","stripe","stripe_actions","threadTags","threads","threads_action","user_server_settings","vercel_domains"] as const;
+export const NAMESPACES = ["admin","agent_wrappers","attachments","cache","channels","counts","dashboard","dashboard_mutations","dashboard_queries","discord_accounts","discord_token","github","ignored_discord_accounts","messages","onboarding","onboarding_action","search","server_preferences","servers","sitemap","stripe","stripe_actions","threadTags","threads","threads_action","user_server_settings","user_subscription","user_subscription_actions","vercel_domains"] as const;
 
 export const NAMESPACE_STRUCTURE = {
   "agent_wrappers": ["abortStream","addMessages","addStreamDelta","createStream","createThread","finalizeMessage","finishStream","getMessageSearchFields","getThread","listMessagesByThreadId","listStreamDeltas","listStreams","searchMessages","updateAgentStatus"],
@@ -160,6 +164,8 @@ export const AUTHENTICATED_NAMESPACE_STRUCTURE = {
   "stripe_actions": [],
   "threads": ["getThreadsForServer"],
   "threads_action": ["generateThreadSummary"],
+  "user_subscription": ["getUserSubscription"],
+  "user_subscription_actions": ["createBillingPortalSession","createCheckoutSession","syncAfterCheckout"],
   "vercel_domains": ["addDomain","getDomainStatus"]
 } as const;
 

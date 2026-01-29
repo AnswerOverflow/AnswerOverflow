@@ -56,7 +56,7 @@ export function useChatState({
 	);
 
 	const rateLimitStatus = useAuthenticatedQuery(
-		api.chat.mutations.getChatRateLimitStatus,
+		api.chat.usage.getMessageUsageStatus,
 		{},
 		{ allowAnonymous: true },
 	);
@@ -231,6 +231,8 @@ export function useChatState({
 				serverContext: effectiveServerContext,
 				promptMessageId: messageId,
 				modelId: model,
+				userId: session?.data?.user?.id,
+				userPlan: rateLimitStatus?.plan,
 			});
 		} catch (error) {
 			console.error("streamChat error:", error);
