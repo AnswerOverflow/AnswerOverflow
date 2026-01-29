@@ -67,7 +67,7 @@ export function RateLimitWarning({
 					onClick={() => startCheckout()}
 					disabled={isCheckoutLoading}
 				>
-					Upgrade to Pro
+					Get 1,250/mo for $5
 				</Button>
 			)}
 		</div>

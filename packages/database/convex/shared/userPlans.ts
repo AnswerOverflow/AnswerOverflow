@@ -1,14 +1,14 @@
 export const USER_PLANS = {
 	FREE: {
 		name: "Free",
-		messagesPerMonth: 20,
+		messagesPerMonth: 10,
 		dailyReset: true,
 		priceId: null,
 		priceAmount: 0,
 	},
 	PRO: {
 		name: "Pro",
-		messagesPerMonth: 1500,
+		messagesPerMonth: 1250,
 		dailyReset: false,
 		priceId: process.env.STRIPE_USER_PRO_PRICE_ID ?? null,
 		priceAmount: 500,

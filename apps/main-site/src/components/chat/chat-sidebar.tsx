@@ -205,7 +205,7 @@ function UsageIndicator() {
 					onClick={() => startCheckout()}
 					disabled={isCheckoutLoading}
 				>
-					Upgrade to Pro
+					Get 1,250 messages/mo for $5
 				</Button>
 			)}
 		</div>
