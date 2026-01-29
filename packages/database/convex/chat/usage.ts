@@ -9,7 +9,11 @@ import {
 	type QueryCtx,
 } from "../client";
 import { authComponent } from "../shared/betterAuth";
-import { getPlanConfig, type UserPlanType } from "../shared/userPlans";
+import {
+	getPlanConfig,
+	USER_PLANS,
+	type UserPlanType,
+} from "../shared/userPlans";
 
 const ONE_DAY = Duration.decode("1 day");
 
@@ -37,13 +41,16 @@ export async function getUserPlan(
 	ctx: QueryCtx,
 	userId: string,
 ): Promise<UserPlanType> {
+	const userProPriceId = USER_PLANS.PRO.priceId;
 	const subscriptions = await ctx.runQuery(
 		components.stripe.public.listSubscriptionsByUserId,
 		{ userId },
 	);
 
 	const activeSubscription = subscriptions.find(
-		(s) => s.status === "active" || s.status === "trialing",
+		(s) =>
+			(s.status === "active" || s.status === "trialing") &&
+			s.priceId === userProPriceId,
 	);
 
 	if (activeSubscription) {
