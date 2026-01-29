@@ -1,7 +1,10 @@
 "use client";
 
 import { useIsNavbarHidden } from "@packages/ui/hooks/use-scroll-container";
+import { useUserSubscription } from "@packages/ui/hooks/use-user-subscription";
 import { Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatHeaderMobile } from "./chat-header-mobile";
@@ -10,6 +13,25 @@ import { ChatPromptInput } from "./chat-prompt-input";
 
 import { ChatStateProvider, useChatContext } from "./chat-state-provider";
 import type { GitHubRepo } from "./types";
+
+function CheckoutSuccessHandler() {
+	const searchParams = useSearchParams();
+	const { syncAfterCheckout } = useUserSubscription();
+	const hasSynced = useRef(false);
+
+	useEffect(() => {
+		if (searchParams.get("checkout") === "success" && !hasSynced.current) {
+			hasSynced.current = true;
+			syncAfterCheckout().then(() => {
+				const url = new URL(window.location.href);
+				url.searchParams.delete("checkout");
+				window.history.replaceState({}, "", url.toString());
+			});
+		}
+	}, [searchParams, syncAfterCheckout]);
+
+	return null;
+}
 
 type ChatInterfaceProps = {
 	threadId?: string;
@@ -82,6 +104,7 @@ export function ChatInterface({
 			initialRepo={initialRepo}
 			stickToBottom={stickToBottom}
 		>
+			<CheckoutSuccessHandler />
 			<ChatInterfaceContent />
 		</ChatStateProvider>
 	);

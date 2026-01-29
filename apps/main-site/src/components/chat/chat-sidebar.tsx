@@ -12,10 +12,12 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "@packages/ui/components/sheet";
+import { useUserSubscription } from "@packages/ui/hooks/use-user-subscription";
 import { cn } from "@packages/ui/lib/utils";
 import { usePaginatedQuery } from "convex-helpers/react/cache/hooks";
 import { formatDistanceToNow } from "date-fns";
 import {
+	CreditCard,
 	GitBranch,
 	Loader2,
 	Menu,
@@ -147,6 +149,71 @@ function SidebarHeader() {
 	);
 }
 
+function UsageIndicator() {
+	const session = useSession({ allowAnonymous: true });
+	const isAnonymous = !session?.data || session.data.user.isAnonymous;
+	const {
+		usageStatus,
+		isPro,
+		messagesRemaining,
+		usagePercentage,
+		startCheckout,
+		openBillingPortal,
+		isCheckoutLoading,
+		isPortalLoading,
+	} = useUserSubscription();
+
+	if (isAnonymous || !usageStatus) {
+		return null;
+	}
+
+	const usageBarWidth = Math.min(100, usagePercentage);
+
+	return (
+		<div className="p-4 border-t">
+			<div className="flex items-center justify-between mb-2">
+				<span className="text-xs font-medium text-muted-foreground">
+					{isPro ? "Pro" : "Free"} Plan
+				</span>
+				<span className="text-xs text-muted-foreground">
+					{messagesRemaining} left
+				</span>
+			</div>
+			<div className="h-1.5 bg-muted rounded-full overflow-hidden mb-3">
+				<div
+					className={cn(
+						"h-full rounded-full transition-all",
+						usagePercentage > 80 ? "bg-destructive" : "bg-primary",
+					)}
+					style={{ width: `${usageBarWidth}%` }}
+				/>
+			</div>
+			{isPro ? (
+				<Button
+					variant="ghost"
+					size="sm"
+					className="w-full text-xs"
+					onClick={() => openBillingPortal()}
+					disabled={isPortalLoading}
+				>
+					<CreditCard className="size-3 mr-1.5" />
+					Manage subscription
+				</Button>
+			) : (
+				<Button
+					variant="outline"
+					size="sm"
+					className="w-full text-xs"
+					onClick={() => startCheckout()}
+					disabled={isCheckoutLoading}
+				>
+					Upgrade to Pro
+				</Button>
+			)}
+		</div>
+	);
+}
+
 function SidebarContent({ onThreadClick }: { onThreadClick?: () => void }) {
 	const posthog = usePostHog();
 
@@ -175,6 +242,7 @@ function SidebarContent({ onThreadClick }: { onThreadClick?: () => void }) {
 				</div>
 				<ThreadList onThreadClick={onThreadClick} />
 			</div>
+			<UsageIndicator />
 		</div>
 	);
 }

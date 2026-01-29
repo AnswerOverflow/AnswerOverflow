@@ -63,6 +63,7 @@ export function ChatPromptInput() {
 						resetsAt={chat.rateLimitStatus.resetsAt}
 						isAnonymous={chat.rateLimitStatus.isAnonymous}
 						onSignIn={chat.handleSignIn}
+						plan={chat.rateLimitStatus.plan}
 					/>
 				)}
 			<PromptInput onSubmit={handleSubmit} attachedTop={showWarningBanner}>
