@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { Button } from "@packages/ui/components/button";
 import { useUserSubscription } from "@packages/ui/hooks/use-user-subscription";
 import { AlertCircle as AlertCircleIcon, LockIcon } from "lucide-react";
@@ -37,6 +38,7 @@ export function RateLimitWarning({
 	plan?: "FREE" | "PRO";
 }) {
 	const { startCheckout, isCheckoutLoading } = useUserSubscription();
+	const posthog = usePostHog();
 
 	const showUpgrade = !isAnonymous && plan === "FREE";
 
@@ -44,6 +46,15 @@ export function RateLimitWarning({
 		remaining === 0
 			? `Out of messages.${resetsAt ? ` Resets in ${formatTimeUntilReset(resetsAt)}.` : ""}`
 			: `${remaining} message${remaining === 1 ? "" : "s"} remaining.${resetsAt ? ` Resets in ${formatTimeUntilReset(resetsAt)}.` : ""}`;
+
+	const handleCheckoutClick = () => {
+		trackEvent(
+			"Chat Checkout Started",
+			{ plan: "PRO", priceAmount: 500, currentPlan: plan ?? "FREE" },
+			posthog,
+		);
+		startCheckout();
+	};
 
 	return (
 		<div className="flex items-center gap-2 rounded-t-md border-2 border-b-0 border-border bg-secondary px-3 py-1.5">
@@ -64,7 +75,7 @@ export function RateLimitWarning({
 					size="sm"
 					variant="ghost"
 					className="h-6 shrink-0 px-2 text-xs"
-					onClick={() => startCheckout()}
+					onClick={handleCheckoutClick}
 					disabled={isCheckoutLoading}
 				>
 					Get 1,250/mo for $5

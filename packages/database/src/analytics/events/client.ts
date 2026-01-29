@@ -124,6 +124,26 @@ export type ClientEvents = {
 		referralLink: string | null;
 		feedback: string | null;
 	};
+	"Chat Checkout Started": {
+		plan: "PRO";
+		priceAmount: number;
+		currentPlan: "FREE" | "PRO";
+	};
+	"Chat Checkout Completed": {
+		plan: "PRO";
+		priceAmount: number;
+	};
+	"Chat Checkout Canceled": {
+		plan: "PRO";
+	};
+	"Chat Limit Reached": {
+		plan: "FREE" | "PRO";
+		messagesUsed: number;
+		messagesLimit: number;
+	};
+	"Chat Subscription Canceled": {
+		plan: "PRO";
+	};
 };
 
 export type ClientEventName = keyof ClientEvents;

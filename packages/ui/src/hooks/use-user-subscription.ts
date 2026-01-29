@@ -81,6 +81,7 @@ export function useUserSubscription() {
 
 	const isPro = subscription?.plan === "PRO";
 	const isLoading = subscription === undefined || usageStatus === undefined;
+	const dailyReset = usageStatus?.dailyReset ?? false;
 
 	const messagesRemaining = usageStatus
 		? Math.max(
@@ -106,6 +107,7 @@ export function useUserSubscription() {
 		error,
 		messagesRemaining,
 		usagePercentage,
+		dailyReset,
 		startCheckout,
 		openBillingPortal,
 		syncAfterCheckout,

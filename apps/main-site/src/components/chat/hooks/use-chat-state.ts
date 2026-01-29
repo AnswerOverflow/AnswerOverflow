@@ -231,6 +231,8 @@ export function useChatState({
 				serverContext: effectiveServerContext,
 				promptMessageId: messageId,
 				modelId: model,
+				userId: session?.data?.user?.id,
+				userPlan: rateLimitStatus?.plan,
 			});
 		} catch (error) {
 			console.error("streamChat error:", error);

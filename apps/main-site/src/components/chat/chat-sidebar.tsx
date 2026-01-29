@@ -153,6 +153,7 @@ function SidebarHeader() {
 function UsageIndicator() {
 	const session = useSession({ allowAnonymous: true });
 	const isAnonymous = !session?.data || session.data.user.isAnonymous;
+	const posthog = usePostHog();
 	const {
 		usageStatus,
 		isPro,
@@ -162,11 +163,21 @@ function UsageIndicator() {
 		openBillingPortal,
 		isCheckoutLoading,
 		isPortalLoading,
+		dailyReset,
 	} = useUserSubscription();
 
 	if (isAnonymous || !usageStatus) {
 		return null;
 	}
+
+	const handleCheckoutClick = () => {
+		trackEvent(
+			"Chat Checkout Started",
+			{ plan: "PRO", priceAmount: 500, currentPlan: isPro ? "PRO" : "FREE" },
+			posthog,
+		);
+		startCheckout();
+	};
 
 	return (
 		<div className="p-4 border-t">
@@ -175,7 +186,7 @@ function UsageIndicator() {
 					{isPro ? "Pro" : "Free"} Plan
 				</span>
 				<span className="text-xs text-muted-foreground">
-					{messagesRemaining} left
+					{messagesRemaining} left {dailyReset ? "today" : "this month"}
 				</span>
 			</div>
 			<Progress
@@ -202,7 +213,7 @@ function UsageIndicator() {
 					variant="outline"
 					size="sm"
 					className="w-full text-xs"
-					onClick={() => startCheckout()}
+					onClick={handleCheckoutClick}
 					disabled={isCheckoutLoading}
 				>
 					Get 1,250 messages/mo for $5

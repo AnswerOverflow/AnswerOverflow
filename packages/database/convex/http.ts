@@ -39,11 +39,7 @@ registerRoutes(http, components.stripe, {
 			if (!userId) return;
 
 			const { periodStart, periodEnd } = getSubscriptionPeriod(subscription);
-			const previousItem = (
-				event.data.previous_attributes as {
-					items?: { data?: Stripe.SubscriptionItem[] };
-				}
-			)?.items?.data?.[0];
+			const previousItem = event.data.previous_attributes?.items?.data?.[0];
 
 			const periodChanged =
 				previousItem?.current_period_end &&
