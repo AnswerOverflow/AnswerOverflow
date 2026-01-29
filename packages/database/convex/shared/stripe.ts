@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import type { Plan } from "./betterAuth";
 
-const getStripeClient = (): Stripe => {
+export const getStripeClient = (): Stripe => {
 	const secretKey = process.env.STRIPE_SECRET_KEY;
 	if (!secretKey) {
 		throw new Error("STRIPE_SECRET_KEY environment variable is required");

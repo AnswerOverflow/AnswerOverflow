@@ -197,6 +197,9 @@ export const resetUsageForSubscription = internalMutation({
 		const periodEndMillis = stripeSecondsToMillis(args.periodEnd);
 
 		if (existing) {
+			if (existing.periodStart >= periodStartMillis) {
+				return;
+			}
 			await ctx.db.patch(existing._id, {
 				periodStart: periodStartMillis,
 				periodEnd: periodEndMillis,

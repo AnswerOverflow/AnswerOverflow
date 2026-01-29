@@ -1,21 +1,13 @@
 "use node";
 
 import { StripeSubscriptions } from "@convex-dev/stripe";
-import Stripe from "stripe";
 import { components, internal } from "../_generated/api";
 import { authenticatedAction } from "../client";
 import { authComponent } from "../shared/betterAuth";
+import { getStripeClient } from "../shared/stripe";
 import { USER_PLANS } from "../shared/userPlans";
 
 const stripeClient = new StripeSubscriptions(components.stripe, {});
-
-function getStripeClient(): Stripe {
-	const secretKey = process.env.STRIPE_SECRET_KEY;
-	if (!secretKey) {
-		throw new Error("STRIPE_SECRET_KEY environment variable is required");
-	}
-	return new Stripe(secretKey);
-}
 
 function getSiteUrl(): string {
 	const url = process.env.SITE_URL;
@@ -93,25 +85,6 @@ export const syncAfterCheckout = authenticatedAction({
 		const user = await authComponent.getAuthUser(ctx);
 		if (!user) {
 			throw new Error("Not authenticated");
-		}
-
-		const localSubscriptions = await ctx.runQuery(
-			components.stripe.public.listSubscriptionsByUserId,
-			{ userId: user._id },
-		);
-
-		const localActive = localSubscriptions.find(
-			(s) => s.status === "active" || s.status === "trialing",
-		);
-
-		if (localActive) {
-			const item = localActive;
-			await ctx.runMutation(internal.chat.usage.resetUsageForSubscription, {
-				userId: user._id,
-				periodStart: Math.floor(Date.now() / 1000),
-				periodEnd: item.currentPeriodEnd,
-			});
-			return { success: true, plan: "PRO" as const };
 		}
 
 		const stripe = getStripeClient();
