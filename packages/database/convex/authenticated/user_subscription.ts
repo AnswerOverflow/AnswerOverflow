@@ -1,7 +1,7 @@
 import { components } from "../_generated/api";
 import { authenticatedQuery } from "../client";
 import { authComponent } from "../shared/betterAuth";
-import { USER_PLANS } from "../shared/userPlans";
+import { findActiveUserProSubscription } from "../shared/userPlans";
 
 export const getUserSubscription = authenticatedQuery({
 	args: {},
@@ -15,17 +15,12 @@ export const getUserSubscription = authenticatedQuery({
 			return { plan: "FREE" as const, subscription: null };
 		}
 
-		const userProPriceId = USER_PLANS.PRO.priceId;
 		const subscriptions = await ctx.runQuery(
 			components.stripe.public.listSubscriptionsByUserId,
 			{ userId: user._id },
 		);
 
-		const activeSubscription = subscriptions.find(
-			(s) =>
-				(s.status === "active" || s.status === "trialing") &&
-				s.priceId === userProPriceId,
-		);
+		const activeSubscription = findActiveUserProSubscription(subscriptions);
 
 		if (activeSubscription) {
 			return {

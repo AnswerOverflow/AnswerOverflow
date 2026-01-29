@@ -5,7 +5,7 @@ import { components, internal } from "../_generated/api";
 import { authenticatedAction } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import { getStripeClient } from "../shared/stripe";
-import { USER_PLANS } from "../shared/userPlans";
+import { findUserProSubscription, USER_PLANS } from "../shared/userPlans";
 
 const stripeClient = new StripeSubscriptions(components.stripe, {});
 
@@ -63,15 +63,12 @@ export const createBillingPortalSession = authenticatedAction({
 			throw new Error("Not authenticated");
 		}
 
-		const userProPriceId = USER_PLANS.PRO.priceId;
 		const subscriptions = await ctx.runQuery(
 			components.stripe.public.listSubscriptionsByUserId,
 			{ userId: user._id },
 		);
 
-		const userSubscription = subscriptions.find(
-			(s) => s.priceId === userProPriceId,
-		);
+		const userSubscription = findUserProSubscription(subscriptions);
 
 		if (!userSubscription) {
 			throw new Error("No subscription found");

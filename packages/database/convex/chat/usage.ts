@@ -10,8 +10,8 @@ import {
 } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import {
+	findActiveUserProSubscription,
 	getPlanConfig,
-	USER_PLANS,
 	type UserPlanType,
 } from "../shared/userPlans";
 
@@ -46,17 +46,12 @@ export async function getUserPlanInfo(
 	ctx: QueryCtx,
 	userId: string,
 ): Promise<UserPlanInfo> {
-	const userProPriceId = USER_PLANS.PRO.priceId;
 	const subscriptions = await ctx.runQuery(
 		components.stripe.public.listSubscriptionsByUserId,
 		{ userId },
 	);
 
-	const activeSubscription = subscriptions.find(
-		(s) =>
-			(s.status === "active" || s.status === "trialing") &&
-			s.priceId === userProPriceId,
-	);
+	const activeSubscription = findActiveUserProSubscription(subscriptions);
 
 	if (activeSubscription) {
 		return {
