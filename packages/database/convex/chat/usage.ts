@@ -73,7 +73,7 @@ export async function getUserPlan(
 
 async function getOrCreateUsage(ctx: QueryCtx | MutationCtx, userId: string) {
 	const existing = await ctx.db
-		.query("userMessageUsage")
+		.query("userAIChatMessageUsage")
 		.withIndex("by_userId", (q) => q.eq("userId", userId))
 		.first();
 
@@ -91,7 +91,7 @@ async function ensureUsageRecord(ctx: MutationCtx, userId: string) {
 	}
 
 	const now = nowMillis();
-	const id = await ctx.db.insert("userMessageUsage", {
+	const id = await ctx.db.insert("userAIChatMessageUsage", {
 		userId,
 		periodStart: now,
 		periodEnd: addOneDay(now),
@@ -218,7 +218,7 @@ export const resetUsageForSubscription = internalMutation({
 	},
 	handler: async (ctx, args) => {
 		const existing = await ctx.db
-			.query("userMessageUsage")
+			.query("userAIChatMessageUsage")
 			.withIndex("by_userId", (q) => q.eq("userId", args.userId))
 			.first();
 
@@ -235,7 +235,7 @@ export const resetUsageForSubscription = internalMutation({
 				subscriptionMessagesUsed: 0,
 			});
 		} else {
-			await ctx.db.insert("userMessageUsage", {
+			await ctx.db.insert("userAIChatMessageUsage", {
 				userId: args.userId,
 				periodStart: periodStartMillis,
 				periodEnd: periodEndMillis,

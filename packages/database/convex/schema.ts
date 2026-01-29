@@ -458,7 +458,7 @@ const ChatThreadMetadataSchema = Schema.Struct({
 	agentError: Schema.optional(Schema.String),
 });
 
-const UserMessageUsageSchema = Schema.Struct({
+const UserAIChatMessageUsageSchema = Schema.Struct({
 	userId: Schema.String,
 	periodStart: Schema.Number,
 	periodEnd: Schema.Number,
@@ -539,9 +539,10 @@ export const confectSchema = defineSchema({
 		"by_threadId",
 		["threadId"],
 	),
-	userMessageUsage: defineTable(UserMessageUsageSchema).index("by_userId", [
-		"userId",
-	]),
+	userAIChatMessageUsage: defineTable(UserAIChatMessageUsageSchema).index(
+		"by_userId",
+		["userId"],
+	),
 });
 
 export default confectSchema.convexSchemaDefinition;
@@ -568,7 +569,7 @@ export {
 	ReactionSchema,
 	GitHubIssueStatusSchema,
 	GitHubIssueSchema,
-	UserMessageUsageSchema,
+	type UserAIChatMessageUsageSchema,
 };
 
 export const serverSchema = compileSchema(ServerSchema);
@@ -629,7 +630,7 @@ export type ComponentActionRow = Schema.Schema.Type<
 	typeof ComponentActionRowSchema
 >;
 export type ActionRowItem = Schema.Schema.Type<typeof ActionRowItemSchema>;
-export type UserMessageUsage = Schema.Schema.Type<
-	typeof UserMessageUsageSchema
+export type UserAIChatMessageUsage = Schema.Schema.Type<
+	typeof UserAIChatMessageUsageSchema
 >;
 export type { MessageComponent, ContainerChild };
