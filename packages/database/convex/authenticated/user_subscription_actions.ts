@@ -99,10 +99,16 @@ export const syncAfterCheckout = authenticatedAction({
 			return { success: true, plan: "FREE" as const };
 		}
 
+		const userProPriceId = USER_PLANS.PRO.priceId;
+		if (!userProPriceId) {
+			return { success: true, plan: "FREE" as const };
+		}
+
 		const stripeSubscriptions = await stripe.subscriptions.list({
 			customer: customer.id,
-			limit: 1,
+			price: userProPriceId,
 			status: "all",
+			limit: 1,
 		});
 
 		const subscription = stripeSubscriptions.data[0];
