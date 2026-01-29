@@ -8,11 +8,11 @@ import { Loader2 } from "lucide-react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Suspense } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
+import type { DiscordServerContext } from "@/lib/discord-server-types";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatHeaderMobile } from "./chat-header-mobile";
 import { ChatMessages } from "./chat-messages";
 import { ChatPromptInput } from "./chat-prompt-input";
-
 import { ChatStateProvider, useChatContext } from "./chat-state-provider";
 import type { GitHubRepo } from "./types";
 
@@ -68,6 +68,8 @@ function CheckoutSuccessHandler() {
 type ChatInterfaceProps = {
 	threadId?: string;
 	initialRepo?: GitHubRepo;
+	initialServer?: DiscordServerContext;
+	initialInput?: string;
 };
 
 function ChatInterfaceContent() {
@@ -127,6 +129,8 @@ function ChatInterfaceContent() {
 export function ChatInterface({
 	threadId: initialThreadId,
 	initialRepo,
+	initialServer,
+	initialInput,
 }: ChatInterfaceProps) {
 	const stickToBottom = useStickToBottom({ initial: "instant" });
 
@@ -134,6 +138,8 @@ export function ChatInterface({
 		<ChatStateProvider
 			initialThreadId={initialThreadId}
 			initialRepo={initialRepo}
+			initialServer={initialServer}
+			initialInput={initialInput}
 			stickToBottom={stickToBottom}
 		>
 			<CheckoutSuccessHandler />

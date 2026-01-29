@@ -23,6 +23,8 @@ import type { GitHubRepo } from "../types";
 export type UseChatStateProps = {
 	initialThreadId?: string;
 	initialRepo?: GitHubRepo;
+	initialServer?: DiscordServerContext;
+	initialInput?: string;
 };
 
 export type RateLimitStatus = {
@@ -34,19 +36,21 @@ export type RateLimitStatus = {
 export function useChatState({
 	initialThreadId,
 	initialRepo,
+	initialServer,
+	initialInput,
 }: UseChatStateProps) {
 	const session = useSession({ allowAnonymous: true });
 	const isAuthenticated = !!session?.data;
 	const authClient = useAuthClient();
 	const posthog = usePostHog();
 
-	const [input, setInput] = useState("");
+	const [input, setInput] = useState(initialInput ?? "");
 	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
 		initialRepo ?? null,
 	);
 	const [serverOverride, setServerOverride] = useState<
 		DiscordServerContext | null | undefined
-	>(undefined);
+	>(initialServer ?? undefined);
 	const [modelOverride, setModelOverride] = useState<string | null>(null);
 	const [optimisticUserMessage, setOptimisticUserMessage] = useState<
 		string | null

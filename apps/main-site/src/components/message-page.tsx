@@ -35,6 +35,7 @@ import { CheckCircle2, MessageSquare } from "lucide-react";
 import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
+import { FloatingAskInput } from "@/components/floating-ask-input";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { OpenInDiscordLink } from "@/components/open-in-discord-modal";
 import { ResourcesSidebar } from "@/components/resources-sidebar";
@@ -693,6 +694,21 @@ export function MessagePage(props: {
 						/>
 					)}
 				</div>
+
+				{!tenant && (
+					<FloatingAskInput
+						serverDiscordId={headerData.server.discordId.toString()}
+						serverName={headerData.server.name}
+						pageContext={{
+							type: "message",
+							threadName: headerData.thread?.name,
+							channelName: headerData.channel.name,
+							messageId: (
+								headerData.firstMessage?.message.id ?? headerData.canonicalId
+							).toString(),
+						}}
+					/>
+				)}
 			</div>
 		</MessageResultPageProvider>
 	);
