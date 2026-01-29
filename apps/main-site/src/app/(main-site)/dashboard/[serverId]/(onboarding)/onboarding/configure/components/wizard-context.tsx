@@ -39,6 +39,11 @@ type AIRecommendation = {
 
 type ServerSettings = RecommendedConfiguration["serverSettings"];
 
+export type OnboardingFeedback = {
+	referralSource: string | null;
+	feedback: string | null;
+};
+
 type WizardState = {
 	isLoading: boolean;
 	error: string | null;
@@ -46,6 +51,7 @@ type WizardState = {
 	configurations: Array<ChannelConfiguration>;
 	serverSettings: ServerSettings;
 	aiRecommendations: Map<string, AIRecommendation>;
+	onboardingFeedback: OnboardingFeedback;
 };
 
 type WizardContextValue = WizardState & {
@@ -62,6 +68,7 @@ type WizardContextValue = WizardState & {
 	getAllNonForumChannels: () => Array<ChannelInfo>;
 	getConfiguredChannels: () => Array<ChannelConfiguration>;
 	getAIRecommendation: (channelId: string) => AIRecommendation | undefined;
+	setOnboardingFeedback: (feedback: Partial<OnboardingFeedback>) => void;
 	reload: () => Promise<void>;
 };
 
@@ -142,6 +149,11 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 		useState<Array<ChannelConfiguration> | null>(null);
 	const [serverSettingsOverride, setServerSettingsOverride] =
 		useState<ServerSettings | null>(null);
+	const [onboardingFeedback, setOnboardingFeedbackState] =
+		useState<OnboardingFeedback>({
+			referralSource: null,
+			feedback: null,
+		});
 
 	const configurations =
 		configurationsOverride ?? configData?.configurations ?? [];
@@ -257,6 +269,16 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 		[aiRecommendations],
 	);
 
+	const setOnboardingFeedback = useCallback(
+		(feedback: Partial<OnboardingFeedback>) => {
+			setOnboardingFeedbackState((prev) => ({
+				...prev,
+				...feedback,
+			}));
+		},
+		[],
+	);
+
 	const reload = useCallback(async () => {
 		setConfigurationsOverride(null);
 		setServerSettingsOverride(null);
@@ -270,6 +292,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 		configurations,
 		serverSettings,
 		aiRecommendations,
+		onboardingFeedback,
 		serverId,
 		setServerSettings,
 		updateChannelConfig,
@@ -280,6 +303,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 		getAllNonForumChannels,
 		getConfiguredChannels,
 		getAIRecommendation,
+		setOnboardingFeedback,
 		reload,
 	};
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
+import { trackEvent } from "@packages/ui/analytics/client/track-event";
 import { Badge } from "@packages/ui/components/badge";
 import {
 	Empty,
@@ -9,6 +10,15 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from "@packages/ui/components/empty";
+import { Label } from "@packages/ui/components/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@packages/ui/components/select";
+import { Textarea } from "@packages/ui/components/textarea";
 import {
 	Tooltip,
 	TooltipContent,
@@ -25,12 +35,25 @@ import {
 	Settings2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useMemo, useState } from "react";
 import { StepLayout } from "../components/step-layout";
 import { WizardCard } from "../components/wizard-card";
 import type { ForumTagInfo } from "../components/wizard-context";
 import { useWizard } from "../components/wizard-context";
 import { WizardNav } from "../components/wizard-nav";
+
+const REFERRAL_SOURCES = [
+	{ value: "google", label: "Google Search" },
+	{ value: "discord", label: "Discord" },
+	{ value: "twitter", label: "Twitter/X" },
+	{ value: "github", label: "GitHub" },
+	{ value: "reddit", label: "Reddit" },
+	{ value: "youtube", label: "YouTube" },
+	{ value: "friend", label: "Friend or Colleague" },
+	{ value: "blog", label: "Blog Post or Article" },
+	{ value: "other", label: "Other" },
+] as const;
 
 function FeatureBadge({
 	icon: Icon,
@@ -96,12 +119,15 @@ function SolvedTagBadge({ tag }: { tag: ForumTagInfo }) {
 
 export default function CompletePage() {
 	const router = useRouter();
+	const posthog = usePostHog();
 	const {
 		serverId,
 		serverSettings,
 		allChannels,
 		getConfiguredChannels,
 		getAllForumChannels,
+		onboardingFeedback,
+		setOnboardingFeedback,
 	} = useWizard();
 
 	const [isApplying, setIsApplying] = useState(false);
@@ -154,6 +180,20 @@ export default function CompletePage() {
 				serverSettings,
 			});
 
+			// Track onboarding feedback via PostHog analytics
+			if (onboardingFeedback.referralSource || onboardingFeedback.feedback) {
+				trackEvent(
+					"Onboarding Feedback Submitted",
+					{
+						serverId,
+						serverName: serverId,
+						referralSource: onboardingFeedback.referralSource,
+						feedback: onboardingFeedback.feedback,
+					},
+					posthog,
+				);
+			}
+
 			router.push(`/dashboard/${serverId}`);
 		} catch (err) {
 			console.error("Failed to apply configuration:", err);
@@ -181,6 +221,48 @@ export default function CompletePage() {
 							</EmptyDescription>
 						</EmptyHeader>
 					</Empty>
+				</WizardCard>
+
+				<WizardCard>
+					<div className="space-y-4">
+						<div className="space-y-2">
+							<Label htmlFor="referral-source-empty">
+								How did you hear about Answer Overflow?
+							</Label>
+							<Select
+								value={onboardingFeedback.referralSource ?? ""}
+								onValueChange={(value) =>
+									setOnboardingFeedback({ referralSource: value || null })
+								}
+							>
+								<SelectTrigger id="referral-source-empty" className="w-full">
+									<SelectValue placeholder="Select an option" />
+								</SelectTrigger>
+								<SelectContent>
+									{REFERRAL_SOURCES.map((source) => (
+										<SelectItem key={source.value} value={source.value}>
+											{source.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="feedback-empty">
+								Any feedback or suggestions? (optional)
+							</Label>
+							<Textarea
+								id="feedback-empty"
+								placeholder="Tell us what you think, what features you'd like to see, or any issues you encountered..."
+								value={onboardingFeedback.feedback ?? ""}
+								onChange={(e) =>
+									setOnboardingFeedback({ feedback: e.target.value || null })
+								}
+								rows={3}
+							/>
+						</div>
+					</div>
 				</WizardCard>
 
 				<WizardNav
@@ -273,6 +355,48 @@ export default function CompletePage() {
 							{error}
 						</div>
 					)}
+				</div>
+			</WizardCard>
+
+			<WizardCard>
+				<div className="space-y-4">
+					<div className="space-y-2">
+						<Label htmlFor="referral-source">
+							How did you hear about Answer Overflow?
+						</Label>
+						<Select
+							value={onboardingFeedback.referralSource ?? ""}
+							onValueChange={(value) =>
+								setOnboardingFeedback({ referralSource: value || null })
+							}
+						>
+							<SelectTrigger id="referral-source" className="w-full">
+								<SelectValue placeholder="Select an option" />
+							</SelectTrigger>
+							<SelectContent>
+								{REFERRAL_SOURCES.map((source) => (
+									<SelectItem key={source.value} value={source.value}>
+										{source.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="feedback">
+							Any feedback or suggestions? (optional)
+						</Label>
+						<Textarea
+							id="feedback"
+							placeholder="Tell us what you think, what features you'd like to see, or any issues you encountered..."
+							value={onboardingFeedback.feedback ?? ""}
+							onChange={(e) =>
+								setOnboardingFeedback({ feedback: e.target.value || null })
+							}
+							rows={3}
+						/>
+					</div>
 				</div>
 			</WizardCard>
 
