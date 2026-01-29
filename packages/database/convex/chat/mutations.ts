@@ -18,9 +18,8 @@ import {
 } from "../client";
 import { authComponent } from "../shared/betterAuth";
 import { defaultModelId, getModelById, vModelId } from "../shared/models";
-import { rateLimiter } from "../shared/rateLimiter";
 import { resolveServerContext } from "./shared";
-import { checkAndConsumeMessage, getUsageStatus } from "./usage";
+import { checkAndConsumeMessage } from "./usage";
 
 export const vRepoContext = v.object({
 	owner: v.string(),
@@ -61,20 +60,9 @@ export const sendMessage = anonOrAuthenticatedMutation({
 			);
 		}
 
-		if (isAnonymous) {
-			const rateLimit = await rateLimiter.limit(ctx, "chatMessageAnon", {
-				key: userId,
-			});
-			if (!rateLimit.ok) {
-				throw new Error(
-					`Rate limit exceeded. Try again in ${Math.ceil((rateLimit.retryAfter ?? 0) / 1000)} seconds.`,
-				);
-			}
-		} else {
-			const usageResult = await checkAndConsumeMessage(ctx, userId);
-			if (!usageResult.allowed) {
-				throw new Error(usageResult.reason ?? "Message limit exceeded");
-			}
+		const usageResult = await checkAndConsumeMessage(ctx, userId);
+		if (!usageResult.allowed) {
+			throw new Error(usageResult.reason ?? "Message limit exceeded");
 		}
 
 		let threadId = args.threadId;
@@ -252,44 +240,6 @@ export const getChatThreadMetadata = anonOrAuthenticatedQuery({
 			modelId: metadata?.modelId ?? null,
 			agentStatus: metadata?.agentStatus ?? "idle",
 			agentError: metadata?.agentError ?? null,
-		};
-	},
-});
-
-export const getChatRateLimitStatus = anonOrAuthenticatedQuery({
-	args: {},
-	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
-		const isAnonymous = user?.isAnonymous ?? false;
-
-		if (isAnonymous) {
-			const { value, ts } = await rateLimiter.getValue(ctx, "chatMessageAnon", {
-				key: args.userId,
-			});
-			const remaining = Math.max(0, Math.floor(value ?? 10));
-			return {
-				remaining,
-				limit: 10,
-				isAnonymous: true,
-				resetsAt: null,
-				plan: "FREE" as const,
-				purchasedCredits: 0,
-			};
-		}
-
-		const status = await getUsageStatus(ctx, args.userId);
-		const remaining = Math.max(
-			0,
-			status.subscriptionMessagesLimit - status.subscriptionMessagesUsed,
-		);
-
-		return {
-			remaining: remaining + status.purchasedCredits,
-			limit: status.subscriptionMessagesLimit,
-			isAnonymous: false,
-			resetsAt: status.periodEnd,
-			plan: status.plan,
-			purchasedCredits: status.purchasedCredits,
 		};
 	},
 });

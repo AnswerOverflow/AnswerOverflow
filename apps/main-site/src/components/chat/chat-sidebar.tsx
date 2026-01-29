@@ -6,6 +6,7 @@ import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo
 import { Button } from "@packages/ui/components/button";
 import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
+import { Progress } from "@packages/ui/components/progress";
 import {
 	Sheet,
 	SheetContent,
@@ -167,8 +168,6 @@ function UsageIndicator() {
 		return null;
 	}
 
-	const usageBarWidth = Math.min(100, usagePercentage);
-
 	return (
 		<div className="p-4 border-t">
 			<div className="flex items-center justify-between mb-2">
@@ -179,15 +178,14 @@ function UsageIndicator() {
 					{messagesRemaining} left
 				</span>
 			</div>
-			<div className="h-1.5 bg-muted rounded-full overflow-hidden mb-3">
-				<div
-					className={cn(
-						"h-full rounded-full transition-all",
-						usagePercentage > 80 ? "bg-destructive" : "bg-primary",
-					)}
-					style={{ width: `${usageBarWidth}%` }}
-				/>
-			</div>
+			<Progress
+				value={Math.min(100, usagePercentage)}
+				className={cn(
+					"h-1.5 mb-3",
+					usagePercentage > 80 &&
+						"[&>[data-slot=progress-indicator]]:bg-destructive",
+				)}
+			/>
 			{isPro ? (
 				<Button
 					variant="ghost"

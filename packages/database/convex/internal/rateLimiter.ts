@@ -58,22 +58,3 @@ export const checkAiIssueExtraction = internalMutation({
 		};
 	},
 });
-
-export const checkChatMessage = internalMutation({
-	args: {
-		key: v.string(),
-	},
-	returns: v.object({
-		ok: v.boolean(),
-		retryAfter: v.optional(v.number()),
-	}),
-	handler: async (ctx, args) => {
-		const result = await rateLimiter.limit(ctx, "chatMessage", {
-			key: args.key,
-		});
-		return {
-			ok: result.ok,
-			retryAfter: result.retryAfter ?? undefined,
-		};
-	},
-});

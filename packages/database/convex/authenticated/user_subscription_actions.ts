@@ -1,7 +1,6 @@
 "use node";
 
 import { StripeSubscriptions } from "@convex-dev/stripe";
-import { v } from "convex/values";
 import Stripe from "stripe";
 import { components, internal } from "../_generated/api";
 import { authenticatedAction } from "../client";
@@ -85,69 +84,6 @@ export const createBillingPortalSession = authenticatedAction({
 			customerId: subscriptions[0]?.stripeCustomerId ?? "",
 			returnUrl: `${getSiteUrl()}/chat`,
 		});
-	},
-});
-
-export const cancelSubscription = authenticatedAction({
-	args: {
-		immediately: v.optional(v.boolean()),
-	},
-	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
-		if (!user) {
-			throw new Error("Not authenticated");
-		}
-
-		const subscriptions = await ctx.runQuery(
-			components.stripe.public.listSubscriptionsByUserId,
-			{ userId: user._id },
-		);
-
-		const activeSubscription = subscriptions.find(
-			(s) => s.status === "active" || s.status === "trialing",
-		);
-
-		if (!activeSubscription) {
-			throw new Error("No active subscription found");
-		}
-
-		await stripeClient.cancelSubscription(ctx, {
-			stripeSubscriptionId: activeSubscription.stripeSubscriptionId,
-			cancelAtPeriodEnd: !args.immediately,
-		});
-
-		return { success: true };
-	},
-});
-
-export const reactivateSubscription = authenticatedAction({
-	args: {},
-	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
-		if (!user) {
-			throw new Error("Not authenticated");
-		}
-
-		const subscriptions = await ctx.runQuery(
-			components.stripe.public.listSubscriptionsByUserId,
-			{ userId: user._id },
-		);
-
-		const cancelingSubscription = subscriptions.find(
-			(s) =>
-				(s.status === "active" || s.status === "trialing") &&
-				s.cancelAtPeriodEnd,
-		);
-
-		if (!cancelingSubscription) {
-			throw new Error("No subscription to reactivate");
-		}
-
-		await stripeClient.reactivateSubscription(ctx, {
-			stripeSubscriptionId: cancelingSubscription.stripeSubscriptionId,
-		});
-
-		return { success: true };
 	},
 });
 

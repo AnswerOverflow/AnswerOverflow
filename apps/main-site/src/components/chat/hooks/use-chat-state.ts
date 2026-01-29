@@ -56,7 +56,7 @@ export function useChatState({
 	);
 
 	const rateLimitStatus = useAuthenticatedQuery(
-		api.chat.mutations.getChatRateLimitStatus,
+		api.chat.usage.getMessageUsageStatus,
 		{},
 		{ allowAnonymous: true },
 	);

@@ -2,9 +2,9 @@
 
 import { useIsNavbarHidden } from "@packages/ui/hooks/use-scroll-container";
 import { useUserSubscription } from "@packages/ui/hooks/use-user-subscription";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatHeaderMobile } from "./chat-header-mobile";
@@ -15,20 +15,23 @@ import { ChatStateProvider, useChatContext } from "./chat-state-provider";
 import type { GitHubRepo } from "./types";
 
 function CheckoutSuccessHandler() {
-	const searchParams = useSearchParams();
+	const [checkout, setCheckout] = useQueryState(
+		"checkout",
+		parseAsStringLiteral(["success", "canceled"]),
+	);
 	const { syncAfterCheckout } = useUserSubscription();
-	const hasSynced = useRef(false);
 
-	useEffect(() => {
-		if (searchParams.get("checkout") === "success" && !hasSynced.current) {
-			hasSynced.current = true;
-			syncAfterCheckout().then(() => {
-				const url = new URL(window.location.href);
-				url.searchParams.delete("checkout");
-				window.history.replaceState({}, "", url.toString());
-			});
-		}
-	}, [searchParams, syncAfterCheckout]);
+	useQuery({
+		queryKey: ["checkout-sync", checkout],
+		queryFn: async () => {
+			if (checkout !== "success") return null;
+			await syncAfterCheckout();
+			setCheckout(null);
+			return true;
+		},
+		enabled: checkout === "success",
+		staleTime: Number.POSITIVE_INFINITY,
+	});
 
 	return null;
 }

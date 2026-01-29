@@ -123,10 +123,8 @@ export const FUNCTION_TYPE_MAP = {
   "user_server_settings.upsertManyBotUserServerSettings": "mutation",
   "user_server_settings.upsertManyUserServerSettings": "mutation",
   "user_server_settings.upsertUserServerSettings": "mutation",
-  "user_subscription_actions.cancelSubscription": "action",
   "user_subscription_actions.createBillingPortalSession": "action",
   "user_subscription_actions.createCheckoutSession": "action",
-  "user_subscription_actions.reactivateSubscription": "action",
   "user_subscription_actions.syncAfterCheckout": "action",
   "user_subscription.getUserSubscription": "query",
   "vercel_domains.addDomain": "action",
@@ -167,7 +165,7 @@ export const AUTHENTICATED_NAMESPACE_STRUCTURE = {
   "threads": ["getThreadsForServer"],
   "threads_action": ["generateThreadSummary"],
   "user_subscription": ["getUserSubscription"],
-  "user_subscription_actions": ["cancelSubscription","createBillingPortalSession","createCheckoutSession","reactivateSubscription","syncAfterCheckout"],
+  "user_subscription_actions": ["createBillingPortalSession","createCheckoutSession","syncAfterCheckout"],
   "vercel_domains": ["addDomain","getDomainStatus"]
 } as const;
 

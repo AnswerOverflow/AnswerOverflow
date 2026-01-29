@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { components, internal } from "../_generated/api";
+import { DateTime, Duration } from "effect";
+import { components } from "../_generated/api";
 import {
 	anonOrAuthenticatedMutation,
 	anonOrAuthenticatedQuery,
@@ -8,13 +9,29 @@ import {
 	type QueryCtx,
 } from "../client";
 import { authComponent } from "../shared/betterAuth";
-import {
-	getPlanConfig,
-	USER_PLANS,
-	type UserPlanType,
-} from "../shared/userPlans";
+import { getPlanConfig, type UserPlanType } from "../shared/userPlans";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+const ONE_DAY = Duration.decode("1 day");
+
+function nowMillis(): number {
+	return DateTime.unsafeMake(Date.now()).epochMillis;
+}
+
+function addOneDay(timestamp: number): number {
+	const dt = DateTime.unsafeMake(timestamp);
+	const future = DateTime.addDuration(dt, ONE_DAY);
+	return future.epochMillis;
+}
+
+function isPeriodExpired(periodEnd: number): boolean {
+	const now = DateTime.unsafeMake(Date.now());
+	const end = DateTime.unsafeMake(periodEnd);
+	return DateTime.greaterThan(now, end);
+}
+
+function stripeSecondsToMillis(seconds: number): number {
+	return DateTime.unsafeMake(seconds * 1000).epochMillis;
+}
 
 export async function getUserPlan(
 	ctx: QueryCtx,
@@ -55,11 +72,11 @@ async function ensureUsageRecord(ctx: MutationCtx, userId: string) {
 		return existing;
 	}
 
-	const now = Date.now();
+	const now = nowMillis();
 	const id = await ctx.db.insert("userMessageUsage", {
 		userId,
 		periodStart: now,
-		periodEnd: now + DAY_MS,
+		periodEnd: addOneDay(now),
 		subscriptionMessagesUsed: 0,
 		purchasedCredits: 0,
 	});
@@ -78,17 +95,22 @@ export async function checkAndConsumeMessage(
 	const plan = await getUserPlan(ctx, userId);
 	const planConfig = getPlanConfig(plan);
 	const usage = await ensureUsageRecord(ctx, userId);
-	const now = Date.now();
+	const now = nowMillis();
 
-	if (plan === "FREE" && planConfig.dailyReset && now > usage.periodEnd) {
+	if (
+		plan === "FREE" &&
+		planConfig.dailyReset &&
+		isPeriodExpired(usage.periodEnd)
+	) {
+		const newPeriodEnd = addOneDay(now);
 		await ctx.db.patch(usage._id, {
 			periodStart: now,
-			periodEnd: now + DAY_MS,
+			periodEnd: newPeriodEnd,
 			subscriptionMessagesUsed: 0,
 		});
 		usage.subscriptionMessagesUsed = 0;
 		usage.periodStart = now;
-		usage.periodEnd = now + DAY_MS;
+		usage.periodEnd = newPeriodEnd;
 	}
 
 	if (usage.subscriptionMessagesUsed < planConfig.messagesPerMonth) {
@@ -124,7 +146,7 @@ export async function getUsageStatus(ctx: QueryCtx, userId: string) {
 	const plan = await getUserPlan(ctx, userId);
 	const planConfig = getPlanConfig(plan);
 	const usage = await getOrCreateUsage(ctx, userId);
-	const now = Date.now();
+	const now = nowMillis();
 
 	if (!usage) {
 		return {
@@ -132,7 +154,7 @@ export async function getUsageStatus(ctx: QueryCtx, userId: string) {
 			subscriptionMessagesUsed: 0,
 			subscriptionMessagesLimit: planConfig.messagesPerMonth,
 			purchasedCredits: 0,
-			periodEnd: now + DAY_MS,
+			periodEnd: addOneDay(now),
 			dailyReset: planConfig.dailyReset,
 		};
 	}
@@ -140,9 +162,13 @@ export async function getUsageStatus(ctx: QueryCtx, userId: string) {
 	let effectiveUsed = usage.subscriptionMessagesUsed;
 	let effectivePeriodEnd = usage.periodEnd;
 
-	if (plan === "FREE" && planConfig.dailyReset && now > usage.periodEnd) {
+	if (
+		plan === "FREE" &&
+		planConfig.dailyReset &&
+		isPeriodExpired(usage.periodEnd)
+	) {
 		effectiveUsed = 0;
-		effectivePeriodEnd = now + DAY_MS;
+		effectivePeriodEnd = addOneDay(now);
 	}
 
 	return {
@@ -167,17 +193,20 @@ export const resetUsageForSubscription = internalMutation({
 			.withIndex("by_userId", (q) => q.eq("userId", args.userId))
 			.first();
 
+		const periodStartMillis = stripeSecondsToMillis(args.periodStart);
+		const periodEndMillis = stripeSecondsToMillis(args.periodEnd);
+
 		if (existing) {
 			await ctx.db.patch(existing._id, {
-				periodStart: args.periodStart * 1000,
-				periodEnd: args.periodEnd * 1000,
+				periodStart: periodStartMillis,
+				periodEnd: periodEndMillis,
 				subscriptionMessagesUsed: 0,
 			});
 		} else {
 			await ctx.db.insert("userMessageUsage", {
 				userId: args.userId,
-				periodStart: args.periodStart * 1000,
-				periodEnd: args.periodEnd * 1000,
+				periodStart: periodStartMillis,
+				periodEnd: periodEndMillis,
 				subscriptionMessagesUsed: 0,
 				purchasedCredits: 0,
 			});
@@ -191,22 +220,17 @@ export const getMessageUsageStatus = anonOrAuthenticatedQuery({
 		const user = await authComponent.getAuthUser(ctx);
 		const isAnonymous = user?.isAnonymous ?? false;
 
-		if (isAnonymous) {
-			return {
-				plan: "FREE" as const,
-				subscriptionMessagesUsed: 0,
-				subscriptionMessagesLimit: USER_PLANS.FREE.messagesPerMonth,
-				purchasedCredits: 0,
-				periodEnd: Date.now() + DAY_MS,
-				dailyReset: true,
-				isAnonymous: true,
-			};
-		}
-
 		const status = await getUsageStatus(ctx, args.userId);
+		const remaining =
+			Math.max(
+				0,
+				status.subscriptionMessagesLimit - status.subscriptionMessagesUsed,
+			) + status.purchasedCredits;
+
 		return {
 			...status,
-			isAnonymous: false,
+			remaining,
+			isAnonymous,
 		};
 	},
 });
@@ -214,13 +238,6 @@ export const getMessageUsageStatus = anonOrAuthenticatedQuery({
 export const consumeMessage = anonOrAuthenticatedMutation({
 	args: {},
 	handler: async (ctx, args) => {
-		const user = await authComponent.getAuthUser(ctx);
-		const isAnonymous = user?.isAnonymous ?? false;
-
-		if (isAnonymous) {
-			return { allowed: true };
-		}
-
 		return checkAndConsumeMessage(ctx, args.userId);
 	},
 });

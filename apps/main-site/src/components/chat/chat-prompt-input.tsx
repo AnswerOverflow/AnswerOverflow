@@ -60,7 +60,7 @@ export function ChatPromptInput() {
 				!chat.selectedModelRequiresSignIn && (
 					<RateLimitWarning
 						remaining={chat.rateLimitStatus.remaining}
-						resetsAt={chat.rateLimitStatus.resetsAt}
+						resetsAt={chat.rateLimitStatus.periodEnd}
 						isAnonymous={chat.rateLimitStatus.isAnonymous}
 						onSignIn={chat.handleSignIn}
 						plan={chat.rateLimitStatus.plan}

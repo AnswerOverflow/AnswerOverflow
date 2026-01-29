@@ -29,12 +29,6 @@ export function useUserSubscription() {
 	const createBillingPortalSessionAction = useAction(
 		api.authenticated.user_subscription_actions.createBillingPortalSession,
 	);
-	const cancelSubscriptionAction = useAction(
-		api.authenticated.user_subscription_actions.cancelSubscription,
-	);
-	const reactivateSubscriptionAction = useAction(
-		api.authenticated.user_subscription_actions.reactivateSubscription,
-	);
 	const syncAfterCheckoutAction = useAction(
 		api.authenticated.user_subscription_actions.syncAfterCheckout,
 	);
@@ -75,37 +69,6 @@ export function useUserSubscription() {
 		}
 	}, [createBillingPortalSessionAction]);
 
-	const cancelSubscription = useCallback(
-		async (immediately = false) => {
-			setError(null);
-			try {
-				await cancelSubscriptionAction({ immediately });
-				return true;
-			} catch (err) {
-				setError(
-					err instanceof Error ? err.message : "Failed to cancel subscription",
-				);
-				return false;
-			}
-		},
-		[cancelSubscriptionAction],
-	);
-
-	const reactivateSubscription = useCallback(async () => {
-		setError(null);
-		try {
-			await reactivateSubscriptionAction({});
-			return true;
-		} catch (err) {
-			setError(
-				err instanceof Error
-					? err.message
-					: "Failed to reactivate subscription",
-			);
-			return false;
-		}
-	}, [reactivateSubscriptionAction]);
-
 	const syncAfterCheckout = useCallback(async () => {
 		if (!isAuthenticated) return null;
 		try {
@@ -145,8 +108,6 @@ export function useUserSubscription() {
 		usagePercentage,
 		startCheckout,
 		openBillingPortal,
-		cancelSubscription,
-		reactivateSubscription,
 		syncAfterCheckout,
 	};
 }
