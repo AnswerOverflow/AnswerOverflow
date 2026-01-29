@@ -37,10 +37,15 @@ function stripeSecondsToMillis(seconds: number): number {
 	return DateTime.unsafeMake(seconds * 1000).epochMillis;
 }
 
-export async function getUserPlan(
+type UserPlanInfo = {
+	plan: UserPlanType;
+	currentPeriodEnd: number | null;
+};
+
+export async function getUserPlanInfo(
 	ctx: QueryCtx,
 	userId: string,
-): Promise<UserPlanType> {
+): Promise<UserPlanInfo> {
 	const userProPriceId = USER_PLANS.PRO.priceId;
 	const subscriptions = await ctx.runQuery(
 		components.stripe.public.listSubscriptionsByUserId,
@@ -54,10 +59,21 @@ export async function getUserPlan(
 	);
 
 	if (activeSubscription) {
-		return "PRO";
+		return {
+			plan: "PRO",
+			currentPeriodEnd: activeSubscription.currentPeriodEnd * 1000,
+		};
 	}
 
-	return "FREE";
+	return { plan: "FREE", currentPeriodEnd: null };
+}
+
+export async function getUserPlan(
+	ctx: QueryCtx,
+	userId: string,
+): Promise<UserPlanType> {
+	const info = await getUserPlanInfo(ctx, userId);
+	return info.plan;
 }
 
 async function getOrCreateUsage(ctx: QueryCtx | MutationCtx, userId: string) {
@@ -99,16 +115,12 @@ export async function checkAndConsumeMessage(
 	ctx: MutationCtx,
 	userId: string,
 ): Promise<{ allowed: boolean; reason?: string }> {
-	const plan = await getUserPlan(ctx, userId);
-	const planConfig = getPlanConfig(plan);
+	const planInfo = await getUserPlanInfo(ctx, userId);
+	const planConfig = getPlanConfig(planInfo.plan);
 	const usage = await ensureUsageRecord(ctx, userId);
 	const now = nowMillis();
 
-	if (
-		plan === "FREE" &&
-		planConfig.dailyReset &&
-		isPeriodExpired(usage.periodEnd)
-	) {
+	if (planInfo.plan === "FREE" && isPeriodExpired(usage.periodEnd)) {
 		const newPeriodEnd = addOneDay(now);
 		await ctx.db.patch(usage._id, {
 			periodStart: now,
@@ -118,6 +130,21 @@ export async function checkAndConsumeMessage(
 		usage.subscriptionMessagesUsed = 0;
 		usage.periodStart = now;
 		usage.periodEnd = newPeriodEnd;
+	}
+
+	if (
+		planInfo.plan === "PRO" &&
+		planInfo.currentPeriodEnd &&
+		usage.periodEnd < planInfo.currentPeriodEnd
+	) {
+		await ctx.db.patch(usage._id, {
+			periodStart: now,
+			periodEnd: planInfo.currentPeriodEnd,
+			subscriptionMessagesUsed: 0,
+		});
+		usage.subscriptionMessagesUsed = 0;
+		usage.periodStart = now;
+		usage.periodEnd = planInfo.currentPeriodEnd;
 	}
 
 	if (usage.subscriptionMessagesUsed < planConfig.messagesPerMonth) {
@@ -134,7 +161,7 @@ export async function checkAndConsumeMessage(
 		return { allowed: true };
 	}
 
-	if (plan === "FREE") {
+	if (planInfo.plan === "FREE") {
 		return {
 			allowed: false,
 			reason:
