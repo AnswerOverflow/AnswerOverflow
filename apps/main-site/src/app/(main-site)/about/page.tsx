@@ -2,8 +2,10 @@ import { Database } from "@packages/database/database";
 import { SessionRecording } from "@packages/ui/analytics/client";
 import { Effect } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
+import { Suspense } from "react";
 import { runtime } from "../../../lib/runtime";
-import { AboutPageClient } from "./client";
+import { AboutPageClient, AboutPageSkeleton } from "./client";
 import { TestimonialsSection } from "./testimonials";
 
 export const metadata: Metadata = {
@@ -17,22 +19,37 @@ export const metadata: Metadata = {
 	},
 };
 
-export default async function AboutPage() {
-	const serversLiveData = await Effect.gen(function* () {
+async function fetchAboutPageServers() {
+	"use cache";
+	cacheLife("hours");
+	cacheTag("about-servers");
+
+	return Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* database.public.servers.getBrowseServers();
 		return liveData;
 	}).pipe(runtime.runPromise);
+}
 
+async function AboutPageLoader() {
+	const serversLiveData = await fetchAboutPageServers();
 	const servers = serversLiveData ?? [];
 
 	return (
+		<AboutPageClient
+			servers={servers}
+			testimonialsSection={<TestimonialsSection />}
+		/>
+	);
+}
+
+export default function AboutPage() {
+	return (
 		<>
 			<SessionRecording />
-			<AboutPageClient
-				servers={servers}
-				testimonialsSection={<TestimonialsSection />}
-			/>
+			<Suspense fallback={<AboutPageSkeleton />}>
+				<AboutPageLoader />
+			</Suspense>
 		</>
 	);
 }

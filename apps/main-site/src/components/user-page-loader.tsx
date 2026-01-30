@@ -3,6 +3,7 @@ import { Database } from "@packages/database/database";
 import { ThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import {
@@ -22,6 +23,10 @@ export type UserPosts = FunctionReturnType<
 export async function fetchUserPageHeaderData(
 	userId: bigint,
 ): Promise<UserPageHeaderData | null> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("user-header", userId.toString());
+
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.discord_accounts.getUserPageHeaderData({
@@ -35,6 +40,10 @@ export async function fetchUserPosts(
 	serverId?: bigint,
 	cursor: string | null = null,
 ): Promise<UserPosts> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("user-posts", userId.toString(), serverId?.toString() ?? "all");
+
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.discord_accounts.getUserPosts({
@@ -61,6 +70,10 @@ async function PostsLoader(props: {
 	cursor: string | null;
 	basePath: string;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("posts-loader", props.userId.toString(), props.serverId ?? "all");
+
 	const serverIdBigInt = props.serverId ? BigInt(props.serverId) : undefined;
 	const posts = await fetchUserPosts(
 		props.userId,
@@ -78,7 +91,7 @@ async function PostsLoader(props: {
 	);
 }
 
-export function UserPageLoader(props: {
+export async function UserPageLoader(props: {
 	headerData: UserPageHeaderData | null;
 	userId: string;
 	serverId?: string;
@@ -86,6 +99,10 @@ export function UserPageLoader(props: {
 	serverFilterLabel: string;
 	cursor?: string;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("user-page-loader", props.userId, props.serverId ?? "all");
+
 	const { headerData, userId, serverId, basePath, serverFilterLabel, cursor } =
 		props;
 

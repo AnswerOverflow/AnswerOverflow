@@ -1,16 +1,34 @@
 import { Database } from "@packages/database/database";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import {
 	fetchUserPageHeaderData,
 	UserPageLoader,
 } from "../../../../../components/user-page-loader";
 import { runtime } from "../../../../../lib/runtime";
+
+export async function generateStaticParams() {
+	return [{ domain: "placeholder.example.com", userId: "123456789012345678" }];
+}
+
+async function fetchTenantData(domain: string) {
+	"use cache";
+	cacheLife("hours");
+	cacheTag("tenant-user-page", domain);
+
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.public.servers.getServerByDomain({ domain });
+	}).pipe(runtime.runPromise);
+}
 
 type Props = {
 	params: Promise<{ domain: string; userId: string }>;
@@ -31,10 +49,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		redirect(`/u/${parsed.value.cleaned}`);
 	}
 
-	const tenantData = await Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.public.servers.getServerByDomain({ domain });
-	}).pipe(runtime.runPromise);
+	const tenantData = await fetchTenantData(domain);
 
 	const headerData = await fetchUserPageHeaderData(parsed.value.id);
 	const userName = headerData?.user.name ?? "User";
@@ -95,10 +110,7 @@ export default async function TenantUserPage(props: Props) {
 		redirect(`/u/${parsed.value.cleaned}`);
 	}
 
-	const tenantData = await Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.public.servers.getServerByDomain({ domain });
-	}).pipe(runtime.runPromise);
+	const tenantData = await fetchTenantData(domain);
 
 	if (!tenantData?.server) {
 		return notFound();

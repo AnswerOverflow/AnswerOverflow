@@ -7,6 +7,7 @@ import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import type { FunctionReturnType } from "convex/server";
 import { Effect, Exit } from "effect";
 import { Megaphone } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import { runtime } from "@/lib/runtime";
 
 type RecentAnnouncementsProps = {
@@ -44,6 +45,10 @@ export function RecentAnnouncementsSkeleton() {
 async function fetchRecentAnnouncements(
 	serverId: string,
 ): Promise<RecentAnnouncementsResult | null> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("recent-announcements", serverId);
+
 	const exit = await Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.search.getRecentAnnouncements({
@@ -121,6 +126,10 @@ function RecentAnnouncementsList(props: {
 }
 
 export async function RecentAnnouncements(props: RecentAnnouncementsProps) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("recent-announcements-component", props.serverId);
+
 	const results = await fetchRecentAnnouncements(props.serverId);
 
 	if (results === null || results.length === 0) {

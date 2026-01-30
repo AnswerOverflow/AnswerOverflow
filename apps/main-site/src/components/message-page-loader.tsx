@@ -8,6 +8,7 @@ import {
 import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
@@ -29,6 +30,10 @@ export type MessagePageReplies = FunctionReturnType<
 export async function fetchMessagePageHeaderData(
 	messageId: bigint,
 ): Promise<MessagePageHeaderData | null> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("message-header", messageId.toString());
+
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.messages.getMessagePageHeaderData({
@@ -42,6 +47,10 @@ export async function fetchMessagePageReplies(args: {
 	after: bigint;
 	cursor: string | null;
 }): Promise<MessagePageReplies> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("message-replies", args.channelId.toString(), args.after.toString());
+
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.messages.getMessages({
@@ -115,6 +124,14 @@ async function RepliesLoader(props: {
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag(
+		"replies-loader",
+		props.channelId.toString(),
+		props.after.toString(),
+	);
+
 	const initialData = await fetchMessagePageReplies({
 		channelId: props.channelId,
 		after: props.after,
@@ -136,11 +153,17 @@ async function RepliesLoader(props: {
 	);
 }
 
-export function MessagePageLoader(props: {
+export async function MessagePageLoader(props: {
 	headerData: MessagePageHeaderData | null;
 	messageId: string;
 	cursor?: string;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	if (props.headerData) {
+		cacheTag("message-page-loader", props.headerData.canonicalId.toString());
+	}
+
 	const { headerData, messageId, cursor } = props;
 
 	if (!headerData) {

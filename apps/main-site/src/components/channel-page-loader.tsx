@@ -9,6 +9,7 @@ import {
 import type { FunctionReturnType } from "convex/server";
 import { Effect } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
@@ -48,6 +49,12 @@ export async function fetchCommunityPageHeaderData(
 	serverDiscordId: bigint,
 	channelDiscordId?: bigint,
 ): Promise<CommunityPageHeaderData | null> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("community-header", serverDiscordId.toString());
+	if (channelDiscordId) {
+		cacheTag("channel-header", channelDiscordId.toString());
+	}
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.channels.getCommunityPageHeaderData({
@@ -60,6 +67,10 @@ export async function fetchCommunityPageHeaderData(
 export async function fetchServerPageHeaderData(
 	serverDiscordId: bigint,
 ): Promise<ServerPageHeaderData | null> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("server-header", serverDiscordId.toString());
+
 	const data = await fetchCommunityPageHeaderData(serverDiscordId);
 	if (!data) return null;
 	return data as ServerPageHeaderData;
@@ -69,6 +80,10 @@ export async function fetchChannelPageHeaderData(
 	serverDiscordId: bigint,
 	channelDiscordId: bigint,
 ): Promise<ChannelPageHeaderData | null> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("channel-page-header", channelDiscordId.toString());
+
 	const data = await fetchCommunityPageHeaderData(
 		serverDiscordId,
 		channelDiscordId,
@@ -81,6 +96,9 @@ export async function fetchChannelPageThreads(
 	channelDiscordId: bigint,
 	cursor: string | null = null,
 ): Promise<ChannelPageThreads> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("channel-threads", channelDiscordId.toString());
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.channels.getChannelPageThreads({
@@ -94,6 +112,9 @@ export async function fetchServerPageThreads(
 	serverDiscordId: bigint,
 	cursor: string | null = null,
 ): Promise<ServerPageThreads> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("server-threads", serverDiscordId.toString());
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.channels.getServerPageThreads({
@@ -107,6 +128,9 @@ export async function fetchChannelPageMessages(
 	channelDiscordId: bigint,
 	cursor: string | null = null,
 ): Promise<ChannelPageMessages> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("channel-messages", channelDiscordId.toString());
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.channels.getChannelPageMessages({
@@ -225,6 +249,10 @@ async function ServerThreadsLoader(props: {
 	serverDiscordId: bigint;
 	cursor: string | null;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("server-threads-loader", props.serverDiscordId.toString());
+
 	const initialData = await fetchServerPageThreads(
 		props.serverDiscordId,
 		props.cursor,
@@ -243,6 +271,10 @@ async function ChannelThreadsLoader(props: {
 	channelDiscordId: bigint;
 	cursor: string | null;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("channel-threads-loader", props.channelDiscordId.toString());
+
 	const initialData = await fetchChannelPageThreads(
 		props.channelDiscordId,
 		props.cursor,
@@ -261,6 +293,10 @@ async function ChannelMessagesLoader(props: {
 	channelDiscordId: bigint;
 	cursor: string | null;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("channel-messages-loader", props.channelDiscordId.toString());
+
 	const initialData = await fetchChannelPageMessages(
 		props.channelDiscordId,
 		props.cursor,
@@ -279,6 +315,15 @@ export async function ServerPageLoader(props: {
 	headerData: ServerPageHeaderData | null;
 	cursor?: string;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	if (props.headerData) {
+		cacheTag(
+			"server-page-loader",
+			props.headerData.server.discordId.toString(),
+		);
+	}
+
 	const { headerData, cursor } = props;
 
 	if (!headerData) {
@@ -312,6 +357,15 @@ export async function ChannelPageLoader(props: {
 	headerData: ChannelPageHeaderData | null;
 	cursor?: string;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	if (props.headerData) {
+		cacheTag(
+			"channel-page-loader",
+			props.headerData.selectedChannel.id.toString(),
+		);
+	}
+
 	const { headerData, cursor } = props;
 
 	if (!headerData) {

@@ -10,6 +10,10 @@ type Props = {
 	params: Promise<{ domain: string }>;
 };
 
+export async function generateStaticParams() {
+	return [{ domain: "placeholder.example.com" }];
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const domain = decodeURIComponent(params.domain);
