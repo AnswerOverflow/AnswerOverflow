@@ -5,7 +5,7 @@ export function register() {
 		dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		sendDefaultPii: true,
 		sampleRate: 0.25,
-		tracesSampleRate: process.env.NODE_ENV === "production" ? 0.5 : 1.0,
+		tracesSampleRate: 0,
 	});
 }
 
