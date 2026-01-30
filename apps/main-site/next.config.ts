@@ -1,4 +1,3 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
 import { withBotId } from "botid/next/config";
 import { createMDX } from "fumadocs-mdx/next";
@@ -115,20 +114,4 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default withSentryConfig(
-	withVercelToolbar(withBotId(withMDX(nextConfig))),
-	{
-		org: process.env.SENTRY_ORG,
-		project: process.env.SENTRY_PROJECT,
-		silent: !process.env.CI,
-		widenClientFileUpload: true,
-		disableLogger: true,
-		automaticVercelMonitors: true,
-		sourcemaps: {
-			deleteSourcemapsAfterUpload: false,
-		},
-		reactComponentAnnotation: {
-			enabled: true,
-		},
-	},
-);
+export default withVercelToolbar(withBotId(withMDX(nextConfig)));
