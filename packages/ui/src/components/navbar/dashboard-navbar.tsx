@@ -2,6 +2,7 @@
 
 import { PanelLeftIcon } from "lucide-react";
 import * as React from "react";
+import { cn } from "../../lib/utils";
 import { AnswerOverflowLogo } from "../answer-overflow-logo";
 import { Button } from "../button";
 import { useIsImpersonating } from "../impersonation-banner";
@@ -32,12 +33,14 @@ export interface DashboardNavbarProps {
 	serverSelect?: ServerSelectDropdownProps;
 	homeHref?: string;
 	children?: React.ReactNode;
+	className?: string;
 }
 
 export function DashboardNavbar({
 	serverSelect,
 	homeHref = "/",
 	children,
+	className,
 }: DashboardNavbarProps) {
 	const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
 	const isImpersonating = useIsImpersonating();
@@ -46,7 +49,7 @@ export function DashboardNavbar({
 		<DashboardNavbarContext.Provider
 			value={{ mobileSidebarOpen, setMobileSidebarOpen }}
 		>
-			<div className="relative flex w-full flex-col">
+			<div className={cn("relative flex w-full flex-col", className)}>
 				<header
 					className="fixed left-0 right-0 z-40 flex h-navbar items-center gap-4 border-b bg-background px-4 lg:pl-[calc(255.44px+1rem)]"
 					style={{ top: isImpersonating ? "40px" : "0" }}
