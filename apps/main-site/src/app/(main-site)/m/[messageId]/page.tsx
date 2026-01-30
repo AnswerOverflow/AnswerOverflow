@@ -1,4 +1,5 @@
 import { Database } from "@packages/database/database";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
@@ -29,6 +30,7 @@ export async function generateStaticParams() {
 
 type Props = {
 	params: Promise<{ messageId: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -44,10 +46,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	return generateMessagePageMetadata(headerData, params.messageId, null);
 }
 
-async function MessagePageContent(props: { messageId: string }) {
-	"use cache";
-	cacheLife("minutes");
-	cacheTag("message-page", props.messageId);
+async function MessagePageContent(props: {
+	messageId: string;
+	searchParams: Promise<{ cursor?: string }>;
+}) {
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
 
 	const parsed = parseSnowflakeId(props.messageId);
 	if (Option.isNone(parsed)) {
@@ -70,7 +74,11 @@ async function MessagePageContent(props: { messageId: string }) {
 	}
 
 	return (
-		<MessagePageLoader headerData={headerData} messageId={props.messageId} />
+		<MessagePageLoader
+			headerData={headerData}
+			messageId={props.messageId}
+			cursor={cursor}
+		/>
 	);
 }
 
@@ -79,7 +87,10 @@ export default async function Page(props: Props) {
 
 	return (
 		<Suspense fallback={<MessagePageSkeleton />}>
-			<MessagePageContent messageId={params.messageId} />
+			<MessagePageContent
+				messageId={params.messageId}
+				searchParams={props.searchParams}
+			/>
 		</Suspense>
 	);
 }

@@ -1,4 +1,5 @@
 import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Option } from "effect";
@@ -20,6 +21,7 @@ export async function generateStaticParams() {
 
 type Props = {
 	params: Promise<{ domain: string; channelId: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -66,10 +68,10 @@ function TenantChannelPageSkeleton() {
 async function TenantChannelPageContent(props: {
 	domain: string;
 	channelId: string;
+	searchParams: Promise<{ cursor?: string }>;
 }) {
-	"use cache";
-	cacheLife("minutes");
-	cacheTag("tenant-channel-page", props.domain, props.channelId);
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
 
 	const parsedChannelId = parseSnowflakeId(props.channelId);
 	if (Option.isNone(parsedChannelId)) {
@@ -98,7 +100,7 @@ async function TenantChannelPageContent(props: {
 		return redirect(getTenantCanonicalUrl(tenant, `/`));
 	}
 
-	return <ChannelPageLoader headerData={headerData} />;
+	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
 }
 
 export default async function TenantChannelPage(props: Props) {
@@ -107,7 +109,11 @@ export default async function TenantChannelPage(props: Props) {
 
 	return (
 		<Suspense fallback={<TenantChannelPageSkeleton />}>
-			<TenantChannelPageContent domain={domain} channelId={params.channelId} />
+			<TenantChannelPageContent
+				domain={domain}
+				channelId={params.channelId}
+				searchParams={props.searchParams}
+			/>
 		</Suspense>
 	);
 }

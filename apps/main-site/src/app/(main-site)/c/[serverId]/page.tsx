@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
@@ -30,6 +31,7 @@ export async function generateStaticParams() {
 
 type Props = {
 	params: Promise<{ serverId: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -63,10 +65,12 @@ function ServerPageSkeleton() {
 	);
 }
 
-async function ServerPageContent(props: { serverId: string }) {
-	"use cache";
-	cacheLife("minutes");
-	cacheTag("server-page", props.serverId);
+async function ServerPageContent(props: {
+	serverId: string;
+	searchParams: Promise<{ cursor?: string }>;
+}) {
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
 
 	const parsed = parseSnowflakeId(props.serverId);
 	if (Option.isNone(parsed)) {
@@ -140,7 +144,7 @@ async function ServerPageContent(props: { serverId: string }) {
 		);
 	}
 
-	return <ServerPageLoader headerData={headerData} />;
+	return <ServerPageLoader headerData={headerData} cursor={cursor} />;
 }
 
 export default async function ServerPage(props: Props) {
@@ -148,7 +152,10 @@ export default async function ServerPage(props: Props) {
 
 	return (
 		<Suspense fallback={<ServerPageSkeleton />}>
-			<ServerPageContent serverId={params.serverId} />
+			<ServerPageContent
+				serverId={params.serverId}
+				searchParams={props.searchParams}
+			/>
 		</Suspense>
 	);
 }

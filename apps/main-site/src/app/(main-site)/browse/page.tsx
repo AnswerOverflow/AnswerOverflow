@@ -1,4 +1,3 @@
-"use cache";
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";

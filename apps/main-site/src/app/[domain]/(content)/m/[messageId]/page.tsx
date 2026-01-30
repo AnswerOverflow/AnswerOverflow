@@ -1,5 +1,6 @@
 import { Database } from "@packages/database/database";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import type { Metadata } from "next";
@@ -52,6 +53,7 @@ async function fetchTenantAndHeaderData(domain: string, messageId: bigint) {
 
 type Props = {
 	params: Promise<{ domain: string; messageId: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -119,10 +121,10 @@ async function RepliesLoader(props: {
 async function TenantMessagePageContent(props: {
 	domain: string;
 	messageId: string;
+	searchParams: Promise<{ cursor?: string }>;
 }) {
-	"use cache";
-	cacheLife("minutes");
-	cacheTag("tenant-message-page-content", props.domain, props.messageId);
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : null;
 
 	const parsed = parseSnowflakeId(props.messageId);
 	if (Option.isNone(parsed)) {
@@ -168,7 +170,7 @@ async function TenantMessagePageContent(props: {
 							firstMessage={headerData.firstMessage ?? undefined}
 							server={headerData.server}
 							channel={headerData.channel}
-							cursor={null}
+							cursor={cursor}
 						/>
 					</Suspense>
 				) : (
@@ -211,7 +213,11 @@ export default async function TenantMessagePage(props: Props) {
 
 	return (
 		<Suspense fallback={<MessagePageSkeleton />}>
-			<TenantMessagePageContent domain={domain} messageId={params.messageId} />
+			<TenantMessagePageContent
+				domain={domain}
+				messageId={params.messageId}
+				searchParams={props.searchParams}
+			/>
 		</Suspense>
 	);
 }

@@ -1,5 +1,6 @@
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Hash } from "lucide-react";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
@@ -19,6 +20,7 @@ export async function generateStaticParams() {
 
 type Props = {
 	params: Promise<{ domain: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -50,10 +52,12 @@ function TenantServerPageSkeleton() {
 	);
 }
 
-async function TenantServerPageContent(props: { domain: string }) {
-	"use cache";
-	cacheLife("minutes");
-	cacheTag("tenant-server-page", props.domain);
+async function TenantServerPageContent(props: {
+	domain: string;
+	searchParams: Promise<{ cursor?: string }>;
+}) {
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
 
 	const data = await getTenantData(props.domain);
 	if (!data) {
@@ -113,7 +117,7 @@ async function TenantServerPageContent(props: { domain: string }) {
 		);
 	}
 
-	return <ServerPageLoader headerData={headerData} />;
+	return <ServerPageLoader headerData={headerData} cursor={cursor} />;
 }
 
 export default async function DomainPage(props: Props) {
@@ -122,7 +126,10 @@ export default async function DomainPage(props: Props) {
 
 	return (
 		<Suspense fallback={<TenantServerPageSkeleton />}>
-			<TenantServerPageContent domain={domain} />
+			<TenantServerPageContent
+				domain={domain}
+				searchParams={props.searchParams}
+			/>
 		</Suspense>
 	);
 }

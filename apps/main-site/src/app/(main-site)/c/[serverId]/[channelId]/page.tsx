@@ -1,5 +1,6 @@
 import { Database } from "@packages/database/database";
 import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
@@ -46,6 +47,7 @@ export async function generateStaticParams() {
 
 type Props = {
 	params: Promise<{ serverId: string; channelId: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -88,10 +90,10 @@ function ChannelPageSkeleton() {
 async function ChannelPageContent(props: {
 	serverId: string;
 	channelId: string;
+	searchParams: Promise<{ cursor?: string }>;
 }) {
-	"use cache";
-	cacheLife("minutes");
-	cacheTag("channel-page", props.serverId, props.channelId);
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
 
 	const parsedServerId = parseSnowflakeId(props.serverId);
 	const parsedChannelId = parseSnowflakeId(props.channelId);
@@ -119,7 +121,7 @@ async function ChannelPageContent(props: {
 		}
 	}
 
-	return <ChannelPageLoader headerData={headerData} />;
+	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
 }
 
 export default async function ChannelPage(props: Props) {
@@ -130,6 +132,7 @@ export default async function ChannelPage(props: Props) {
 			<ChannelPageContent
 				serverId={params.serverId}
 				channelId={params.channelId}
+				searchParams={props.searchParams}
 			/>
 		</Suspense>
 	);
