@@ -8,12 +8,14 @@ import { TimeAgo } from "@packages/ui/components/time-ago";
 import type { FunctionReturnType } from "convex/server";
 import { Effect, Exit } from "effect";
 import { CheckCircle2 } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import { runtime } from "@/lib/runtime";
 
 type SimilarThreadsProps = {
 	searchQuery: string;
 	currentThreadId: string;
 	currentServerId: string;
+	currentParentChannelId: string;
 	serverId?: string;
 };
 
@@ -61,6 +63,7 @@ async function fetchSimilarThreads(
 			searchQuery: args.searchQuery,
 			currentThreadId: args.currentThreadId,
 			currentServerId: args.currentServerId,
+			currentParentChannelId: args.currentParentChannelId,
 			serverId: args.serverId,
 			limit: args.limit,
 		});
@@ -163,6 +166,10 @@ function SimilarThreadsList(props: {
 }
 
 export async function SimilarThreads(props: SimilarThreadsProps) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("similar-threads-component", props.currentThreadId);
+
 	const results = await fetchSimilarThreads({
 		...props,
 		limit: 4,

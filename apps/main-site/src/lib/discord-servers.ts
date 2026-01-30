@@ -2,11 +2,16 @@ import "server-only";
 
 import { Database } from "@packages/database/database";
 import { Array as Arr, Effect, pipe } from "effect";
+import { cacheLife, cacheTag } from "next/cache";
 import { getCommunityServers } from "./community-servers";
 import type { DiscordServerContext } from "./discord-server-types";
 import { runtime } from "./runtime";
 
 export async function getFeaturedServers(): Promise<DiscordServerContext[]> {
+	"use cache";
+	cacheLife("hours");
+	cacheTag("featured-servers");
+
 	const convexServersPromise = Effect.gen(function* () {
 		const database = yield* Database;
 		const convexServers =

@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { runtime } from "../../../lib/runtime";
 import { ServerGrid } from "./client";
 
@@ -15,14 +16,22 @@ export const metadata: Metadata = {
 	},
 };
 
-export default async function BrowsePage() {
-	const serversLiveData = await Effect.gen(function* () {
+export async function getBrowseServers() {
+	"use cache";
+	cacheLife("hours");
+	cacheTag("browse-servers");
+
+	const servers = await Effect.gen(function* () {
 		const database = yield* Database;
 		const liveData = yield* database.public.servers.getBrowseServers({});
-		return liveData;
+		return liveData ?? [];
 	}).pipe(runtime.runPromise);
 
-	const servers = serversLiveData ?? [];
+	return servers;
+}
+
+export default async function BrowsePage() {
+	const servers = await getBrowseServers();
 
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">

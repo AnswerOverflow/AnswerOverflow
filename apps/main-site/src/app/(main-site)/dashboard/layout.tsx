@@ -1,70 +1,39 @@
-"use client";
+import { Suspense } from "react";
+import DashboardClientLayout from "./client-layout";
 
-import { api } from "@packages/database/convex/_generated/api";
-import { SessionRecording } from "@packages/ui/analytics/client";
-import { useSession } from "@packages/ui/components/convex-client-provider";
-import {
-	DashboardNavbar,
-	type ServerSelectServer,
-} from "@packages/ui/components/navbar";
-import { usePathname } from "next/navigation";
-import { useAuthenticatedQuery } from "../../../lib/use-authenticated-query";
+function DashboardLoadingFallback() {
+	return (
+		<div className="min-h-screen bg-background">
+			<div className="border-b h-navbar flex items-center px-4">
+				<div className="h-6 w-32 bg-muted animate-pulse rounded" />
+			</div>
+			<div className="flex">
+				<div className="hidden lg:block w-[255.44px] border-r h-[calc(100vh-4rem)]">
+					<div className="p-4 space-y-2">
+						<div className="h-8 w-full bg-muted animate-pulse rounded" />
+						<div className="h-8 w-full bg-muted animate-pulse rounded" />
+						<div className="h-8 w-full bg-muted animate-pulse rounded" />
+					</div>
+				</div>
+				<div className="flex-1 p-6">
+					<div className="space-y-4">
+						<div className="h-10 w-64 bg-muted animate-pulse rounded" />
+						<div className="h-64 w-full bg-muted animate-pulse rounded" />
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
 
 export default function DashboardLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	const pathname = usePathname();
-	const { data: session, isPending } = useSession({ allowAnonymous: false });
-
-	const isDashboardRoot = pathname === "/dashboard";
-	const serverIdMatch = pathname?.match(/^\/dashboard\/([^/]+)/);
-	const serverId = serverIdMatch ? (serverIdMatch[1] as string) : undefined;
-
-	const shouldShowServerSelect = serverId !== undefined;
-
-	const servers = useAuthenticatedQuery(
-		api.authenticated.dashboard_queries.getUserServersForDropdown,
-		{},
-	);
-
-	const serversForDropdown: ServerSelectServer[] =
-		servers?.map((server) => ({
-			id: server.discordId.toString(),
-			name: server.name,
-			icon: server.icon,
-			hasBot: server.hasBot,
-			discordId: server.discordId,
-		})) ?? [];
-
-	const serverSelectProps =
-		shouldShowServerSelect && serversForDropdown.length > 0
-			? {
-					currentServerId: serverId,
-					servers: serversForDropdown,
-					getServerHref: (id: string) => `/dashboard/${id}`,
-					addNewHref: "/dashboard",
-					isLoading: servers === undefined,
-				}
-			: undefined;
-
-	const isSignedOut = !isPending && !session?.user;
-	const hideNavbar = isDashboardRoot && isSignedOut;
-
-	if (hideNavbar) {
-		return (
-			<>
-				<SessionRecording />
-				{children}
-			</>
-		);
-	}
-
 	return (
-		<DashboardNavbar serverSelect={serverSelectProps}>
-			<SessionRecording />
-			{children}
-		</DashboardNavbar>
+		<Suspense fallback={<DashboardLoadingFallback />}>
+			<DashboardClientLayout>{children}</DashboardClientLayout>
+		</Suspense>
 	);
 }

@@ -1,15 +1,23 @@
+import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Option } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
+import { CommunityPageSkeleton } from "../../../../../components/channel-page-content";
 import {
 	ChannelPageLoader,
 	fetchChannelPageHeaderData,
 	generateChannelPageMetadata,
 } from "../../../../../components/channel-page-loader";
 import { getTenantData } from "../../../../../lib/tenant";
+
+export async function generateStaticParams() {
+	return [{ domain: "vapi.ai", channelId: "placeholder" }];
+}
 
 type Props = {
 	params: Promise<{ domain: string; channelId: string }>;
@@ -43,14 +51,29 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	return generateChannelPageMetadata(headerData, basePath, tenant);
 }
 
-export default async function TenantChannelPage(props: Props) {
-	const params = await props.params;
-	const searchParams = await props.searchParams;
-	const domain = decodeURIComponent(params.domain);
-	const encodedCursor = searchParams?.cursor;
-	const cursor = encodedCursor ? decodeCursor(encodedCursor) : undefined;
+function TenantChannelPageSkeleton() {
+	return (
+		<CommunityPageSkeleton
+			threadsSkeleton={
+				<div className="space-y-4">
+					{Array.from({ length: 5 }).map((_, i) => (
+						<ChannelThreadCardSkeleton key={`skeleton-${i}`} />
+					))}
+				</div>
+			}
+		/>
+	);
+}
 
-	const parsedChannelId = parseSnowflakeId(params.channelId);
+async function TenantChannelPageContent(props: {
+	domain: string;
+	channelId: string;
+	searchParams: Promise<{ cursor?: string }>;
+}) {
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
+
+	const parsedChannelId = parseSnowflakeId(props.channelId);
 	if (Option.isNone(parsedChannelId)) {
 		return notFound();
 	}
@@ -58,7 +81,7 @@ export default async function TenantChannelPage(props: Props) {
 		redirect(`/c/${parsedChannelId.value.cleaned}`);
 	}
 
-	const data = await getTenantData(domain);
+	const data = await getTenantData(props.domain);
 	if (!data) {
 		return notFound();
 	}
@@ -78,4 +101,19 @@ export default async function TenantChannelPage(props: Props) {
 	}
 
 	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
+}
+
+export default async function TenantChannelPage(props: Props) {
+	const params = await props.params;
+	const domain = decodeURIComponent(params.domain);
+
+	return (
+		<Suspense fallback={<TenantChannelPageSkeleton />}>
+			<TenantChannelPageContent
+				domain={domain}
+				channelId={params.channelId}
+				searchParams={props.searchParams}
+			/>
+		</Suspense>
+	);
 }

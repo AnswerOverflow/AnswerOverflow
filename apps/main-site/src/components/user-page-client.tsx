@@ -10,23 +10,22 @@ import {
 import { EmptyStateCard } from "@packages/ui/components/empty";
 import { Link } from "@packages/ui/components/link";
 import { ServerIcon } from "@packages/ui/components/server-icon";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import {
 	ThreadCard,
 	ThreadCardSkeleton,
 } from "@packages/ui/components/thread-card";
-import { encodeCursor } from "@packages/ui/utils/cursor";
-import type { FunctionReturnType } from "convex/server";
+import { useQuery } from "convex/react";
 import { Inbox } from "lucide-react";
-import type { ReactNode } from "react";
 
-export type ServerInfo = {
+type ServerInfo = {
 	id: string;
 	name: string;
 	icon?: string;
 	discordId: bigint;
 };
 
-export function UserHeader({ user }: { user: DiscordUser }) {
+function UserHeader({ user }: { user: DiscordUser }) {
 	return (
 		<div className="flex flex-row items-center gap-4">
 			<DiscordAvatar user={user} size={64} />
@@ -35,7 +34,16 @@ export function UserHeader({ user }: { user: DiscordUser }) {
 	);
 }
 
-export function ServerSelect({
+function UserHeaderSkeleton() {
+	return (
+		<div className="flex flex-row items-center gap-4">
+			<Skeleton className="h-16 w-16 rounded-full" />
+			<Skeleton className="h-10 w-48" />
+		</div>
+	);
+}
+
+function ServerSelect({
 	server,
 	selected,
 	basePath,
@@ -59,7 +67,7 @@ export function ServerSelect({
 	);
 }
 
-export function ServerFilter({
+function ServerFilter({
 	servers,
 	serverId,
 	basePath,
@@ -91,7 +99,7 @@ export function ServerFilter({
 	);
 }
 
-export function EmptyState({ message }: { message: string }) {
+function EmptyState({ message }: { message: string }) {
 	return (
 		<EmptyStateCard
 			icon={Inbox}
@@ -102,80 +110,76 @@ export function EmptyState({ message }: { message: string }) {
 	);
 }
 
-export function UserPageLayout({
-	user,
-	servers,
+function UserPostsList({
+	userId,
+	serverId,
+}: {
+	userId: bigint;
+	serverId?: bigint;
+}) {
+	return (
+		<ConvexInfiniteList
+			query={api.public.discord_accounts.getUserPosts}
+			queryArgs={{ userId, serverId }}
+			pageSize={20}
+			initialLoaderCount={5}
+			loader={<ThreadCardSkeleton />}
+			emptyState={<EmptyState message="No posts found" />}
+			renderItem={(result: SearchResult) => (
+				<ThreadCard
+					key={result.message.message.id.toString()}
+					result={result}
+				/>
+			)}
+		/>
+	);
+}
+
+export function UserPageClient({
+	userId,
 	serverId,
 	basePath,
 	serverFilterLabel,
-	children,
 }: {
-	user: DiscordUser;
-	servers: ServerInfo[];
+	userId: string;
 	serverId?: string;
 	basePath: string;
 	serverFilterLabel: string;
-	children: ReactNode;
 }) {
+	const userIdBigInt = BigInt(userId);
+	const serverIdBigInt = serverId ? BigInt(serverId) : undefined;
+	const headerData = useQuery(
+		api.public.discord_accounts.getUserPageHeaderData,
+		{ userId: userIdBigInt },
+	);
+
+	if (headerData === undefined) {
+		return (
+			<div className="flex flex-col gap-4">
+				<UserHeaderSkeleton />
+				<div className="space-y-4">
+					{Array.from({ length: 5 }).map((_, i) => (
+						<ThreadCardSkeleton key={`skeleton-${i}`} />
+					))}
+				</div>
+			</div>
+		);
+	}
+
+	if (headerData === null) {
+		return <EmptyState message="User not found" />;
+	}
+
 	return (
 		<div className="flex flex-col gap-4">
-			<UserHeader user={user} />
+			<UserHeader user={headerData.user} />
 			<ServerFilter
-				servers={servers}
+				servers={headerData.servers}
 				serverId={serverId}
 				basePath={basePath}
 				label={serverFilterLabel}
 			/>
-			{children}
+			<UserPostsList userId={userIdBigInt} serverId={serverIdBigInt} />
 		</div>
-	);
-}
-
-export type UserPosts = FunctionReturnType<
-	typeof api.public.discord_accounts.getUserPosts
->;
-
-export function UserPostsList({
-	userId,
-	serverId,
-	initialData,
-	nextCursor,
-	basePath,
-}: {
-	userId: bigint;
-	serverId?: string;
-	initialData?: UserPosts;
-	nextCursor?: string | null;
-	basePath: string;
-}) {
-	const serverIdBigInt = serverId ? BigInt(serverId) : undefined;
-
-	return (
-		<>
-			<ConvexInfiniteList
-				query={api.public.discord_accounts.getUserPosts}
-				queryArgs={{ userId, serverId: serverIdBigInt }}
-				pageSize={20}
-				initialLoaderCount={5}
-				loader={<ThreadCardSkeleton />}
-				initialData={initialData}
-				emptyState={<EmptyState message="No posts found" />}
-				renderItem={(result: SearchResult) => (
-					<ThreadCard
-						key={result.message.message.id.toString()}
-						result={result}
-					/>
-				)}
-			/>
-			{nextCursor && (
-				<a
-					href={`${basePath}${serverId ? `?s=${serverId}&` : "?"}cursor=${encodeCursor(nextCursor)}`}
-					className="sr-only"
-					aria-hidden="true"
-				>
-					Next page
-				</a>
-			)}
-		</>
 	);
 }

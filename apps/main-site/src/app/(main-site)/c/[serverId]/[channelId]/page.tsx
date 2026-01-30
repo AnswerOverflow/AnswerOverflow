@@ -1,14 +1,49 @@
+import { Database } from "@packages/database/database";
+import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
-import { Option } from "effect";
+import { Effect, Option } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
+import { CommunityPageSkeleton } from "../../../../../components/channel-page-content";
 import {
 	ChannelPageLoader,
 	fetchChannelPageHeaderData,
 	generateChannelPageMetadata,
 } from "../../../../../components/channel-page-loader";
+import { runtime } from "../../../../../lib/runtime";
+
+export async function generateStaticParams() {
+	const servers = await Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.public.servers.getBrowseServers({});
+	}).pipe(runtime.runPromise);
+
+	const params: Array<{ serverId: string; channelId: string }> = [];
+
+	for (const server of servers.slice(0, 5)) {
+		const serverData = await Effect.gen(function* () {
+			const database = yield* Database;
+			return yield* database.public.servers.getServerByDiscordIdWithChannels({
+				discordId: server.discordId,
+			});
+		}).pipe(runtime.runPromise);
+
+		if (serverData?.channels) {
+			for (const channel of serverData.channels.slice(0, 2)) {
+				params.push({
+					serverId: server.discordId.toString(),
+					channelId: channel.id.toString(),
+				});
+			}
+		}
+	}
+
+	return params;
+}
 
 type Props = {
 	params: Promise<{ serverId: string; channelId: string }>;
@@ -38,14 +73,30 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	return generateChannelPageMetadata(headerData, basePath);
 }
 
-export default async function ChannelPage(props: Props) {
-	const params = await props.params;
-	const searchParams = await props.searchParams;
-	const encodedCursor = searchParams?.cursor;
-	const cursor = encodedCursor ? decodeCursor(encodedCursor) : undefined;
+function ChannelPageSkeleton() {
+	return (
+		<CommunityPageSkeleton
+			threadsSkeleton={
+				<div className="space-y-4">
+					{Array.from({ length: 5 }).map((_, i) => (
+						<ChannelThreadCardSkeleton key={`skeleton-${i}`} />
+					))}
+				</div>
+			}
+		/>
+	);
+}
 
-	const parsedServerId = parseSnowflakeId(params.serverId);
-	const parsedChannelId = parseSnowflakeId(params.channelId);
+async function ChannelPageContent(props: {
+	serverId: string;
+	channelId: string;
+	searchParams: Promise<{ cursor?: string }>;
+}) {
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
+
+	const parsedServerId = parseSnowflakeId(props.serverId);
+	const parsedChannelId = parseSnowflakeId(props.channelId);
 	if (Option.isNone(parsedServerId) || Option.isNone(parsedChannelId)) {
 		return notFound();
 	}
@@ -71,4 +122,18 @@ export default async function ChannelPage(props: Props) {
 	}
 
 	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
+}
+
+export default async function ChannelPage(props: Props) {
+	const params = await props.params;
+
+	return (
+		<Suspense fallback={<ChannelPageSkeleton />}>
+			<ChannelPageContent
+				serverId={params.serverId}
+				channelId={params.channelId}
+				searchParams={props.searchParams}
+			/>
+		</Suspense>
+	);
 }

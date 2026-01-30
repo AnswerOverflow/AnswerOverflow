@@ -794,3 +794,89 @@ export function ChannelPageContent(
 ) {
 	return <CommunityPageContent {...props} />;
 }
+
+function ChannelListSkeleton() {
+	return (
+		<nav className="space-y-0.5">
+			{Array.from({ length: 8 }).map((_, i) => (
+				<div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded">
+					<div className="size-4 rounded bg-muted animate-pulse" />
+					<div className="h-4 flex-1 rounded bg-muted animate-pulse" />
+				</div>
+			))}
+		</nav>
+	);
+}
+
+function ServerHeaderSkeleton() {
+	return (
+		<div className="border-b">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+				<div className="flex items-start gap-4">
+					<div className="size-16 rounded-full bg-muted animate-pulse shrink-0" />
+					<div className="flex-1 min-w-0">
+						<div className="flex items-start gap-4">
+							<div className="flex-1 min-w-0">
+								<div className="h-7 w-64 bg-muted animate-pulse rounded mb-2" />
+								<div className="h-4 w-full max-w-md bg-muted animate-pulse rounded" />
+							</div>
+							<div className="h-9 w-20 bg-muted animate-pulse rounded shrink-0" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function ResourcesSidebarSkeleton() {
+	return (
+		<div className="text-left px-2 mb-4">
+			<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide mb-2">
+				Resources
+			</div>
+			<nav className="space-y-0.5">
+				<div className="flex items-center gap-2 py-1.5 rounded">
+					<div className="size-4 rounded bg-muted animate-pulse shrink-0" />
+					<div className="h-4 w-20 rounded bg-muted animate-pulse" />
+				</div>
+			</nav>
+		</div>
+	);
+}
+
+export function CommunityPageSkeleton({
+	threadsSkeleton,
+}: {
+	threadsSkeleton: React.ReactNode;
+}) {
+	return (
+		<div className="min-h-screen bg-background">
+			<ServerHeaderSkeleton />
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+				<div className="flex gap-8">
+					<div className="hidden lg:block">
+						<aside className="w-52 shrink-0">
+							<div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
+								<ResourcesSidebarSkeleton />
+								<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
+									Channels
+								</div>
+								<ChannelListSkeleton />
+							</div>
+						</aside>
+					</div>
+					<main className="flex-1 min-w-0">
+						<div className="flex items-center gap-4 mb-4 lg:hidden">
+							<div className="h-9 w-full bg-muted animate-pulse rounded" />
+						</div>
+						<div className="mb-6">
+							<div className="h-10 w-full bg-muted animate-pulse rounded" />
+						</div>
+						{threadsSkeleton}
+					</main>
+				</div>
+			</div>
+		</div>
+	);
+}

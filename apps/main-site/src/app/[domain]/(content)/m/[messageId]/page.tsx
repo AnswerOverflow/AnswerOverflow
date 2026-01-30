@@ -4,6 +4,7 @@ import { decodeCursor } from "@packages/ui/utils/cursor";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import {
@@ -16,6 +17,7 @@ import {
 	fetchMessagePageHeaderData,
 	fetchMessagePageReplies,
 	generateMessagePageMetadata,
+	MessagePageSkeleton,
 } from "../../../../../components/message-page-loader";
 import {
 	RecentAnnouncements,
@@ -28,16 +30,34 @@ import {
 import { runtime } from "../../../../../lib/runtime";
 import { getTenantData } from "../../../../../lib/tenant";
 
+export async function generateStaticParams() {
+	return [{ domain: "vapi.ai", messageId: "placeholder" }];
+}
+
+async function fetchTenantAndHeaderData(domain: string, messageId: bigint) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("tenant-message-page", domain, messageId.toString());
+
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const tenant = yield* database.public.servers.getServerByDomain({
+			domain,
+		});
+		const header = yield* database.public.messages.getMessagePageHeaderData({
+			messageId,
+		});
+		return [tenant, header] as const;
+	}).pipe(runtime.runPromise);
+}
+
 type Props = {
 	params: Promise<{ domain: string; messageId: string }>;
-	searchParams: Promise<{ cursor?: string; focus?: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-	const [params, searchParams] = await Promise.all([
-		props.params,
-		props.searchParams,
-	]);
+	const params = await props.params;
 	const parsed = parseSnowflakeId(params.messageId);
 	if (Option.isNone(parsed)) {
 		return notFound();
@@ -51,12 +71,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		return {};
 	}
 	const { tenant } = data;
-	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
 	return generateMessagePageMetadata(
 		headerData,
 		params.messageId,
-		cursor,
+		null,
 		tenant,
 	);
 }
@@ -70,6 +89,14 @@ async function RepliesLoader(props: {
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
 }) {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag(
+		"tenant-replies-loader",
+		props.channelId.toString(),
+		props.after.toString(),
+	);
+
 	const initialData = await fetchMessagePageReplies({
 		channelId: props.channelId,
 		after: props.after,
@@ -91,31 +118,26 @@ async function RepliesLoader(props: {
 	);
 }
 
-export default async function TenantMessagePage(props: Props) {
-	const [params, searchParams] = await Promise.all([
-		props.params,
-		props.searchParams,
-	]);
-	const parsed = parseSnowflakeId(params.messageId);
+async function TenantMessagePageContent(props: {
+	domain: string;
+	messageId: string;
+	searchParams: Promise<{ cursor?: string }>;
+}) {
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : null;
+
+	const parsed = parseSnowflakeId(props.messageId);
 	if (Option.isNone(parsed)) {
 		return notFound();
 	}
 	if (parsed.value.wasCleaned) {
 		redirect(`/m/${parsed.value.cleaned}`);
 	}
-	const domain = decodeURIComponent(params.domain);
-	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 
-	const [tenantData, headerData] = await Effect.gen(function* () {
-		const database = yield* Database;
-		const tenant = yield* database.public.servers.getServerByDomain({
-			domain,
-		});
-		const header = yield* database.public.messages.getMessagePageHeaderData({
-			messageId: parsed.value.id,
-		});
-		return [tenant, header] as const;
-	}).pipe(runtime.runPromise);
+	const [tenantData, headerData] = await fetchTenantAndHeaderData(
+		props.domain,
+		parsed.value.id,
+	);
 
 	if (!tenantData?.server || !headerData) {
 		return notFound();
@@ -126,8 +148,8 @@ export default async function TenantMessagePage(props: Props) {
 	}
 
 	const canonicalId = headerData.canonicalId.toString();
-	if (canonicalId !== params.messageId) {
-		redirect(`/m/${canonicalId}?focus=${params.messageId}`);
+	if (canonicalId !== props.messageId) {
+		redirect(`/m/${canonicalId}?focus=${props.messageId}`);
 	}
 
 	const solutionMessageId = headerData.solutionMessage?.message.id;
@@ -169,6 +191,7 @@ export default async function TenantMessagePage(props: Props) {
 							headerData.canonicalId
 						).toString()}
 						currentServerId={headerData.server.discordId.toString()}
+						currentParentChannelId={headerData.channel.id.toString()}
 						serverId={headerData.server.discordId.toString()}
 					/>
 				</Suspense>
@@ -181,5 +204,20 @@ export default async function TenantMessagePage(props: Props) {
 				</Suspense>
 			}
 		/>
+	);
+}
+
+export default async function TenantMessagePage(props: Props) {
+	const params = await props.params;
+	const domain = decodeURIComponent(params.domain);
+
+	return (
+		<Suspense fallback={<MessagePageSkeleton />}>
+			<TenantMessagePageContent
+				domain={domain}
+				messageId={params.messageId}
+				searchParams={props.searchParams}
+			/>
+		</Suspense>
 	);
 }

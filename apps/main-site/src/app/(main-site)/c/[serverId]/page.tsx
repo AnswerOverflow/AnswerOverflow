@@ -1,18 +1,37 @@
+import { Database } from "@packages/database/database";
 import { ServerIcon } from "@packages/ui/components/server-icon";
+import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
-import { Option } from "effect";
+import { Effect, Option } from "effect";
 import { Hash } from "lucide-react";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
+import { CommunityPageSkeleton } from "../../../../components/channel-page-content";
 import {
 	fetchServerPageHeaderData,
 	generateServerPageMetadata,
 	ServerPageLoader,
 } from "../../../../components/channel-page-loader";
+import { runtime } from "../../../../lib/runtime";
+
+export async function generateStaticParams() {
+	const servers = await Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.public.servers.getBrowseServers({});
+	}).pipe(runtime.runPromise);
+
+	return servers.slice(0, 10).map((server) => ({
+		serverId: server.discordId.toString(),
+	}));
+}
 
 type Props = {
 	params: Promise<{ serverId: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -32,10 +51,28 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	return generateServerPageMetadata(headerData, basePath);
 }
 
-export default async function ServerPage(props: Props) {
-	const params = await props.params;
+function ServerPageSkeleton() {
+	return (
+		<CommunityPageSkeleton
+			threadsSkeleton={
+				<div className="space-y-4">
+					{Array.from({ length: 5 }).map((_, i) => (
+						<ChannelThreadCardSkeleton key={`skeleton-${i}`} />
+					))}
+				</div>
+			}
+		/>
+	);
+}
 
-	const parsed = parseSnowflakeId(params.serverId);
+async function ServerPageContent(props: {
+	serverId: string;
+	searchParams: Promise<{ cursor?: string }>;
+}) {
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
+
+	const parsed = parseSnowflakeId(props.serverId);
 	if (Option.isNone(parsed)) {
 		return notFound();
 	}
@@ -107,5 +144,18 @@ export default async function ServerPage(props: Props) {
 		);
 	}
 
-	return <ServerPageLoader headerData={headerData} />;
+	return <ServerPageLoader headerData={headerData} cursor={cursor} />;
+}
+
+export default async function ServerPage(props: Props) {
+	const params = await props.params;
+
+	return (
+		<Suspense fallback={<ServerPageSkeleton />}>
+			<ServerPageContent
+				serverId={params.serverId}
+				searchParams={props.searchParams}
+			/>
+		</Suspense>
+	);
 }

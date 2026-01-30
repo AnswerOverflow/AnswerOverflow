@@ -1,7 +1,19 @@
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { runtime } from "../../../../lib/runtime";
+
+async function fetchTenantDataForSearch(domain: string) {
+	"use cache";
+	cacheLife("hours");
+	cacheTag("tenant-search", domain);
+
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.public.servers.getServerByDomain({ domain });
+	}).pipe(runtime.runPromise);
+}
 
 type Props = {
 	params: Promise<{ domain: string }>;
@@ -12,10 +24,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
 	const domain = decodeURIComponent(params.domain);
 
-	const tenantData = await Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.public.servers.getServerByDomain({ domain });
-	}).pipe(runtime.runPromise);
+	const tenantData = await fetchTenantDataForSearch(domain);
 
 	const serverName = tenantData?.server?.name ?? "this community";
 

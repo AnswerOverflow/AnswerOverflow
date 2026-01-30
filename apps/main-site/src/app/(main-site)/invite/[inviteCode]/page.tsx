@@ -1,6 +1,7 @@
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { DiscordInviteLanding } from "../../../../components/discord-invite-landing";
 import {
@@ -8,6 +9,25 @@ import {
 	getDiscordIconUrl,
 } from "../../../../lib/discord-invite";
 import { runtime } from "../../../../lib/runtime";
+
+export function generateStaticParams() {
+	return [{ inviteCode: "answeroverflow" }];
+}
+
+async function checkServerExists(guildId: string): Promise<boolean> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("server-exists", guildId);
+
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const result =
+			yield* database.public.servers.getServerByDiscordIdWithChannels({
+				discordId: BigInt(guildId),
+			});
+		return result !== null;
+	}).pipe(runtime.runPromise);
+}
 
 type Props = {
 	params: Promise<{ inviteCode: string }>;
@@ -48,14 +68,7 @@ export default async function InvitePage(props: Props) {
 		return notFound();
 	}
 
-	const serverExists = await Effect.gen(function* () {
-		const database = yield* Database;
-		const result =
-			yield* database.public.servers.getServerByDiscordIdWithChannels({
-				discordId: BigInt(inviteData.guildId),
-			});
-		return result !== null;
-	}).pipe(runtime.runPromise);
+	const serverExists = await checkServerExists(inviteData.guildId);
 
 	if (serverExists) {
 		redirect(`/c/${inviteData.guildId}`);

@@ -766,6 +766,26 @@ function FloatingPromo() {
 	);
 }
 
+export function AboutPageSkeleton() {
+	return (
+		<div className="min-h-screen bg-background">
+			<section className="relative overflow-hidden py-20 sm:py-32">
+				<div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 to-transparent" />
+				<div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+					<div className="h-14 w-3/4 mx-auto bg-muted animate-pulse rounded-lg" />
+					<div className="mt-12 mx-auto max-w-2xl">
+						<div className="h-[400px] bg-muted animate-pulse rounded-xl" />
+					</div>
+					<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+						<div className="h-12 w-40 bg-muted animate-pulse rounded-lg" />
+						<div className="h-12 w-48 bg-muted animate-pulse rounded-lg" />
+					</div>
+				</div>
+			</section>
+		</div>
+	);
+}
+
 export function AboutPageClient({
 	servers,
 	testimonialsSection,

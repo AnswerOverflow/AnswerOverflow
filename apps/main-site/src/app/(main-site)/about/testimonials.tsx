@@ -1,5 +1,5 @@
 import { Link } from "@packages/ui/components/link";
-import { unstable_cache } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { fetchTweet, type Tweet } from "react-tweet/api";
 import { AddTestimonialCard } from "./client";
 
@@ -9,14 +9,14 @@ const TESTIMONIAL_IDS = [
 	"2005083849550962874",
 ];
 
-const getTweet = unstable_cache(
-	async (id: string): Promise<Tweet | undefined> => {
-		const { data } = await fetchTweet(id);
-		return data;
-	},
-	["tweet"],
-	{ revalidate: 3600 },
-);
+async function getTweet(id: string): Promise<Tweet | undefined> {
+	"use cache";
+	cacheLife("hours");
+	cacheTag("tweet", id);
+
+	const { data } = await fetchTweet(id);
+	return data;
+}
 
 function XLogo({ className }: { className?: string }) {
 	return (

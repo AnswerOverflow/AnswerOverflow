@@ -1,7 +1,8 @@
 import { Providers } from "@packages/ui/components/providers";
+import { ScrollContainerProvider } from "@packages/ui/hooks/use-scroll-container";
 import type { Metadata } from "next";
-import { NavbarWrapper } from "@/components/navbar-wrapper";
-import { getGitHubStars } from "@/lib/github";
+import { Suspense } from "react";
+import { MainSiteFooter, MainSiteNavbar } from "@/components/navbar-wrapper";
 
 export const metadata: Metadata = {
 	title: "Answer Overflow - Discord Content Discovery",
@@ -35,16 +36,22 @@ export const metadata: Metadata = {
 	},
 };
 
-export default async function MainSiteLayout({
+export default function MainSiteLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	const githubStars = await getGitHubStars();
-
 	return (
 		<Providers tenant={null}>
-			<NavbarWrapper githubStars={githubStars}>{children}</NavbarWrapper>
+			<ScrollContainerProvider>
+				<Suspense>
+					<MainSiteNavbar />
+				</Suspense>
+				<div className="pt-navbar">{children}</div>
+				<Suspense>
+					<MainSiteFooter />
+				</Suspense>
+			</ScrollContainerProvider>
 		</Providers>
 	);
 }

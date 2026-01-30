@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from "next/cache";
 import "server-only";
 
 export type DiscordInviteGuild = {
@@ -40,11 +41,12 @@ export type DiscordInviteData = {
 export async function fetchDiscordInvite(
 	inviteCode: string,
 ): Promise<DiscordInviteData | null> {
+	"use cache";
+	cacheLife("minutes");
+	cacheTag("discord-invite", inviteCode);
+
 	const response = await fetch(
 		`https://discord.com/api/v10/invites/${inviteCode}?with_counts=true`,
-		{
-			next: { revalidate: 300 },
-		},
 	);
 
 	if (!response.ok) {

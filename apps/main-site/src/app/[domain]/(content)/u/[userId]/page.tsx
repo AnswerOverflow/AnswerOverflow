@@ -1,26 +1,38 @@
 import { Database } from "@packages/database/database";
-import { decodeCursor } from "@packages/ui/utils/cursor";
 import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import {
 	fetchUserPageHeaderData,
-	UserPageLoader,
+	UserPageClient,
 } from "../../../../../components/user-page-loader";
 import { runtime } from "../../../../../lib/runtime";
 
+export async function generateStaticParams() {
+	return [{ domain: "vapi.ai", userId: "placeholder" }];
+}
+
+async function fetchTenantData(domain: string) {
+	"use cache";
+	cacheLife("hours");
+	cacheTag("tenant-user-page", domain);
+
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		return yield* database.public.servers.getServerByDomain({ domain });
+	}).pipe(runtime.runPromise);
+}
+
 type Props = {
 	params: Promise<{ domain: string; userId: string }>;
-	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
-	const searchParams = await props.searchParams;
-	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const domain = decodeURIComponent(params.domain);
 
 	const parsed = parseSnowflakeId(params.userId);
@@ -31,10 +43,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		redirect(`/u/${parsed.value.cleaned}`);
 	}
 
-	const tenantData = await Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.public.servers.getServerByDomain({ domain });
-	}).pipe(runtime.runPromise);
+	const tenantData = await fetchTenantData(domain);
 
 	const headerData = await fetchUserPageHeaderData(parsed.value.id);
 	const userName = headerData?.user.name ?? "User";
@@ -67,7 +76,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		alternates: {
 			canonical: canonicalUrl,
 		},
-		robots: cursor ? "noindex, follow" : { index: false },
+		robots: { index: false },
 		openGraph: {
 			title,
 			description,
@@ -84,7 +93,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function TenantUserPage(props: Props) {
 	const params = await props.params;
-	const searchParams = await props.searchParams;
 	const domain = decodeURIComponent(params.domain);
 
 	const parsed = parseSnowflakeId(params.userId);
@@ -95,33 +103,18 @@ export default async function TenantUserPage(props: Props) {
 		redirect(`/u/${parsed.value.cleaned}`);
 	}
 
-	const tenantData = await Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.public.servers.getServerByDomain({ domain });
-	}).pipe(runtime.runPromise);
+	const tenantData = await fetchTenantData(domain);
 
 	if (!tenantData?.server) {
 		return notFound();
 	}
 
-	const headerData = await fetchUserPageHeaderData(parsed.value.id);
-
-	if (!headerData) {
-		return notFound();
-	}
-
-	const cursor = searchParams.cursor
-		? decodeCursor(searchParams.cursor)
-		: undefined;
-
 	return (
-		<UserPageLoader
-			headerData={headerData}
+		<UserPageClient
 			userId={parsed.value.cleaned}
 			serverId={tenantData.server.discordId.toString()}
 			basePath={`/u/${parsed.value.cleaned}`}
 			serverFilterLabel="Explore posts from servers"
-			cursor={cursor}
 		/>
 	);
 }

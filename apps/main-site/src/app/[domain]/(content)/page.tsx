@@ -1,7 +1,12 @@
 import { ServerIcon } from "@packages/ui/components/server-icon";
+import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
+import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Hash } from "lucide-react";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { CommunityPageSkeleton } from "../../../components/channel-page-content";
 import {
 	fetchServerPageHeaderData,
 	generateServerPageMetadata,
@@ -9,8 +14,13 @@ import {
 } from "../../../components/channel-page-loader";
 import { getTenantData } from "../../../lib/tenant";
 
+export async function generateStaticParams() {
+	return [{ domain: "vapi.ai" }];
+}
+
 type Props = {
 	params: Promise<{ domain: string }>;
+	searchParams: Promise<{ cursor?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -28,11 +38,28 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	return generateServerPageMetadata(headerData, "/", tenant);
 }
 
-export default async function DomainPage(props: Props) {
-	const params = await props.params;
-	const domain = decodeURIComponent(params.domain);
+function TenantServerPageSkeleton() {
+	return (
+		<CommunityPageSkeleton
+			threadsSkeleton={
+				<div className="space-y-4">
+					{Array.from({ length: 5 }).map((_, i) => (
+						<ChannelThreadCardSkeleton key={`skeleton-${i}`} />
+					))}
+				</div>
+			}
+		/>
+	);
+}
 
-	const data = await getTenantData(domain);
+async function TenantServerPageContent(props: {
+	domain: string;
+	searchParams: Promise<{ cursor?: string }>;
+}) {
+	const params = await props.searchParams;
+	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
+
+	const data = await getTenantData(props.domain);
 	if (!data) {
 		return notFound();
 	}
@@ -90,5 +117,19 @@ export default async function DomainPage(props: Props) {
 		);
 	}
 
-	return <ServerPageLoader headerData={headerData} />;
+	return <ServerPageLoader headerData={headerData} cursor={cursor} />;
+}
+
+export default async function DomainPage(props: Props) {
+	const params = await props.params;
+	const domain = decodeURIComponent(params.domain);
+
+	return (
+		<Suspense fallback={<TenantServerPageSkeleton />}>
+			<TenantServerPageContent
+				domain={domain}
+				searchParams={props.searchParams}
+			/>
+		</Suspense>
+	);
 }

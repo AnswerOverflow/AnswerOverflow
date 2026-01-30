@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 export type GitHubSearchRepo = {
 	id: number;
@@ -11,7 +11,11 @@ export type GitHubSearchRepo = {
 	language: string | null;
 };
 
-async function fetchFeaturedReposInternal(): Promise<Array<GitHubSearchRepo>> {
+export async function getFeaturedRepos(): Promise<Array<GitHubSearchRepo>> {
+	"use cache";
+	cacheLife("days");
+	cacheTag("featured-repos");
+
 	const response = await fetch(
 		"https://api.github.com/search/repositories?q=stars:>50000&per_page=20&sort=stars&order=desc",
 		{
@@ -54,15 +58,11 @@ async function fetchFeaturedReposInternal(): Promise<Array<GitHubSearchRepo>> {
 		}));
 }
 
-export const getFeaturedRepos = unstable_cache(
-	fetchFeaturedReposInternal,
-	["featured-repos"],
-	{
-		revalidate: 60 * 60 * 24,
-	},
-);
+export async function getGitHubStars(): Promise<number | null> {
+	"use cache";
+	cacheLife("hours");
+	cacheTag("github-stars");
 
-async function fetchGitHubStarsInternal(): Promise<number | null> {
 	const response = await fetch(
 		"https://api.github.com/repos/AnswerOverflow/AnswerOverflow",
 		{
@@ -81,11 +81,3 @@ async function fetchGitHubStarsInternal(): Promise<number | null> {
 	const data = (await response.json()) as { stargazers_count?: number };
 	return data.stargazers_count ?? null;
 }
-
-export const getGitHubStars = unstable_cache(
-	fetchGitHubStarsInternal,
-	["github-stars"],
-	{
-		revalidate: 60 * 60,
-	},
-);

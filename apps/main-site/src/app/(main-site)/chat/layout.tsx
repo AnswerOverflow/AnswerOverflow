@@ -1,4 +1,5 @@
 import { SignInIfAnon } from "@packages/ui/components/sign-in-if-anon";
+import { Suspense } from "react";
 import { ChatSidebar } from "@/components/chat/chat-sidebar";
 import { FeaturedReposProvider } from "@/components/chat/featured-repos-provider";
 import { FeaturedServersProvider } from "@/components/chat/featured-servers-provider";
@@ -18,7 +19,9 @@ export default async function ChatLayout({
 		<FeaturedReposProvider repos={featuredRepos}>
 			<FeaturedServersProvider servers={featuredServers}>
 				<SignInIfAnon />
-				<ChatSidebar>{children}</ChatSidebar>
+				<Suspense>
+					<ChatSidebar>{children}</ChatSidebar>
+				</Suspense>
 			</FeaturedServersProvider>
 		</FeaturedReposProvider>
 	);

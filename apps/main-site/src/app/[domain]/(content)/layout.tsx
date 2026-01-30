@@ -2,13 +2,21 @@ import { Providers } from "@packages/ui/components/providers";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { getTenantData } from "@/lib/tenant";
-import { DomainNavbarFooterWrapper } from "../../../components/domain-navbar-footer-wrapper";
+import {
+	DomainFooter,
+	DomainNavbar,
+} from "../../../components/domain-navbar-footer-wrapper";
 
 type Props = {
 	children: React.ReactNode;
 	params: Promise<{ domain: string }>;
 };
+
+export async function generateStaticParams() {
+	return [{ domain: "vapi.ai" }];
+}
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
@@ -91,7 +99,13 @@ export default async function DomainLayout(props: Props) {
 
 	return (
 		<Providers tenant={data.tenant}>
-			<DomainNavbarFooterWrapper>{props.children}</DomainNavbarFooterWrapper>
+			<Suspense>
+				<DomainNavbar />
+			</Suspense>
+			<div className="pt-[var(--navbar-height)]">{props.children}</div>
+			<Suspense>
+				<DomainFooter />
+			</Suspense>
 		</Providers>
 	);
 }
