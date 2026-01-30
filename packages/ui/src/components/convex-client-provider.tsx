@@ -87,14 +87,16 @@ const AuthClientContext = createContext<AuthClient | null>(null);
 function AuthClientProvider({
 	children,
 	tenant,
+	convexClient,
 }: {
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
+	convexClient: ConvexReactClient;
 }) {
 	const authClient = useMemo(() => getOrCreateAuthClient(tenant), [tenant]);
 	return (
 		<AuthClientContext.Provider value={authClient}>
-			<ConvexBetterAuthProvider client={convex} authClient={authClient}>
+			<ConvexBetterAuthProvider client={convexClient} authClient={authClient}>
 				{children}
 			</ConvexBetterAuthProvider>
 		</AuthClientContext.Provider>
@@ -146,7 +148,9 @@ export function ConvexClientProvider({
 		<QueryClientProvider client={qc}>
 			<ConvexProvider client={cc}>
 				<ConvexQueryCacheProvider>
-					<AuthClientProvider tenant={tenant}>{children}</AuthClientProvider>
+					<AuthClientProvider tenant={tenant} convexClient={cc}>
+						{children}
+					</AuthClientProvider>
 				</ConvexQueryCacheProvider>
 			</ConvexProvider>
 		</QueryClientProvider>
