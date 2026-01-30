@@ -1,6 +1,5 @@
 import { Database } from "@packages/database/database";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
-import { decodeCursor } from "@packages/ui/utils/cursor";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import type { Metadata } from "next";
@@ -53,14 +52,10 @@ async function fetchTenantAndHeaderData(domain: string, messageId: bigint) {
 
 type Props = {
 	params: Promise<{ domain: string; messageId: string }>;
-	searchParams: Promise<{ cursor?: string; focus?: string }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-	const [params, searchParams] = await Promise.all([
-		props.params,
-		props.searchParams,
-	]);
+	const params = await props.params;
 	const parsed = parseSnowflakeId(params.messageId);
 	if (Option.isNone(parsed)) {
 		return notFound();
@@ -74,12 +69,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 		return {};
 	}
 	const { tenant } = data;
-	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
 	return generateMessagePageMetadata(
 		headerData,
 		params.messageId,
-		cursor,
+		null,
 		tenant,
 	);
 }
@@ -125,7 +119,6 @@ async function RepliesLoader(props: {
 async function TenantMessagePageContent(props: {
 	domain: string;
 	messageId: string;
-	cursor: string | null;
 }) {
 	"use cache";
 	cacheLife("minutes");
@@ -175,7 +168,7 @@ async function TenantMessagePageContent(props: {
 							firstMessage={headerData.firstMessage ?? undefined}
 							server={headerData.server}
 							channel={headerData.channel}
-							cursor={props.cursor}
+							cursor={null}
 						/>
 					</Suspense>
 				) : (
@@ -213,20 +206,12 @@ async function TenantMessagePageContent(props: {
 }
 
 export default async function TenantMessagePage(props: Props) {
-	const [params, searchParams] = await Promise.all([
-		props.params,
-		props.searchParams,
-	]);
+	const params = await props.params;
 	const domain = decodeURIComponent(params.domain);
-	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 
 	return (
 		<Suspense fallback={<MessagePageSkeleton />}>
-			<TenantMessagePageContent
-				domain={domain}
-				messageId={params.messageId}
-				cursor={cursor}
-			/>
+			<TenantMessagePageContent domain={domain} messageId={params.messageId} />
 		</Suspense>
 	);
 }

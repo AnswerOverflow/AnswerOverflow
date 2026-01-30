@@ -18,21 +18,36 @@ import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 import { getTenantUrl, type TenantInfo } from "../utils/links";
 
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
-	expectAuth: false,
-	unsavedChangesWarning: false,
-});
-const convexQueryClient = new ConvexQueryClient(convex);
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			queryKeyHashFn: convexQueryClient.hashFn(),
-			queryFn: convexQueryClient.queryFn(),
-		},
-	},
-});
+let convex: ConvexReactClient | null = null;
+let convexQueryClient: ConvexQueryClient | null = null;
+let queryClient: QueryClient | null = null;
 
-convexQueryClient.connect(queryClient);
+function getConvexClient() {
+	if (!convex) {
+		convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
+			expectAuth: false,
+			unsavedChangesWarning: false,
+		});
+	}
+	return convex;
+}
+
+function getQueryClient() {
+	if (!queryClient) {
+		const convexInstance = getConvexClient();
+		convexQueryClient = new ConvexQueryClient(convexInstance);
+		queryClient = new QueryClient({
+			defaultOptions: {
+				queries: {
+					queryKeyHashFn: convexQueryClient.hashFn(),
+					queryFn: convexQueryClient.queryFn(),
+				},
+			},
+		});
+		convexQueryClient.connect(queryClient);
+	}
+	return queryClient;
+}
 
 function createAuthClientInstance(baseURL: string | undefined) {
 	return createAuthClient({
@@ -124,9 +139,12 @@ export function ConvexClientProvider({
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
 }) {
+	const qc = getQueryClient();
+	const cc = getConvexClient();
+
 	return (
-		<QueryClientProvider client={queryClient}>
-			<ConvexProvider client={convex}>
+		<QueryClientProvider client={qc}>
+			<ConvexProvider client={cc}>
 				<ConvexQueryCacheProvider>
 					<AuthClientProvider tenant={tenant}>{children}</AuthClientProvider>
 				</ConvexQueryCacheProvider>

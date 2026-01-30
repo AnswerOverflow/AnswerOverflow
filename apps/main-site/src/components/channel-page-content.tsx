@@ -829,6 +829,22 @@ function ServerHeaderSkeleton() {
 	);
 }
 
+function ResourcesSidebarSkeleton() {
+	return (
+		<div className="text-left px-2 mb-4">
+			<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide mb-2">
+				Resources
+			</div>
+			<nav className="space-y-0.5">
+				<div className="flex items-center gap-2 py-1.5 rounded">
+					<div className="size-4 rounded bg-muted animate-pulse shrink-0" />
+					<div className="h-4 w-20 rounded bg-muted animate-pulse" />
+				</div>
+			</nav>
+		</div>
+	);
+}
+
 export function CommunityPageSkeleton({
 	threadsSkeleton,
 }: {
@@ -842,7 +858,7 @@ export function CommunityPageSkeleton({
 					<div className="hidden lg:block">
 						<aside className="w-52 shrink-0">
 							<div className="sticky top-[calc(var(--navbar-height)+1.5rem)]">
-								<ResourcesSidebar className="mb-4 px-2" sponsorUrl={null} />
+								<ResourcesSidebarSkeleton />
 								<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide px-2 mb-2">
 									Channels
 								</div>

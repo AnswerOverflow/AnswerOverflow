@@ -1,6 +1,7 @@
 import { Providers } from "@packages/ui/components/providers";
 import { ScrollContainerProvider } from "@packages/ui/hooks/use-scroll-container";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { MainSiteFooter, MainSiteNavbar } from "@/components/navbar-wrapper";
 
 export const metadata: Metadata = {
@@ -43,9 +44,13 @@ export default function MainSiteLayout({
 	return (
 		<Providers tenant={null}>
 			<ScrollContainerProvider>
-				<MainSiteNavbar />
+				<Suspense>
+					<MainSiteNavbar />
+				</Suspense>
 				<div className="pt-navbar">{children}</div>
-				<MainSiteFooter />
+				<Suspense>
+					<MainSiteFooter />
+				</Suspense>
 			</ScrollContainerProvider>
 		</Providers>
 	);

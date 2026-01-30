@@ -1,13 +1,13 @@
-import { ChatPageHandler } from "@/components/chat/chat-page-handler";
+import { Suspense } from "react";
+import {
+	ChatPageHandler,
+	ChatPageSkeleton,
+} from "@/components/chat/chat-page-handler";
 
-type Props = {
-	searchParams: Promise<{ server?: string; q?: string }>;
-};
-
-export default async function ChatPage({ searchParams }: Props) {
-	const params = await searchParams;
-
+export default function ChatPage() {
 	return (
-		<ChatPageHandler serverDiscordId={params.server} initialQuery={params.q} />
+		<Suspense fallback={<ChatPageSkeleton />}>
+			<ChatPageHandler />
+		</Suspense>
 	);
 }

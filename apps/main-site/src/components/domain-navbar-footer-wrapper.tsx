@@ -5,17 +5,9 @@ import { TenantNavbar } from "@packages/ui/components/navbar";
 import { useTenant } from "@packages/ui/components/tenant-context";
 import { usePathname } from "next/navigation";
 
-export function DomainNavbarFooterWrapper({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+export function DomainNavbar() {
 	const pathname = usePathname();
 	const tenant = useTenant();
-
-	if (pathname?.startsWith("/dashboard")) {
-		return <>{children}</>;
-	}
 
 	const isOverviewPage = pathname === "/" || pathname?.startsWith("/c/");
 	const showServerInNavbar = !isOverviewPage;
@@ -29,11 +21,9 @@ export function DomainNavbarFooterWrapper({
 				}
 			: null;
 
-	return (
-		<>
-			<TenantNavbar showBorder={!isOverviewPage} server={server} />
-			<div className="pt-[var(--navbar-height)]">{children}</div>
-			<TenantFooter />
-		</>
-	);
+	return <TenantNavbar showBorder={!isOverviewPage} server={server} />;
+}
+
+export function DomainFooter() {
+	return <TenantFooter />;
 }

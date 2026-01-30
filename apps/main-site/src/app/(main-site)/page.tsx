@@ -1,37 +1,32 @@
 import { Database } from "@packages/database/database";
-import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Effect } from "effect";
 import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
 import { runtime } from "../../lib/runtime";
 import { HomePageClient, HomePageSkeleton } from "./client";
 
-type Props = {
-	searchParams: Promise<{ cursor?: string }>;
-};
-
-async function fetchRecentThreads(cursor: string | null) {
+async function fetchRecentThreads() {
 	"use cache";
 	cacheLife("minutes");
-	cacheTag("home-recent-threads", cursor ?? "initial");
+	cacheTag("home-recent-threads");
 
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.search.getRecentThreads({
 			paginationOpts: {
 				numItems: 20,
-				cursor,
+				cursor: null,
 			},
 		});
 	}).pipe(runtime.runPromise);
 }
 
-async function HomePageLoader({ cursor }: { cursor: string | null }) {
+async function HomePageLoader() {
 	"use cache";
 	cacheLife("minutes");
-	cacheTag("home-page-loader", cursor ?? "initial");
+	cacheTag("home-page-loader");
 
-	const initialData = await fetchRecentThreads(cursor);
+	const initialData = await fetchRecentThreads();
 
 	return (
 		<HomePageClient
@@ -41,13 +36,10 @@ async function HomePageLoader({ cursor }: { cursor: string | null }) {
 	);
 }
 
-export default async function HomePage(props: Props) {
-	const searchParams = await props.searchParams;
-	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
-
+export default async function HomePage() {
 	return (
 		<Suspense fallback={<HomePageSkeleton />}>
-			<HomePageLoader cursor={cursor} />
+			<HomePageLoader />
 		</Suspense>
 	);
 }

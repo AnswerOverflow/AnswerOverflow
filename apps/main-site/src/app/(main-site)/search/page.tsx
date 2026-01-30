@@ -19,10 +19,6 @@ import { useQueryState } from "nuqs";
 import { Suspense } from "react";
 import { useDebounce } from "use-debounce";
 
-type Props = {
-	searchParams: Promise<{ q?: string; s?: string; c?: string }>;
-};
-
 function SearchResults({ query }: { query: string }) {
 	return (
 		<ConvexInfiniteList
@@ -105,7 +101,7 @@ function SearchPageContent() {
 	);
 }
 
-export default function SearchPage(_props: Props) {
+export default function SearchPage() {
 	return (
 		<Suspense
 			fallback={
