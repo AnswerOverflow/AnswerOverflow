@@ -223,6 +223,7 @@ export async function MessagePageLoader(props: {
 							headerData.canonicalId
 						).toString()}
 						currentServerId={headerData.server.discordId.toString()}
+						currentParentChannelId={headerData.channel.id.toString()}
 					/>
 				</Suspense>
 			}

@@ -209,6 +209,7 @@ async function TenantMessagePageContent(props: {
 							headerData.canonicalId
 						).toString()}
 						currentServerId={headerData.server.discordId.toString()}
+						currentParentChannelId={headerData.channel.id.toString()}
 						serverId={headerData.server.discordId.toString()}
 					/>
 				</Suspense>

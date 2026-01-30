@@ -15,6 +15,7 @@ type SimilarThreadsProps = {
 	searchQuery: string;
 	currentThreadId: string;
 	currentServerId: string;
+	currentParentChannelId: string;
 	serverId?: string;
 };
 
@@ -66,6 +67,7 @@ async function fetchSimilarThreads(
 			searchQuery: args.searchQuery,
 			currentThreadId: args.currentThreadId,
 			currentServerId: args.currentServerId,
+			currentParentChannelId: args.currentParentChannelId,
 			serverId: args.serverId,
 			limit: args.limit,
 		});
