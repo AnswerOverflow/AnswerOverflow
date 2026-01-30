@@ -17,6 +17,7 @@ import {
 	fetchMessagePageHeaderData,
 	fetchMessagePageReplies,
 	generateMessagePageMetadata,
+	MessagePageSkeleton,
 } from "../../../../../components/message-page-loader";
 import {
 	RecentAnnouncements,
@@ -121,18 +122,6 @@ async function RepliesLoader(props: {
 	);
 }
 
-function TenantMessagePageSkeleton() {
-	return (
-		<div className="container mx-auto px-4 py-8">
-			<div className="space-y-4">
-				<div className="h-8 w-3/4 bg-muted animate-pulse rounded" />
-				<div className="h-64 w-full bg-muted animate-pulse rounded" />
-				<div className="h-32 w-full bg-muted animate-pulse rounded" />
-			</div>
-		</div>
-	);
-}
-
 async function TenantMessagePageContent(props: {
 	domain: string;
 	messageId: string;
@@ -232,7 +221,7 @@ export default async function TenantMessagePage(props: Props) {
 	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 
 	return (
-		<Suspense fallback={<TenantMessagePageSkeleton />}>
+		<Suspense fallback={<MessagePageSkeleton />}>
 			<TenantMessagePageContent
 				domain={domain}
 				messageId={params.messageId}

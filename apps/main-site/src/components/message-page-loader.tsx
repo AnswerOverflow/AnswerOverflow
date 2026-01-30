@@ -1,6 +1,7 @@
 import type { api } from "@packages/database/convex/_generated/api";
 import { Database } from "@packages/database/database";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import {
 	getTenantCanonicalUrl,
 	type TenantInfo,
@@ -18,6 +19,63 @@ import {
 	RecentAnnouncementsSkeleton,
 } from "./recent-announcements";
 import { SimilarThreads, SimilarThreadsSkeleton } from "./similar-threads";
+
+export function MessagePageSkeleton() {
+	return (
+		<div className="mx-auto pt-2 pb-16">
+			<div className="flex w-full flex-col justify-center gap-4 md:flex-row">
+				<main className="flex w-full max-w-3xl grow flex-col gap-4">
+					<div className="flex flex-col gap-2 pl-2">
+						<div className="flex flex-row items-center gap-2">
+							<Skeleton className="h-12 w-12 rounded-full" />
+							<div className="flex flex-col gap-1">
+								<Skeleton className="h-4 w-32" />
+								<Skeleton className="h-3 w-24" />
+							</div>
+						</div>
+						<Skeleton className="h-8 w-3/4" />
+						<div className="space-y-2">
+							<Skeleton className="h-4 w-full" />
+							<Skeleton className="h-4 w-full" />
+							<Skeleton className="h-4 w-2/3" />
+						</div>
+					</div>
+					<Skeleton className="h-px w-full my-4" />
+					<div className="space-y-4">
+						{[1, 2, 3].map((i) => (
+							<div key={i} className="p-2">
+								<div className="flex flex-row min-w-0">
+									<Skeleton className="h-10 w-10 rounded-full shrink-0" />
+									<div className="flex flex-col pl-2 pt-2 min-w-0 flex-1 gap-2">
+										<div className="flex flex-row items-center gap-2">
+											<Skeleton className="h-4 w-24" />
+											<Skeleton className="h-3 w-16" />
+										</div>
+										<Skeleton className="h-4 w-full" />
+										<Skeleton className="h-4 w-3/4" />
+									</div>
+								</div>
+							</div>
+						))}
+					</div>
+				</main>
+				<div className="hidden md:flex w-[400px] shrink-0 flex-col items-center gap-4">
+					<div className="w-full rounded-md border-2 bg-card overflow-hidden">
+						<Skeleton className="w-full aspect-[5/2]" />
+						<div className="flex flex-col items-start gap-4 p-4">
+							<div className="flex w-full flex-row items-center justify-between">
+								<Skeleton className="h-5 w-32" />
+								<Skeleton className="h-8 w-16 rounded-3xl" />
+							</div>
+							<Skeleton className="h-4 w-full" />
+							<Skeleton className="h-4 w-3/4" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
 
 export type MessagePageHeaderData = NonNullable<
 	FunctionReturnType<typeof api.public.messages.getMessagePageHeaderData>
