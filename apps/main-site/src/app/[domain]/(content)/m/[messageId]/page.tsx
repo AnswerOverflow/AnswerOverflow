@@ -30,7 +30,7 @@ import { runtime } from "../../../../../lib/runtime";
 import { getTenantData } from "../../../../../lib/tenant";
 
 export async function generateStaticParams() {
-	return [];
+	return [{ domain: "vapi.ai", messageId: "placeholder" }];
 }
 
 async function fetchTenantAndHeaderData(domain: string, messageId: bigint) {

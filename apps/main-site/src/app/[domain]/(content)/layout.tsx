@@ -11,7 +11,7 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-	return [];
+	return [{ domain: "vapi.ai" }];
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

@@ -16,7 +16,7 @@ import {
 import { runtime } from "../../../../../lib/runtime";
 
 export async function generateStaticParams() {
-	return [];
+	return [{ domain: "vapi.ai", userId: "placeholder" }];
 }
 
 async function fetchTenantData(domain: string) {

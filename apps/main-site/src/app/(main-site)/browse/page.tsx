@@ -1,3 +1,4 @@
+"use cache";
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 	},
 };
 
-export default async function BrowsePage() {
+export async function getBrowseServers() {
 	"use cache";
 	cacheLife("hours");
 	cacheTag("browse-servers");
@@ -26,6 +27,12 @@ export default async function BrowsePage() {
 		const liveData = yield* database.public.servers.getBrowseServers({});
 		return liveData ?? [];
 	}).pipe(runtime.runPromise);
+
+	return servers;
+}
+
+export default async function BrowsePage() {
+	const servers = await getBrowseServers();
 
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
