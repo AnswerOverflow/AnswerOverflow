@@ -26,10 +26,8 @@ async function fetchRecentThreads(cursor: string | null) {
 	}).pipe(runtime.runPromise);
 }
 
-async function HomePageLoader(props: Props) {
+async function HomePageLoader({ cursor }: { cursor: string | null }) {
 	"use cache";
-	const searchParams = await props.searchParams;
-	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	cacheLife("minutes");
 	cacheTag("home-page-loader", cursor ?? "initial");
 
@@ -44,9 +42,12 @@ async function HomePageLoader(props: Props) {
 }
 
 export default async function HomePage(props: Props) {
+	const searchParams = await props.searchParams;
+	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
+
 	return (
 		<Suspense fallback={<HomePageSkeleton />}>
-			<HomePageLoader {...props} />
+			<HomePageLoader cursor={cursor} />
 		</Suspense>
 	);
 }

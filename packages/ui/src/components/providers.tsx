@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type * as React from "react";
 import { Suspense } from "react";
@@ -8,11 +9,17 @@ import {
 	PostHogIdentify,
 	PostHogPageview,
 } from "../analytics/client";
-import { ConvexClientProvider, useSession } from "./convex-client-provider";
+import { useSession } from "./convex-client-provider";
 import { HydrationProvider } from "./hydration-context";
 import { ImpersonationBanner } from "./impersonation-banner";
 import { type Tenant, TenantProvider } from "./tenant-context";
 import { VercelToolbar } from "./vercel-toolbar";
+
+const ConvexClientProvider = dynamic(
+	() =>
+		import("./convex-client-provider").then((mod) => mod.ConvexClientProvider),
+	{ ssr: false },
+);
 
 function IdentifyUser() {
 	const { data } = useSession();
