@@ -16,7 +16,7 @@ import {
 import { runtime } from "../../../../../lib/runtime";
 
 export async function generateStaticParams() {
-	return [{ domain: "placeholder.example.com", userId: "123456789012345678" }];
+	return [];
 }
 
 async function fetchTenantData(domain: string) {

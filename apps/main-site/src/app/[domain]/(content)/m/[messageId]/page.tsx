@@ -30,9 +30,7 @@ import { runtime } from "../../../../../lib/runtime";
 import { getTenantData } from "../../../../../lib/tenant";
 
 export async function generateStaticParams() {
-	return [
-		{ domain: "placeholder.example.com", messageId: "123456789012345678" },
-	];
+	return [];
 }
 
 async function fetchTenantAndHeaderData(domain: string, messageId: bigint) {

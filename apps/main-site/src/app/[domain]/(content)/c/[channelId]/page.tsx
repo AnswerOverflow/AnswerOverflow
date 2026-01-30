@@ -16,9 +16,7 @@ import {
 import { getTenantData } from "../../../../../lib/tenant";
 
 export async function generateStaticParams() {
-	return [
-		{ domain: "placeholder.example.com", channelId: "123456789012345678" },
-	];
+	return [];
 }
 
 type Props = {

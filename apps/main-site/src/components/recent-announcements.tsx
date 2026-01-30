@@ -45,10 +45,6 @@ export function RecentAnnouncementsSkeleton() {
 async function fetchRecentAnnouncements(
 	serverId: string,
 ): Promise<RecentAnnouncementsResult | null> {
-	"use cache";
-	cacheLife("minutes");
-	cacheTag("recent-announcements", serverId);
-
 	const exit = await Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.search.getRecentAnnouncements({

@@ -11,7 +11,7 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-	return [{ domain: "placeholder.example.com" }];
+	return [];
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

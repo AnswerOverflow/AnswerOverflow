@@ -8,7 +8,7 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-	return [{ domain: "placeholder.example.com", repo: "placeholder-repo" }];
+	return [];
 }
 
 export default async function RepoPage(props: Props) {

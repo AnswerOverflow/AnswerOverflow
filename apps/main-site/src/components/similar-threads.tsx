@@ -57,10 +57,6 @@ export function SimilarThreadsSkeleton() {
 async function fetchSimilarThreads(
 	args: SimilarThreadsProps & { limit: number },
 ): Promise<SimilarThreadsResult | null> {
-	"use cache";
-	cacheLife("minutes");
-	cacheTag("similar-threads", args.currentThreadId);
-
 	const exit = await Effect.gen(function* () {
 		const database = yield* Database;
 		return yield* database.public.search.getSimilarThreads({
