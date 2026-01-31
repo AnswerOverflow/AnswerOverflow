@@ -1,4 +1,6 @@
 import { Database } from "@packages/database/database";
+import { Skeleton } from "@packages/ui/components/skeleton";
+import { ThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
@@ -6,14 +8,15 @@ import { Effect, Option } from "effect";
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import {
 	fetchUserPageHeaderData,
 	UserPageClient,
 } from "../../../../../components/user-page-loader";
 import { runtime } from "../../../../../lib/runtime";
 
-export async function generateStaticParams() {
-	return [{ domain: "vapi.ai", userId: "placeholder" }];
+export function generateStaticParams() {
+	return [{ domain: "placeholder", userId: "placeholder" }];
 }
 
 async function fetchTenantData(domain: string) {
@@ -91,11 +94,27 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	};
 }
 
-export default async function TenantUserPage(props: Props) {
-	const params = await props.params;
-	const domain = decodeURIComponent(params.domain);
+function UserPageSkeleton() {
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex flex-row items-center gap-4">
+				<Skeleton className="h-16 w-16 rounded-full" />
+				<Skeleton className="h-10 w-48" />
+			</div>
+			<div className="space-y-4">
+				{Array.from({ length: 5 }).map((_, i) => (
+					<ThreadCardSkeleton key={`skeleton-${i}`} />
+				))}
+			</div>
+		</div>
+	);
+}
 
-	const parsed = parseSnowflakeId(params.userId);
+async function TenantUserPageContent(props: {
+	domain: string;
+	userId: string;
+}) {
+	const parsed = parseSnowflakeId(props.userId);
 	if (Option.isNone(parsed)) {
 		return notFound();
 	}
@@ -103,7 +122,7 @@ export default async function TenantUserPage(props: Props) {
 		redirect(`/u/${parsed.value.cleaned}`);
 	}
 
-	const tenantData = await fetchTenantData(domain);
+	const tenantData = await fetchTenantData(props.domain);
 
 	if (!tenantData?.server) {
 		return notFound();
@@ -116,5 +135,16 @@ export default async function TenantUserPage(props: Props) {
 			basePath={`/u/${parsed.value.cleaned}`}
 			serverFilterLabel="Explore posts from servers"
 		/>
+	);
+}
+
+export default async function TenantUserPage(props: Props) {
+	const params = await props.params;
+	const domain = decodeURIComponent(params.domain);
+
+	return (
+		<Suspense fallback={<UserPageSkeleton />}>
+			<TenantUserPageContent domain={domain} userId={params.userId} />
+		</Suspense>
 	);
 }

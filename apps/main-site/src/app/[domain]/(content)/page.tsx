@@ -3,7 +3,6 @@ import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Hash } from "lucide-react";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CommunityPageSkeleton } from "../../../components/channel-page-content";
@@ -14,8 +13,8 @@ import {
 } from "../../../components/channel-page-loader";
 import { getTenantData } from "../../../lib/tenant";
 
-export async function generateStaticParams() {
-	return [{ domain: "vapi.ai" }];
+export function generateStaticParams() {
+	return [{ domain: "placeholder" }];
 }
 
 type Props = {
