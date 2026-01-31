@@ -1,8 +1,7 @@
-import { Database } from "@packages/database/database";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
-import { Effect, Option } from "effect";
+import { Option } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -12,19 +11,9 @@ import {
 	MessagePageLoader,
 	MessagePageSkeleton,
 } from "../../../../components/message-page-loader";
-import { runtime } from "../../../../lib/runtime";
 
-export async function generateStaticParams() {
-	const result = await Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.public.search.getRecentThreads({
-			paginationOpts: { numItems: 10, cursor: null },
-		});
-	}).pipe(runtime.runPromise);
-
-	return result.page.map((thread) => ({
-		messageId: thread.message.message.id.toString(),
-	}));
+export function generateStaticParams() {
+	return [{ messageId: "placeholder" }];
 }
 
 type Props = {

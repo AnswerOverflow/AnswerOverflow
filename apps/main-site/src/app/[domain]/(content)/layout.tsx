@@ -9,14 +9,14 @@ import {
 	DomainNavbar,
 } from "../../../components/domain-navbar-footer-wrapper";
 
+export function generateStaticParams() {
+	return [{ domain: "placeholder" }];
+}
+
 type Props = {
 	children: React.ReactNode;
 	params: Promise<{ domain: string }>;
 };
-
-export async function generateStaticParams() {
-	return [{ domain: "vapi.ai" }];
-}
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;

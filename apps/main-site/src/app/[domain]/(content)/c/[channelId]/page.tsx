@@ -4,7 +4,6 @@ import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Option } from "effect";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { CommunityPageSkeleton } from "../../../../../components/channel-page-content";
@@ -15,8 +14,8 @@ import {
 } from "../../../../../components/channel-page-loader";
 import { getTenantData } from "../../../../../lib/tenant";
 
-export async function generateStaticParams() {
-	return [{ domain: "vapi.ai", channelId: "placeholder" }];
+export function generateStaticParams() {
+	return [{ domain: "placeholder", channelId: "placeholder" }];
 }
 
 type Props = {

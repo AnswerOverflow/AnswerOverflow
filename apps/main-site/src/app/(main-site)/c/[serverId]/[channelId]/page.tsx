@@ -1,9 +1,8 @@
-import { Database } from "@packages/database/database";
 import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
-import { Effect, Option } from "effect";
+import { Option } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -13,35 +12,9 @@ import {
 	fetchChannelPageHeaderData,
 	generateChannelPageMetadata,
 } from "../../../../../components/channel-page-loader";
-import { runtime } from "../../../../../lib/runtime";
 
-export async function generateStaticParams() {
-	const servers = await Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.public.servers.getBrowseServers({});
-	}).pipe(runtime.runPromise);
-
-	const params: Array<{ serverId: string; channelId: string }> = [];
-
-	for (const server of servers.slice(0, 5)) {
-		const serverData = await Effect.gen(function* () {
-			const database = yield* Database;
-			return yield* database.public.servers.getServerByDiscordIdWithChannels({
-				discordId: server.discordId,
-			});
-		}).pipe(runtime.runPromise);
-
-		if (serverData?.channels) {
-			for (const channel of serverData.channels.slice(0, 2)) {
-				params.push({
-					serverId: server.discordId.toString(),
-					channelId: channel.id.toString(),
-				});
-			}
-		}
-	}
-
-	return params;
+export function generateStaticParams() {
+	return [{ serverId: "placeholder", channelId: "placeholder" }];
 }
 
 type Props = {

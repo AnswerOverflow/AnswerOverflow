@@ -1,20 +1,23 @@
+import { Skeleton } from "@packages/ui/components/skeleton";
+import { ThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import { makeUserIconLink } from "@packages/ui/utils/discord-avatar";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Option } from "effect";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import {
 	fetchUserPageHeaderData,
 	UserPageClient,
 } from "../../../../components/user-page-loader";
 
+export function generateStaticParams() {
+	return [{ userId: "placeholder" }];
+}
+
 type Props = {
 	params: Promise<{ userId: string }>;
 };
-
-export async function generateStaticParams() {
-	return [{ userId: "placeholder" }];
-}
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
@@ -63,10 +66,24 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	};
 }
 
-export default async function UserPage(props: Props) {
-	const params = await props.params;
+function UserPageSkeleton() {
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex flex-row items-center gap-4">
+				<Skeleton className="h-16 w-16 rounded-full" />
+				<Skeleton className="h-10 w-48" />
+			</div>
+			<div className="space-y-4">
+				{Array.from({ length: 5 }).map((_, i) => (
+					<ThreadCardSkeleton key={`skeleton-${i}`} />
+				))}
+			</div>
+		</div>
+	);
+}
 
-	const parsed = parseSnowflakeId(params.userId);
+async function UserPageContent(props: { userId: string }) {
+	const parsed = parseSnowflakeId(props.userId);
 	if (Option.isNone(parsed)) {
 		return notFound();
 	}
@@ -80,5 +97,15 @@ export default async function UserPage(props: Props) {
 			basePath={`/u/${parsed.value.cleaned}`}
 			serverFilterLabel="Explore posts from servers"
 		/>
+	);
+}
+
+export default async function UserPage(props: Props) {
+	const params = await props.params;
+
+	return (
+		<Suspense fallback={<UserPageSkeleton />}>
+			<UserPageContent userId={params.userId} />
+		</Suspense>
 	);
 }

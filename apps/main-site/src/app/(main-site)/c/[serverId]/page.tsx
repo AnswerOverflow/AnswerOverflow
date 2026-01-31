@@ -1,10 +1,9 @@
-import { Database } from "@packages/database/database";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ChannelThreadCardSkeleton } from "@packages/ui/components/thread-card";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { getServerCustomUrl } from "@packages/ui/utils/server";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
-import { Effect, Option } from "effect";
+import { Option } from "effect";
 import { Hash } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -15,17 +14,9 @@ import {
 	generateServerPageMetadata,
 	ServerPageLoader,
 } from "../../../../components/channel-page-loader";
-import { runtime } from "../../../../lib/runtime";
 
-export async function generateStaticParams() {
-	const servers = await Effect.gen(function* () {
-		const database = yield* Database;
-		return yield* database.public.servers.getBrowseServers({});
-	}).pipe(runtime.runPromise);
-
-	return servers.slice(0, 10).map((server) => ({
-		serverId: server.discordId.toString(),
-	}));
+export function generateStaticParams() {
+	return [{ serverId: "placeholder" }];
 }
 
 type Props = {
