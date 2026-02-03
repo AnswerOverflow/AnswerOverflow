@@ -34,23 +34,46 @@ export const getDashboardData = guildManagerQuery({
 			args.serverId,
 		);
 
-		const allChannels = await getManyFrom(
-			ctx.db,
-			"channels",
-			"by_serverId",
-			args.serverId,
+		const [textChannels, announcementChannels, forumChannels, allSettings] =
+			await Promise.all([
+				ctx.db
+					.query("channels")
+					.withIndex("by_serverId_and_type", (q) =>
+						q.eq("serverId", args.serverId).eq("type", ChannelType.GuildText),
+					)
+					.collect(),
+				ctx.db
+					.query("channels")
+					.withIndex("by_serverId_and_type", (q) =>
+						q
+							.eq("serverId", args.serverId)
+							.eq("type", ChannelType.GuildAnnouncement),
+					)
+					.collect(),
+				ctx.db
+					.query("channels")
+					.withIndex("by_serverId_and_type", (q) =>
+						q.eq("serverId", args.serverId).eq("type", ChannelType.GuildForum),
+					)
+					.collect(),
+				ctx.db
+					.query("channelSettings")
+					.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
+					.collect(),
+			]);
+
+		const channels = [
+			...textChannels,
+			...announcementChannels,
+			...forumChannels,
+		];
+
+		const settingsByChannelId = new Map(
+			allSettings.map((s) => [s.channelId, s]),
 		);
 
-		const channels = allChannels.filter(
-			(channel) => !isThreadType(channel.type),
-		);
-
-		const channelSettings = await asyncMap(channels, (channel) =>
-			getOneFrom(ctx.db, "channelSettings", "by_channelId", channel.id),
-		);
-
-		const channelsWithFlags = channels.map((channel, idx) => {
-			const settings = channelSettings[idx];
+		const channelsWithFlags = channels.map((channel) => {
+			const settings = settingsByChannelId.get(channel.id);
 			return {
 				id: channel.id,
 				name: channel.name,
