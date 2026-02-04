@@ -6,9 +6,11 @@ import { Status } from "discord.js";
 import { Console, Duration, Effect, Layer, Ref, Schedule } from "effect";
 import { DiscordClient } from "../core/discord-client-service";
 import { Discord } from "../core/discord-service";
+import { getLastEventReceivedTime } from "./event-tracker";
 
 const HEALTH_CHECK_INTERVAL = Duration.seconds(30);
 const GATEWAY_DEATH_TIMEOUT = Duration.minutes(5);
+const EVENT_SILENCE_TIMEOUT = Duration.minutes(3);
 
 const startGatewayMonitoring = Effect.gen(function* () {
 	const client = yield* DiscordClient;
@@ -81,52 +83,94 @@ const startHealthCheck = Effect.gen(function* () {
 	const client = yield* DiscordClient;
 	const discord = yield* Discord;
 	const consecutiveFailures = yield* Ref.make(0);
+	const consecutiveEventSilence = yield* Ref.make(0);
 	const maxConsecutiveFailures = Math.ceil(
 		Duration.toMillis(GATEWAY_DEATH_TIMEOUT) /
+			Duration.toMillis(HEALTH_CHECK_INTERVAL),
+	);
+	const maxEventSilenceChecks = Math.ceil(
+		Duration.toMillis(EVENT_SILENCE_TIMEOUT) /
 			Duration.toMillis(HEALTH_CHECK_INTERVAL),
 	);
 
 	const checkHealth = Effect.gen(function* () {
 		const wsStatus = client.ws.status;
 		const wsPing = client.ws.ping;
+		const lastEventTime = getLastEventReceivedTime();
+		const timeSinceLastEvent = Date.now() - lastEventTime;
+		const eventSilenceThresholdMs = Duration.toMillis(EVENT_SILENCE_TIMEOUT);
 
-		if (wsStatus === Status.Ready && wsPing >= 0) {
+		const isWsHealthy = wsStatus === Status.Ready && wsPing >= 0;
+		const hasRecentEvents = timeSinceLastEvent < eventSilenceThresholdMs;
+
+		if (isWsHealthy && hasRecentEvents) {
 			const failures = yield* Ref.get(consecutiveFailures);
-			if (failures > 0) {
+			const silenceCount = yield* Ref.get(consecutiveEventSilence);
+			if (failures > 0 || silenceCount > 0) {
 				yield* Console.log(
-					`Gateway connection recovered after ${String(failures)} failed checks (ping: ${String(wsPing)}ms)`,
+					`Gateway connection recovered after ${String(failures)} failed checks, ${String(silenceCount)} silence checks (ping: ${String(wsPing)}ms)`,
 				);
 				captureMessage(
-					`Gateway recovered after ${String(failures)} failed health checks`,
+					`Gateway recovered after ${String(failures)} failed health checks, ${String(silenceCount)} silence checks`,
 					"info",
 				);
 			}
 			yield* Ref.set(consecutiveFailures, 0);
+			yield* Ref.set(consecutiveEventSilence, 0);
 			return;
 		}
 
-		const newFailures = yield* Ref.updateAndGet(
-			consecutiveFailures,
-			(n) => n + 1,
-		);
-		const statusName = getWsStatusName(wsStatus);
+		if (!isWsHealthy) {
+			const newFailures = yield* Ref.updateAndGet(
+				consecutiveFailures,
+				(n) => n + 1,
+			);
+			const statusName = getWsStatusName(wsStatus);
 
-		yield* Console.warn(
-			`Gateway health check failed (${String(newFailures)}/${String(maxConsecutiveFailures)}): status=${statusName} ping=${String(wsPing)}ms`,
-		);
+			yield* Console.warn(
+				`Gateway health check failed (${String(newFailures)}/${String(maxConsecutiveFailures)}): status=${statusName} ping=${String(wsPing)}ms`,
+			);
 
-		if (newFailures >= maxConsecutiveFailures) {
-			const message = `Gateway dead for ${String(Duration.toMillis(GATEWAY_DEATH_TIMEOUT) / 1000)}s (${String(newFailures)} consecutive failures). Status: ${statusName}, Ping: ${String(wsPing)}ms. Forcing restart.`;
-			console.error(`[GatewayHealth] ${message}`);
-			captureMessage(message, "error");
+			if (newFailures >= maxConsecutiveFailures) {
+				const message = `Gateway dead for ${String(Duration.toMillis(GATEWAY_DEATH_TIMEOUT) / 1000)}s (${String(newFailures)} consecutive failures). Status: ${statusName}, Ping: ${String(wsPing)}ms. Forcing restart.`;
+				console.error(`[GatewayHealth] ${message}`);
+				captureMessage(message, "error");
 
-			try {
-				yield* discord.callClient(() => client.destroy());
-			} catch {
-				// noop
+				try {
+					yield* discord.callClient(() => client.destroy());
+				} catch {
+					// noop
+				}
+
+				process.exit(1);
 			}
+		} else if (!hasRecentEvents) {
+			yield* Ref.set(consecutiveFailures, 0);
 
-			process.exit(1);
+			const newSilenceCount = yield* Ref.updateAndGet(
+				consecutiveEventSilence,
+				(n) => n + 1,
+			);
+			const statusName = getWsStatusName(wsStatus);
+			const silenceDurationSec = Math.round(timeSinceLastEvent / 1000);
+
+			yield* Console.warn(
+				`Gateway zombie detected (${String(newSilenceCount)}/${String(maxEventSilenceChecks)}): No events for ${String(silenceDurationSec)}s. Status=${statusName} ping=${String(wsPing)}ms`,
+			);
+
+			if (newSilenceCount >= maxEventSilenceChecks) {
+				const message = `Gateway zombie - no events received for ${String(silenceDurationSec)}s despite appearing healthy (status=${statusName}, ping=${String(wsPing)}ms). Forcing restart.`;
+				console.error(`[GatewayHealth] ${message}`);
+				captureMessage(message, "error");
+
+				try {
+					yield* discord.callClient(() => client.destroy());
+				} catch {
+					// noop
+				}
+
+				process.exit(1);
+			}
 		}
 	}).pipe(
 		Effect.withSpan("gateway_health.check"),
@@ -151,7 +195,7 @@ const startHealthCheck = Effect.gen(function* () {
 	yield* Effect.fork(Effect.repeat(checkHealth, schedule));
 
 	yield* Console.log(
-		`Gateway health check started (interval: ${String(Duration.toMillis(HEALTH_CHECK_INTERVAL) / 1000)}s, death timeout: ${String(Duration.toMillis(GATEWAY_DEATH_TIMEOUT) / 1000)}s)`,
+		`Gateway health check started (interval: ${String(Duration.toMillis(HEALTH_CHECK_INTERVAL) / 1000)}s, death timeout: ${String(Duration.toMillis(GATEWAY_DEATH_TIMEOUT) / 1000)}s, event silence timeout: ${String(Duration.toMillis(EVENT_SILENCE_TIMEOUT) / 1000)}s)`,
 	);
 });
 

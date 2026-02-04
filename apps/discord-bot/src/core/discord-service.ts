@@ -25,6 +25,7 @@ import {
 	Runtime,
 } from "effect";
 import { discordApiCalls, discordApiErrors } from "../metrics";
+import { recordEventReceived } from "../services/event-tracker";
 import { DiscordClient, DiscordClientLayer } from "./discord-client-service";
 
 export class DiscordAPIError extends Data.TaggedError("DiscordAPIError")<{
@@ -127,6 +128,8 @@ export const createDiscordService = Effect.gen(function* () {
 			const eventKey = String(event);
 
 			const listener = (...args: ClientEvents[E]) => {
+				recordEventReceived();
+
 				const handlerEffect = Effect.scoped(handler(...args)).pipe(
 					Effect.tapErrorCause((cause) =>
 						Effect.sync(() => {
