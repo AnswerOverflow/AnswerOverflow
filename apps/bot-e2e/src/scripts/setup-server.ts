@@ -1,10 +1,11 @@
 import { Database } from "@packages/database/database";
-import type {
-	CategoryChannel,
-	ForumChannel,
-	Guild,
-	TextChannel,
-	ThreadChannel,
+import {
+	type CategoryChannel,
+	Constants,
+	type ForumChannel,
+	type Guild,
+	type TextChannel,
+	type ThreadChannel,
 } from "discord.js-selfbot-v13";
 import { Array as Arr, Effect } from "effect";
 import { disposeRuntime, runMain } from "../core/runtime";
@@ -16,7 +17,9 @@ const CATEGORY_NAME = "E2E Test Channels";
 type ChannelConfig = {
 	name: string;
 	type: "GUILD_TEXT" | "GUILD_FORUM";
-	discordType: number;
+	discordType:
+		| typeof Constants.ChannelTypes.GUILD_TEXT
+		| typeof Constants.ChannelTypes.GUILD_FORUM;
 	topic: string;
 	settings: {
 		indexingEnabled: boolean;
@@ -31,7 +34,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "mark-solution-enabled",
 		type: "GUILD_TEXT",
-		discordType: 0,
+		discordType: Constants.ChannelTypes.GUILD_TEXT,
 		topic: "Text channel with mark solution enabled.",
 		settings: {
 			indexingEnabled: false,
@@ -44,7 +47,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "mark-solution-disabled",
 		type: "GUILD_TEXT",
-		discordType: 0,
+		discordType: Constants.ChannelTypes.GUILD_TEXT,
 		topic: "Text channel with mark solution disabled.",
 		settings: {
 			indexingEnabled: false,
@@ -57,7 +60,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "auto-thread-enabled",
 		type: "GUILD_TEXT",
-		discordType: 0,
+		discordType: Constants.ChannelTypes.GUILD_TEXT,
 		topic: "Text channel with auto-thread enabled.",
 		settings: {
 			indexingEnabled: false,
@@ -70,7 +73,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "forum-mark-solution",
 		type: "GUILD_FORUM",
-		discordType: 15,
+		discordType: Constants.ChannelTypes.GUILD_FORUM,
 		topic: "Forum channel with mark solution enabled.",
 		settings: {
 			indexingEnabled: false,
@@ -83,7 +86,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "forum-no-settings",
 		type: "GUILD_FORUM",
-		discordType: 15,
+		discordType: Constants.ChannelTypes.GUILD_FORUM,
 		topic: "Forum channel with no settings enabled.",
 		settings: {
 			indexingEnabled: false,
@@ -96,7 +99,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "read-the-rules",
 		type: "GUILD_TEXT",
-		discordType: 0,
+		discordType: Constants.ChannelTypes.GUILD_TEXT,
 		topic: "Channel for testing read-the-rules feature.",
 		settings: {
 			indexingEnabled: false,
@@ -109,7 +112,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "ai-auto-answer",
 		type: "GUILD_TEXT",
-		discordType: 0,
+		discordType: Constants.ChannelTypes.GUILD_TEXT,
 		topic: "Channel for testing AI auto-answer feature.",
 		settings: {
 			indexingEnabled: false,
@@ -122,7 +125,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "indexing-enabled",
 		type: "GUILD_TEXT",
-		discordType: 0,
+		discordType: Constants.ChannelTypes.GUILD_TEXT,
 		topic: "Channel where indexing is enabled.",
 		settings: {
 			indexingEnabled: true,
@@ -135,7 +138,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "indexing-disabled",
 		type: "GUILD_TEXT",
-		discordType: 0,
+		discordType: Constants.ChannelTypes.GUILD_TEXT,
 		topic: "Channel where indexing is explicitly disabled.",
 		settings: {
 			indexingEnabled: false,
@@ -148,7 +151,7 @@ const CHANNELS_TO_CREATE: Array<ChannelConfig> = [
 	{
 		name: "playground",
 		type: "GUILD_TEXT",
-		discordType: 0,
+		discordType: Constants.ChannelTypes.GUILD_TEXT,
 		topic: "General playground for ad-hoc testing.",
 		settings: {
 			indexingEnabled: false,

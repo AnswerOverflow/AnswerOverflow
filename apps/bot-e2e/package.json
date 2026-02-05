@@ -15,6 +15,7 @@
 		"typecheck:slow": "tsc -p tsconfig.json --noEmit"
 	},
 	"dependencies": {
+		"@effect/platform": "^0.93.8",
 		"@packages/database": "workspace:*",
 		"discord.js-selfbot-v13": "^3.7.1",
 		"effect": "catalog:"

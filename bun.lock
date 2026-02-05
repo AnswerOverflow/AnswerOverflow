@@ -35,6 +35,7 @@
       "name": "@apps/bot-e2e",
       "version": "0.0.1",
       "dependencies": {
+        "@effect/platform": "^0.93.8",
         "@packages/database": "workspace:*",
         "discord.js-selfbot-v13": "^3.7.1",
         "effect": "catalog:",

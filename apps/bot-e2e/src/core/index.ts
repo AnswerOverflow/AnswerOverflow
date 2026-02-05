@@ -7,10 +7,11 @@ export {
 	waitForReaction,
 	waitForThreadTag,
 } from "./assertions";
+export type { PushoverMessage } from "./pushover-service";
+export { Pushover, PushoverError } from "./pushover-service";
 export {
 	disposeRuntime,
 	E2ELayer,
-	getRuntime,
 	runMain,
 	runMainExit,
 } from "./runtime";

@@ -1,38 +1,22 @@
 import { DatabaseHttpLayer } from "@packages/database/database";
 import { type Effect, Layer, ManagedRuntime } from "effect";
+import { Pushover } from "./pushover-service";
 import { SelfbotLayer } from "./selfbot-service";
 
-export const E2ELayer = Layer.mergeAll(SelfbotLayer, DatabaseHttpLayer);
+export const E2ELayer = Layer.mergeAll(
+	SelfbotLayer,
+	DatabaseHttpLayer,
+	Pushover.Default,
+);
 
-let runtimeInstance: ManagedRuntime.ManagedRuntime<
-	Layer.Layer.Success<typeof E2ELayer>,
-	never
-> | null = null;
+const runtimeInstance = ManagedRuntime.make(E2ELayer);
 
-export const getRuntime = () => {
-	if (!runtimeInstance) {
-		runtimeInstance = ManagedRuntime.make(E2ELayer);
-	}
-	return runtimeInstance;
-};
-
-export const disposeRuntime = async () => {
-	if (runtimeInstance) {
-		await runtimeInstance.dispose();
-		runtimeInstance = null;
-	}
-};
+export const disposeRuntime = () => runtimeInstance.dispose();
 
 export const runMain = <A, E>(
 	effect: Effect.Effect<A, E, Layer.Layer.Success<typeof E2ELayer>>,
-) => {
-	const runtime = getRuntime();
-	return runtime.runPromise(effect);
-};
+) => runtimeInstance.runPromise(effect);
 
 export const runMainExit = <A, E>(
 	effect: Effect.Effect<A, E, Layer.Layer.Success<typeof E2ELayer>>,
-) => {
-	const runtime = getRuntime();
-	return runtime.runPromiseExit(effect);
-};
+) => runtimeInstance.runPromiseExit(effect);
