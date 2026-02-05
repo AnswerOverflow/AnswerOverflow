@@ -1,121 +1,106 @@
 import type { Message, ThreadChannel } from "discord.js-selfbot-v13";
-import { Data, Duration, Effect } from "effect";
+import { Data, Duration, Effect, Option, Schedule } from "effect";
 
 export class WaitTimeoutError extends Data.TaggedError("WaitTimeoutError")<{
 	description: string;
-	timeoutMs: number;
+	timeout: Duration.Duration;
 }> {
 	override get message() {
-		return `Timed out waiting for ${this.description} after ${this.timeoutMs}ms`;
+		return `Timed out waiting for ${this.description} after ${Duration.format(this.timeout)}`;
 	}
 }
 
-interface WaitForOptions {
+export interface WaitForOptions {
 	timeout?: Duration.DurationInput;
 	interval?: Duration.DurationInput;
 }
 
+const DEFAULT_TIMEOUT = Duration.seconds(10);
+const DEFAULT_INTERVAL = Duration.millis(500);
+
+class NotYetError extends Data.TaggedError("NotYetError") {}
+
 const waitForCondition = <T>(
-	check: () => Effect.Effect<T | null | undefined, never, never>,
+	check: Effect.Effect<Option.Option<T>>,
 	description: string,
 	options: WaitForOptions = {},
 ): Effect.Effect<T, WaitTimeoutError> => {
-	const timeoutMs = Duration.toMillis(
-		Duration.isDuration(options.timeout)
-			? options.timeout
-			: Duration.decode(options.timeout ?? "10 seconds"),
-	);
-	const intervalMs = Duration.toMillis(
-		Duration.isDuration(options.interval)
-			? options.interval
-			: Duration.decode(options.interval ?? "500 millis"),
+	const timeout = Duration.decode(options.timeout ?? DEFAULT_TIMEOUT);
+	const interval = Duration.decode(options.interval ?? DEFAULT_INTERVAL);
+
+	const schedule = Schedule.spaced(interval).pipe(
+		Schedule.compose(Schedule.elapsed),
+		Schedule.whileOutput(Duration.lessThan(timeout)),
 	);
 
-	const startTime = Date.now();
-
-	const loop: Effect.Effect<T, WaitTimeoutError> = Effect.gen(function* () {
-		const result = yield* check();
-
-		if (result !== null && result !== undefined) {
-			return result;
-		}
-
-		if (Date.now() - startTime >= timeoutMs) {
-			return yield* Effect.fail(
-				new WaitTimeoutError({
-					description,
-					timeoutMs,
-				}),
-			);
-		}
-
-		yield* Effect.sleep(Duration.millis(intervalMs));
-		return yield* loop;
-	});
-
-	return loop;
+	return check.pipe(
+		Effect.flatMap(
+			Option.match({
+				onNone: () => Effect.fail(new NotYetError()),
+				onSome: Effect.succeed,
+			}),
+		),
+		Effect.retry(schedule),
+		Effect.mapError(() => new WaitTimeoutError({ description, timeout })),
+	);
 };
 
 export const waitForBotReply = (
 	thread: ThreadChannel,
 	botId: string,
 	options: WaitForOptions = {},
-): Effect.Effect<Message, WaitTimeoutError> => {
-	const check = () =>
+): Effect.Effect<Message, WaitTimeoutError> =>
+	waitForCondition(
 		Effect.tryPromise({
 			try: async () => {
 				const messages = await thread.messages.fetch({ limit: 10 });
-				const botMessage = messages.find((m) => m.author.id === botId);
-				return botMessage ?? null;
+				return Option.fromNullable(messages.find((m) => m.author.id === botId));
 			},
-			catch: () => null,
-		}).pipe(Effect.orElseSucceed(() => null));
-
-	return waitForCondition(check, `bot reply from ${botId}`, options);
-};
+			catch: () => Option.none<Message>(),
+		}).pipe(Effect.catchAll(() => Effect.succeed(Option.none<Message>()))),
+		`bot reply from ${botId}`,
+		options,
+	);
 
 export const waitForReaction = (
 	message: Message,
 	emoji: string,
 	options: WaitForOptions = {},
-): Effect.Effect<boolean, WaitTimeoutError> => {
-	const check = () =>
+): Effect.Effect<true, WaitTimeoutError> =>
+	waitForCondition(
 		Effect.tryPromise({
 			try: async () => {
 				const freshMessage = await message.fetch(true);
 				const reaction = freshMessage.reactions.cache.find(
 					(r) => r.emoji.name === emoji,
 				);
-				if (reaction && reaction.count > 0) {
-					return true;
-				}
-				return null;
+				return reaction && reaction.count > 0
+					? Option.some(true as const)
+					: Option.none<true>();
 			},
-			catch: () => null,
-		}).pipe(Effect.orElseSucceed(() => null));
-
-	return waitForCondition(check, `reaction ${emoji}`, options);
-};
+			catch: () => Option.none<true>(),
+		}).pipe(Effect.catchAll(() => Effect.succeed(Option.none<true>()))),
+		`reaction ${emoji}`,
+		options,
+	);
 
 export const waitForThreadTag = (
 	thread: ThreadChannel,
 	tagId: string,
 	options: WaitForOptions = {},
-): Effect.Effect<boolean, WaitTimeoutError> => {
-	const check = () =>
+): Effect.Effect<true, WaitTimeoutError> =>
+	waitForCondition(
 		Effect.tryPromise({
 			try: async () => {
 				const freshThread = (await thread.fetch(true)) as ThreadChannel;
-				if (freshThread.appliedTags?.includes(tagId)) {
-					return true;
-				}
-				return null;
+				return freshThread.appliedTags?.includes(tagId)
+					? Option.some(true as const)
+					: Option.none<true>();
 			},
-			catch: () => null,
-		}).pipe(Effect.orElseSucceed(() => null));
-
-	return waitForCondition(check, `thread tag ${tagId}`, options);
-};
+			catch: () => Option.none<true>(),
+		}).pipe(Effect.catchAll(() => Effect.succeed(Option.none<true>()))),
+		`thread tag ${tagId}`,
+		options,
+	);
 
 export { waitForCondition };
-export type { WaitForOptions };
