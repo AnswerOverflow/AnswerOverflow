@@ -30,11 +30,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	return generateMessagePageMetadata(headerData, params.messageId, null);
 }
 
-async function MessagePageContent(props: {
-	messageId: string;
-	searchParams: Promise<{ cursor?: string }>;
-}) {
+async function MessagePageContent(props: Props) {
 	const params = await props.searchParams;
+	const messageId = await props.params.messageId;
 	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
 
 	const parsed = parseSnowflakeId(props.messageId);
@@ -67,14 +65,9 @@ async function MessagePageContent(props: {
 }
 
 export default async function Page(props: Props) {
-	const params = await props.params;
-
 	return (
 		<Suspense fallback={<MessagePageSkeleton />}>
-			<MessagePageContent
-				messageId={params.messageId}
-				searchParams={props.searchParams}
-			/>
+			<MessagePageContent props={props} />
 		</Suspense>
 	);
 }
