@@ -24,6 +24,7 @@ import {
 	Option,
 	Order,
 	Predicate,
+	Random,
 	Schedule,
 } from "effect";
 import { Discord } from "../core/discord-service";
@@ -1062,11 +1063,14 @@ export function runIndexingCore() {
 		yield* Effect.logInfo("=== Starting indexing run ===");
 
 		const guilds = yield* discord.getGuilds();
-		const totalGuilds = guilds.length;
-		yield* Effect.logInfo(`Found ${totalGuilds} guilds to index`);
+		const shuffledGuilds = yield* Random.shuffle(guilds);
+		const totalGuilds = shuffledGuilds.length;
+		yield* Effect.logInfo(
+			`Found ${totalGuilds} guilds to index (randomized order)`,
+		);
 
 		yield* Effect.forEach(
-			Arr.map(guilds, (guild, index) => ({ guild, index })),
+			Arr.map(shuffledGuilds, (guild, index) => ({ guild, index })),
 			({ guild, index }) =>
 				indexGuild(guild, index, totalGuilds).pipe(
 					catchAllWithReport((error) =>
