@@ -1,11 +1,11 @@
 import { Database } from "@packages/database/database";
 import {
-	type CategoryChannel,
+	CategoryChannel,
 	Constants,
 	type ForumChannel,
 	type Guild,
 	type TextChannel,
-	type ThreadChannel,
+	ThreadChannel,
 } from "discord.js-selfbot-v13";
 import { Array as Arr, Effect } from "effect";
 import { disposeRuntime, runMain } from "../core/runtime";
@@ -176,9 +176,19 @@ const deleteAllChannelsAndCategories = (guild: Guild) =>
 
 		const allChannels = Array.from(guild.channels.cache.values());
 
-		const threads = allChannels.filter(
-			(c): c is ThreadChannel => "isThread" in c && c.isThread(),
+		const threads = Arr.filter(
+			allChannels,
+			(c): c is ThreadChannel => c instanceof ThreadChannel,
 		);
+		const categories = Arr.filter(
+			allChannels,
+			(c): c is CategoryChannel => c instanceof CategoryChannel,
+		);
+		const regularChannels = Arr.filter(
+			allChannels,
+			(c) => !(c instanceof ThreadChannel) && !(c instanceof CategoryChannel),
+		);
+
 		for (const thread of threads) {
 			yield* selfbot
 				.deleteChannel(thread)
@@ -191,12 +201,6 @@ const deleteAllChannelsAndCategories = (guild: Guild) =>
 				);
 		}
 
-		const regularChannels = allChannels.filter(
-			(c) =>
-				"type" in c &&
-				c.type !== "GUILD_CATEGORY" &&
-				!("isThread" in c && c.isThread()),
-		);
 		for (const channel of regularChannels) {
 			yield* selfbot
 				.deleteChannel(channel)
@@ -209,9 +213,6 @@ const deleteAllChannelsAndCategories = (guild: Guild) =>
 				);
 		}
 
-		const categories = allChannels.filter(
-			(c): c is CategoryChannel => "type" in c && c.type === "GUILD_CATEGORY",
-		);
 		for (const category of categories) {
 			yield* selfbot
 				.deleteChannel(category)

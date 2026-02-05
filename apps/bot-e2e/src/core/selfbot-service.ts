@@ -1,5 +1,6 @@
 import {
 	type CategoryChannel,
+	type Channel,
 	Client,
 	type ForumChannel,
 	type Guild,
@@ -8,6 +9,15 @@ import {
 	type ThreadChannel,
 } from "discord.js-selfbot-v13";
 import { Context, Data, Effect, Layer } from "effect";
+
+export const isThread = (c: Channel): c is ThreadChannel =>
+	"isThread" in c && (c as ThreadChannel).isThread();
+
+export const isCategory = (c: Channel): c is CategoryChannel =>
+	"type" in c && (c as CategoryChannel).type === "GUILD_CATEGORY";
+
+export const isRegularChannel = (c: Channel): boolean =>
+	"type" in c && !isCategory(c) && !isThread(c);
 
 const DISCORD_API_BASE = "https://discord.com/api/v9";
 
