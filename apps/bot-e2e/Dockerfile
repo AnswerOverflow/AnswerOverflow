@@ -3,8 +3,8 @@ FROM oven/bun:1
 WORKDIR /app
 
 COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile
+RUN bun install
 
 COPY . .
 
-CMD ["bun", "test"]
+CMD ["bun", "run", "run-tests.ts"]
