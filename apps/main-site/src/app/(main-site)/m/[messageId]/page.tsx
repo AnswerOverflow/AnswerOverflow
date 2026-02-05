@@ -12,10 +12,6 @@ import {
 	MessagePageSkeleton,
 } from "../../../../components/message-page-loader";
 
-export function generateStaticParams() {
-	return [{ messageId: "placeholder" }];
-}
-
 type Props = {
 	params: Promise<{ messageId: string }>;
 	searchParams: Promise<{ cursor?: string }>;
