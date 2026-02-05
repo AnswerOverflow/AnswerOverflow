@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"start": "bun run run-tests.ts",
+		"start": "bun with-env bun run run-tests.ts",
 		"with-env": "bun run --env-file=../../.env.production",
 		"test": "bun run with-env vitest run --no-watch",
 		"test:watch": "bun run with-env vitest",

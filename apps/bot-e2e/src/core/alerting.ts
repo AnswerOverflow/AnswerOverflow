@@ -33,8 +33,10 @@ export const sendAlert = (payload: AlertPayload) =>
 		yield* pushover.send({
 			title: `🚨 E2E Failed: ${payload.testName}`,
 			message,
-			priority: 1,
+			priority: 2,
 			sound: "siren",
+			retry: 30,
+			expire: 300,
 		});
 
 		console.log("Pushover alert sent");
