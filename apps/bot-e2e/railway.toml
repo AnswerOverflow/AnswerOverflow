@@ -2,7 +2,7 @@
 builder = "dockerfile"
 
 [deploy]
-startCommand = "bun test"
+startCommand = "bun run start"
 restartPolicyType = "never"
 
 [cron]
