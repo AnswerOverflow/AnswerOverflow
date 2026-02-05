@@ -4,13 +4,21 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"test": "bun test",
-		"test:mark-solution": "bun run tests/mark-solution.test.ts",
+		"with-env": "bun run --env-file=../../.env.production",
+		"test": "bun run with-env bun test",
+		"test:mark-solution": "bun run with-env bun test tests/mark-solution.test.ts",
+		"setup": "bun run with-env bun run src/setup-server.ts",
+		"wipe": "bun run with-env bun run src/wipe-server.ts",
+		"teardown": "bun run with-env bun run src/teardown-server.ts",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@packages/database": "workspace:*",
+		"convex": "^1.17.4",
 		"debug": "^4.4.3",
-		"discord.js-selfbot-v13": "^3.7.1"
+		"discord.js-selfbot-v13": "^3.7.1",
+		"effect": "^3.14.8",
+		"ioredis": "^5.9.2"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.2.2"

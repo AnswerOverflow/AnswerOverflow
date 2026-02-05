@@ -5,9 +5,11 @@ import {
 	type TextChannel,
 	type ThreadChannel,
 } from "discord.js-selfbot-v13";
+import { cacheGet, cacheSet, closeRedis } from "./cache";
 
 const DISCORD_API_BASE = "https://discord.com/api/v9";
 const TOKEN_FILE = new URL("../.discord-token", import.meta.url).pathname;
+const COMMANDS_CACHE_TTL = 300;
 
 interface ApplicationCommand {
 	id: string;
@@ -18,6 +20,10 @@ interface ApplicationCommand {
 }
 
 async function loadToken(): Promise<string> {
+	if (process.env.DISCORD_E2E_TOKEN) {
+		return process.env.DISCORD_E2E_TOKEN;
+	}
+
 	if (process.env.DISCORD_TOKEN) {
 		return process.env.DISCORD_TOKEN;
 	}
@@ -28,7 +34,7 @@ async function loadToken(): Promise<string> {
 	}
 
 	throw new Error(
-		"Discord token not found. Set DISCORD_TOKEN env var or create .discord-token file.",
+		"Discord token not found. Set DISCORD_E2E_TOKEN env var or create .discord-token file.",
 	);
 }
 
@@ -79,6 +85,7 @@ async function cleanup(): Promise<void> {
 		} catch {}
 		clientInstance = null;
 	}
+	await closeRedis();
 }
 
 function getGuild(client: Client, guildName: string): Guild {
@@ -167,6 +174,12 @@ function getRawApiHeaders(): Record<string, string> {
 async function getApplicationCommands(
 	guildId: string,
 ): Promise<Array<ApplicationCommand>> {
+	const cacheKey = `commands:${guildId}`;
+	const cached = await cacheGet<Array<ApplicationCommand>>(cacheKey);
+	if (cached) {
+		return cached;
+	}
+
 	const response = await fetch(
 		`${DISCORD_API_BASE}/guilds/${guildId}/application-command-index`,
 		{
@@ -176,13 +189,20 @@ async function getApplicationCommands(
 	);
 
 	if (!response.ok) {
-		const error = await response.json();
+		const error = (await response.json()) as { retry_after?: number };
+		if (error.retry_after) {
+			const waitTime = error.retry_after ?? 5;
+			console.log(`Rate limited, waiting ${waitTime}s...`);
+			await new Promise((r) => setTimeout(r, waitTime * 1000 + 100));
+			return getApplicationCommands(guildId);
+		}
 		throw new Error(`Failed to get commands: ${JSON.stringify(error)}`);
 	}
 
 	const data = (await response.json()) as {
 		application_commands: Array<ApplicationCommand>;
 	};
+	await cacheSet(cacheKey, data.application_commands, COMMANDS_CACHE_TTL);
 	return data.application_commands;
 }
 
