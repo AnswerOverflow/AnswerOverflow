@@ -181,30 +181,55 @@ export const getUserServersForDropdown = authenticatedQuery({
 export const getIndexedMessageCount = guildManagerQuery({
 	args: {},
 	handler: async (ctx, args) => {
-		const [rootCount, threadMsgCount, threadCount, recentThreads] =
-			await Promise.all([
-				rootChannelMessageCounts.count(ctx, {
-					bounds: { prefix: [args.serverId] },
-				}),
-				threadMessageCounts.count(ctx, {
-					bounds: { prefix: [args.serverId] },
-				}),
-				threadCounts.count(ctx, {
-					bounds: { prefix: [args.serverId] },
-				}),
-				ctx.db
-					.query("channels")
-					.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
-					.order("desc")
-					.filter((q) =>
-						q.or(
-							q.eq(q.field("type"), ChannelType.AnnouncementThread),
-							q.eq(q.field("type"), ChannelType.PublicThread),
-							q.eq(q.field("type"), ChannelType.PrivateThread),
-						),
-					)
-					.take(5),
-			]);
+		const [
+			rootCount,
+			threadMsgCount,
+			threadCount,
+			announcementThreads,
+			publicThreads,
+			privateThreads,
+		] = await Promise.all([
+			rootChannelMessageCounts.count(ctx, {
+				bounds: { prefix: [args.serverId] },
+			}),
+			threadMessageCounts.count(ctx, {
+				bounds: { prefix: [args.serverId] },
+			}),
+			threadCounts.count(ctx, {
+				bounds: { prefix: [args.serverId] },
+			}),
+			ctx.db
+				.query("channels")
+				.withIndex("by_serverId_and_type", (q) =>
+					q
+						.eq("serverId", args.serverId)
+						.eq("type", ChannelType.AnnouncementThread),
+				)
+				.order("desc")
+				.take(5),
+			ctx.db
+				.query("channels")
+				.withIndex("by_serverId_and_type", (q) =>
+					q.eq("serverId", args.serverId).eq("type", ChannelType.PublicThread),
+				)
+				.order("desc")
+				.take(5),
+			ctx.db
+				.query("channels")
+				.withIndex("by_serverId_and_type", (q) =>
+					q.eq("serverId", args.serverId).eq("type", ChannelType.PrivateThread),
+				)
+				.order("desc")
+				.take(5),
+		]);
+
+		const recentThreads = [
+			...announcementThreads,
+			...publicThreads,
+			...privateThreads,
+		]
+			.sort((a, b) => b._creationTime - a._creationTime)
+			.slice(0, 5);
 		const messageIds = recentThreads.map((thread) => thread.id);
 		const messages = await asyncMap(messageIds, async (messageId) => {
 			return getMessageById(ctx, messageId);

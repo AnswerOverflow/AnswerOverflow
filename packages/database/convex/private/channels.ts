@@ -59,20 +59,35 @@ export const findAllChannelsByServerId = privateQuery({
 		serverId: v.int64(),
 	},
 	handler: async (ctx, args) => {
-		const channelsByType = await Promise.all(
-			ROOT_CHANNEL_TYPES.map((type) =>
-				ctx.db
-					.query("channels")
-					.withIndex("by_serverId_and_type", (q) =>
-						q.eq("serverId", args.serverId).eq("type", type),
-					)
-					.collect(),
+		const [channelsByType, allSettings] = await Promise.all([
+			Promise.all(
+				ROOT_CHANNEL_TYPES.map((type) =>
+					ctx.db
+						.query("channels")
+						.withIndex("by_serverId_and_type", (q) =>
+							q.eq("serverId", args.serverId).eq("type", type),
+						)
+						.collect(),
+				),
 			),
-		);
+			ctx.db
+				.query("channelSettings")
+				.withIndex("by_serverId", (q) => q.eq("serverId", args.serverId))
+				.collect(),
+		]);
 
 		const channels = channelsByType.flat();
+		const settingsByChannelId = new Map(
+			allSettings.map((s) => [s.channelId, s]),
+		);
 
-		return await addSettingsToChannels(ctx, channels);
+		return channels.map((channel) => ({
+			...channel,
+			flags: settingsByChannelId.get(channel.id) ?? {
+				...DEFAULT_CHANNEL_SETTINGS,
+				channelId: channel.id,
+			},
+		}));
 	},
 });
 

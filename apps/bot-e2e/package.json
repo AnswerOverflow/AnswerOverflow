@@ -1,0 +1,17 @@
+{
+	"name": "@apps/bot-e2e",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "bun test",
+		"test:mark-solution": "bun run tests/mark-solution.test.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"discord.js-selfbot-v13": "^3.7.1"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.2.2"
+	}
+}
