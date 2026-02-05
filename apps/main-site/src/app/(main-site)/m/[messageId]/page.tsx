@@ -32,7 +32,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 async function MessagePageContent(props: Props) {
 	const params = await props.searchParams;
-	const messageId = await props.params.messageId;
+	const messageId = (await props.params).messageId;
 	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
 
 	const parsed = parseSnowflakeId(props.messageId);
