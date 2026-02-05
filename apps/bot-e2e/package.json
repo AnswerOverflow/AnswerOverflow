@@ -16,7 +16,6 @@
 	},
 	"dependencies": {
 		"@packages/database": "workspace:*",
-		"convex": "^1.17.4",
 		"discord.js-selfbot-v13": "^3.7.1",
 		"effect": "catalog:"
 	},
