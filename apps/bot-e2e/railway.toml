@@ -1,0 +1,9 @@
+[build]
+builder = "dockerfile"
+
+[deploy]
+startCommand = "bun test"
+restartPolicyType = "never"
+
+[cron]
+schedule = "*/5 * * * *"

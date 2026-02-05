@@ -18,11 +18,18 @@ interface ApplicationCommand {
 }
 
 async function loadToken(): Promise<string> {
-	const tokenFile = Bun.file(TOKEN_FILE);
-	if (!(await tokenFile.exists())) {
-		throw new Error(`Token file not found at ${TOKEN_FILE}`);
+	if (process.env.DISCORD_TOKEN) {
+		return process.env.DISCORD_TOKEN;
 	}
-	return (await tokenFile.text()).trim();
+
+	const tokenFile = Bun.file(TOKEN_FILE);
+	if (await tokenFile.exists()) {
+		return (await tokenFile.text()).trim();
+	}
+
+	throw new Error(
+		"Discord token not found. Set DISCORD_TOKEN env var or create .discord-token file.",
+	);
 }
 
 let clientInstance: Client | null = null;
