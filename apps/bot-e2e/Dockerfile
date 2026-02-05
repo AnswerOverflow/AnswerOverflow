@@ -17,8 +17,8 @@ FROM oven/bun:1.3.3-slim
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy installed dependencies and source from builder
-COPY --from=builder /usr/src/app ./
+# Copy installed dependencies and source from builder (owned by bun user)
+COPY --from=builder --chown=bun:bun /usr/src/app ./
 
 # Set environment variable
 ENV NODE_ENV=production
