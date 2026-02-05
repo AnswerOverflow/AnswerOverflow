@@ -25,5 +25,5 @@
 			}
 		]
 	},
-	"include": ["src/**/*", "tests/**/*"]
+	"include": ["src/**/*", "tests/**/*", "run-tests.ts", "vitest.config.mts"]
 }

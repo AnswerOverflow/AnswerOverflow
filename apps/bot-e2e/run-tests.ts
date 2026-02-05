@@ -1,5 +1,8 @@
-import { Config, Effect, Option } from "effect";
+import { Config, Effect, Layer, Option } from "effect";
 import { sendAlert } from "./src/core/alerting";
+import { Pushover } from "./src/core/pushover-service";
+
+const AlertingLayer = Pushover.Default;
 
 const runTests = Effect.gen(function* () {
 	const environment = yield* Config.string("RAILWAY_ENVIRONMENT").pipe(
@@ -8,7 +11,7 @@ const runTests = Effect.gen(function* () {
 
 	const startTime = Date.now();
 
-	const proc = Bun.spawn(["bun", "run", "test"], {
+	const proc = Bun.spawn(["bun", "x", "vitest", "run", "--no-watch"], {
 		cwd: import.meta.dir,
 		stdout: "inherit",
 		stderr: "inherit",
@@ -28,7 +31,12 @@ const runTests = Effect.gen(function* () {
 			error: `Tests exited with code ${exitCode} after ${duration}ms`,
 			timestamp: new Date().toISOString(),
 			environment: Option.getOrElse(environment, () => "local"),
-		}).pipe(Effect.catchAll(() => Effect.void));
+		}).pipe(
+			Effect.catchAll((e) => {
+				console.error("Failed to send alert:", e);
+				return Effect.void;
+			}),
+		);
 
 		process.exit(exitCode);
 	}
@@ -36,7 +44,7 @@ const runTests = Effect.gen(function* () {
 	console.log(`\n✅ All tests passed in ${duration}ms`);
 });
 
-Effect.runPromise(runTests).catch((err) => {
+Effect.runPromise(runTests.pipe(Effect.provide(AlertingLayer))).catch((err) => {
 	console.error("Fatal error:", err);
 	process.exit(1);
 });
