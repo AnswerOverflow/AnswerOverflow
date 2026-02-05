@@ -4,6 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"start": "vitest run --no-watch",
 		"with-env": "bun run --env-file=../../.env.production",
 		"test": "bun run with-env vitest run --no-watch",
 		"test:watch": "bun run with-env vitest",
