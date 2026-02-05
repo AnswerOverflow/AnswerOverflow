@@ -4,7 +4,7 @@ import { CHANNELS, E2ELayer, GUILD_NAME, Selfbot } from "../src/core";
 
 const MARK_SOLUTION_COMMAND = "✅ Mark Solution";
 
-it.scoped(
+it.scopedLive(
 	"can send message and create thread",
 	() =>
 		Effect.gen(function* () {
@@ -41,7 +41,7 @@ it.scoped(
 	{ timeout: 30000 },
 );
 
-it.scoped(
+it.scopedLive(
 	"can find bot commands",
 	() =>
 		Effect.gen(function* () {
@@ -65,7 +65,7 @@ it.scoped(
 	{ timeout: 30000 },
 );
 
-it.scoped(
+it.scopedLive(
 	"can invoke mark solution command",
 	() =>
 		Effect.gen(function* () {

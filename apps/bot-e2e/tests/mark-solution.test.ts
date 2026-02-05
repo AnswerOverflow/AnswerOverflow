@@ -10,7 +10,7 @@ import {
 
 const MARK_SOLUTION_COMMAND = "✅ Mark Solution";
 
-it.scoped(
+it.scopedLive(
 	"should mark a message as solution and add reaction",
 	() =>
 		Effect.gen(function* () {
@@ -62,7 +62,7 @@ it.scoped(
 			console.log("Command invoked, waiting for bot response...");
 
 			const hasReaction = yield* waitForReaction(threadMessage, "✅", {
-				timeout: "15 seconds",
+				timeout: "25 seconds",
 			}).pipe(
 				Effect.map(() => true),
 				Effect.catchTag("WaitTimeoutError", () => {
