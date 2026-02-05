@@ -1,19 +1,33 @@
-FROM oven/bun:1
+FROM oven/bun:1.3.3 AS builder
 
-WORKDIR /app
+# Set working directory
+WORKDIR /usr/src/app
 
-COPY package.json bun.lock ./
-COPY patches ./patches
-COPY apps/bot-e2e/package.json ./apps/bot-e2e/
-COPY packages/database/package.json ./packages/database/
-COPY packages/typescript-config/package.json ./packages/typescript-config/
+# Copy everything (root .dockerignore has exceptions for bot-e2e test files)
+COPY . .
 
-RUN bun install --filter=@apps/bot-e2e
+ENV NODE_ENV=production
 
-COPY apps/bot-e2e ./apps/bot-e2e
-COPY packages/database ./packages/database
-COPY packages/typescript-config ./packages/typescript-config
+# Install dependencies (ignore scripts to skip husky prepare hook in Docker)
+RUN bun install --frozen-lockfile --ignore-scripts
 
-WORKDIR /app/apps/bot-e2e
+# Start a new stage for a smaller final image
+FROM oven/bun:1.3.3-slim
 
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy installed dependencies and source from builder
+COPY --from=builder /usr/src/app ./
+
+# Set environment variable
+ENV NODE_ENV=production
+
+# Use non-root user for better security
+USER bun
+
+# Set the working directory for bot-e2e
+WORKDIR /usr/src/app/apps/bot-e2e
+
+# Run the E2E tests
 CMD ["bun", "run", "start"]

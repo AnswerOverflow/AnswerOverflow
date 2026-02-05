@@ -58,13 +58,18 @@ LICENSE
 .eslintignore
 biome.json
 
-# Test files
+# Test files (excluded except for bot-e2e which runs tests in production)
 *.test.ts
 *.test.tsx
 *.spec.ts
 *.spec.tsx
 vitest.config.mts
 **/__tests__
+# Keep bot-e2e test files
+!apps/bot-e2e/**/*.test.ts
+!apps/bot-e2e/**/vitest.config.mts
+!apps/bot-e2e/vitest.config.mts
+!apps/bot-e2e/tests/**
 
 # Context/vendored repos (not needed in production)
 .context
