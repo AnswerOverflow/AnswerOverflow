@@ -37,13 +37,14 @@
       "dependencies": {
         "@packages/database": "workspace:*",
         "convex": "^1.17.4",
-        "debug": "^4.4.3",
         "discord.js-selfbot-v13": "^3.7.1",
-        "effect": "^3.14.8",
-        "ioredis": "^5.9.2",
+        "effect": "catalog:",
       },
       "devDependencies": {
-        "@types/bun": "^1.2.2",
+        "@effect/vitest": "catalog:",
+        "@packages/typescript-config": "workspace:*",
+        "@types/bun": "latest",
+        "vitest": "catalog:",
       },
     },
     "apps/discord-bot": {

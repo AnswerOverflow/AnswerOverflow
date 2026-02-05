@@ -1,84 +1,115 @@
-import {
-	afterAll,
-	beforeAll,
-	describe,
-	expect,
-	setDefaultTimeout,
-	test,
-} from "bun:test";
-import type { Client, Guild, TextChannel } from "discord.js-selfbot-v13";
-import {
-	cleanup,
-	createThread,
-	findCommand,
-	getClient,
-	getGuild,
-	getTextChannel,
-	invokeMessageContextMenu,
-	sendMessage,
-} from "../src/client";
-import { CHANNELS, GUILD_NAME } from "../src/test-channels";
+import { expect, it } from "@effect/vitest";
+import { Effect } from "effect";
+import { CHANNELS, E2ELayer, GUILD_NAME, Selfbot } from "../src/core";
 
-setDefaultTimeout(30000);
+const MARK_SOLUTION_COMMAND = "✅ Mark Solution";
 
-describe("Smoke Tests", () => {
-	let client: Client;
-	let guild: Guild;
-	let channel: TextChannel;
+it.scoped(
+	"can send message and create thread",
+	() =>
+		Effect.gen(function* () {
+			const selfbot = yield* Selfbot;
 
-	beforeAll(async () => {
-		client = await getClient();
-		guild = getGuild(client, GUILD_NAME);
-		channel = getTextChannel(guild, CHANNELS.PLAYGROUND);
-	});
+			yield* selfbot.client.login();
+			const guild = yield* selfbot.getGuild(GUILD_NAME);
+			const channel = yield* selfbot.getTextChannel(guild, CHANNELS.PLAYGROUND);
 
-	afterAll(async () => {
-		await cleanup();
-	});
+			const timestamp = new Date().toISOString();
 
-	test("can send message and create thread", async () => {
-		const timestamp = new Date().toISOString();
+			const message = yield* selfbot.sendMessage(
+				channel,
+				`Smoke test - ${timestamp}`,
+			);
+			expect(message.id).toBeDefined();
+			expect(message.content).toContain("Smoke test");
 
-		const message = await sendMessage(channel, `Smoke test - ${timestamp}`);
-		expect(message.id).toBeDefined();
-		expect(message.content).toContain("Smoke test");
+			const thread = yield* selfbot.createThread(
+				message,
+				`Smoke Thread ${timestamp}`,
+			);
+			expect(thread.id).toBeDefined();
+			expect(thread.name).toContain("Smoke Thread");
 
-		const thread = await createThread(message, `Smoke Thread ${timestamp}`);
-		expect(thread.id).toBeDefined();
-		expect(thread.name).toContain("Smoke Thread");
+			const threadMessage = yield* selfbot.sendMessage(
+				thread,
+				"Reply in thread",
+			);
+			expect(threadMessage.id).toBeDefined();
 
-		const threadMessage = await sendMessage(thread, "Reply in thread");
-		expect(threadMessage.id).toBeDefined();
+			console.log("✅ Basic Discord operations work");
 
-		console.log("✅ Basic Discord operations work");
-	});
+			yield* selfbot.client.destroy();
+		}).pipe(Effect.provide(E2ELayer)),
+	{ timeout: 30000 },
+);
 
-	test("can find bot commands", async () => {
-		const markSolution = await findCommand(guild.id, "✅ Mark Solution", 3);
-		expect(markSolution).toBeDefined();
-		expect(markSolution.application_id).toBeDefined();
+it.scoped(
+	"can find bot commands",
+	() =>
+		Effect.gen(function* () {
+			const selfbot = yield* Selfbot;
 
-		console.log(
-			`✅ Found Mark Solution command (app: ${markSolution.application_id})`,
-		);
-	});
+			yield* selfbot.client.login();
+			const guild = yield* selfbot.getGuild(GUILD_NAME);
 
-	test("can invoke mark solution command", async () => {
-		const timestamp = new Date().toISOString();
+			const markSolution = yield* selfbot.findCommand(
+				guild.id,
+				MARK_SOLUTION_COMMAND,
+				3,
+			);
+			expect(markSolution).toBeDefined();
+			expect(markSolution.application_id).toBeDefined();
 
-		const message = await sendMessage(channel, `Invoke test - ${timestamp}`);
-		const thread = await createThread(message, `Invoke Thread ${timestamp}`);
-		const threadMessage = await sendMessage(thread, "Answer to mark");
+			console.log(
+				`✅ Found Mark Solution command (app: ${markSolution.application_id})`,
+			);
 
-		const command = await findCommand(guild.id, "✅ Mark Solution", 3);
+			yield* selfbot.client.destroy();
+		}).pipe(Effect.provide(E2ELayer)),
+	{ timeout: 30000 },
+);
 
-		await invokeMessageContextMenu(
-			guild.id,
-			thread.id,
-			threadMessage.id,
-			command,
-		);
+it.scoped(
+	"can invoke mark solution command",
+	() =>
+		Effect.gen(function* () {
+			const selfbot = yield* Selfbot;
 
-		console.log("✅ Mark solution command invoked successfully");
-	});
-});
+			yield* selfbot.client.login();
+			const guild = yield* selfbot.getGuild(GUILD_NAME);
+			const channel = yield* selfbot.getTextChannel(guild, CHANNELS.PLAYGROUND);
+
+			const timestamp = new Date().toISOString();
+
+			const message = yield* selfbot.sendMessage(
+				channel,
+				`Invoke test - ${timestamp}`,
+			);
+			const thread = yield* selfbot.createThread(
+				message,
+				`Invoke Thread ${timestamp}`,
+			);
+			const threadMessage = yield* selfbot.sendMessage(
+				thread,
+				"Answer to mark",
+			);
+
+			const command = yield* selfbot.findCommand(
+				guild.id,
+				MARK_SOLUTION_COMMAND,
+				3,
+			);
+
+			yield* selfbot.invokeMessageContextMenu(
+				guild.id,
+				thread.id,
+				threadMessage.id,
+				command,
+			);
+
+			console.log("✅ Mark solution command invoked successfully");
+
+			yield* selfbot.client.destroy();
+		}).pipe(Effect.provide(E2ELayer)),
+	{ timeout: 30000 },
+);

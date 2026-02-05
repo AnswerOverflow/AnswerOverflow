@@ -1,89 +1,84 @@
+import { expect, it } from "@effect/vitest";
+import { Effect } from "effect";
 import {
-	afterAll,
-	beforeAll,
-	describe,
-	expect,
-	setDefaultTimeout,
-	test,
-} from "bun:test";
-import type { Client, Guild, TextChannel } from "discord.js-selfbot-v13";
-import { waitForReaction } from "../src/assertions";
-import {
-	cleanup,
-	createThread,
-	findCommand,
-	getClient,
-	getGuild,
-	getTextChannel,
-	invokeMessageContextMenu,
-	sendMessage,
-} from "../src/client";
-import { CHANNELS, GUILD_NAME } from "../src/test-channels";
-
-setDefaultTimeout(30000);
+	CHANNELS,
+	E2ELayer,
+	GUILD_NAME,
+	Selfbot,
+	waitForReaction,
+} from "../src/core";
 
 const MARK_SOLUTION_COMMAND = "✅ Mark Solution";
 
-describe("Mark Solution E2E", () => {
-	let client: Client;
-	let guild: Guild;
-	let channel: TextChannel;
+it.scoped(
+	"should mark a message as solution and add reaction",
+	() =>
+		Effect.gen(function* () {
+			const selfbot = yield* Selfbot;
 
-	beforeAll(async () => {
-		client = await getClient();
-		guild = getGuild(client, GUILD_NAME);
-		channel = getTextChannel(guild, CHANNELS.MARK_SOLUTION_ENABLED);
+			yield* selfbot.client.login();
+			const guild = yield* selfbot.getGuild(GUILD_NAME);
+			const channel = yield* selfbot.getTextChannel(
+				guild,
+				CHANNELS.MARK_SOLUTION_ENABLED,
+			);
 
-		console.log(`Using guild: ${guild.name} (${guild.id})`);
-		console.log(`Using channel: ${channel.name} (${channel.id})`);
-	});
+			console.log(`Using guild: ${guild.name} (${guild.id})`);
+			console.log(`Using channel: ${channel.name} (${channel.id})`);
 
-	afterAll(async () => {
-		await cleanup();
-	});
+			const timestamp = new Date().toISOString();
 
-	test("should mark a message as solution and add reaction", async () => {
-		const timestamp = new Date().toISOString();
+			const message = yield* selfbot.sendMessage(
+				channel,
+				`E2E Test Question - ${timestamp}`,
+			);
+			expect(message.id).toBeDefined();
 
-		const message = await sendMessage(
-			channel,
-			`E2E Test Question - ${timestamp}`,
-		);
-		expect(message.id).toBeDefined();
+			const thread = yield* selfbot.createThread(
+				message,
+				`E2E Test Thread ${timestamp}`,
+			);
+			expect(thread.id).toBeDefined();
 
-		const thread = await createThread(message, `E2E Test Thread ${timestamp}`);
-		expect(thread.id).toBeDefined();
+			const threadMessage = yield* selfbot.sendMessage(
+				thread,
+				`This is the answer to mark as solved - ${timestamp}`,
+			);
+			expect(threadMessage.id).toBeDefined();
 
-		const threadMessage = await sendMessage(
-			thread,
-			`This is the answer to mark as solved - ${timestamp}`,
-		);
-		expect(threadMessage.id).toBeDefined();
+			const command = yield* selfbot.findCommand(
+				guild.id,
+				MARK_SOLUTION_COMMAND,
+				3,
+			);
 
-		const command = await findCommand(guild.id, MARK_SOLUTION_COMMAND, 3);
+			yield* selfbot.invokeMessageContextMenu(
+				guild.id,
+				thread.id,
+				threadMessage.id,
+				command,
+			);
 
-		await invokeMessageContextMenu(
-			guild.id,
-			thread.id,
-			threadMessage.id,
-			command,
-		);
+			console.log("Command invoked, waiting for bot response...");
 
-		console.log("Command invoked, waiting for bot response...");
+			const hasReaction = yield* waitForReaction(threadMessage, "✅", {
+				timeout: "15 seconds",
+			}).pipe(
+				Effect.map(() => true),
+				Effect.catchTag("WaitTimeoutError", () => {
+					console.log("❌ Bot did not add reaction within timeout");
+					console.log("This could mean:");
+					console.log("  - Bot is not running");
+					console.log("  - Channel doesn't have mark solution enabled");
+					console.log("  - Bot doesn't have permission to react");
+					return Effect.succeed(false);
+				}),
+			);
 
-		const hasReaction = await waitForReaction(threadMessage, "✅", {
-			timeout: 15000,
-		});
+			expect(hasReaction).toBe(true);
+			console.log("✅ Bot added checkmark reaction to solution message");
 
-		if (!hasReaction) {
-			console.log("❌ Bot did not add reaction within timeout");
-			console.log("This could mean:");
-			console.log("  - Bot is not running");
-			console.log("  - Channel doesn't have mark solution enabled");
-			console.log("  - Bot doesn't have permission to react");
-		}
-
-		expect(hasReaction).toBe(true);
-		console.log("✅ Bot added checkmark reaction to solution message");
-	});
-});
+			yield* selfbot.client.destroy();
+		}).pipe(Effect.provide(E2ELayer)),
+	{ timeout: 30000 },
+);
