@@ -35,7 +35,7 @@ async function MessagePageContent(props: Props) {
 	const messageId = (await props.params).messageId;
 	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
 
-	const parsed = parseSnowflakeId(props.messageId);
+	const parsed = parseSnowflakeId(messageId);
 	if (Option.isNone(parsed)) {
 		return notFound();
 	}
@@ -48,7 +48,7 @@ async function MessagePageContent(props: Props) {
 	if (headerData?.server.customDomain) {
 		const customUrl = getServerCustomUrl(
 			headerData.server,
-			`/m/${props.messageId}`,
+			`/m/${messageId}`,
 		);
 		if (customUrl) {
 			return redirect(customUrl);
@@ -58,7 +58,7 @@ async function MessagePageContent(props: Props) {
 	return (
 		<MessagePageLoader
 			headerData={headerData}
-			messageId={props.messageId}
+			messageId={messageId}
 			cursor={cursor}
 		/>
 	);
@@ -67,7 +67,7 @@ async function MessagePageContent(props: Props) {
 export default async function Page(props: Props) {
 	return (
 		<Suspense fallback={<MessagePageSkeleton />}>
-			<MessagePageContent props={props} />
+			<MessagePageContent {...props} />
 		</Suspense>
 	);
 }
