@@ -45,19 +45,22 @@ const waitForCondition = <T>(
 	);
 };
 
+const tryOption = <T>(fn: () => Promise<T | null | undefined>) =>
+	Effect.promise(fn).pipe(
+		Effect.map(Option.fromNullable),
+		Effect.orElseSucceed(() => Option.none<T>()),
+	);
+
 export const waitForBotReply = (
 	thread: ThreadChannel,
 	botId: string,
 	options: WaitForOptions = {},
 ): Effect.Effect<Message, WaitTimeoutError> =>
 	waitForCondition(
-		Effect.tryPromise({
-			try: async () => {
-				const messages = await thread.messages.fetch({ limit: 10 });
-				return Option.fromNullable(messages.find((m) => m.author.id === botId));
-			},
-			catch: () => Option.none<Message>(),
-		}).pipe(Effect.catchAll(() => Effect.succeed(Option.none<Message>()))),
+		tryOption(async () => {
+			const messages = await thread.messages.fetch({ limit: 10 });
+			return messages.find((m) => m.author.id === botId);
+		}),
 		`bot reply from ${botId}`,
 		options,
 	);
@@ -68,18 +71,13 @@ export const waitForReaction = (
 	options: WaitForOptions = {},
 ): Effect.Effect<true, WaitTimeoutError> =>
 	waitForCondition(
-		Effect.tryPromise({
-			try: async () => {
-				const freshMessage = await message.fetch(true);
-				const reaction = freshMessage.reactions.cache.find(
-					(r) => r.emoji.name === emoji,
-				);
-				return reaction && reaction.count > 0
-					? Option.some(true as const)
-					: Option.none<true>();
-			},
-			catch: () => Option.none<true>(),
-		}).pipe(Effect.catchAll(() => Effect.succeed(Option.none<true>()))),
+		tryOption(async () => {
+			const freshMessage = await message.fetch(true);
+			const reaction = freshMessage.reactions.cache.find(
+				(r) => r.emoji.name === emoji,
+			);
+			return reaction && reaction.count > 0 ? (true as const) : null;
+		}),
 		`reaction ${emoji}`,
 		options,
 	);
@@ -90,15 +88,10 @@ export const waitForThreadTag = (
 	options: WaitForOptions = {},
 ): Effect.Effect<true, WaitTimeoutError> =>
 	waitForCondition(
-		Effect.tryPromise({
-			try: async () => {
-				const freshThread = (await thread.fetch(true)) as ThreadChannel;
-				return freshThread.appliedTags?.includes(tagId)
-					? Option.some(true as const)
-					: Option.none<true>();
-			},
-			catch: () => Option.none<true>(),
-		}).pipe(Effect.catchAll(() => Effect.succeed(Option.none<true>()))),
+		tryOption(async () => {
+			const freshThread = (await thread.fetch(true)) as ThreadChannel;
+			return freshThread.appliedTags?.includes(tagId) ? (true as const) : null;
+		}),
 		`thread tag ${tagId}`,
 		options,
 	);
