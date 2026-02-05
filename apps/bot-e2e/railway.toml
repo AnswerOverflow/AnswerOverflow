@@ -1,9 +1,9 @@
 [build]
-builder = "nixpacks"
-buildCommand = "bun install --frozen-lockfile"
+builder = "dockerfile"
+dockerfilePath = "apps/bot-e2e/Dockerfile"
 
 [deploy]
-startCommand = "cd apps/bot-e2e && bun run start"
+startCommand = "bun run start"
 restartPolicyType = "never"
 
 [cron]
