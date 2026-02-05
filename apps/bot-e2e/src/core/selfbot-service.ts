@@ -75,9 +75,10 @@ const clientInstance: Client = new Client({
 	checkUpdate: false,
 } as ConstructorParameters<typeof Client>[0]);
 
+let tokenCache: string | null = null;
+
 export const createSelfbotService = Effect.sync(() => {
 	const client: Client = clientInstance;
-	let tokenCache: string | null = null;
 
 	const loadToken = () =>
 		Effect.gen(function* () {

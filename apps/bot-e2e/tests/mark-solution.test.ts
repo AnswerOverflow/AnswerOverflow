@@ -77,8 +77,6 @@ it.scoped(
 
 			expect(hasReaction).toBe(true);
 			console.log("✅ Bot added checkmark reaction to solution message");
-
-			yield* selfbot.client.destroy();
 		}).pipe(Effect.provide(E2ELayer)),
 	{ timeout: 30000 },
 );

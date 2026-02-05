@@ -37,8 +37,6 @@ it.scoped(
 			expect(threadMessage.id).toBeDefined();
 
 			console.log("✅ Basic Discord operations work");
-
-			yield* selfbot.client.destroy();
 		}).pipe(Effect.provide(E2ELayer)),
 	{ timeout: 30000 },
 );
@@ -63,8 +61,6 @@ it.scoped(
 			console.log(
 				`✅ Found Mark Solution command (app: ${markSolution.application_id})`,
 			);
-
-			yield* selfbot.client.destroy();
 		}).pipe(Effect.provide(E2ELayer)),
 	{ timeout: 30000 },
 );
@@ -108,8 +104,6 @@ it.scoped(
 			);
 
 			console.log("✅ Mark solution command invoked successfully");
-
-			yield* selfbot.client.destroy();
 		}).pipe(Effect.provide(E2ELayer)),
 	{ timeout: 30000 },
 );
