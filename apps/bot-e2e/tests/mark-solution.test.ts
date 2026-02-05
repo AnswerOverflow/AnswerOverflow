@@ -1,65 +1,82 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { Client, Guild, TextChannel } from "discord.js-selfbot-v13";
+import { expect, it } from "@effect/vitest";
+import { Effect } from "effect";
 import {
-	cleanup,
-	createThread,
-	findCommand,
-	getClient,
-	getGuild,
-	getTextChannel,
-	invokeMessageContextMenu,
-	sendMessage,
-} from "../src/client";
+	CHANNELS,
+	E2ELayer,
+	GUILD_NAME,
+	Selfbot,
+	waitForReaction,
+} from "../src/core";
 
-const GUILD_NAME = "AO Integration";
-const CHANNEL_NAME = "general";
 const MARK_SOLUTION_COMMAND = "✅ Mark Solution";
 
-describe("Mark Solution E2E", () => {
-	let client: Client;
-	let guild: Guild;
-	let channel: TextChannel;
+it.scopedLive(
+	"should mark a message as solution and add reaction",
+	() =>
+		Effect.gen(function* () {
+			const selfbot = yield* Selfbot;
 
-	beforeAll(async () => {
-		client = await getClient();
-		guild = getGuild(client, GUILD_NAME);
-		channel = getTextChannel(guild, CHANNEL_NAME);
+			yield* selfbot.client.login();
+			const guild = yield* selfbot.getGuild(GUILD_NAME);
+			const channel = yield* selfbot.getTextChannel(
+				guild,
+				CHANNELS.MARK_SOLUTION_ENABLED,
+			);
 
-		console.log(`Using guild: ${guild.name} (${guild.id})`);
-		console.log(`Using channel: ${channel.name} (${channel.id})`);
-	});
+			console.log(`Using guild: ${guild.name} (${guild.id})`);
+			console.log(`Using channel: ${channel.name} (${channel.id})`);
 
-	afterAll(async () => {
-		await cleanup();
-	});
+			const timestamp = new Date().toISOString();
 
-	test("should mark a message as solution in a thread", async () => {
-		const timestamp = new Date().toISOString();
+			const message = yield* selfbot.sendMessage(
+				channel,
+				`E2E Test Question - ${timestamp}`,
+			);
+			expect(message.id).toBeDefined();
 
-		const message = await sendMessage(
-			channel,
-			`E2E Test Question - ${timestamp}`,
-		);
-		expect(message.id).toBeDefined();
+			const thread = yield* selfbot.createThread(
+				message,
+				`E2E Test Thread ${timestamp}`,
+			);
+			expect(thread.id).toBeDefined();
 
-		const thread = await createThread(message, `E2E Test Thread ${timestamp}`);
-		expect(thread.id).toBeDefined();
+			const threadMessage = yield* selfbot.sendMessage(
+				thread,
+				`This is the answer to mark as solved - ${timestamp}`,
+			);
+			expect(threadMessage.id).toBeDefined();
 
-		const threadMessage = await sendMessage(
-			thread,
-			`This is the answer to mark as solved - ${timestamp}`,
-		);
-		expect(threadMessage.id).toBeDefined();
+			const command = yield* selfbot.findCommand(
+				guild.id,
+				MARK_SOLUTION_COMMAND,
+				3,
+			);
 
-		const command = await findCommand(guild.id, MARK_SOLUTION_COMMAND, 3);
+			yield* selfbot.invokeMessageContextMenu(
+				guild.id,
+				thread.id,
+				threadMessage.id,
+				command,
+			);
 
-		await invokeMessageContextMenu(
-			guild.id,
-			thread.id,
-			threadMessage.id,
-			command,
-		);
+			console.log("Command invoked, waiting for bot response...");
 
-		console.log("✅ Mark solution command invoked successfully");
-	});
-});
+			const hasReaction = yield* waitForReaction(threadMessage, "✅", {
+				timeout: "25 seconds",
+			}).pipe(
+				Effect.map(() => true),
+				Effect.catchTag("WaitTimeoutError", () => {
+					console.log("❌ Bot did not add reaction within timeout");
+					console.log("This could mean:");
+					console.log("  - Bot is not running");
+					console.log("  - Channel doesn't have mark solution enabled");
+					console.log("  - Bot doesn't have permission to react");
+					return Effect.succeed(false);
+				}),
+			);
+
+			expect(hasReaction).toBe(true);
+			console.log("✅ Bot added checkmark reaction to solution message");
+		}).pipe(Effect.provide(E2ELayer)),
+	{ timeout: 30000 },
+);
