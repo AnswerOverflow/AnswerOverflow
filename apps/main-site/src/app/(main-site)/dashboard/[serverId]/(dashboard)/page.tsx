@@ -37,7 +37,7 @@ import {
 	MessageSquare,
 	MessagesSquare,
 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
@@ -677,9 +677,24 @@ function DashboardContent({ serverId }: { serverId: bigint }) {
 }
 
 export default function DashboardOverviewPage() {
-	const params = useParams();
-	const serverIdParam = params.serverId as string;
-	const parsedServerId = parseSnowflakeId(serverIdParam);
+	const params = useParams<{ serverId?: string | Array<string> }>();
+	const pathname = usePathname();
+	const rawServerIdParam = params.serverId;
+	const serverIdParam =
+		typeof rawServerIdParam === "string"
+			? rawServerIdParam
+			: (rawServerIdParam?.[0] ?? "");
+
+	const parsedServerIdFromParam = parseSnowflakeId(serverIdParam.trim());
+	const parsedServerId = O.isSome(parsedServerIdFromParam)
+		? parsedServerIdFromParam
+		: (() => {
+				const fallbackServerId = pathname.match(/^\/dashboard\/(\d+)/)?.[1];
+				if (!fallbackServerId) {
+					return O.none();
+				}
+				return parseSnowflakeId(fallbackServerId);
+			})();
 
 	if (O.isNone(parsedServerId)) {
 		return <div className="text-muted-foreground">Invalid server ID</div>;
