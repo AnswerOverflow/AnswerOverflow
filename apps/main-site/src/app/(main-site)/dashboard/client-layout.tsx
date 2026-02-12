@@ -52,11 +52,17 @@ export default function DashboardLayout({
 	const isSignedOut = !isPending && !session?.user;
 	const hideNavbar = isDashboardRoot && isSignedOut;
 
+	if (hideNavbar) {
+		return (
+			<>
+				<SessionRecording />
+				{children}
+			</>
+		);
+	}
+
 	return (
-		<DashboardNavbar
-			serverSelect={serverSelectProps}
-			className={hideNavbar ? "hidden" : undefined}
-		>
+		<DashboardNavbar serverSelect={serverSelectProps}>
 			<SessionRecording />
 			{children}
 		</DashboardNavbar>
