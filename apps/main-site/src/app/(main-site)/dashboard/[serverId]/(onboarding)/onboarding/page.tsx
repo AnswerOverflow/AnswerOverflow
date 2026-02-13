@@ -14,9 +14,11 @@ import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQueryWithStatus } from "@packages/ui/hooks/use-query-with-status";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import * as Sentry from "@sentry/nextjs";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
+import { Option as O } from "effect";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthClient } from "../../../../../../lib/auth-client";
@@ -25,8 +27,16 @@ type OnboardingStep = "auth" | "install";
 
 export default function OnboardingPage() {
 	const router = useRouter();
-	const params = useParams();
-	const serverId = params.serverId as string;
+	const params = useParams<{ serverId?: string | Array<string> }>();
+	const rawServerIdParam = params.serverId;
+	const serverId =
+		typeof rawServerIdParam === "string"
+			? rawServerIdParam
+			: (rawServerIdParam?.[0] ?? "");
+	const parsedServerId = parseSnowflakeId(serverId.trim());
+	const normalizedServerId = O.isSome(parsedServerId)
+		? parsedServerId.value.cleaned
+		: "";
 	const authClient = useAuthClient();
 	const { data: session, isPending: isSessionPending } = useSession({
 		allowAnonymous: false,
@@ -49,15 +59,24 @@ export default function OnboardingPage() {
 		enabled: !isSessionPending && !!session?.user,
 	});
 
-	const selectedServer = servers?.find((s) => s.discordId === serverId);
+	const selectedServer = servers?.find(
+		(s) => s.discordId === normalizedServerId,
+	);
 
 	const { data: serverFromDb } = useQueryWithStatus(
 		api.authenticated.dashboard_queries.getUserServersForDropdown,
 		session?.user ? {} : "skip",
 	);
 	const serverWithBot = serverFromDb?.find(
-		(s) => s.discordId.toString() === serverId && s.hasBot && s.aoServerId,
+		(s) =>
+			s.discordId.toString() === normalizedServerId && s.hasBot && s.aoServerId,
 	);
+
+	const serverForDisplay = selectedServer ?? {
+		discordId: normalizedServerId,
+		name: "this server",
+		icon: null,
+	};
 
 	useEffect(() => {
 		if (isSessionPending) {
@@ -70,26 +89,33 @@ export default function OnboardingPage() {
 			return;
 		}
 
-		if (!serverId) {
+		if (!normalizedServerId) {
 			router.push("/dashboard");
 			return;
 		}
 
 		if (serverWithBot) {
-			router.push(`/dashboard/${serverId}/onboarding/configure`);
+			router.push(`/dashboard/${normalizedServerId}/onboarding/configure`);
 			return;
 		}
 
-		if (step === "auth" && serverId) {
+		if (step === "auth" && normalizedServerId) {
 			setStep("install");
 		}
-	}, [session, isSessionPending, serverId, step, router, serverWithBot]);
+	}, [
+		session,
+		isSessionPending,
+		normalizedServerId,
+		step,
+		router,
+		serverWithBot,
+	]);
 
 	useEffect(() => {
 		if (isWaitingForBot && serverWithBot) {
-			router.push(`/dashboard/${serverId}/onboarding/configure`);
+			router.push(`/dashboard/${normalizedServerId}/onboarding/configure`);
 		}
-	}, [isWaitingForBot, serverWithBot, serverId, router]);
+	}, [isWaitingForBot, serverWithBot, normalizedServerId, router]);
 
 	const handleInstallClick = async (discordId: string) => {
 		const discordClientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
@@ -110,7 +136,7 @@ export default function OnboardingPage() {
 
 	if (isSessionPending || isServersLoading) {
 		return (
-			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)] bg-red-500">
 				<div className="w-full max-w-2xl mx-auto space-y-6">
 					<Skeleton className="h-12 w-64" />
 					<Skeleton className="h-96 w-full" />
@@ -121,7 +147,7 @@ export default function OnboardingPage() {
 
 	if (step === "auth" || !session?.user) {
 		return (
-			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)] bg-red-500">
 				<div className="w-full max-w-2xl mx-auto">
 					<Card>
 						<CardHeader className="text-center">
@@ -140,7 +166,7 @@ export default function OnboardingPage() {
 							</p>
 							<Button
 								onClick={async () => {
-									const callbackUrl = `/dashboard/${serverId}/onboarding`;
+									const callbackUrl = `/dashboard/${normalizedServerId}/onboarding`;
 									await authClient.signIn.social({
 										provider: "discord",
 										callbackURL: callbackUrl,
@@ -157,9 +183,9 @@ export default function OnboardingPage() {
 		);
 	}
 
-	if (!serverId || !selectedServer) {
+	if (!normalizedServerId) {
 		return (
-			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)] bg-red-500">
 				<div className="w-full max-w-2xl mx-auto">
 					<Card>
 						<CardHeader className="text-center">
@@ -179,10 +205,10 @@ export default function OnboardingPage() {
 		);
 	}
 
-	if (step === "install" && selectedServer) {
+	if (step === "install" && normalizedServerId) {
 		if (isWaitingForBot) {
 			return (
-				<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+				<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)] bg-red-500">
 					<div className="w-full max-w-2xl mx-auto">
 						<Card>
 							<CardHeader className="text-center">
@@ -192,7 +218,7 @@ export default function OnboardingPage() {
 								<CardDescription>
 									Complete the bot installation in the popup window. This page
 									will automatically continue once the bot is added to{" "}
-									{selectedServer.name}.
+									{serverForDisplay.name}.
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="flex flex-col items-center gap-6">
@@ -204,9 +230,7 @@ export default function OnboardingPage() {
 								</div>
 								<Button
 									variant="outline"
-									onClick={() =>
-										handleInstallClick(selectedServer.discordId.toString())
-									}
+									onClick={() => handleInstallClick(serverForDisplay.discordId)}
 								>
 									Open Installation Window Again
 								</Button>
@@ -218,16 +242,16 @@ export default function OnboardingPage() {
 		}
 
 		return (
-			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
+			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)] bg-red-500">
 				<div className="w-full max-w-2xl mx-auto">
 					<BotPermissionsDisplay
 						server={{
-							discordId: BigInt(selectedServer.discordId),
-							name: selectedServer.name,
-							icon: selectedServer.icon,
+							discordId: BigInt(serverForDisplay.discordId),
+							name: serverForDisplay.name,
+							icon: serverForDisplay.icon,
 						}}
 						onCancel={() => router.push("/dashboard")}
-						onAdd={() => handleInstallClick(selectedServer.discordId)}
+						onAdd={() => handleInstallClick(serverForDisplay.discordId)}
 					/>
 				</div>
 			</main>
