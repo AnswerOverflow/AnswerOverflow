@@ -19,9 +19,14 @@ export function anonymizeDiscordAccount(seed: bigint): DiscordAccountPublic {
 		length: 2,
 		seed: seedStr,
 	});
+
+	const randomId = BigInt(
+		"0x" + Buffer.from(shortName).toString("hex").slice(0, 16),
+	);
+
 	return {
 		avatar: null,
 		name: shortName,
-		id: seedStr,
+		id: randomId.toString(),
 	};
 }

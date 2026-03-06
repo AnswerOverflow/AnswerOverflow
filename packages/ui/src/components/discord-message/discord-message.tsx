@@ -20,6 +20,7 @@ export type DiscordMessageProps = {
 		id: bigint;
 		name: string;
 		avatar?: string;
+		isAnonymous?: boolean;
 	} | null;
 	attachments?: DisplayAttachment[];
 	reactions?: Array<{
@@ -93,12 +94,18 @@ export function DiscordMessage({
 							</AvatarFallback>
 						</Avatar>
 						<div className="flex-1 min-w-0 flex items-center gap-2">
-							<Link
-								href={userUrlGetter(author.id.toString())}
-								className="font-semibold text-card-foreground hover:underline"
-							>
-								{author.name}
-							</Link>
+							{author.isAnonymous ? (
+								<span className="font-semibold text-card-foreground">
+									{author.name}
+								</span>
+							) : (
+								<Link
+									href={userUrlGetter(author.id.toString())}
+									className="font-semibold text-card-foreground hover:underline"
+								>
+									{author.name}
+								</Link>
+							)}
 							{isBot && (
 								<Badge
 									variant="default"

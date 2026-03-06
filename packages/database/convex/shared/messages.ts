@@ -574,6 +574,7 @@ export type EnrichedMessage = {
 		id: bigint;
 		name: string;
 		avatar?: string;
+		isAnonymous?: boolean;
 	} | null;
 	attachments: AttachmentDoc[];
 	reactions: Array<{
@@ -973,7 +974,12 @@ export async function enrichMessageForDisplay(
 		}),
 	);
 
-	let authorData: { id: bigint; name: string; avatar?: string } | null = null;
+	let authorData: {
+		id: bigint;
+		name: string;
+		avatar?: string;
+		isAnonymous?: boolean;
+	} | null = null;
 	if (author) {
 		if (options?.isAnonymous) {
 			const anonymized = anonymizeDiscordAccount(message.authorId);
@@ -981,6 +987,7 @@ export async function enrichMessageForDisplay(
 				id: BigInt(anonymized.id),
 				name: anonymized.name,
 				avatar: anonymized.avatar ?? undefined,
+				isAnonymous: true,
 			};
 		} else if (message.webhookId && message.metadata?.webhookName) {
 			authorData = {

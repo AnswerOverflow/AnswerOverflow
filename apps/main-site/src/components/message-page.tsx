@@ -401,15 +401,22 @@ export function MessagePage(props: {
 		? "/"
 		: `/c/${headerData.server.discordId.toString()}`;
 
-	const UserLink = () =>
-		firstMessage?.author ? (
+	const UserLink = () => {
+		if (!firstMessage?.author) {
+			return null;
+		}
+		if (firstMessage.author.isAnonymous) {
+			return <span>{firstMessage.author.name}</span>;
+		}
+		return (
 			<Link
 				href={`/u/${firstMessage.author.id.toString()}`}
 				className="hover:underline"
 			>
 				{firstMessage.author.name}
 			</Link>
-		) : null;
+		);
+	};
 
 	const discordUrl = firstMessage
 		? getDiscordURLForMessage({
@@ -465,8 +472,12 @@ export function MessagePage(props: {
 					author: {
 						"@type": "Person",
 						name: firstMessage.author.name,
-						identifier: firstMessage.author.id.toString(),
-						url: `/u/${firstMessage.author.id.toString()}`,
+						...(firstMessage.author.isAnonymous
+							? {}
+							: {
+									identifier: firstMessage.author.id.toString(),
+									url: `/u/${firstMessage.author.id.toString()}`,
+								}),
 					},
 					image: firstMessageMedia?.url ? firstMessageMedia.url : undefined,
 					headline: title,

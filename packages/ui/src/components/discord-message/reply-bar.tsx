@@ -75,12 +75,16 @@ export function ReplyBar({ reference, className }: ReplyBarProps) {
 							{author.name.charAt(0).toUpperCase()}
 						</AvatarFallback>
 					</Avatar>
-					<Link
-						href={`/u/${author.id.toString()}`}
-						className="font-medium hover:underline flex-shrink-0"
-					>
-						{author.name}
-					</Link>
+					{author.isAnonymous ? (
+						<span className="font-medium flex-shrink-0">{author.name}</span>
+					) : (
+						<Link
+							href={`/u/${author.id.toString()}`}
+							className="font-medium hover:underline flex-shrink-0"
+						>
+							{author.name}
+						</Link>
+					)}
 				</>
 			) : (
 				<span className="font-medium flex-shrink-0">Unknown User</span>

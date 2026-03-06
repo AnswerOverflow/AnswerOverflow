@@ -93,12 +93,16 @@ export function ThinMessage(props: {
 					<div className="flex flex-col pl-2 pt-2 min-w-0 flex-1">
 						<div className="flex flex-row items-center gap-2 text-muted-foreground">
 							{author ? (
-								<Link
-									className="hover:underline"
-									href={`/u/${author.id.toString()}`}
-								>
-									{author.name}
-								</Link>
+								author.isAnonymous ? (
+									<span>{author.name}</span>
+								) : (
+									<Link
+										className="hover:underline"
+										href={`/u/${author.id.toString()}`}
+									>
+										{author.name}
+									</Link>
+								)
 							) : (
 								<span>Unknown</span>
 							)}
