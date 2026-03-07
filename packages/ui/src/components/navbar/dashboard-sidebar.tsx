@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useFeatureFlagEnabled } from "posthog-js/react";
 import type * as React from "react";
 import { cn } from "../../lib/utils";
@@ -14,10 +14,30 @@ export interface DashboardSidebarProps {
 	homeHref?: string;
 }
 
+function getServerIdFromDashboardPath(
+	pathname: string | null,
+): string | undefined {
+	if (!pathname) {
+		return undefined;
+	}
+
+	const match = pathname.match(/^\/dashboard\/([^/]+)/);
+	if (!match) {
+		return undefined;
+	}
+
+	const serverIdSegment = match[1];
+	if (!serverIdSegment) {
+		return undefined;
+	}
+
+	const serverId = decodeURIComponent(serverIdSegment);
+	return /^\d+$/.test(serverId) ? serverId : undefined;
+}
+
 function SidebarNavigation({ onLinkClick }: { onLinkClick?: () => void }) {
-	const params = useParams();
 	const pathname = usePathname();
-	const serverId = params.serverId as string | undefined;
+	const serverId = getServerIdFromDashboardPath(pathname);
 	const threadsEnabled = useFeatureFlagEnabled("dashboard-threads-list");
 
 	const navItems = serverId
