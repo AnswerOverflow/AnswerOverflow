@@ -1,3 +1,4 @@
+import { getOneFrom } from "convex-helpers/server/relationships";
 import type { MutationCtx, QueryCtx } from "../client";
 import { getUserServerSettingsForServerByDiscordId, isSuperUser } from "./auth";
 
@@ -7,6 +8,18 @@ const MANAGE_GUILD = 0x20;
 export type GuildManagerPermissionResult =
 	| { hasPermission: true }
 	| { hasPermission: false; errorMessage: string };
+
+export function hasDashboardRoleAccess(
+	userRoleIds: readonly bigint[] | undefined,
+	allowedRoleIds: readonly bigint[] | undefined,
+): boolean {
+	if (!userRoleIds?.length || !allowedRoleIds?.length) {
+		return false;
+	}
+
+	const allowedRoleIdsSet = new Set(allowedRoleIds);
+	return userRoleIds.some((roleId) => allowedRoleIdsSet.has(roleId));
+}
 
 export async function checkGuildManagerPermissions(
 	ctx: QueryCtx | MutationCtx,
@@ -36,6 +49,24 @@ export async function checkGuildManagerPermissions(
 		(userServerSettings.permissions & MANAGE_GUILD) === MANAGE_GUILD;
 
 	if (hasAdminOrManageGuild) {
+		return {
+			hasPermission: true,
+		};
+	}
+
+	const serverPreferences = await getOneFrom(
+		ctx.db,
+		"serverPreferences",
+		"by_serverId",
+		serverId,
+	);
+
+	if (
+		hasDashboardRoleAccess(
+			userServerSettings.roleIds,
+			serverPreferences?.dashboardRoleIds,
+		)
+	) {
 		return {
 			hasPermission: true,
 		};

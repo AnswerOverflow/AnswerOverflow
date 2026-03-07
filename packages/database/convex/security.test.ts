@@ -264,6 +264,52 @@ describe("Security", () => {
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 
+		it.scoped("should allow user with a configured dashboard access role", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const convexClient = yield* ConvexClientTest;
+				const { client } = convexClient;
+				const server = yield* createServer();
+				const user = yield* createAuthor();
+				const dashboardRoleId = BigInt("987654321");
+
+				yield* database.private.server_preferences.upsertServerPreferences({
+					serverId: server.discordId,
+					plan: "FREE",
+					dashboardRoleIds: [dashboardRoleId],
+				});
+
+				yield* database.private.user_server_settings.upsertUserServerSettings({
+					settings: {
+						userId: user.id,
+						serverId: server.discordId,
+						permissions: SEND_MESSAGES,
+						roleIds: [dashboardRoleId],
+						canPubliclyDisplayMessages: false,
+						messageIndexingDisabled: false,
+						apiCallsUsed: 0,
+					},
+				});
+
+				const result = yield* Effect.tryPromise(() =>
+					client.mutation(
+						api.authenticated.dashboard_mutations.updateServerPreferencesFlags,
+						{
+							backendAccessToken: "test-backend-access-token",
+							discordAccountId: user.id,
+							serverId: server.discordId,
+							flags: {
+								anonymizeMessagesEnabled: true,
+							},
+						},
+					),
+				);
+
+				expect(result).toBeDefined();
+				expect(result.anonymizeMessagesEnabled).toBe(true);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
 		it.scoped(
 			"should reject user trying to modify channel settings for server they don't manage",
 			() =>

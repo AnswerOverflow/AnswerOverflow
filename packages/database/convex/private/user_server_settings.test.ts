@@ -306,4 +306,39 @@ describe("user_server_settings", () => {
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 	});
+
+	describe("deleteUserServerSettings", () => {
+		it.scoped("should delete existing settings", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const server = yield* createServer();
+				const author = yield* createAuthor();
+
+				yield* database.private.user_server_settings.upsertUserServerSettings({
+					settings: {
+						userId: author.id,
+						serverId: server.discordId,
+						permissions: 32,
+						roleIds: [BigInt(1234)],
+						canPubliclyDisplayMessages: true,
+						messageIndexingDisabled: false,
+						apiCallsUsed: 0,
+					},
+				});
+
+				yield* database.private.user_server_settings.deleteUserServerSettings({
+					userId: author.id,
+					serverId: server.discordId,
+				});
+
+				const result =
+					yield* database.private.user_server_settings.findUserServerSettingsById(
+						{ userId: author.id, serverId: server.discordId },
+						{ subscribe: false },
+					);
+
+				expect(result).toBeNull();
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+	});
 });

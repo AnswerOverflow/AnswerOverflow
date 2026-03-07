@@ -15,6 +15,7 @@ const ADVANCED_AND_ABOVE_PLANS: ReadonlyArray<string> = [
 export const updateServerPreferencesFlags = guildManagerMutation({
 	args: {
 		flags: v.object({
+			dashboardRoleIds: v.optional(v.array(v.int64())),
 			readTheRulesConsentEnabled: v.optional(v.boolean()),
 			considerAllMessagesPublicEnabled: v.optional(v.boolean()),
 			anonymizeMessagesEnabled: v.optional(v.boolean()),

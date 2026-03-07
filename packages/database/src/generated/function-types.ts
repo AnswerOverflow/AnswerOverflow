@@ -44,6 +44,7 @@ export const FUNCTION_TYPE_MAP = {
   "dashboard_queries.getDashboardData": "query",
   "dashboard_queries.getIndexedMessageCount": "query",
   "dashboard_queries.getUserServersForDropdown": "query",
+  "dashboard.getDashboardRolesForServer": "action",
   "dashboard.getPageViewsForServer": "action",
   "dashboard.getQuestionsAndAnswers": "action",
   "dashboard.getServerInvitesClicked": "action",
@@ -118,6 +119,7 @@ export const FUNCTION_TYPE_MAP = {
   "threadTags.getTagsForThreads": "query",
   "threadTags.getThreadIdsByTags": "query",
   "threadTags.syncThreadTags": "mutation",
+  "user_server_settings.deleteUserServerSettings": "mutation",
   "user_server_settings.findManyUserServerSettings": "query",
   "user_server_settings.findUserServerSettingsById": "query",
   "user_server_settings.upsertManyBotUserServerSettings": "mutation",
@@ -148,12 +150,12 @@ export const NAMESPACE_STRUCTURE = {
   "servers": ["findManyServersByDiscordId","findManyServersById","getAllServers","getBrowseServers","getCachedBrowsableServers","getServerByDiscordId","getServerByDiscordIdWithChannels","getServerByDomain","scheduleRecommendedConfigurationCache","updateServer","upsertServer"],
   "sitemap": ["collectThreadsForServer","getServersForSitemap"],
   "threadTags": ["getTagsForThread","getTagsForThreads","getThreadIdsByTags","syncThreadTags"],
-  "user_server_settings": ["findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
+  "user_server_settings": ["deleteUserServerSettings","findManyUserServerSettings","findUserServerSettingsById","upsertManyBotUserServerSettings","upsertManyUserServerSettings","upsertUserServerSettings"]
 } as const;
 
 export const AUTHENTICATED_NAMESPACE_STRUCTURE = {
   "admin": [],
-  "dashboard": ["getPageViewsForServer","getQuestionsAndAnswers","getServerInvitesClicked","getTopPagesForServer","getTopQuestionSolversForServer","getUserServers","trackBotAddClick"],
+  "dashboard": ["getDashboardRolesForServer","getPageViewsForServer","getQuestionsAndAnswers","getServerInvitesClicked","getTopPagesForServer","getTopQuestionSolversForServer","getUserServers","trackBotAddClick"],
   "dashboard_mutations": ["generateBotCustomizationUploadUrl","updateBotCustomization","updateChannelSettingsFlags","updateChannelSolutionTag","updateChannelTagsToRemoveOnSolve","updateCustomDomain","updateServerPreferencesFlags"],
   "dashboard_queries": ["getDashboardData","getIndexedMessageCount","getUserServersForDropdown"],
   "discord_token": [],

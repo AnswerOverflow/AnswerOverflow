@@ -7,8 +7,10 @@ import {
 	DashboardNavbar,
 	type ServerSelectServer,
 } from "@packages/ui/components/navbar";
+import { Spinner } from "@packages/ui/components/spinner";
+import { useQuery } from "@tanstack/react-query";
+import { useAction } from "convex/react";
 import { usePathname } from "next/navigation";
-import { useAuthenticatedQuery } from "../../../lib/use-authenticated-query";
 
 export default function DashboardLayout({
 	children,
@@ -21,22 +23,37 @@ export default function DashboardLayout({
 	const isDashboardRoot = pathname === "/dashboard";
 	const serverIdMatch = pathname?.match(/^\/dashboard\/([^/]+)/);
 	const serverId = serverIdMatch ? (serverIdMatch[1] as string) : undefined;
+	const getUserServers = useAction(api.authenticated.dashboard.getUserServers);
 
 	const shouldShowServerSelect = serverId !== undefined;
+	const shouldLoadServerList =
+		serverId !== undefined && !isPending && !!session?.user;
 
-	const servers = useAuthenticatedQuery(
-		api.authenticated.dashboard_queries.getUserServersForDropdown,
-		{},
-	);
+	const {
+		data: servers,
+		isLoading: isLoadingServers,
+		isError: hasServerListError,
+	} = useQuery({
+		queryKey: ["dashboard-servers"],
+		queryFn: async () => {
+			if (!session?.user) {
+				throw new Error("Not authenticated");
+			}
+			return await getUserServers({});
+		},
+		enabled: shouldLoadServerList,
+	});
 
 	const serversForDropdown: ServerSelectServer[] =
-		servers?.map((server) => ({
-			id: server.discordId.toString(),
-			name: server.name,
-			icon: server.icon,
-			hasBot: server.hasBot,
-			discordId: server.discordId,
-		})) ?? [];
+		servers
+			?.filter((server) => server.hasBot)
+			.map((server) => ({
+				id: server.discordId.toString(),
+				name: server.name,
+				icon: server.icon,
+				hasBot: server.hasBot,
+				discordId: BigInt(server.discordId),
+			})) ?? [];
 
 	const serverSelectProps =
 		shouldShowServerSelect && serversForDropdown.length > 0
@@ -51,6 +68,14 @@ export default function DashboardLayout({
 
 	const isSignedOut = !isPending && !session?.user;
 	const hideNavbar = isDashboardRoot && isSignedOut;
+
+	if (shouldLoadServerList && isLoadingServers && !hasServerListError) {
+		return (
+			<div className="min-h-screen bg-background flex items-center justify-center">
+				<Spinner />
+			</div>
+		);
+	}
 
 	if (hideNavbar) {
 		return (

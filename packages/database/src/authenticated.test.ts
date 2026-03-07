@@ -138,6 +138,82 @@ describe("Authenticated queries", () => {
 					expect(nonManagedFound).toBeUndefined();
 				}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
+
+		it.scoped(
+			"should return servers where user has a configured dashboard access role",
+			() =>
+				Effect.gen(function* () {
+					const database = yield* Database;
+
+					const testDiscordAccountId = BigInt(Date.now());
+					const roleManagedServerId = BigInt(Date.now() + 1);
+					const roleWithoutAccessServerId = BigInt(Date.now() + 2);
+					const dashboardRoleId = BigInt(Date.now() + 3);
+
+					yield* database.private.servers.upsertServer({
+						discordId: roleManagedServerId,
+						name: "Role Managed Server",
+						approximateMemberCount: 100,
+					});
+
+					yield* database.private.servers.upsertServer({
+						discordId: roleWithoutAccessServerId,
+						name: "Role Without Access Server",
+						approximateMemberCount: 50,
+					});
+
+					yield* database.private.server_preferences.upsertServerPreferences({
+						serverId: roleManagedServerId,
+						plan: "FREE",
+						dashboardRoleIds: [dashboardRoleId],
+					});
+
+					yield* database.private.user_server_settings.upsertUserServerSettings(
+						{
+							settings: {
+								userId: testDiscordAccountId,
+								serverId: roleManagedServerId,
+								permissions: 0,
+								roleIds: [dashboardRoleId],
+								canPubliclyDisplayMessages: true,
+								messageIndexingDisabled: false,
+								apiCallsUsed: 0,
+							},
+						},
+					);
+
+					yield* database.private.user_server_settings.upsertUserServerSettings(
+						{
+							settings: {
+								userId: testDiscordAccountId,
+								serverId: roleWithoutAccessServerId,
+								permissions: 0,
+								roleIds: [BigInt(Date.now() + 4)],
+								canPubliclyDisplayMessages: true,
+								messageIndexingDisabled: false,
+								apiCallsUsed: 0,
+							},
+						},
+					);
+
+					const result =
+						yield* database.authenticated.dashboard_queries.getUserServersForDropdown(
+							{},
+							{ discordAccountId: testDiscordAccountId, subscribe: false },
+						);
+
+					const roleManagedFound = result.find(
+						(s) => s.discordId === roleManagedServerId,
+					);
+					const roleWithoutAccessFound = result.find(
+						(s) => s.discordId === roleWithoutAccessServerId,
+					);
+
+					expect(roleManagedFound).toBeDefined();
+					expect(roleManagedFound?.name).toBe("Role Managed Server");
+					expect(roleWithoutAccessFound).toBeUndefined();
+				}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
 	});
 
 	describe("Main site path (token)", () => {

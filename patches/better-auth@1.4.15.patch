@@ -1,0 +1,18 @@
+diff --git a/dist/client/proxy.mjs b/dist/client/proxy.mjs
+index c79a8e492dbaeb449cfa2b48795a655ce01bcba9..48e82009d6a26ce1c13a1c446be1629a64f97d36 100644
+--- a/dist/client/proxy.mjs
++++ b/dist/client/proxy.mjs
+@@ -12,8 +12,12 @@ function getMethod(path, knownPathMethods, args) {
+ function createDynamicPathProxy(routes, client, knownPathMethods, atoms, atomListeners) {
+ 	function createProxy(path = []) {
+ 		return new Proxy(function() {}, {
+-			get(_, prop) {
++			get(target, prop) {
++				if (prop === Symbol.toPrimitive) return () => "BetterAuthClient";
+ 				if (typeof prop !== "string") return;
++				if (prop === "displayName" || prop === "name") return "BetterAuthClient";
++				if (prop === "toString") return () => "[BetterAuthClient]";
++				if (prop === "valueOf") return () => target;
+ 				if (prop === "then" || prop === "catch" || prop === "finally") return;
+ 				const fullPath = [...path, prop];
+ 				let current = routes;

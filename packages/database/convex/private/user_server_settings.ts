@@ -163,3 +163,24 @@ export const upsertManyUserServerSettings = privateMutation({
 		}
 	},
 });
+
+export const deleteUserServerSettings = privateMutation({
+	args: {
+		userId: v.int64(),
+		serverId: v.int64(),
+	},
+	handler: async (ctx, args) => {
+		const existing = await findUserServerSettingsByIdShared(
+			ctx,
+			args.userId,
+			args.serverId,
+		);
+
+		if (!existing) {
+			return null;
+		}
+
+		await ctx.db.delete(existing._id);
+		return null;
+	},
+});

@@ -12,7 +12,7 @@ export const DEFAULT_SERVER_PREFERENCES = {
 
 type ServerWithMetadata = {
 	hasBot: boolean;
-	highestRole: "Owner" | "Administrator" | "Manage Guild";
+	highestRole: "Owner" | "Administrator" | "Manage Guild" | "Dashboard Role";
 };
 
 export function sortServersByBotAndRole<T extends ServerWithMetadata>(
@@ -23,12 +23,13 @@ export function sortServersByBotAndRole<T extends ServerWithMetadata>(
 		if (!a.hasBot && b.hasBot) return 1;
 
 		const roleOrder: Record<
-			"Owner" | "Administrator" | "Manage Guild",
+			"Owner" | "Administrator" | "Manage Guild" | "Dashboard Role",
 			number
 		> = {
 			Owner: 0,
 			Administrator: 1,
 			"Manage Guild": 2,
+			"Dashboard Role": 3,
 		};
 		return roleOrder[a.highestRole] - roleOrder[b.highestRole];
 	});

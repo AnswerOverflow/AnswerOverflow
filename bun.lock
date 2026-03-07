@@ -484,6 +484,7 @@
     },
   },
   "patchedDependencies": {
+    "better-auth@1.4.15": "patches/better-auth@1.4.15.patch",
     "ai@6.0.39": "patches/ai@6.0.39.patch",
   },
   "overrides": {

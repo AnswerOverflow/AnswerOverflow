@@ -10,7 +10,7 @@ type ServerCardProps = {
 		discordId: bigint;
 		name: string;
 		icon: string | null;
-		highestRole: "Manage Guild" | "Administrator" | "Owner";
+		highestRole: "Manage Guild" | "Administrator" | "Owner" | "Dashboard Role";
 		hasBot: boolean;
 		aoServerId: string | undefined;
 	};

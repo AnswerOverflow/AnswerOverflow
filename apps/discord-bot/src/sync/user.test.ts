@@ -1,5 +1,6 @@
 import { Data, Equal } from "effect";
 import { describe, expect, test } from "vitest";
+import { getMemberRoleIds, hasRelevantMemberAccessChanges } from "./user";
 import { toAODiscordAccount } from "../utils/conversions";
 
 function hasRelevantChanges(
@@ -25,6 +26,25 @@ function hasRelevantChanges(
 		toAODiscordAccount(newUser as Parameters<typeof toAODiscordAccount>[0]),
 	);
 	return !Equal.equals(oldAccount, newAccount);
+}
+
+function createMemberAccessState({
+	guildId = "1",
+	partial = false,
+	permissionBitfield = 32n,
+	roleIds = ["1", "3", "2"],
+}: {
+	guildId?: string;
+	partial?: boolean;
+	permissionBitfield?: bigint;
+	roleIds?: string[];
+} = {}): Parameters<typeof getMemberRoleIds>[0] {
+	return {
+		partial,
+		guild: { id: guildId },
+		permissions: { bitfield: permissionBitfield },
+		roles: { cache: new Map(roleIds.map((roleId) => [roleId, {}])) },
+	};
 }
 
 describe("hasRelevantChanges", () => {
@@ -85,5 +105,52 @@ describe("hasRelevantChanges", () => {
 		const oldUser = { ...baseUser };
 		const newUser = { ...baseUser };
 		expect(hasRelevantChanges(oldUser, newUser)).toBe(false);
+	});
+});
+
+describe("getMemberRoleIds", () => {
+	test("filters the guild id role and sorts the remaining role ids", () => {
+		const member = createMemberAccessState({
+			guildId: "10",
+			roleIds: ["42", "10", "7"],
+		});
+
+		expect(getMemberRoleIds(member)).toEqual([7n, 42n]);
+	});
+});
+
+describe("hasRelevantMemberAccessChanges", () => {
+	test("returns true when the old member is partial", () => {
+		const oldMember = createMemberAccessState({ partial: true });
+		const newMember = createMemberAccessState();
+
+		expect(hasRelevantMemberAccessChanges(oldMember, newMember)).toBe(true);
+	});
+
+	test("returns false when permissions and role ids are unchanged", () => {
+		const oldMember = createMemberAccessState({
+			roleIds: ["1", "5", "3"],
+			permissionBitfield: 32n,
+		});
+		const newMember = createMemberAccessState({
+			roleIds: ["3", "1", "5"],
+			permissionBitfield: 32n,
+		});
+
+		expect(hasRelevantMemberAccessChanges(oldMember, newMember)).toBe(false);
+	});
+
+	test("returns true when permissions change", () => {
+		const oldMember = createMemberAccessState({ permissionBitfield: 32n });
+		const newMember = createMemberAccessState({ permissionBitfield: 64n });
+
+		expect(hasRelevantMemberAccessChanges(oldMember, newMember)).toBe(true);
+	});
+
+	test("returns true when role ids change", () => {
+		const oldMember = createMemberAccessState({ roleIds: ["1", "5", "3"] });
+		const newMember = createMemberAccessState({ roleIds: ["1", "5", "9"] });
+
+		expect(hasRelevantMemberAccessChanges(oldMember, newMember)).toBe(true);
 	});
 });

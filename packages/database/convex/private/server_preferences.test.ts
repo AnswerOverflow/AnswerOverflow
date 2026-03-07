@@ -104,6 +104,22 @@ describe("server_preferences", () => {
 				expect(result.customDomain).toBe("myserver.example.com");
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
+
+		it.scoped("should store dashboard access roles", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const server = yield* createServer();
+
+				const result =
+					yield* database.private.server_preferences.upsertServerPreferences({
+						serverId: server.discordId,
+						plan: "FREE",
+						dashboardRoleIds: [123n, 456n],
+					});
+
+				expect(result.dashboardRoleIds).toEqual([123n, 456n]);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
 	});
 
 	describe("getServerPreferencesByServerId", () => {

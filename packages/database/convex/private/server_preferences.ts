@@ -12,6 +12,7 @@ const serverPreferencesSchema = v.object({
 	stripeCustomerId: v.optional(v.string()),
 	stripeSubscriptionId: v.optional(v.string()),
 	plan: planValidator,
+	dashboardRoleIds: v.optional(v.array(v.int64())),
 	readTheRulesConsentEnabled: v.optional(v.boolean()),
 	considerAllMessagesPublicEnabled: v.optional(v.boolean()),
 	anonymizeMessagesEnabled: v.optional(v.boolean()),

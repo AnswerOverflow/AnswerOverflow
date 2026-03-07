@@ -10,13 +10,13 @@ import {
 	threadMessageCounts,
 } from "../private/counts";
 import { enrichMessages } from "../shared/dataAccess";
+import { hasDashboardRoleAccess } from "../shared/guildManagerPermissions";
 import {
 	DISCORD_PERMISSIONS,
 	getHighestRoleFromPermissions,
 	getMessageById,
 	getServerByDiscordId,
 	hasPermission,
-	isThreadType,
 	sortServersByBotAndRole,
 } from "../shared/shared";
 export const getDashboardData = guildManagerQuery({
@@ -112,6 +112,7 @@ export const getDashboardData = guildManagerQuery({
 				plan: preferences?.plan ?? "FREE",
 				customDomain: preferences?.customDomain ?? null,
 				preferences: {
+					dashboardRoleIds: preferences?.dashboardRoleIds ?? [],
 					readTheRulesConsentEnabled:
 						preferences?.readTheRulesConsentEnabled ?? false,
 					considerAllMessagesPublicEnabled:
@@ -148,19 +149,37 @@ export const getUserServersForDropdown = authenticatedQuery({
 			discordAccountId,
 		);
 
-		const manageableSettings = userServerSettings.filter((setting) => {
+		const servers = await asyncMap(userServerSettings, async (setting) => {
 			const permissions = setting.permissions;
-			return (
+			const hasManageAccess =
 				hasPermission(permissions, DISCORD_PERMISSIONS.Administrator) ||
-				hasPermission(permissions, DISCORD_PERMISSIONS.ManageGuild)
-			);
-		});
+				hasPermission(permissions, DISCORD_PERMISSIONS.ManageGuild);
 
-		const servers = await asyncMap(manageableSettings, async (setting) => {
+			const preferences = await getOneFrom(
+				ctx.db,
+				"serverPreferences",
+				"by_serverId",
+				setting.serverId,
+			);
+			const hasRoleAccess = hasDashboardRoleAccess(
+				setting.roleIds,
+				preferences?.dashboardRoleIds,
+			);
+
+			if (!hasManageAccess && !hasRoleAccess) {
+				return null;
+			}
+
 			const server = await getServerByDiscordId(ctx, setting.serverId);
 			if (!server) return null;
 
-			const highestRole = getHighestRoleFromPermissions(setting.permissions);
+			const highestRole:
+				| "Owner"
+				| "Administrator"
+				| "Manage Guild"
+				| "Dashboard Role" = hasManageAccess
+				? getHighestRoleFromPermissions(setting.permissions)
+				: "Dashboard Role";
 
 			return {
 				discordId: server.discordId,

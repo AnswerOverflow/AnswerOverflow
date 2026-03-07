@@ -37,6 +37,9 @@ const ServerPreferencesSchema = Schema.Struct({
 	stripeCustomerId: Schema.optional(Schema.String),
 	stripeSubscriptionId: Schema.optional(Schema.String),
 	plan: PlanSchema,
+	dashboardRoleIds: Schema.optional(
+		Schema.Array(Schema.BigIntFromSelf).pipe(Schema.mutable),
+	),
 	readTheRulesConsentEnabled: Schema.optional(Schema.Boolean),
 	considerAllMessagesPublicEnabled: Schema.optional(Schema.Boolean),
 	anonymizeMessagesEnabled: Schema.optional(Schema.Boolean),
@@ -73,6 +76,9 @@ const UserServerSettingsSchema = Schema.Struct({
 	serverId: Schema.BigIntFromSelf,
 	userId: Schema.BigIntFromSelf, // Discord account ID (snowflake), not BetterAuth user ID
 	permissions: Schema.Number, // Bitfield of permissions for the user in the server, this comes from Discord and is not allowed to be modified by the user
+	roleIds: Schema.optional(
+		Schema.Array(Schema.BigIntFromSelf).pipe(Schema.mutable),
+	),
 	canPubliclyDisplayMessages: Schema.Boolean,
 	messageIndexingDisabled: Schema.Boolean,
 	apiKey: Schema.optional(Schema.String),
