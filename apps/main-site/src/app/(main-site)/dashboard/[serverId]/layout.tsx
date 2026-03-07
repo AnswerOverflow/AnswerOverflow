@@ -1,5 +1,23 @@
-import { Suspense } from "react";
-import { DashboardServerIdBoundary } from "./server-id-context";
+"use client";
+
+import { Suspense, use } from "react";
+import { DashboardServerIdProvider } from "./server-id-context";
+
+function ServerIdLayoutContent({
+	children,
+	params,
+}: {
+	children: React.ReactNode;
+	params: Promise<{ serverId: string }>;
+}) {
+	const { serverId } = use(params);
+
+	return (
+		<DashboardServerIdProvider serverId={serverId}>
+			{children}
+		</DashboardServerIdProvider>
+	);
+}
 
 export default function ServerIdLayout({
 	children,
@@ -10,9 +28,7 @@ export default function ServerIdLayout({
 }) {
 	return (
 		<Suspense fallback={null}>
-			<DashboardServerIdBoundary params={params}>
-				{children}
-			</DashboardServerIdBoundary>
+			<ServerIdLayoutContent params={params}>{children}</ServerIdLayoutContent>
 		</Suspense>
 	);
 }
