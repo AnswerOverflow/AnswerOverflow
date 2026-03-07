@@ -12,32 +12,17 @@ import { useDashboardNavbar } from "./dashboard-navbar";
 export interface DashboardSidebarProps {
 	children?: React.ReactNode;
 	homeHref?: string;
+	serverId?: string;
 }
 
-function getServerIdFromDashboardPath(
-	pathname: string | null,
-): string | undefined {
-	if (!pathname) {
-		return undefined;
-	}
-
-	const match = pathname.match(/^\/dashboard\/([^/]+)/);
-	if (!match) {
-		return undefined;
-	}
-
-	const serverIdSegment = match[1];
-	if (!serverIdSegment) {
-		return undefined;
-	}
-
-	const serverId = decodeURIComponent(serverIdSegment);
-	return /^\d+$/.test(serverId) ? serverId : undefined;
-}
-
-function SidebarNavigation({ onLinkClick }: { onLinkClick?: () => void }) {
+function SidebarNavigation({
+	serverId,
+	onLinkClick,
+}: {
+	serverId?: string;
+	onLinkClick?: () => void;
+}) {
 	const pathname = usePathname();
-	const serverId = getServerIdFromDashboardPath(pathname);
 	const threadsEnabled = useFeatureFlagEnabled("dashboard-threads-list");
 
 	const navItems = serverId
@@ -111,6 +96,7 @@ function SidebarHeader({ homeHref }: { homeHref: string }) {
 export function DashboardSidebar({
 	children,
 	homeHref = "/",
+	serverId,
 }: DashboardSidebarProps) {
 	const { mobileSidebarOpen, setMobileSidebarOpen } = useDashboardNavbar();
 
@@ -118,7 +104,7 @@ export function DashboardSidebar({
 		<div className="relative flex w-full">
 			<aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-50 w-[255.44px] flex-col border-r bg-background">
 				<SidebarHeader homeHref={homeHref} />
-				<SidebarNavigation />
+				<SidebarNavigation serverId={serverId} />
 			</aside>
 
 			<Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
@@ -129,6 +115,7 @@ export function DashboardSidebar({
 					<div className="flex h-full flex-col">
 						<SidebarHeader homeHref={homeHref} />
 						<SidebarNavigation
+							serverId={serverId}
 							onLinkClick={() => setMobileSidebarOpen(false)}
 						/>
 					</div>

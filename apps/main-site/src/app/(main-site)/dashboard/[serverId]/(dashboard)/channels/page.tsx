@@ -45,10 +45,10 @@ import {
 	MessageSquare,
 	Search,
 } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import React from "react";
 import { useAuthenticatedQuery } from "../../../../../../lib/use-authenticated-query";
+import { useDashboardServerId } from "../../server-id-context";
 
 type ChannelFlagKey =
 	| "indexingEnabled"
@@ -347,8 +347,7 @@ function ChooseTagsToRemoveOnSolveCard({
 }
 
 export default function ChannelsPage() {
-	const params = useParams();
-	const serverId = params.serverId as string;
+	const serverId = useDashboardServerId();
 
 	const [selectedChannelIdsParam, setSelectedChannelIdsParam] = useQueryState(
 		"channels",

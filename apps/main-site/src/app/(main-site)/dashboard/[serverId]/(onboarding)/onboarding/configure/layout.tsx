@@ -2,8 +2,9 @@
 
 import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useDashboardServerId } from "../../../server-id-context";
 import { WizardProvider } from "./components/wizard-context";
 
 export default function ConfigureLayout({
@@ -12,8 +13,7 @@ export default function ConfigureLayout({
 	children: React.ReactNode;
 }) {
 	const router = useRouter();
-	const params = useParams();
-	const serverId = params.serverId as string;
+	const serverId = useDashboardServerId();
 	const { data: session, isPending: isSessionPending } = useSession({
 		allowAnonymous: false,
 	});

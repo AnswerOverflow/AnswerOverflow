@@ -23,9 +23,9 @@ import { Switch } from "@packages/ui/components/switch";
 import { useQuery } from "@tanstack/react-query";
 import { useAction, useMutation } from "convex/react";
 import { Check, Search } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthenticatedQuery } from "../../../../../../lib/use-authenticated-query";
+import { useDashboardServerId } from "../../server-id-context";
 import { TierAccessOnly } from "../components/tier-access-only";
 import { CurrentPlanCard } from "./components";
 
@@ -303,8 +303,7 @@ function DashboardAccessRolesCard({
 }
 
 export default function SettingsPage() {
-	const params = useParams();
-	const serverId = params.serverId as string;
+	const serverId = useDashboardServerId();
 	const [isSavingDashboardRoles, setIsSavingDashboardRoles] = useState(false);
 
 	const dashboardData = useAuthenticatedQuery(

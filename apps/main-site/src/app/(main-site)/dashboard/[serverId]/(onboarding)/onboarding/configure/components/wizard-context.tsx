@@ -6,8 +6,8 @@ import type { ForumTag } from "@packages/database/convex/schema";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { ChannelType } from "discord-api-types/v10";
-import { useParams } from "next/navigation";
 import { createContext, useCallback, useContext, useState } from "react";
+import { useDashboardServerId } from "../../../../server-id-context";
 
 export type ForumTagInfo = ForumTag;
 
@@ -84,8 +84,7 @@ export function useWizard() {
 }
 
 export function WizardProvider({ children }: { children: React.ReactNode }) {
-	const params = useParams();
-	const serverId = params.serverId as string;
+	const serverId = useDashboardServerId();
 
 	const getRecommendedConfiguration = useAction(
 		api.authenticated.onboarding_action.getRecommendedConfiguration,

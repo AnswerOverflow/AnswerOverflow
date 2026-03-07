@@ -17,16 +17,16 @@ import { useQueryWithStatus } from "@packages/ui/hooks/use-query-with-status";
 import * as Sentry from "@sentry/nextjs";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthClient } from "../../../../../../lib/auth-client";
+import { useDashboardServerId } from "../../server-id-context";
 
 type OnboardingStep = "auth" | "install";
 
 export default function OnboardingPage() {
 	const router = useRouter();
-	const params = useParams();
-	const serverId = params.serverId as string;
+	const serverId = useDashboardServerId();
 	const authClient = useAuthClient();
 	const { data: session, isPending: isSessionPending } = useSession({
 		allowAnonymous: false,

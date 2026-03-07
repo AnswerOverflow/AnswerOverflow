@@ -43,7 +43,6 @@ import {
 	Tag,
 	X,
 } from "lucide-react";
-import { useParams } from "next/navigation";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -51,6 +50,7 @@ import {
 	MessageContentSkeleton,
 	type MessagePageHeaderData,
 } from "@/components/message-page";
+import { useDashboardServerId } from "../../server-id-context";
 
 const SORT_OPTIONS = ["newest", "oldest"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
@@ -418,8 +418,7 @@ function useIntersectionObserver(onIntersect: () => void, enabled: boolean) {
 }
 
 export default function ThreadsPage() {
-	const params = useParams();
-	const serverId = params.serverId as string;
+	const serverId = useDashboardServerId();
 	const session = useSession({ allowAnonymous: false });
 	const isMobile = useIsMobile();
 
