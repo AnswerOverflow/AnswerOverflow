@@ -87,7 +87,11 @@ export class ConvexClientHttp extends Context.Tag("ConvexClientHttp")<
 	Effect.Effect.Success<typeof createHttpService>
 >() {}
 
-const ConvexClientHttpSharedLayer = Layer.effectContext(
+const ConvexClientHttpSharedLayer: Layer.Layer<
+	ConvexClientHttp | ConvexClientUnified,
+	never,
+	never
+> = Layer.effectContext(
 	Effect.gen(function* () {
 		const service = yield* createHttpService;
 		const unifiedService: WrappedUnifiedClient = {

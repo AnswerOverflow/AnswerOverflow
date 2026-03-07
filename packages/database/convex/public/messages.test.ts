@@ -661,6 +661,56 @@ describe("privacy filtering", () => {
 	);
 
 	it.scoped(
+		"should anonymize author details when server has anonymization enabled",
+		() =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const server = yield* createServer();
+				const channel = yield* createChannel(server.discordId, { type: 0 });
+				const author = yield* createAuthor({
+					name: "VisibleAuthor",
+					avatar: "visible-avatar",
+				});
+
+				yield* enableChannelIndexing(channel.id);
+				yield* database.private.server_preferences.upsertServerPreferences({
+					serverId: server.discordId,
+					plan: "FREE",
+					considerAllMessagesPublicEnabled: true,
+					anonymizeMessagesEnabled: true,
+				});
+
+				const baseId = 1000000000000000000n;
+
+				yield* createMessage(
+					{
+						authorId: author.id,
+						serverId: server.discordId,
+						channelId: channel.id,
+					},
+					{ id: baseId + 1n },
+				);
+
+				const result = yield* database.public.messages.getMessages(
+					{
+						channelId: channel.id,
+						after: baseId,
+						paginationOpts: { numItems: 10, cursor: null },
+					},
+					{ subscribe: false },
+				);
+
+				expect(result.page).toHaveLength(1);
+				const anonymizedAuthor = result.page[0]?.author;
+				expect(anonymizedAuthor).not.toBeNull();
+				expect(anonymizedAuthor?.isAnonymous).toBe(true);
+				expect(anonymizedAuthor?.id).not.toBe(author.id);
+				expect(anonymizedAuthor?.name).not.toBe(author.name);
+				expect(anonymizedAuthor?.avatar).toBeUndefined();
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+	);
+
+	it.scoped(
 		"should show messages when author has canPubliclyDisplayMessages consent",
 		() =>
 			Effect.gen(function* () {

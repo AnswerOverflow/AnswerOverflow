@@ -163,7 +163,11 @@ export class ConvexClientLive extends Context.Tag("ConvexClientLive")<
 	Effect.Effect.Success<typeof createLiveService>
 >() {}
 
-const ConvexClientLiveSharedLayer = Layer.effectContext(
+const ConvexClientLiveSharedLayer: Layer.Layer<
+	ConvexClientLive | ConvexClientUnified,
+	never,
+	never
+> = Layer.effectContext(
 	Effect.gen(function* () {
 		const service = yield* createLiveService;
 		const clientProxy = new Proxy({} as ConvexClientShared, {

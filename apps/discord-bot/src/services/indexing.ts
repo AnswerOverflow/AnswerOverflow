@@ -1063,7 +1063,7 @@ export function runIndexingCore() {
 		yield* Effect.logInfo("=== Starting indexing run ===");
 
 		const guilds = yield* discord.getGuilds();
-		const shuffledGuilds = yield* Random.shuffle(guilds);
+		const shuffledGuilds = Arr.fromIterable(yield* Random.shuffle(guilds));
 		const totalGuilds = shuffledGuilds.length;
 		yield* Effect.logInfo(
 			`Found ${totalGuilds} guilds to index (randomized order)`,

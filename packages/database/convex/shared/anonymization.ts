@@ -11,6 +11,16 @@ export type DiscordAccountPublic = {
 	avatar?: string | null;
 };
 
+const textEncoder = new TextEncoder();
+
+function encodeHexPrefix(value: string, maxHexLength: number): string {
+	return Array.from(textEncoder.encode(value), (byte) =>
+		byte.toString(16).padStart(2, "0"),
+	)
+		.join("")
+		.slice(0, maxHexLength);
+}
+
 export function anonymizeDiscordAccount(seed: bigint): DiscordAccountPublic {
 	const seedStr = seed.toString();
 	const shortName: string = uniqueNamesGenerator({
@@ -20,9 +30,7 @@ export function anonymizeDiscordAccount(seed: bigint): DiscordAccountPublic {
 		seed: seedStr,
 	});
 
-	const randomId = BigInt(
-		"0x" + Buffer.from(shortName).toString("hex").slice(0, 16),
-	);
+	const randomId = BigInt(`0x${encodeHexPrefix(shortName, 16) || "0"}`);
 
 	return {
 		avatar: null,
