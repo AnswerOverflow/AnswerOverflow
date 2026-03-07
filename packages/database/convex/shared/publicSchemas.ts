@@ -335,6 +335,7 @@ const authorValidator = v.union(
 		id: v.int64(),
 		name: v.string(),
 		avatar: v.optional(v.string()),
+		isAnonymous: v.optional(v.boolean()),
 	}),
 	v.null(),
 );
