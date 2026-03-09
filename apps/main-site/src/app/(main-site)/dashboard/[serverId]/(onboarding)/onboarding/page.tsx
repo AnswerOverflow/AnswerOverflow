@@ -157,6 +157,8 @@ export default function OnboardingPage() {
 		);
 	}
 
+	console.log("serverId", serverId);
+	console.log("selectedServer", selectedServer);
 	if (!serverId || !selectedServer) {
 		return (
 			<main className="flex flex-col p-6 md:p-8 pt-12 md:pt-16 min-h-[calc(100vh-4rem)]">
