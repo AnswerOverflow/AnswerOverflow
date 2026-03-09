@@ -2,6 +2,11 @@
   <img src="./assets/answer-overflow-banner-v3.png" alt="Answer Overflow" />
 </p>
 
+<a href="https://vercel.com/oss">
+  <img alt="Vercel OSS Program" src="https://vercel.com/oss/program-badge.svg" />
+</a>
+
+
 # Answer Overflow
 
 Questions get answered in your Discord, then that knowledge disappears. Answer Overflow makes it findable - in Google, ChatGPT, your AI agents via MCP, wherever people are looking for answers.
