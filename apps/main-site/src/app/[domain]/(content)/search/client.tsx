@@ -32,6 +32,7 @@ function TenantSearchResults({
 			queryArgs={{ query, serverId }}
 			pageSize={10}
 			initialLoaderCount={5}
+			skipLoadedQueries={true}
 			loader={<ThreadCardSkeleton />}
 			emptyState={
 				<Empty className="py-16">
