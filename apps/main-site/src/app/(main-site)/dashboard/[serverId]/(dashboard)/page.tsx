@@ -27,20 +27,19 @@ import {
 	TableHeader,
 	TableRow,
 } from "@packages/ui/components/table";
-import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
-import { Option as O } from "effect";
 import {
 	ExternalLink,
 	FileText,
 	MessageSquare,
 	MessagesSquare,
 } from "lucide-react";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
+import { getDashboardServerIdFromPathname } from "../server-id-context";
 
 type DatePreset = "7d" | "30d" | "90d" | "all";
 
@@ -677,28 +676,12 @@ function DashboardContent({ serverId }: { serverId: bigint }) {
 }
 
 export default function DashboardOverviewPage() {
-	const params = useParams<{ serverId?: string | Array<string> }>();
 	const pathname = usePathname();
-	const rawServerIdParam = params.serverId;
-	const serverIdParam =
-		typeof rawServerIdParam === "string"
-			? rawServerIdParam
-			: (rawServerIdParam?.[0] ?? "");
+	const serverId = getDashboardServerIdFromPathname(pathname);
 
-	const parsedServerIdFromParam = parseSnowflakeId(serverIdParam.trim());
-	const parsedServerId = O.isSome(parsedServerIdFromParam)
-		? parsedServerIdFromParam
-		: (() => {
-				const fallbackServerId = pathname.match(/^\/dashboard\/(\d+)/)?.[1];
-				if (!fallbackServerId) {
-					return O.none();
-				}
-				return parseSnowflakeId(fallbackServerId);
-			})();
-
-	if (O.isNone(parsedServerId)) {
+	if (!serverId) {
 		return <div className="text-muted-foreground">Invalid server ID</div>;
 	}
 
-	return <DashboardContent serverId={parsedServerId.value.id} />;
+	return <DashboardContent serverId={BigInt(serverId)} />;
 }

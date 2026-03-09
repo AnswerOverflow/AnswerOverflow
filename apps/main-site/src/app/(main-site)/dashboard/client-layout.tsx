@@ -11,6 +11,7 @@ import { Spinner } from "@packages/ui/components/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { usePathname } from "next/navigation";
+import { getDashboardServerIdFromPathname } from "./[serverId]/server-id-context";
 
 export default function DashboardLayout({
 	children,
@@ -21,13 +22,12 @@ export default function DashboardLayout({
 	const { data: session, isPending } = useSession({ allowAnonymous: false });
 
 	const isDashboardRoot = pathname === "/dashboard";
-	const serverIdMatch = pathname?.match(/^\/dashboard\/([^/]+)/);
-	const serverId = serverIdMatch ? (serverIdMatch[1] as string) : undefined;
+	const serverId = getDashboardServerIdFromPathname(pathname);
 	const getUserServers = useAction(api.authenticated.dashboard.getUserServers);
 
-	const shouldShowServerSelect = serverId !== undefined;
+	const shouldShowServerSelect = serverId !== null;
 	const shouldLoadServerList =
-		serverId !== undefined && !isPending && !!session?.user;
+		serverId !== null && !isPending && !!session?.user;
 
 	const {
 		data: servers,
@@ -58,7 +58,7 @@ export default function DashboardLayout({
 	const serverSelectProps =
 		shouldShowServerSelect && serversForDropdown.length > 0
 			? {
-					currentServerId: serverId,
+					currentServerId: serverId ?? undefined,
 					servers: serversForDropdown,
 					getServerHref: (id: string) => `/dashboard/${id}`,
 					addNewHref: "/dashboard",

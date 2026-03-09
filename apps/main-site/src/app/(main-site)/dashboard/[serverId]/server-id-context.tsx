@@ -1,29 +1,34 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
+import { Option as O } from "effect";
+import { usePathname } from "next/navigation";
 
-const DashboardServerIdContext = createContext<string | null>(null);
+export const getDashboardServerIdFromPathname = (
+	pathname: string | null,
+): string | null => {
+	const serverIdSegment = pathname?.match(/^\/dashboard\/([^/]+)/)?.[1];
 
-export function DashboardServerIdProvider({
-	serverId,
-	children,
-}: {
-	serverId: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<DashboardServerIdContext.Provider value={serverId}>
-			{children}
-		</DashboardServerIdContext.Provider>
-	);
-}
+	if (!serverIdSegment) {
+		return null;
+	}
+
+	const parsedServerId = parseSnowflakeId(serverIdSegment.trim());
+
+	if (O.isNone(parsedServerId)) {
+		return null;
+	}
+
+	return parsedServerId.value.cleaned;
+};
 
 export function useDashboardServerId(): string {
-	const serverId = useContext(DashboardServerIdContext);
+	const pathname = usePathname();
+	const serverId = getDashboardServerIdFromPathname(pathname);
 
 	if (!serverId) {
 		throw new Error(
-			"useDashboardServerId must be used within DashboardServerIdProvider",
+			"useDashboardServerId could not determine a valid server ID from the URL",
 		);
 	}
 
