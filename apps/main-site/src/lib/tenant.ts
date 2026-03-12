@@ -2,7 +2,6 @@ import { Database } from "@packages/database/database";
 import type { Tenant } from "@packages/ui/components/tenant-context";
 import { normalizeSubpath } from "@packages/ui/utils/links";
 import { Effect } from "effect";
-import { cacheLife, cacheTag } from "next/cache";
 import { runtime } from "./runtime";
 
 const subpathTenants = [
@@ -30,8 +29,6 @@ export async function getTenantData(
 	domain: string,
 ): Promise<TenantMetadata | null> {
 	// "use cache";
-	cacheLife("hours");
-	cacheTag("tenant-data", domain);
 
 	const raw = await Effect.gen(function* () {
 		const database = yield* Database;

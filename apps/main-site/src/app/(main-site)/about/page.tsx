@@ -2,7 +2,6 @@ import { Database } from "@packages/database/database";
 import { SessionRecording } from "@packages/ui/analytics/client";
 import { Effect } from "effect";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
 import { runtime } from "../../../lib/runtime";
 import { AboutPageClient, AboutPageSkeleton } from "./client";
@@ -21,8 +20,6 @@ export const metadata: Metadata = {
 
 async function fetchAboutPageServers() {
 	// "use cache";
-	cacheLife("hours");
-	cacheTag("about-servers");
 
 	return Effect.gen(function* () {
 		const database = yield* Database;

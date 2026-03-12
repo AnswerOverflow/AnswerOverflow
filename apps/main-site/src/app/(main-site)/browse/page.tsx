@@ -1,7 +1,6 @@
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { runtime } from "../../../lib/runtime";
 import { ServerGrid } from "./client";
 
@@ -18,8 +17,6 @@ export const metadata: Metadata = {
 
 export async function getBrowseServers() {
 	// "use cache";
-	cacheLife("hours");
-	cacheTag("browse-servers");
 
 	const servers = await Effect.gen(function* () {
 		const database = yield* Database;

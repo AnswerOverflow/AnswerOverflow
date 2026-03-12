@@ -1,7 +1,6 @@
 import { Database } from "@packages/database/database";
 import { decodeCursor } from "@packages/ui/utils/cursor";
 import { Effect } from "effect";
-import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
 import { runtime } from "../../lib/runtime";
 import { HomePageClient, HomePageSkeleton } from "./client";
@@ -12,8 +11,6 @@ type Props = {
 
 async function fetchRecentThreads(cursor: string | null) {
 	// "use cache";
-	cacheLife("minutes");
-	cacheTag("home-recent-threads", cursor ?? "initial");
 
 	return Effect.gen(function* () {
 		const database = yield* Database;

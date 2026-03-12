@@ -6,7 +6,6 @@ import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import {
@@ -21,8 +20,6 @@ export function generateStaticParams() {
 
 async function fetchTenantData(domain: string) {
 	// "use cache";
-	cacheLife("hours");
-	cacheTag("tenant-user-page", domain);
 
 	return Effect.gen(function* () {
 		const database = yield* Database;

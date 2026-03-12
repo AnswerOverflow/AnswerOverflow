@@ -8,7 +8,6 @@ import { TimeAgo } from "@packages/ui/components/time-ago";
 import type { FunctionReturnType } from "convex/server";
 import { Effect, Exit } from "effect";
 import { CheckCircle2 } from "lucide-react";
-import { cacheLife, cacheTag } from "next/cache";
 import { runtime } from "@/lib/runtime";
 
 type SimilarThreadsProps = {
@@ -167,8 +166,6 @@ function SimilarThreadsList(props: {
 
 export async function SimilarThreads(props: SimilarThreadsProps) {
 	// "use cache";
-	cacheLife("minutes");
-	cacheTag("similar-threads-component", props.currentThreadId);
 
 	const results = await fetchSimilarThreads({
 		...props,

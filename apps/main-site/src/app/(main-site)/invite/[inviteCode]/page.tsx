@@ -2,7 +2,6 @@ import { Database } from "@packages/database/database";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Effect } from "effect";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { DiscordInviteLanding } from "../../../../components/discord-invite-landing";
@@ -18,8 +17,6 @@ export function generateStaticParams() {
 
 async function checkServerExists(guildId: string): Promise<boolean> {
 	// "use cache";
-	cacheLife("minutes");
-	cacheTag("server-exists", guildId);
 
 	return Effect.gen(function* () {
 		const database = yield* Database;

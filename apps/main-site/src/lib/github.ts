@@ -1,5 +1,3 @@
-import { cacheLife, cacheTag } from "next/cache";
-
 export type GitHubSearchRepo = {
 	id: number;
 	name: string;
@@ -13,8 +11,6 @@ export type GitHubSearchRepo = {
 
 export async function getFeaturedRepos(): Promise<Array<GitHubSearchRepo>> {
 	// "use cache";
-	cacheLife("days");
-	cacheTag("featured-repos");
 
 	const response = await fetch(
 		"https://api.github.com/search/repositories?q=stars:>50000&per_page=20&sort=stars&order=desc",
@@ -60,8 +56,6 @@ export async function getFeaturedRepos(): Promise<Array<GitHubSearchRepo>> {
 
 export async function getGitHubStars(): Promise<number | null> {
 	// "use cache";
-	cacheLife("hours");
-	cacheTag("github-stars");
 
 	const response = await fetch(
 		"https://api.github.com/repos/AnswerOverflow/AnswerOverflow",

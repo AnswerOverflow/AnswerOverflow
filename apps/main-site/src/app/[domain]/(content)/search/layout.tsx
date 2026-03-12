@@ -1,13 +1,10 @@
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { runtime } from "../../../../lib/runtime";
 
 async function fetchTenantDataForSearch(domain: string) {
 	// "use cache";
-	cacheLife("hours");
-	cacheTag("tenant-search", domain);
 
 	return Effect.gen(function* () {
 		const database = yield* Database;

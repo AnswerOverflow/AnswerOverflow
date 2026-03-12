@@ -4,7 +4,6 @@ import { decodeCursor } from "@packages/ui/utils/cursor";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import {
@@ -36,8 +35,6 @@ export function generateStaticParams() {
 
 async function fetchTenantAndHeaderData(domain: string, messageId: bigint) {
 	// "use cache";
-	cacheLife("minutes");
-	cacheTag("tenant-message-page", domain, messageId.toString());
 
 	return Effect.gen(function* () {
 		const database = yield* Database;
@@ -90,12 +87,6 @@ async function RepliesLoader(props: {
 	cursor: string | null;
 }) {
 	// "use cache";
-	cacheLife("minutes");
-	cacheTag(
-		"tenant-replies-loader",
-		props.channelId.toString(),
-		props.after.toString(),
-	);
 
 	const initialData = await fetchMessagePageReplies({
 		channelId: props.channelId,
