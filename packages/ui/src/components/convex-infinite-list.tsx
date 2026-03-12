@@ -30,7 +30,6 @@ type ConvexInfiniteListProps<Query extends PaginatedQueryReference> = {
 	filterResults?: (
 		items: Array<PaginatedQueryItem<Query>>,
 	) => Array<PaginatedQueryItem<Query>>;
-	skipLoadedQueries?: boolean;
 };
 
 function LoadingSkeletons({
@@ -63,7 +62,6 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	className,
 	itemClassName = "mb-4",
 	filterResults,
-	skipLoadedQueries = false,
 }: ConvexInfiniteListProps<Query>) {
 	const {
 		results: rawResults,
@@ -72,7 +70,6 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 	} = useCachedPaginatedQuery(query, queryArgs, {
 		initialNumItems: pageSize,
 		initialData,
-		skipLoadedQueries,
 	});
 
 	const results = filterResults

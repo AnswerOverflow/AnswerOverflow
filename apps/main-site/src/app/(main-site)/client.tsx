@@ -92,7 +92,6 @@ export function HomePageClient({
 						queryArgs={{ query: debouncedSearchQuery }}
 						pageSize={20}
 						initialLoaderCount={5}
-						skipLoadedQueries={true}
 						loader={<ThreadCardSkeleton />}
 						emptyState={
 							<Empty className="py-16">
@@ -122,7 +121,6 @@ export function HomePageClient({
 							queryArgs={{}}
 							pageSize={20}
 							initialLoaderCount={5}
-							skipLoadedQueries={true}
 							loader={<ThreadCardSkeleton />}
 							initialData={initialData}
 							emptyState={

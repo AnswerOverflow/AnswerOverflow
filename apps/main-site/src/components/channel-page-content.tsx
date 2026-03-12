@@ -420,7 +420,6 @@ function SearchResults({
 			queryArgs={{ query, serverId, channelId, tagIds: queryTagIds }}
 			pageSize={20}
 			initialLoaderCount={5}
-			skipLoadedQueries={true}
 			loader={<ThreadCardSkeleton />}
 			className="space-y-4"
 			emptyState={emptyState}
@@ -451,7 +450,6 @@ export function ServerThreadsList({
 				queryArgs={{ serverDiscordId }}
 				pageSize={20}
 				initialLoaderCount={5}
-				skipLoadedQueries={true}
 				loader={<ChannelThreadCardSkeleton />}
 				initialData={initialData}
 				className="space-y-4"
@@ -513,7 +511,6 @@ export function ThreadsList({
 				queryArgs={{ channelDiscordId, tagIds }}
 				pageSize={20}
 				initialLoaderCount={5}
-				skipLoadedQueries={true}
 				loader={<ChannelThreadCardSkeleton />}
 				initialData={hasTagFilter ? undefined : initialData}
 				className="space-y-4"
@@ -569,7 +566,6 @@ export function MessagesList({
 				queryArgs={{ channelDiscordId }}
 				pageSize={20}
 				initialLoaderCount={5}
-				skipLoadedQueries={true}
 				loader={<MessageCardSkeleton />}
 				initialData={initialData}
 				className="space-y-4"

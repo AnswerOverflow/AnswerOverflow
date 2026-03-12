@@ -18,7 +18,6 @@ type PaginationState = {
 	pages: PageInfo[];
 	lastCursor: string | null;
 	isDone: boolean;
-	pageResults: Array<PageResult | undefined>;
 };
 
 type PageResult = {
@@ -61,7 +60,6 @@ function setCachedPaginationState(key: string, state: PaginationState): void {
 type CachedPaginatedQueryOptions = {
 	initialNumItems: number;
 	initialData?: PageResult;
-	skipLoadedQueries?: boolean;
 };
 
 export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
@@ -69,7 +67,7 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 	args: PaginatedQueryArgs<Query> | "skip",
 	options: CachedPaginatedQueryOptions,
 ): UsePaginatedQueryReturnType<Query> {
-	const { initialNumItems, initialData, skipLoadedQueries = false } = options;
+	const { initialNumItems, initialData } = options;
 	const skip = args === "skip";
 
 	const queryName = getFunctionName(query);
@@ -84,14 +82,6 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 		}
 		return [{ cursor: "", numItems: initialNumItems }];
 	});
-	const [storedPageResults, setStoredPageResults] = useState<
-		Array<PageResult | undefined>
-	>(() => {
-		if (cachedState && cachedState.pageResults.length > 0) {
-			return cachedState.pageResults;
-		}
-		return initialData ? [initialData] : [];
-	});
 
 	const prevCacheKeyRef = useRef(cacheKey);
 
@@ -101,13 +91,11 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 			const newCachedState = skip ? null : getCachedPaginationState(cacheKey);
 			if (newCachedState && newCachedState.pages.length > 0) {
 				setPages(newCachedState.pages);
-				setStoredPageResults(newCachedState.pageResults);
 			} else {
 				setPages([{ cursor: "", numItems: initialNumItems }]);
-				setStoredPageResults(initialData ? [initialData] : []);
 			}
 		}
-	}, [cacheKey, skip, initialNumItems, initialData]);
+	}, [cacheKey, skip, initialNumItems]);
 
 	const queries = useMemo(() => {
 		if (skip) {
@@ -120,9 +108,6 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 		> = {};
 
 		pages.forEach((page, index) => {
-			if (skipLoadedQueries && storedPageResults[index] !== undefined) {
-				return;
-			}
 			queryMap[`page${index}`] = {
 				query: query as FunctionReference<"query">,
 				args: {
@@ -136,23 +121,16 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 		});
 
 		return queryMap;
-	}, [skip, query, args, pages, skipLoadedQueries, storedPageResults]);
+	}, [skip, query, args, pages]);
 
 	const results = useQueries(queries);
 
 	const isUsingInitialData =
-		storedPageResults[0] === undefined &&
-		results.page0 === undefined &&
-		initialData !== undefined;
+		results.page0 === undefined && initialData !== undefined;
 
 	const pageResults = useMemo(() => {
 		const pageData: Array<PageResult | undefined> = [];
 		for (let i = 0; i < pages.length; i++) {
-			const storedResult = storedPageResults[i];
-			if (storedResult !== undefined) {
-				pageData.push(storedResult);
-				continue;
-			}
 			const result = results[`page${i}`];
 			if (result instanceof Error) {
 				throw result;
@@ -164,7 +142,7 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 			}
 		}
 		return pageData;
-	}, [results, pages.length, initialData, storedPageResults]);
+	}, [results, pages.length, initialData]);
 
 	const allItems = useMemo(() => {
 		const items: Array<Value> = [];
@@ -175,29 +153,6 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 		}
 		return items;
 	}, [pageResults]);
-
-	useEffect(() => {
-		if (skip || !skipLoadedQueries) return;
-
-		setStoredPageResults((previousResults) => {
-			let changed = previousResults.length !== pages.length;
-			const nextResults = pages.map((_, index) => {
-				const previousResult = previousResults[index];
-				if (previousResult !== undefined) {
-					return previousResult;
-				}
-
-				const pageResult = pageResults[index];
-				if (pageResult !== undefined) {
-					changed = true;
-				}
-
-				return pageResult;
-			});
-
-			return changed ? nextResults : previousResults;
-		});
-	}, [skip, skipLoadedQueries, pageResults, pages]);
 
 	const lastLoadedPageIndex = useMemo(() => {
 		for (let i = pageResults.length - 1; i >= 0; i--) {
@@ -222,7 +177,6 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 			pages,
 			lastCursor: lastLoadedResult?.continueCursor ?? null,
 			isDone: lastLoadedResult?.isDone ?? false,
-			pageResults,
 		};
 		setCachedPaginationState(cacheKey, state);
 	}, [
@@ -230,7 +184,6 @@ export function useCachedPaginatedQuery<Query extends PaginatedQueryReference>(
 		cacheKey,
 		pages,
 		lastLoadedResult,
-		pageResults,
 		isLoadingFirstPage,
 		isLoadingMore,
 	]);

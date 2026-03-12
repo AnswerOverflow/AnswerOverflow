@@ -123,7 +123,6 @@ function UserPostsList({
 			queryArgs={{ userId, serverId }}
 			pageSize={20}
 			initialLoaderCount={5}
-			skipLoadedQueries={true}
 			loader={<ThreadCardSkeleton />}
 			emptyState={<EmptyState message="No posts found" />}
 			renderItem={(result: SearchResult) => (

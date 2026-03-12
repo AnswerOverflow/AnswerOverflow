@@ -210,7 +210,6 @@ export function MessageContent(props: {
 					}}
 					pageSize={50}
 					initialLoaderCount={3}
-					skipLoadedQueries={true}
 					loader={<ReplyMessageSkeleton />}
 					filterResults={filterMessages}
 					emptyState={
@@ -323,7 +322,6 @@ export function RepliesSection(props: {
 						}}
 						pageSize={50}
 						initialLoaderCount={3}
-						skipLoadedQueries={true}
 						loader={<ReplyMessageSkeleton />}
 						initialData={filteredInitialData}
 						filterResults={filterMessages}
