@@ -21,6 +21,7 @@ import { getTenantUrl, type TenantInfo } from "../utils/links";
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
 	expectAuth: false,
 	unsavedChangesWarning: false,
+	skipConvexDeploymentUrlCheck: true,
 });
 const convexQueryClient = new ConvexQueryClient(convex);
 const queryClient = new QueryClient({
