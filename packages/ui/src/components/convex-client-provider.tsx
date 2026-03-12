@@ -27,6 +27,7 @@ function getConvexClient() {
 		convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
 			expectAuth: false,
 			unsavedChangesWarning: false,
+			verbose: true,
 		});
 	}
 	return convex;
