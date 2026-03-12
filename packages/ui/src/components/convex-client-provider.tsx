@@ -18,37 +18,21 @@ import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 import { getTenantUrl, type TenantInfo } from "../utils/links";
 
-let convex: ConvexReactClient | null = null;
-let convexQueryClient: ConvexQueryClient | null = null;
-let queryClient: QueryClient | null = null;
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
+	expectAuth: false,
+	unsavedChangesWarning: false,
+});
+const convexQueryClient = new ConvexQueryClient(convex);
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			queryKeyHashFn: convexQueryClient.hashFn(),
+			queryFn: convexQueryClient.queryFn(),
+		},
+	},
+});
 
-function getConvexClient() {
-	if (!convex) {
-		convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
-			expectAuth: false,
-			unsavedChangesWarning: false,
-			verbose: true,
-		});
-	}
-	return convex;
-}
-
-function getQueryClient() {
-	if (!queryClient) {
-		const convexInstance = getConvexClient();
-		convexQueryClient = new ConvexQueryClient(convexInstance);
-		queryClient = new QueryClient({
-			defaultOptions: {
-				queries: {
-					queryKeyHashFn: convexQueryClient.hashFn(),
-					queryFn: convexQueryClient.queryFn(),
-				},
-			},
-		});
-		convexQueryClient.connect(queryClient);
-	}
-	return queryClient;
-}
+convexQueryClient.connect(queryClient);
 
 function createAuthClientInstance(baseURL: string | undefined) {
 	return createAuthClient({
@@ -88,16 +72,14 @@ const AuthClientContext = createContext<AuthClient | null>(null);
 function AuthClientProvider({
 	children,
 	tenant,
-	convexClient,
 }: {
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
-	convexClient: ConvexReactClient;
 }) {
 	const authClient = useMemo(() => getOrCreateAuthClient(tenant), [tenant]);
 	return (
 		<AuthClientContext.Provider value={authClient}>
-			<ConvexBetterAuthProvider client={convexClient} authClient={authClient}>
+			<ConvexBetterAuthProvider client={convex} authClient={authClient}>
 				{children}
 			</ConvexBetterAuthProvider>
 		</AuthClientContext.Provider>
@@ -142,16 +124,11 @@ export function ConvexClientProvider({
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
 }) {
-	const qc = getQueryClient();
-	const cc = getConvexClient();
-
 	return (
-		<QueryClientProvider client={qc}>
-			<ConvexProvider client={cc}>
+		<QueryClientProvider client={queryClient}>
+			<ConvexProvider client={convex}>
 				<ConvexQueryCacheProvider>
-					<AuthClientProvider tenant={tenant} convexClient={cc}>
-						{children}
-					</AuthClientProvider>
+					<AuthClientProvider tenant={tenant}>{children}</AuthClientProvider>
 				</ConvexQueryCacheProvider>
 			</ConvexProvider>
 		</QueryClientProvider>
