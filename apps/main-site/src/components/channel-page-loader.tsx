@@ -49,7 +49,7 @@ export async function fetchCommunityPageHeaderData(
 	serverDiscordId: bigint,
 	channelDiscordId?: bigint,
 ): Promise<CommunityPageHeaderData | null> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("community-header", serverDiscordId.toString());
 	if (channelDiscordId) {
@@ -67,7 +67,7 @@ export async function fetchCommunityPageHeaderData(
 export async function fetchServerPageHeaderData(
 	serverDiscordId: bigint,
 ): Promise<ServerPageHeaderData | null> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("server-header", serverDiscordId.toString());
 
@@ -80,7 +80,7 @@ export async function fetchChannelPageHeaderData(
 	serverDiscordId: bigint,
 	channelDiscordId: bigint,
 ): Promise<ChannelPageHeaderData | null> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("channel-page-header", channelDiscordId.toString());
 
@@ -96,7 +96,7 @@ export async function fetchChannelPageThreads(
 	channelDiscordId: bigint,
 	cursor: string | null = null,
 ): Promise<ChannelPageThreads> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("channel-threads", channelDiscordId.toString());
 	return Effect.gen(function* () {
@@ -112,7 +112,7 @@ export async function fetchServerPageThreads(
 	serverDiscordId: bigint,
 	cursor: string | null = null,
 ): Promise<ServerPageThreads> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("server-threads", serverDiscordId.toString());
 	return Effect.gen(function* () {
@@ -128,7 +128,7 @@ export async function fetchChannelPageMessages(
 	channelDiscordId: bigint,
 	cursor: string | null = null,
 ): Promise<ChannelPageMessages> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("channel-messages", channelDiscordId.toString());
 	return Effect.gen(function* () {
@@ -249,7 +249,7 @@ async function ServerThreadsLoader(props: {
 	serverDiscordId: bigint;
 	cursor: string | null;
 }) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("server-threads-loader", props.serverDiscordId.toString());
 
@@ -271,7 +271,7 @@ async function ChannelThreadsLoader(props: {
 	channelDiscordId: bigint;
 	cursor: string | null;
 }) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("channel-threads-loader", props.channelDiscordId.toString());
 
@@ -293,7 +293,7 @@ async function ChannelMessagesLoader(props: {
 	channelDiscordId: bigint;
 	cursor: string | null;
 }) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("channel-messages-loader", props.channelDiscordId.toString());
 
@@ -315,7 +315,7 @@ export async function ServerPageLoader(props: {
 	headerData: ServerPageHeaderData | null;
 	cursor?: string;
 }) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	if (props.headerData) {
 		cacheTag(
@@ -357,7 +357,7 @@ export async function ChannelPageLoader(props: {
 	headerData: ChannelPageHeaderData | null;
 	cursor?: string;
 }) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	if (props.headerData) {
 		cacheTag(

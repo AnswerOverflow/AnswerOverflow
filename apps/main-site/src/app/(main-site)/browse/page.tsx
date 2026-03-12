@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export async function getBrowseServers() {
-	"use cache";
+	// "use cache";
 	cacheLife("hours");
 	cacheTag("browse-servers");
 

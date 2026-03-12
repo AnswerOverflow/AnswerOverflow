@@ -12,7 +12,7 @@ export type GitHubSearchRepo = {
 };
 
 export async function getFeaturedRepos(): Promise<Array<GitHubSearchRepo>> {
-	"use cache";
+	// "use cache";
 	cacheLife("days");
 	cacheTag("featured-repos");
 
@@ -59,7 +59,7 @@ export async function getFeaturedRepos(): Promise<Array<GitHubSearchRepo>> {
 }
 
 export async function getGitHubStars(): Promise<number | null> {
-	"use cache";
+	// "use cache";
 	cacheLife("hours");
 	cacheTag("github-stars");
 

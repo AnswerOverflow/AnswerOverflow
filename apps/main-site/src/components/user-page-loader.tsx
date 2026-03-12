@@ -16,7 +16,7 @@ export type UserPosts = FunctionReturnType<
 export async function fetchUserPageHeaderData(
 	userId: bigint,
 ): Promise<UserPageHeaderData | null> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("user-header", userId.toString());
 

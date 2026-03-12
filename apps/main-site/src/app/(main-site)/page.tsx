@@ -11,7 +11,7 @@ type Props = {
 };
 
 async function fetchRecentThreads(cursor: string | null) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("home-recent-threads", cursor ?? "initial");
 

@@ -10,7 +10,7 @@ const TESTIMONIAL_IDS = [
 ];
 
 async function getTweet(id: string): Promise<Tweet | undefined> {
-	"use cache";
+	// "use cache";
 	cacheLife("hours");
 	cacheTag("tweet", id);
 

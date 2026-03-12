@@ -29,7 +29,7 @@ export type TenantMetadata = {
 export async function getTenantData(
 	domain: string,
 ): Promise<TenantMetadata | null> {
-	"use cache";
+	// "use cache";
 	cacheLife("hours");
 	cacheTag("tenant-data", domain);
 

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 async function fetchAboutPageServers() {
-	"use cache";
+	// "use cache";
 	cacheLife("hours");
 	cacheTag("about-servers");
 

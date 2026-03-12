@@ -17,7 +17,7 @@ export function generateStaticParams() {
 }
 
 async function checkServerExists(guildId: string): Promise<boolean> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("server-exists", guildId);
 

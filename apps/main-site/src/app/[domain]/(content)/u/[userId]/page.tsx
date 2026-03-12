@@ -20,7 +20,7 @@ export function generateStaticParams() {
 }
 
 async function fetchTenantData(domain: string) {
-	"use cache";
+	// "use cache";
 	cacheLife("hours");
 	cacheTag("tenant-user-page", domain);
 

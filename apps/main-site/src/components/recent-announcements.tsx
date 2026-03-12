@@ -122,7 +122,7 @@ function RecentAnnouncementsList(props: {
 }
 
 export async function RecentAnnouncements(props: RecentAnnouncementsProps) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("recent-announcements-component", props.serverId);
 

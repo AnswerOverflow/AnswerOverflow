@@ -35,7 +35,7 @@ export function generateStaticParams() {
 }
 
 async function fetchTenantAndHeaderData(domain: string, messageId: bigint) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("tenant-message-page", domain, messageId.toString());
 
@@ -89,7 +89,7 @@ async function RepliesLoader(props: {
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
 }) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag(
 		"tenant-replies-loader",

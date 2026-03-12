@@ -41,7 +41,7 @@ export type DiscordInviteData = {
 export async function fetchDiscordInvite(
 	inviteCode: string,
 ): Promise<DiscordInviteData | null> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("discord-invite", inviteCode);
 

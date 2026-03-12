@@ -5,7 +5,7 @@ import { runtime } from "../../../lib/runtime";
 import { DashboardClient } from "./client";
 
 async function fetchRecentThreads() {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("dashboard-recent-threads");
 

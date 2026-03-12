@@ -8,7 +8,7 @@ import type { DiscordServerContext } from "./discord-server-types";
 import { runtime } from "./runtime";
 
 export async function getFeaturedServers(): Promise<DiscordServerContext[]> {
-	"use cache";
+	// "use cache";
 	cacheLife("hours");
 	cacheTag("featured-servers");
 

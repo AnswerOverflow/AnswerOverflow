@@ -5,7 +5,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { runtime } from "../../../../lib/runtime";
 
 async function fetchTenantDataForSearch(domain: string) {
-	"use cache";
+	// "use cache";
 	cacheLife("hours");
 	cacheTag("tenant-search", domain);
 

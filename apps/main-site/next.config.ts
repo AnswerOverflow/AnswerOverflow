@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
-	cacheComponents: true,
+	cacheComponents: false,
 	reactCompiler: true,
 	experimental: {
 		turbopackFileSystemCacheForDev: true,

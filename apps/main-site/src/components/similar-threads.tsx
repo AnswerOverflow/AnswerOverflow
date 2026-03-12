@@ -166,7 +166,7 @@ function SimilarThreadsList(props: {
 }
 
 export async function SimilarThreads(props: SimilarThreadsProps) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("similar-threads-component", props.currentThreadId);
 

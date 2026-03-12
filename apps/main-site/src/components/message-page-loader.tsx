@@ -88,7 +88,7 @@ export type MessagePageReplies = FunctionReturnType<
 export async function fetchMessagePageHeaderData(
 	messageId: bigint,
 ): Promise<MessagePageHeaderData | null> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("message-header", messageId.toString());
 
@@ -105,7 +105,7 @@ export async function fetchMessagePageReplies(args: {
 	after: bigint;
 	cursor: string | null;
 }): Promise<MessagePageReplies> {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag("message-replies", args.channelId.toString(), args.after.toString());
 
@@ -182,7 +182,7 @@ async function RepliesLoader(props: {
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
 }) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	cacheTag(
 		"replies-loader",
@@ -216,7 +216,7 @@ export async function MessagePageLoader(props: {
 	messageId: string;
 	cursor?: string;
 }) {
-	"use cache";
+	// "use cache";
 	cacheLife("minutes");
 	if (props.headerData) {
 		cacheTag("message-page-loader", props.headerData.canonicalId.toString());
