@@ -127,6 +127,7 @@ export function ConvexClientProvider({
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
 }) {
+	console.log("query client", queryClient, "convex", convex);
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ConvexProvider client={convex}>
