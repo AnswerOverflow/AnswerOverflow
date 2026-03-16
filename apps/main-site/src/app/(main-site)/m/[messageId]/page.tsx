@@ -19,6 +19,7 @@ type Props = {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
+	const searchParams = await props.searchParams;
 	const parsed = parseSnowflakeId(params.messageId);
 	if (Option.isNone(parsed)) {
 		return notFound();
@@ -26,8 +27,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	if (parsed.value.wasCleaned) {
 		redirect(`/m/${parsed.value.cleaned}`);
 	}
+	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
-	return generateMessagePageMetadata(headerData, params.messageId, null);
+	return generateMessagePageMetadata(headerData, params.messageId, cursor);
 }
 
 async function MessagePageContent(props: Props) {
@@ -46,10 +48,7 @@ async function MessagePageContent(props: Props) {
 	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
 
 	if (headerData?.server.customDomain) {
-		const customUrl = getServerCustomUrl(
-			headerData.server,
-			`/m/${messageId}`,
-		);
+		const customUrl = getServerCustomUrl(headerData.server, `/m/${messageId}`);
 		if (customUrl) {
 			return redirect(customUrl);
 		}
