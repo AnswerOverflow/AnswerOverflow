@@ -38,7 +38,10 @@ import { useEffect } from "react";
 import { FloatingAskInput } from "@/components/floating-ask-input";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { OpenInDiscordLink } from "@/components/open-in-discord-modal";
-import { ResourcesSidebar } from "@/components/resources-sidebar";
+import {
+	ResourcesSidebar,
+	SponsoredCard,
+} from "@/components/resources-sidebar";
 import { ThreadTags } from "@/components/thread-tags";
 
 export type MessagePageHeaderData = NonNullable<
@@ -593,8 +596,8 @@ export function MessagePage(props: {
 						{repliesSlot}
 					</main>
 
-					<div className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:self-start md:w-[400px] [@media(min-height:800px)]:sticky [@media(min-height:800px)]:top-[calc(var(--navbar-height)+1rem)]">
-						<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block overflow-hidden">
+					<aside className="flex w-full shrink-0 flex-col items-center gap-4 text-center md:self-start md:w-[400px] md:sticky md:top-[calc(var(--navbar-height)+1rem)] md:max-h-[calc(100vh-var(--navbar-height)-2rem)] md:overflow-y-auto">
+						<div className="hidden w-full rounded-md border-2 bg-card drop-shadow-md md:block">
 							{headerData.server.banner && (
 								<img
 									src={`https://cdn.discordapp.com/banners/${headerData.server.discordId}/${headerData.server.banner}.webp?size=480`}
@@ -647,6 +650,7 @@ export function MessagePage(props: {
 								{recentAnnouncementsSlot}
 							</div>
 						</div>
+						<SponsoredCard serverId={headerData.server.discordId.toString()} />
 						{similarThreadsSlot}
 						{firstMessage && (
 							<div className="flex w-full flex-col justify-center gap-2 text-center">
@@ -680,7 +684,7 @@ export function MessagePage(props: {
 								/>
 							</div>
 						)}
-					</div>
+					</aside>
 
 					{firstMessage && (
 						<TrackLoad
@@ -710,6 +714,7 @@ export function MessagePage(props: {
 									serverId: firstMessage.message.serverId.toString(),
 									channelId: firstMessage.message.channelId.toString(),
 								},
+								sponsor: !tenant ? "plannotator" : null,
 							}}
 						/>
 					)}

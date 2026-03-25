@@ -21,6 +21,7 @@ export type ClientEvents = {
 	> & {
 		thread?: AnalyticsThread | null;
 		solutionAuthorId?: string | null;
+		sponsor?: string | null;
 	};
 	"Community Page View": Pick<BaseClientProps, "server"> & {
 		channel?: AnalyticsChannel | null;
@@ -116,6 +117,9 @@ export type ClientEvents = {
 	"Sponsor Link Click": {
 		url: string | null | undefined;
 		type: "github" | "other";
+	};
+	"Sponsored Card Click": {
+		sponsor: string;
 	};
 	"Onboarding Feedback Submitted": {
 		serverId: string;

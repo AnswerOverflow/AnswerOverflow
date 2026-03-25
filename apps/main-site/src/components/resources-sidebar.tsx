@@ -25,8 +25,8 @@ import { TrackLink } from "@packages/ui/components/track-link";
 import { cn } from "@packages/ui/lib/utils";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { Check, Copy, Heart } from "lucide-react";
-import { parseAsBoolean, useQueryState } from "nuqs";
 import Image from "next/image";
+import { parseAsBoolean, useQueryState } from "nuqs";
 import { useState } from "react";
 import { mcpProviders } from "./mcp-install-configs";
 
@@ -210,6 +210,36 @@ export function MCPServerResource() {
 				<MCPInstallForm mcpUrl={mcpUrl} serverName={serverName} />
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+const SPONSORED_IMAGE =
+	"https://cdn.answeroverflow.com/1486404878359335092/d2a528c0-128c-4c86-851b-1d5c9ba9e21c.jpeg";
+
+export function SponsoredCard({ serverId }: { serverId?: string }) {
+	const tenant = useTenant();
+	if (tenant || serverId === SUPABASE_SERVER_ID) return null;
+	return (
+		<div className="w-full rounded-md border-2 bg-card drop-shadow-md">
+			<div className="px-3 py-2">
+				<div className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60">
+					Sponsored
+				</div>
+			</div>
+			<TrackLink
+				href="https://plannotator.ai/?utm_source=www.answeroverflow.com"
+				eventName="Sponsored Card Click"
+				eventData={{ sponsor: "plannotator" }}
+			>
+				<Image
+					src={SPONSORED_IMAGE}
+					alt="Plannotator"
+					width={400}
+					height={516}
+					className="w-full h-auto"
+				/>
+			</TrackLink>
+		</div>
 	);
 }
 
