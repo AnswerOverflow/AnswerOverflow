@@ -10,6 +10,7 @@ import type {
 } from "convex/server";
 import { Context, Duration, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
+import betterAuthSchema from "../convex/betterAuth/schema";
 import schema from "../convex/schema";
 import {
 	type ConvexClientShared,
@@ -48,12 +49,16 @@ async function findConvexFiles(
 	return files;
 }
 
-async function buildModules(): Promise<Record<string, () => Promise<unknown>>> {
-	const convexFiles = await findConvexFiles(convexDir);
+async function buildModules(
+	rootDir: string,
+	pathPrefix: string = "",
+): Promise<Record<string, () => Promise<unknown>>> {
+	const convexFiles = await findConvexFiles(rootDir);
 	const modules: Record<string, () => Promise<unknown>> = {};
 	for (const file of convexFiles) {
-		const normalizedPath = `/convex/${file.replace(/\\/g, "/")}`;
-		const fullPath = resolve(convexDir, file);
+		const normalizedPrefix = pathPrefix ? `${pathPrefix}/` : "";
+		const normalizedPath = `/convex/${normalizedPrefix}${file.replace(/\\/g, "/")}`;
+		const fullPath = resolve(rootDir, file);
 		modules[normalizedPath] = async () => {
 			return await import(fullPath);
 		};
@@ -62,8 +67,18 @@ async function buildModules(): Promise<Record<string, () => Promise<unknown>>> {
 }
 
 const createTestService = Effect.gen(function* () {
-	const modules = yield* Effect.promise(buildModules);
+	const [modules, betterAuthModules] = yield* Effect.all([
+		Effect.promise(() => buildModules(convexDir)),
+		Effect.promise(() =>
+			buildModules(join(convexDir, "betterAuth"), "betterAuth"),
+		),
+	]);
 	const testClient = convexTest(schema, modules);
+	testClient.registerComponent(
+		"betterAuth",
+		betterAuthSchema,
+		betterAuthModules,
+	);
 
 	aggregate.register(testClient, "rootChannelMessageCounts");
 	aggregate.register(testClient, "threadMessageCounts");
