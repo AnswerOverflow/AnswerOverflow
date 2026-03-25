@@ -24,7 +24,6 @@ const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
 	skipConvexDeploymentUrlCheck: true,
 });
 
-console.log("convex url", process.env.NEXT_PUBLIC_CONVEX_URL);
 const convexQueryClient = new ConvexQueryClient(convex);
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -127,7 +126,6 @@ export function ConvexClientProvider({
 	children: ReactNode;
 	tenant: TenantInfo | null | undefined;
 }) {
-	console.log("query client", queryClient, "convex", convex);
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ConvexProvider client={convex}>

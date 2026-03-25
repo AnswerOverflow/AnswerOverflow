@@ -641,6 +641,8 @@ export function MessagePage(props: {
 								<ResourcesSidebar
 									className="w-full pt-4 border-t"
 									sponsorUrl={headerData.server.sponsorUrl}
+									serverId={headerData.server.discordId.toString()}
+									bowieImageIndex={Math.floor(Math.random() * 4)}
 								/>
 								{recentAnnouncementsSlot}
 							</div>

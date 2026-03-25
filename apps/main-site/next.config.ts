@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
 				protocol: "https",
 				hostname: "answer-overflow-discord-attachments.s3.amazonaws.com",
 			},
+			{
+				protocol: "https",
+				hostname: "cdn.answeroverflow.com",
+			},
 		],
 	},
 	cacheComponents: false,

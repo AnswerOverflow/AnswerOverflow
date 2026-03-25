@@ -26,8 +26,17 @@ import { cn } from "@packages/ui/lib/utils";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { Check, Copy, Heart } from "lucide-react";
 import { parseAsBoolean, useQueryState } from "nuqs";
+import Image from "next/image";
 import { useState } from "react";
 import { mcpProviders } from "./mcp-install-configs";
+
+const SUPABASE_SERVER_ID = "839993398554656828";
+const BOWIE_IMAGES = [
+	"https://cdn.answeroverflow.com/1486155152824991834/HENwuuXX0AA6qkA.png",
+	"https://cdn.answeroverflow.com/1486155153689149541/HENwuu2bgAADphV.png",
+	"https://cdn.answeroverflow.com/1486155154444255485/HENwuoza8AA4s6Y.png",
+	"https://cdn.answeroverflow.com/1486155058285379784/HENxNsRb0AAfnGN.png",
+];
 
 export function CopyButton({
 	text,
@@ -204,17 +213,41 @@ export function MCPServerResource() {
 	);
 }
 
+function BowieSidebarCard({ imageIndex }: { imageIndex: number }) {
+	return (
+		<div className="mt-4">
+			<Image
+				src={BOWIE_IMAGES[imageIndex % BOWIE_IMAGES.length]!}
+				alt="Bowie the Supabase Dog"
+				width={400}
+				height={400}
+				className="aspect-square w-full object-cover object-center rounded-xl"
+			/>
+			<div className="pt-2">
+				<div className="text-sm font-medium text-foreground/90">
+					Bowie says hi
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export function ResourcesSidebar({
 	className,
 	sponsorUrl,
+	serverId,
+	bowieImageIndex,
 }: {
 	className?: string;
 	sponsorUrl?: string | null;
+	serverId?: string;
+	bowieImageIndex?: number;
 }) {
 	const isGitHubSponsor = sponsorUrl?.includes("github.com/sponsors");
 	const sponsorLabel = isGitHubSponsor
 		? "GitHub Sponsor"
 		: "Support the project";
+	const showBowieCard = serverId === SUPABASE_SERVER_ID;
 
 	return (
 		<div className={cn("text-left", className)}>
@@ -241,6 +274,7 @@ export function ResourcesSidebar({
 					</TrackLink>
 				)}
 			</nav>
+			{showBowieCard && <BowieSidebarCard imageIndex={bowieImageIndex ?? 0} />}
 		</div>
 	);
 }
