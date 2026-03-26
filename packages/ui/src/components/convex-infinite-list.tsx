@@ -85,8 +85,11 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 				lastLoadedLength.current = results.length;
 			}
 
-			const lastPageStart = lastLoadedLength.current - pageSize;
-			if (range.endIndex >= lastPageStart) {
+			const loadMoreThreshold = Math.max(
+				lastLoadedLength.current - Math.min(pageSize, 5),
+				0,
+			);
+			if (range.endIndex >= loadMoreThreshold) {
 				lastLoadedLength.current = results.length + pageSize;
 				loadMore(pageSize);
 			}
