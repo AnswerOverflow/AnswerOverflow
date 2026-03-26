@@ -315,7 +315,7 @@ export const service = Effect.gen(function* () {
 					const wrappedFunction = ((
 						args?: any,
 						options: QueryOptions = {
-							subscribe: true,
+							subscribe: false,
 						},
 					) => {
 						const fullArgs: Record<string, unknown> = isPublic
@@ -411,7 +411,7 @@ export const service = Effect.gen(function* () {
 					const wrappedFunction = ((
 						args?: any,
 						// @ts-expect-error
-						options: AuthenticatedQueryOptions = { subscribe: true },
+						options: AuthenticatedQueryOptions = { subscribe: false },
 					) => {
 						const { subscribe, discordAccountId, token } = options;
 

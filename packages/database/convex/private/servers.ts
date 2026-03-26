@@ -203,30 +203,29 @@ export const getAllServers = privateQuery({
 export const getBrowseServers = privateQuery({
 	args: {},
 	handler: async (ctx) => {
-		const allServers = await ctx.db.query("servers").collect();
+		const indexedSettings = await ctx.db
+			.query("channelSettings")
+			.withIndex("by_indexingEnabled_and_serverId", (q) =>
+				q.eq("indexingEnabled", true),
+			)
+			.collect();
 
-		const nonKickedServers = allServers.filter(
-			(server) => server.kickedTime === undefined || server.kickedTime === null,
+		const serverIds = Arr.dedupe(
+			Arr.filter(
+				indexedSettings.map((setting) => setting.serverId),
+				Predicate.isNotNullable,
+			),
+		);
+		const servers = await asyncMap(serverIds, (serverId) =>
+			getOneFrom(ctx.db, "servers", "by_discordId", serverId),
 		);
 
-		const filteredServers: typeof nonKickedServers = [];
-
-		for (const server of nonKickedServers) {
-			const hasIndexingEnabled = await ctx.db
-				.query("channelSettings")
-				.withIndex("by_serverId_and_indexingEnabled", (q) =>
-					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
-				)
-				.first();
-
-			if (hasIndexingEnabled) {
-				filteredServers.push(server);
-			}
-		}
-
-		return filteredServers.sort(
-			(a, b) => b.approximateMemberCount - a.approximateMemberCount,
-		);
+		return Arr.filter(servers, Predicate.isNotNull)
+			.filter(
+				(server) =>
+					server.kickedTime === undefined || server.kickedTime === null,
+			)
+			.sort((a, b) => b.approximateMemberCount - a.approximateMemberCount);
 	},
 });
 
@@ -349,14 +348,14 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 		]);
 
 		const indexedChannelIds = new Set(indexedSettings.map((s) => s.channelId));
+		const allServerChannels = await ctx.db
+			.query("channels")
+			.withIndex("by_serverId", (q) => q.eq("serverId", server.discordId))
+			.collect();
 
-		const indexedChannels = await asyncMap(
-			Array.from(indexedChannelIds),
-			(channelId) =>
-				getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
-		);
-
-		const channels = Arr.filter(indexedChannels, Predicate.isNotNull)
+		const channels = Arr.filter(allServerChannels, (channel) =>
+			indexedChannelIds.has(channel.id),
+		)
 			.filter(
 				(c) =>
 					c.type === CHANNEL_TYPE.GuildText ||
@@ -385,30 +384,29 @@ export const getServerByDiscordIdWithChannels = privateQuery({
 export const getBrowseServersInternal = internalQuery({
 	args: {},
 	handler: async (ctx) => {
-		const allServers = await ctx.db.query("servers").collect();
+		const indexedSettings = await ctx.db
+			.query("channelSettings")
+			.withIndex("by_indexingEnabled_and_serverId", (q) =>
+				q.eq("indexingEnabled", true),
+			)
+			.collect();
 
-		const nonKickedServers = allServers.filter(
-			(server) => server.kickedTime === undefined || server.kickedTime === null,
+		const serverIds = Arr.dedupe(
+			Arr.filter(
+				indexedSettings.map((setting) => setting.serverId),
+				Predicate.isNotNullable,
+			),
+		);
+		const servers = await asyncMap(serverIds, (serverId) =>
+			getOneFrom(ctx.db, "servers", "by_discordId", serverId),
 		);
 
-		const filteredServers: typeof nonKickedServers = [];
-
-		for (const server of nonKickedServers) {
-			const hasIndexingEnabled = await ctx.db
-				.query("channelSettings")
-				.withIndex("by_serverId_and_indexingEnabled", (q) =>
-					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
-				)
-				.first();
-
-			if (hasIndexingEnabled) {
-				filteredServers.push(server);
-			}
-		}
-
-		return filteredServers.sort(
-			(a, b) => b.approximateMemberCount - a.approximateMemberCount,
-		);
+		return Arr.filter(servers, Predicate.isNotNull)
+			.filter(
+				(server) =>
+					server.kickedTime === undefined || server.kickedTime === null,
+			)
+			.sort((a, b) => b.approximateMemberCount - a.approximateMemberCount);
 	},
 });
 

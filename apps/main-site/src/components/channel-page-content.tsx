@@ -3,7 +3,6 @@
 import { api } from "@packages/database/convex/_generated/api";
 import type { ForumTag } from "@packages/database/convex/schema";
 import { Button } from "@packages/ui/components/button";
-import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import {
 	Empty,
 	EmptyDescription,
@@ -22,6 +21,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@packages/ui/components/sheet";
+import { SnapshotInfiniteList } from "@packages/ui/components/snapshot-infinite-list";
 import { useTenant } from "@packages/ui/components/tenant-context";
 import {
 	ChannelMessageCard,
@@ -36,10 +36,11 @@ import { cn } from "@packages/ui/lib/utils";
 import { encodeCursor } from "@packages/ui/utils/cursor";
 import { ChannelType, getChannelIcon } from "@packages/ui/utils/discord";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
+import { useConvex } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { FileQuestion, Menu } from "lucide-react";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { JsonLdScript } from "./json-ld-script";
 import { ResourcesSidebar } from "./resources-sidebar";
@@ -413,11 +414,25 @@ function SearchResults({
 	);
 
 	const queryTagIds = tagIds && tagIds.length > 0 ? tagIds : undefined;
+	const convex = useConvex();
+	const loadPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.search.publicSearch, {
+				query,
+				serverId,
+				channelId,
+				tagIds: queryTagIds,
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[channelId, convex, query, queryTagIds, serverId],
+	);
 
 	return (
-		<ConvexInfiniteList
-			query={api.public.search.publicSearch}
-			queryArgs={{ query, serverId, channelId, tagIds: queryTagIds }}
+		<SnapshotInfiniteList
+			loadPage={loadPage}
 			pageSize={20}
 			initialLoaderCount={5}
 			loader={<ThreadCardSkeleton />}
@@ -443,11 +458,23 @@ export function ServerThreadsList({
 	initialData?: ServerPageThreads;
 	nextCursor?: string | null;
 }) {
+	const convex = useConvex();
+	const loadPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.channels.getServerPageThreads, {
+				serverDiscordId,
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[convex, serverDiscordId],
+	);
+
 	return (
 		<>
-			<ConvexInfiniteList
-				query={api.public.channels.getServerPageThreads}
-				queryArgs={{ serverDiscordId }}
+			<SnapshotInfiniteList
+				loadPage={loadPage}
 				pageSize={20}
 				initialLoaderCount={5}
 				loader={<ChannelThreadCardSkeleton />}
@@ -503,12 +530,24 @@ export function ThreadsList({
 	);
 	const hasTagFilter = selectedTagIds.length > 0;
 	const tagIds = hasTagFilter ? selectedTagIds : undefined;
+	const convex = useConvex();
+	const loadPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.channels.getChannelPageThreads, {
+				channelDiscordId,
+				tagIds,
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[channelDiscordId, convex, tagIds],
+	);
 
 	return (
 		<>
-			<ConvexInfiniteList
-				query={api.public.channels.getChannelPageThreads}
-				queryArgs={{ channelDiscordId, tagIds }}
+			<SnapshotInfiniteList
+				loadPage={loadPage}
 				pageSize={20}
 				initialLoaderCount={5}
 				loader={<ChannelThreadCardSkeleton />}
@@ -559,11 +598,23 @@ export function MessagesList({
 	initialData?: ChannelPageMessages;
 	nextCursor?: string | null;
 }) {
+	const convex = useConvex();
+	const loadPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.channels.getChannelPageMessages, {
+				channelDiscordId,
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[channelDiscordId, convex],
+	);
+
 	return (
 		<>
-			<ConvexInfiniteList
-				query={api.public.channels.getChannelPageMessages}
-				queryArgs={{ channelDiscordId }}
+			<SnapshotInfiniteList
+				loadPage={loadPage}
 				pageSize={20}
 				initialLoaderCount={5}
 				loader={<MessageCardSkeleton />}

@@ -21,10 +21,9 @@ describe("Database query caching", () => {
 
 				database.metrics.resetQueryMetrics();
 
-				const result1 = yield* database.private.servers.getServerByDiscordId(
-					{ discordId: testDiscordId },
-					{ subscribe: false },
-				);
+				const result1 = yield* database.private.servers.getServerByDiscordId({
+					discordId: testDiscordId,
+				});
 				expect(result1).not.toBeNull();
 				expect(result1?.name).toBe("Test Server");
 
@@ -35,10 +34,9 @@ describe("Database query caching", () => {
 				expect(metricsAfterFirst.misses).toBe(1);
 				expect(metricsAfterFirst.hits).toBe(0);
 
-				const result2 = yield* database.private.servers.getServerByDiscordId(
-					{ discordId: testDiscordId },
-					{ subscribe: false },
-				);
+				const result2 = yield* database.private.servers.getServerByDiscordId({
+					discordId: testDiscordId,
+				});
 				expect(result2).not.toBeNull();
 				expect(result2?.name).toBe("Test Server");
 
@@ -59,10 +57,9 @@ describe("Database query caching", () => {
 
 			const nonExistentId = BigInt(999999999999);
 
-			const result = yield* database.private.servers.getServerByDiscordId(
-				{ discordId: nonExistentId },
-				{ subscribe: false },
-			);
+			const result = yield* database.private.servers.getServerByDiscordId({
+				discordId: nonExistentId,
+			});
 
 			expect(result).toBeNull();
 		}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -89,14 +86,12 @@ describe("Database query caching", () => {
 
 			database.metrics.resetQueryMetrics();
 
-			const result1 = yield* database.private.servers.getServerByDiscordId(
-				{ discordId: testDiscordId1 },
-				{ subscribe: false },
-			);
-			const result2 = yield* database.private.servers.getServerByDiscordId(
-				{ discordId: testDiscordId2 },
-				{ subscribe: false },
-			);
+			const result1 = yield* database.private.servers.getServerByDiscordId({
+				discordId: testDiscordId1,
+			});
+			const result2 = yield* database.private.servers.getServerByDiscordId({
+				discordId: testDiscordId2,
+			});
 
 			expect(result1?.name).toBe("Server One");
 			expect(result2?.name).toBe("Server Two");
@@ -128,11 +123,9 @@ describe("Database query caching", () => {
 
 			const result1Again = yield* database.private.servers.getServerByDiscordId(
 				{ discordId: testDiscordId1 },
-				{ subscribe: false },
 			);
 			const result2Again = yield* database.private.servers.getServerByDiscordId(
 				{ discordId: testDiscordId2 },
-				{ subscribe: false },
 			);
 
 			expect(result1Again?.name).toBe("Server One");
@@ -179,10 +172,7 @@ describe("Database query caching", () => {
 
 			database.metrics.resetQueryMetrics();
 
-			const allServers1 = yield* database.private.servers.getAllServers(
-				{},
-				{ subscribe: false },
-			);
+			const allServers1 = yield* database.private.servers.getAllServers({});
 			expect(allServers1.length).toBeGreaterThan(0);
 
 			expect(
@@ -194,10 +184,7 @@ describe("Database query caching", () => {
 					.hits,
 			).toBe(0);
 
-			const allServers2 = yield* database.private.servers.getAllServers(
-				{},
-				{ subscribe: false },
-			);
+			const allServers2 = yield* database.private.servers.getAllServers({});
 			expect(allServers2.length).toBe(allServers1.length);
 
 			expect(
@@ -227,14 +214,12 @@ describe("Database query caching", () => {
 
 			const [result1, result2] = yield* Effect.all(
 				[
-					database.private.servers.getServerByDiscordId(
-						{ discordId: testDiscordId },
-						{ subscribe: false },
-					),
-					database.private.servers.getServerByDiscordId(
-						{ discordId: testDiscordId },
-						{ subscribe: false },
-					),
+					database.private.servers.getServerByDiscordId({
+						discordId: testDiscordId,
+					}),
+					database.private.servers.getServerByDiscordId({
+						discordId: testDiscordId,
+					}),
 				],
 				{ concurrency: "unbounded" },
 			);

@@ -23,7 +23,6 @@ describe("channels", () => {
 
 				const channel = yield* database.private.channels.findChannelByDiscordId(
 					{ discordId: channelId },
-					{ subscribe: false },
 				);
 				expect(channel).not.toBeNull();
 				expect(channel?.name).toBe("general");
@@ -50,7 +49,6 @@ describe("channels", () => {
 
 				const updated = yield* database.private.channels.findChannelByDiscordId(
 					{ discordId: channel.id },
-					{ subscribe: false },
 				);
 				expect(updated?.name).toBe("updated");
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -75,10 +73,9 @@ describe("channels", () => {
 					},
 				});
 
-				const thread = yield* database.private.channels.findChannelByDiscordId(
-					{ discordId: threadId },
-					{ subscribe: false },
-				);
+				const thread = yield* database.private.channels.findChannelByDiscordId({
+					discordId: threadId,
+				});
 				expect(thread?.parentId).toBe(parentChannel.id);
 				expect(thread?.type).toBe(11);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -91,10 +88,9 @@ describe("channels", () => {
 				const database = yield* Database;
 				const nonExistentId = BigInt(999999999999);
 
-				const result = yield* database.private.channels.findChannelByDiscordId(
-					{ discordId: nonExistentId },
-					{ subscribe: false },
-				);
+				const result = yield* database.private.channels.findChannelByDiscordId({
+					discordId: nonExistentId,
+				});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -106,10 +102,9 @@ describe("channels", () => {
 				const server = yield* createServer();
 				const channel = yield* createChannel(server.discordId);
 
-				const result = yield* database.private.channels.findChannelByDiscordId(
-					{ discordId: channel.id },
-					{ subscribe: false },
-				);
+				const result = yield* database.private.channels.findChannelByDiscordId({
+					discordId: channel.id,
+				});
 
 				expect(result).not.toBeNull();
 				expect(result?.flags).toBeDefined();
@@ -132,10 +127,9 @@ describe("channels", () => {
 				});
 
 				const channels =
-					yield* database.private.channels.findAllChannelsByServerId(
-						{ serverId: server.discordId },
-						{ subscribe: false },
-					);
+					yield* database.private.channels.findAllChannelsByServerId({
+						serverId: server.discordId,
+					});
 
 				expect(channels.length).toBeGreaterThanOrEqual(3);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -147,10 +141,9 @@ describe("channels", () => {
 				const server = yield* createServer();
 
 				const channels =
-					yield* database.private.channels.findAllChannelsByServerId(
-						{ serverId: server.discordId },
-						{ subscribe: false },
-					);
+					yield* database.private.channels.findAllChannelsByServerId({
+						serverId: server.discordId,
+					});
 
 				expect(channels).toEqual([]);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -171,7 +164,6 @@ describe("channels", () => {
 
 				const updated = yield* database.private.channels.findChannelByDiscordId(
 					{ discordId: channel.id },
-					{ subscribe: false },
 				);
 				expect(updated?.flags.indexingEnabled).toBe(true);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -190,7 +182,6 @@ describe("channels", () => {
 
 				const updated = yield* database.private.channels.findChannelByDiscordId(
 					{ discordId: channel.id },
-					{ subscribe: false },
 				);
 				expect(updated?.flags.markSolutionEnabled).toBe(true);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -213,7 +204,6 @@ describe("channels", () => {
 
 				const updated = yield* database.private.channels.findChannelByDiscordId(
 					{ discordId: channel.id },
-					{ subscribe: false },
 				);
 				expect(updated?.flags.indexingEnabled).toBe(true);
 				expect(updated?.flags.markSolutionEnabled).toBe(true);
@@ -235,10 +225,9 @@ describe("channels", () => {
 				});
 
 				const channels =
-					yield* database.private.channels.findManyChannelsByDiscordIds(
-						{ discordIds: [channel1.id, channel2.id] },
-						{ subscribe: false },
-					);
+					yield* database.private.channels.findManyChannelsByDiscordIds({
+						discordIds: [channel1.id, channel2.id],
+					});
 
 				expect(channels.length).toBe(2);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -252,10 +241,9 @@ describe("channels", () => {
 				const fakeId = BigInt(999999999999);
 
 				const channels =
-					yield* database.private.channels.findManyChannelsByDiscordIds(
-						{ discordIds: [channel.id, fakeId] },
-						{ subscribe: false },
-					);
+					yield* database.private.channels.findManyChannelsByDiscordIds({
+						discordIds: [channel.id, fakeId],
+					});
 
 				expect(channels.length).toBe(1);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -273,7 +261,6 @@ describe("channels", () => {
 
 				const deleted = yield* database.private.channels.findChannelByDiscordId(
 					{ discordId: channel.id },
-					{ subscribe: false },
 				);
 				expect(deleted).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),

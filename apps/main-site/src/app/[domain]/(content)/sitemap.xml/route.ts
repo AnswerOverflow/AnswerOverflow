@@ -50,16 +50,13 @@ export async function GET(
 				!state.done && state.sitemap.entries.length < MAX_SITEMAP_ENTRIES,
 			body: (state) =>
 				Effect.gen(function* () {
-					const threads = yield* database.public.channels.getServerPageThreads(
-						{
-							serverDiscordId: tenant.server.discordId,
-							paginationOpts: {
-								numItems: SITEMAP_BATCH_SIZE,
-								cursor: state.cursor,
-							},
+					const threads = yield* database.public.channels.getServerPageThreads({
+						serverDiscordId: tenant.server.discordId,
+						paginationOpts: {
+							numItems: SITEMAP_BATCH_SIZE,
+							cursor: state.cursor,
 						},
-						{ subscribe: false },
-					);
+					});
 
 					const remainingSlots =
 						MAX_SITEMAP_ENTRIES - state.sitemap.entries.length;

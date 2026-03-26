@@ -268,7 +268,6 @@ const processWebhook = (
 
 		const issue = yield* database.private.github.getGitHubIssueByRepoAndNumber(
 			{ repoOwner, repoName, issueNumber },
-			{ subscribe: false },
 		);
 
 		if (!issue) {

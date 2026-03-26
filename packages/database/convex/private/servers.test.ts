@@ -19,10 +19,9 @@ describe("servers", () => {
 
 				expect(result.isNew).toBe(true);
 
-				const server = yield* database.private.servers.getServerByDiscordId(
-					{ discordId },
-					{ subscribe: false },
-				);
+				const server = yield* database.private.servers.getServerByDiscordId({
+					discordId,
+				});
 				expect(server).not.toBeNull();
 				expect(server?.name).toBe("Test Server");
 				expect(server?.approximateMemberCount).toBe(100);
@@ -48,10 +47,9 @@ describe("servers", () => {
 
 				expect(result.isNew).toBe(false);
 
-				const server = yield* database.private.servers.getServerByDiscordId(
-					{ discordId },
-					{ subscribe: false },
-				);
+				const server = yield* database.private.servers.getServerByDiscordId({
+					discordId,
+				});
 				expect(server?.name).toBe("Updated Name");
 				expect(server?.approximateMemberCount).toBe(200);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -71,10 +69,9 @@ describe("servers", () => {
 					vanityInviteCode: "coolserver",
 				});
 
-				const server = yield* database.private.servers.getServerByDiscordId(
-					{ discordId },
-					{ subscribe: false },
-				);
+				const server = yield* database.private.servers.getServerByDiscordId({
+					discordId,
+				});
 				expect(server?.icon).toBe("abc123");
 				expect(server?.description).toBe("A cool server");
 				expect(server?.vanityInviteCode).toBe("coolserver");
@@ -88,10 +85,9 @@ describe("servers", () => {
 				const database = yield* Database;
 				const nonExistentId = BigInt(999999999999);
 
-				const result = yield* database.private.servers.getServerByDiscordId(
-					{ discordId: nonExistentId },
-					{ subscribe: false },
-				);
+				const result = yield* database.private.servers.getServerByDiscordId({
+					discordId: nonExistentId,
+				});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -102,10 +98,9 @@ describe("servers", () => {
 				const database = yield* Database;
 				const server = yield* createServer({ name: "Find Me" });
 
-				const result = yield* database.private.servers.getServerByDiscordId(
-					{ discordId: server.discordId },
-					{ subscribe: false },
-				);
+				const result = yield* database.private.servers.getServerByDiscordId({
+					discordId: server.discordId,
+				});
 
 				expect(result).not.toBeNull();
 				expect(result?.name).toBe("Find Me");
@@ -124,10 +119,9 @@ describe("servers", () => {
 					server: { name: "After Update" },
 				});
 
-				const updated = yield* database.private.servers.getServerByDiscordId(
-					{ discordId: server.discordId },
-					{ subscribe: false },
-				);
+				const updated = yield* database.private.servers.getServerByDiscordId({
+					discordId: server.discordId,
+				});
 				expect(updated?.name).toBe("After Update");
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
@@ -158,10 +152,7 @@ describe("servers", () => {
 				yield* createServer({ name: "Server 2" });
 				yield* createServer({ name: "Server 3" });
 
-				const servers = yield* database.private.servers.getAllServers(
-					{},
-					{ subscribe: false },
-				);
+				const servers = yield* database.private.servers.getAllServers({});
 
 				expect(servers.length).toBeGreaterThanOrEqual(3);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -177,10 +168,9 @@ describe("servers", () => {
 				const server2 = yield* createServer({ name: "Batch Server 2" });
 
 				const servers =
-					yield* database.private.servers.findManyServersByDiscordId(
-						{ discordIds: [server1.discordId, server2.discordId] },
-						{ subscribe: false },
-					);
+					yield* database.private.servers.findManyServersByDiscordId({
+						discordIds: [server1.discordId, server2.discordId],
+					});
 
 				expect(servers.length).toBe(2);
 				expect(servers.map((s) => s.name)).toContain("Batch Server 1");
@@ -196,10 +186,9 @@ describe("servers", () => {
 				const fakeId = BigInt(999999999999);
 
 				const servers =
-					yield* database.private.servers.findManyServersByDiscordId(
-						{ discordIds: [server1.discordId, fakeId] },
-						{ subscribe: false },
-					);
+					yield* database.private.servers.findManyServersByDiscordId({
+						discordIds: [server1.discordId, fakeId],
+					});
 
 				expect(servers.length).toBe(1);
 				expect(servers[0]?.name).toBe("Real Server");
@@ -211,10 +200,9 @@ describe("servers", () => {
 				const database = yield* Database;
 
 				const servers =
-					yield* database.private.servers.findManyServersByDiscordId(
-						{ discordIds: [] },
-						{ subscribe: false },
-					);
+					yield* database.private.servers.findManyServersByDiscordId({
+						discordIds: [],
+					});
 
 				expect(servers).toEqual([]);
 			}).pipe(Effect.provide(DatabaseTestLayer)),

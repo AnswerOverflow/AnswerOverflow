@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import { FormattedNumber } from "@packages/ui/components/formatted-number";
@@ -14,6 +13,7 @@ import { Separator } from "@packages/ui/components/separator";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { SnapshotInfiniteList } from "@packages/ui/components/snapshot-infinite-list";
 import { useTenant } from "@packages/ui/components/tenant-context";
 import { ThinMessage } from "@packages/ui/components/thin-message";
 import { TimeAgo } from "@packages/ui/components/time-ago";
@@ -30,11 +30,12 @@ import {
 	getServerHomepageUrl,
 } from "@packages/ui/utils/server";
 import { getDate } from "@packages/ui/utils/snowflake";
+import { useConvex } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { CheckCircle2, MessageSquare } from "lucide-react";
 import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { FloatingAskInput } from "@/components/floating-ask-input";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { OpenInDiscordLink } from "@/components/open-in-discord-modal";
@@ -163,6 +164,7 @@ export function MessageContent(props: {
 	const queryChannelId = headerData.threadId ?? headerData.channelId;
 	const afterMessageId =
 		headerData.threadId ?? headerData.firstMessage?.message.id;
+	const effectiveAfterMessageId = afterMessageId ?? 0n;
 
 	const filterMessages = (messages: MessagePageReplies["page"]) =>
 		messages.filter(
@@ -171,6 +173,19 @@ export function MessageContent(props: {
 				!HIDDEN_MESSAGE_TYPES.includes(m.message.type ?? 0) &&
 				m.message.id !== firstMessage?.message.id,
 		);
+	const convex = useConvex();
+	const loadMessagesPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.messages.getMessages, {
+				channelId: queryChannelId,
+				after: effectiveAfterMessageId,
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[convex, effectiveAfterMessageId, queryChannelId],
+	);
 
 	return (
 		<div className="space-y-4">
@@ -205,12 +220,8 @@ export function MessageContent(props: {
 			</div>
 			<Separator className="my-4" />
 			{afterMessageId && (
-				<ConvexInfiniteList
-					query={api.public.messages.getMessages}
-					queryArgs={{
-						channelId: queryChannelId,
-						after: afterMessageId,
-					}}
+				<SnapshotInfiniteList
+					loadPage={loadMessagesPage}
 					pageSize={50}
 					initialLoaderCount={3}
 					loader={<ReplyMessageSkeleton />}
@@ -305,6 +316,19 @@ export function RepliesSection(props: {
 				!HIDDEN_MESSAGE_TYPES.includes(m.message.type ?? 0) &&
 				m.message.id !== firstMessage?.message.id,
 		);
+	const convex = useConvex();
+	const loadRepliesPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.messages.getMessages, {
+				channelId,
+				after,
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[after, channelId, convex],
+	);
 
 	const filteredInitialData = initialData
 		? {
@@ -317,12 +341,8 @@ export function RepliesSection(props: {
 		<>
 			<div className="rounded-md">
 				<div className="flex flex-col gap-4">
-					<ConvexInfiniteList
-						query={api.public.messages.getMessages}
-						queryArgs={{
-							channelId,
-							after,
-						}}
+					<SnapshotInfiniteList
+						loadPage={loadRepliesPage}
 						pageSize={50}
 						initialLoaderCount={3}
 						loader={<ReplyMessageSkeleton />}

@@ -14,7 +14,6 @@ describe("ignored_discord_accounts", () => {
 				const result =
 					yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
 						{ id: author.id },
-						{ subscribe: false },
 					);
 
 				expect(result).toBeNull();
@@ -33,7 +32,6 @@ describe("ignored_discord_accounts", () => {
 				const result =
 					yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
 						{ id: author.id },
-						{ subscribe: false },
 					);
 
 				expect(result).not.toBeNull();
@@ -68,7 +66,6 @@ describe("ignored_discord_accounts", () => {
 				const accounts =
 					yield* database.private.discord_accounts.findManyDiscordAccountsByIds(
 						{ ids: [author.id] },
-						{ subscribe: false },
 					);
 				expect(accounts.length).toBe(1);
 				expect(accounts[0]?.name).toBe("RecreatedUser");
@@ -122,7 +119,6 @@ describe("ignored_discord_accounts", () => {
 				const accounts =
 					yield* database.private.discord_accounts.findManyDiscordAccountsByIds(
 						{ ids: [accountId] },
-						{ subscribe: false },
 					);
 				expect(accounts.length).toBe(0);
 			}).pipe(Effect.provide(DatabaseTestLayer)),

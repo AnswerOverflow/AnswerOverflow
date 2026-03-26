@@ -1,3 +1,4 @@
+import type { Server } from "@packages/database/convex/schema";
 import { Database } from "@packages/database/database";
 import { SessionRecording } from "@packages/ui/analytics/client";
 import { Effect } from "effect";
@@ -23,14 +24,22 @@ async function fetchAboutPageServers() {
 
 	return Effect.gen(function* () {
 		const database = yield* Database;
-		const liveData = yield* database.public.servers.getBrowseServers();
-		return liveData;
+		const browsableServers =
+			yield* database.public.servers.getCachedBrowsableServers({});
+		return browsableServers.map(
+			(server): Server => ({
+				discordId: BigInt(server.discordId),
+				name: server.name,
+				icon: server.icon ?? undefined,
+				description: server.description ?? undefined,
+				approximateMemberCount: server.approximateMemberCount,
+			}),
+		);
 	}).pipe(runtime.runPromise);
 }
 
 async function AboutPageLoader() {
-	const serversLiveData = await fetchAboutPageServers();
-	const servers = serversLiveData ?? [];
+	const servers = await fetchAboutPageServers();
 
 	return (
 		<AboutPageClient

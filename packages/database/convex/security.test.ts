@@ -406,10 +406,9 @@ describe("Security", () => {
 					yield* enableChannelIndexing(channel1.id);
 
 					const server2Channels =
-						yield* database.public.servers.getServerByDiscordIdWithChannels(
-							{ discordId: server2.discordId },
-							{ subscribe: false },
-						);
+						yield* database.public.servers.getServerByDiscordIdWithChannels({
+							discordId: server2.discordId,
+						});
 
 					expect(server2Channels?.channels ?? []).toHaveLength(0);
 				}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -451,14 +450,11 @@ describe("Security", () => {
 						},
 					});
 
-					const result = yield* database.public.messages.getMessages(
-						{
-							channelId: channel1.id,
-							after: 1000000000000000000n,
-							paginationOpts: { numItems: 10, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const result = yield* database.public.messages.getMessages({
+						channelId: channel1.id,
+						after: 1000000000000000000n,
+						paginationOpts: { numItems: 10, cursor: null },
+					});
 
 					expect(result.page).toHaveLength(1);
 					expect(result.page[0]?.message.content).toBe("Server 1 message");

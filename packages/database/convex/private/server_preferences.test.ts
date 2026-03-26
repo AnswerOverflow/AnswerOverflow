@@ -131,7 +131,6 @@ describe("server_preferences", () => {
 				const result =
 					yield* database.private.server_preferences.getServerPreferencesByServerId(
 						{ serverId: nonExistentId },
-						{ subscribe: false },
 					);
 
 				expect(result).toBeNull();
@@ -152,7 +151,6 @@ describe("server_preferences", () => {
 				const result =
 					yield* database.private.server_preferences.getServerPreferencesByServerId(
 						{ serverId: server.discordId },
-						{ subscribe: false },
 					);
 
 				expect(result).not.toBeNull();
@@ -184,7 +182,6 @@ describe("server_preferences", () => {
 				const result =
 					yield* database.private.server_preferences.getServerPreferencesByServerId(
 						{ serverId: server.discordId },
-						{ subscribe: false },
 					);
 
 				expect(result?.plan).toBe("STARTER");
@@ -212,7 +209,6 @@ describe("server_preferences", () => {
 				const result =
 					yield* database.private.server_preferences.getServerPreferencesByServerId(
 						{ serverId: server.discordId },
-						{ subscribe: false },
 					);
 
 				expect(result?.stripeCustomerId).toBe("cus_abc123");
@@ -240,7 +236,6 @@ describe("server_preferences", () => {
 				const result =
 					yield* database.private.server_preferences.getServerPreferencesByServerId(
 						{ serverId: server.discordId },
-						{ subscribe: false },
 					);
 
 				expect(result?.stripeSubscriptionId).toBe("sub_xyz789");

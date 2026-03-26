@@ -150,17 +150,14 @@ export const handleSimilarThreadsButtonInteraction = Effect.fn(
 	const threadName = thread.name;
 	const parentChannelId = thread.parentId;
 
-	let similarThreads = yield* database.public.search.getSimilarThreads(
-		{
-			searchQuery: threadName,
-			currentThreadId: threadId,
-			currentServerId: serverId,
-			currentParentChannelId: parentChannelId ?? undefined,
-			serverId: serverId,
-			limit: 4,
-		},
-		{ subscribe: false },
-	);
+	let similarThreads = yield* database.public.search.getSimilarThreads({
+		searchQuery: threadName,
+		currentThreadId: threadId,
+		currentServerId: serverId,
+		currentParentChannelId: parentChannelId ?? undefined,
+		serverId: serverId,
+		limit: 4,
+	});
 
 	yield* Effect.annotateCurrentSpan({
 		"search.query": threadName,
@@ -189,17 +186,14 @@ export const handleSimilarThreadsButtonInteraction = Effect.fn(
 
 		if (firstMessage?.content) {
 			const contentSnippet = firstMessage.content.slice(0, 100);
-			similarThreads = yield* database.public.search.getSimilarThreads(
-				{
-					searchQuery: contentSnippet,
-					currentThreadId: threadId,
-					currentServerId: serverId,
-					currentParentChannelId: parentChannelId ?? undefined,
-					serverId: serverId,
-					limit: 5,
-				},
-				{ subscribe: false },
-			);
+			similarThreads = yield* database.public.search.getSimilarThreads({
+				searchQuery: contentSnippet,
+				currentThreadId: threadId,
+				currentServerId: serverId,
+				currentParentChannelId: parentChannelId ?? undefined,
+				serverId: serverId,
+				limit: 5,
+			});
 		}
 	}
 

@@ -505,6 +505,7 @@ export const confectSchema = defineSchema({
 		}),
 	channelSettings: defineTable(ChannelSettingsSchema)
 		.index("by_channelId", ["channelId"])
+		.index("by_indexingEnabled_and_serverId", ["indexingEnabled", "serverId"])
 		.index("by_serverId", ["serverId"])
 		.index("by_serverId_and_indexingEnabled", ["serverId", "indexingEnabled"])
 		.index("by_inviteCode", ["inviteCode"]),

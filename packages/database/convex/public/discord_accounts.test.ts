@@ -17,10 +17,9 @@ describe("public/discord_accounts", () => {
 				const nonExistentId = BigInt(999999999999);
 
 				const result =
-					yield* database.public.discord_accounts.getUserPageHeaderData(
-						{ userId: nonExistentId },
-						{ subscribe: false },
-					);
+					yield* database.public.discord_accounts.getUserPageHeaderData({
+						userId: nonExistentId,
+					});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -53,10 +52,9 @@ describe("public/discord_accounts", () => {
 					);
 
 					const result =
-						yield* database.public.discord_accounts.getUserPageHeaderData(
-							{ userId: author.id },
-							{ subscribe: false },
-						);
+						yield* database.public.discord_accounts.getUserPageHeaderData({
+							userId: author.id,
+						});
 
 					expect(result).not.toBeNull();
 					expect(result?.user.name).toBe("PublicUser");
@@ -85,10 +83,9 @@ describe("public/discord_accounts", () => {
 					);
 
 					const result =
-						yield* database.public.discord_accounts.getUserPageHeaderData(
-							{ userId: author.id },
-							{ subscribe: false },
-						);
+						yield* database.public.discord_accounts.getUserPageHeaderData({
+							userId: author.id,
+						});
 
 					expect(result).not.toBeNull();
 					expect(result?.user.name).toBe("OptedInUser");
@@ -119,10 +116,9 @@ describe("public/discord_accounts", () => {
 				});
 
 				const result =
-					yield* database.public.discord_accounts.getUserPageHeaderData(
-						{ userId: author.id },
-						{ subscribe: false },
-					);
+					yield* database.public.discord_accounts.getUserPageHeaderData({
+						userId: author.id,
+					});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -153,10 +149,9 @@ describe("public/discord_accounts", () => {
 				});
 
 				const result =
-					yield* database.public.discord_accounts.getUserPageHeaderData(
-						{ userId: author.id },
-						{ subscribe: false },
-					);
+					yield* database.public.discord_accounts.getUserPageHeaderData({
+						userId: author.id,
+					});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -170,13 +165,10 @@ describe("public/discord_accounts", () => {
 				const fixture = yield* createForumThreadWithReplies();
 				yield* fixture.addRootMessage();
 
-				const result = yield* database.public.discord_accounts.getUserPosts(
-					{
-						userId: fixture.author.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.discord_accounts.getUserPosts({
+					userId: fixture.author.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page.length).toBeGreaterThanOrEqual(1);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -187,13 +179,10 @@ describe("public/discord_accounts", () => {
 				const database = yield* Database;
 				const author = yield* createAuthor();
 
-				const result = yield* database.public.discord_accounts.getUserPosts(
-					{
-						userId: author.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.discord_accounts.getUserPosts({
+					userId: author.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toEqual([]);
 			}).pipe(Effect.provide(DatabaseTestLayer)),

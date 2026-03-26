@@ -19,7 +19,7 @@ type SimilarThreadsProps = {
 };
 
 type SimilarThreadsResult = FunctionReturnType<
-	typeof api.public.search.getSimilarThreads
+	typeof api.public.search.getCachedSimilarThreads
 >;
 
 function SimilarThreadsContainer(props: { children: React.ReactNode }) {
@@ -58,7 +58,7 @@ async function fetchSimilarThreads(
 ): Promise<SimilarThreadsResult | null> {
 	const exit = await Effect.gen(function* () {
 		const database = yield* Database;
-		return yield* database.public.search.getSimilarThreads({
+		return yield* database.public.search.getCachedSimilarThreads({
 			searchQuery: args.searchQuery,
 			currentThreadId: args.currentThreadId,
 			currentServerId: args.currentServerId,

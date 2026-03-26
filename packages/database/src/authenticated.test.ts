@@ -36,7 +36,7 @@ describe("Authenticated queries", () => {
 					const result =
 						yield* database.authenticated.dashboard_queries.getUserServersForDropdown(
 							{},
-							{ discordAccountId: testDiscordAccountId, subscribe: false },
+							{ discordAccountId: testDiscordAccountId },
 						);
 
 					expect(result).toBeDefined();
@@ -60,7 +60,7 @@ describe("Authenticated queries", () => {
 					const result =
 						yield* database.authenticated.dashboard_queries.getUserServersForDropdown(
 							{},
-							{ discordAccountId: nonExistentUserId, subscribe: false },
+							{ discordAccountId: nonExistentUserId },
 						);
 
 					expect(result).toBeDefined();
@@ -120,7 +120,7 @@ describe("Authenticated queries", () => {
 					const result =
 						yield* database.authenticated.dashboard_queries.getUserServersForDropdown(
 							{},
-							{ discordAccountId: testDiscordAccountId, subscribe: false },
+							{ discordAccountId: testDiscordAccountId },
 						);
 
 					expect(result).toBeDefined();
@@ -199,7 +199,7 @@ describe("Authenticated queries", () => {
 					const result =
 						yield* database.authenticated.dashboard_queries.getUserServersForDropdown(
 							{},
-							{ discordAccountId: testDiscordAccountId, subscribe: false },
+							{ discordAccountId: testDiscordAccountId },
 						);
 
 					const roleManagedFound = result.find(
@@ -226,7 +226,7 @@ describe("Authenticated queries", () => {
 					const result = yield* Effect.either(
 						database.authenticated.dashboard_queries.getUserServersForDropdown(
 							{},
-							{ token: "test-jwt-token", subscribe: false },
+							{ token: "test-jwt-token" },
 						),
 					);
 

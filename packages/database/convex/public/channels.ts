@@ -209,18 +209,50 @@ export const getServerPageThreads = publicQuery({
 			)
 			.collect();
 
-		const indexedChannelIds = indexedSettings.map((s) => s.channelId);
-
-		const indexedChannels = await asyncMap(indexedChannelIds, (channelId) =>
-			getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
+		const indexedChannelIdSet = new Set(
+			indexedSettings.map((setting) => setting.channelId),
 		);
+
+		const [textChannels, announcementChannels, forumChannels] =
+			await Promise.all([
+				ctx.db
+					.query("channels")
+					.withIndex("by_serverId_and_type", (q) =>
+						q
+							.eq("serverId", server.discordId)
+							.eq("type", CHANNEL_TYPE.GuildText),
+					)
+					.collect(),
+				ctx.db
+					.query("channels")
+					.withIndex("by_serverId_and_type", (q) =>
+						q
+							.eq("serverId", server.discordId)
+							.eq("type", CHANNEL_TYPE.GuildAnnouncement),
+					)
+					.collect(),
+				ctx.db
+					.query("channels")
+					.withIndex("by_serverId_and_type", (q) =>
+						q
+							.eq("serverId", server.discordId)
+							.eq("type", CHANNEL_TYPE.GuildForum),
+					)
+					.collect(),
+			]);
+
+		const indexedChannels = [
+			...textChannels,
+			...announcementChannels,
+			...forumChannels,
+		];
 
 		const channelIdToInfo = new Map<
 			bigint,
 			{ id: bigint; name: string; type: number }
 		>();
 		for (const channel of indexedChannels) {
-			if (channel) {
+			if (indexedChannelIdSet.has(channel.id)) {
 				channelIdToInfo.set(channel.id, {
 					id: channel.id,
 					name: channel.name,
@@ -246,7 +278,7 @@ export const getServerPageThreads = publicQuery({
 			paginatedResult.page,
 			(channel) =>
 				channel.parentId !== undefined &&
-				indexedChannelIds.includes(channel.parentId),
+				indexedChannelIdSet.has(channel.parentId),
 		);
 
 		const page = await asyncMap(threads, async (thread) => {
@@ -287,39 +319,50 @@ async function getServerHeaderData(
 
 	if (!server || server.kickedTime) return null;
 
-	const [indexedSettings, serverPreferences] = await Promise.all([
-		ctx.db
-			.query("channelSettings")
-			.withIndex("by_serverId_and_indexingEnabled", (q) =>
-				q.eq("serverId", server.discordId).eq("indexingEnabled", true),
-			)
-			.collect(),
-		getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
-	]);
+	const [indexedSettings, serverPreferences, allServerChannels] =
+		await Promise.all([
+			ctx.db
+				.query("channelSettings")
+				.withIndex("by_serverId_and_indexingEnabled", (q) =>
+					q.eq("serverId", server.discordId).eq("indexingEnabled", true),
+				)
+				.collect(),
+			getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
+			ctx.db
+				.query("channels")
+				.withIndex("by_serverId", (q) => q.eq("serverId", server.discordId))
+				.collect(),
+		]);
 
-	const indexedChannelIds = indexedSettings.map((s) => s.channelId);
+	const indexedChannelIds = new Set(indexedSettings.map((s) => s.channelId));
 
 	const settingsMap = new Map(indexedSettings.map((s) => [s.channelId, s]));
 
-	const allIndexedChannels = await asyncMap(indexedChannelIds, (channelId) =>
-		getOneFrom(ctx.db, "channels", "by_discordChannelId", channelId, "id"),
+	const allChannelMap = new Map(
+		allServerChannels.map((channel) => [channel.id, channel]),
 	);
 
 	const categoryIds = new Set(
-		Arr.filter(allIndexedChannels, Predicate.isNotNull)
+		Arr.filter(allServerChannels, (channel) =>
+			indexedChannelIds.has(channel.id),
+		)
 			.map((c) => c.categoryId)
 			.filter((id): id is bigint => id !== undefined),
 	);
 
-	const categories = await asyncMap([...categoryIds], (categoryId) =>
-		getOneFrom(ctx.db, "channels", "by_discordChannelId", categoryId, "id"),
-	);
+	const categories = [];
+	for (const categoryId of categoryIds) {
+		const category = allChannelMap.get(categoryId);
+		if (category) {
+			categories.push(category);
+		}
+	}
 
-	const categoryMap = new Map(
-		Arr.filter(categories, Predicate.isNotNull).map((c) => [c.id, c]),
-	);
+	const categoryMap = new Map(categories.map((c) => [c.id, c]));
 
-	const indexedChannels = Arr.filter(allIndexedChannels, Predicate.isNotNull)
+	const indexedChannels = Arr.filter(allServerChannels, (channel) =>
+		indexedChannelIds.has(channel.id),
+	)
 		.filter(
 			(c) =>
 				c.type === CHANNEL_TYPE.GuildText ||
@@ -358,7 +401,7 @@ async function getServerHeaderData(
 	)?.inviteCode;
 	const inviteCode = server.vanityInviteCode ?? channelInviteCode;
 
-	const sortedCategories = Arr.filter(categories, Predicate.isNotNull).sort(
+	const sortedCategories = categories.sort(
 		(a, b) => (a.position ?? 0) - (b.position ?? 0),
 	);
 

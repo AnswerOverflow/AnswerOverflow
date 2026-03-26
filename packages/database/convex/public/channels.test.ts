@@ -21,13 +21,10 @@ describe("public/channels", () => {
 				const fixture = yield* createForumThreadWithReplies();
 				yield* fixture.addRootMessage();
 
-				const result = yield* database.public.channels.getChannelPageThreads(
-					{
-						channelDiscordId: fixture.forum.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.channels.getChannelPageThreads({
+					channelDiscordId: fixture.forum.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page.length).toBeGreaterThanOrEqual(1);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -54,24 +51,18 @@ describe("public/channels", () => {
 					parentId: forum.id,
 				});
 
-				const page1 = yield* database.public.channels.getChannelPageThreads(
-					{
-						channelDiscordId: forum.id,
-						paginationOpts: { numItems: 2, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const page1 = yield* database.public.channels.getChannelPageThreads({
+					channelDiscordId: forum.id,
+					paginationOpts: { numItems: 2, cursor: null },
+				});
 
 				expect(page1.page.length).toBe(2);
 				expect(page1.isDone).toBe(false);
 
-				const page2 = yield* database.public.channels.getChannelPageThreads(
-					{
-						channelDiscordId: forum.id,
-						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
-					},
-					{ subscribe: false },
-				);
+				const page2 = yield* database.public.channels.getChannelPageThreads({
+					channelDiscordId: forum.id,
+					paginationOpts: { numItems: 2, cursor: page1.continueCursor },
+				});
 
 				expect(page2.page.length).toBeGreaterThanOrEqual(1);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -83,13 +74,10 @@ describe("public/channels", () => {
 				const server = yield* createServer();
 				const forum = yield* createChannel(server.discordId, { type: 15 });
 
-				const result = yield* database.public.channels.getChannelPageThreads(
-					{
-						channelDiscordId: forum.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.channels.getChannelPageThreads({
+					channelDiscordId: forum.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toEqual([]);
 				expect(result.isDone).toBe(true);
@@ -122,13 +110,10 @@ describe("public/channels", () => {
 						parentId: forum.id,
 					});
 
-					const result = yield* database.public.channels.getChannelPageThreads(
-						{
-							channelDiscordId: forum.id,
-							paginationOpts: { numItems: 10, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const result = yield* database.public.channels.getChannelPageThreads({
+						channelDiscordId: forum.id,
+						paginationOpts: { numItems: 10, cursor: null },
+					});
 
 					expect(result.page).toHaveLength(3);
 					expect(result.page[0]?.thread.id).toBe(thread2.id);
@@ -168,25 +153,19 @@ describe("public/channels", () => {
 						parentId: forum.id,
 					});
 
-					const page1 = yield* database.public.channels.getChannelPageThreads(
-						{
-							channelDiscordId: forum.id,
-							paginationOpts: { numItems: 2, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const page1 = yield* database.public.channels.getChannelPageThreads({
+						channelDiscordId: forum.id,
+						paginationOpts: { numItems: 2, cursor: null },
+					});
 
 					expect(page1.page).toHaveLength(2);
 					expect(page1.page[0]?.thread.id).toBe(1000000000000000400n);
 					expect(page1.page[1]?.thread.id).toBe(1000000000000000300n);
 
-					const page2 = yield* database.public.channels.getChannelPageThreads(
-						{
-							channelDiscordId: forum.id,
-							paginationOpts: { numItems: 2, cursor: page1.continueCursor },
-						},
-						{ subscribe: false },
-					);
+					const page2 = yield* database.public.channels.getChannelPageThreads({
+						channelDiscordId: forum.id,
+						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
+					});
 
 					expect(page2.page).toHaveLength(2);
 					expect(page2.page[0]?.thread.id).toBe(1000000000000000200n);
@@ -203,13 +182,10 @@ describe("public/channels", () => {
 				yield* fixture.addMessage({ content: "First message" });
 				yield* fixture.addMessage({ content: "Second message" });
 
-				const result = yield* database.public.channels.getChannelPageMessages(
-					{
-						channelDiscordId: fixture.channel.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.channels.getChannelPageMessages({
+					channelDiscordId: fixture.channel.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page.length).toBe(2);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -223,13 +199,10 @@ describe("public/channels", () => {
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 
-				const page1 = yield* database.public.channels.getChannelPageMessages(
-					{
-						channelDiscordId: fixture.channel.id,
-						paginationOpts: { numItems: 2, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const page1 = yield* database.public.channels.getChannelPageMessages({
+					channelDiscordId: fixture.channel.id,
+					paginationOpts: { numItems: 2, cursor: null },
+				});
 
 				expect(page1.page.length).toBe(2);
 				expect(page1.isDone).toBe(false);
@@ -272,7 +245,6 @@ describe("public/channels", () => {
 							channelDiscordId: channel.id,
 							paginationOpts: { numItems: 10, cursor: null },
 						},
-						{ subscribe: false },
 					);
 
 					expect(result.page).toHaveLength(3);
@@ -318,13 +290,10 @@ describe("public/channels", () => {
 						parentChannelId: undefined,
 					});
 
-					const page1 = yield* database.public.channels.getChannelPageMessages(
-						{
-							channelDiscordId: channel.id,
-							paginationOpts: { numItems: 2, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const page1 = yield* database.public.channels.getChannelPageMessages({
+						channelDiscordId: channel.id,
+						paginationOpts: { numItems: 2, cursor: null },
+					});
 
 					expect(page1.page).toHaveLength(2);
 					const ids1 = page1.page
@@ -332,13 +301,10 @@ describe("public/channels", () => {
 						.filter((id): id is bigint => id !== undefined);
 					expect(ids1).toEqual([1000000000000000400n, 1000000000000000300n]);
 
-					const page2 = yield* database.public.channels.getChannelPageMessages(
-						{
-							channelDiscordId: channel.id,
-							paginationOpts: { numItems: 2, cursor: page1.continueCursor },
-						},
-						{ subscribe: false },
-					);
+					const page2 = yield* database.public.channels.getChannelPageMessages({
+						channelDiscordId: channel.id,
+						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
+					});
 
 					expect(page2.page).toHaveLength(2);
 					const ids2 = page2.page
@@ -355,13 +321,10 @@ describe("public/channels", () => {
 				const database = yield* Database;
 				const nonExistentId = BigInt(999999999999);
 
-				const result = yield* database.public.channels.getServerPageThreads(
-					{
-						serverDiscordId: nonExistentId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.channels.getServerPageThreads({
+					serverDiscordId: nonExistentId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toEqual([]);
 				expect(result.isDone).toBe(true);
@@ -390,13 +353,10 @@ describe("public/channels", () => {
 					parentId: nonIndexedForum.id,
 				});
 
-				const result = yield* database.public.channels.getServerPageThreads(
-					{
-						serverDiscordId: server.discordId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.channels.getServerPageThreads({
+					serverDiscordId: server.discordId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(1);
 				expect(result.page[0]?.thread.id).toBe(indexedThread.id);
@@ -419,13 +379,10 @@ describe("public/channels", () => {
 					parentId: forum.id,
 				});
 
-				const result = yield* database.public.channels.getServerPageThreads(
-					{
-						serverDiscordId: server.discordId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.channels.getServerPageThreads({
+					serverDiscordId: server.discordId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(1);
 				expect(result.page[0]?.channel).not.toBeNull();
@@ -440,13 +397,10 @@ describe("public/channels", () => {
 				const fixture = yield* createForumThreadWithReplies();
 				yield* fixture.addRootMessage();
 
-				const result = yield* database.public.channels.getServerPageThreads(
-					{
-						serverDiscordId: fixture.server.discordId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.channels.getServerPageThreads({
+					serverDiscordId: fixture.server.discordId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(1);
 				expect(result.page[0]?.message).not.toBeNull();
@@ -475,24 +429,18 @@ describe("public/channels", () => {
 					parentId: forum.id,
 				});
 
-				const page1 = yield* database.public.channels.getServerPageThreads(
-					{
-						serverDiscordId: server.discordId,
-						paginationOpts: { numItems: 2, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const page1 = yield* database.public.channels.getServerPageThreads({
+					serverDiscordId: server.discordId,
+					paginationOpts: { numItems: 2, cursor: null },
+				});
 
 				expect(page1.page.length).toBeLessThanOrEqual(2);
 				expect(page1.isDone).toBe(false);
 
-				const page2 = yield* database.public.channels.getServerPageThreads(
-					{
-						serverDiscordId: server.discordId,
-						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
-					},
-					{ subscribe: false },
-				);
+				const page2 = yield* database.public.channels.getServerPageThreads({
+					serverDiscordId: server.discordId,
+					paginationOpts: { numItems: 2, cursor: page1.continueCursor },
+				});
 
 				expect(page2.page.length).toBeGreaterThanOrEqual(1);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -524,13 +472,10 @@ describe("public/channels", () => {
 						parentId: forum.id,
 					});
 
-					const result = yield* database.public.channels.getServerPageThreads(
-						{
-							serverDiscordId: server.discordId,
-							paginationOpts: { numItems: 10, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const result = yield* database.public.channels.getServerPageThreads({
+						serverDiscordId: server.discordId,
+						paginationOpts: { numItems: 10, cursor: null },
+					});
 
 					expect(result.page).toHaveLength(3);
 					expect(result.page[0]?.thread.id).toBe(thread3.id);
@@ -558,13 +503,10 @@ describe("public/channels", () => {
 					parentId: forum2.id,
 				});
 
-				const result = yield* database.public.channels.getServerPageThreads(
-					{
-						serverDiscordId: server.discordId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.channels.getServerPageThreads({
+					serverDiscordId: server.discordId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(2);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -585,13 +527,10 @@ describe("public/channels", () => {
 						parentId: forum.id,
 					});
 
-					const result = yield* database.public.channels.getServerPageThreads(
-						{
-							serverDiscordId: server.discordId,
-							paginationOpts: { numItems: 10, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const result = yield* database.public.channels.getServerPageThreads({
+						serverDiscordId: server.discordId,
+						paginationOpts: { numItems: 10, cursor: null },
+					});
 
 					expect(result.page).toHaveLength(1);
 					expect(result.page[0]?.message).toBeNull();
@@ -606,10 +545,9 @@ describe("public/channels", () => {
 				const nonExistentId = BigInt(999999999999);
 
 				const result =
-					yield* database.public.channels.getCommunityPageHeaderData(
-						{ serverDiscordId: nonExistentId },
-						{ subscribe: false },
-					);
+					yield* database.public.channels.getCommunityPageHeaderData({
+						serverDiscordId: nonExistentId,
+					});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -623,10 +561,9 @@ describe("public/channels", () => {
 				yield* enableChannelIndexing(channel.id);
 
 				const result =
-					yield* database.public.channels.getCommunityPageHeaderData(
-						{ serverDiscordId: server.discordId },
-						{ subscribe: false },
-					);
+					yield* database.public.channels.getCommunityPageHeaderData({
+						serverDiscordId: server.discordId,
+					});
 
 				expect(result).not.toBeNull();
 				expect(result?.server.name).toBe("Community Server");
@@ -645,13 +582,10 @@ describe("public/channels", () => {
 				yield* enableChannelIndexing(channel.id);
 
 				const result =
-					yield* database.public.channels.getCommunityPageHeaderData(
-						{
-							serverDiscordId: server.discordId,
-							channelDiscordId: channel.id,
-						},
-						{ subscribe: false },
-					);
+					yield* database.public.channels.getCommunityPageHeaderData({
+						serverDiscordId: server.discordId,
+						channelDiscordId: channel.id,
+					});
 
 				expect(result).not.toBeNull();
 				expect(result?.selectedChannel).not.toBeNull();
@@ -669,13 +603,10 @@ describe("public/channels", () => {
 				const channel2 = yield* createChannel(server2.discordId);
 
 				const result =
-					yield* database.public.channels.getCommunityPageHeaderData(
-						{
-							serverDiscordId: server1.discordId,
-							channelDiscordId: channel2.id,
-						},
-						{ subscribe: false },
-					);
+					yield* database.public.channels.getCommunityPageHeaderData({
+						serverDiscordId: server1.discordId,
+						channelDiscordId: channel2.id,
+					});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),

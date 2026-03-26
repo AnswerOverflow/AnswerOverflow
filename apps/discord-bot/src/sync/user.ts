@@ -94,10 +94,9 @@ const invalidateUserGuildsCacheForMember = (
 ) =>
 	Effect.gen(function* () {
 		const oauthAccount =
-			yield* database.private.cache.findDiscordOAuthAccountByDiscordId(
-				{ discordId: discordUserId },
-				{ subscribe: false },
-			);
+			yield* database.private.cache.findDiscordOAuthAccountByDiscordId({
+				discordId: discordUserId,
+			});
 
 		if (!oauthAccount) {
 			return;
@@ -123,10 +122,10 @@ const syncExistingMemberServerSettings = (
 		const userId = BigInt(member.user.id);
 		const serverId = BigInt(member.guild.id);
 		const existingSettings =
-			yield* database.private.user_server_settings.findUserServerSettingsById(
-				{ userId, serverId },
-				{ subscribe: false },
-			);
+			yield* database.private.user_server_settings.findUserServerSettingsById({
+				userId,
+				serverId,
+			});
 
 		if (!existingSettings) {
 			return false;
@@ -167,10 +166,10 @@ const deleteExistingMemberServerSettings = (
 		const userId = BigInt(member.user.id);
 		const serverId = BigInt(member.guild.id);
 		const existingSettings =
-			yield* database.private.user_server_settings.findUserServerSettingsById(
-				{ userId, serverId },
-				{ subscribe: false },
-			);
+			yield* database.private.user_server_settings.findUserServerSettingsById({
+				userId,
+				serverId,
+			});
 
 		if (!existingSettings) {
 			return false;

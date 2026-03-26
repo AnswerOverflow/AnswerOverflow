@@ -2,7 +2,6 @@
 
 import { api } from "@packages/database/convex/_generated/api";
 import type { SearchResult } from "@packages/database/convex/shared/dataAccess";
-import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import {
 	DiscordAvatar,
 	type DiscordUser,
@@ -11,12 +10,14 @@ import { EmptyStateCard } from "@packages/ui/components/empty";
 import { Link } from "@packages/ui/components/link";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { SnapshotInfiniteList } from "@packages/ui/components/snapshot-infinite-list";
 import {
 	ThreadCard,
 	ThreadCardSkeleton,
 } from "@packages/ui/components/thread-card";
-import { useQuery } from "convex/react";
+import { useConvex, useQuery } from "convex/react";
 import { Inbox } from "lucide-react";
+import { useCallback } from "react";
 
 type ServerInfo = {
 	id: string;
@@ -117,10 +118,23 @@ function UserPostsList({
 	userId: bigint;
 	serverId?: bigint;
 }) {
+	const convex = useConvex();
+	const loadPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.discord_accounts.getUserPosts, {
+				userId,
+				serverId,
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[convex, serverId, userId],
+	);
+
 	return (
-		<ConvexInfiniteList
-			query={api.public.discord_accounts.getUserPosts}
-			queryArgs={{ userId, serverId }}
+		<SnapshotInfiniteList
+			loadPage={loadPage}
 			pageSize={20}
 			initialLoaderCount={5}
 			loader={<ThreadCardSkeleton />}

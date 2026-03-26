@@ -142,10 +142,9 @@ describe("user_server_settings", () => {
 					},
 				});
 
-				const deleted = yield* database.private.messages.getMessageById(
-					{ id: message.id },
-					{ subscribe: false },
-				);
+				const deleted = yield* database.private.messages.getMessageById({
+					id: message.id,
+				});
 				expect(deleted).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
@@ -161,7 +160,6 @@ describe("user_server_settings", () => {
 				const result =
 					yield* database.private.user_server_settings.findUserServerSettingsById(
 						{ userId: nonExistentUserId, serverId: nonExistentServerId },
-						{ subscribe: false },
 					);
 
 				expect(result).toBeNull();
@@ -188,7 +186,6 @@ describe("user_server_settings", () => {
 				const result =
 					yield* database.private.user_server_settings.findUserServerSettingsById(
 						{ userId: author.id, serverId: server.discordId },
-						{ subscribe: false },
 					);
 
 				expect(result).not.toBeNull();
@@ -235,7 +232,6 @@ describe("user_server_settings", () => {
 								{ userId: author.id, serverId: server2.discordId },
 							],
 						},
-						{ subscribe: false },
 					);
 
 				expect(result.length).toBe(2);
@@ -249,7 +245,6 @@ describe("user_server_settings", () => {
 				const result =
 					yield* database.private.user_server_settings.findManyUserServerSettings(
 						{ settings: [] },
-						{ subscribe: false },
 					);
 
 				expect(result).toEqual([]);
@@ -334,7 +329,6 @@ describe("user_server_settings", () => {
 				const result =
 					yield* database.private.user_server_settings.findUserServerSettingsById(
 						{ userId: author.id, serverId: server.discordId },
-						{ subscribe: false },
 					);
 
 				expect(result).toBeNull();

@@ -25,14 +25,11 @@ describe("getMessages", () => {
 				const reply1 = yield* fixture.addMessage({ content: "First reply" });
 				const reply2 = yield* fixture.addMessage({ content: "Second reply" });
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.thread.id,
-						after: rootMessage.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: fixture.thread.id,
+					after: rootMessage.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(2);
 				expect(result.isDone).toBe(true);
@@ -53,14 +50,11 @@ describe("getMessages", () => {
 
 					const rootMessage = yield* fixture.addRootMessage();
 
-					const result = yield* database.public.messages.getMessages(
-						{
-							channelId: fixture.thread.id,
-							after: rootMessage.id,
-							paginationOpts: { numItems: 10, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const result = yield* database.public.messages.getMessages({
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
+						paginationOpts: { numItems: 10, cursor: null },
+					});
 
 					expect(result.page).toHaveLength(0);
 					expect(result.isDone).toBe(true);
@@ -77,26 +71,20 @@ describe("getMessages", () => {
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 
-				const page1 = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.thread.id,
-						after: rootMessage.id,
-						paginationOpts: { numItems: 2, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const page1 = yield* database.public.messages.getMessages({
+					channelId: fixture.thread.id,
+					after: rootMessage.id,
+					paginationOpts: { numItems: 2, cursor: null },
+				});
 
 				expect(page1.page).toHaveLength(2);
 				expect(page1.isDone).toBe(false);
 
-				const page2 = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.thread.id,
-						after: rootMessage.id,
-						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
-					},
-					{ subscribe: false },
-				);
+				const page2 = yield* database.public.messages.getMessages({
+					channelId: fixture.thread.id,
+					after: rootMessage.id,
+					paginationOpts: { numItems: 2, cursor: page1.continueCursor },
+				});
 
 				expect(page2.page).toHaveLength(1);
 				expect(page2.isDone).toBe(true);
@@ -111,14 +99,11 @@ describe("getMessages", () => {
 				const rootMessage = yield* fixture.addRootMessage();
 				yield* fixture.addMessage({ content: "Test content" });
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.thread.id,
-						after: rootMessage.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: fixture.thread.id,
+					after: rootMessage.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page[0]?.author).not.toBeNull();
 				expect(result.page[0]?.author?.id).toBe(fixture.author.id);
@@ -136,14 +121,11 @@ describe("getMessages", () => {
 				const reply1 = yield* fixture.addMessage({ content: "First reply" });
 				const reply2 = yield* fixture.addMessage({ content: "Second reply" });
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.thread.id,
-						after: rootMessage.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: fixture.thread.id,
+					after: rootMessage.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(2);
 				expect(result.isDone).toBe(true);
@@ -164,14 +146,11 @@ describe("getMessages", () => {
 
 					const rootMessage = yield* fixture.addRootMessage();
 
-					const result = yield* database.public.messages.getMessages(
-						{
-							channelId: fixture.thread.id,
-							after: rootMessage.id,
-							paginationOpts: { numItems: 10, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const result = yield* database.public.messages.getMessages({
+						channelId: fixture.thread.id,
+						after: rootMessage.id,
+						paginationOpts: { numItems: 10, cursor: null },
+					});
 
 					expect(result.page).toHaveLength(0);
 					expect(result.isDone).toBe(true);
@@ -188,26 +167,20 @@ describe("getMessages", () => {
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 
-				const page1 = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.thread.id,
-						after: rootMessage.id,
-						paginationOpts: { numItems: 2, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const page1 = yield* database.public.messages.getMessages({
+					channelId: fixture.thread.id,
+					after: rootMessage.id,
+					paginationOpts: { numItems: 2, cursor: null },
+				});
 
 				expect(page1.page).toHaveLength(2);
 				expect(page1.isDone).toBe(false);
 
-				const page2 = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.thread.id,
-						after: rootMessage.id,
-						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
-					},
-					{ subscribe: false },
-				);
+				const page2 = yield* database.public.messages.getMessages({
+					channelId: fixture.thread.id,
+					after: rootMessage.id,
+					paginationOpts: { numItems: 2, cursor: page1.continueCursor },
+				});
 
 				expect(page2.page).toHaveLength(1);
 				expect(page2.isDone).toBe(true);
@@ -222,14 +195,11 @@ describe("getMessages", () => {
 				const rootMessage = yield* fixture.addRootMessage();
 				yield* fixture.addMessage({ content: "Test content" });
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.thread.id,
-						after: rootMessage.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: fixture.thread.id,
+					after: rootMessage.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page[0]?.author).not.toBeNull();
 				expect(result.page[0]?.author?.id).toBe(fixture.author.id);
@@ -247,14 +217,11 @@ describe("getMessages", () => {
 				const msg2 = yield* fixture.addMessage({ content: "Second message" });
 				const msg3 = yield* fixture.addMessage({ content: "Third message" });
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.channel.id,
-						after: msg1.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: fixture.channel.id,
+					after: msg1.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(2);
 				expect(result.isDone).toBe(true);
@@ -275,14 +242,11 @@ describe("getMessages", () => {
 
 					const msg1 = yield* fixture.addMessage({ content: "Only message" });
 
-					const result = yield* database.public.messages.getMessages(
-						{
-							channelId: fixture.channel.id,
-							after: msg1.id,
-							paginationOpts: { numItems: 10, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const result = yield* database.public.messages.getMessages({
+						channelId: fixture.channel.id,
+						after: msg1.id,
+						paginationOpts: { numItems: 10, cursor: null },
+					});
 
 					expect(result.page).toHaveLength(0);
 					expect(result.isDone).toBe(true);
@@ -299,26 +263,20 @@ describe("getMessages", () => {
 				yield* fixture.addMessage();
 				yield* fixture.addMessage();
 
-				const page1 = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.channel.id,
-						after: firstMsg.id,
-						paginationOpts: { numItems: 2, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const page1 = yield* database.public.messages.getMessages({
+					channelId: fixture.channel.id,
+					after: firstMsg.id,
+					paginationOpts: { numItems: 2, cursor: null },
+				});
 
 				expect(page1.page).toHaveLength(2);
 				expect(page1.isDone).toBe(false);
 
-				const page2 = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.channel.id,
-						after: firstMsg.id,
-						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
-					},
-					{ subscribe: false },
-				);
+				const page2 = yield* database.public.messages.getMessages({
+					channelId: fixture.channel.id,
+					after: firstMsg.id,
+					paginationOpts: { numItems: 2, cursor: page1.continueCursor },
+				});
 
 				expect(page2.page).toHaveLength(1);
 				expect(page2.isDone).toBe(true);
@@ -333,14 +291,11 @@ describe("getMessages", () => {
 				const firstMsg = yield* fixture.addMessage({ content: "First" });
 				yield* fixture.addMessage({ content: "Test content" });
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: fixture.channel.id,
-						after: firstMsg.id,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: fixture.channel.id,
+					after: firstMsg.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page[0]?.author).not.toBeNull();
 				expect(result.page[0]?.author?.id).toBe(fixture.author.id);
@@ -375,14 +330,11 @@ describe("getMessages", () => {
 					yield* createMessage(base, { id: id1, content: "First by id" });
 					yield* createMessage(base, { id: id2, content: "Second by id" });
 
-					const result = yield* database.public.messages.getMessages(
-						{
-							channelId: channel.id,
-							after: 0n,
-							paginationOpts: { numItems: 10, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const result = yield* database.public.messages.getMessages({
+						channelId: channel.id,
+						after: 0n,
+						paginationOpts: { numItems: 10, cursor: null },
+					});
 
 					expect(result.page).toHaveLength(3);
 					expect(result.page[0]?.message.id).toBe(id1);
@@ -419,14 +371,11 @@ describe("getMessages", () => {
 					yield* createMessage(base, { id: id3 });
 					yield* createMessage(base, { id: id2 });
 
-					const result = yield* database.public.messages.getMessages(
-						{
-							channelId: channel.id,
-							after: id2,
-							paginationOpts: { numItems: 10, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const result = yield* database.public.messages.getMessages({
+						channelId: channel.id,
+						after: id2,
+						paginationOpts: { numItems: 10, cursor: null },
+					});
 
 					expect(result.page).toHaveLength(2);
 					expect(result.page[0]?.message.id).toBe(id3);
@@ -455,14 +404,11 @@ describe("getMessages", () => {
 				yield* createMessage(base, { id: baseId + 1n });
 				yield* createMessage(base, { id: baseId + 2n });
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: channel.id,
-						after: baseId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: channel.id,
+					after: baseId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(3);
 				expect(result.page[0]?.message.id).toBe(baseId + 1n);
@@ -501,28 +447,22 @@ describe("getMessages", () => {
 						yield* createMessage(base, { id });
 					}
 
-					const page1 = yield* database.public.messages.getMessages(
-						{
-							channelId: channel.id,
-							after: 0n,
-							paginationOpts: { numItems: 2, cursor: null },
-						},
-						{ subscribe: false },
-					);
+					const page1 = yield* database.public.messages.getMessages({
+						channelId: channel.id,
+						after: 0n,
+						paginationOpts: { numItems: 2, cursor: null },
+					});
 
 					expect(page1.page).toHaveLength(2);
 					expect(page1.page[0]?.message.id).toBe(1000000000000000100n);
 					expect(page1.page[1]?.message.id).toBe(1000000000000000200n);
 					expect(page1.isDone).toBe(false);
 
-					const page2 = yield* database.public.messages.getMessages(
-						{
-							channelId: channel.id,
-							after: 0n,
-							paginationOpts: { numItems: 2, cursor: page1.continueCursor },
-						},
-						{ subscribe: false },
-					);
+					const page2 = yield* database.public.messages.getMessages({
+						channelId: channel.id,
+						after: 0n,
+						paginationOpts: { numItems: 2, cursor: page1.continueCursor },
+					});
 
 					expect(page2.page).toHaveLength(2);
 					expect(page2.page[0]?.message.id).toBe(1000000000000000300n);
@@ -570,14 +510,11 @@ describe("getMessages", () => {
 					{ id: baseId + 3n },
 				);
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: channel.id,
-						after: baseId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: channel.id,
+					after: baseId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(3);
 				expect(result.page[0]?.author?.id).toBe(author1.id);
@@ -611,14 +548,11 @@ describe("privacy filtering", () => {
 					{ id: baseId + 1n },
 				);
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: channel.id,
-						after: baseId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: channel.id,
+					after: baseId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(0);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -647,14 +581,11 @@ describe("privacy filtering", () => {
 					{ id: baseId + 1n },
 				);
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: channel.id,
-						after: baseId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: channel.id,
+					after: baseId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(1);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -691,14 +622,11 @@ describe("privacy filtering", () => {
 					{ id: baseId + 1n },
 				);
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: channel.id,
-						after: baseId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: channel.id,
+					after: baseId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(1);
 				const anonymizedAuthor = result.page[0]?.author;
@@ -743,14 +671,11 @@ describe("privacy filtering", () => {
 					{ id: baseId + 1n },
 				);
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: channel.id,
-						after: baseId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: channel.id,
+					after: baseId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(1);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -790,14 +715,11 @@ describe("privacy filtering", () => {
 					{ id: baseId + 1n },
 				);
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: channel.id,
-						after: baseId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: channel.id,
+					after: baseId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(1);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -853,14 +775,11 @@ describe("privacy filtering", () => {
 					{ id: baseId + 3n },
 				);
 
-				const result = yield* database.public.messages.getMessages(
-					{
-						channelId: channel.id,
-						after: baseId,
-						paginationOpts: { numItems: 10, cursor: null },
-					},
-					{ subscribe: false },
-				);
+				const result = yield* database.public.messages.getMessages({
+					channelId: channel.id,
+					after: baseId,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
 
 				expect(result.page).toHaveLength(2);
 				const authorIds = result.page.map((p) => p.author?.id);
@@ -875,10 +794,9 @@ describe("getMessagePageHeaderData", () => {
 		Effect.gen(function* () {
 			const database = yield* Database;
 
-			const result = yield* database.public.messages.getMessagePageHeaderData(
-				{ messageId: 999999999999999999n },
-				{ subscribe: false },
-			);
+			const result = yield* database.public.messages.getMessagePageHeaderData({
+				messageId: 999999999999999999n,
+			});
 
 			expect(result).toBeNull();
 		}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -906,10 +824,9 @@ describe("getMessagePageHeaderData", () => {
 				{ id: thread.id, parentChannelId: forum.id },
 			);
 
-			const result = yield* database.public.messages.getMessagePageHeaderData(
-				{ messageId: thread.id },
-				{ subscribe: false },
-			);
+			const result = yield* database.public.messages.getMessagePageHeaderData({
+				messageId: thread.id,
+			});
 
 			expect(result).toBeNull();
 		}).pipe(Effect.provide(DatabaseTestLayer)),

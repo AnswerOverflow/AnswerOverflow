@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import {
 	Empty,
 	EmptyDescription,
@@ -10,14 +9,17 @@ import {
 	EmptyTitle,
 } from "@packages/ui/components/empty";
 import { SearchInput } from "@packages/ui/components/search-input";
+import { SnapshotInfiniteList } from "@packages/ui/components/snapshot-infinite-list";
 import {
 	ThreadCard,
 	ThreadCardSkeleton,
 } from "@packages/ui/components/thread-card";
 import { encodeCursor } from "@packages/ui/utils/cursor";
+import { useConvex } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { FileQuestion } from "lucide-react";
 import { useQueryState } from "nuqs";
+import { useCallback } from "react";
 import { useDebounce } from "use-debounce";
 
 type RecentThreadsResult = FunctionReturnType<
@@ -63,9 +65,31 @@ export function HomePageClient({
 		defaultValue: "",
 	});
 	const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
+	const convex = useConvex();
 	const hasQuery = debouncedSearchQuery.trim().length > 0;
 	const isSearching =
 		searchQuery !== debouncedSearchQuery && searchQuery.trim().length > 0;
+	const loadSearchPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.search.publicSearch, {
+				query: debouncedSearchQuery,
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[convex, debouncedSearchQuery],
+	);
+	const loadRecentThreadsPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.search.getRecentThreads, {
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[convex],
+	);
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -87,9 +111,8 @@ export function HomePageClient({
 				</div>
 
 				{hasQuery ? (
-					<ConvexInfiniteList
-						query={api.public.search.publicSearch}
-						queryArgs={{ query: debouncedSearchQuery }}
+					<SnapshotInfiniteList
+						loadPage={loadSearchPage}
 						pageSize={20}
 						initialLoaderCount={5}
 						loader={<ThreadCardSkeleton />}
@@ -116,9 +139,8 @@ export function HomePageClient({
 					/>
 				) : (
 					<>
-						<ConvexInfiniteList
-							query={api.public.search.getRecentThreads}
-							queryArgs={{}}
+						<SnapshotInfiniteList
+							loadPage={loadRecentThreadsPage}
 							pageSize={20}
 							initialLoaderCount={5}
 							loader={<ThreadCardSkeleton />}

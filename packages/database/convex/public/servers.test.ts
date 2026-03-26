@@ -14,10 +14,9 @@ describe("public/servers", () => {
 			Effect.gen(function* () {
 				const database = yield* Database;
 
-				const result = yield* database.public.servers.getServerByDomain(
-					{ domain: "nonexistent.example.com" },
-					{ subscribe: false },
-				);
+				const result = yield* database.public.servers.getServerByDomain({
+					domain: "nonexistent.example.com",
+				});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -35,10 +34,9 @@ describe("public/servers", () => {
 					subpath: "/community",
 				});
 
-				const result = yield* database.public.servers.getServerByDomain(
-					{ domain: "custom.example.com" },
-					{ subscribe: false },
-				);
+				const result = yield* database.public.servers.getServerByDomain({
+					domain: "custom.example.com",
+				});
 
 				expect(result).not.toBeNull();
 				expect(result?.server.name).toBe("Domain Server");
@@ -59,10 +57,7 @@ describe("public/servers", () => {
 
 				yield* createServer({ name: "Non-Indexed Server" });
 
-				const servers = yield* database.public.servers.getBrowseServers(
-					{},
-					{ subscribe: false },
-				);
+				const servers = yield* database.public.servers.getBrowseServers({});
 
 				const foundIndexed = servers.find((s) => s.name === "Indexed Server");
 				const foundNonIndexed = servers.find(
@@ -92,10 +87,7 @@ describe("public/servers", () => {
 				const largeChannel = yield* createChannel(largeServer.discordId);
 				yield* enableChannelIndexing(largeChannel.id);
 
-				const servers = yield* database.public.servers.getBrowseServers(
-					{},
-					{ subscribe: false },
-				);
+				const servers = yield* database.public.servers.getBrowseServers({});
 
 				const smallIdx = servers.findIndex((s) => s.name === "Small Server");
 				const largeIdx = servers.findIndex((s) => s.name === "Large Server");
@@ -112,10 +104,9 @@ describe("public/servers", () => {
 				const nonExistentId = BigInt(999999999999);
 
 				const result =
-					yield* database.public.servers.getServerByDiscordIdWithChannels(
-						{ discordId: nonExistentId },
-						{ subscribe: false },
-					);
+					yield* database.public.servers.getServerByDiscordIdWithChannels({
+						discordId: nonExistentId,
+					});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -132,10 +123,9 @@ describe("public/servers", () => {
 				yield* enableChannelIndexing(channel.id);
 
 				const result =
-					yield* database.public.servers.getServerByDiscordIdWithChannels(
-						{ discordId: server.discordId },
-						{ subscribe: false },
-					);
+					yield* database.public.servers.getServerByDiscordIdWithChannels({
+						discordId: server.discordId,
+					});
 
 				expect(result).not.toBeNull();
 				expect(result?.server.name).toBe("With Channels");
@@ -155,10 +145,9 @@ describe("public/servers", () => {
 				});
 
 				const result =
-					yield* database.public.servers.getServerByDiscordIdWithChannels(
-						{ discordId: server.discordId },
-						{ subscribe: false },
-					);
+					yield* database.public.servers.getServerByDiscordIdWithChannels({
+						discordId: server.discordId,
+					});
 
 				expect(result?.server.customDomain).toBe("myserver.example.com");
 			}).pipe(Effect.provide(DatabaseTestLayer)),

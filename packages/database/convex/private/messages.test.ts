@@ -33,10 +33,9 @@ describe("messages", () => {
 					ignoreChecks: true,
 				});
 
-				const message = yield* database.private.messages.getMessageById(
-					{ id: messageId },
-					{ subscribe: false },
-				);
+				const message = yield* database.private.messages.getMessageById({
+					id: messageId,
+				});
 				expect(message).not.toBeNull();
 				expect(message?.content).toBe("Hello world");
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -56,10 +55,9 @@ describe("messages", () => {
 					ignoreChecks: true,
 				});
 
-				const updated = yield* database.private.messages.getMessageById(
-					{ id: message.id },
-					{ subscribe: false },
-				);
+				const updated = yield* database.private.messages.getMessageById({
+					id: message.id,
+				});
 				expect(updated?.content).toBe("Updated");
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
@@ -125,10 +123,9 @@ describe("messages", () => {
 				const database = yield* Database;
 				const nonExistentId = BigInt(999999999999);
 
-				const result = yield* database.private.messages.getMessageById(
-					{ id: nonExistentId },
-					{ subscribe: false },
-				);
+				const result = yield* database.private.messages.getMessageById({
+					id: nonExistentId,
+				});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -140,10 +137,9 @@ describe("messages", () => {
 				const fixture = yield* createForumThreadWithReplies();
 				const message = yield* fixture.addMessage({ content: "Find me" });
 
-				const result = yield* database.private.messages.getMessageById(
-					{ id: message.id },
-					{ subscribe: false },
-				);
+				const result = yield* database.private.messages.getMessageById({
+					id: message.id,
+				});
 
 				expect(result).not.toBeNull();
 				expect(result?.content).toBe("Find me");
@@ -160,10 +156,9 @@ describe("messages", () => {
 
 				yield* database.private.messages.deleteMessage({ id: message.id });
 
-				const deleted = yield* database.private.messages.getMessageById(
-					{ id: message.id },
-					{ subscribe: false },
-				);
+				const deleted = yield* database.private.messages.getMessageById({
+					id: message.id,
+				});
 				expect(deleted).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
@@ -181,14 +176,12 @@ describe("messages", () => {
 					ids: [msg1.id, msg2.id],
 				});
 
-				const deleted1 = yield* database.private.messages.getMessageById(
-					{ id: msg1.id },
-					{ subscribe: false },
-				);
-				const deleted2 = yield* database.private.messages.getMessageById(
-					{ id: msg2.id },
-					{ subscribe: false },
-				);
+				const deleted1 = yield* database.private.messages.getMessageById({
+					id: msg1.id,
+				});
+				const deleted2 = yield* database.private.messages.getMessageById({
+					id: msg2.id,
+				});
 				expect(deleted1).toBeNull();
 				expect(deleted2).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -210,10 +203,9 @@ describe("messages", () => {
 					questionMessageId: question.id,
 				});
 
-				const updated = yield* database.private.messages.getMessageById(
-					{ id: answer.id },
-					{ subscribe: false },
-				);
+				const updated = yield* database.private.messages.getMessageById({
+					id: answer.id,
+				});
 				expect(updated?.questionId).toBe(question.id);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
@@ -240,16 +232,14 @@ describe("messages", () => {
 					questionMessageId: question.id,
 				});
 
-				const oldSolution = yield* database.private.messages.getMessageById(
-					{ id: firstAnswer.id },
-					{ subscribe: false },
-				);
+				const oldSolution = yield* database.private.messages.getMessageById({
+					id: firstAnswer.id,
+				});
 				expect(oldSolution?.questionId).toBeUndefined();
 
-				const newSolution = yield* database.private.messages.getMessageById(
-					{ id: secondAnswer.id },
-					{ subscribe: false },
-				);
+				const newSolution = yield* database.private.messages.getMessageById({
+					id: secondAnswer.id,
+				});
 				expect(newSolution?.questionId).toBe(question.id);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
@@ -319,10 +309,10 @@ describe("messages", () => {
 				);
 
 				const topSolvers =
-					yield* database.private.messages.getTopQuestionSolversByServerId(
-						{ serverId: server.discordId, limit: 10 },
-						{ subscribe: false },
-					);
+					yield* database.private.messages.getTopQuestionSolversByServerId({
+						serverId: server.discordId,
+						limit: 10,
+					});
 
 				expect(topSolvers.length).toBeGreaterThanOrEqual(1);
 			}).pipe(Effect.provide(DatabaseTestLayer)),

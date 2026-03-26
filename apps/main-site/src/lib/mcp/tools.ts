@@ -373,7 +373,7 @@ export async function findSimilarThreadsCore(
 		args,
 		Effect.gen(function* () {
 			const database = yield* Database;
-			const similar = yield* database.public.search.getSimilarThreads({
+			const similar = yield* database.public.search.getCachedSimilarThreads({
 				searchQuery: query,
 				currentThreadId: "0",
 				currentServerId: serverId,

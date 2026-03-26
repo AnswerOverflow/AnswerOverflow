@@ -5,7 +5,6 @@ import type {
 	PaginatedQueryItem,
 	PaginatedQueryReference,
 } from "convex/react";
-
 import { type ReactNode, useCallback, useRef } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { useCachedPaginatedQuery } from "../hooks/use-cached-paginated-query";
@@ -72,9 +71,7 @@ export function ConvexInfiniteList<Query extends PaginatedQueryReference>({
 		initialData,
 	});
 
-	const results = filterResults
-		? filterResults(rawResults as Array<PaginatedQueryItem<Query>>)
-		: rawResults;
+	const results = filterResults ? filterResults(rawResults) : rawResults;
 
 	const canLoadMore = status === "CanLoadMore";
 	const isLoadingMore = status === "LoadingMore";

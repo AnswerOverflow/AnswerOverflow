@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { ConvexInfiniteList } from "@packages/ui/components/convex-infinite-list";
 import {
 	Empty,
 	EmptyDescription,
@@ -10,13 +9,16 @@ import {
 	EmptyTitle,
 } from "@packages/ui/components/empty";
 import { SearchInput } from "@packages/ui/components/search-input";
+import { SnapshotInfiniteList } from "@packages/ui/components/snapshot-infinite-list";
 import { useTenant } from "@packages/ui/components/tenant-context";
 import {
 	ThreadCard,
 	ThreadCardSkeleton,
 } from "@packages/ui/components/thread-card";
+import { useConvex } from "convex/react";
 import { FileQuestion, Search } from "lucide-react";
 import { useQueryState } from "nuqs";
+import { useCallback } from "react";
 import { useDebounce } from "use-debounce";
 
 function TenantSearchResults({
@@ -26,10 +28,23 @@ function TenantSearchResults({
 	query: string;
 	serverId: string;
 }) {
+	const convex = useConvex();
+	const loadPage = useCallback(
+		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
+			convex.query(api.public.search.publicSearch, {
+				query,
+				serverId,
+				paginationOpts: {
+					numItems,
+					cursor,
+				},
+			}),
+		[convex, query, serverId],
+	);
+
 	return (
-		<ConvexInfiniteList
-			query={api.public.search.publicSearch}
-			queryArgs={{ query, serverId }}
+		<SnapshotInfiniteList
+			loadPage={loadPage}
 			pageSize={10}
 			initialLoaderCount={5}
 			loader={<ThreadCardSkeleton />}

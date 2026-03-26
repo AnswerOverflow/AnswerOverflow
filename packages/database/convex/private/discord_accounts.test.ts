@@ -56,7 +56,6 @@ describe("discord_accounts", () => {
 				const accounts =
 					yield* database.private.discord_accounts.findManyDiscordAccountsByIds(
 						{ ids: [author1.id, author2.id] },
-						{ subscribe: false },
 					);
 
 				expect(accounts.length).toBe(2);
@@ -74,7 +73,6 @@ describe("discord_accounts", () => {
 				const accounts =
 					yield* database.private.discord_accounts.findManyDiscordAccountsByIds(
 						{ ids: [author.id, fakeId] },
-						{ subscribe: false },
 					);
 
 				expect(accounts.length).toBe(1);
@@ -89,7 +87,6 @@ describe("discord_accounts", () => {
 				const accounts =
 					yield* database.private.discord_accounts.findManyDiscordAccountsByIds(
 						{ ids: [] },
-						{ subscribe: false },
 					);
 
 				expect(accounts).toEqual([]);
@@ -142,14 +139,12 @@ describe("discord_accounts", () => {
 				const accounts =
 					yield* database.private.discord_accounts.findManyDiscordAccountsByIds(
 						{ ids: [author.id] },
-						{ subscribe: false },
 					);
 				expect(accounts.length).toBe(0);
 
 				const ignored =
 					yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
 						{ id: author.id },
-						{ subscribe: false },
 					);
 				expect(ignored).not.toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
@@ -167,10 +162,9 @@ describe("discord_accounts", () => {
 					id: fixture.author.id,
 				});
 
-				const deletedMessage = yield* database.private.messages.getMessageById(
-					{ id: message.id },
-					{ subscribe: false },
-				);
+				const deletedMessage = yield* database.private.messages.getMessageById({
+					id: message.id,
+				});
 				expect(deletedMessage).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
@@ -186,10 +180,9 @@ describe("discord_accounts", () => {
 				});
 
 				const result =
-					yield* database.private.discord_accounts.getUserPageHeaderData(
-						{ userId: author.id },
-						{ subscribe: false },
-					);
+					yield* database.private.discord_accounts.getUserPageHeaderData({
+						userId: author.id,
+					});
 
 				expect(result).not.toBeNull();
 				expect(result?.user.name).toBe("HeaderUser");
@@ -203,10 +196,9 @@ describe("discord_accounts", () => {
 				const nonExistentId = BigInt(999999999999);
 
 				const result =
-					yield* database.private.discord_accounts.getUserPageHeaderData(
-						{ userId: nonExistentId },
-						{ subscribe: false },
-					);
+					yield* database.private.discord_accounts.getUserPageHeaderData({
+						userId: nonExistentId,
+					});
 
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
