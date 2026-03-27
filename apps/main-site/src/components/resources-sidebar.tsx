@@ -213,30 +213,51 @@ export function MCPServerResource() {
 	);
 }
 
-const SPONSORED_IMAGE =
-	"https://cdn.answeroverflow.com/1486404878359335092/d2a528c0-128c-4c86-851b-1d5c9ba9e21c.jpeg";
+const SPONSORS = [
+	{
+		name: "plannotator",
+		href: "https://plannotator.ai/?utm_source=www.answeroverflow.com",
+		image:
+			"https://cdn.answeroverflow.com/1486404878359335092/d2a528c0-128c-4c86-851b-1d5c9ba9e21c.jpeg",
+		width: 400,
+		height: 516,
+	},
+	{
+		name: "invent",
+		href: "https://www.useinvent.com/?utm_source=www.answeroverflow.com",
+		image:
+			"https://cdn.answeroverflow.com/1486944608360337418/064d70bc-58a7-44fc-89b6-f63f8c01173b.png",
+		width: 400,
+		height: 400,
+	},
+	{
+		name: "morphllm",
+		href: "https://www.morphllm.com/?utm_source=www.answeroverflow.com",
+		image:
+			"https://cdn.answeroverflow.com/1486944590882799656/94455281-5ac3-4fa4-94c2-0f56335ca2aa.jpeg",
+		width: 400,
+		height: 400,
+	},
+];
 
-export function SponsoredCard({ serverId }: { serverId?: string }) {
-	const tenant = useTenant();
-	if (tenant || serverId === SUPABASE_SERVER_ID) return null;
+function SponsoredContent({ sponsorIndex }: { sponsorIndex: number }) {
+	const sponsor = SPONSORS[sponsorIndex % SPONSORS.length]!;
 	return (
-		<div className="w-full rounded-md border-2 bg-card drop-shadow-md">
-			<div className="px-3 py-2">
-				<div className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60">
-					Sponsored
-				</div>
+		<div>
+			<div className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60 mb-2">
+				Sponsored
 			</div>
 			<TrackLink
-				href="https://plannotator.ai/?utm_source=www.answeroverflow.com"
+				href={sponsor.href}
 				eventName="Sponsored Card Click"
-				eventData={{ sponsor: "plannotator" }}
+				eventData={{ sponsor: sponsor.name }}
 			>
 				<Image
-					src={SPONSORED_IMAGE}
-					alt="Plannotator"
-					width={400}
-					height={516}
-					className="w-full h-auto"
+					src={sponsor.image}
+					alt={sponsor.name}
+					width={sponsor.width}
+					height={sponsor.height}
+					className="w-full h-auto rounded-xl"
 				/>
 			</TrackLink>
 		</div>
@@ -267,21 +288,27 @@ export function ResourcesSidebar({
 	sponsorUrl,
 	serverId,
 	bowieImageIndex,
+	sponsorIndex,
 }: {
 	className?: string;
 	sponsorUrl?: string | null;
 	serverId?: string;
 	bowieImageIndex?: number;
+	sponsorIndex?: number;
 }) {
+	const tenant = useTenant();
 	const isGitHubSponsor = sponsorUrl?.includes("github.com/sponsors");
 	const sponsorLabel = isGitHubSponsor
 		? "GitHub Sponsor"
 		: "Support the project";
 	const showBowieCard = serverId === SUPABASE_SERVER_ID;
+	const showSponsored = !tenant && !showBowieCard;
 
 	return (
 		<div className={cn("text-left", className)}>
-			<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide mb-2">
+			{showSponsored && <SponsoredContent sponsorIndex={sponsorIndex ?? 0} />}
+			{showBowieCard && <BowieSidebarCard imageIndex={bowieImageIndex ?? 0} />}
+			<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide mb-2 mt-4">
 				Resources
 			</div>
 			<nav className="space-y-0.5">
@@ -304,7 +331,6 @@ export function ResourcesSidebar({
 					</TrackLink>
 				)}
 			</nav>
-			{showBowieCard && <BowieSidebarCard imageIndex={bowieImageIndex ?? 0} />}
 		</div>
 	);
 }

@@ -39,10 +39,7 @@ import { useCallback, useEffect } from "react";
 import { FloatingAskInput } from "@/components/floating-ask-input";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { OpenInDiscordLink } from "@/components/open-in-discord-modal";
-import {
-	ResourcesSidebar,
-	SponsoredCard,
-} from "@/components/resources-sidebar";
+import { ResourcesSidebar } from "@/components/resources-sidebar";
 import { ThreadTags } from "@/components/thread-tags";
 
 export type MessagePageHeaderData = NonNullable<
@@ -389,12 +386,16 @@ export function MessagePage(props: {
 	repliesSlot: ReactNode;
 	similarThreadsSlot: ReactNode;
 	recentAnnouncementsSlot?: ReactNode;
+	sponsorIndex: number;
+	bowieImageIndex: number;
 }) {
 	const {
 		headerData,
 		repliesSlot,
 		similarThreadsSlot,
 		recentAnnouncementsSlot,
+		sponsorIndex,
+		bowieImageIndex,
 	} = props;
 
 	const tenant = useTenant();
@@ -665,12 +666,12 @@ export function MessagePage(props: {
 									className="w-full pt-4 border-t"
 									sponsorUrl={headerData.server.sponsorUrl}
 									serverId={headerData.server.discordId.toString()}
-									bowieImageIndex={Math.floor(Math.random() * 4)}
+									bowieImageIndex={bowieImageIndex}
+									sponsorIndex={sponsorIndex}
 								/>
 								{recentAnnouncementsSlot}
 							</div>
 						</div>
-						<SponsoredCard serverId={headerData.server.discordId.toString()} />
 						{similarThreadsSlot}
 						{firstMessage && (
 							<div className="flex w-full flex-col justify-center gap-2 text-center">
@@ -734,7 +735,7 @@ export function MessagePage(props: {
 									serverId: firstMessage.message.serverId.toString(),
 									channelId: firstMessage.message.channelId.toString(),
 								},
-								sponsor: !tenant ? "plannotator" : null,
+								sponsor: !tenant ? "rotating" : null,
 							}}
 						/>
 					)}
