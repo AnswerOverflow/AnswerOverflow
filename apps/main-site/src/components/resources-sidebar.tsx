@@ -232,7 +232,7 @@ const SPONSORS = [
 	},
 	{
 		name: "morphllm",
-		href: "https://www.morphllm.com/?utm_source=www.answeroverflow.com",
+		href: "https://www.morphllm.com/mcp?utm_source=www.answeroverflow.com",
 		image:
 			"https://cdn.answeroverflow.com/1486944590882799656/94455281-5ac3-4fa4-94c2-0f56335ca2aa.jpeg",
 		width: 400,
