@@ -339,7 +339,9 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					return;
 				}
 
-				yield* Effect.forkDaemon(syncGuild(guild));
+				// Keep server parity on the main handler so a completed guildCreate
+				// handler means the guild is available in the database.
+				yield* syncGuild(guild);
 				yield* Effect.forkDaemon(
 					catchAllSilentWithReport(trackServerJoin(guild)),
 				);
