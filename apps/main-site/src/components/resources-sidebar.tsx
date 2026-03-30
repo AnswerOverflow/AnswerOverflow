@@ -27,7 +27,7 @@ import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { Check, Copy, Heart } from "lucide-react";
 import Image from "next/image";
 import { parseAsBoolean, useQueryState } from "nuqs";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { mcpProviders } from "./mcp-install-configs";
 
 const SUPABASE_SERVER_ID = "839993398554656828";
@@ -213,8 +213,25 @@ export function MCPServerResource() {
 	);
 }
 
-const SPONSORS = [
+type ImageSponsor = {
+	type: "image";
+	name: string;
+	href: string;
+	image: string;
+	width: number;
+	height: number;
+};
+
+type CarbonSponsor = {
+	type: "carbon";
+	name: string;
+};
+
+type Sponsor = ImageSponsor | CarbonSponsor;
+
+const SPONSORS: Sponsor[] = [
 	{
+		type: "image",
 		name: "plannotator",
 		href: "https://plannotator.ai/?utm_source=www.answeroverflow.com",
 		image:
@@ -223,6 +240,7 @@ const SPONSORS = [
 		height: 516,
 	},
 	{
+		type: "image",
 		name: "invent",
 		href: "https://www.useinvent.com/?utm_source=www.answeroverflow.com",
 		image:
@@ -231,6 +249,7 @@ const SPONSORS = [
 		height: 400,
 	},
 	{
+		type: "image",
 		name: "morphllm",
 		href: "https://www.morphllm.com/mcp?utm_source=www.answeroverflow.com",
 		image:
@@ -238,28 +257,54 @@ const SPONSORS = [
 		width: 400,
 		height: 400,
 	},
+	{
+		type: "carbon",
+		name: "carbon",
+	},
 ];
+
+function CarbonAd() {
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		const script = document.createElement("script");
+		script.src =
+			"//cdn.carbonads.com/carbon.js?serve=CWYIV53I&placement=wwwansweroverflowcom&format=cover";
+		script.id = "_carbonads_js";
+		script.async = true;
+		container.appendChild(script);
+
+		return () => {
+			container.innerHTML = "";
+		};
+	}, []);
+
+	return <div ref={containerRef} />;
+}
 
 function SponsoredContent({ sponsorIndex }: { sponsorIndex: number }) {
 	const sponsor = SPONSORS[sponsorIndex % SPONSORS.length]!;
 	return (
 		<div>
-			<div className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60 mb-2">
-				Sponsored
-			</div>
-			<TrackLink
-				href={sponsor.href}
-				eventName="Sponsored Card Click"
-				eventData={{ sponsor: sponsor.name }}
-			>
-				<Image
-					src={sponsor.image}
-					alt={sponsor.name}
-					width={sponsor.width}
-					height={sponsor.height}
-					className="w-full h-auto rounded-xl"
-				/>
-			</TrackLink>
+			{sponsor.type === "image" && (
+				<TrackLink
+					href={sponsor.href}
+					eventName="Sponsored Card Click"
+					eventData={{ sponsor: sponsor.name }}
+				>
+					<Image
+						src={sponsor.image}
+						alt={sponsor.name}
+						width={sponsor.width}
+						height={sponsor.height}
+						className="w-full h-auto rounded-xl"
+					/>
+				</TrackLink>
+			)}
+			{sponsor.type === "carbon" && <CarbonAd />}
 		</div>
 	);
 }
