@@ -2,9 +2,7 @@ import { Database } from "@packages/database/database";
 import {
 	CategoryChannel,
 	Constants,
-	type ForumChannel,
 	type Guild,
-	type TextChannel,
 	ThreadChannel,
 } from "discord.js-selfbot-v13";
 import { Array as Arr, Effect } from "effect";
@@ -332,9 +330,9 @@ const setupServer = Effect.gen(function* () {
 
 	yield* configureConvexChannels(serverId, categoryId, channels);
 
-	console.log("\n" + "=".repeat(50));
+	console.log(`\n${"=".repeat(50)}`);
 	console.log("✅ Server setup complete!");
-	console.log("=".repeat(50) + "\n");
+	console.log(`${"=".repeat(50)}\n`);
 
 	yield* selfbot.client.destroy();
 });

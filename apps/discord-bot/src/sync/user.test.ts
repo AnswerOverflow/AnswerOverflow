@@ -1,7 +1,7 @@
 import { Data, Equal } from "effect";
 import { describe, expect, test } from "vitest";
-import { getMemberRoleIds, hasRelevantMemberAccessChanges } from "./user";
 import { toAODiscordAccount } from "../utils/conversions";
+import { getMemberRoleIds, hasRelevantMemberAccessChanges } from "./user";
 
 function hasRelevantChanges(
 	oldUser: {

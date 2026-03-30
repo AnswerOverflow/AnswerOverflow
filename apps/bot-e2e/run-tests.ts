@@ -1,4 +1,4 @@
-import { Config, Effect, Layer, Option } from "effect";
+import { Config, Effect, Option } from "effect";
 import { sendAlert } from "./src/core/alerting";
 import { Pushover } from "./src/core/pushover-service";
 

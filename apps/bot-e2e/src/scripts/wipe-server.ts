@@ -66,9 +66,9 @@ const wipeServer = Effect.gen(function* () {
 			);
 	}
 
-	console.log("\n" + "=".repeat(50));
+	console.log(`\n${"=".repeat(50)}`);
 	console.log("✅ Server wiped!");
-	console.log("=".repeat(50) + "\n");
+	console.log(`${"=".repeat(50)}\n`);
 
 	yield* selfbot.client.destroy();
 });
