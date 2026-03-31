@@ -1,21 +1,18 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-
-const fontDir = join(process.cwd(), "src/styles");
-const satoshiBlackPromise = readFile(join(fontDir, "Satoshi-Black.ttf"));
-const satoshiBoldPromise = readFile(join(fontDir, "Satoshi-Bold.ttf"));
-
 export async function loadOgFonts() {
 	const [satoshiBlack, satoshiBold] = await Promise.all([
-		satoshiBlackPromise,
-		satoshiBoldPromise,
+		fetch(new URL("../../../styles/Satoshi-Black.ttf", import.meta.url)).then(
+			(response) => response.arrayBuffer(),
+		),
+		fetch(new URL("../../../styles/Satoshi-Bold.ttf", import.meta.url)).then(
+			(response) => response.arrayBuffer(),
+		),
 	]);
 	return { satoshiBlack, satoshiBold };
 }
 
 export function getOgFontConfig(fonts: {
-	satoshiBlack: Buffer;
-	satoshiBold: Buffer;
+	satoshiBlack: ArrayBuffer;
+	satoshiBold: ArrayBuffer;
 }) {
 	return [
 		{ name: "Satoshi Black", data: fonts.satoshiBlack },

@@ -9,10 +9,12 @@ const TESTIMONIAL_IDS = [
 ];
 
 async function getTweet(id: string): Promise<Tweet | undefined> {
-	// "use cache";
-
-	const { data } = await fetchTweet(id);
-	return data;
+	try {
+		const { data } = await fetchTweet(id);
+		return data;
+	} catch {
+		return undefined;
+	}
 }
 
 function XLogo({ className }: { className?: string }) {

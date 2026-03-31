@@ -45,7 +45,6 @@
 		"@shikijs/themes": "^3.21.0",
 		"@tailwindcss/typography": "^0.5.19",
 		"@tanstack/react-query": "catalog:",
-		"@vercel/toolbar": "^0.1.41",
 		"@xyflow/react": "^12.10.0",
 		"ai": "catalog:",
 		"better-auth": "catalog:",

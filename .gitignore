@@ -63,3 +63,10 @@ personal-notes/
 
 scripts/scraping/
 bun-sqlite.d.ts
+.executor
+.open-next/
+.dev.vars
+.cf-worker.env
+community-servers.generated.ts
+apps/main-site/src/proxy.ts
+1/

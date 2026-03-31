@@ -1,9 +1,7 @@
-import createWithVercelToolbar from "@vercel/toolbar/plugins/next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import { withBotId } from "botid/next/config";
 import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
-
-const withVercelToolbar = createWithVercelToolbar();
 
 const withMDX = createMDX();
 
@@ -49,10 +47,28 @@ const nextConfig: NextConfig = {
 	productionBrowserSourceMaps: true,
 	rewrites: async () => {
 		return [
-			// {
-			// 	source: "/api/auth/:path*",
-			// 	destination: "https://www.answeroverflow.com/api/auth/:path*",
-			// },
+			{
+				source: "/docs",
+				has: [
+					{
+						type: "header",
+						key: "host",
+						value: "www.answeroverflow.com",
+					},
+				],
+				destination: "https://answeroverflow.mintlify.dev/docs",
+			},
+			{
+				source: "/docs/:match*",
+				has: [
+					{
+						type: "header",
+						key: "host",
+						value: "www.answeroverflow.com",
+					},
+				],
+				destination: "https://answeroverflow.mintlify.dev/docs/:match*",
+			},
 			{
 				source: "/api/stickers/:stickerId.json",
 				destination: "https://cdn.discordapp.com/stickers/:stickerId.json",
@@ -118,4 +134,8 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default withVercelToolbar(withBotId(withMDX(nextConfig)));
+export default withBotId(withMDX(nextConfig));
+
+if (process.env.DEPLOY_TARGET === "cloudflare") {
+	initOpenNextCloudflareForDev();
+}
