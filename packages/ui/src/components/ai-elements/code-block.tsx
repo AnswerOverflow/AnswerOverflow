@@ -8,15 +8,14 @@ import {
 	createContext,
 	type HTMLAttributes,
 	useContext,
-	useEffect,
-	useRef,
 	useState,
 } from "react";
-import { type BundledLanguage, codeToHtml, type ShikiTransformer } from "shiki";
+import type { ShikiTransformer } from "shiki";
+import { highlightWithShiki, normalizeShikiLanguage } from "../../lib/shiki";
 
 type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
 	code: string;
-	language: BundledLanguage;
+	language: string;
 	showLineNumbers?: boolean;
 };
 
@@ -49,27 +48,47 @@ const lineNumberTransformer: ShikiTransformer = {
 	},
 };
 
-export async function highlightCode(
+export function highlightCode(
 	code: string,
-	language: BundledLanguage,
+	language: string,
 	showLineNumbers = false,
 ) {
 	const transformers: ShikiTransformer[] = showLineNumbers
 		? [lineNumberTransformer]
 		: [];
+	const normalizedLanguage = normalizeShikiLanguage(language);
 
-	return await Promise.all([
-		codeToHtml(code, {
-			lang: language,
+	if (normalizedLanguage === null) {
+		return [
+			highlightWithShiki({
+				code,
+				language,
+				theme: "one-light",
+				transformers,
+			}),
+			highlightWithShiki({
+				code,
+				language,
+				theme: "one-dark-pro",
+				transformers,
+			}),
+		] as const;
+	}
+
+	return [
+		highlightWithShiki({
+			code,
+			language: normalizedLanguage,
 			theme: "one-light",
 			transformers,
 		}),
-		codeToHtml(code, {
-			lang: language,
+		highlightWithShiki({
+			code,
+			language: normalizedLanguage,
 			theme: "one-dark-pro",
 			transformers,
 		}),
-	]);
+	] as const;
 }
 
 export const CodeBlock = ({
@@ -80,23 +99,7 @@ export const CodeBlock = ({
 	children,
 	...props
 }: CodeBlockProps) => {
-	const [html, setHtml] = useState<string>("");
-	const [darkHtml, setDarkHtml] = useState<string>("");
-	const mounted = useRef(false);
-
-	useEffect(() => {
-		highlightCode(code, language, showLineNumbers).then(([light, dark]) => {
-			if (!mounted.current) {
-				setHtml(light);
-				setDarkHtml(dark);
-				mounted.current = true;
-			}
-		});
-
-		return () => {
-			mounted.current = false;
-		};
-	}, [code, language, showLineNumbers]);
+	const [html, darkHtml] = highlightCode(code, language, showLineNumbers);
 
 	return (
 		<CodeBlockContext.Provider value={{ code }}>

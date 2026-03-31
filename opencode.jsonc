@@ -1,5 +1,13 @@
 {
 	"$schema": "https://opencode.ai/config.json",
 	"instructions": [".cursor/rules/*.mdc"],
-	"plugin": ["opencode-openai-codex-auth@4.0.2"]
+	"plugin": ["opencode-openai-codex-auth@4.0.2"],
+	"mcp": {
+		"executor-stdio": {
+			"type": "local",
+			"command": ["executor", "mcp", "--stdio"],
+			"enabled": true,
+			"environment": {}
+		}
+	}
 }

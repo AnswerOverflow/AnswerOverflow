@@ -3,6 +3,7 @@
 import { Button } from "@packages/ui/components/button";
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { highlightWithShiki } from "../lib/shiki";
 import { cn } from "../lib/utils";
 
 function CodeBlockButtons({
@@ -45,34 +46,70 @@ function CodeBlockInternal({
 	content: string;
 	className?: string;
 }) {
+	const lightHtml = highlightWithShiki({
+		code: content,
+		language: lang,
+		theme: "github-light",
+	});
+	const darkHtml = highlightWithShiki({
+		code: content,
+		language: lang,
+		theme: "github-dark",
+	});
+
 	return (
-		<pre
-			className={cn(
-				"m-0 min-w-full w-fit overflow-x-auto p-4 pr-12 text-sm",
-				className,
-			)}
-		>
-			<code data-language={lang}>{content}</code>
-		</pre>
+		<>
+			<div
+				className={cn(
+					"dark:hidden [&_pre]:m-0 [&_pre]:min-w-full [&_pre]:w-fit [&_pre]:overflow-x-auto [&_pre]:p-4 [&_pre]:pr-12 [&_pre]:text-sm",
+					className,
+				)}
+				dangerouslySetInnerHTML={{ __html: lightHtml }}
+			/>
+			<div
+				className={cn(
+					"hidden dark:block [&_pre]:m-0 [&_pre]:min-w-full [&_pre]:w-fit [&_pre]:overflow-x-auto [&_pre]:p-4 [&_pre]:pr-12 [&_pre]:text-sm",
+					className,
+				)}
+				dangerouslySetInnerHTML={{ __html: darkHtml }}
+			/>
+		</>
 	);
 }
 
 function InlineCodeInternal({
 	code,
+	language,
 	className,
 }: {
 	code: string;
+	language?: string;
 	className?: string;
 }) {
+	const lightHtml = highlightWithShiki({
+		code,
+		language,
+		theme: "github-light",
+		inline: true,
+	});
+	const darkHtml = highlightWithShiki({
+		code,
+		language,
+		theme: "github-dark",
+		inline: true,
+	});
+
 	return (
-		<code
-			className={cn(
-				"inline-code not-prose inline-block align-middle rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-sm *:whitespace-normal max-w-full overflow-x-auto",
-				className,
-			)}
-		>
-			{code}
-		</code>
+		<>
+			<span
+				className={cn("dark:hidden", className)}
+				dangerouslySetInnerHTML={{ __html: lightHtml }}
+			/>
+			<span
+				className={cn("hidden dark:inline", className)}
+				dangerouslySetInnerHTML={{ __html: darkHtml }}
+			/>
+		</>
 	);
 }
 
@@ -95,10 +132,20 @@ export function CodeBlock({
 	);
 }
 
-export function InlineCode({ code }: { code: string; language?: string }) {
+export function InlineCode({
+	code,
+	language,
+}: {
+	code: string;
+	language?: string;
+}) {
 	return (
 		<span className="relative inline-block max-w-full">
-			<InlineCodeInternal code={code} className="inline-block" />
+			<InlineCodeInternal
+				code={code}
+				language={language}
+				className="inline-block"
+			/>
 		</span>
 	);
 }

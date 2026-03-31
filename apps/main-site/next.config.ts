@@ -45,6 +45,16 @@ const nextConfig: NextConfig = {
 		turbopackFileSystemCacheForDev: true,
 	},
 	productionBrowserSourceMaps: true,
+	webpack: (config) => {
+		if (process.env.DEPLOY_TARGET === "cloudflare") {
+			config.module.rules.push({
+				test: /onig\.wasm$/,
+				type: "asset/resource",
+			});
+		}
+
+		return config;
+	},
 	rewrites: async () => {
 		return [
 			{

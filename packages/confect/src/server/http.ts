@@ -21,6 +21,9 @@ import type {
 	GenericConfectDataModel,
 } from "./data-model";
 
+const convexSiteUrl =
+	process.env.CONVEX_SITE_URL ?? process.env.NEXT_PUBLIC_CONVEX_SITE_URL ?? "";
+
 type Middleware = (
 	httpApp: HttpApp.Default,
 ) => HttpApp.Default<
@@ -56,10 +59,7 @@ const makeHandler =
 		const ApiDocsLive = HttpApiScalar.layer({
 			path: `${pathPrefix}docs`,
 			scalar: {
-				baseServerURL: `${
-					// biome-ignore lint/complexity/useLiteralKeys: TS says this must be accessed with a string literal
-					process.env["CONVEX_SITE_URL"]
-				}${pathPrefix}`,
+				baseServerURL: `${convexSiteUrl}${pathPrefix}`,
 				...scalar,
 			},
 		}).pipe(Layer.provide(ApiLive));
