@@ -15,6 +15,7 @@
 		"build": "bun run prepare:platform && bun run generate:community-servers && bun with-env next build",
 		"build:prod": "bun run prepare:platform && bun run generate:community-servers && bun with-env:prod next build",
 		"build:cloudflare": "DEPLOY_TARGET=cloudflare bun run build:prod",
+		"build:cloudflare:ci": "DEPLOY_TARGET=cloudflare bun run prepare:platform && bun run generate:community-servers && next build",
 		"start": "bun with-env next start",
 		"start:prod": "bun with-env:prod next start",
 		"preview": "bun run prepare:preview-env && DEPLOY_TARGET=cloudflare bun with-env:prod opennextjs-cloudflare preview",
