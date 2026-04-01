@@ -3,7 +3,6 @@ import { ScrollContainerProvider } from "@packages/ui/hooks/use-scroll-container
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { MainSiteFooter, MainSiteNavbar } from "@/components/navbar-wrapper";
-import { StarWarsTransition } from "@/components/star-wars-transition";
 
 export const metadata: Metadata = {
 	title: "Answer Overflow - Discord Content Discovery",
@@ -44,17 +43,15 @@ export default function MainSiteLayout({
 }) {
 	return (
 		<Providers tenant={null}>
-			<StarWarsTransition>
-				<ScrollContainerProvider>
-					<Suspense>
-						<MainSiteNavbar />
-					</Suspense>
-					<div className="pt-navbar">{children}</div>
-					<Suspense>
-						<MainSiteFooter />
-					</Suspense>
-				</ScrollContainerProvider>
-			</StarWarsTransition>
+			<ScrollContainerProvider>
+				<Suspense>
+					<MainSiteNavbar />
+				</Suspense>
+				<div className="pt-navbar">{children}</div>
+				<Suspense>
+					<MainSiteFooter />
+				</Suspense>
+			</ScrollContainerProvider>
 		</Providers>
 	);
 }
