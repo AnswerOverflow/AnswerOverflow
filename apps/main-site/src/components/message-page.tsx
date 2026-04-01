@@ -663,6 +663,7 @@ export function MessagePage(props: {
 									{discordUrl && <OpenInDiscordLink discordUrl={discordUrl} />}
 								</div>
 								<ResourcesSidebar
+									showSponsor={true}
 									className="w-full pt-4 border-t"
 									sponsorUrl={headerData.server.sponsorUrl}
 									serverId={headerData.server.discordId.toString()}

@@ -334,12 +334,14 @@ export function ResourcesSidebar({
 	serverId,
 	bowieImageIndex,
 	sponsorIndex,
+	showSponsor,
 }: {
 	className?: string;
 	sponsorUrl?: string | null;
 	serverId?: string;
 	bowieImageIndex?: number;
 	sponsorIndex?: number;
+	showSponsor?: boolean;
 }) {
 	const tenant = useTenant();
 	const isGitHubSponsor = sponsorUrl?.includes("github.com/sponsors");
@@ -347,7 +349,7 @@ export function ResourcesSidebar({
 		? "GitHub Sponsor"
 		: "Support the project";
 	const showBowieCard = serverId === SUPABASE_SERVER_ID;
-	const showSponsored = !tenant && !showBowieCard;
+	const showSponsored = showSponsor && !tenant && !showBowieCard;
 
 	return (
 		<div className={cn("text-left", className)}>

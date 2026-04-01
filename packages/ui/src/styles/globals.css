@@ -196,3 +196,176 @@
 .animate-marquee-right {
 	animation: marquee-right 500s linear infinite;
 }
+
+/* ─── Star Wars page wipe transitions (April Fools 2026) ─── */
+
+/* Disable all SW transitions when user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	[data-sw-transition]::view-transition-old(root),
+	[data-sw-transition]::view-transition-new(root) {
+		animation: none !important;
+	}
+}
+
+/* Disable the default crossfade when a SW transition is active */
+[data-sw-transition]::view-transition-old(root) {
+	z-index: 2;
+	animation-duration: 1.15s;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	animation-fill-mode: both;
+	/* Lightsaber glow along the wipe edge */
+	filter: drop-shadow(0 0 3px rgba(255, 255, 255, 1))
+		drop-shadow(0 0 10px rgba(130, 200, 255, 1))
+		drop-shadow(0 0 30px rgba(80, 160, 255, 0.8));
+}
+[data-sw-transition]::view-transition-new(root) {
+	z-index: 1;
+	animation: none;
+}
+
+/* Wipe right (edge sweeps left → right) */
+[data-sw-transition="wipe-right"]::view-transition-old(root) {
+	animation-name: sw-wipe-right;
+}
+@keyframes sw-wipe-right {
+	from { clip-path: inset(0 0 0 0); }
+	to { clip-path: inset(0 0 0 100%); }
+}
+
+/* Wipe left (edge sweeps right → left) */
+[data-sw-transition="wipe-left"]::view-transition-old(root) {
+	animation-name: sw-wipe-left;
+}
+@keyframes sw-wipe-left {
+	from { clip-path: inset(0 0 0 0); }
+	to { clip-path: inset(0 100% 0 0); }
+}
+
+/* Wipe down (edge sweeps top → bottom) */
+[data-sw-transition="wipe-down"]::view-transition-old(root) {
+	animation-name: sw-wipe-down;
+}
+@keyframes sw-wipe-down {
+	from { clip-path: inset(0); }
+	to { clip-path: inset(100% 0 0 0); }
+}
+
+/* Wipe up (edge sweeps bottom → top) */
+[data-sw-transition="wipe-up"]::view-transition-old(root) {
+	animation-name: sw-wipe-up;
+}
+@keyframes sw-wipe-up {
+	from { clip-path: inset(0); }
+	to { clip-path: inset(0 0 100% 0); }
+}
+
+/* Iris close (circle shrinks to center, revealing new page) */
+[data-sw-transition="iris-close"]::view-transition-old(root) {
+	animation-name: sw-iris-close;
+}
+@keyframes sw-iris-close {
+	from { clip-path: circle(100% at 50% 50%); }
+	to { clip-path: circle(0% at 50% 50%); }
+}
+
+/* Iris open (new page expands from center) */
+[data-sw-transition="iris-open"]::view-transition-old(root) {
+	z-index: 1;
+}
+[data-sw-transition="iris-open"]::view-transition-new(root) {
+	z-index: 2;
+	animation-name: sw-iris-open;
+	animation-duration: 1.15s;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	animation-fill-mode: both;
+}
+@keyframes sw-iris-open {
+	from { clip-path: circle(0% at 50% 50%); }
+	to { clip-path: circle(100% at 50% 50%); }
+}
+
+/* Diamond wipe from center */
+[data-sw-transition="diamond"]::view-transition-old(root) {
+	z-index: 1;
+}
+[data-sw-transition="diamond"]::view-transition-new(root) {
+	z-index: 2;
+	animation-name: sw-diamond;
+	animation-duration: 1.15s;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	animation-fill-mode: both;
+}
+@keyframes sw-diamond {
+	from { clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%); }
+	to { clip-path: polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%); }
+}
+
+/* Star wipe — the classic */
+[data-sw-transition="star-wipe"]::view-transition-old(root) {
+	z-index: 1;
+}
+[data-sw-transition="star-wipe"]::view-transition-new(root) {
+	z-index: 2;
+	animation-name: sw-star-wipe;
+	animation-duration: 1.44s;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	animation-fill-mode: both;
+}
+@keyframes sw-star-wipe {
+	from {
+		clip-path: polygon(
+			50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%,
+			50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%
+		);
+	}
+	to {
+		clip-path: polygon(
+			50% -50%,
+			62% 30%,
+			115% 20%,
+			72% 60%,
+			85% 115%,
+			50% 80%,
+			15% 115%,
+			28% 60%,
+			-15% 20%,
+			38% 30%
+		);
+	}
+}
+
+/* Horizontal split (opens from center) */
+[data-sw-transition="split-h"]::view-transition-old(root) {
+	animation-name: sw-split-h;
+}
+@keyframes sw-split-h {
+	from { clip-path: inset(0 0 0 0); }
+	to { clip-path: inset(50% 0); }
+}
+
+/* Vertical split (opens from center) */
+[data-sw-transition="split-v"]::view-transition-old(root) {
+	animation-name: sw-split-v;
+}
+@keyframes sw-split-v {
+	from { clip-path: inset(0 0 0 0); }
+	to { clip-path: inset(0 50%); }
+}
+
+/* Diagonal wipe top-left → bottom-right */
+[data-sw-transition="diagonal-tl"]::view-transition-old(root) {
+	animation-name: sw-diagonal-tl;
+}
+@keyframes sw-diagonal-tl {
+	from { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+	to { clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%); }
+}
+
+/* Diagonal wipe top-right → bottom-left */
+[data-sw-transition="diagonal-tr"]::view-transition-old(root) {
+	animation-name: sw-diagonal-tr;
+}
+@keyframes sw-diagonal-tr {
+	from { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+	to { clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%); }
+}
