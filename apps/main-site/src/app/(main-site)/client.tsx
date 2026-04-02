@@ -21,6 +21,7 @@ import { FileQuestion } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useCallback } from "react";
 import { useDebounce } from "use-debounce";
+import { CrawlablePaginationNav } from "../../components/crawlable-pagination-nav";
 
 type RecentThreadsResult = FunctionReturnType<
 	typeof api.public.search.getRecentThreads
@@ -57,9 +58,11 @@ export function HomePageSkeleton() {
 export function HomePageClient({
 	initialData,
 	nextCursor,
+	currentCursor,
 }: {
 	initialData?: RecentThreadsResult;
 	nextCursor?: string | null;
+	currentCursor?: string | null;
 }) {
 	const [searchQuery, setSearchQuery] = useQueryState("q", {
 		defaultValue: "",
@@ -157,15 +160,12 @@ export function HomePageClient({
 								/>
 							)}
 						/>
-						{nextCursor && (
-							<a
-								href={`?cursor=${encodeCursor(nextCursor)}`}
-								className="sr-only"
-								aria-hidden="true"
-							>
-								Next page
-							</a>
-						)}
+						<CrawlablePaginationNav
+							firstPageHref={currentCursor ? "/" : undefined}
+							nextPageHref={
+								nextCursor ? `?cursor=${encodeCursor(nextCursor)}` : undefined
+							}
+						/>
 					</>
 				)}
 			</div>

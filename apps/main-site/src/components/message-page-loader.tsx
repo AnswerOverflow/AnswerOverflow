@@ -2,6 +2,7 @@ import type { api } from "@packages/database/convex/_generated/api";
 import { Database } from "@packages/database/database";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { encodeCursor } from "@packages/ui/utils/cursor";
 import {
 	getTenantCanonicalUrl,
 	type TenantInfo,
@@ -12,6 +13,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
+import { buildSearchQueryString } from "../lib/search-params";
 import { MessagePage, RepliesSection, RepliesSkeleton } from "./message-page";
 import {
 	RecentAnnouncements,
@@ -112,16 +114,35 @@ export async function fetchMessagePageReplies(args: {
 	}).pipe(runtime.runPromise);
 }
 
+function buildPaginatedPath(path: string, cursorParam?: string | null) {
+	return `${path}${buildSearchQueryString({ cursor: cursorParam ?? undefined })}`;
+}
+
+function buildFocusedMessageUrl(args: {
+	canonicalId: string;
+	focusMessageId: string;
+	cursor?: string | null;
+}) {
+	return `/m/${args.canonicalId}${buildSearchQueryString({
+		focus: args.focusMessageId,
+		cursor: args.cursor ? encodeCursor(args.cursor) : undefined,
+	})}`;
+}
+
 export function generateMessagePageMetadata(
 	headerData: MessagePageHeaderData | null,
 	messageId: string,
-	cursor: string | null = null,
-	tenant: TenantInfo | null = null,
+	options: {
+		cursorParam?: string | null;
+		focusMessageId?: string | null;
+		tenant?: TenantInfo | null;
+	} = {},
 ): Metadata {
 	if (!headerData) {
 		return {};
 	}
 
+	const tenant = options.tenant ?? null;
 	const isTenant = tenant !== null;
 	const { firstMessage } = headerData;
 	const rootMessageDeleted = !firstMessage;
@@ -140,7 +161,10 @@ export function generateMessagePageMetadata(
 		: `/og/post?id=${messageId}`;
 
 	const fullTitle = `${title} - ${headerData.server.name}`;
-	const path = `/m/${headerData.canonicalId.toString()}`;
+	const path = buildPaginatedPath(
+		`/m/${headerData.canonicalId.toString()}`,
+		options.cursorParam,
+	);
 	const canonicalUrl = getTenantCanonicalUrl(tenant, path);
 
 	return {
@@ -162,7 +186,7 @@ export function generateMessagePageMetadata(
 		alternates: {
 			canonical: canonicalUrl,
 		},
-		robots: cursor ? "noindex, follow" : "index, follow",
+		robots: options.focusMessageId ? "noindex, follow" : "index, follow",
 	};
 }
 
@@ -174,6 +198,7 @@ async function RepliesLoader(props: {
 	server?: MessagePageHeaderData["server"];
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
+	firstPageHref: string;
 }) {
 	// "use cache";
 
@@ -194,6 +219,7 @@ async function RepliesLoader(props: {
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
 			currentCursor={props.cursor}
+			firstPageHref={props.firstPageHref}
 		/>
 	);
 }
@@ -221,14 +247,20 @@ export async function MessagePageLoader(props: {
 	const canonicalId = headerData.canonicalId.toString();
 
 	if (canonicalId !== messageId) {
-		redirect(`/m/${canonicalId}?focus=${messageId}`);
+		redirect(
+			buildFocusedMessageUrl({
+				canonicalId,
+				focusMessageId: messageId,
+				cursor,
+			}),
+		);
 	}
 
 	const solutionMessageId = headerData.solutionMessage?.message.id;
-
 	const queryChannelId = headerData.threadId ?? headerData.channelId;
 	const afterMessageId =
 		headerData.threadId ?? headerData.firstMessage?.message.id;
+	const firstPageHref = `/m/${canonicalId}`;
 
 	return (
 		<MessagePage
@@ -246,6 +278,7 @@ export async function MessagePageLoader(props: {
 							server={headerData.server}
 							channel={headerData.channel}
 							cursor={cursor ?? null}
+							firstPageHref={firstPageHref}
 						/>
 					</Suspense>
 				) : (

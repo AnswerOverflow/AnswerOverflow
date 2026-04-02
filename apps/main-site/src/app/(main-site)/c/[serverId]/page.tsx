@@ -14,18 +14,29 @@ import {
 	generateServerPageMetadata,
 	ServerPageLoader,
 } from "../../../../components/channel-page-loader";
+import {
+	buildSearchQueryString,
+	getFirstSearchParamValue,
+	hasNonEmptySearchParam,
+} from "../../../../lib/search-params";
 
 export function generateStaticParams() {
 	return [{ serverId: "placeholder" }];
 }
 
+type SearchParams = {
+	cursor?: string | string[];
+	q?: string | string[];
+};
+
 type Props = {
 	params: Promise<{ serverId: string }>;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
+	const searchParams = await props.searchParams;
 
 	const parsed = parseSnowflakeId(params.serverId);
 	if (Option.isNone(parsed)) {
@@ -36,9 +47,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	}
 
 	const headerData = await fetchServerPageHeaderData(parsed.value.id);
-
 	const basePath = `/c/${parsed.value.cleaned}`;
-	return generateServerPageMetadata(headerData, basePath);
+	const cursorParam = getFirstSearchParamValue(searchParams.cursor);
+	const hasQuery = hasNonEmptySearchParam(searchParams.q);
+
+	return generateServerPageMetadata(headerData, basePath, null, {
+		cursorParam: hasQuery ? null : cursorParam,
+		noindex: hasQuery,
+	});
 }
 
 function ServerPageSkeleton() {
@@ -57,10 +73,11 @@ function ServerPageSkeleton() {
 
 async function ServerPageContent(props: {
 	serverId: string;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 }) {
 	const params = await props.searchParams;
-	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
+	const cursorParam = getFirstSearchParamValue(params.cursor);
+	const cursor = cursorParam ? decodeCursor(cursorParam) : undefined;
 
 	const parsed = parseSnowflakeId(props.serverId);
 	if (Option.isNone(parsed)) {
@@ -77,9 +94,13 @@ async function ServerPageContent(props: {
 	}
 
 	const { server, channels } = headerData;
+	const basePath = `/c/${parsed.value.cleaned}`;
 
 	if (server.customDomain) {
-		const customUrl = getServerCustomUrl(server, `/c/${parsed.value.cleaned}`);
+		const customUrl = getServerCustomUrl(
+			server,
+			`${basePath}${buildSearchQueryString(params)}`,
+		);
 		if (customUrl) {
 			return redirect(customUrl);
 		}
@@ -134,7 +155,13 @@ async function ServerPageContent(props: {
 		);
 	}
 
-	return <ServerPageLoader headerData={headerData} cursor={cursor} />;
+	return (
+		<ServerPageLoader
+			headerData={headerData}
+			cursor={cursor}
+			basePath={basePath}
+		/>
+	);
 }
 
 export default async function ServerPage(props: Props) {

@@ -42,6 +42,7 @@ import { FileQuestion, Menu } from "lucide-react";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useState } from "react";
 import { useDebounce } from "use-debounce";
+import { CrawlablePaginationNav } from "./crawlable-pagination-nav";
 import { JsonLdScript } from "./json-ld-script";
 import { ResourcesSidebar } from "./resources-sidebar";
 import { TagFilter } from "./tag-filter";
@@ -453,10 +454,14 @@ export function ServerThreadsList({
 	serverDiscordId,
 	initialData,
 	nextCursor,
+	currentCursor,
+	firstPageHref,
 }: {
 	serverDiscordId: bigint;
 	initialData?: ServerPageThreads;
 	nextCursor?: string | null;
+	currentCursor?: string | null;
+	firstPageHref?: string;
 }) {
 	const convex = useConvex();
 	const loadPage = useCallback(
@@ -502,15 +507,12 @@ export function ServerThreadsList({
 					/>
 				)}
 			/>
-			{nextCursor && (
-				<a
-					href={`?cursor=${encodeCursor(nextCursor)}`}
-					className="sr-only"
-					aria-hidden="true"
-				>
-					Next page
-				</a>
-			)}
+			<CrawlablePaginationNav
+				firstPageHref={currentCursor ? firstPageHref : undefined}
+				nextPageHref={
+					nextCursor ? `?cursor=${encodeCursor(nextCursor)}` : undefined
+				}
+			/>
 		</>
 	);
 }
@@ -519,10 +521,14 @@ export function ThreadsList({
 	channelDiscordId,
 	initialData,
 	nextCursor,
+	currentCursor,
+	firstPageHref,
 }: {
 	channelDiscordId: bigint;
 	initialData?: ChannelPageThreads;
 	nextCursor?: string | null;
+	currentCursor?: string | null;
+	firstPageHref?: string;
 }) {
 	const [selectedTagIds] = useQueryState(
 		"tags",
@@ -576,14 +582,13 @@ export function ThreadsList({
 					/>
 				)}
 			/>
-			{!hasTagFilter && nextCursor && (
-				<a
-					href={`?cursor=${encodeCursor(nextCursor)}`}
-					className="sr-only"
-					aria-hidden="true"
-				>
-					Next page
-				</a>
+			{!hasTagFilter && (
+				<CrawlablePaginationNav
+					firstPageHref={currentCursor ? firstPageHref : undefined}
+					nextPageHref={
+						nextCursor ? `?cursor=${encodeCursor(nextCursor)}` : undefined
+					}
+				/>
 			)}
 		</>
 	);
@@ -593,10 +598,14 @@ export function MessagesList({
 	channelDiscordId,
 	initialData,
 	nextCursor,
+	currentCursor,
+	firstPageHref,
 }: {
 	channelDiscordId: bigint;
 	initialData?: ChannelPageMessages;
 	nextCursor?: string | null;
+	currentCursor?: string | null;
+	firstPageHref?: string;
 }) {
 	const convex = useConvex();
 	const loadPage = useCallback(
@@ -642,15 +651,12 @@ export function MessagesList({
 					) : null
 				}
 			/>
-			{nextCursor && (
-				<a
-					href={`?cursor=${encodeCursor(nextCursor)}`}
-					className="sr-only"
-					aria-hidden="true"
-				>
-					Next page
-				</a>
-			)}
+			<CrawlablePaginationNav
+				firstPageHref={currentCursor ? firstPageHref : undefined}
+				nextPageHref={
+					nextCursor ? `?cursor=${encodeCursor(nextCursor)}` : undefined
+				}
+			/>
 		</>
 	);
 }

@@ -1,6 +1,6 @@
 import { Database } from "@packages/database/database";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
-import { decodeCursor } from "@packages/ui/utils/cursor";
+import { decodeCursor, encodeCursor } from "@packages/ui/utils/cursor";
 import { parseSnowflakeId } from "@packages/ui/utils/snowflake";
 import { Effect, Option } from "effect";
 import type { Metadata } from "next";
@@ -27,6 +27,10 @@ import {
 	SimilarThreadsSkeleton,
 } from "../../../../../components/similar-threads";
 import { runtime } from "../../../../../lib/runtime";
+import {
+	buildSearchQueryString,
+	getFirstSearchParamValue,
+} from "../../../../../lib/search-params";
 import { getTenantData } from "../../../../../lib/tenant";
 
 export function generateStaticParams() {
@@ -48,9 +52,14 @@ async function fetchTenantAndHeaderData(domain: string, messageId: bigint) {
 	}).pipe(runtime.runPromise);
 }
 
+type SearchParams = {
+	cursor?: string | string[];
+	focus?: string | string[];
+};
+
 type Props = {
 	params: Promise<{ domain: string; messageId: string }>;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -63,7 +72,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	if (parsed.value.wasCleaned) {
 		redirect(`/m/${parsed.value.cleaned}`);
 	}
-	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const domain = decodeURIComponent(params.domain);
 	const data = await getTenantData(domain);
 	if (!data) {
@@ -71,12 +79,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	}
 	const { tenant } = data;
 	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
-	return generateMessagePageMetadata(
-		headerData,
-		params.messageId,
-		cursor,
+	return generateMessagePageMetadata(headerData, params.messageId, {
+		cursorParam: getFirstSearchParamValue(searchParams.cursor),
+		focusMessageId: getFirstSearchParamValue(searchParams.focus),
 		tenant,
-	);
+	});
 }
 
 async function RepliesLoader(props: {
@@ -87,6 +94,7 @@ async function RepliesLoader(props: {
 	server?: MessagePageHeaderData["server"];
 	channel?: MessagePageHeaderData["channel"];
 	cursor: string | null;
+	firstPageHref: string;
 }) {
 	// "use cache";
 
@@ -107,6 +115,7 @@ async function RepliesLoader(props: {
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
 			currentCursor={props.cursor}
+			firstPageHref={props.firstPageHref}
 		/>
 	);
 }
@@ -114,10 +123,11 @@ async function RepliesLoader(props: {
 async function TenantMessagePageContent(props: {
 	domain: string;
 	messageId: string;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 }) {
 	const params = await props.searchParams;
-	const cursor = params.cursor ? decodeCursor(params.cursor) : null;
+	const cursorParam = getFirstSearchParamValue(params.cursor);
+	const cursor = cursorParam ? decodeCursor(cursorParam) : null;
 
 	const parsed = parseSnowflakeId(props.messageId);
 	if (Option.isNone(parsed)) {
@@ -142,13 +152,19 @@ async function TenantMessagePageContent(props: {
 
 	const canonicalId = headerData.canonicalId.toString();
 	if (canonicalId !== props.messageId) {
-		redirect(`/m/${canonicalId}?focus=${props.messageId}`);
+		redirect(
+			`/m/${canonicalId}${buildSearchQueryString({
+				focus: props.messageId,
+				cursor: cursor ? encodeCursor(cursor) : undefined,
+			})}`,
+		);
 	}
 
 	const solutionMessageId = headerData.solutionMessage?.message.id;
 	const queryChannelId = headerData.threadId ?? headerData.channelId;
 	const afterMessageId =
 		headerData.threadId ?? headerData.firstMessage?.message.id;
+	const firstPageHref = `/m/${canonicalId}`;
 
 	return (
 		<MessagePage
@@ -166,6 +182,7 @@ async function TenantMessagePageContent(props: {
 							server={headerData.server}
 							channel={headerData.channel}
 							cursor={cursor}
+							firstPageHref={firstPageHref}
 						/>
 					</Suspense>
 				) : (

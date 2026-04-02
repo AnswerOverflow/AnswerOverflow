@@ -11,19 +11,29 @@ import {
 	generateServerPageMetadata,
 	ServerPageLoader,
 } from "../../../components/channel-page-loader";
+import {
+	getFirstSearchParamValue,
+	hasNonEmptySearchParam,
+} from "../../../lib/search-params";
 import { getTenantData } from "../../../lib/tenant";
 
 export function generateStaticParams() {
 	return [{ domain: "placeholder" }];
 }
 
+type SearchParams = {
+	cursor?: string | string[];
+	q?: string | string[];
+};
+
 type Props = {
 	params: Promise<{ domain: string }>;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
+	const searchParams = await props.searchParams;
 	const domain = decodeURIComponent(params.domain);
 
 	const data = await getTenantData(domain);
@@ -33,8 +43,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	const { tenant } = data;
 
 	const headerData = await fetchServerPageHeaderData(tenant.discordId);
+	const cursorParam = getFirstSearchParamValue(searchParams.cursor);
+	const hasQuery = hasNonEmptySearchParam(searchParams.q);
 
-	return generateServerPageMetadata(headerData, "/", tenant);
+	return generateServerPageMetadata(headerData, "/", tenant, {
+		cursorParam: hasQuery ? null : cursorParam,
+		noindex: hasQuery,
+	});
 }
 
 function TenantServerPageSkeleton() {
@@ -53,10 +68,11 @@ function TenantServerPageSkeleton() {
 
 async function TenantServerPageContent(props: {
 	domain: string;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 }) {
 	const params = await props.searchParams;
-	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
+	const cursorParam = getFirstSearchParamValue(params.cursor);
+	const cursor = cursorParam ? decodeCursor(cursorParam) : undefined;
 
 	const data = await getTenantData(props.domain);
 	if (!data) {
@@ -116,7 +132,9 @@ async function TenantServerPageContent(props: {
 		);
 	}
 
-	return <ServerPageLoader headerData={headerData} cursor={cursor} />;
+	return (
+		<ServerPageLoader headerData={headerData} cursor={cursor} basePath="/" />
+	);
 }
 
 export default async function DomainPage(props: Props) {

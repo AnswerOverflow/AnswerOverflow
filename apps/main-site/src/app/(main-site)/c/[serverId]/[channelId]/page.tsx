@@ -12,18 +12,30 @@ import {
 	fetchChannelPageHeaderData,
 	generateChannelPageMetadata,
 } from "../../../../../components/channel-page-loader";
+import {
+	buildSearchQueryString,
+	getFirstSearchParamValue,
+} from "../../../../../lib/search-params";
 
 export function generateStaticParams() {
 	return [{ serverId: "placeholder", channelId: "placeholder" }];
 }
 
+type SearchParams = {
+	cursor?: string | string[];
+	q?: string | string[];
+	scope?: string | string[];
+	tags?: string | string[];
+};
+
 type Props = {
 	params: Promise<{ serverId: string; channelId: string }>;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
+	const searchParams = await props.searchParams;
 
 	const parsedServerId = parseSnowflakeId(params.serverId);
 	const parsedChannelId = parseSnowflakeId(params.channelId);
@@ -42,7 +54,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	);
 
 	const basePath = `/c/${parsedServerId.value.cleaned}/${parsedChannelId.value.cleaned}`;
-	return generateChannelPageMetadata(headerData, basePath);
+	return generateChannelPageMetadata(headerData, basePath, null, {
+		cursorParam: getFirstSearchParamValue(searchParams.cursor),
+	});
 }
 
 function ChannelPageSkeleton() {
@@ -62,10 +76,11 @@ function ChannelPageSkeleton() {
 async function ChannelPageContent(props: {
 	serverId: string;
 	channelId: string;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 }) {
 	const params = await props.searchParams;
-	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
+	const cursorParam = getFirstSearchParamValue(params.cursor);
+	const cursor = cursorParam ? decodeCursor(cursorParam) : undefined;
 
 	const parsedServerId = parseSnowflakeId(props.serverId);
 	const parsedChannelId = parseSnowflakeId(props.channelId);
@@ -86,14 +101,20 @@ async function ChannelPageContent(props: {
 	if (headerData?.server.customDomain) {
 		const customUrl = getServerCustomUrl(
 			headerData.server,
-			`/c/${parsedServerId.value.cleaned}/${parsedChannelId.value.cleaned}`,
+			`/c/${parsedServerId.value.cleaned}/${parsedChannelId.value.cleaned}${buildSearchQueryString(params)}`,
 		);
 		if (customUrl) {
 			return redirect(customUrl);
 		}
 	}
 
-	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
+	return (
+		<ChannelPageLoader
+			headerData={headerData}
+			cursor={cursor}
+			basePath={`/c/${parsedServerId.value.cleaned}/${parsedChannelId.value.cleaned}`}
+		/>
+	);
 }
 
 export default async function ChannelPage(props: Props) {

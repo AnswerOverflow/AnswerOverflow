@@ -36,6 +36,7 @@ import { CheckCircle2, MessageSquare } from "lucide-react";
 import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 import { useCallback, useEffect } from "react";
+import { CrawlablePaginationNav } from "@/components/crawlable-pagination-nav";
 import { FloatingAskInput } from "@/components/floating-ask-input";
 import { JsonLdScript } from "@/components/json-ld-script";
 import { OpenInDiscordLink } from "@/components/open-in-discord-modal";
@@ -294,6 +295,7 @@ export function RepliesSection(props: {
 	initialData?: MessagePageReplies;
 	nextCursor?: string | null;
 	currentCursor?: string | null;
+	firstPageHref?: string;
 }) {
 	const {
 		channelId,
@@ -304,6 +306,8 @@ export function RepliesSection(props: {
 		channel,
 		initialData,
 		nextCursor,
+		currentCursor,
+		firstPageHref,
 	} = props;
 
 	const filterMessages = (messages: MessagePageReplies["page"]) =>
@@ -368,15 +372,12 @@ export function RepliesSection(props: {
 					/>
 				</div>
 			</div>
-			{nextCursor && (
-				<a
-					href={`?cursor=${encodeCursor(nextCursor)}`}
-					className="sr-only"
-					aria-hidden="true"
-				>
-					Next page
-				</a>
-			)}
+			<CrawlablePaginationNav
+				firstPageHref={currentCursor ? firstPageHref : undefined}
+				nextPageHref={
+					nextCursor ? `?cursor=${encodeCursor(nextCursor)}` : undefined
+				}
+			/>
 		</>
 	);
 }

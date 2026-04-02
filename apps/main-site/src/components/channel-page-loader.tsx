@@ -12,6 +12,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { runtime } from "../lib/runtime";
+import { buildSearchQueryString } from "../lib/search-params";
 import {
 	ChannelPageContent,
 	MessagesList,
@@ -122,10 +123,18 @@ export async function fetchChannelPageMessages(
 	}).pipe(runtime.runPromise);
 }
 
+function buildPaginatedPath(basePath: string, cursorParam?: string | null) {
+	return `${basePath}${buildSearchQueryString({ cursor: cursorParam ?? undefined })}`;
+}
+
 export function generateServerPageMetadata(
 	headerData: ServerPageHeaderData | null,
 	basePath: string,
 	tenant: TenantInfo | null = null,
+	options: {
+		cursorParam?: string | null;
+		noindex?: boolean;
+	} = {},
 ): Metadata {
 	if (!headerData) {
 		return {};
@@ -143,7 +152,10 @@ export function generateServerPageMetadata(
 		? `/og/community?id=${server.discordId.toString()}&tenant=true`
 		: `/og/community?id=${server.discordId.toString()}`;
 
-	const canonicalUrl = getTenantCanonicalUrl(tenant, basePath);
+	const canonicalUrl = getTenantCanonicalUrl(
+		tenant,
+		buildPaginatedPath(basePath, options.cursorParam),
+	);
 
 	return {
 		title,
@@ -164,7 +176,7 @@ export function generateServerPageMetadata(
 		alternates: {
 			canonical: canonicalUrl,
 		},
-		robots: "index, follow",
+		robots: options.noindex ? "noindex, follow" : "index, follow",
 	};
 }
 
@@ -172,6 +184,10 @@ export function generateChannelPageMetadata(
 	headerData: ChannelPageHeaderData | null,
 	basePath: string,
 	tenant: TenantInfo | null = null,
+	options: {
+		cursorParam?: string | null;
+		noindex?: boolean;
+	} = {},
 ): Metadata {
 	if (!headerData) {
 		return {};
@@ -192,7 +208,10 @@ export function generateChannelPageMetadata(
 		? `/og/community?id=${server.discordId.toString()}&tenant=true`
 		: `/og/community?id=${server.discordId.toString()}`;
 
-	const canonicalUrl = getTenantCanonicalUrl(tenant, basePath);
+	const canonicalUrl = getTenantCanonicalUrl(
+		tenant,
+		buildPaginatedPath(basePath, options.cursorParam),
+	);
 
 	return {
 		title,
@@ -213,7 +232,7 @@ export function generateChannelPageMetadata(
 		alternates: {
 			canonical: canonicalUrl,
 		},
-		robots: "noindex, follow",
+		robots: (options.noindex ?? true) ? "noindex, follow" : "index, follow",
 	};
 }
 
@@ -230,6 +249,7 @@ function ThreadsSkeleton() {
 async function ServerThreadsLoader(props: {
 	serverDiscordId: bigint;
 	cursor: string | null;
+	basePath?: string;
 }) {
 	// "use cache";
 	const initialData = await fetchServerPageThreads(
@@ -242,6 +262,8 @@ async function ServerThreadsLoader(props: {
 			serverDiscordId={props.serverDiscordId}
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
+			currentCursor={props.cursor}
+			firstPageHref={props.basePath}
 		/>
 	);
 }
@@ -249,6 +271,7 @@ async function ServerThreadsLoader(props: {
 async function ChannelThreadsLoader(props: {
 	channelDiscordId: bigint;
 	cursor: string | null;
+	basePath?: string;
 }) {
 	// "use cache";
 	const initialData = await fetchChannelPageThreads(
@@ -261,6 +284,8 @@ async function ChannelThreadsLoader(props: {
 			channelDiscordId={props.channelDiscordId}
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
+			currentCursor={props.cursor}
+			firstPageHref={props.basePath}
 		/>
 	);
 }
@@ -268,6 +293,7 @@ async function ChannelThreadsLoader(props: {
 async function ChannelMessagesLoader(props: {
 	channelDiscordId: bigint;
 	cursor: string | null;
+	basePath?: string;
 }) {
 	// "use cache";
 	const initialData = await fetchChannelPageMessages(
@@ -280,6 +306,8 @@ async function ChannelMessagesLoader(props: {
 			channelDiscordId={props.channelDiscordId}
 			initialData={initialData}
 			nextCursor={initialData.isDone ? null : initialData.continueCursor}
+			currentCursor={props.cursor}
+			firstPageHref={props.basePath}
 		/>
 	);
 }
@@ -287,6 +315,7 @@ async function ChannelMessagesLoader(props: {
 export async function ServerPageLoader(props: {
 	headerData: ServerPageHeaderData | null;
 	cursor?: string;
+	basePath?: string;
 }) {
 	// "use cache";
 
@@ -307,6 +336,7 @@ export async function ServerPageLoader(props: {
 				<ServerThreadsLoader
 					serverDiscordId={headerData.server.discordId}
 					cursor={cursor ?? null}
+					basePath={props.basePath}
 				/>
 			</Suspense>
 		</ServerPageContent>
@@ -322,6 +352,7 @@ function isAnnouncementChannel(type: number): boolean {
 export async function ChannelPageLoader(props: {
 	headerData: ChannelPageHeaderData | null;
 	cursor?: string;
+	basePath?: string;
 }) {
 	// "use cache";
 
@@ -346,11 +377,13 @@ export async function ChannelPageLoader(props: {
 					<ChannelMessagesLoader
 						channelDiscordId={headerData.selectedChannel.id}
 						cursor={cursor ?? null}
+						basePath={props.basePath}
 					/>
 				) : (
 					<ChannelThreadsLoader
 						channelDiscordId={headerData.selectedChannel.id}
 						cursor={cursor ?? null}
+						basePath={props.basePath}
 					/>
 				)}
 			</Suspense>

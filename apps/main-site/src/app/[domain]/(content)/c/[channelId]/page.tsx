@@ -12,19 +12,25 @@ import {
 	fetchChannelPageHeaderData,
 	generateChannelPageMetadata,
 } from "../../../../../components/channel-page-loader";
+import { getFirstSearchParamValue } from "../../../../../lib/search-params";
 import { getTenantData } from "../../../../../lib/tenant";
 
 export function generateStaticParams() {
 	return [{ domain: "placeholder", channelId: "placeholder" }];
 }
 
+type SearchParams = {
+	cursor?: string | string[];
+};
+
 type Props = {
 	params: Promise<{ domain: string; channelId: string }>;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
 	const params = await props.params;
+	const searchParams = await props.searchParams;
 	const domain = decodeURIComponent(params.domain);
 
 	const parsedChannelId = parseSnowflakeId(params.channelId);
@@ -47,7 +53,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	);
 
 	const basePath = `/c/${parsedChannelId.value.cleaned}`;
-	return generateChannelPageMetadata(headerData, basePath, tenant);
+	return generateChannelPageMetadata(headerData, basePath, tenant, {
+		cursorParam: getFirstSearchParamValue(searchParams.cursor),
+	});
 }
 
 function TenantChannelPageSkeleton() {
@@ -67,10 +75,11 @@ function TenantChannelPageSkeleton() {
 async function TenantChannelPageContent(props: {
 	domain: string;
 	channelId: string;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 }) {
 	const params = await props.searchParams;
-	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
+	const cursorParam = getFirstSearchParamValue(params.cursor);
+	const cursor = cursorParam ? decodeCursor(cursorParam) : undefined;
 
 	const parsedChannelId = parseSnowflakeId(props.channelId);
 	if (Option.isNone(parsedChannelId)) {
@@ -99,7 +108,13 @@ async function TenantChannelPageContent(props: {
 		return redirect(getTenantCanonicalUrl(tenant, `/`));
 	}
 
-	return <ChannelPageLoader headerData={headerData} cursor={cursor} />;
+	return (
+		<ChannelPageLoader
+			headerData={headerData}
+			cursor={cursor}
+			basePath={`/c/${parsedChannelId.value.cleaned}`}
+		/>
+	);
 }
 
 export default async function TenantChannelPage(props: Props) {

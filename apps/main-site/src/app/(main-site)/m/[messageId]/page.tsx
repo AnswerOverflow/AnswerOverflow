@@ -11,10 +11,19 @@ import {
 	MessagePageLoader,
 	MessagePageSkeleton,
 } from "../../../../components/message-page-loader";
+import {
+	buildSearchQueryString,
+	getFirstSearchParamValue,
+} from "../../../../lib/search-params";
+
+type SearchParams = {
+	cursor?: string | string[];
+	focus?: string | string[];
+};
 
 type Props = {
 	params: Promise<{ messageId: string }>;
-	searchParams: Promise<{ cursor?: string }>;
+	searchParams: Promise<SearchParams>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -27,15 +36,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 	if (parsed.value.wasCleaned) {
 		redirect(`/m/${parsed.value.cleaned}`);
 	}
-	const cursor = searchParams.cursor ? decodeCursor(searchParams.cursor) : null;
 	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
-	return generateMessagePageMetadata(headerData, params.messageId, cursor);
+	return generateMessagePageMetadata(headerData, params.messageId, {
+		cursorParam: getFirstSearchParamValue(searchParams.cursor),
+		focusMessageId: getFirstSearchParamValue(searchParams.focus),
+	});
 }
 
 async function MessagePageContent(props: Props) {
 	const params = await props.searchParams;
 	const messageId = (await props.params).messageId;
-	const cursor = params.cursor ? decodeCursor(params.cursor) : undefined;
+	const cursorParam = getFirstSearchParamValue(params.cursor);
+	const cursor = cursorParam ? decodeCursor(cursorParam) : undefined;
 
 	const parsed = parseSnowflakeId(messageId);
 	if (Option.isNone(parsed)) {
@@ -48,7 +60,10 @@ async function MessagePageContent(props: Props) {
 	const headerData = await fetchMessagePageHeaderData(parsed.value.id);
 
 	if (headerData?.server.customDomain) {
-		const customUrl = getServerCustomUrl(headerData.server, `/m/${messageId}`);
+		const customUrl = getServerCustomUrl(
+			headerData.server,
+			`/m/${messageId}${buildSearchQueryString(params)}`,
+		);
 		if (customUrl) {
 			return redirect(customUrl);
 		}
