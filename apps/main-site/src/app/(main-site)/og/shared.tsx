@@ -1,14 +1,29 @@
-export async function loadOgFonts() {
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { cache } from "react";
+
+function toArrayBuffer(buffer: Buffer<ArrayBufferLike>): ArrayBuffer {
+	return buffer.buffer.slice(
+		buffer.byteOffset,
+		buffer.byteOffset + buffer.byteLength,
+	);
+}
+
+export const loadOgFonts = cache(async function loadOgFonts() {
 	const [satoshiBlack, satoshiBold] = await Promise.all([
-		fetch(new URL("../../../styles/Satoshi-Black.ttf", import.meta.url)).then(
-			(response) => response.arrayBuffer(),
-		),
-		fetch(new URL("../../../styles/Satoshi-Bold.ttf", import.meta.url)).then(
-			(response) => response.arrayBuffer(),
-		),
+		readFile(
+			fileURLToPath(
+				new URL("../../../styles/Satoshi-Black.ttf", import.meta.url),
+			),
+		).then(toArrayBuffer),
+		readFile(
+			fileURLToPath(
+				new URL("../../../styles/Satoshi-Bold.ttf", import.meta.url),
+			),
+		).then(toArrayBuffer),
 	]);
 	return { satoshiBlack, satoshiBold };
-}
+});
 
 export function getOgFontConfig(fonts: {
 	satoshiBlack: ArrayBuffer;
