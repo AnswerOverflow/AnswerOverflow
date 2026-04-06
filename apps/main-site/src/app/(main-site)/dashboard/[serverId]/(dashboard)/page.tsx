@@ -38,7 +38,10 @@ import {
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { useAuthenticatedQuery } from "../../../../../lib/use-authenticated-query";
+import {
+	useAuthenticatedQuery,
+	useAuthenticatedQueryWithStatus,
+} from "../../../../../lib/use-authenticated-query";
 import { getDashboardServerIdFromPathname } from "../server-id-context";
 
 type DatePreset = "7d" | "30d" | "90d" | "all";
@@ -610,13 +613,47 @@ function DashboardContent({ serverId }: { serverId: bigint }) {
 	const [datePreset, setDatePreset] = useState<DatePreset>("7d");
 	const dateRange = getDateRangeFromPreset(datePreset);
 
-	const dashboardData = useAuthenticatedQuery(
+	const {
+		data: dashboardData,
+		isLoading,
+		error,
+		isSessionPending,
+		isAuthenticated,
+	} = useAuthenticatedQueryWithStatus(
 		api.authenticated.dashboard_queries.getDashboardData,
 		{ serverId },
 	);
 
+	if (isSessionPending) {
+		return (
+			<div className="flex items-center gap-2 text-muted-foreground">
+				<Spinner /> Authenticating...
+			</div>
+		);
+	}
+
+	if (!isAuthenticated) {
+		return (
+			<div className="text-muted-foreground">
+				Please sign in to access the dashboard.
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="text-destructive">
+				Failed to load dashboard: {error.message}
+			</div>
+		);
+	}
+
 	if (!dashboardData) {
-		return <div className="text-muted-foreground">Loading dashboard...</div>;
+		return (
+			<div className="flex items-center gap-2 text-muted-foreground">
+				<Spinner /> Loading dashboard...
+			</div>
+		);
 	}
 
 	const { server, channels } = dashboardData;

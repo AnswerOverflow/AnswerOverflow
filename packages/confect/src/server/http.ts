@@ -21,8 +21,11 @@ import type {
 	GenericConfectDataModel,
 } from "./data-model";
 
-const convexSiteUrl =
-	process.env.CONVEX_SITE_URL ?? process.env.NEXT_PUBLIC_CONVEX_SITE_URL ?? "";
+function getConvexSiteUrl() {
+	return (
+		process.env.CONVEX_SITE_URL ?? process.env.NEXT_PUBLIC_CONVEX_SITE_URL ?? ""
+	);
+}
 
 type Middleware = (
 	httpApp: HttpApp.Default,
@@ -59,7 +62,7 @@ const makeHandler =
 		const ApiDocsLive = HttpApiScalar.layer({
 			path: `${pathPrefix}docs`,
 			scalar: {
-				baseServerURL: `${convexSiteUrl}${pathPrefix}`,
+				baseServerURL: `${getConvexSiteUrl()}${pathPrefix}`,
 				...scalar,
 			},
 		}).pipe(Layer.provide(ApiLive));

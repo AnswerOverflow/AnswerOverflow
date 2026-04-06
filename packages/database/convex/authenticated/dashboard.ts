@@ -419,7 +419,12 @@ async function syncDashboardAccessForGuild(
 		owner: boolean;
 	},
 ): Promise<SyncedDashboardAccessState> {
-	const permissionsNumber = Number(args.permissions);
+	// Ensure owners always have the Administrator bit set, even if Discord's
+	// API no longer includes it in the permissions field for owners.
+	const rawPermissions = Number(args.permissions);
+	const permissionsNumber = args.owner
+		? rawPermissions | DISCORD_PERMISSIONS.Administrator
+		: rawPermissions;
 	const hasManageAccess = hasManageAccessForGuild(
 		permissionsNumber,
 		args.owner,
