@@ -70,3 +70,6 @@ bun-sqlite.d.ts
 community-servers.generated.ts
 apps/main-site/src/proxy.ts
 1/
+.mcp.json
+opencode.json
+mcp.json

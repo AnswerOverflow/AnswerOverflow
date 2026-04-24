@@ -1,7 +1,11 @@
 import { Data, Equal } from "effect";
 import { describe, expect, test } from "vitest";
 import { toAODiscordAccount } from "../utils/conversions";
-import { getMemberRoleIds, hasRelevantMemberAccessChanges } from "./user";
+import {
+	getMemberPermissions,
+	getMemberRoleIds,
+	hasRelevantMemberAccessChanges,
+} from "./user";
 
 function hasRelevantChanges(
 	oldUser: {
@@ -116,6 +120,17 @@ describe("getMemberRoleIds", () => {
 		});
 
 		expect(getMemberRoleIds(member)).toEqual([7n, 42n]);
+	});
+});
+
+describe("getMemberPermissions", () => {
+	test("preserves dashboard permissions from unsafe Discord permission bitfields", () => {
+		const member = createMemberAccessState({
+			permissionBitfield: (1n << 56n) | 8n,
+		});
+
+		expect(Number(member.permissions.bitfield) & 8).toBe(0);
+		expect(getMemberPermissions(member)).toBe(8);
 	});
 });
 

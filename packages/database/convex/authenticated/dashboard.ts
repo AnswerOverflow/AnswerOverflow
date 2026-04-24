@@ -19,6 +19,7 @@ import { getDiscordAccountWithToken, getTokenStatus } from "../shared/auth";
 import { hasDashboardRoleAccess } from "../shared/guildManagerPermissions";
 import {
 	DISCORD_PERMISSIONS,
+	getDashboardPermissionMask,
 	getHighestRoleFromPermissions,
 	hasPermission,
 	sortServersByBotAndRole,
@@ -421,7 +422,7 @@ async function syncDashboardAccessForGuild(
 ): Promise<SyncedDashboardAccessState> {
 	// Ensure owners always have the Administrator bit set, even if Discord's
 	// API no longer includes it in the permissions field for owners.
-	const rawPermissions = Number(args.permissions);
+	const rawPermissions = getDashboardPermissionMask(args.permissions);
 	const permissionsNumber = args.owner
 		? rawPermissions | DISCORD_PERMISSIONS.Administrator
 		: rawPermissions;
@@ -627,8 +628,11 @@ export const getUserServers = authenticatedAction({
 
 		for (const guild of discordGuilds) {
 			const permissions = BigInt(guild.permissions);
+			const dashboardPermissionMask = getDashboardPermissionMask(
+				guild.permissions,
+			);
 			const hasManageAccess = hasManageAccessForGuild(
-				Number(guild.permissions),
+				dashboardPermissionMask,
 				guild.owner,
 			);
 			const syncedAccess = syncedAccessByGuildId.get(guild.id);
@@ -954,7 +958,7 @@ export const syncUserServerSettingsBackground = internalAction({
 		);
 
 		for (const { guild, aoServer } of serversToSync) {
-			const permissionsNumber = Number(guild.permissions);
+			const permissionsNumber = getDashboardPermissionMask(guild.permissions);
 
 			const existingSettings = existingSettingsByServerId.get(
 				aoServer.discordId,

@@ -2,7 +2,14 @@
 	"mcpServers": {
 		"executor-stdio": {
 			"command": "executor",
-			"args": ["mcp", "--stdio"]
+			"args": [
+				"mcp",
+				"--stdio"
+			]
+		},
+		"executor": {
+			"type": "http",
+			"url": "https://executor.sh/mcp"
 		}
 	}
 }

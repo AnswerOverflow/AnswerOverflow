@@ -1,9 +1,7 @@
 import { getOneFrom } from "convex-helpers/server/relationships";
 import type { MutationCtx, QueryCtx } from "../client";
 import { getUserServerSettingsForServerByDiscordId, isSuperUser } from "./auth";
-
-const ADMINISTRATOR = 0x8;
-const MANAGE_GUILD = 0x20;
+import { DISCORD_PERMISSIONS, hasPermission } from "./permissionsShared";
 
 export type GuildManagerPermissionResult =
 	| { hasPermission: true }
@@ -45,8 +43,14 @@ export async function checkGuildManagerPermissions(
 	}
 
 	const hasAdminOrManageGuild =
-		(userServerSettings.permissions & ADMINISTRATOR) === ADMINISTRATOR ||
-		(userServerSettings.permissions & MANAGE_GUILD) === MANAGE_GUILD;
+		hasPermission(
+			userServerSettings.permissions,
+			DISCORD_PERMISSIONS.Administrator,
+		) ||
+		hasPermission(
+			userServerSettings.permissions,
+			DISCORD_PERMISSIONS.ManageGuild,
+		);
 
 	if (hasAdminOrManageGuild) {
 		return {

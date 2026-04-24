@@ -1,4 +1,5 @@
 import type { DiscordAccount } from "@packages/database/convex/schema";
+import { getDashboardPermissionMask } from "@packages/database/convex/shared/permissionsShared";
 import { Database } from "@packages/database/database";
 import type { GuildMember, PartialUser, User } from "discord.js";
 import { Console, Data, Duration, Effect, Equal, Layer, Metric } from "effect";
@@ -73,7 +74,7 @@ export function getMemberRoleIds(member: MemberAccessState): bigint[] {
 }
 
 export function getMemberPermissions(member: MemberAccessState): number {
-	return Number(member.permissions.bitfield);
+	return getDashboardPermissionMask(member.permissions.bitfield);
 }
 
 export function hasRelevantMemberAccessChanges(

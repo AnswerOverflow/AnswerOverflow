@@ -19,6 +19,7 @@ export {
 	findSolutionsByQuestionId,
 	findUserServerSettingsById,
 	getChannelWithSettings,
+	getDashboardPermissionMask,
 	getDiscordAccountById,
 	getFirstMessagesInChannels,
 	getHighestRoleFromPermissions,

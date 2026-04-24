@@ -3,6 +3,17 @@ export const DISCORD_PERMISSIONS = {
 	ManageGuild: 0x20,
 } as const;
 
+export const DASHBOARD_PERMISSION_MASK =
+	DISCORD_PERMISSIONS.Administrator | DISCORD_PERMISSIONS.ManageGuild;
+
+export function getDashboardPermissionMask(
+	permissions: number | bigint | string,
+): number {
+	const permissionsBigInt = BigInt(permissions);
+	const maskBigInt = BigInt(DASHBOARD_PERMISSION_MASK);
+	return Number(permissionsBigInt & maskBigInt);
+}
+
 export function hasPermission(
 	permissions: number | bigint,
 	permission: number | bigint,

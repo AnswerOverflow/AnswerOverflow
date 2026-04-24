@@ -37,6 +37,7 @@ export {
 } from "./messages";
 export {
 	DISCORD_PERMISSIONS,
+	getDashboardPermissionMask,
 	getHighestRoleFromPermissions,
 	hasPermission,
 } from "./permissionsShared";
