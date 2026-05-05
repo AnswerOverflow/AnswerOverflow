@@ -43,7 +43,7 @@ yarn-error.log*
 
 temp-*
 
-*.env*
+*.env
 
 # eslint
 .eslintcache
