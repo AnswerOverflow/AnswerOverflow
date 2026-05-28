@@ -169,7 +169,6 @@ async function TenantMessagePageContent(props: {
 	return (
 		<MessagePage
 			headerData={headerData}
-			sponsorIndex={Math.floor(Math.random() * 1000)}
 			bowieImageIndex={Math.floor(Math.random() * 1000)}
 			repliesSlot={
 				afterMessageId ? (
