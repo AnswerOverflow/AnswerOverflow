@@ -387,7 +387,6 @@ export function MessagePage(props: {
 	repliesSlot: ReactNode;
 	similarThreadsSlot: ReactNode;
 	recentAnnouncementsSlot?: ReactNode;
-	sponsorIndex: number;
 	bowieImageIndex: number;
 }) {
 	const {
@@ -395,7 +394,6 @@ export function MessagePage(props: {
 		repliesSlot,
 		similarThreadsSlot,
 		recentAnnouncementsSlot,
-		sponsorIndex,
 		bowieImageIndex,
 	} = props;
 
@@ -669,7 +667,6 @@ export function MessagePage(props: {
 									sponsorUrl={headerData.server.sponsorUrl}
 									serverId={headerData.server.discordId.toString()}
 									bowieImageIndex={bowieImageIndex}
-									sponsorIndex={sponsorIndex}
 								/>
 								{recentAnnouncementsSlot}
 							</div>
@@ -737,7 +734,6 @@ export function MessagePage(props: {
 									serverId: firstMessage.message.serverId.toString(),
 									channelId: firstMessage.message.channelId.toString(),
 								},
-								sponsor: !tenant ? "rotating" : null,
 							}}
 						/>
 					)}

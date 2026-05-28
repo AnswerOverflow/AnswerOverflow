@@ -213,56 +213,6 @@ export function MCPServerResource() {
 	);
 }
 
-type ImageSponsor = {
-	type: "image";
-	name: string;
-	href: string;
-	image: string;
-	width: number;
-	height: number;
-};
-
-type CarbonSponsor = {
-	type: "carbon";
-	name: string;
-};
-
-type Sponsor = ImageSponsor | CarbonSponsor;
-
-const SPONSORS: Sponsor[] = [
-	{
-		type: "image",
-		name: "plannotator",
-		href: "https://plannotator.ai/?utm_source=www.answeroverflow.com",
-		image:
-			"https://cdn.answeroverflow.com/1486404878359335092/d2a528c0-128c-4c86-851b-1d5c9ba9e21c.jpeg",
-		width: 400,
-		height: 516,
-	},
-	{
-		type: "image",
-		name: "invent",
-		href: "https://www.useinvent.com/?utm_source=www.answeroverflow.com",
-		image:
-			"https://cdn.answeroverflow.com/1486944608360337418/064d70bc-58a7-44fc-89b6-f63f8c01173b.png",
-		width: 400,
-		height: 400,
-	},
-	{
-		type: "image",
-		name: "morphllm",
-		href: "https://www.morphllm.com/mcp?utm_source=www.answeroverflow.com",
-		image:
-			"https://cdn.answeroverflow.com/1486944590882799656/94455281-5ac3-4fa4-94c2-0f56335ca2aa.jpeg",
-		width: 400,
-		height: 400,
-	},
-	{
-		type: "carbon",
-		name: "carbon",
-	},
-];
-
 function CarbonAd() {
 	const containerRef = useRef<HTMLDivElement>(null);
 
@@ -283,30 +233,6 @@ function CarbonAd() {
 	}, []);
 
 	return <div ref={containerRef} />;
-}
-
-function SponsoredContent({ sponsorIndex }: { sponsorIndex: number }) {
-	const sponsor = SPONSORS[sponsorIndex % SPONSORS.length]!;
-	return (
-		<div>
-			{sponsor.type === "image" && (
-				<TrackLink
-					href={sponsor.href}
-					eventName="Sponsored Card Click"
-					eventData={{ sponsor: sponsor.name }}
-				>
-					<Image
-						src={sponsor.image}
-						alt={sponsor.name}
-						width={sponsor.width}
-						height={sponsor.height}
-						className="w-full h-auto rounded-xl"
-					/>
-				</TrackLink>
-			)}
-			{sponsor.type === "carbon" && <CarbonAd />}
-		</div>
-	);
 }
 
 function BowieSidebarCard({ imageIndex }: { imageIndex: number }) {
@@ -333,14 +259,12 @@ export function ResourcesSidebar({
 	sponsorUrl,
 	serverId,
 	bowieImageIndex,
-	sponsorIndex,
 	showSponsor,
 }: {
 	className?: string;
 	sponsorUrl?: string | null;
 	serverId?: string;
 	bowieImageIndex?: number;
-	sponsorIndex?: number;
 	showSponsor?: boolean;
 }) {
 	const tenant = useTenant();
@@ -349,11 +273,11 @@ export function ResourcesSidebar({
 		? "GitHub Sponsor"
 		: "Support the project";
 	const showBowieCard = serverId === SUPABASE_SERVER_ID;
-	const showSponsored = showSponsor && !tenant && !showBowieCard;
+	const showCarbonAd = showSponsor && !tenant && !showBowieCard;
 
 	return (
 		<div className={cn("text-left", className)}>
-			{showSponsored && <SponsoredContent sponsorIndex={sponsorIndex ?? 0} />}
+			{showCarbonAd && <CarbonAd />}
 			{showBowieCard && <BowieSidebarCard imageIndex={bowieImageIndex ?? 0} />}
 			<div className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide mb-2 mt-4">
 				Resources
