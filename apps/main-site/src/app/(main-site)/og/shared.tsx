@@ -2,11 +2,10 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { cache } from "react";
 
-function toArrayBuffer(buffer: Buffer<ArrayBufferLike>): ArrayBuffer {
-	return buffer.buffer.slice(
-		buffer.byteOffset,
-		buffer.byteOffset + buffer.byteLength,
-	);
+function toArrayBuffer(buffer: Buffer): ArrayBuffer {
+	const arrayBuffer = new ArrayBuffer(buffer.byteLength);
+	new Uint8Array(arrayBuffer).set(buffer);
+	return arrayBuffer;
 }
 
 export const loadOgFonts = cache(async function loadOgFonts() {

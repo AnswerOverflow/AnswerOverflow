@@ -21,7 +21,22 @@ const rows = db
 db.close();
 
 mkdirSync(dirname(outputPath), { recursive: true });
+// Emit the rows via JSON.parse rather than an inline object-array literal. A
+// literal this large makes TypeScript infer a union over every row and fail
+// with TS2590 ("union type that is too complex to represent"); JSON.parse
+// returns `any`, so the array just takes the declared CommunityServerRow[] type.
+const header = `export type CommunityServerRow = {
+	id: string;
+	name: string;
+	icon: string | null;
+	member_count: number | null;
+	invite: string | null;
+	description: string | null;
+};
+
+`;
+const json = JSON.stringify(rows);
 writeFileSync(
 	outputPath,
-	`export const communityServers = ${JSON.stringify(rows, null, "\t")};\n`,
+	`${header}export const communityServers: CommunityServerRow[] = JSON.parse(\n\t${JSON.stringify(json)},\n);\n`,
 );
