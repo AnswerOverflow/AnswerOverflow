@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/security/noDangerouslySetInnerHtml: HTML is generated server-side by shiki from trusted code input, not user content */
 "use client";
 
 import { Button } from "@packages/ui/components/button";
