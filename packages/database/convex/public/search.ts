@@ -1,10 +1,9 @@
-import { ActionCache } from "@convex-dev/action-cache";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { Array as Arr, Predicate } from "effect";
-import { components, internal } from "../_generated/api";
-import { internalAction, internalQuery } from "../client";
+import { internal } from "../_generated/api";
+import { internalMutation, internalQuery } from "../client";
 import { CHANNEL_TYPE } from "../shared/channels";
 import {
 	createDataAccessCache,
@@ -13,6 +12,7 @@ import {
 	type SearchResult,
 	searchMessages,
 } from "../shared/dataAccess";
+import { getThreadStartMessage } from "../shared/messages";
 import { findSimilarThreads } from "../shared/similarThreads";
 import { publicAction, publicQuery } from "./custom_functions";
 
@@ -194,7 +194,15 @@ export const getSimilarThreads = publicQuery({
 	},
 });
 
-export const getSimilarThreadsInternal = internalQuery({
+// Stored similar-thread lists older than this are recomputed on next view. This
+// bounds staleness (so newly-created threads eventually surface) without paying
+// for a full-text search on every page render.
+const SIMILAR_THREADS_STALE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+// Runs the actual full-text search. This is the only billed search work for the
+// "similar threads" feature, and it now runs at most once per thread per
+// `SIMILAR_THREADS_STALE_MS` window instead of once per page view.
+export const computeSimilarThreadsInternal = internalQuery({
 	args: {
 		searchQuery: v.string(),
 		currentThreadId: v.string(),
@@ -203,11 +211,14 @@ export const getSimilarThreadsInternal = internalQuery({
 		serverId: v.optional(v.string()),
 		limit: v.optional(v.number()),
 	},
-	handler: async (ctx, args) => {
+	handler: async (
+		ctx,
+		args,
+	): Promise<{ similarThreadIds: bigint[]; results: SearchResult[] }> => {
 		const cache = createDataAccessCache(ctx);
 		const ctxWithCache = { ...ctx, cache };
 		const limit = Math.min(args.limit ?? 4, 10);
-		const similarThreads = await findSimilarThreads(ctxWithCache, {
+		const startMessages = await findSimilarThreads(ctxWithCache, {
 			searchQuery: args.searchQuery,
 			currentThreadId: BigInt(args.currentThreadId),
 			currentServerId: BigInt(args.currentServerId),
@@ -218,36 +229,76 @@ export const getSimilarThreadsInternal = internalQuery({
 			limit,
 		});
 
-		return await enrichMessagesWithServerAndChannels(
+		// A thread's start message lives in the thread channel, so its channelId
+		// is the thread id we store and re-resolve on subsequent reads.
+		const similarThreadIds = startMessages.map((m) => m.channelId);
+		const results = await enrichMessagesWithServerAndChannels(
 			ctxWithCache,
-			similarThreads,
+			startMessages,
 		);
+		return { similarThreadIds, results };
 	},
 });
 
-export const fetchSimilarThreadsInternal = internalAction({
+// Reads the precomputed list and resolves it to enriched results. Performs no
+// full-text search. Returns null when the thread has never been computed or the
+// stored entry is stale, signalling the caller to recompute.
+export const getStoredSimilarThreads = internalQuery({
 	args: {
-		searchQuery: v.string(),
 		currentThreadId: v.string(),
-		currentServerId: v.string(),
-		currentParentChannelId: v.optional(v.string()),
-		serverId: v.optional(v.string()),
 		limit: v.optional(v.number()),
 	},
-	handler: async (ctx, args): Promise<SearchResult[]> => {
-		return await ctx.runQuery(
-			internal.public.search.getSimilarThreadsInternal,
-			args,
+	handler: async (ctx, args): Promise<SearchResult[] | null> => {
+		const threadId = BigInt(args.currentThreadId);
+		const stored = await ctx.db
+			.query("similarThreads")
+			.withIndex("by_threadId", (q) => q.eq("threadId", threadId))
+			.unique();
+
+		if (!stored || Date.now() - stored.computedAt > SIMILAR_THREADS_STALE_MS) {
+			return null;
+		}
+
+		const cache = createDataAccessCache(ctx);
+		const ctxWithCache = { ...ctx, cache };
+		const limit = Math.min(args.limit ?? 4, 10);
+		const startMessages = await asyncMap(
+			stored.similarThreadIds.slice(0, limit),
+			(id) => getThreadStartMessage(ctxWithCache, id),
+		);
+		return await enrichMessagesWithServerAndChannels(
+			ctxWithCache,
+			Arr.filter(startMessages, Predicate.isNotNullable),
 		);
 	},
 });
 
-const getSimilarThreadsCache = () =>
-	new ActionCache(components.actionCache, {
-		action: internal.public.search.fetchSimilarThreadsInternal,
-		name: "similarThreads",
-		ttl: 5 * 60 * 1000, // 5 minutes
-	});
+export const storeSimilarThreads = internalMutation({
+	args: {
+		currentThreadId: v.string(),
+		similarThreadIds: v.array(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const threadId = BigInt(args.currentThreadId);
+		const similarThreadIds = args.similarThreadIds.map((id) => BigInt(id));
+		const computedAt = Date.now();
+
+		const existing = await ctx.db
+			.query("similarThreads")
+			.withIndex("by_threadId", (q) => q.eq("threadId", threadId))
+			.unique();
+
+		if (existing) {
+			await ctx.db.patch(existing._id, { similarThreadIds, computedAt });
+		} else {
+			await ctx.db.insert("similarThreads", {
+				threadId,
+				similarThreadIds,
+				computedAt,
+			});
+		}
+	},
+});
 
 export const getCachedSimilarThreads = publicAction({
 	args: {
@@ -259,14 +310,39 @@ export const getCachedSimilarThreads = publicAction({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args): Promise<SearchResult[]> => {
-		return await getSimilarThreadsCache().fetch(ctx, {
-			searchQuery: args.searchQuery,
+		// The persistent store is keyed by thread id and assumes the search query
+		// is the thread's title (the website's thread-page usage). Callers that
+		// pass an arbitrary query without a parent-channel scope — e.g. the MCP
+		// tool, which sends currentThreadId "0" — must bypass the store so they
+		// don't collide on a shared key. findSimilarThreads already returns []
+		// without a parent channel, so this path does no search work.
+		if (!args.currentParentChannelId) {
+			const { results } = await ctx.runQuery(
+				internal.public.search.computeSimilarThreadsInternal,
+				args,
+			);
+			return results;
+		}
+
+		// Fast path: serve the precomputed list (no full-text search).
+		const stored = await ctx.runQuery(
+			internal.public.search.getStoredSimilarThreads,
+			{ currentThreadId: args.currentThreadId, limit: args.limit },
+		);
+		if (stored !== null) {
+			return stored;
+		}
+
+		// Cold/stale path: search once, persist for future views, then return.
+		const { similarThreadIds, results } = await ctx.runQuery(
+			internal.public.search.computeSimilarThreadsInternal,
+			args,
+		);
+		await ctx.runMutation(internal.public.search.storeSimilarThreads, {
 			currentThreadId: args.currentThreadId,
-			currentServerId: args.currentServerId,
-			currentParentChannelId: args.currentParentChannelId,
-			serverId: args.serverId,
-			limit: args.limit,
+			similarThreadIds: similarThreadIds.map(String),
 		});
+		return results;
 	},
 });
 

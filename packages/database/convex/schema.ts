@@ -472,6 +472,16 @@ const UserAIChatMessageUsageSchema = Schema.Struct({
 	purchasedCredits: Schema.Number,
 });
 
+// Precomputed "similar threads" results, keyed by the thread being viewed.
+// Populated lazily on read-miss (and refreshed past `computedAt + STALE_MS`) so
+// page renders read a stored list instead of running a full-text search every
+// view. See packages/database/convex/public/search.ts.
+const SimilarThreadsSchema = Schema.Struct({
+	threadId: Schema.BigIntFromSelf,
+	similarThreadIds: Schema.Array(Schema.BigIntFromSelf).pipe(Schema.mutable),
+	computedAt: Schema.Number,
+});
+
 export const confectSchema = defineSchema({
 	servers: defineTable(ServerSchema).index("by_discordId", ["discordId"]),
 	serverPreferences: defineTable(ServerPreferencesSchema)
@@ -550,6 +560,9 @@ export const confectSchema = defineSchema({
 		"by_userId",
 		["userId"],
 	),
+	similarThreads: defineTable(SimilarThreadsSchema).index("by_threadId", [
+		"threadId",
+	]),
 });
 
 export default confectSchema.convexSchemaDefinition;
