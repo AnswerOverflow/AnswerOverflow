@@ -615,7 +615,6 @@ function DashboardContent({ serverId }: { serverId: bigint }) {
 
 	const {
 		data: dashboardData,
-		isLoading,
 		error,
 		isSessionPending,
 		isAuthenticated,
