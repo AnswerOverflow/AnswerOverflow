@@ -1,7 +1,9 @@
+// Use Bun's built-in SQLite so this install-time script has no native addon to
+// compile, avoiding NODE_MODULE_VERSION ABI mismatches in CI. Run with `bun`.
+import { Database } from "bun:sqlite";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import Database from "better-sqlite3";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const dbPath = resolve(scriptDir, "../../../scripts/community-servers.db");
@@ -10,9 +12,9 @@ const outputPath = resolve(
 	"../src/generated/community-servers.generated.ts",
 );
 
-const db = new Database(dbPath, { readonly: true, fileMustExist: true });
+const db = new Database(dbPath, { readonly: true });
 const rows = db
-	.prepare(
+	.query(
 		"SELECT id, name, icon, member_count, invite, description FROM community_servers ORDER BY member_count DESC NULLS LAST",
 	)
 	.all();

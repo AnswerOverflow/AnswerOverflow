@@ -4,9 +4,9 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"postinstall": "fumadocs-mdx && node scripts/generate-community-servers.mjs",
+		"postinstall": "fumadocs-mdx && bun scripts/generate-community-servers.mjs",
 		"build:next": "bun run scripts/build-next.mjs",
-		"generate:community-servers": "node scripts/generate-community-servers.mjs",
+		"generate:community-servers": "bun scripts/generate-community-servers.mjs",
 		"prepare:platform": "node scripts/prepare-platform.mjs",
 		"prepare:preview-env": "cp ../../.env.production .dev.vars",
 		"with-env": "bun run --env-file=../../.env --",
