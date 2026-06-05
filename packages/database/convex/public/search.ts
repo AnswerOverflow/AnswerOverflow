@@ -310,6 +310,19 @@ export const getCachedSimilarThreads = publicAction({
 		limit: v.optional(v.number()),
 	},
 	handler: async (ctx, args): Promise<SearchResult[]> => {
+		// `args` here also carries the fields injected by the publicAction wrapper
+		// (publicBackendAccessToken, discordAccountId, type). The internal queries
+		// have strict validators, so pass only the fields they declare — otherwise
+		// the call throws ArgumentValidationError on the extra wrapper fields.
+		const computeArgs = {
+			searchQuery: args.searchQuery,
+			currentThreadId: args.currentThreadId,
+			currentServerId: args.currentServerId,
+			currentParentChannelId: args.currentParentChannelId,
+			serverId: args.serverId,
+			limit: args.limit,
+		};
+
 		// The persistent store is keyed by thread id and assumes the search query
 		// is the thread's title (the website's thread-page usage). Callers that
 		// pass an arbitrary query without a parent-channel scope — e.g. the MCP
@@ -319,7 +332,7 @@ export const getCachedSimilarThreads = publicAction({
 		if (!args.currentParentChannelId) {
 			const { results } = await ctx.runQuery(
 				internal.public.search.computeSimilarThreadsInternal,
-				args,
+				computeArgs,
 			);
 			return results;
 		}
@@ -336,7 +349,7 @@ export const getCachedSimilarThreads = publicAction({
 		// Cold/stale path: search once, persist for future views, then return.
 		const { similarThreadIds, results } = await ctx.runQuery(
 			internal.public.search.computeSimilarThreadsInternal,
-			args,
+			computeArgs,
 		);
 		await ctx.runMutation(internal.public.search.storeSimilarThreads, {
 			currentThreadId: args.currentThreadId,
