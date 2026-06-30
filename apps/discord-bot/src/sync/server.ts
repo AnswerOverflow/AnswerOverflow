@@ -86,19 +86,6 @@ function notifySuperUserOfServerJoin(guild: Guild) {
 const RHYS_AVATAR_URL =
 	"https://cdn.discordapp.com/avatars/523949187663134754/7716e305f7de26045526d9da6eef2dab.webp";
 
-function getPacificAvailabilityTimestamps() {
-	const today = new Date().toLocaleDateString("en-CA", {
-		timeZone: "America/Los_Angeles",
-	});
-	const start = new Date(`${today}T08:00:00-08:00`);
-	const end = new Date(`${today}T22:00:00-08:00`);
-
-	return {
-		start: Math.floor(start.getTime() / 1000),
-		end: Math.floor(end.getTime() / 1000),
-	};
-}
-
 function notifyUserWhoAddedBot(guild: Guild) {
 	return Effect.gen(function* () {
 		yield* Effect.annotateCurrentSpan({
@@ -125,15 +112,12 @@ function notifyUserWhoAddedBot(guild: Guild) {
 		}
 
 		const addedByUserId = preferences.addedByUserId.toString();
-		const { start, end } = getPacificAvailabilityTimestamps();
-		const botId = guild.client.user?.id;
 
 		yield* Effect.annotateCurrentSpan({ target_user_id: addedByUserId });
 
 		yield* discord.callClient(async () => {
 			const user = await guild.client.users.fetch(addedByUserId);
 
-			const botMention = botId ? `<@${botId}>` : "the bot";
 			const embed = new EmbedBuilder()
 				.setColor("#5865F2")
 				.setAuthor({
@@ -142,8 +126,7 @@ function notifyUserWhoAddedBot(guild: Guild) {
 				})
 				.setDescription(
 					`Hey! Thanks for adding Answer Overflow to **${guild.name}**!\n\n` +
-						`If you need any help with setup, have any bugs, feedback, or feature requests just DM ${botMention} - it comes straight to me.\n\n` +
-						`I'm usually available <t:${start}:t> - <t:${end}:t>, so if I don't respond right away, I'll get back to you as soon as I can!`,
+						`If you need any help with setup, have any bugs, feedback, or feature requests, use the \`/feedback\` and \`/bug-report\` commands.`,
 				)
 				.setTimestamp();
 

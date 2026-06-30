@@ -23,7 +23,6 @@ import { ReadTheRulesConsentHandlerLayer } from "./interactions/read-the-rules-c
 import { SimilarThreadsButtonHandlerLayer } from "./interactions/similar-threads-button";
 import { AutoThreadHandlerLayer } from "./services/auto-thread";
 import { BotIdentitySyncHandlerLayer } from "./services/bot-identity-sync";
-import { DMForwardingHandlerLayer } from "./services/dm-forwarding";
 import { GatewayHealthHandlerLayer } from "./services/gateway-health";
 import { IndexingHandlerLayer } from "./services/indexing";
 import { SendMarkSolutionInstructionsHandlerLayer } from "./services/send-mark-solution-instructions-handler";
@@ -59,7 +58,6 @@ export const BotLayers = Layer.mergeAll(
 	SendMarkSolutionInstructionsHandlerLayer,
 	StatusUpdateHandlerLayer,
 	IndexingHandlerLayer,
-	DMForwardingHandlerLayer,
 	FeedbackCommandHandlerLayer,
 	BugReportCommandHandlerLayer,
 	BotIdentitySyncHandlerLayer,
