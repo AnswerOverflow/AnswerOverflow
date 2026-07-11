@@ -67,6 +67,7 @@ export function SnapshotInfiniteList<Item>({
 }: SnapshotInfiniteListProps<Item>) {
 	const generationRef = useRef(0);
 	const lastLoadedLength = useRef(0);
+	const lastAutoAdvancedCursor = useRef<string | null>(null);
 	const [pages, setPages] = useState<Array<SnapshotPage<Item>>>(() =>
 		initialData ? [initialData] : [],
 	);
@@ -129,6 +130,7 @@ export function SnapshotInfiniteList<Item>({
 		generationRef.current += 1;
 		const generation = generationRef.current;
 		lastLoadedLength.current = 0;
+		lastAutoAdvancedCursor.current = null;
 		setError(null);
 
 		if (initialData) {
@@ -158,6 +160,26 @@ export function SnapshotInfiniteList<Item>({
 	const results = filterResults ? filterResults(rawResults) : rawResults;
 
 	const canLoadMore = !isLoadingFirstPage && !isLoadingMore && !isDone;
+
+	useEffect(() => {
+		if (
+			!canLoadMore ||
+			continueCursor === null ||
+			results.length > 0 ||
+			lastAutoAdvancedCursor.current === continueCursor
+		) {
+			return;
+		}
+
+		lastAutoAdvancedCursor.current = continueCursor;
+		setIsLoadingMore(true);
+		void fetchPage({
+			cursor: continueCursor,
+			numItems: pageSize,
+			append: true,
+			generation: generationRef.current,
+		});
+	}, [canLoadMore, continueCursor, fetchPage, pageSize, results.length]);
 
 	const handleRangeChanged = useCallback(
 		(range: { startIndex: number; endIndex: number }) => {

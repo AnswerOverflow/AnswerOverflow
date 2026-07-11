@@ -235,5 +235,66 @@ describe("public/discord_accounts", () => {
 				);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
+
+		it.scoped("should keep a cursor when an anonymized page is empty", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const identifiedFixture = yield* createForumThreadWithReplies();
+				yield* identifiedFixture.addRootMessage();
+
+				const anonymousServer = yield* createServer();
+				const anonymousForum = yield* createChannel(anonymousServer.discordId, {
+					type: 15,
+				});
+				yield* enableChannelIndexing(anonymousForum.id);
+				yield* database.private.server_preferences.upsertServerPreferences({
+					serverId: anonymousServer.discordId,
+					plan: "FREE",
+					considerAllMessagesPublicEnabled: true,
+					anonymizeMessagesEnabled: true,
+				});
+
+				for (let count = 0; count < 2; count += 1) {
+					const thread = yield* createChannel(anonymousServer.discordId, {
+						type: 11,
+						parentId: anonymousForum.id,
+					});
+					yield* createMessage(
+						{
+							authorId: identifiedFixture.author.id,
+							serverId: anonymousServer.discordId,
+							channelId: thread.id,
+						},
+						{
+							id: thread.id,
+							parentChannelId: anonymousForum.id,
+						},
+					);
+				}
+
+				const firstPage = yield* database.public.discord_accounts.getUserPosts({
+					userId: identifiedFixture.author.id,
+					paginationOpts: { numItems: 2, cursor: null },
+				});
+
+				expect(firstPage.page).toEqual([]);
+				expect(firstPage.isDone).toBe(false);
+
+				const secondPage = yield* database.public.discord_accounts.getUserPosts(
+					{
+						userId: identifiedFixture.author.id,
+						paginationOpts: {
+							numItems: 2,
+							cursor: firstPage.continueCursor,
+						},
+					},
+				);
+
+				expect(secondPage.page).toHaveLength(1);
+				expect(secondPage.page[0]?.server.discordId).toBe(
+					identifiedFixture.server.discordId,
+				);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
 	});
 });
