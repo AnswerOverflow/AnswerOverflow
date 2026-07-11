@@ -35,12 +35,71 @@ async function hashApiKey(key: string): Promise<string> {
 	return base64UrlEncode(hashBuffer);
 }
 
+function createApiCaller(apiCallerId: bigint) {
+	return Effect.gen(function* () {
+		const convexClient = yield* ConvexClientTest;
+		const { client } = convexClient;
+		const rawApiKey = `user_test_solution_key_${apiCallerId.toString()}`;
+		const hashedApiKey = yield* Effect.tryPromise(() => hashApiKey(rawApiKey));
+		const now = Date.now();
+
+		const createdUser = yield* Effect.tryPromise(() =>
+			client.mutation(components.betterAuth.adapter.create, {
+				input: {
+					model: "user",
+					data: {
+						name: "API User",
+						email: `api-user-${apiCallerId.toString()}@example.com`,
+						emailVerified: true,
+						createdAt: now,
+						updatedAt: now,
+						userId: null,
+					},
+				},
+			}),
+		);
+		const betterAuthUserId = String(
+			createdUser.id ?? createdUser._id ?? "missing-user-id",
+		);
+
+		yield* Effect.tryPromise(() =>
+			client.mutation(components.betterAuth.adapter.create, {
+				input: {
+					model: "account",
+					data: {
+						accountId: apiCallerId.toString(),
+						providerId: "discord",
+						userId: betterAuthUserId,
+						createdAt: now,
+						updatedAt: now,
+					},
+				},
+			}),
+		);
+
+		yield* Effect.tryPromise(() =>
+			client.mutation(components.betterAuth.adapter.create, {
+				input: {
+					model: "apikey",
+					data: {
+						key: hashedApiKey,
+						userId: betterAuthUserId,
+						createdAt: now,
+						updatedAt: now,
+						enabled: true,
+					},
+				},
+			}),
+		);
+
+		return { client, rawApiKey };
+	});
+}
+
 describe("api.messages.updateSolution", () => {
 	it.scoped("returns tracking payload and ignores idempotent replays", () =>
 		Effect.gen(function* () {
 			const database = yield* Database;
-			const convexClient = yield* ConvexClientTest;
-			const { client } = convexClient;
 
 			const server = yield* createServer();
 			const forum = yield* createChannel(server.discordId, { type: 15 });
@@ -94,60 +153,7 @@ describe("api.messages.updateSolution", () => {
 				},
 			});
 
-			const rawApiKey = "user_test_solution_key";
-			const hashedApiKey = yield* Effect.tryPromise(() =>
-				hashApiKey(rawApiKey),
-			);
-			const now = Date.now();
-
-			const createdUser = yield* Effect.tryPromise(() =>
-				client.mutation(components.betterAuth.adapter.create, {
-					input: {
-						model: "user",
-						data: {
-							name: "API User",
-							email: "api-user@example.com",
-							emailVerified: true,
-							createdAt: now,
-							updatedAt: now,
-							userId: null,
-						},
-					},
-				}),
-			);
-			const betterAuthUserId = String(
-				createdUser.id ?? createdUser._id ?? "missing-user-id",
-			);
-
-			yield* Effect.tryPromise(() =>
-				client.mutation(components.betterAuth.adapter.create, {
-					input: {
-						model: "account",
-						data: {
-							accountId: apiCaller.id.toString(),
-							providerId: "discord",
-							userId: betterAuthUserId,
-							createdAt: now,
-							updatedAt: now,
-						},
-					},
-				}),
-			);
-
-			yield* Effect.tryPromise(() =>
-				client.mutation(components.betterAuth.adapter.create, {
-					input: {
-						model: "apikey",
-						data: {
-							key: hashedApiKey,
-							userId: betterAuthUserId,
-							createdAt: now,
-							updatedAt: now,
-							enabled: true,
-						},
-					},
-				}),
-			);
+			const { client, rawApiKey } = yield* createApiCaller(apiCaller.id);
 
 			const firstResult = yield* Effect.tryPromise(() =>
 				client.mutation(api.api.messages.updateSolution, {
@@ -157,12 +163,14 @@ describe("api.messages.updateSolution", () => {
 				}),
 			);
 
-			expect(firstResult).not.toBeNull();
-			expect(firstResult?.channel.id).toBe(forum.id.toString());
-			expect(firstResult?.thread.id).toBe(thread.id.toString());
-			expect(firstResult?.questionSolver.id).toBe(answerAuthor.id.toString());
-			expect(firstResult?.markAsSolver.id).toBe(apiCaller.id.toString());
-			expect(firstResult?.accountId).toBe(answerAuthor.id.toString());
+			if (!firstResult || "error" in firstResult) {
+				throw new Error("Expected a solved-question tracking payload");
+			}
+			expect(firstResult.channel.id).toBe(forum.id.toString());
+			expect(firstResult.thread.id).toBe(thread.id.toString());
+			expect(firstResult.questionSolver.id).toBe(answerAuthor.id.toString());
+			expect(firstResult.markAsSolver.id).toBe(apiCaller.id.toString());
+			expect(firstResult.accountId).toBe(answerAuthor.id.toString());
 
 			const storedAnswer = yield* database.private.messages.getMessageById(
 				{ id: answer.id },
@@ -180,5 +188,87 @@ describe("api.messages.updateSolution", () => {
 
 			expect(secondResult).toBeNull();
 		}).pipe(Effect.provide(DatabaseTestLayer)),
+	);
+
+	it.scoped("returns a typed result when the question is not indexed", () =>
+		Effect.gen(function* () {
+			const apiCaller = yield* createAuthor();
+			const { client, rawApiKey } = yield* createApiCaller(apiCaller.id);
+
+			const result = yield* Effect.tryPromise(() =>
+				client.mutation(api.api.messages.updateSolution, {
+					messageId: 100000000000000001n,
+					solutionId: null,
+					apiKey: rawApiKey,
+				}),
+			);
+
+			expect(result).toEqual({ error: "QUESTION_NOT_FOUND" });
+		}).pipe(Effect.provide(DatabaseTestLayer)),
+	);
+
+	it.scoped(
+		"returns a typed result without clearing the current solution when the replacement is not indexed",
+		() =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const server = yield* createServer();
+				const forum = yield* createChannel(server.discordId, { type: 15 });
+				const thread = yield* createChannel(server.discordId, {
+					type: 11,
+					parentId: forum.id,
+				});
+				const questionAuthor = yield* createAuthor();
+				const answerAuthor = yield* createAuthor();
+				const apiCaller = yield* createAuthor();
+
+				const question = yield* createMessage(
+					{
+						authorId: questionAuthor.id,
+						serverId: server.discordId,
+						channelId: thread.id,
+					},
+					{ id: thread.id, parentChannelId: forum.id },
+				);
+				const currentSolution = yield* createMessage(
+					{
+						authorId: answerAuthor.id,
+						serverId: server.discordId,
+						channelId: thread.id,
+					},
+					{ id: thread.id + 1n, parentChannelId: forum.id },
+				);
+
+				yield* database.private.messages.markMessageAsSolution({
+					solutionMessageId: currentSolution.id,
+					questionMessageId: question.id,
+				});
+				yield* database.private.user_server_settings.upsertUserServerSettings({
+					settings: {
+						serverId: server.discordId,
+						userId: apiCaller.id,
+						permissions: ADMINISTRATOR,
+						roleIds: [],
+						canPubliclyDisplayMessages: true,
+						messageIndexingDisabled: false,
+						apiCallsUsed: 0,
+					},
+				});
+				const { client, rawApiKey } = yield* createApiCaller(apiCaller.id);
+
+				const result = yield* Effect.tryPromise(() =>
+					client.mutation(api.api.messages.updateSolution, {
+						messageId: question.id,
+						solutionId: thread.id + 2n,
+						apiKey: rawApiKey,
+					}),
+				);
+
+				expect(result).toEqual({ error: "SOLUTION_NOT_FOUND" });
+				const storedSolution = yield* database.private.messages.getMessageById({
+					id: currentSolution.id,
+				});
+				expect(storedSolution?.questionId).toBe(question.id);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
 	);
 });
