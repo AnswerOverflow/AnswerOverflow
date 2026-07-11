@@ -240,7 +240,18 @@ describe("public/discord_accounts", () => {
 			Effect.gen(function* () {
 				const database = yield* Database;
 				const identifiedFixture = yield* createForumThreadWithReplies();
-				yield* identifiedFixture.addRootMessage();
+				yield* createMessage(
+					{
+						authorId: identifiedFixture.author.id,
+						serverId: identifiedFixture.server.discordId,
+						channelId: identifiedFixture.thread.id,
+					},
+					{
+						id: identifiedFixture.thread.id,
+						parentChannelId: identifiedFixture.forum.id,
+						childThreadId: 1n,
+					},
+				);
 
 				const anonymousServer = yield* createServer();
 				const anonymousForum = yield* createChannel(anonymousServer.discordId, {
@@ -268,6 +279,7 @@ describe("public/discord_accounts", () => {
 						{
 							id: thread.id,
 							parentChannelId: anonymousForum.id,
+							childThreadId: 3n - BigInt(count),
 						},
 					);
 				}
