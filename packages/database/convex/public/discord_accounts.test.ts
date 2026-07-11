@@ -4,8 +4,11 @@ import { Database } from "../../src/database";
 import { DatabaseTestLayer } from "../../src/database-test";
 import {
 	createAuthor,
+	createChannel,
 	createForumThreadWithReplies,
+	createMessage,
 	createServer,
+	enableChannelIndexing,
 	makeMessagesPublic,
 } from "../../src/test";
 
@@ -185,6 +188,51 @@ describe("public/discord_accounts", () => {
 				});
 
 				expect(result.page).toEqual([]);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped("should not link anonymized posts from a real user profile", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const publicFixture = yield* createForumThreadWithReplies();
+				yield* publicFixture.addRootMessage();
+
+				const anonymousServer = yield* createServer();
+				const anonymousForum = yield* createChannel(anonymousServer.discordId, {
+					type: 15,
+				});
+				const anonymousThread = yield* createChannel(
+					anonymousServer.discordId,
+					{ type: 11, parentId: anonymousForum.id },
+				);
+				yield* enableChannelIndexing(anonymousForum.id);
+				yield* database.private.server_preferences.upsertServerPreferences({
+					serverId: anonymousServer.discordId,
+					plan: "FREE",
+					considerAllMessagesPublicEnabled: true,
+					anonymizeMessagesEnabled: true,
+				});
+				yield* createMessage(
+					{
+						authorId: publicFixture.author.id,
+						serverId: anonymousServer.discordId,
+						channelId: anonymousThread.id,
+					},
+					{
+						id: anonymousThread.id,
+						parentChannelId: anonymousForum.id,
+					},
+				);
+
+				const result = yield* database.public.discord_accounts.getUserPosts({
+					userId: publicFixture.author.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
+
+				expect(result.page).toHaveLength(1);
+				expect(result.page[0]?.server.discordId).toBe(
+					publicFixture.server.discordId,
+				);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 	});
