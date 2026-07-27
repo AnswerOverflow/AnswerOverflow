@@ -194,14 +194,9 @@ export const getSimilarThreads = publicQuery({
 	},
 });
 
-// Stored similar-thread lists older than this are recomputed on next view. This
-// bounds staleness (so newly-created threads eventually surface) without paying
-// for a full-text search on every page render.
-const SIMILAR_THREADS_STALE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-
 // Runs the actual full-text search. This is the only billed search work for the
-// "similar threads" feature, and it now runs at most once per thread per
-// `SIMILAR_THREADS_STALE_MS` window instead of once per page view.
+// "similar threads" feature, and it runs at most once per thread instead of
+// once per page view.
 export const computeSimilarThreadsInternal = internalQuery({
 	args: {
 		searchQuery: v.string(),
@@ -241,8 +236,8 @@ export const computeSimilarThreadsInternal = internalQuery({
 });
 
 // Reads the precomputed list and resolves it to enriched results. Performs no
-// full-text search. Returns null when the thread has never been computed or the
-// stored entry is stale, signalling the caller to recompute.
+// full-text search. Returns null only when the thread has never been computed,
+// signalling the caller to compute and persist it.
 export const getStoredSimilarThreads = internalQuery({
 	args: {
 		currentThreadId: v.string(),
@@ -255,7 +250,7 @@ export const getStoredSimilarThreads = internalQuery({
 			.withIndex("by_threadId", (q) => q.eq("threadId", threadId))
 			.unique();
 
-		if (!stored || Date.now() - stored.computedAt > SIMILAR_THREADS_STALE_MS) {
+		if (!stored) {
 			return null;
 		}
 
