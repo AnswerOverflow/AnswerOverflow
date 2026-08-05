@@ -303,6 +303,51 @@ function fetchChannelMessages(
 	);
 }
 
+export function includeThreadStarter(
+	messages: Message[],
+	starterMessage: Message | null,
+): Message[] {
+	if (
+		!starterMessage ||
+		messages.some((message) => message.id === starterMessage.id)
+	) {
+		return messages;
+	}
+
+	return Arr.sort([...messages, starterMessage], sortMessagesByIdAsc);
+}
+
+function fetchThreadMessages(
+	thread: AnyThreadChannel,
+	lastIndexedSnowflake?: bigint | null,
+) {
+	return Effect.gen(function* () {
+		const discord = yield* Discord;
+		const messages = yield* fetchChannelMessages(
+			thread.id,
+			thread.name,
+			lastIndexedSnowflake?.toString() ?? undefined,
+		);
+
+		if (messages.some((message) => message.id === thread.id)) {
+			return messages;
+		}
+
+		const starterMessage = yield* discord
+			.callClient(() => thread.fetchStarterMessage())
+			.pipe(
+				catchAllWithReport((error) =>
+					Console.warn(
+						`Failed to fetch starter message for thread ${thread.name} (${thread.id}):`,
+						error,
+					).pipe(Effect.as(null)),
+				),
+			);
+
+		return includeThreadStarter(messages, starterMessage);
+	});
+}
+
 function fetchForumThreads(
 	forumChannelId: string,
 	forumChannelName: string,
@@ -677,10 +722,9 @@ function indexThread(
 	return Effect.gen(function* () {
 		yield* syncChannel(thread);
 
-		const threadMessages = yield* fetchChannelMessages(
-			thread.id,
-			thread.name,
-			lastIndexedSnowflake?.toString() ?? undefined,
+		const threadMessages = yield* fetchThreadMessages(
+			thread,
+			lastIndexedSnowflake,
 		);
 		yield* storeMessages(
 			threadMessages,
