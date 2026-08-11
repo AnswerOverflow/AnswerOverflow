@@ -49,8 +49,8 @@ export function Providers({
 					</Suspense>
 					<NextThemesProvider
 						attribute="class"
-						defaultTheme="system"
-						enableSystem
+						defaultTheme="dark"
+						enableSystem={false}
 						enableColorScheme
 					>
 						<ConvexClientProvider tenant={tenant}>
