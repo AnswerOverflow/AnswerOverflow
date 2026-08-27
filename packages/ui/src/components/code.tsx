@@ -103,11 +103,11 @@ function InlineCodeInternal({
 	return (
 		<>
 			<span
-				className={cn("dark:hidden", className)}
+				className={cn(className, "dark:hidden")}
 				dangerouslySetInnerHTML={{ __html: lightHtml }}
 			/>
 			<span
-				className={cn("hidden dark:inline", className)}
+				className={cn(className, "hidden dark:inline")}
 				dangerouslySetInnerHTML={{ __html: darkHtml }}
 			/>
 		</>
@@ -142,11 +142,7 @@ export function InlineCode({
 }) {
 	return (
 		<span className="relative inline-block max-w-full">
-			<InlineCodeInternal
-				code={code}
-				language={language}
-				className="inline-block"
-			/>
+			<InlineCodeInternal code={code} language={language} />
 		</span>
 	);
 }
