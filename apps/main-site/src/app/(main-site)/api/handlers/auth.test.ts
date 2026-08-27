@@ -68,6 +68,7 @@ describe("handleAuth proxyToConvex", () => {
 	it("strips transfer-encoding and content-length from chunked POSTs", async () => {
 		handlerPOST.mockImplementation(async (req: Request) => {
 			expect(req.headers.get("transfer-encoding")).toBeNull();
+			expect(req.headers.get("te")).toBeNull();
 			expect(req.headers.get("content-length")).toBeNull();
 			expect(req.headers.get("connection")).toBeNull();
 			expect(req.headers.get("content-type")).toBe("application/json");
@@ -88,6 +89,7 @@ describe("handleAuth proxyToConvex", () => {
 		// them on so the strip path is actually exercised.
 		const headers = new Headers(request.headers);
 		headers.set("transfer-encoding", "chunked");
+		headers.set("te", "trailers");
 		headers.set("content-length", "9999");
 		headers.set("connection", "keep-alive");
 		Object.defineProperty(request, "headers", { value: headers });

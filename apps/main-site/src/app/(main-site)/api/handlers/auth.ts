@@ -69,6 +69,7 @@ export async function proxyToConvex(request: Request): Promise<Response> {
 		// buffered request, so drop them and let fetch set Content-Length.
 		const headers = new Headers(request.headers);
 		headers.delete("transfer-encoding");
+		headers.delete("te");
 		headers.delete("content-length");
 		headers.delete("connection");
 		headers.delete("keep-alive");
