@@ -29,6 +29,73 @@ async function checkForBot(request: Request): Promise<boolean> {
 	}
 }
 
+// Vercel's router can leak Next.js-internal query params (e.g. nxtPslugs from
+// the /api/[[...slugs]] catch-all) into the request URL; they must not be
+// forwarded to Convex.
+const NEXT_INTERNAL_PARAM_PREFIXES = ["nxtP", "nxtI"];
+
+export function stripNextInternalParams(url: URL): URL {
+	const cleaned = new URL(url);
+	for (const key of [...cleaned.searchParams.keys()]) {
+		if (NEXT_INTERNAL_PARAM_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+			cleaned.searchParams.delete(key);
+		}
+	}
+	return cleaned;
+}
+
+function isNetworkFetchError(error: unknown): boolean {
+	return (
+		error instanceof TypeError ||
+		(error instanceof Error && error.message === "fetch failed")
+	);
+}
+
+// The upstream handler forwards this request to Convex as a fetch with a
+// streamed body, which undici cannot replay if the pooled connection to Convex
+// was closed by the peer — the request dies with `TypeError: fetch failed`
+// before anything reaches Convex. Buffer the body so each attempt is
+// self-contained, and retry once on a network-level failure (no response was
+// received, so retrying is safe).
+export async function proxyToConvex(request: Request): Promise<Response> {
+	const url = stripNextInternalParams(new URL(request.url));
+	const bodyBuffer =
+		request.method === "GET" || request.method === "HEAD"
+			? undefined
+			: await request.arrayBuffer();
+	const makeRequest = () =>
+		new Request(url, {
+			method: request.method,
+			headers: request.headers,
+			// Copy so undici/fetch cannot detach the buffer across retries
+			body: bodyBuffer ? bodyBuffer.slice(0) : undefined,
+		});
+	const proxy = request.method === "GET" ? handler.GET : handler.POST;
+	try {
+		return await proxy(makeRequest());
+	} catch (error) {
+		if (!isNetworkFetchError(error)) throw error;
+		console.error(
+			"Auth proxy request to Convex failed, retrying once:",
+			error,
+			error instanceof Error ? error.cause : undefined,
+		);
+		try {
+			return await proxy(makeRequest());
+		} catch (retryError) {
+			console.error(
+				"Auth proxy retry failed:",
+				retryError,
+				retryError instanceof Error ? retryError.cause : undefined,
+			);
+			return new Response(
+				JSON.stringify({ message: "Unable to reach auth service" }),
+				{ status: 502, headers: { "Content-Type": "application/json" } },
+			);
+		}
+	}
+}
+
 export async function handleAuth(c: Context) {
 	const method = c.request.method;
 	const url = new URL(c.request.url);
@@ -56,11 +123,8 @@ export async function handleAuth(c: Context) {
 		}
 	}
 
-	if (method === "GET") {
-		return handler.GET(c.request);
-	}
-	if (method === "POST") {
-		return handler.POST(c.request);
+	if (method === "GET" || method === "POST") {
+		return proxyToConvex(c.request);
 	}
 
 	return new Response("Method not allowed", { status: 405 });
