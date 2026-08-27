@@ -1,11 +1,20 @@
 import type { Infer } from "convex/values";
 import { getManyFrom, getOneFrom } from "convex-helpers/server/relationships";
 import { Array as Arr, Predicate } from "effect";
-import type { Doc } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../client";
-import type { attachmentSchema, emojiSchema, messageSchema } from "../schema";
+import type {
+	attachmentSchema,
+	emojiSchema,
+	MessageSnapshot,
+	messageSchema,
+} from "../schema";
 import { anonymizeDiscordAccount } from "./anonymization.js";
 import type { QueryCtxWithCache } from "./dataAccess";
+import {
+	cdnUrlForAttachment,
+	rewriteDiscordMediaUrlToCdn,
+} from "./mediaUrl.js";
 
 type Message = Infer<typeof messageSchema>;
 type MessageDoc = Doc<"messages">;
@@ -563,6 +572,69 @@ export async function upsertManyMessagesOptimized(
 	}
 }
 
+async function resolveSnapshotEmbedMedia<
+	T extends {
+		url?: string;
+		proxyUrl?: string;
+		s3Key?: string;
+		storageId?: Id<"_storage">;
+	},
+>(
+	ctx: QueryCtxWithCache,
+	media: T | undefined,
+	cdnDomain: string,
+): Promise<T | undefined> {
+	if (!media) {
+		return media;
+	}
+	if (media.s3Key) {
+		const url = `https://${cdnDomain}/${media.s3Key}`;
+		return { ...media, url, proxyUrl: url };
+	}
+	if (media.storageId) {
+		const url = await ctx.storage.getUrl(media.storageId);
+		if (url) {
+			return { ...media, url, proxyUrl: url };
+		}
+		return media;
+	}
+	if (media.url) {
+		const url = rewriteDiscordMediaUrlToCdn(media.url, cdnDomain);
+		if (url !== media.url) {
+			return { ...media, url, proxyUrl: url };
+		}
+	}
+	return media;
+}
+
+async function resolveSnapshotForDisplay(
+	ctx: QueryCtxWithCache,
+	snapshot: MessageSnapshot,
+	cdnDomain: string,
+): Promise<MessageSnapshot> {
+	const attachments = snapshot.attachments?.map((attachment) => ({
+		...attachment,
+		url: cdnUrlForAttachment(attachment.id, attachment.filename, cdnDomain),
+	}));
+
+	const embeds = snapshot.embeds
+		? await Promise.all(
+				snapshot.embeds.map(async (embed) => ({
+					...embed,
+					image: await resolveSnapshotEmbedMedia(ctx, embed.image, cdnDomain),
+					thumbnail: await resolveSnapshotEmbedMedia(
+						ctx,
+						embed.thumbnail,
+						cdnDomain,
+					),
+					video: await resolveSnapshotEmbedMedia(ctx, embed.video, cdnDomain),
+				})),
+			)
+		: undefined;
+
+	return { ...snapshot, attachments, embeds };
+}
+
 export type EnrichedMessageReference = {
 	messageId: bigint;
 	message: EnrichedMessage | null;
@@ -1024,9 +1096,15 @@ export async function enrichMessageForDisplay(
 		}
 	}
 
-	const messageWithResolvedEmbeds = embedsWithResolvedUrls
-		? { ...message, embeds: embedsWithResolvedUrls }
-		: message;
+	const snapshotForDisplay = message.snapshot
+		? await resolveSnapshotForDisplay(ctx, message.snapshot, cdnDomain)
+		: undefined;
+
+	const messageWithResolvedEmbeds = {
+		...message,
+		embeds: embedsWithResolvedUrls,
+		...(snapshotForDisplay !== undefined && { snapshot: snapshotForDisplay }),
+	};
 
 	const baseEnriched: EnrichedMessage = {
 		message: messageWithResolvedEmbeds,

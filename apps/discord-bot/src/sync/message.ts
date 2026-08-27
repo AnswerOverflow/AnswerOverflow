@@ -19,6 +19,7 @@ import {
 	toUpsertMessageArgs,
 } from "../utils/conversions";
 import { catchAllWithReport } from "../utils/error-reporting";
+import { extractSnapshotMediaToUpload } from "../utils/snapshot-media";
 
 const BATCH_CONFIG = {
 	maxBatchSize: process.env.NODE_ENV === "production" ? 3 : 1,
@@ -132,16 +133,17 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					toAOMessage(newMessage, server.discordId.toString()),
 				);
 
-				if (newMessage.attachments.size > 0) {
-					const attachmentsToUpload = Array.from(
-						newMessage.attachments.values(),
-					).map((att) => ({
+				const attachmentsToUpload = [
+					...Array.from(newMessage.attachments.values()).map((att) => ({
 						id: att.id,
 						url: att.url,
 						filename: att.name ?? "",
 						contentType: att.contentType ?? undefined,
-					}));
+					})),
+					...extractSnapshotMediaToUpload(newMessage),
+				];
 
+				if (attachmentsToUpload.length > 0) {
 					yield* uploadAttachmentsInBatches(attachmentsToUpload).pipe(
 						Effect.withSpan("sync.message.upload_attachments", {
 							attributes: {
@@ -308,16 +310,17 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					toChannelKeyedArgs(toUpsertMessageArgs(data)),
 				);
 
-				if (message.attachments.size > 0) {
-					const attachmentsToUpload = Array.from(
-						message.attachments.values(),
-					).map((att) => ({
+				const attachmentsToUpload = [
+					...Array.from(message.attachments.values()).map((att) => ({
 						id: att.id,
 						url: att.url,
 						filename: att.name ?? "",
 						contentType: att.contentType ?? undefined,
-					}));
+					})),
+					...extractSnapshotMediaToUpload(message),
+				];
 
+				if (attachmentsToUpload.length > 0) {
 					yield* uploadAttachmentsInBatches(attachmentsToUpload).pipe(
 						Effect.withSpan("sync.message.upload_attachments", {
 							attributes: {
