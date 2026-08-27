@@ -65,6 +65,40 @@ describe("handleAuth proxyToConvex", () => {
 		expect(handlerPOST).toHaveBeenCalledTimes(1);
 	});
 
+	it("strips transfer-encoding and content-length from chunked POSTs", async () => {
+		handlerPOST.mockImplementation(async (req: Request) => {
+			expect(req.headers.get("transfer-encoding")).toBeNull();
+			expect(req.headers.get("content-length")).toBeNull();
+			expect(req.headers.get("connection")).toBeNull();
+			expect(req.headers.get("content-type")).toBe("application/json");
+			expect(await req.text()).toBe('{"provider":"discord"}');
+			return new Response(JSON.stringify({ ok: true }), { status: 200 });
+		});
+
+		const request = new Request(
+			"https://www.answeroverflow.com/api/auth/sign-in/social",
+			{
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: '{"provider":"discord"}',
+			},
+		);
+		// The Request constructor may refuse to carry framing headers alongside a
+		// body, but real incoming Vercel requests expose them via .headers; force
+		// them on so the strip path is actually exercised.
+		const headers = new Headers(request.headers);
+		headers.set("transfer-encoding", "chunked");
+		headers.set("content-length", "9999");
+		headers.set("connection", "keep-alive");
+		Object.defineProperty(request, "headers", { value: headers });
+		expect(request.headers.get("transfer-encoding")).toBe("chunked");
+		expect(request.headers.get("content-length")).toBe("9999");
+
+		const response = await handleAuth(makeContext(request));
+		expect(response.status).toBe(200);
+		expect(handlerPOST).toHaveBeenCalledTimes(1);
+	});
+
 	it("retries once after TypeError fetch failed and succeeds with replayable body", async () => {
 		const fetchFailed = new TypeError("fetch failed");
 		(fetchFailed as Error & { cause?: unknown }).cause = {
