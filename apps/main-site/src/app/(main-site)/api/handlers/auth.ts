@@ -63,13 +63,23 @@ export async function proxyToConvex(request: Request): Promise<Response> {
 		request.method === "GET" || request.method === "HEAD"
 			? undefined
 			: await request.arrayBuffer();
-	const makeRequest = () =>
-		new Request(url, {
+	const makeRequest = () => {
+		// Hop-by-hop / body-framing headers describe the incoming stream, not the
+		// buffered body we forward; undici rejects chunked transfer-encoding on a
+		// buffered request, so drop them and let fetch set Content-Length.
+		const headers = new Headers(request.headers);
+		headers.delete("transfer-encoding");
+		headers.delete("te");
+		headers.delete("content-length");
+		headers.delete("connection");
+		headers.delete("keep-alive");
+		return new Request(url, {
 			method: request.method,
-			headers: request.headers,
+			headers,
 			// Copy so undici/fetch cannot detach the buffer across retries
 			body: bodyBuffer ? bodyBuffer.slice(0) : undefined,
 		});
+	};
 	const proxy = request.method === "GET" ? handler.GET : handler.POST;
 	try {
 		return await proxy(makeRequest());
