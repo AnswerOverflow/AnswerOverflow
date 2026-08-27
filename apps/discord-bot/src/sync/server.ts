@@ -370,6 +370,11 @@ export const ServerParityLayer = Layer.scopedDiscard(
 					"discord.guild_id": guild.id,
 					"discord.guild_name": guild.name,
 				});
+				// Discord.js also fires guildDelete for unavailable/partial guilds
+				// (e.g. outages or reconnects); those are not real kicks/leaves.
+				if (!guild.available || !guild.name) {
+					return;
+				}
 				yield* Metric.incrementBy(activeGuilds, -1);
 
 				const db = yield* Database;
