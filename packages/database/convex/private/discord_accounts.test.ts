@@ -170,6 +170,148 @@ describe("discord_accounts", () => {
 		);
 	});
 
+	describe("deleteDiscordAccountBatch", () => {
+		it.scoped("should finish small accounts in one call", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const fixture = yield* createForumThreadWithReplies();
+				const message = yield* fixture.addMessage({
+					content: "Will be deleted",
+				});
+
+				yield* database.private.user_server_settings.upsertUserServerSettings({
+					settings: {
+						userId: fixture.author.id,
+						serverId: fixture.server.discordId,
+						permissions: 32,
+						canPubliclyDisplayMessages: true,
+						messageIndexingDisabled: false,
+						apiCallsUsed: 0,
+					},
+				});
+
+				const result =
+					yield* database.private.discord_accounts.deleteDiscordAccountBatch({
+						id: fixture.author.id,
+					});
+
+				expect(result.done).toBe(true);
+				expect(result.deletedMessages).toBeGreaterThan(0);
+				expect(result.continueCursor).toBeNull();
+
+				const accounts =
+					yield* database.private.discord_accounts.findManyDiscordAccountsByIds(
+						{ ids: [fixture.author.id] },
+					);
+				expect(accounts.length).toBe(0);
+
+				const deletedMessage = yield* database.private.messages.getMessageById({
+					id: message.id,
+				});
+				expect(deletedMessage).toBeNull();
+
+				const ignored =
+					yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+						{ id: fixture.author.id },
+					);
+				expect(ignored).not.toBeNull();
+
+				const settings =
+					yield* database.private.user_server_settings.findUserServerSettingsById(
+						{
+							userId: fixture.author.id,
+							serverId: fixture.server.discordId,
+						},
+					);
+				expect(settings).toBeNull();
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped(
+			"should page message deletes and only finish when none remain",
+			() =>
+				Effect.gen(function* () {
+					const database = yield* Database;
+					const fixture = yield* createForumThreadWithReplies();
+					const first = yield* fixture.addMessage({ content: "first" });
+					const second = yield* fixture.addMessage({ content: "second" });
+					const third = yield* fixture.addMessage({ content: "third" });
+
+					const page1 =
+						yield* database.private.discord_accounts.deleteDiscordAccountBatch({
+							id: fixture.author.id,
+							limit: 2,
+						});
+
+					expect(page1.done).toBe(false);
+					expect(page1.deletedMessages).toBe(2);
+					expect(page1.continueCursor).toEqual(expect.any(String));
+
+					const page2 =
+						yield* database.private.discord_accounts.deleteDiscordAccountBatch({
+							id: fixture.author.id,
+							cursor: page1.continueCursor,
+							limit: 2,
+						});
+
+					expect(page2.done).toBe(true);
+					expect(page2.deletedMessages).toBe(1);
+					expect(page2.continueCursor).toBeNull();
+
+					const remainingMessages = yield* Effect.all([
+						database.private.messages.getMessageById({ id: first.id }),
+						database.private.messages.getMessageById({ id: second.id }),
+						database.private.messages.getMessageById({ id: third.id }),
+					]);
+					expect(remainingMessages.every((message) => message === null)).toBe(
+						true,
+					);
+
+					const accounts =
+						yield* database.private.discord_accounts.findManyDiscordAccountsByIds(
+							{ ids: [fixture.author.id] },
+						);
+					expect(accounts.length).toBe(0);
+
+					const ignored =
+						yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+							{ id: fixture.author.id },
+						);
+					expect(ignored).not.toBeNull();
+				}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped("should finalize when the account has no messages", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const author = yield* createAuthor({ name: "NoMessages" });
+
+				const result =
+					yield* database.private.discord_accounts.deleteDiscordAccountBatch({
+						id: author.id,
+					});
+
+				expect(result).toEqual({
+					done: true,
+					deletedMessages: 0,
+					continueCursor: null,
+				});
+
+				const accounts =
+					yield* database.private.discord_accounts.findManyDiscordAccountsByIds(
+						{ ids: [author.id] },
+					);
+				expect(accounts.length).toBe(0);
+
+				const ignored =
+					yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+						{ id: author.id },
+					);
+				expect(ignored).not.toBeNull();
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+	});
+
 	describe("findDiscordAccountsByName", () => {
 		it.scoped("should return only accounts with the exact name", () =>
 			Effect.gen(function* () {
