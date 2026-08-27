@@ -117,6 +117,71 @@ export const deleteDiscordAccount = privateMutation({
 	},
 });
 
+const DEFAULT_DELETE_ACCOUNT_BATCH_LIMIT = 10;
+const MAX_DELETE_ACCOUNT_BATCH_LIMIT = 25;
+
+function clampDeleteAccountBatchLimit(limit: number | undefined): number {
+	return Math.min(
+		Math.max(Math.floor(limit ?? DEFAULT_DELETE_ACCOUNT_BATCH_LIMIT), 1),
+		MAX_DELETE_ACCOUNT_BATCH_LIMIT,
+	);
+}
+
+export const deleteDiscordAccountBatch = privateMutation({
+	args: {
+		id: v.int64(),
+		cursor: v.optional(v.union(v.string(), v.null())),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const limit = clampDeleteAccountBatchLimit(args.limit);
+		// Block re-indexing before paging so later batches cannot be refilled.
+		await upsertIgnoredDiscordAccountInternalLogic(ctx, args.id);
+		// Take remaining messages from the start. Cursor is a client resume
+		// token; Convex paginate cursors skip leftover rows after deletes.
+		const messages = await ctx.db
+			.query("messages")
+			.withIndex("by_authorId", (q) => q.eq("authorId", args.id))
+			.take(limit + 1);
+		const page = messages.slice(0, limit);
+		const hasMore = messages.length > limit;
+
+		for (const message of page) {
+			await deleteMessageInternalLogic(ctx, message.id);
+		}
+
+		if (hasMore) {
+			const lastDeleted = page[page.length - 1];
+			return {
+				done: false,
+				deletedMessages: page.length,
+				continueCursor: lastDeleted?.id.toString() ?? args.cursor ?? "",
+			};
+		}
+
+		const existing = await getOneFrom(
+			ctx.db,
+			"discordAccounts",
+			"by_discordAccountId",
+			args.id,
+			"id",
+		);
+
+		if (existing) {
+			await ctx.db.delete(existing._id);
+		}
+
+		await upsertIgnoredDiscordAccountInternalLogic(ctx, args.id);
+		await deleteUserServerSettingsByUserIdLogic(ctx, args.id);
+
+		return {
+			done: true,
+			deletedMessages: page.length,
+			continueCursor: null,
+		};
+	},
+});
+
 export const findManyDiscordAccountsByIds = privateQuery({
 	args: {
 		ids: v.array(v.int64()),

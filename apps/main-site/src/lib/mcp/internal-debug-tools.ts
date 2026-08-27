@@ -383,6 +383,28 @@ async function deleteDiscordAccount(userId: bigint) {
 	}).pipe(runtime.runPromise);
 }
 
+async function deleteDiscordAccountBatch(
+	userId: bigint,
+	cursor?: string,
+	limit?: number,
+) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const result =
+			yield* database.private.discord_accounts.deleteDiscordAccountBatch({
+				id: userId,
+				cursor,
+				limit,
+			});
+		return {
+			userId: userId.toString(),
+			done: result.done,
+			deletedMessages: result.deletedMessages,
+			continueCursor: result.continueCursor,
+		};
+	}).pipe(runtime.runPromise);
+}
+
 async function deleteIndexedMessage(messageId: bigint) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
@@ -483,6 +505,25 @@ export function registerInternalDebugTools(server: McpServer) {
 		},
 		async ({ userId }) =>
 			toolResponse(await deleteDiscordAccount(BigInt(userId))),
+	);
+
+	server.registerTool(
+		"delete_discord_account_batch",
+		{
+			title: "Delete Discord Account Batch",
+			description:
+				"Delete a small page of indexed messages for one Discord account. Repeat with the returned cursor until done; the last page deletes the account, prevents re-indexing, and clears per-server settings.",
+			inputSchema: {
+				userId: snowflakeSchema,
+				cursor: z.string().optional(),
+				limit: z.number().int().min(1).max(25).optional(),
+			},
+			annotations: { readOnlyHint: false, openWorldHint: false },
+		},
+		async ({ userId, cursor, limit }) =>
+			toolResponse(
+				await deleteDiscordAccountBatch(BigInt(userId), cursor, limit),
+			),
 	);
 
 	server.registerTool(
