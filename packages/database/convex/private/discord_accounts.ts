@@ -135,6 +135,8 @@ export const deleteDiscordAccountBatch = privateMutation({
 	},
 	handler: async (ctx, args) => {
 		const limit = clampDeleteAccountBatchLimit(args.limit);
+		// Block re-indexing before paging so later batches cannot be refilled.
+		await upsertIgnoredDiscordAccountInternalLogic(ctx, args.id);
 		// Take remaining messages from the start. Cursor is a client resume
 		// token; Convex paginate cursors skip leftover rows after deletes.
 		const messages = await ctx.db

@@ -247,6 +247,12 @@ describe("discord_accounts", () => {
 					expect(page1.deletedMessages).toBe(2);
 					expect(page1.continueCursor).toEqual(expect.any(String));
 
+					const ignoredAfterPage1 =
+						yield* database.private.ignored_discord_accounts.findIgnoredDiscordAccountById(
+							{ id: fixture.author.id },
+						);
+					expect(ignoredAfterPage1).not.toBeNull();
+
 					const page2 =
 						yield* database.private.discord_accounts.deleteDiscordAccountBatch({
 							id: fixture.author.id,
