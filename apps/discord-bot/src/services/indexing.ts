@@ -49,6 +49,7 @@ import {
 	catchAllCauseWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
+import { extractSnapshotMediaToUpload } from "../utils/snapshot-media";
 
 const INDEXING_CONFIG = {
 	cronExpression: "0 */6 * * *",
@@ -595,14 +596,15 @@ function upsertMessages(
 
 function uploadMedia(messages: Message[], channelId: string) {
 	return Effect.gen(function* () {
-		const allAttachments = Arr.flatMap(messages, (msg) =>
-			Arr.map(Arr.fromIterable(msg.attachments.values()), (att) => ({
+		const allAttachments = Arr.flatMap(messages, (msg) => [
+			...Arr.map(Arr.fromIterable(msg.attachments.values()), (att) => ({
 				id: att.id,
 				url: att.url,
 				filename: att.name ?? "",
 				contentType: att.contentType ?? undefined,
 			})),
-		);
+			...extractSnapshotMediaToUpload(msg),
+		]);
 
 		if (allAttachments.length > 0) {
 			yield* uploadAttachmentsInBatches(allAttachments);
