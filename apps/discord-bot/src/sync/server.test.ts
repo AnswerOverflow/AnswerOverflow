@@ -113,3 +113,60 @@ it.scoped("guild-parity: runs first on guildCreate", () =>
 		expect(serverLiveData?.discordId).toBe(BigInt(guild.id));
 	}).pipe(Effect.provide(makeTestLayerWithParity())),
 );
+
+it.scoped(
+	"guild-parity: skips kickedTime on guildDelete for unavailable guilds",
+	() =>
+		Effect.gen(function* () {
+			const database = yield* Database;
+			const discordMock = yield* DiscordClientMock;
+			const discord = yield* Discord;
+
+			const guild = discordMock.utilities.createMockGuild({
+				description: "A test guild",
+			});
+			discordMock.utilities.seedGuild(guild);
+
+			discordMock.utilities.emitGuildCreate(guild);
+			yield* discord.client.waitForHandlers("guildCreate");
+
+			guild.available = false;
+			discordMock.utilities.emitGuildDelete(guild);
+			yield* discord.client.waitForHandlers("guildDelete");
+
+			const serverLiveData =
+				yield* database.private.servers.getServerByDiscordId({
+					discordId: BigInt(guild.id),
+				});
+			expect(serverLiveData).not.toBeNull();
+			expect(serverLiveData?.kickedTime).toBeFalsy();
+		}).pipe(Effect.provide(makeTestLayerWithParity())),
+);
+
+it.scoped("guild-parity: sets kickedTime on guildDelete for real leaves", () =>
+	Effect.gen(function* () {
+		const database = yield* Database;
+		const discordMock = yield* DiscordClientMock;
+		const discord = yield* Discord;
+
+		const guild = discordMock.utilities.createMockGuild({
+			description: "A test guild",
+		});
+		discordMock.utilities.seedGuild(guild);
+
+		discordMock.utilities.emitGuildCreate(guild);
+		yield* discord.client.waitForHandlers("guildCreate");
+
+		discordMock.utilities.emitGuildDelete(guild);
+		yield* discord.client.waitForHandlers("guildDelete");
+
+		// getServerByDiscordId filters out kicked servers, so a null result
+		// means kickedTime was set by the guildDelete handler.
+		const serverLiveData = yield* database.private.servers.getServerByDiscordId(
+			{
+				discordId: BigInt(guild.id),
+			},
+		);
+		expect(serverLiveData).toBeNull();
+	}).pipe(Effect.provide(makeTestLayerWithParity())),
+);

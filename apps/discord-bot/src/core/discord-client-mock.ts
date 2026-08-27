@@ -128,6 +128,8 @@ const createDiscordClientMockService = (options: DiscordMockOptions = {}) =>
 				max_stage_video_channel_users: null,
 				nsfw_level: 0,
 				premium_progress_bar_enabled: false,
+				// Without a channels array discord.js marks the guild unavailable
+				channels: [],
 			};
 			// @ts-expect-error - _add is private but we need it for testing
 			return client.guilds._add(guildData);
