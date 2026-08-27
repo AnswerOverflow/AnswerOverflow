@@ -176,6 +176,24 @@ export const upsertManyDiscordAccounts = privateMutation({
 	},
 });
 
+export const findDiscordAccountsByName = privateQuery({
+	args: {
+		name: v.string(),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const limit = Math.min(Math.max(Math.floor(args.limit ?? 20), 1), 100);
+		const accounts = await ctx.db
+			.query("discordAccounts")
+			.withIndex("by_name", (q) => q.eq("name", args.name))
+			.take(limit);
+		return accounts.map((account) => ({
+			id: account.id,
+			name: account.name,
+		}));
+	},
+});
+
 export const getUserPageHeaderData = privateQuery({
 	args: {
 		userId: v.int64(),

@@ -488,10 +488,9 @@ export const confectSchema = defineSchema({
 		.index("by_serverId", ["serverId"])
 		.index("by_customDomain", ["customDomain"])
 		.index("by_stripeCustomerId", ["stripeCustomerId"]),
-	discordAccounts: defineTable(DiscordAccountSchema).index(
-		"by_discordAccountId",
-		["id"],
-	),
+	discordAccounts: defineTable(DiscordAccountSchema)
+		.index("by_discordAccountId", ["id"])
+		.index("by_name", ["name"]),
 	userServerSettings: defineTable(UserServerSettingsSchema)
 		.index("by_serverId", ["serverId"])
 		.index("by_userId", ["userId"])

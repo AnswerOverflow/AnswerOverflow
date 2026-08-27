@@ -170,6 +170,76 @@ describe("discord_accounts", () => {
 		);
 	});
 
+	describe("findDiscordAccountsByName", () => {
+		it.scoped("should return only accounts with the exact name", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const match1 = yield* createAuthor({ name: "SharedName" });
+				const match2 = yield* createAuthor({ name: "SharedName" });
+				yield* createAuthor({ name: "OtherName" });
+
+				const accounts =
+					yield* database.private.discord_accounts.findDiscordAccountsByName({
+						name: "SharedName",
+					});
+
+				expect(accounts.length).toBe(2);
+				expect(accounts.map((a) => a.id)).toContain(match1.id);
+				expect(accounts.map((a) => a.id)).toContain(match2.id);
+				expect(accounts.every((a) => a.name === "SharedName")).toBe(true);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped("should respect the limit", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				yield* createAuthor({ name: "LimitedName" });
+				yield* createAuthor({ name: "LimitedName" });
+				yield* createAuthor({ name: "LimitedName" });
+
+				const accounts =
+					yield* database.private.discord_accounts.findDiscordAccountsByName({
+						name: "LimitedName",
+						limit: 2,
+					});
+
+				expect(accounts.length).toBe(2);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped("should return empty array when no accounts match", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				yield* createAuthor({ name: "SomeUser" });
+
+				const accounts =
+					yield* database.private.discord_accounts.findDiscordAccountsByName({
+						name: "NoSuchUser",
+					});
+
+				expect(accounts).toEqual([]);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped("should return only id and name fields", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const author = yield* createAuthor({
+					name: "FieldsUser",
+					avatar: "avatar123",
+				});
+
+				const accounts =
+					yield* database.private.discord_accounts.findDiscordAccountsByName({
+						name: "FieldsUser",
+					});
+
+				expect(accounts.length).toBe(1);
+				expect(accounts[0]).toEqual({ id: author.id, name: "FieldsUser" });
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+	});
+
 	describe("getUserPageHeaderData", () => {
 		it.scoped("should return user data", () =>
 			Effect.gen(function* () {

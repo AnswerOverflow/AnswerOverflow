@@ -373,6 +373,41 @@ async function inspectSolutionState(questionId: bigint, solutionId: bigint) {
 	}).pipe(runtime.runPromise);
 }
 
+async function deleteDiscordAccount(userId: bigint) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		yield* database.private.discord_accounts.deleteDiscordAccount({
+			id: userId,
+		});
+		return { userId: userId.toString(), deleted: true };
+	}).pipe(runtime.runPromise);
+}
+
+async function deleteIndexedMessage(messageId: bigint) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		yield* database.private.messages.deleteMessage({ id: messageId });
+		return { messageId: messageId.toString(), deleted: true };
+	}).pipe(runtime.runPromise);
+}
+
+async function findDiscordAccountsByName(name: string, limit: number) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const accounts =
+			yield* database.private.discord_accounts.findDiscordAccountsByName({
+				name,
+				limit,
+			});
+		return {
+			accounts: accounts.map((account) => ({
+				id: account.id.toString(),
+				name: account.name,
+			})),
+		};
+	}).pipe(runtime.runPromise);
+}
+
 /** Registers tools for internal Answer Overflow debugging. */
 export function registerInternalDebugTools(server: McpServer) {
 	registerConvexDebugTools(server);
@@ -435,5 +470,46 @@ export function registerInternalDebugTools(server: McpServer) {
 			toolResponse(
 				await inspectSolutionState(BigInt(questionId), BigInt(solutionId)),
 			),
+	);
+
+	server.registerTool(
+		"delete_discord_account",
+		{
+			title: "Delete Discord Account",
+			description:
+				"Delete one indexed Discord account by ID, along with its indexed messages and per-server settings, and prevent it from being re-indexed.",
+			inputSchema: { userId: snowflakeSchema },
+			annotations: { readOnlyHint: false, openWorldHint: false },
+		},
+		async ({ userId }) =>
+			toolResponse(await deleteDiscordAccount(BigInt(userId))),
+	);
+
+	server.registerTool(
+		"delete_indexed_message",
+		{
+			title: "Delete Indexed Message",
+			description: "Delete one indexed Discord message by ID.",
+			inputSchema: { messageId: snowflakeSchema },
+			annotations: { readOnlyHint: false, openWorldHint: false },
+		},
+		async ({ messageId }) =>
+			toolResponse(await deleteIndexedMessage(BigInt(messageId))),
+	);
+
+	server.registerTool(
+		"find_discord_accounts_by_name",
+		{
+			title: "Find Discord Accounts By Name",
+			description:
+				"Look up indexed Discord accounts by exact username, returning only account IDs and names.",
+			inputSchema: {
+				name: z.string(),
+				limit: z.number().int().min(1).max(100).default(20).optional(),
+			},
+			annotations: { readOnlyHint: true, openWorldHint: false },
+		},
+		async ({ name, limit }) =>
+			toolResponse(await findDiscordAccountsByName(name, limit ?? 20)),
 	);
 }
