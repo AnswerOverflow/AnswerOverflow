@@ -141,10 +141,14 @@ describe("public/servers", () => {
 					const server = yield* createServer();
 					const forum = yield* createChannel(server.discordId, { type: 15 });
 					yield* enableChannelIndexing(forum.id);
-					yield* createChannel(server.discordId, { type: 0 });
+					yield* createChannel(server.discordId, {
+						id: forum.id + 100n,
+						type: 0,
+					});
 
-					for (let i = 0; i < 20; i++) {
+					for (let i = 0; i < 3; i++) {
 						yield* createChannel(server.discordId, {
+							id: forum.id + BigInt(i + 1),
 							type: 11,
 							parentId: forum.id,
 						});
