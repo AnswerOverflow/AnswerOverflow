@@ -59,6 +59,16 @@ export type ClientEvents = {
 	"MCP Provider Select": {
 		provider: string;
 	};
+	"MCP Land Modal Shown": {
+		page: "thread" | "community";
+		url: string;
+	};
+	"MCP Land Modal Dismissed": {
+		page: "thread" | "community";
+	};
+	"MCP Land Prompt Copy Click": {
+		url: string;
+	};
 	"Feedback Submitted": {
 		feedback: string;
 		page: string;
