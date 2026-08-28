@@ -16,7 +16,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "claude-code",
 		name: "Claude Code",
-		icon: "https://claude.ai/favicon.ico",
+		icon: "/mcp-icons/claude.ico",
 		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "command",
 			description: "Run this command in your terminal:",
@@ -89,7 +89,7 @@ export const mcpProviders: MCPProvider[] = [
 	{
 		id: "claude-desktop",
 		name: "Claude Desktop",
-		icon: "https://claude.ai/favicon.ico",
+		icon: "/mcp-icons/claude.ico",
 		getRemoteConfig: (mcpUrl, serverName) => ({
 			type: "json",
 			description:

@@ -151,8 +151,28 @@ export function MCPInstallForm({
 		trackEvent("MCP URL Copy Click", { url: mcpUrl }, posthog);
 	};
 
+	const handleAddMcpCopy = () => {
+		trackEvent(
+			"MCP Install Copy Click",
+			{ provider: "add-mcp", url: mcpUrl },
+			posthog,
+		);
+	};
+
 	return (
 		<div className="space-y-4 min-w-0">
+			<div className="min-w-0">
+				<label className="text-sm font-medium mb-1.5 block">One command</label>
+				<p className="text-xs text-muted-foreground mb-2">
+					Adds the server to Claude Code, Cursor, Codex, and other agents:
+				</p>
+				<Code
+					code={`npx add-mcp ${mcpUrl} --name ${serverName}`}
+					language="bash"
+					onCopy={handleAddMcpCopy}
+				/>
+			</div>
+
 			<div className="min-w-0">
 				<label className="text-sm font-medium mb-1.5 block">Server URL</label>
 				<div className="flex items-center gap-2 min-w-0">
