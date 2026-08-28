@@ -8,6 +8,7 @@ import {
 	searchAnswerOverflow,
 	searchServers,
 } from "@/lib/mcp/tools";
+import { prefersHtmlForMcp } from "@/lib/request-routing";
 
 const buildUrl = (path: string) => `https://www.answeroverflow.com${path}`;
 
@@ -116,5 +117,8 @@ const handler = createMcpHandler(
 export { handler as POST };
 
 export function GET(request: NextRequest) {
-	return NextResponse.redirect(new URL("/mcp/setup", request.url), 307);
+	if (prefersHtmlForMcp(request.headers.get("accept") ?? "")) {
+		return NextResponse.redirect(new URL("/mcp/setup", request.url), 307);
+	}
+	return handler(request);
 }
