@@ -97,15 +97,17 @@ export const getServerByDiscordIdWithChannels = publicQuery({
 			getOneFrom(ctx.db, "serverPreferences", "by_serverId", server.discordId),
 		]);
 
-		const indexedChannelIds = new Set(indexedSettings.map((s) => s.channelId));
-		const allServerChannels = await ctx.db
-			.query("channels")
-			.withIndex("by_serverId", (q) => q.eq("serverId", server.discordId))
-			.collect();
+		const loadedChannels = await asyncMap(indexedSettings, (settings) =>
+			getOneFrom(
+				ctx.db,
+				"channels",
+				"by_discordChannelId",
+				settings.channelId,
+				"id",
+			),
+		);
 
-		const channels = Arr.filter(allServerChannels, (channel) =>
-			indexedChannelIds.has(channel.id),
-		)
+		const channels = Arr.filter(loadedChannels, Predicate.isNotNull)
 			.filter(
 				(c) =>
 					c.type === CHANNEL_TYPE.GuildText ||

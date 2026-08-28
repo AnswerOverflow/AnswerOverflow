@@ -611,5 +611,162 @@ describe("public/channels", () => {
 				expect(result).toBeNull();
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
+
+		it.scoped("should omit non-indexed channels from the header", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const server = yield* createServer();
+				const indexed = yield* createChannel(server.discordId, { type: 0 });
+				yield* enableChannelIndexing(indexed.id);
+				yield* createChannel(server.discordId, { type: 0 });
+
+				const result =
+					yield* database.public.channels.getCommunityPageHeaderData({
+						serverDiscordId: server.discordId,
+					});
+
+				expect(result?.channels.map((c) => c.id)).toEqual([indexed.id]);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped(
+			"should not return threads as header channels, only indexed parents",
+			() =>
+				Effect.gen(function* () {
+					const database = yield* Database;
+					const server = yield* createServer();
+					const forum = yield* createChannel(server.discordId, { type: 15 });
+					yield* enableChannelIndexing(forum.id);
+
+					for (let i = 0; i < 3; i++) {
+						yield* createChannel(server.discordId, {
+							id: forum.id + BigInt(i + 1),
+							type: 11,
+							parentId: forum.id,
+						});
+					}
+
+					const result =
+						yield* database.public.channels.getCommunityPageHeaderData({
+							serverDiscordId: server.discordId,
+						});
+
+					expect(result?.channels.map((c) => c.id)).toEqual([forum.id]);
+				}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped(
+			"should only include categories referenced by indexed channels",
+			() =>
+				Effect.gen(function* () {
+					const database = yield* Database;
+					const server = yield* createServer();
+					const referencedCategory = yield* createChannel(server.discordId, {
+						type: 4,
+						position: 0,
+					});
+					yield* createChannel(server.discordId, {
+						type: 4,
+						position: 1,
+					});
+					const channel = yield* createChannel(server.discordId, {
+						type: 0,
+						categoryId: referencedCategory.id,
+					});
+					yield* enableChannelIndexing(channel.id);
+
+					const result =
+						yield* database.public.channels.getCommunityPageHeaderData({
+							serverDiscordId: server.discordId,
+						});
+
+					expect(result?.categories.map((c) => c.id)).toEqual([
+						referencedCategory.id,
+					]);
+				}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped("should sort channels by displayOrder when set", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const server = yield* createServer();
+				const first = yield* createChannel(server.discordId, {
+					type: 0,
+					position: 5,
+				});
+				const second = yield* createChannel(server.discordId, {
+					type: 0,
+					position: 0,
+				});
+				yield* database.private.channels.updateChannelSettings({
+					channelId: first.id,
+					settings: { indexingEnabled: true, displayOrder: 1 },
+				});
+				yield* database.private.channels.updateChannelSettings({
+					channelId: second.id,
+					settings: { indexingEnabled: true, displayOrder: 2 },
+				});
+
+				const result =
+					yield* database.public.channels.getCommunityPageHeaderData({
+						serverDiscordId: server.discordId,
+					});
+
+				expect(result?.channels.map((c) => c.id)).toEqual([
+					first.id,
+					second.id,
+				]);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped(
+			"should sort channels by category position then channel position",
+			() =>
+				Effect.gen(function* () {
+					const database = yield* Database;
+					const server = yield* createServer();
+					const earlyCategory = yield* createChannel(server.discordId, {
+						type: 4,
+						position: 0,
+					});
+					const lateCategory = yield* createChannel(server.discordId, {
+						type: 4,
+						position: 1,
+					});
+					const lateCategoryChannel = yield* createChannel(server.discordId, {
+						type: 0,
+						categoryId: lateCategory.id,
+						position: 0,
+					});
+					const earlyCategorySecond = yield* createChannel(server.discordId, {
+						type: 0,
+						categoryId: earlyCategory.id,
+						position: 3,
+					});
+					const earlyCategoryFirst = yield* createChannel(server.discordId, {
+						type: 0,
+						categoryId: earlyCategory.id,
+						position: 1,
+					});
+					yield* enableChannelIndexing(lateCategoryChannel.id);
+					yield* enableChannelIndexing(earlyCategorySecond.id);
+					yield* enableChannelIndexing(earlyCategoryFirst.id);
+
+					const result =
+						yield* database.public.channels.getCommunityPageHeaderData({
+							serverDiscordId: server.discordId,
+						});
+
+					expect(result?.channels.map((c) => c.id)).toEqual([
+						earlyCategoryFirst.id,
+						earlyCategorySecond.id,
+						lateCategoryChannel.id,
+					]);
+					expect(result?.categories.map((c) => c.id)).toEqual([
+						earlyCategory.id,
+						lateCategory.id,
+					]);
+				}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
 	});
 });
