@@ -95,6 +95,20 @@ function shouldHandleRequest(pathname: string) {
 	return true;
 }
 
+// MCP protocol clients poll GET /mcp expecting streamable HTTP/SSE; only
+// browsers should be sent to the install page.
+export function prefersHtmlForMcp(acceptHeader: string): boolean {
+	const accept = acceptHeader.toLowerCase();
+	if (
+		accept.includes("text/event-stream") ||
+		accept.includes("application/json") ||
+		accept.includes("application/mcp")
+	) {
+		return false;
+	}
+	return accept.includes("text/html");
+}
+
 export function buildRoutingResult(input: RoutingInput): RoutingResult {
 	if (!shouldHandleRequest(input.pathname)) {
 		return nextResult();
@@ -120,7 +134,11 @@ export function buildRoutingResult(input: RoutingInput): RoutingResult {
 		}
 	}
 
-	if (input.method === "GET" && input.pathname === "/mcp") {
+	if (
+		input.method === "GET" &&
+		input.pathname === "/mcp" &&
+		prefersHtmlForMcp(input.acceptHeader)
+	) {
 		return rewriteResult("/mcp/setup");
 	}
 
