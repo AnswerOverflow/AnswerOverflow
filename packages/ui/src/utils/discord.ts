@@ -93,6 +93,27 @@ type MessageWithServerAndChannel = {
 	id: bigint;
 };
 
+export function hasRenderableContent(enriched: {
+	message: {
+		content?: string | null;
+		embeds?: ReadonlyArray<unknown> | null;
+		stickers?: ReadonlyArray<unknown> | null;
+		components?: ReadonlyArray<unknown> | null;
+		snapshot?: unknown;
+	};
+	attachments?: ReadonlyArray<unknown> | null;
+}): boolean {
+	const { message, attachments } = enriched;
+	return (
+		(message.content?.trim().length ?? 0) > 0 ||
+		(attachments?.length ?? 0) > 0 ||
+		(message.embeds?.length ?? 0) > 0 ||
+		(message.stickers?.length ?? 0) > 0 ||
+		(message.components?.length ?? 0) > 0 ||
+		(message.snapshot !== null && message.snapshot !== undefined)
+	);
+}
+
 export function getDiscordURLForMessage(message: MessageWithServerAndChannel) {
 	const serverId = message.serverId.toString();
 	const channelId = message.channelId.toString();

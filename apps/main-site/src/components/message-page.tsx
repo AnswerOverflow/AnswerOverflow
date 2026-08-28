@@ -23,6 +23,7 @@ import { encodeCursor } from "@packages/ui/utils/cursor";
 import {
 	ChannelType,
 	getDiscordURLForMessage,
+	hasRenderableContent,
 	MessageType,
 } from "@packages/ui/utils/discord";
 import {
@@ -170,7 +171,8 @@ export function MessageContent(props: {
 			(m) =>
 				!HIDDEN_AUTHOR_IDS.includes(m.message.authorId) &&
 				!HIDDEN_MESSAGE_TYPES.includes(m.message.type ?? 0) &&
-				m.message.id !== firstMessage?.message.id,
+				m.message.id !== firstMessage?.message.id &&
+				hasRenderableContent(m),
 		);
 	const convex = useConvex();
 	const loadMessagesPage = useCallback(
@@ -316,7 +318,8 @@ export function RepliesSection(props: {
 			(m) =>
 				!HIDDEN_AUTHOR_IDS.includes(m.message.authorId) &&
 				!HIDDEN_MESSAGE_TYPES.includes(m.message.type ?? 0) &&
-				m.message.id !== firstMessage?.message.id,
+				m.message.id !== firstMessage?.message.id &&
+				hasRenderableContent(m),
 		);
 	const convex = useConvex();
 	const loadRepliesPage = useCallback(
