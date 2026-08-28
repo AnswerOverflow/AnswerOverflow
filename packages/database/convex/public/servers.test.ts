@@ -133,6 +133,32 @@ describe("public/servers", () => {
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 
+		it.scoped(
+			"should not return threads as channels, only indexed parents",
+			() =>
+				Effect.gen(function* () {
+					const database = yield* Database;
+					const server = yield* createServer();
+					const forum = yield* createChannel(server.discordId, { type: 15 });
+					yield* enableChannelIndexing(forum.id);
+					yield* createChannel(server.discordId, { type: 0 });
+
+					for (let i = 0; i < 20; i++) {
+						yield* createChannel(server.discordId, {
+							type: 11,
+							parentId: forum.id,
+						});
+					}
+
+					const result =
+						yield* database.public.servers.getServerByDiscordIdWithChannels({
+							discordId: server.discordId,
+						});
+
+					expect(result?.channels.map((c) => c.id)).toEqual([forum.id]);
+				}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
 		it.scoped("should include custom domain in response", () =>
 			Effect.gen(function* () {
 				const database = yield* Database;
