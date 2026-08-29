@@ -44,7 +44,6 @@ import { useCallback, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { CrawlablePaginationNav } from "./crawlable-pagination-nav";
 import { JsonLdScript } from "./json-ld-script";
-import { MCPAgentLandModal } from "./mcp-agent-land-modal";
 import { ResourcesSidebar } from "./resources-sidebar";
 import { TagFilter } from "./tag-filter";
 
@@ -835,8 +834,6 @@ export function CommunityPageContent({
 					</main>
 				</div>
 			</div>
-
-			<MCPAgentLandModal page="community" serverName={server.name} />
 		</div>
 	);
 }
