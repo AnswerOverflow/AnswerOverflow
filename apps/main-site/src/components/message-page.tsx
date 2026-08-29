@@ -39,7 +39,6 @@ import { useCallback, useEffect } from "react";
 import { CrawlablePaginationNav } from "@/components/crawlable-pagination-nav";
 import { FloatingAskInput } from "@/components/floating-ask-input";
 import { JsonLdScript } from "@/components/json-ld-script";
-import { MCPAgentLandModal } from "@/components/mcp-agent-land-modal";
 import { OpenInDiscordLink } from "@/components/open-in-discord-modal";
 import { ResourcesSidebar } from "@/components/resources-sidebar";
 import { ThreadTags } from "@/components/thread-tags";
@@ -754,12 +753,6 @@ export function MessagePage(props: {
 						}}
 					/>
 				)}
-
-				<MCPAgentLandModal
-					page="thread"
-					serverName={headerData.server.name}
-					threadTitle={title}
-				/>
 			</div>
 		</MessageResultPageProvider>
 	);
