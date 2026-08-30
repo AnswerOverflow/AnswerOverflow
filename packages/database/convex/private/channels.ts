@@ -204,6 +204,48 @@ export const findChannelSettingsWithIndexingEnabled = privateQuery({
 	},
 });
 
+export const findServerIdsWithUnindexedChannels = privateQuery({
+	args: {},
+	handler: async (ctx) => {
+		const enabledSettings = await ctx.db
+			.query("channelSettings")
+			.withIndex("by_indexingEnabled_and_serverId", (q) =>
+				q.eq("indexingEnabled", true),
+			)
+			.collect();
+
+		const unindexedSettings = enabledSettings.filter(
+			(settings) => settings.lastIndexedSnowflake === undefined,
+		);
+
+		const serverIds = new Set<bigint>();
+		const settingsMissingServerId: typeof unindexedSettings = [];
+		for (const settings of unindexedSettings) {
+			if (settings.serverId !== undefined) {
+				serverIds.add(settings.serverId);
+			} else {
+				settingsMissingServerId.push(settings);
+			}
+		}
+
+		// Older settings rows may predate the denormalized serverId field
+		const channels = await asyncMap(settingsMissingServerId, (settings) =>
+			getOneFrom(
+				ctx.db,
+				"channels",
+				"by_discordChannelId",
+				settings.channelId,
+				"id",
+			),
+		);
+		for (const channel of channels) {
+			if (channel) serverIds.add(channel.serverId);
+		}
+
+		return [...serverIds].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+	},
+});
+
 async function getServerHeaderData(
 	ctx: { db: GenericDatabaseReader<DataModel> },
 	serverDiscordId: bigint,

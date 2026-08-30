@@ -63,6 +63,8 @@ const INDEXING_CONFIG = {
 	batchWriteDelayJitter: 100,
 	maxThreadsToCollect: 5000,
 	recentUpdateThreshold: Duration.hours(6),
+	catchUpInterval: Duration.minutes(15),
+	catchUpCooldown: Duration.hours(6),
 } as const;
 
 function getJitteredDelay(): Duration.Duration {
@@ -770,10 +772,10 @@ function indexTextChannel(
 							threadChannel?.flags?.lastIndexedSnowflake,
 						);
 					}).pipe(
-						catchAllWithReport((error) =>
+						catchAllCauseWithReport((cause) =>
 							Console.error(
 								`Error indexing thread ${thread.name} (${thread.id}):`,
-								error,
+								cause,
 							),
 						),
 					),
@@ -915,11 +917,11 @@ function indexForumChannel(
 
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
-					catchAllWithReport((error) => {
+					catchAllCauseWithReport((cause) => {
 						completedThreads++;
 						return Console.error(
 							`Forum ${channel.name}: Error indexing thread ${thread.name} (${thread.id}):`,
-							error,
+							cause,
 						);
 					}),
 				),
@@ -964,7 +966,7 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 			`[${guildIndex + 1}/${totalGuilds}] Starting indexing for guild: ${guild.name} (${guild.id})`,
 		);
 
-		yield* syncGuild(guild).pipe(Effect.forkDaemon);
+		yield* syncGuild(guild);
 
 		const channelSettingsWithIndexing =
 			yield* database.private.channels.findChannelSettingsWithIndexingEnabled({
@@ -1024,12 +1026,12 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
-					catchAllWithReport((error) => {
+					catchAllCauseWithReport((cause) => {
 						completedChannels++;
 						const channelId = channel.isDMBased() ? channel.id : channel.name;
 						return Console.error(
 							`[${guildIndex + 1}/${totalGuilds}] ${guild.name}: Error indexing channel ${channelId}:`,
-							error,
+							cause,
 						);
 					}),
 				),
@@ -1075,10 +1077,10 @@ export function runIndexingCore() {
 			Arr.map(shuffledGuilds, (guild, index) => ({ guild, index })),
 			({ guild, index }) =>
 				indexGuild(guild, index, totalGuilds).pipe(
-					catchAllWithReport((error) =>
+					catchAllCauseWithReport((cause) =>
 						Effect.logError(
 							`[${index + 1}/${totalGuilds}] Error indexing guild ${guild.name}:`,
-							error,
+							cause,
 						),
 					),
 				),
@@ -1095,8 +1097,8 @@ export function runIndexingCore() {
 		);
 	}).pipe(
 		Effect.withSpan("indexing.run_core"),
-		catchAllWithReport((error) =>
-			Effect.logError("Fatal error during indexing:", error),
+		catchAllCauseWithReport((cause) =>
+			Effect.logError("Fatal error during indexing:", cause),
 		),
 	);
 }
@@ -1107,8 +1109,8 @@ export function runIndexingForGuild(guild: Guild) {
 		yield* Effect.logInfo(`=== Starting indexing for guild: ${guild.name} ===`);
 
 		yield* indexGuild(guild, 0, 1).pipe(
-			catchAllWithReport((error) =>
-				Effect.logError(`Error indexing guild ${guild.name}:`, error),
+			catchAllCauseWithReport((cause) =>
+				Effect.logError(`Error indexing guild ${guild.name}:`, cause),
 			),
 		);
 
@@ -1127,8 +1129,8 @@ export function runIndexingForGuild(guild: Guild) {
 				"guild.name": guild.name,
 			},
 		}),
-		catchAllWithReport((error) =>
-			Effect.logError("Fatal error during guild indexing:", error),
+		catchAllCauseWithReport((cause) =>
+			Effect.logError("Fatal error during guild indexing:", cause),
 		),
 	);
 }
@@ -1156,15 +1158,94 @@ export const startIndexingLoop = Effect.fn("indexing.start_loop")(function* () {
 		INDEXING_CONFIG.cronTimezone,
 	);
 
+	// The error handler must sit inside Effect.schedule: outside it, one failed
+	// run would tear down the schedule itself and no further ticks would fire.
 	yield* Effect.forkDaemon(
-		Effect.schedule(runIndexing(), schedule).pipe(
-			catchAllCauseWithReport((cause) =>
-				Effect.logError("Error in scheduled indexing run:", cause),
+		Effect.schedule(
+			runIndexing().pipe(
+				catchAllCauseWithReport((cause) =>
+					Effect.logError("Error in scheduled indexing run:", cause),
+				),
 			),
+			schedule,
 		),
 	);
 
 	yield* Effect.logInfo("Indexing loop started successfully");
+});
+
+export function runCatchUpIndexing(lastAttemptAtMs: Map<string, number>) {
+	return Effect.gen(function* () {
+		const database = yield* Database;
+		const discord = yield* Discord;
+
+		const serverIds =
+			yield* database.private.channels.findServerIdsWithUnindexedChannels();
+		if (serverIds.length === 0) return;
+
+		const now = yield* Clock.currentTimeMillis;
+		const cooldownMs = Duration.toMillis(INDEXING_CONFIG.catchUpCooldown);
+		const guilds = yield* discord.getGuilds();
+		const guildsById = new Map(guilds.map((guild) => [guild.id, guild]));
+
+		const guildsToIndex = Arr.filterMap(serverIds, (serverId) => {
+			const guild = guildsById.get(serverId.toString());
+			if (!guild) return Option.none();
+			const lastAttempt = lastAttemptAtMs.get(guild.id);
+			if (lastAttempt !== undefined && now - lastAttempt < cooldownMs) {
+				return Option.none();
+			}
+			return Option.some(guild);
+		});
+
+		if (guildsToIndex.length === 0) return;
+
+		yield* Effect.logInfo(
+			`Catch-up indexing: ${guildsToIndex.length} guilds have channels that were never indexed`,
+		);
+
+		yield* Effect.forEach(
+			guildsToIndex,
+			(guild) =>
+				Effect.suspend(() => {
+					// Record the attempt up front so guilds that fail permanently
+					// (missing permissions, etc.) are not retried every 15 minutes.
+					lastAttemptAtMs.set(guild.id, now);
+					return runIndexingForGuild(guild);
+				}).pipe(
+					catchAllCauseWithReport((cause) =>
+						Effect.logError(
+							`Catch-up indexing failed for guild ${guild.id}:`,
+							cause,
+						),
+					),
+				),
+			{ concurrency: 1 },
+		);
+	}).pipe(Effect.withSpan("indexing.run_catch_up"));
+}
+
+// Backfills servers whose indexing was enabled from the dashboard (or that the
+// bot joined with indexing already on) without waiting for the 6h global crawl.
+// Deliberately does not take indexingLock - a small catch-up run must not queue
+// behind a full crawl of every guild.
+export const startCatchUpIndexingLoop = Effect.fn(
+	"indexing.start_catch_up_loop",
+)(function* () {
+	const lastAttemptAtMs = new Map<string, number>();
+
+	yield* Effect.forkDaemon(
+		Effect.repeat(
+			runCatchUpIndexing(lastAttemptAtMs).pipe(
+				catchAllCauseWithReport((cause) =>
+					Effect.logError("Error in catch-up indexing run:", cause),
+				),
+			),
+			Schedule.spaced(INDEXING_CONFIG.catchUpInterval),
+		),
+	);
+
+	yield* Effect.logInfo("Catch-up indexing loop started successfully");
 });
 
 export const IndexingHandlerLayer = Layer.scopedDiscard(
@@ -1172,11 +1253,18 @@ export const IndexingHandlerLayer = Layer.scopedDiscard(
 		const discord = yield* Discord;
 
 		yield* discord.client.on("clientReady", () =>
-			startIndexingLoop().pipe(
-				catchAllCauseWithReport((cause) =>
-					Effect.logError("Error starting indexing loop:", cause),
-				),
-			),
+			Effect.gen(function* () {
+				yield* startIndexingLoop().pipe(
+					catchAllCauseWithReport((cause) =>
+						Effect.logError("Error starting indexing loop:", cause),
+					),
+				);
+				yield* startCatchUpIndexingLoop().pipe(
+					catchAllCauseWithReport((cause) =>
+						Effect.logError("Error starting catch-up indexing loop:", cause),
+					),
+				);
+			}),
 		);
 
 		yield* Effect.addFinalizer(() =>
