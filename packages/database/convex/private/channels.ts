@@ -204,6 +204,34 @@ export const findChannelSettingsWithIndexingEnabled = privateQuery({
 	},
 });
 
+// This runs on the catch-up loop's 15-minute tick, so it must stay cheap: the
+// index narrows the scan to enabled channels that were never indexed, and the
+// row bound caps the worst case. Legacy rows that predate the denormalized
+// serverId field are skipped rather than resolved through an N+1 channel
+// lookup - the 6h global crawl still covers those servers.
+const UNINDEXED_CHANNELS_SCAN_LIMIT = 500;
+
+export const findServerIdsWithUnindexedChannels = privateQuery({
+	args: {},
+	handler: async (ctx) => {
+		const unindexedSettings = await ctx.db
+			.query("channelSettings")
+			.withIndex("by_indexingEnabled_and_lastIndexedSnowflake", (q) =>
+				q.eq("indexingEnabled", true).eq("lastIndexedSnowflake", undefined),
+			)
+			.take(UNINDEXED_CHANNELS_SCAN_LIMIT);
+
+		const serverIds = new Set<bigint>();
+		for (const settings of unindexedSettings) {
+			if (settings.serverId !== undefined) {
+				serverIds.add(settings.serverId);
+			}
+		}
+
+		return [...serverIds].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+	},
+});
+
 async function getServerHeaderData(
 	ctx: { db: GenericDatabaseReader<DataModel> },
 	serverDiscordId: bigint,

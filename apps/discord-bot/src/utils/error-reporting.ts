@@ -10,7 +10,7 @@ import type {
 	Message,
 	ModalSubmitInteraction,
 } from "discord.js";
-import { type Cause, Effect } from "effect";
+import { Cause, Effect } from "effect";
 
 type DiscordContext = {
 	guildId?: string | null;
@@ -121,6 +121,33 @@ export const catchAllCauseWithReport = <E, A, R, E2>(
 				}),
 			),
 			Effect.catchAllCause(handler),
+		);
+};
+
+// Like catchAllCauseWithReport, but interruption passes through instead of
+// being converted into a handled "success". Use this at walk/loop sites that
+// must survive one bad item: timeouts and shutdown interrupt fibers, and a
+// handler that swallows the interrupt cause would let the loop keep running
+// (and let callers mistake an aborted run for a completed one).
+export const catchNonInterruptCauseWithReport = <E, A2, R, E2>(
+	handler: (cause: Cause.Cause<E>) => Effect.Effect<A2, E2, R>,
+) => {
+	return <A, R2>(
+		effect: Effect.Effect<A, E, R2>,
+	): Effect.Effect<A | A2, E2, R | R2> =>
+		effect.pipe(
+			Effect.catchAllCause((cause) =>
+				Cause.isInterruptedOnly(cause)
+					? // An interrupted-only cause carries no typed failures, so
+						// stripFailures is an identity that retypes it to Cause<never>.
+						Effect.failCause(Cause.stripFailures(cause))
+					: Effect.zipRight(
+							Effect.sync(() => {
+								captureEffectCause(cause);
+							}),
+							handler(cause),
+						),
+			),
 		);
 };
 
