@@ -9,7 +9,10 @@ import {
 	runIndexingCore,
 	runIndexingForGuild,
 } from "../services/indexing";
-import { catchAllWithReport } from "../utils/error-reporting";
+import {
+	catchAllWithReport,
+	catchNonInterruptCauseWithReport,
+} from "../utils/error-reporting";
 
 function formatDurationMs(ms: number): string {
 	const hours = Math.floor(ms / 1000 / 60 / 60);
@@ -148,13 +151,23 @@ const handleIndexServer = Effect.fn("index_server_command")(function* (
 			);
 
 			const startTime = yield* Clock.currentTimeMillis;
-			yield* runIndexingForGuild(guild);
+			const status = yield* runIndexingForGuild(guild).pipe(
+				catchNonInterruptCauseWithReport((cause) =>
+					Console.error(`Error indexing guild ${guild.name}:`, cause).pipe(
+						Effect.as("failed" as const),
+					),
+				),
+			);
 			const endTime = yield* Clock.currentTimeMillis;
 			const duration = endTime - startTime;
 
 			yield* discord.callClient(() =>
 				message.reply(
-					`Indexing for **${guild.name}** complete in ${formatDurationMs(duration)}`,
+					status === "completed"
+						? `Indexing for **${guild.name}** complete in ${formatDurationMs(duration)}`
+						: status === "skipped"
+							? `**${guild.name}** is already being indexed by another run (catch-up or global crawl). Try again once it finishes.`
+							: `Indexing for **${guild.name}** failed after ${formatDurationMs(duration)}. Check the logs for details.`,
 				),
 			);
 

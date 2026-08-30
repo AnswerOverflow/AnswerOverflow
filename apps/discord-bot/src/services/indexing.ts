@@ -46,8 +46,8 @@ import {
 	toUpsertMessageArgs,
 } from "../utils/conversions";
 import {
-	catchAllCauseWithReport,
 	catchAllWithReport,
+	catchNonInterruptCauseWithReport,
 } from "../utils/error-reporting";
 import { extractSnapshotMediaToUpload } from "../utils/snapshot-media";
 
@@ -65,7 +65,35 @@ const INDEXING_CONFIG = {
 	recentUpdateThreshold: Duration.hours(6),
 	catchUpInterval: Duration.minutes(15),
 	catchUpCooldown: Duration.hours(6),
+	catchUpMaxGuildsPerTick: 25,
+	syncGuildTimeout: Duration.minutes(2),
 } as const;
+
+// Guilds currently being indexed by any path (global crawl, catch-up loop, or
+// !index start). The global indexingLock only serializes full crawls; this set
+// is what prevents two runs from indexing the same guild concurrently.
+export const guildsBeingIndexed = new Set<string>();
+
+function withGuildIndexingSlot<A, E, R>(
+	guildId: string,
+	effect: Effect.Effect<A, E, R>,
+): Effect.Effect<Option.Option<A>, E, R> {
+	return Effect.acquireUseRelease(
+		Effect.sync(() => {
+			if (guildsBeingIndexed.has(guildId)) return false;
+			guildsBeingIndexed.add(guildId);
+			return true;
+		}),
+		(acquired) =>
+			acquired
+				? Effect.map(effect, Option.some)
+				: Effect.succeed(Option.none<A>()),
+		(acquired) =>
+			Effect.sync(() => {
+				if (acquired) guildsBeingIndexed.delete(guildId);
+			}),
+	);
+}
 
 function getJitteredDelay(): Duration.Duration {
 	const jitter = Math.random() * INDEXING_CONFIG.batchWriteDelayJitter;
@@ -772,7 +800,7 @@ function indexTextChannel(
 							threadChannel?.flags?.lastIndexedSnowflake,
 						);
 					}).pipe(
-						catchAllCauseWithReport((cause) =>
+						catchNonInterruptCauseWithReport((cause) =>
 							Console.error(
 								`Error indexing thread ${thread.name} (${thread.id}):`,
 								cause,
@@ -917,7 +945,7 @@ function indexForumChannel(
 
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
-					catchAllCauseWithReport((cause) => {
+					catchNonInterruptCauseWithReport((cause) => {
 						completedThreads++;
 						return Console.error(
 							`Forum ${channel.name}: Error indexing thread ${thread.name} (${thread.id}):`,
@@ -966,7 +994,16 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 			`[${guildIndex + 1}/${totalGuilds}] Starting indexing for guild: ${guild.name} (${guild.id})`,
 		);
 
-		yield* syncGuild(guild);
+		// syncGuild does optional work (icon/banner uploads, channel resync) that
+		// must not stall the serial crawl; message indexing works without it.
+		const syncResult = yield* syncGuild(guild).pipe(
+			Effect.timeoutOption(INDEXING_CONFIG.syncGuildTimeout),
+		);
+		if (Option.isNone(syncResult)) {
+			yield* Console.warn(
+				`Guild sync timed out for ${guild.name} (${guild.id}), continuing with indexing`,
+			);
+		}
 
 		const channelSettingsWithIndexing =
 			yield* database.private.channels.findChannelSettingsWithIndexingEnabled({
@@ -1026,7 +1063,7 @@ function indexGuild(guild: Guild, guildIndex: number, totalGuilds: number) {
 
 					yield* Effect.sleep(INDEXING_CONFIG.channelProcessDelay);
 				}).pipe(
-					catchAllCauseWithReport((cause) => {
+					catchNonInterruptCauseWithReport((cause) => {
 						completedChannels++;
 						const channelId = channel.isDMBased() ? channel.id : channel.name;
 						return Console.error(
@@ -1076,8 +1113,18 @@ export function runIndexingCore() {
 		yield* Effect.forEach(
 			Arr.map(shuffledGuilds, (guild, index) => ({ guild, index })),
 			({ guild, index }) =>
-				indexGuild(guild, index, totalGuilds).pipe(
-					catchAllCauseWithReport((cause) =>
+				Effect.gen(function* () {
+					const result = yield* withGuildIndexingSlot(
+						guild.id,
+						indexGuild(guild, index, totalGuilds),
+					);
+					if (Option.isNone(result)) {
+						yield* Effect.logInfo(
+							`[${index + 1}/${totalGuilds}] Skipping guild ${guild.name} (${guild.id}) - already being indexed by another run`,
+						);
+					}
+				}).pipe(
+					catchNonInterruptCauseWithReport((cause) =>
 						Effect.logError(
 							`[${index + 1}/${totalGuilds}] Error indexing guild ${guild.name}:`,
 							cause,
@@ -1097,31 +1144,46 @@ export function runIndexingCore() {
 		);
 	}).pipe(
 		Effect.withSpan("indexing.run_core"),
-		catchAllCauseWithReport((cause) =>
+		catchNonInterruptCauseWithReport((cause) =>
 			Effect.logError("Fatal error during indexing:", cause),
 		),
 	);
 }
 
+// Fails (typed error or defect) if the guild could not be indexed - callers
+// decide whether to swallow, so the catch-up loop can tell a completed run
+// apart from a failed one. Returns "skipped" if another run already holds the
+// guild's indexing slot.
 export function runIndexingForGuild(guild: Guild) {
 	return Effect.gen(function* () {
-		const startTime = yield* Clock.currentTimeMillis;
-		yield* Effect.logInfo(`=== Starting indexing for guild: ${guild.name} ===`);
+		const result = yield* withGuildIndexingSlot(
+			guild.id,
+			Effect.gen(function* () {
+				const startTime = yield* Clock.currentTimeMillis;
+				yield* Effect.logInfo(
+					`=== Starting indexing for guild: ${guild.name} ===`,
+				);
 
-		yield* indexGuild(guild, 0, 1).pipe(
-			catchAllCauseWithReport((cause) =>
-				Effect.logError(`Error indexing guild ${guild.name}:`, cause),
-			),
+				yield* indexGuild(guild, 0, 1);
+
+				const endTime = yield* Clock.currentTimeMillis;
+				const duration = endTime - startTime;
+
+				yield* Metric.update(indexingDuration, duration);
+
+				yield* Effect.logInfo(
+					`=== Indexing complete for ${guild.name} in ${formatDurationMs(duration)} ===`,
+				);
+			}),
 		);
 
-		const endTime = yield* Clock.currentTimeMillis;
-		const duration = endTime - startTime;
-
-		yield* Metric.update(indexingDuration, duration);
-
-		yield* Effect.logInfo(
-			`=== Indexing complete for ${guild.name} in ${formatDurationMs(duration)} ===`,
-		);
+		if (Option.isNone(result)) {
+			yield* Effect.logInfo(
+				`Skipping indexing for guild ${guild.name} (${guild.id}) - already being indexed by another run`,
+			);
+			return "skipped" as const;
+		}
+		return "completed" as const;
 	}).pipe(
 		Effect.withSpan("indexing.run_for_guild", {
 			attributes: {
@@ -1129,9 +1191,6 @@ export function runIndexingForGuild(guild: Guild) {
 				"guild.name": guild.name,
 			},
 		}),
-		catchAllCauseWithReport((cause) =>
-			Effect.logError("Fatal error during guild indexing:", cause),
-		),
 	);
 }
 
@@ -1163,7 +1222,7 @@ export const startIndexingLoop = Effect.fn("indexing.start_loop")(function* () {
 	yield* Effect.forkDaemon(
 		Effect.schedule(
 			runIndexing().pipe(
-				catchAllCauseWithReport((cause) =>
+				catchNonInterruptCauseWithReport((cause) =>
 					Effect.logError("Error in scheduled indexing run:", cause),
 				),
 			),
@@ -1174,7 +1233,7 @@ export const startIndexingLoop = Effect.fn("indexing.start_loop")(function* () {
 	yield* Effect.logInfo("Indexing loop started successfully");
 });
 
-export function runCatchUpIndexing(lastAttemptAtMs: Map<string, number>) {
+export function runCatchUpIndexing(lastSuccessAtMs: Map<string, number>) {
 	return Effect.gen(function* () {
 		const database = yield* Database;
 		const discord = yield* Discord;
@@ -1188,32 +1247,47 @@ export function runCatchUpIndexing(lastAttemptAtMs: Map<string, number>) {
 		const guilds = yield* discord.getGuilds();
 		const guildsById = new Map(guilds.map((guild) => [guild.id, guild]));
 
-		const guildsToIndex = Arr.filterMap(serverIds, (serverId) => {
+		const eligibleGuilds = Arr.filterMap(serverIds, (serverId) => {
 			const guild = guildsById.get(serverId.toString());
 			if (!guild) return Option.none();
-			const lastAttempt = lastAttemptAtMs.get(guild.id);
-			if (lastAttempt !== undefined && now - lastAttempt < cooldownMs) {
+			const lastSuccess = lastSuccessAtMs.get(guild.id);
+			if (lastSuccess !== undefined && now - lastSuccess < cooldownMs) {
 				return Option.none();
 			}
 			return Option.some(guild);
 		});
 
-		if (guildsToIndex.length === 0) return;
+		if (eligibleGuilds.length === 0) return;
+
+		const guildsToIndex = eligibleGuilds.slice(
+			0,
+			INDEXING_CONFIG.catchUpMaxGuildsPerTick,
+		);
 
 		yield* Effect.logInfo(
-			`Catch-up indexing: ${guildsToIndex.length} guilds have channels that were never indexed`,
+			`Catch-up indexing: ${eligibleGuilds.length} guilds have channels that were never indexed${
+				guildsToIndex.length < eligibleGuilds.length
+					? `, indexing first ${guildsToIndex.length} this tick`
+					: ""
+			}`,
 		);
 
 		yield* Effect.forEach(
 			guildsToIndex,
 			(guild) =>
-				Effect.suspend(() => {
-					// Record the attempt up front so guilds that fail permanently
-					// (missing permissions, etc.) are not retried every 15 minutes.
-					lastAttemptAtMs.set(guild.id, now);
-					return runIndexingForGuild(guild);
-				}).pipe(
-					catchAllCauseWithReport((cause) =>
+				runIndexingForGuild(guild).pipe(
+					// The cooldown is only recorded after a completed run: a failed
+					// or interrupted run must be retried on the next tick, and a run
+					// skipped because the guild is already in-flight will be settled
+					// by whichever run holds the slot.
+					Effect.flatMap((status) =>
+						status === "completed"
+							? Effect.map(Clock.currentTimeMillis, (completedAt) => {
+									lastSuccessAtMs.set(guild.id, completedAt);
+								})
+							: Effect.void,
+					),
+					catchNonInterruptCauseWithReport((cause) =>
 						Effect.logError(
 							`Catch-up indexing failed for guild ${guild.id}:`,
 							cause,
@@ -1232,12 +1306,12 @@ export function runCatchUpIndexing(lastAttemptAtMs: Map<string, number>) {
 export const startCatchUpIndexingLoop = Effect.fn(
 	"indexing.start_catch_up_loop",
 )(function* () {
-	const lastAttemptAtMs = new Map<string, number>();
+	const lastSuccessAtMs = new Map<string, number>();
 
 	yield* Effect.forkDaemon(
 		Effect.repeat(
-			runCatchUpIndexing(lastAttemptAtMs).pipe(
-				catchAllCauseWithReport((cause) =>
+			runCatchUpIndexing(lastSuccessAtMs).pipe(
+				catchNonInterruptCauseWithReport((cause) =>
 					Effect.logError("Error in catch-up indexing run:", cause),
 				),
 			),
@@ -1255,12 +1329,12 @@ export const IndexingHandlerLayer = Layer.scopedDiscard(
 		yield* discord.client.on("clientReady", () =>
 			Effect.gen(function* () {
 				yield* startIndexingLoop().pipe(
-					catchAllCauseWithReport((cause) =>
+					catchNonInterruptCauseWithReport((cause) =>
 						Effect.logError("Error starting indexing loop:", cause),
 					),
 				);
 				yield* startCatchUpIndexingLoop().pipe(
-					catchAllCauseWithReport((cause) =>
+					catchNonInterruptCauseWithReport((cause) =>
 						Effect.logError("Error starting catch-up indexing loop:", cause),
 					),
 				);
