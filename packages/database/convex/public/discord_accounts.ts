@@ -31,9 +31,12 @@ export const getUserPosts = publicQuery({
 			ctx,
 			filteredMessages,
 		);
+		const identifiedPosts = enrichedPosts.filter(
+			(post) => !post.message.author?.isAnonymous,
+		);
 
 		return {
-			page: enrichedPosts,
+			page: identifiedPosts,
 			isDone: paginatedResult.isDone,
 			continueCursor: paginatedResult.continueCursor,
 		};

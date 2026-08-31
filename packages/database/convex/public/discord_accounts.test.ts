@@ -4,8 +4,11 @@ import { Database } from "../../src/database";
 import { DatabaseTestLayer } from "../../src/database-test";
 import {
 	createAuthor,
+	createChannel,
 	createForumThreadWithReplies,
+	createMessage,
 	createServer,
+	enableChannelIndexing,
 	makeMessagesPublic,
 } from "../../src/test";
 
@@ -185,6 +188,124 @@ describe("public/discord_accounts", () => {
 				});
 
 				expect(result.page).toEqual([]);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped("should not link anonymized posts from a real user profile", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const publicFixture = yield* createForumThreadWithReplies();
+				yield* publicFixture.addRootMessage();
+
+				const anonymousServer = yield* createServer();
+				const anonymousForum = yield* createChannel(anonymousServer.discordId, {
+					type: 15,
+				});
+				const anonymousThread = yield* createChannel(
+					anonymousServer.discordId,
+					{ type: 11, parentId: anonymousForum.id },
+				);
+				yield* enableChannelIndexing(anonymousForum.id);
+				yield* database.private.server_preferences.upsertServerPreferences({
+					serverId: anonymousServer.discordId,
+					plan: "FREE",
+					considerAllMessagesPublicEnabled: true,
+					anonymizeMessagesEnabled: true,
+				});
+				yield* createMessage(
+					{
+						authorId: publicFixture.author.id,
+						serverId: anonymousServer.discordId,
+						channelId: anonymousThread.id,
+					},
+					{
+						id: anonymousThread.id,
+						parentChannelId: anonymousForum.id,
+					},
+				);
+
+				const result = yield* database.public.discord_accounts.getUserPosts({
+					userId: publicFixture.author.id,
+					paginationOpts: { numItems: 10, cursor: null },
+				});
+
+				expect(result.page).toHaveLength(1);
+				expect(result.page[0]?.server.discordId).toBe(
+					publicFixture.server.discordId,
+				);
+			}).pipe(Effect.provide(DatabaseTestLayer)),
+		);
+
+		it.scoped("should keep a cursor when an anonymized page is empty", () =>
+			Effect.gen(function* () {
+				const database = yield* Database;
+				const identifiedFixture = yield* createForumThreadWithReplies();
+				yield* createMessage(
+					{
+						authorId: identifiedFixture.author.id,
+						serverId: identifiedFixture.server.discordId,
+						channelId: identifiedFixture.thread.id,
+					},
+					{
+						id: identifiedFixture.thread.id,
+						parentChannelId: identifiedFixture.forum.id,
+						childThreadId: 1n,
+					},
+				);
+
+				const anonymousServer = yield* createServer();
+				const anonymousForum = yield* createChannel(anonymousServer.discordId, {
+					type: 15,
+				});
+				yield* enableChannelIndexing(anonymousForum.id);
+				yield* database.private.server_preferences.upsertServerPreferences({
+					serverId: anonymousServer.discordId,
+					plan: "FREE",
+					considerAllMessagesPublicEnabled: true,
+					anonymizeMessagesEnabled: true,
+				});
+
+				for (let count = 0; count < 2; count += 1) {
+					const thread = yield* createChannel(anonymousServer.discordId, {
+						type: 11,
+						parentId: anonymousForum.id,
+					});
+					yield* createMessage(
+						{
+							authorId: identifiedFixture.author.id,
+							serverId: anonymousServer.discordId,
+							channelId: thread.id,
+						},
+						{
+							id: thread.id,
+							parentChannelId: anonymousForum.id,
+							childThreadId: 3n - BigInt(count),
+						},
+					);
+				}
+
+				const firstPage = yield* database.public.discord_accounts.getUserPosts({
+					userId: identifiedFixture.author.id,
+					paginationOpts: { numItems: 2, cursor: null },
+				});
+
+				expect(firstPage.page).toEqual([]);
+				expect(firstPage.isDone).toBe(false);
+
+				const secondPage = yield* database.public.discord_accounts.getUserPosts(
+					{
+						userId: identifiedFixture.author.id,
+						paginationOpts: {
+							numItems: 2,
+							cursor: firstPage.continueCursor,
+						},
+					},
+				);
+
+				expect(secondPage.page).toHaveLength(1);
+				expect(secondPage.page[0]?.server.discordId).toBe(
+					identifiedFixture.server.discordId,
+				);
 			}).pipe(Effect.provide(DatabaseTestLayer)),
 		);
 	});
