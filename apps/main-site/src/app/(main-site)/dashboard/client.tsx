@@ -19,6 +19,7 @@ import { DiscordIcon } from "@packages/ui/icons/index";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { useQueryState } from "nuqs";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ServerCard } from "../../../components/server-card";
 import { useAuthClient } from "../../../lib/auth-client";
@@ -211,6 +212,8 @@ function SignedOutDashboard({
 	authClient: ReturnType<typeof useAuthClient>;
 	initialThreads: SearchResult[];
 }) {
+	const [isSigningIn, setIsSigningIn] = useState(false);
+
 	return (
 		<main className="h-screen flex overflow-hidden">
 			<div className="hidden lg:flex lg:w-1/2 bg-primary/5 dark:bg-primary/10 items-center justify-center p-12 overflow-hidden">
@@ -230,11 +233,27 @@ function SignedOutDashboard({
 					<Button
 						size="lg"
 						className="w-full gap-2 bg-[#5865F2] hover:bg-[#4752C4] text-white"
+						disabled={isSigningIn}
 						onClick={async () => {
-							await authClient.signIn.social({
-								provider: "discord",
-								callbackURL: window.location.href,
-							});
+							setIsSigningIn(true);
+							try {
+								const result = await authClient.signIn.social({
+									provider: "discord",
+									callbackURL: window.location.href,
+								});
+								if (result.error) {
+									toast.error(result.error.message);
+									return;
+								}
+								const redirectURL = result.data?.url;
+								if (redirectURL) {
+									window.location.assign(redirectURL);
+									return;
+								}
+								toast.error("Unable to start Discord sign in");
+							} finally {
+								setIsSigningIn(false);
+							}
 						}}
 					>
 						<DiscordIcon className="size-5" />
