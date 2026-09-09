@@ -94,28 +94,11 @@ function UserAvatar({
 	);
 }
 
-function SignInButton({
-	onSignIn,
-	href,
-}: {
-	onSignIn?: () => void;
-	href?: string;
-}) {
-	if (href) {
-		return (
-			<LinkButton variant="outline" href={href}>
-				Sign In
-			</LinkButton>
-		);
-	}
+function SignInButton() {
 	return (
-		<button
-			type="button"
-			onClick={onSignIn}
-			className="rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-		>
+		<LinkButton variant="outline" href="/dashboard">
 			Sign In
-		</button>
+		</LinkButton>
 	);
 }
 
@@ -141,13 +124,6 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 	});
 	const isOnDashboard = pathname?.startsWith("/dashboard");
 	const isAdmin = session?.user?.role === "admin";
-
-	const handleSignIn = async () => {
-		await authClient.signIn.social({
-			provider: "discord",
-			callbackURL: window.location.href,
-		});
-	};
 
 	const handleSignOut = async () => {
 		await authClient.signOut();
@@ -184,7 +160,6 @@ export function UserSection({ showSignIn = true }: UserSectionProps) {
 				showSignIn={showSignIn}
 				isOnDashboard={isOnDashboard ?? false}
 				isAdmin={isAdmin === true}
-				onSignIn={handleSignIn}
 				onSignOut={handleSignOut}
 				impersonateDialogOpen={impersonateDialogOpen}
 				setImpersonateDialogOpen={setImpersonateDialogOpen}
@@ -198,7 +173,6 @@ function UserSectionContent({
 	showSignIn,
 	isOnDashboard,
 	isAdmin,
-	onSignIn,
 	onSignOut,
 	impersonateDialogOpen,
 	setImpersonateDialogOpen,
@@ -207,20 +181,18 @@ function UserSectionContent({
 	showSignIn: boolean;
 	isOnDashboard: boolean;
 	isAdmin: boolean;
-	onSignIn: () => void;
 	onSignOut: () => void;
 	impersonateDialogOpen: boolean;
 	setImpersonateDialogOpen: (open: boolean) => void;
 }) {
 	const isSkeleton = useIsSkeleton();
 
-	if (isSkeleton) {
-		return <Skeleton className="h-[38px] w-[82px] rounded-md" />;
-	}
-
 	if (!user) {
 		if (showSignIn) {
-			return <SignInButton onSignIn={onSignIn} />;
+			return <SignInButton />;
+		}
+		if (isSkeleton) {
+			return <Skeleton className="h-[38px] w-[82px] rounded-md" />;
 		}
 		return null;
 	}
@@ -253,7 +225,6 @@ export function UserSectionSkeleton() {
 				showSignIn={true}
 				isOnDashboard={false}
 				isAdmin={false}
-				onSignIn={() => {}}
 				onSignOut={() => {}}
 				impersonateDialogOpen={false}
 				setImpersonateDialogOpen={() => {}}
