@@ -49,7 +49,7 @@ function createAuthClientInstance(baseURL: string | undefined) {
 	});
 }
 
-type AuthClient = ReturnType<typeof createAuthClientInstance>;
+export type AuthClient = ReturnType<typeof createAuthClientInstance>;
 
 const authClientCache = new Map<string, AuthClient>();
 

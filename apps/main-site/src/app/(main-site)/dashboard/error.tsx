@@ -9,7 +9,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@packages/ui/components/card";
+import { signInWithDiscord } from "@packages/ui/lib/discord-sign-in";
 import { AlertTriangle, LogIn, RefreshCw } from "lucide-react";
+import { useState } from "react";
 import { useAuthClient } from "../../../lib/auth-client";
 
 export default function DashboardError({
@@ -21,6 +23,7 @@ export default function DashboardError({
 }) {
 	const authClient = useAuthClient();
 	const isDev = process.env.NODE_ENV === "development";
+	const [isSigningIn, setIsSigningIn] = useState(false);
 
 	return (
 		<div className="flex min-h-[50vh] items-center justify-center p-4">
@@ -59,11 +62,14 @@ export default function DashboardError({
 					</Button>
 					<Button
 						variant="default"
+						disabled={isSigningIn}
 						onClick={async () => {
-							await authClient.signIn.social({
-								provider: "discord",
-								callbackURL: window.location.href,
-							});
+							setIsSigningIn(true);
+							try {
+								await signInWithDiscord(authClient, window.location.href);
+							} finally {
+								setIsSigningIn(false);
+							}
 						}}
 					>
 						<LogIn className="size-4" />

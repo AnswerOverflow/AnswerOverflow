@@ -14,6 +14,7 @@ import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQueryWithStatus } from "@packages/ui/hooks/use-query-with-status";
+import { signInWithDiscord } from "@packages/ui/lib/discord-sign-in";
 import * as Sentry from "@sentry/nextjs";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
@@ -37,6 +38,7 @@ export default function OnboardingPage() {
 	);
 	const [step, setStep] = useState<OnboardingStep>("auth");
 	const [isWaitingForBot, setIsWaitingForBot] = useState(false);
+	const [isSigningIn, setIsSigningIn] = useState(false);
 
 	const { data: servers, isLoading: isServersLoading } = useTanstackQuery({
 		queryKey: ["dashboard-servers"],
@@ -140,12 +142,17 @@ export default function OnboardingPage() {
 							</p>
 							<Button
 								onClick={async () => {
-									const callbackUrl = `/dashboard/${serverId}/onboarding`;
-									await authClient.signIn.social({
-										provider: "discord",
-										callbackURL: callbackUrl,
-									});
+									setIsSigningIn(true);
+									try {
+										await signInWithDiscord(
+											authClient,
+											`/dashboard/${serverId}/onboarding`,
+										);
+									} finally {
+										setIsSigningIn(false);
+									}
 								}}
+								disabled={isSigningIn}
 								size="lg"
 							>
 								Sign in with Discord

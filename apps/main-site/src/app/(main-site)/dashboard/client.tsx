@@ -16,6 +16,7 @@ import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { ThreadCard } from "@packages/ui/components/thread-card";
 import { DiscordIcon } from "@packages/ui/icons/index";
+import { signInWithDiscord } from "@packages/ui/lib/discord-sign-in";
 import { useQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { useQueryState } from "nuqs";
@@ -237,20 +238,10 @@ function SignedOutDashboard({
 						onClick={async () => {
 							setIsSigningIn(true);
 							try {
-								const result = await authClient.signIn.social({
-									provider: "discord",
-									callbackURL: window.location.href,
-								});
-								if (result.error) {
-									toast.error(result.error.message);
-									return;
-								}
-								const redirectURL = result.data?.url;
-								if (redirectURL) {
-									window.location.assign(redirectURL);
-									return;
-								}
-								toast.error("Unable to start Discord sign in");
+								await signInWithDiscord(
+									authClient,
+									window.location.href,
+								);
 							} finally {
 								setIsSigningIn(false);
 							}

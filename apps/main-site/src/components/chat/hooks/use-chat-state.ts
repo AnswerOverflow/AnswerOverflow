@@ -12,6 +12,7 @@ import {
 	useAuthClient,
 	useSession,
 } from "@packages/ui/components/convex-client-provider";
+import { signInWithDiscord } from "@packages/ui/lib/discord-sign-in";
 import { useQuery } from "@tanstack/react-query";
 import { useAction, useMutation } from "convex/react";
 import { useState } from "react";
@@ -173,10 +174,7 @@ export function useChatState({
 			{ location: "rate_limit_warning" },
 			posthog,
 		);
-		await authClient.signIn.social({
-			provider: "discord",
-			callbackURL: window.location.href,
-		});
+		await signInWithDiscord(authClient, window.location.href);
 	};
 
 	const handleSubmit = async (text: string) => {
