@@ -1,22 +1,14 @@
 "use client";
 
-import {
-	convexClient,
-	crossDomainClient,
-} from "@convex-dev/better-auth/client/plugins";
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { ConvexQueryClient } from "@convex-dev/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-	adminClient,
-	anonymousClient,
-	apiKeyClient,
-} from "better-auth/client/plugins";
-import { createAuthClient } from "better-auth/react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexQueryCacheProvider } from "convex-helpers/react/cache/provider";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
+import { createAuthClientInstance } from "../lib/auth-client";
 import { getTenantUrl, type TenantInfo } from "../utils/links";
+import { Toaster } from "./sonner";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
 	expectAuth: false,
@@ -35,19 +27,6 @@ const queryClient = new QueryClient({
 });
 
 convexQueryClient.connect(queryClient);
-
-function createAuthClientInstance(baseURL: string | undefined) {
-	return createAuthClient({
-		baseURL,
-		plugins: [
-			anonymousClient(),
-			convexClient(),
-			crossDomainClient(),
-			adminClient(),
-			apiKeyClient(),
-		],
-	});
-}
 
 type AuthClient = ReturnType<typeof createAuthClientInstance>;
 
@@ -83,6 +62,7 @@ function AuthClientProvider({
 		<AuthClientContext.Provider value={authClient}>
 			<ConvexBetterAuthProvider client={convex} authClient={authClient}>
 				{children}
+				<Toaster />
 			</ConvexBetterAuthProvider>
 		</AuthClientContext.Provider>
 	);
