@@ -3,7 +3,11 @@ import { createServer } from "node:http";
 import { Effect, Either, Fiber, Redacted } from "effect";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { makeAnalytics } from "./index";
-import { createPostHogClient, PostHogClient } from "./posthog-client";
+import {
+	createPostHogClient,
+	PostHogClient,
+	PostHogClientLayer,
+} from "./posthog-client";
 
 type CapturedRequest = {
 	method: string | undefined;
@@ -294,5 +298,30 @@ describe("direct PostHog dashboard queries", () => {
 		await started;
 		await Effect.runPromise(Fiber.interrupt(fiber));
 		await closed;
+	});
+});
+
+describe("Convex environment configuration", () => {
+	it("reads credentials when env values are available but membership checks are not", async () => {
+		const previous = process.env;
+		process.env = new Proxy(
+			{},
+			{
+				get(_target, key) {
+					if (key === "POSTHOG_PERSONAL_API_KEY") return "test-personal-key";
+					if (key === "POSTHOG_PROJECT_ID") return "123";
+					return Reflect.get(previous, key);
+				},
+			},
+		);
+		try {
+			expect("POSTHOG_PERSONAL_API_KEY" in process.env).toBe(false);
+			const configured = await Effect.runPromise(
+				PostHogClient.pipe(Effect.provide(PostHogClientLayer)),
+			);
+			expect(configured.query).toBeTypeOf("function");
+		} finally {
+			process.env = previous;
+		}
 	});
 });
