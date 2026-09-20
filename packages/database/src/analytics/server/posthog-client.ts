@@ -1,4 +1,11 @@
-import { Config, Context, Effect, Layer, Redacted } from "effect";
+import {
+	Config,
+	ConfigProvider,
+	Context,
+	Effect,
+	Layer,
+	Redacted,
+} from "effect";
 import type { z } from "zod";
 
 /** The subset of PostHog's query API used by dashboard analytics. */
@@ -110,23 +117,34 @@ export class PostHogClient extends Context.Tag("PostHogClient")<
 /** Reads required production configuration once when the analytics layer is built. */
 export const PostHogClientLayer = Layer.effect(
 	PostHogClient,
-	Effect.gen(function* () {
-		const apiKey = yield* Config.redacted("POSTHOG_PERSONAL_API_KEY").pipe(
-			Config.validate({
-				message: "POSTHOG_PERSONAL_API_KEY must not be empty",
-				validation: (value) => Redacted.value(value).length > 0,
-			}),
-		);
-		const projectId = yield* Config.string("POSTHOG_PROJECT_ID").pipe(
-			Config.validate({
-				message: "POSTHOG_PROJECT_ID must be a numeric project ID",
-				validation: (value) => /^\d+$/.test(value),
-			}),
-		);
-		return createPostHogClient({
-			apiKey,
-			projectId,
-			baseURL: new URL("https://us.posthog.com"),
-		});
-	}),
+	Effect.suspend(() =>
+		Effect.gen(function* () {
+			const apiKey = yield* Config.redacted("POSTHOG_PERSONAL_API_KEY").pipe(
+				Config.validate({
+					message: "POSTHOG_PERSONAL_API_KEY must not be empty",
+					validation: (value) => Redacted.value(value).length > 0,
+				}),
+			);
+			const projectId = yield* Config.string("POSTHOG_PROJECT_ID").pipe(
+				Config.validate({
+					message: "POSTHOG_PROJECT_ID must be a numeric project ID",
+					validation: (value) => /^\d+$/.test(value),
+				}),
+			);
+			return createPostHogClient({
+				apiKey,
+				projectId,
+				baseURL: new URL("https://us.posthog.com"),
+			});
+		}).pipe(
+			Effect.withConfigProvider(
+				ConfigProvider.fromJson({
+					// Convex supports direct env reads, but not the membership checks used
+					// by Effect's default environment provider. Parse an explicit snapshot.
+					POSTHOG_PERSONAL_API_KEY: process.env.POSTHOG_PERSONAL_API_KEY,
+					POSTHOG_PROJECT_ID: process.env.POSTHOG_PROJECT_ID,
+				}),
+			),
+		),
+	),
 );
