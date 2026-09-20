@@ -7,6 +7,7 @@ import type {
 	Server,
 } from "../../convex/schema";
 import { Database } from "../database";
+import { FixtureIds } from "./fixture-ids";
 import { Gen } from "./generators";
 
 const sample = <T>(arb: fc.Arbitrary<T>): T => fc.sample(arb, 1)[0]!;
@@ -14,7 +15,9 @@ const sample = <T>(arb: fc.Arbitrary<T>): T => fc.sample(arb, 1)[0]!;
 export const createServer = (overrides: Partial<Server> = {}) =>
 	Effect.gen(function* () {
 		const database = yield* Database;
-		const data: Server = { ...sample(Gen.server), ...overrides };
+		const ids = yield* FixtureIds;
+		const discordId = yield* ids.allocate(overrides.discordId);
+		const data: Server = { ...sample(Gen.server), ...overrides, discordId };
 		yield* database.private.servers.upsertServer(data);
 		return data;
 	});
@@ -25,7 +28,14 @@ export const createChannel = (
 ) =>
 	Effect.gen(function* () {
 		const database = yield* Database;
-		const data: Channel = { ...sample(Gen.channel), serverId, ...overrides };
+		const ids = yield* FixtureIds;
+		const id = yield* ids.allocate(overrides.id);
+		const data: Channel = {
+			...sample(Gen.channel),
+			serverId,
+			...overrides,
+			id,
+		};
 		yield* database.private.channels.upsertChannel({ channel: data });
 		return data;
 	});
@@ -42,9 +52,12 @@ export const enableChannelIndexing = (channelId: bigint) =>
 export const createAuthor = (overrides: Partial<DiscordAccount> = {}) =>
 	Effect.gen(function* () {
 		const database = yield* Database;
+		const ids = yield* FixtureIds;
+		const id = yield* ids.allocate(overrides.id);
 		const data: DiscordAccount = {
 			...sample(Gen.discordAccount),
 			...overrides,
+			id,
 		};
 		yield* database.private.discord_accounts.upsertDiscordAccount({
 			account: data,
@@ -68,7 +81,9 @@ export const createMessage = (
 ) =>
 	Effect.gen(function* () {
 		const database = yield* Database;
-		const data: Message = { ...sample(Gen.message), ...base, ...overrides };
+		const ids = yield* FixtureIds;
+		const id = yield* ids.allocate(overrides.id);
+		const data: Message = { ...sample(Gen.message), ...base, ...overrides, id };
 		yield* database.private.messages.upsertMessage({
 			message: data,
 			ignoreChecks: true,
