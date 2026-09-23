@@ -43,6 +43,29 @@ export async function handleMarkSolution(args: {
 			},
 		);
 
+		if (trackingPayload && "error" in trackingPayload) {
+			switch (trackingPayload.error) {
+				case "QUESTION_NOT_FOUND":
+					return {
+						success: false,
+						status: 404,
+						error: "Question message is not indexed",
+					};
+				case "SOLUTION_NOT_FOUND":
+					return {
+						success: false,
+						status: 404,
+						error: "Solution message is not indexed",
+					};
+				case "SOLUTION_SERVER_MISMATCH":
+					return {
+						success: false,
+						status: 400,
+						error: "Solution message does not belong to the same server",
+					};
+			}
+		}
+
 		if (trackingPayload) {
 			try {
 				await trackSolvedQuestionFromApi(trackingPayload);

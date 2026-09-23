@@ -61,6 +61,14 @@ const solvedQuestionTrackingPayloadValidator = v.object({
 	timeToSolveInMs: v.number(),
 });
 
+const updateSolutionErrorValidator = v.object({
+	error: v.union(
+		v.literal("QUESTION_NOT_FOUND"),
+		v.literal("SOLUTION_NOT_FOUND"),
+		v.literal("SOLUTION_SERVER_MISMATCH"),
+	),
+});
+
 export type SolvedQuestionTrackingPayload = Infer<
 	typeof solvedQuestionTrackingPayloadValidator
 >;
@@ -108,7 +116,11 @@ export const updateSolution = apiKeyMutation({
 		messageId: v.int64(),
 		solutionId: v.union(v.int64(), v.null()),
 	},
-	returns: v.union(v.null(), solvedQuestionTrackingPayloadValidator),
+	returns: v.union(
+		v.null(),
+		solvedQuestionTrackingPayloadValidator,
+		updateSolutionErrorValidator,
+	),
 	handler: async (ctx, args) => {
 		const message = await getOneFrom(
 			ctx.db,
@@ -118,7 +130,7 @@ export const updateSolution = apiKeyMutation({
 			"id",
 		);
 		if (!message) {
-			throw new Error("Message not found");
+			return { error: "QUESTION_NOT_FOUND" as const };
 		}
 
 		const permissionResult = await checkGuildManagerPermissions(
@@ -128,6 +140,25 @@ export const updateSolution = apiKeyMutation({
 		);
 		assertGuildManagerPermission(permissionResult);
 
+		const solutionMessage =
+			args.solutionId === null
+				? null
+				: await getOneFrom(
+						ctx.db,
+						"messages",
+						"by_messageId",
+						args.solutionId,
+						"id",
+					);
+
+		if (args.solutionId !== null && !solutionMessage) {
+			return { error: "SOLUTION_NOT_FOUND" as const };
+		}
+
+		if (solutionMessage && solutionMessage.serverId !== message.serverId) {
+			return { error: "SOLUTION_SERVER_MISMATCH" as const };
+		}
+
 		const existingSolutions = await ctx.db
 			.query("messages")
 			.withIndex("by_serverId_and_questionId", (q) =>
@@ -136,13 +167,13 @@ export const updateSolution = apiKeyMutation({
 			.collect();
 
 		const solutionWasAlreadySet =
-			args.solutionId !== null &&
+			solutionMessage !== null &&
 			existingSolutions.some(
-				(existingSolution) => existingSolution.id === args.solutionId,
+				(existingSolution) => existingSolution.id === solutionMessage.id,
 			);
 
 		for (const existingSolution of existingSolutions) {
-			if (existingSolution.id === args.solutionId) {
+			if (existingSolution.id === solutionMessage?.id) {
 				continue;
 			}
 			await ctx.db.patch(existingSolution._id, {
@@ -150,23 +181,8 @@ export const updateSolution = apiKeyMutation({
 			});
 		}
 
-		if (args.solutionId === null) {
-			return null;
-		}
-
-		const solutionMessage = await getOneFrom(
-			ctx.db,
-			"messages",
-			"by_messageId",
-			args.solutionId,
-			"id",
-		);
 		if (!solutionMessage) {
-			throw new Error("Solution message not found");
-		}
-
-		if (solutionMessage.serverId !== message.serverId) {
-			throw new Error("Solution message does not belong to the same server");
+			return null;
 		}
 
 		if (!solutionWasAlreadySet) {
