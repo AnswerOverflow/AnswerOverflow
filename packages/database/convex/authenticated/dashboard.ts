@@ -16,7 +16,6 @@ import type { Doc, Id } from "../_generated/dataModel";
 import { type ActionCtx, authenticatedAction, internalAction } from "../client";
 import { guildManagerAction } from "../client/guildManager";
 import { getDiscordAccountWithToken, getTokenStatus } from "../shared/auth";
-import { hasDashboardRoleAccess } from "../shared/guildManagerPermissions";
 import {
 	DISCORD_PERMISSIONS,
 	getDashboardPermissionMask,
@@ -24,6 +23,10 @@ import {
 	hasPermission,
 	sortServersByBotAndRole,
 } from "../shared/shared";
+import {
+	type DashboardAccessSyncDecision,
+	planDashboardAccessSync,
+} from "./dashboard-access";
 
 export class ReauthRequiredError extends Error {
 	public readonly code = "REAUTH_REQUIRED" as const;
@@ -353,45 +356,6 @@ async function fetchGuildRolesWithBot(serverId: bigint): Promise<
 		});
 }
 
-function normalizeRoleIds(roleIds: readonly bigint[]): bigint[] {
-	return [...new Set(roleIds)].sort((left, right) => {
-		if (left === right) {
-			return 0;
-		}
-		return left < right ? -1 : 1;
-	});
-}
-
-function haveSameRoleIds(
-	left: readonly bigint[] | undefined,
-	right: readonly bigint[] | undefined,
-): boolean {
-	const normalizedLeft = normalizeRoleIds(left ?? []);
-	const normalizedRight = normalizeRoleIds(right ?? []);
-
-	if (normalizedLeft.length !== normalizedRight.length) {
-		return false;
-	}
-
-	return normalizedLeft.every(
-		(roleId, index) => roleId === normalizedRight[index],
-	);
-}
-
-type SyncedDashboardAccessState =
-	| {
-			status: "member_not_found";
-			roleIds: bigint[];
-			hasManageAccess: boolean;
-			hasRoleAccess: false;
-	  }
-	| {
-			status: "unchanged" | "synced";
-			roleIds: bigint[];
-			hasManageAccess: boolean;
-			hasRoleAccess: boolean;
-	  };
-
 function hasManageAccessForGuild(
 	permissionsNumber: number,
 	owner: boolean,
@@ -419,7 +383,7 @@ async function syncDashboardAccessForGuild(
 		permissions: string;
 		owner: boolean;
 	},
-): Promise<SyncedDashboardAccessState> {
+): Promise<DashboardAccessSyncDecision> {
 	// Ensure owners always have the Administrator bit set, even if Discord's
 	// API no longer includes it in the permissions field for owners.
 	const rawPermissions = getDashboardPermissionMask(args.permissions);
@@ -447,32 +411,16 @@ async function syncDashboardAccessForGuild(
 		fetchGuildMemberRoleIdsWithBot(args.serverId, args.discordAccountId),
 	]);
 
-	if (!roleIds) {
-		return {
-			status: "member_not_found",
-			roleIds: existingSettings?.roleIds ?? [],
-			hasManageAccess,
-			hasRoleAccess: false,
-		};
-	}
+	const decision = planDashboardAccessSync({
+		existingSettings,
+		permissions: permissionsNumber,
+		hasManageAccess,
+		memberRoleIds: roleIds,
+		dashboardRoleIds: serverPreferences?.dashboardRoleIds,
+	});
 
-	const normalizedRoleIds = normalizeRoleIds(roleIds);
-	const hasRoleAccess = hasDashboardRoleAccess(
-		normalizedRoleIds,
-		serverPreferences?.dashboardRoleIds,
-	);
-
-	if (
-		existingSettings &&
-		existingSettings.permissions === permissionsNumber &&
-		haveSameRoleIds(existingSettings.roleIds, normalizedRoleIds)
-	) {
-		return {
-			status: "unchanged",
-			roleIds: normalizedRoleIds,
-			hasManageAccess,
-			hasRoleAccess,
-		};
+	if (decision.status !== "synced") {
+		return decision;
 	}
 
 	await ctx.runMutation(
@@ -483,7 +431,7 @@ async function syncDashboardAccessForGuild(
 				serverId: args.serverId,
 				userId: args.discordAccountId,
 				permissions: permissionsNumber,
-				roleIds: normalizedRoleIds,
+				roleIds: decision.roleIds,
 				canPubliclyDisplayMessages:
 					existingSettings?.canPubliclyDisplayMessages ?? false,
 				messageIndexingDisabled:
@@ -497,9 +445,9 @@ async function syncDashboardAccessForGuild(
 
 	return {
 		status: "synced",
-		roleIds: normalizedRoleIds,
-		hasManageAccess,
-		hasRoleAccess,
+		roleIds: decision.roleIds,
+		hasManageAccess: decision.hasManageAccess,
+		hasRoleAccess: decision.hasRoleAccess,
 	};
 }
 
