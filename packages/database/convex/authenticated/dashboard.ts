@@ -519,11 +519,10 @@ export const fetchTopQuestionSolvers = internalAction({
 			program.pipe(
 				Effect.provide(ServerAnalyticsLayer({ serverId: args.serverId })),
 				Effect.timeout("30 seconds"),
-				Effect.catchAll(() => Effect.succeed(null)),
 			),
 		);
 
-		return result ?? {};
+		return result;
 	},
 });
 
@@ -541,11 +540,10 @@ export const fetchTopPages = internalAction({
 			program.pipe(
 				Effect.provide(ServerAnalyticsLayer({ serverId: args.serverId })),
 				Effect.timeout("30 seconds"),
-				Effect.catchAll(() => Effect.succeed(null)),
 			),
 		);
 
-		return result ?? {};
+		return result;
 	},
 });
 
@@ -698,11 +696,10 @@ export const getTopQuestionSolversForServer = guildManagerAction({
 					}),
 				),
 				Effect.timeout("30 seconds"),
-				Effect.catchAll(() => Effect.succeed(null)),
 			),
 		);
 
-		if (!analyticsData || Object.keys(analyticsData).length === 0) return {};
+		if (Object.keys(analyticsData).length === 0) return {};
 
 		const userIds = Object.keys(analyticsData).map((id) => BigInt(id));
 
@@ -826,11 +823,10 @@ export const getTopPagesForServer = guildManagerAction({
 					}),
 				),
 				Effect.timeout("30 seconds"),
-				Effect.catchAll(() => Effect.succeed(null)),
 			),
 		);
 
-		if (!analyticsData || Object.keys(analyticsData).length === 0) return {};
+		if (Object.keys(analyticsData).length === 0) return {};
 
 		const messageIds = Object.keys(analyticsData).map((id) => BigInt(id));
 

@@ -25,7 +25,6 @@ const REPOS = [
 		url: "https://github.com/get-convex/convex-backend.git",
 	},
 	{ name: "convex-js", url: "https://github.com/get-convex/convex-js.git" },
-	{ name: "typelytics", url: "https://github.com/RhysSullivan/typelytics.git" },
 	{ name: "tweakcn", url: "https://github.com/jnsahaj/tweakcn.git" },
 	{
 		name: "effect-atom",

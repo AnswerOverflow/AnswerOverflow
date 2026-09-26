@@ -5,6 +5,7 @@ import {
 	ConvexClientTestUnifiedLayer,
 } from "./convex-client-test";
 import { Database, service } from "./database";
+import { FixtureIdsLayer } from "./test/fixture-ids";
 
 process.env.BACKEND_ACCESS_TOKEN = "test-backend-access-token";
 
@@ -17,6 +18,7 @@ const BackendAccessTokenLayer = Layer.setConfigProvider(
 );
 
 export const DatabaseTestLayer = Layer.mergeAll(
+	FixtureIdsLayer,
 	Layer.effect(Database, service).pipe(
 		Layer.provide(ConvexClientTestUnifiedLayer),
 		Layer.provide(BackendAccessTokenLayer),
