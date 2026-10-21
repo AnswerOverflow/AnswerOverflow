@@ -93,19 +93,39 @@ In the account that owns the bucket:
 
 `"instances": { "iad1": 1 }` does not make the bot a singleton. During a
 rollout Vercel starts the new instance immediately and sends `SIGTERM` to the
-old one, which keeps running for up to `terminationGracePeriodSeconds`. On
-`SIGTERM` the bot closes its Discord gateway first, then drains. That keeps the
-overlap short but does not rule it out. Do not run this daemon while another
-copy of the production bot (Railway, EC2) is connected.
+old one, which keeps running for up to `terminationGracePeriodSeconds`.
+
+The bot therefore takes a lease in Convex (`gatewayLeases`, see
+`packages/database/convex/private/gateway_lease.ts` and
+`apps/discord-bot/src/core/gateway-lease.ts`) before it logs in:
+
+- Only the lease holder connects to the Discord gateway. A second process logs
+  `Waiting for gateway lease held by ...` and retries every 2 seconds.
+- The holder renews every 10 seconds; Convex sets expiry to its own time plus
+  30 seconds. If the holder cannot confirm a renew within 20 seconds of the
+  last confirmed one, or Convex reports another holder, it closes the gateway
+  and exits. Vercel restarts it and it waits for the lease.
+- On `SIGTERM` the old process closes the gateway, then releases the lease, so
+  the new one connects within about 2 seconds. After a crash the replacement
+  waits for the lease to expire (up to 30 seconds).
+
+Limits: a process frozen for more than 10 seconds between its last check and a
+Discord call could still act once after its lease expired; Discord offers no
+fencing. Every bot copy, including EC2 or Railway, must run this code for the
+lease to exclude it. While Convex is unreachable for 20 seconds the bot stops.
 
 ## Deploy
 
-1. Set the environment variables above for Production.
-2. Make sure no other production bot is running.
-3. Deploy the repository root to production, for example
+1. Deploy the Convex functions and schema that include `gatewayLeases`
+   (`bun run deploy` in `packages/database`). The table is new and additive;
+   existing code ignores it. The bot cannot start without it.
+2. Set the environment variables above for Production.
+3. Make sure no other production bot is running (older bots do not take the
+   lease).
+4. Deploy the repository root to production, for example
    `vercel deploy --prod` from a clean checkout of the reviewed commit, linked
    to `answer-overflow-discord-bot`.
-4. Watch `vercel daemons instances ls discord-bot` and
+5. Watch `vercel daemons instances ls discord-bot` and
    `vercel logs --query 'daemon:discord-bot'` for `Bot is in N guilds`.
 
 Stop the bot without a deploy: `vercel daemons scale discord-bot iad1=0`.

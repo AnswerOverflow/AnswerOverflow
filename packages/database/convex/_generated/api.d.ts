@@ -48,6 +48,7 @@ import type * as private_cache from "../private/cache.js";
 import type * as private_channels from "../private/channels.js";
 import type * as private_counts from "../private/counts.js";
 import type * as private_discord_accounts from "../private/discord_accounts.js";
+import type * as private_gateway_lease from "../private/gateway_lease.js";
 import type * as private_github from "../private/github.js";
 import type * as private_ignored_discord_accounts from "../private/ignored_discord_accounts.js";
 import type * as private_messages from "../private/messages.js";
@@ -145,6 +146,7 @@ declare const fullApi: ApiFromModules<{
   "private/channels": typeof private_channels;
   "private/counts": typeof private_counts;
   "private/discord_accounts": typeof private_discord_accounts;
+  "private/gateway_lease": typeof private_gateway_lease;
   "private/github": typeof private_github;
   "private/ignored_discord_accounts": typeof private_ignored_discord_accounts;
   "private/messages": typeof private_messages;

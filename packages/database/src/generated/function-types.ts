@@ -61,6 +61,9 @@ export const FUNCTION_TYPE_MAP = {
   "discord_accounts.getUserPosts": "query",
   "discord_accounts.upsertDiscordAccount": "mutation",
   "discord_accounts.upsertManyDiscordAccounts": "mutation",
+  "gateway_lease.acquireGatewayLease": "mutation",
+  "gateway_lease.releaseGatewayLease": "mutation",
+  "gateway_lease.renewGatewayLease": "mutation",
   "github.checkAiIssueExtractionRateLimit": "action",
   "github.createIssue": "action",
   "github.getAccessibleRepos": "action",
@@ -136,7 +139,7 @@ export const FUNCTION_TYPE_MAP = {
   "vercel_domains.getDomainStatus": "action"
 } as const;
 
-export const NAMESPACES = ["admin","agent_wrappers","attachments","cache","channels","counts","dashboard","dashboard_mutations","dashboard_queries","discord_accounts","discord_token","github","ignored_discord_accounts","messages","onboarding","onboarding_action","search","server_preferences","servers","sitemap","stripe","stripe_actions","threadTags","threads","threads_action","user_server_settings","user_subscription","user_subscription_actions","vercel_domains"] as const;
+export const NAMESPACES = ["admin","agent_wrappers","attachments","cache","channels","counts","dashboard","dashboard_mutations","dashboard_queries","discord_accounts","discord_token","gateway_lease","github","ignored_discord_accounts","messages","onboarding","onboarding_action","search","server_preferences","servers","sitemap","stripe","stripe_actions","threadTags","threads","threads_action","user_server_settings","user_subscription","user_subscription_actions","vercel_domains"] as const;
 
 export const NAMESPACE_STRUCTURE = {
   "agent_wrappers": ["abortStream","addMessages","addStreamDelta","createStream","createThread","finalizeMessage","finishStream","getMessageSearchFields","getThread","listMessagesByThreadId","listStreamDeltas","listStreams","searchMessages","updateAgentStatus"],
@@ -145,6 +148,7 @@ export const NAMESPACE_STRUCTURE = {
   "channels": ["deleteChannel","findAllChannelsByServerId","findChannelByDiscordId","findChannelSettingsWithIndexingEnabled","findChannelsByDiscordIds","findManyChannelsByDiscordIds","findServerIdsWithUnindexedChannels","getChannelPageMessages","getChannelPageThreads","getCommunityPageHeaderData","getServerPageThreads","updateChannelSettings","upsertChannel","upsertManyChannels"],
   "counts": [],
   "discord_accounts": ["deleteDiscordAccount","deleteDiscordAccountBatch","findDiscordAccountsByName","findManyDiscordAccountsByIds","getUserPageHeaderData","getUserPosts","upsertDiscordAccount","upsertManyDiscordAccounts"],
+  "gateway_lease": ["acquireGatewayLease","releaseGatewayLease","renewGatewayLease"],
   "github": ["checkAiIssueExtractionRateLimit","getDiscordInviteInfo","getFeatured","getGitHubIssueByRepoAndNumber","getOrgRepos","searchRepos","updateGitHubIssueStatus"],
   "ignored_discord_accounts": ["deleteIgnoredDiscordAccount","findIgnoredDiscordAccountById"],
   "messages": ["deleteManyMessages","deleteMessage","getMessageAsSearchResult","getMessageById","getMessagePageHeaderData","getMessages","getTopQuestionSolversByServerId","getTotalMessageCount","markMessageAsSolution","updateEmbedS3Key","updateEmbedStorageId","upsertManyMessages","upsertMessage"],

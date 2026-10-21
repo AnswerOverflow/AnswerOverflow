@@ -1,3 +1,4 @@
+import { captureMessage } from "@packages/observability/sentry";
 import { Console, Effect, Layer } from "effect";
 import { BugReportCommandHandlerLayer } from "./commands/bug-report";
 import { ChannelSettingsCommandHandlerLayer } from "./commands/channel-settings";
@@ -15,6 +16,13 @@ import { SitemapCommandHandlerLayer } from "./commands/sitemap-command";
 import { V2ComponentsDemoCommandHandlerLayer } from "./commands/v2-components-demo";
 import { DiscordClient } from "./core/discord-client-service";
 import { Discord } from "./core/discord-service";
+import {
+	acquireGatewayLease,
+	ConvexLeaseStore,
+	maintainGatewayLease,
+	newHolderId,
+	releaseGatewayLease,
+} from "./core/gateway-lease";
 import { ConsentButtonHandlerLayer } from "./interactions/consent-button";
 import { DismissButtonHandlerLayer } from "./interactions/dismiss-button";
 import { DMReplyHandlerLayer } from "./interactions/dm-reply-button";
@@ -74,16 +82,34 @@ export const BotLayers = Layer.mergeAll(
 export const program = Effect.gen(function* () {
 	const discord = yield* Discord;
 	const client = yield* DiscordClient;
+	const leaseStore = yield* ConvexLeaseStore;
 
-	// On shutdown, leave the gateway before anything else so this process
-	// stops receiving events while its replacement connects.
-	yield* Effect.addFinalizer(() =>
-		Effect.promise(() => client.destroy()).pipe(
-			Effect.tap(() => Console.log("Discord gateway closed")),
-		),
+	const closeGateway = Effect.promise(() => client.destroy()).pipe(
+		Effect.tap(() => Console.log("Discord gateway closed")),
 	);
 
+	const held = yield* acquireGatewayLease(leaseStore, newHolderId());
+
+	// Finalizers run in reverse: leave the gateway first so this process stops
+	// receiving events, then hand the lease to the replacement.
+	yield* Effect.addFinalizer(() => releaseGatewayLease(leaseStore, held.lease));
+	yield* Effect.addFinalizer(() => closeGateway);
+
 	yield* discord.client.login();
+
+	yield* Effect.forkScoped(
+		maintainGatewayLease(leaseStore, held).pipe(
+			Effect.flatMap((loss) =>
+				Effect.gen(function* () {
+					const message = `Gateway lease ${loss}; disconnecting so only one bot acts.`;
+					console.error(`[GatewayLease] ${message}`);
+					captureMessage(message, "error");
+					yield* closeGateway;
+					process.exit(1);
+				}),
+			),
+		),
+	);
 
 	const guilds = yield* discord.getGuilds();
 	yield* Console.log(`Bot is in ${guilds.length} guilds`);

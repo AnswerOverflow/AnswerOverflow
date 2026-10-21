@@ -482,6 +482,16 @@ const SimilarThreadsSchema = Schema.Struct({
 	computedAt: Schema.Number,
 });
 
+// Exclusive right to hold the production Discord gateway session. One row per
+// lease name. `token` increases with every change of holder; `expiresAt` is in
+// Convex server time. See convex/private/gateway_lease.ts.
+const GatewayLeaseSchema = Schema.Struct({
+	name: Schema.String,
+	holderId: Schema.String,
+	token: Schema.Number,
+	expiresAt: Schema.Number,
+});
+
 export const confectSchema = defineSchema({
 	servers: defineTable(ServerSchema).index("by_discordId", ["discordId"]),
 	serverPreferences: defineTable(ServerPreferencesSchema)
@@ -566,6 +576,7 @@ export const confectSchema = defineSchema({
 	similarThreads: defineTable(SimilarThreadsSchema).index("by_threadId", [
 		"threadId",
 	]),
+	gatewayLeases: defineTable(GatewayLeaseSchema).index("by_name", ["name"]),
 });
 
 export default confectSchema.convexSchemaDefinition;
