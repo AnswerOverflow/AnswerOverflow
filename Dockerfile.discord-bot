@@ -1,0 +1,30 @@
+# Discord bot image for the Vercel daemon in vercel.json. Vercel uses the
+# directory containing this file as the build context, so it lives at the
+# repository root to reach the Bun workspace. Vercel passes project environment
+# variables as build arguments; no ARG is declared, so none reach the image.
+FROM oven/bun:1.3.3 AS builder
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+ENV NODE_ENV=production
+
+RUN bun install --frozen-lockfile --ignore-scripts
+
+FROM oven/bun:1.3.3-slim
+
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app ./
+
+ENV NODE_ENV=production
+
+USER bun
+
+WORKDIR /usr/src/app/apps/discord-bot
+
+# The AWS SDK assumes AWS_ROLE_ARN with the token in AWS_WEB_IDENTITY_TOKEN_FILE
+# and re-reads the file on every refresh. Vercel rotates the token in place.
+# `exec` makes Bun PID 1 so it receives SIGTERM directly.
+CMD ["sh", "-c", "export AWS_WEB_IDENTITY_TOKEN_FILE=\"${VERCEL_OIDC_TOKEN_FILE:?VERCEL_OIDC_TOKEN_FILE is not set}\" && exec bun index.ts"]
