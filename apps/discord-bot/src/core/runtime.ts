@@ -41,8 +41,17 @@ export const runMain = <A, E, R, EL>(
 
 	const controller = new AbortController();
 
+	const program = runtime.runPromise(effect, { signal: controller.signal });
+
+	let shuttingDown = false;
 	const shutdown = async () => {
+		if (shuttingDown) return;
+		shuttingDown = true;
 		console.log("Shutting down gracefully...");
+		// Interrupt the program first and wait for its finalizers, which close
+		// the Discord gateway, before tearing down the services it used.
+		controller.abort();
+		await program.catch(() => undefined);
 		try {
 			await runtime.dispose();
 			console.log("Runtime disposed successfully");
@@ -52,19 +61,12 @@ export const runMain = <A, E, R, EL>(
 		process.exit(0);
 	};
 
-	process.on("SIGINT", () => {
-		controller.abort();
-		shutdown();
-	});
-	process.on("SIGTERM", () => {
-		controller.abort();
-		shutdown();
-	});
+	process.on("SIGINT", shutdown);
+	process.on("SIGTERM", shutdown);
 
-	return runtime
-		.runPromise(effect, { signal: controller.signal })
-		.catch((error) => {
-			console.error("Fatal error:", error);
-			process.exit(1);
-		});
+	return program.catch((error) => {
+		if (shuttingDown) return;
+		console.error("Fatal error:", error);
+		process.exit(1);
+	});
 };
