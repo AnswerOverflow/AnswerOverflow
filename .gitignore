@@ -73,3 +73,6 @@ apps/main-site/src/proxy.ts
 .mcp.json
 opencode.json
 mcp.json
+
+# Vercel daemon project placeholder output
+daemon-output

@@ -1,0 +1,16 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"framework": null,
+	"installCommand": "echo 'The discord-bot daemon installs dependencies in its image'",
+	"buildCommand": "mkdir -p daemon-output && touch daemon-output/.keep",
+	"outputDirectory": "daemon-output",
+	"daemons": {
+		"discord-bot": {
+			"root": "./",
+			"entrypoint": "Dockerfile.discord-bot",
+			"instances": { "iad1": 1 },
+			"resources": { "requests": { "memory": "4Gi" } },
+			"terminationGracePeriodSeconds": 30
+		}
+	}
+}
