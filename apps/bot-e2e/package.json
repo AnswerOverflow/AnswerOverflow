@@ -24,7 +24,7 @@
 	"devDependencies": {
 		"@effect/vitest": "catalog:",
 		"@packages/typescript-config": "workspace:*",
-		"@types/bun": "latest",
+		"@types/bun": "1.4.2",
 		"vitest": "catalog:"
 	}
 }
