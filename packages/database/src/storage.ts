@@ -49,19 +49,14 @@ export class Storage extends Context.Tag("Storage")<
 	}
 >() {}
 
+// Credentials come from the default AWS chain: on Vercel, a web identity role
+// assumed with the daemon's rotating OIDC token.
+export const createS3Client = () => new S3Client({ region: "us-east-1" });
+
 const S3StorageServiceLive = Effect.gen(function* () {
 	const database = yield* Database;
 	const bucketName = process.env.BUCKET_NAME!;
-	const accessKeyId = process.env.IAM_USER_KEY!;
-	const secretAccessKey = process.env.IAM_USER_SECRET!;
-
-	const rawS3Client = new S3Client({
-		credentials: {
-			accessKeyId,
-			secretAccessKey,
-		},
-		region: "us-east-1",
-	});
+	const rawS3Client = createS3Client();
 
 	const uploadFileFromUrl = (input: UploadFileFromUrlInput) =>
 		Effect.gen(function* () {
