@@ -52,16 +52,9 @@ export class Storage extends Context.Tag("Storage")<
 const S3StorageServiceLive = Effect.gen(function* () {
 	const database = yield* Database;
 	const bucketName = process.env.BUCKET_NAME!;
-	const accessKeyId = process.env.IAM_USER_KEY!;
-	const secretAccessKey = process.env.IAM_USER_SECRET!;
 
-	const rawS3Client = new S3Client({
-		credentials: {
-			accessKeyId,
-			secretAccessKey,
-		},
-		region: "us-east-1",
-	});
+	// Credentials come from the default AWS chain (the bot host's instance role).
+	const rawS3Client = new S3Client({ region: "us-east-1" });
 
 	const uploadFileFromUrl = (input: UploadFileFromUrlInput) =>
 		Effect.gen(function* () {

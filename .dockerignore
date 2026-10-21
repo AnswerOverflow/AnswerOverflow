@@ -73,3 +73,6 @@ vitest.config.mts
 
 # Context/vendored repos (not needed in production)
 .context
+
+# Host infrastructure (deployed separately)
+infra

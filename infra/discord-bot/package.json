@@ -1,0 +1,19 @@
+{
+	"name": "@infra/discord-bot",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"plan": "alchemy plan --stage production",
+		"deploy": "alchemy deploy --stage production",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@effect/platform-bun": "^4.0.5",
+		"alchemy": "2.0.0-beta.83",
+		"effect": "^4.0.5"
+	},
+	"devDependencies": {
+		"@types/bun": "1.4.2",
+		"typescript": "^5.9.2"
+	}
+}
