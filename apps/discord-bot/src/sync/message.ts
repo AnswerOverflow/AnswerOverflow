@@ -1,32 +1,29 @@
 import type { DiscordAccount } from "@packages/database/convex/schema";
 import { Database } from "@packages/database/database";
+import type { Storage } from "@packages/database/storage";
 import { Console, Duration, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed, syncOperations } from "../metrics";
-import {
-	uploadAttachmentsInBatches,
-	uploadEmbedImagesInBatches,
-} from "../utils/attachment-upload";
+import { uploadAttachmentsInBatches } from "../utils/attachment-upload";
 import { createBatchedQueue } from "../utils/batched-queue";
 import {
 	type ChannelKeyedItem,
 	createChannelBatchedQueue,
 } from "../utils/channel-batched-queue";
 import {
-	extractEmbedImagesToUpload,
 	toAODiscordAccount,
 	toAOMessage,
 	toUpsertMessageArgs,
 } from "../utils/conversions";
 import { catchAllWithReport } from "../utils/error-reporting";
 import { extractSnapshotMediaToUpload } from "../utils/snapshot-media";
+import { type MessageUpsertArgs, persistMessageBatch } from "./message-batch";
 
 const BATCH_CONFIG = {
 	maxBatchSize: process.env.NODE_ENV === "production" ? 3 : 1,
 	maxWait: Duration.millis(3000),
 } as const;
 
-type MessageUpsertArgs = ReturnType<typeof toUpsertMessageArgs>;
 type ChannelKeyedMessageArgs = MessageUpsertArgs & ChannelKeyedItem;
 
 function toChannelKeyedArgs(args: MessageUpsertArgs): ChannelKeyedMessageArgs {
@@ -44,7 +41,7 @@ export const MessageParityLayer = Layer.scopedDiscard(
 		const messageQueue = yield* createChannelBatchedQueue<
 			ChannelKeyedMessageArgs,
 			unknown,
-			Database
+			Database | Storage
 		>({
 			process: (batch) =>
 				Effect.gen(function* () {
@@ -57,10 +54,9 @@ export const MessageParityLayer = Layer.scopedDiscard(
 					yield* Effect.logDebug(
 						`Processing message batch of ${batch.length} items for channel ${channelId}`,
 					);
-					yield* database.private.messages.upsertManyMessages({
-						messages: batch.map(({ channelId: _, ...rest }) => rest),
-						ignoreChecks: false,
-					});
+					yield* persistMessageBatch(
+						batch.map(({ channelId: _, ...rest }) => rest),
+					);
 				}).pipe(Effect.withSpan("sync.message_batch")),
 			maxBatchSize: BATCH_CONFIG.maxBatchSize,
 			maxWait: BATCH_CONFIG.maxWait,
@@ -156,25 +152,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 				yield* messageQueue.offer(
 					toChannelKeyedArgs(toUpsertMessageArgs(data)),
 				);
-
-				if (newMessage.embeds.length > 0) {
-					const embedImagesToUpload = extractEmbedImagesToUpload(newMessage);
-					if (embedImagesToUpload.length > 0) {
-						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
-							Effect.withSpan("sync.message.upload_embed_images", {
-								attributes: {
-									"embed_images.count": embedImagesToUpload.length.toString(),
-								},
-							}),
-							catchAllWithReport((error) =>
-								Console.warn(
-									`Failed to upload embed images for message ${newMessage.id}:`,
-									error,
-								),
-							),
-						);
-					}
-				}
 
 				yield* accountQueue.offer(toAODiscordAccount(newMessage.author));
 			}).pipe(
@@ -328,25 +305,6 @@ export const MessageParityLayer = Layer.scopedDiscard(
 							},
 						}),
 					);
-				}
-
-				if (message.embeds.length > 0) {
-					const embedImagesToUpload = extractEmbedImagesToUpload(message);
-					if (embedImagesToUpload.length > 0) {
-						yield* uploadEmbedImagesInBatches(embedImagesToUpload).pipe(
-							Effect.withSpan("sync.message.upload_embed_images", {
-								attributes: {
-									"embed_images.count": embedImagesToUpload.length.toString(),
-								},
-							}),
-							catchAllWithReport((error) =>
-								Console.warn(
-									`Failed to upload embed images for message ${message.id}:`,
-									error,
-								),
-							),
-						);
-					}
 				}
 
 				yield* accountQueue.offer(toAODiscordAccount(message.author));
