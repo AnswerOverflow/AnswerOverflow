@@ -10,6 +10,7 @@ import type {
 } from "convex/server";
 import { Context, Duration, Effect, Layer } from "effect";
 import { api, internal } from "../convex/_generated/api";
+import type { Id } from "../convex/_generated/dataModel";
 import betterAuthSchema from "../convex/betterAuth/schema";
 import schema from "../convex/schema";
 import {
@@ -161,9 +162,48 @@ const createTestService = Effect.gen(function* () {
 	const createAuthenticatedClient = (_token: string): ConvexClientShared =>
 		adaptedClient;
 
+	// convex-test keeps its database in a process-wide global, and every test
+	// builds a fresh instance. A job scheduled with `runAfter(0)` fires on a
+	// later tick; if the next test has replaced the global by then, the job
+	// writes to a database with no open transaction ("Write outside of
+	// transaction"). Run every due job to completion before this instance is
+	// dropped.
+	const drainDueScheduledFunctions = async () => {
+		for (let i = 0; i < 100; i++) {
+			await new Promise((resolve) => setTimeout(resolve, 0));
+			await testClient.finishInProgressScheduledFunctions();
+			const jobs = (await testClient.run((ctx) =>
+				ctx.db.system.query("_scheduled_functions").collect(),
+			)) as Array<{
+				_id: Id<"_scheduled_functions">;
+				scheduledTime: number;
+				state: { kind: string };
+			}>;
+			const active = jobs.filter(
+				(job) =>
+					job.state.kind === "inProgress" ||
+					(job.state.kind === "pending" && job.scheduledTime <= Date.now()),
+			);
+			if (active.length === 0) {
+				// Jobs scheduled further out would otherwise fire into a later
+				// test's database. Cancel them.
+				await testClient.run(async (ctx) => {
+					for (const job of jobs) {
+						if (job.state.kind === "pending") {
+							await ctx.scheduler.cancel(job._id);
+						}
+					}
+				});
+				return;
+			}
+		}
+		throw new Error("Scheduled functions did not settle after 100 ticks");
+	};
+
 	return {
 		use,
 		client: adaptedClient,
+		drainDueScheduledFunctions,
 		createAuthenticatedClient,
 		getQueryCallCount: testClient.getQueryCallCount,
 		resetQueryCallCounts: testClient.resetQueryCallCounts,
@@ -175,9 +215,12 @@ export class ConvexClientTest extends Context.Tag("ConvexClientTest")<
 	Effect.Effect.Success<typeof createTestService>
 >() {}
 
-const ConvexClientTestSharedLayer = Layer.effectContext(
+const ConvexClientTestSharedLayer = Layer.scopedContext(
 	Effect.gen(function* () {
 		const service = yield* createTestService;
+		yield* Effect.addFinalizer(() =>
+			Effect.promise(() => service.drainDueScheduledFunctions()),
+		);
 		const unifiedService: WrappedUnifiedClient = {
 			client: service.client,
 			createAuthenticatedClient: service.createAuthenticatedClient,
