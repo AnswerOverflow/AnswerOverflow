@@ -13,6 +13,7 @@ import { MarkSolutionCommandHandlerLayer } from "./commands/mark-solution";
 import { ReacordStressTestLayer } from "./commands/reacord-stress-test/index";
 import { SitemapCommandHandlerLayer } from "./commands/sitemap-command";
 import { V2ComponentsDemoCommandHandlerLayer } from "./commands/v2-components-demo";
+import { DiscordClient } from "./core/discord-client-service";
 import { Discord } from "./core/discord-service";
 import { ConsentButtonHandlerLayer } from "./interactions/consent-button";
 import { DismissButtonHandlerLayer } from "./interactions/dismiss-button";
@@ -72,6 +73,15 @@ export const BotLayers = Layer.mergeAll(
 
 export const program = Effect.gen(function* () {
 	const discord = yield* Discord;
+	const client = yield* DiscordClient;
+
+	// On shutdown, leave the gateway before anything else so this process
+	// stops receiving events while its replacement connects.
+	yield* Effect.addFinalizer(() =>
+		Effect.promise(() => client.destroy()).pipe(
+			Effect.tap(() => Console.log("Discord gateway closed")),
+		),
+	);
 
 	yield* discord.client.login();
 
@@ -79,4 +89,4 @@ export const program = Effect.gen(function* () {
 	yield* Console.log(`Bot is in ${guilds.length} guilds`);
 
 	return yield* Effect.never;
-});
+}).pipe(Effect.scoped);
