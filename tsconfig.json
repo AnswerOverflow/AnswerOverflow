@@ -7,7 +7,6 @@
 		{ "path": "packages/database-utils" },
 		{ "path": "packages/discord-api" },
 		{ "path": "packages/migration" },
-		{ "path": "packages/observability" },
 		{ "path": "packages/test-utils" },
 		{ "path": "packages/ui" }
 	]
