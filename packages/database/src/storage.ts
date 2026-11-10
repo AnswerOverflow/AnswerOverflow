@@ -55,12 +55,17 @@ const S3StorageServiceLive = Effect.gen(function* () {
 	const accessKeyId = process.env.IAM_USER_KEY!;
 	const secretAccessKey = process.env.IAM_USER_SECRET!;
 
+	// S3_ENDPOINT points the client at any S3-compatible store (e.g. R2:
+	// https://<account>.r2.cloudflarestorage.com). Unset means AWS S3.
+	const endpoint = process.env.S3_ENDPOINT;
+
 	const rawS3Client = new S3Client({
 		credentials: {
 			accessKeyId,
 			secretAccessKey,
 		},
-		region: "us-east-1",
+		region: endpoint ? "auto" : "us-east-1",
+		...(endpoint ? { endpoint } : {}),
 	});
 
 	const uploadFileFromUrl = (input: UploadFileFromUrlInput) =>
