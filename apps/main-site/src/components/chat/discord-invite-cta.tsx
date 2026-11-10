@@ -1,6 +1,5 @@
 "use client";
 
-import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { Button } from "@packages/ui/components/button";
 import {
 	Dialog,
@@ -38,7 +37,6 @@ It makes the content of channels you pick accessible outside of Discord. Otherwi
 They've got an about page to learn more & it's free to use: https://answeroverflow.com/about`;
 
 export function DiscordInviteCTA(props: DiscordInviteCTAProps) {
-	const posthog = usePostHog();
 	const [modalOpen, setModalOpen] = useState(false);
 	const [copied, setCopied] = useState(false);
 
@@ -67,43 +65,13 @@ export function DiscordInviteCTA(props: DiscordInviteCTAProps) {
 		: "Ask the admins of their Discord server to add Answer Overflow to get content from Discord being used in the chat";
 
 	const handleCtaClick = () => {
-		trackEvent(
-			"Chat Discord CTA Click",
-			isServer
-				? { serverName: props.serverName }
-				: { repoOwner: props.repoOwner, repoName: props.repoName },
-			posthog,
-		);
 		setModalOpen(true);
 	};
 
 	const handleCopy = async () => {
-		trackEvent(
-			"Chat Discord CTA Copy Message",
-			isServer
-				? { serverName: props.serverName }
-				: { repoOwner: props.repoOwner, repoName: props.repoName },
-			posthog,
-		);
 		await navigator.clipboard.writeText(inviteMessage);
 		setCopied(true);
 		setTimeout(() => setCopied(false), 2000);
-	};
-
-	const handleJoinDiscord = () => {
-		if (discordLink) {
-			trackEvent(
-				"Chat Discord CTA Join",
-				isServer
-					? { serverName: props.serverName, inviteUrl: props.discordInviteUrl }
-					: {
-							repoOwner: props.repoOwner,
-							repoName: props.repoName,
-							inviteCode: props.discordInviteCode,
-						},
-				posthog,
-			);
-		}
 	};
 
 	return (
@@ -161,7 +129,6 @@ export function DiscordInviteCTA(props: DiscordInviteCTAProps) {
 										href={discordLink}
 										target="_blank"
 										rel="noopener noreferrer"
-										onClick={handleJoinDiscord}
 									>
 										<DiscordIcon className="size-4 mr-2" />
 										Join Discord

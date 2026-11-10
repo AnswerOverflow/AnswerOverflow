@@ -68,7 +68,6 @@
 		"next-themes": "^0.4.6",
 		"node-emoji": "^2.2.0",
 		"nuqs": "catalog:",
-		"posthog-js": "^1.252.0",
 		"ramda": "^0.32.0",
 		"react": "catalog:",
 		"react-day-picker": "^9.11.1",
@@ -121,8 +120,6 @@
 		"./hooks/use-scroll-container": "./src/hooks/use-scroll-container.tsx",
 		"./utils/*": "./src/utils/*.ts",
 		"./icons/index": "./src/icons/index.tsx",
-		"./components/code": "./src/components/code.tsx",
-		"./analytics": "./src/analytics/index.ts",
-		"./analytics/client": "./src/analytics/client/index.ts"
+		"./components/code": "./src/components/code.tsx"
 	}
 }

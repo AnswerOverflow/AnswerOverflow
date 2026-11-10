@@ -96,7 +96,6 @@ async function InvitePageContent(props: { inviteCode: string }) {
 	return (
 		<DiscordInviteLanding
 			inviteCode={inviteData.code}
-			guildId={inviteData.guildId}
 			guildName={inviteData.guildName}
 			guildIconUrl={iconUrl}
 			guildDescription={inviteData.guildDescription}

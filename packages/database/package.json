@@ -57,7 +57,6 @@
 		"discord-api-types": "^0.38.24",
 		"effect": "catalog:",
 		"octokit": "^5.0.5",
-		"posthog-node": "^4.2.0",
 		"stripe": "^20.1.0",
 		"unique-names-generator": "^4.7.1",
 		"zod": "catalog:"
@@ -67,7 +66,6 @@
 		"@effect/vitest": "catalog:",
 		"@packages/convex-test": "workspace:*",
 		"@packages/database-utils": "workspace:*",
-		"@packages/observability": "workspace:*",
 		"@packages/test-utils": "workspace:*",
 		"chokidar-cli": "^3.0.0",
 		"dotenv": "^17.2.3",

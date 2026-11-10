@@ -1,6 +1,5 @@
 "use client";
 
-import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { cn } from "@packages/ui/lib/utils";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -22,7 +21,6 @@ export function FloatingAskInput({
 	pageContext,
 }: FloatingAskInputProps) {
 	const router = useRouter();
-	const posthog = usePostHog();
 	const [input, setInput] = useState("");
 	const [isFocused, setIsFocused] = useState(false);
 	const [isAtBottom, setIsAtBottom] = useState(false);
@@ -45,31 +43,11 @@ export function FloatingAskInput({
 
 	const handleFocus = () => {
 		setIsFocused(true);
-		trackEvent(
-			"Floating Ask Input Focus",
-			{
-				serverDiscordId,
-				serverName,
-				messageId: pageContext.messageId,
-			},
-			posthog,
-		);
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!input.trim()) return;
-
-		trackEvent(
-			"Floating Ask Input Submit",
-			{
-				serverDiscordId,
-				serverName,
-				messageId: pageContext.messageId,
-				queryLength: input.trim().length,
-			},
-			posthog,
-		);
 
 		const contextPrefix = `Context: I'm looking at discussion ${pageContext.messageId} from ${serverName} (${serverDiscordId})\n\n`;
 

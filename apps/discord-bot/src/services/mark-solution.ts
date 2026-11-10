@@ -10,7 +10,7 @@ import {
 	EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
-import { ConsentSource } from "../utils/analytics";
+import { ConsentSource } from "../utils/consent";
 import { ANSWER_OVERFLOW_BLUE_HEX } from "../utils/discord-components";
 
 const CONSENT_BUTTON_LABEL = "Publicly Display My Messages";

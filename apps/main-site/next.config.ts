@@ -100,14 +100,6 @@ const nextConfig: NextConfig = {
 				destination:
 					"https://cdn.answeroverflow.com/sitemaps/servers-v2/:serverId.xml",
 			},
-			{
-				source: `/api/${process.env.NEXT_PUBLIC_ANALYTICS_PATH ?? "a"}/static/:path*`,
-				destination: "https://us-assets.i.posthog.com/static/:path*",
-			},
-			{
-				source: `/api/${process.env.NEXT_PUBLIC_ANALYTICS_PATH ?? "a"}/:path*`,
-				destination: "https://us.i.posthog.com/:path*",
-			},
 		];
 	},
 	assetPrefix:

@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-export NEXT_PUBLIC_ANALYTICS_PATH=$(uuidgen | cut -c1-8)
-
 PREVIOUS_SHA="$VERCEL_GIT_PREVIOUS_SHA"
 CURRENT_SHA="$VERCEL_GIT_COMMIT_SHA"
 

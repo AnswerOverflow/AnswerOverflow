@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { AnswerOverflowLogo } from "@packages/ui/components/answer-overflow-logo";
 import { Button } from "@packages/ui/components/button";
 import { useSession } from "@packages/ui/components/convex-client-provider";
@@ -45,7 +44,6 @@ export function useChatSidebar() {
 
 function ThreadList({ onThreadClick }: { onThreadClick?: () => void }) {
 	const pathname = usePathname();
-	const posthog = usePostHog();
 	const session = useSession({ allowAnonymous: true });
 	const isAuthenticated = !!session?.data;
 	const isLoading = session.isPending;
@@ -92,16 +90,11 @@ function ThreadList({ onThreadClick }: { onThreadClick?: () => void }) {
 
 				const repos = thread.repos ?? [];
 
-				const handleThreadClick = () => {
-					trackEvent("Chat Thread Selected", { threadId: thread._id }, posthog);
-					onThreadClick?.();
-				};
-
 				return (
 					<Link
 						key={thread._id}
 						href={threadPath}
-						onClick={handleThreadClick}
+						onClick={onThreadClick}
 						className={cn(
 							"group flex items-start gap-3 rounded-md px-3 py-2 text-sm transition-colors",
 							isActive
@@ -153,7 +146,6 @@ function SidebarHeader() {
 function UsageIndicator() {
 	const session = useSession({ allowAnonymous: true });
 	const isAnonymous = !session?.data || session.data.user.isAnonymous;
-	const posthog = usePostHog();
 	const {
 		usageStatus,
 		isPro,
@@ -171,11 +163,6 @@ function UsageIndicator() {
 	}
 
 	const handleCheckoutClick = () => {
-		trackEvent(
-			"Chat Checkout Started",
-			{ plan: "PRO", priceAmount: 500, currentPlan: isPro ? "PRO" : "FREE" },
-			posthog,
-		);
 		startCheckout();
 	};
 
@@ -224,10 +211,7 @@ function UsageIndicator() {
 }
 
 function SidebarContent({ onThreadClick }: { onThreadClick?: () => void }) {
-	const posthog = usePostHog();
-
 	const handleNewChatClick = (e: React.MouseEvent) => {
-		trackEvent("Chat New Thread Click", {}, posthog);
 		onThreadClick?.();
 
 		e.preventDefault();

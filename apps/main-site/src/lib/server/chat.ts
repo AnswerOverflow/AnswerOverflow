@@ -9,34 +9,13 @@ import {
 	createRepoInstructions,
 	type RepoContext,
 	type ServerContext,
-	type TracingOptions,
 } from "@packages/database/convex/shared/chatAgent";
 import { Database } from "@packages/database/database";
 import { defaultModelId, getModelById } from "@packages/database/models";
 import { createProxyComponent } from "@packages/database/proxy-component";
-import { withTracing } from "@posthog/ai";
 import { Effect } from "effect";
-import { PostHog } from "posthog-node";
 import { createAnswerOverflowTools } from "../mcp/tools";
 import { runtime } from "../runtime";
-
-let posthogClient: PostHog | null = null;
-
-function getPostHogClient(): PostHog | null {
-	if (posthogClient) return posthogClient;
-
-	const apiKey = process.env.NEXT_PUBLIC_POSTHOG_TOKEN;
-	if (!apiKey) {
-		console.warn("[chat] PostHog API key not set, LLM analytics disabled");
-		return null;
-	}
-
-	posthogClient = new PostHog(apiKey, {
-		host: "https://us.posthog.com",
-	});
-
-	return posthogClient;
-}
 
 export async function streamChat(args: {
 	threadId: string;
@@ -44,8 +23,6 @@ export async function streamChat(args: {
 	serverContext: ServerContext | null;
 	promptMessageId: string;
 	modelId: string;
-	userId?: string;
-	userPlan?: "FREE" | "PRO";
 }) {
 	const ctx = createHttpContext({
 		convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL!,
@@ -55,28 +32,7 @@ export async function streamChat(args: {
 
 	const modelId = args.modelId ?? defaultModelId;
 
-	const phClient = getPostHogClient();
-	const tracing: TracingOptions | undefined = phClient
-		? {
-				wrapModel: (model, opts) =>
-					withTracing(model, phClient, {
-						posthogTraceId: opts.traceId,
-						posthogDistinctId: opts.distinctId,
-						posthogProperties: opts.properties,
-					}),
-				traceId: args.threadId,
-				distinctId: args.userId,
-				properties: {
-					modelId,
-					plan: args.userPlan ?? "FREE",
-					hasRepo: args.repos.length > 0,
-					hasServerContext: !!args.serverContext,
-					serverDiscordId: args.serverContext?.discordId,
-				},
-			}
-		: undefined;
-
-	const agent = createChatAgent(component, modelId, tracing);
+	const agent = createChatAgent(component, modelId);
 
 	const virtualBash = createVirtualBash({
 		gitClone: {

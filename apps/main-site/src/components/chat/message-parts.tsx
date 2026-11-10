@@ -36,14 +36,10 @@ export function SmoothMessageResponse({
 export function MessageParts({
 	message,
 	isLastMessage,
-	threadId,
-	onCopyMessage,
 	agentStatus,
 }: {
 	message: UIMessage;
 	isLastMessage: boolean;
-	threadId: string | null;
-	onCopyMessage: (threadId: string | null) => void;
 	agentStatus?: string;
 }) {
 	const isStreaming =
@@ -80,7 +76,6 @@ export function MessageParts({
 										<MessageAction
 											onClick={() => {
 												navigator.clipboard.writeText(part.text);
-												onCopyMessage(threadId);
 											}}
 											tooltip="Copy"
 										>

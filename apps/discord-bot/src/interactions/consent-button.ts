@@ -1,16 +1,16 @@
 import { Database } from "@packages/database/database";
-import type { ButtonInteraction, GuildMember } from "discord.js";
+import type { ButtonInteraction } from "discord.js";
 import { MessageFlags } from "discord.js";
 import { Console, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed } from "../metrics";
 import { CONSENT_ACTION_PREFIX } from "../services/mark-solution";
-import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
-import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
 import {
-	catchAllSilentWithReport,
-	catchAllWithReport,
-} from "../utils/error-reporting";
+	ConsentSource,
+	grantPublicDisplayConsent,
+	isAccountIgnored,
+} from "../utils/consent";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 const CONSENT_SOURCES = [
 	ConsentSource.ForumPostGuidelines,
@@ -129,9 +129,6 @@ export const handleConsentButtonInteraction = Effect.fn(
 	);
 
 	if (granted) {
-		yield* catchAllSilentWithReport(
-			trackUserGrantConsent(member as GuildMember, consentSource),
-		);
 		yield* discord.callClient(() =>
 			interaction.followUp({
 				content:

@@ -5,10 +5,6 @@ import { Data, Duration, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { commandExecuted, solutionsMarked } from "../metrics";
 import { makeMarkSolutionResponse } from "../services/mark-solution";
-import {
-	trackMarkSolutionCommandUsed,
-	trackSolvedQuestion,
-} from "../utils/analytics";
 import { toAOMessage, toUpsertMessageArgs } from "../utils/conversions";
 import {
 	catchAllDefectWithReport,
@@ -343,47 +339,6 @@ export const handleMarkSolutionCommand = Effect.fn("mark_solution_command")(
 
 				yield* catchAllSilentWithReport(
 					discord.callClient(() => targetMessage.react("✅")),
-				);
-
-				const [questionAsker, solutionAuthor] = yield* Effect.all([
-					catchAllSucceedNullWithReport(
-						discord.callClient(() =>
-							guild.members.fetch(questionMessage.author.id),
-						),
-					),
-					catchAllSucceedNullWithReport(
-						discord.callClient(() =>
-							guild.members.fetch(targetMessage.author.id),
-						),
-					),
-				]);
-
-				if (questionAsker && solutionAuthor) {
-					yield* catchAllSilentWithReport(
-						trackSolvedQuestion(
-							thread,
-							channelSettings,
-							questionAsker,
-							solutionAuthor,
-							guildMember,
-							questionMessage,
-							targetMessage,
-							{
-								discordId: server.discordId.toString(),
-								name: server.name,
-							},
-							serverPreferences
-								? {
-										readTheRulesConsentEnabled:
-											serverPreferences.readTheRulesConsentEnabled,
-									}
-								: undefined,
-						),
-					);
-				}
-
-				yield* catchAllSilentWithReport(
-					trackMarkSolutionCommandUsed(guildMember, "Success"),
 				);
 
 				const shouldLock = serverPreferences?.lockOnMarkSolution;

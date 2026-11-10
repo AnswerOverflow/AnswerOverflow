@@ -6,7 +6,6 @@ export {
 	DashboardSidebar,
 	type DashboardSidebarProps,
 } from "./dashboard-sidebar";
-export { FeedbackButton } from "./feedback-button";
 export { GitHubStarButton } from "./github-star-button";
 export { MainSiteNavbar } from "./main-site-navbar";
 export { NavbarBase, type NavbarBaseProps } from "./navbar-base";

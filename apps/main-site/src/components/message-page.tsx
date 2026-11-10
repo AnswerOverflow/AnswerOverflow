@@ -4,7 +4,6 @@ import { api } from "@packages/database/convex/_generated/api";
 import { DiscordAvatar } from "@packages/ui/components/discord-avatar";
 import type { EnrichedMessage } from "@packages/ui/components/discord-message";
 import { FormattedNumber } from "@packages/ui/components/formatted-number";
-import { HelpfulFeedback } from "@packages/ui/components/helpful-feedback";
 import { JumpToSolution } from "@packages/ui/components/jump-to-solution";
 import { Link } from "@packages/ui/components/link";
 import { MessageBody } from "@packages/ui/components/message-body";
@@ -17,7 +16,6 @@ import { SnapshotInfiniteList } from "@packages/ui/components/snapshot-infinite-
 import { useTenant } from "@packages/ui/components/tenant-context";
 import { ThinMessage } from "@packages/ui/components/thin-message";
 import { TimeAgo } from "@packages/ui/components/time-ago";
-import { TrackLoad } from "@packages/ui/components/track-load";
 import { isImageAttachment } from "@packages/ui/utils/attachments";
 import { encodeCursor } from "@packages/ui/utils/cursor";
 import {
@@ -276,7 +274,6 @@ function JoinDiscordCTA(props: {
 					<ServerInviteJoinButton
 						server={server}
 						channel={channel}
-						location="Message Result Page"
 						className="bg-[#248046] hover:bg-[#1a6334] text-white mt-2 w-full"
 					/>
 				</div>
@@ -637,7 +634,6 @@ export function MessagePage(props: {
 									<ServerInviteJoinButton
 										server={headerData.server}
 										channel={headerData.channel}
-										location="Message Result Page"
 										size="sm"
 										variant="default"
 										className="rounded-3xl text-xs font-semibold"
@@ -672,71 +668,7 @@ export function MessagePage(props: {
 							</div>
 						</div>
 						{similarThreadsSlot}
-						{firstMessage && (
-							<div className="flex w-full flex-col justify-center gap-2 text-center">
-								<HelpfulFeedback
-									server={{
-										id: headerData.server.discordId.toString(),
-										name: headerData.server.name,
-									}}
-									channel={{
-										id: headerData.channel.id.toString(),
-										name: headerData.channel.name,
-										type: headerData.channel.type,
-										serverId: headerData.server.discordId.toString(),
-										inviteCode: headerData.channel.inviteCode,
-									}}
-									thread={
-										headerData.thread
-											? {
-													id: headerData.thread.id.toString(),
-													name: headerData.thread.name,
-													type: headerData.thread.type,
-												}
-											: null
-									}
-									message={{
-										id: firstMessage.message.id.toString(),
-										authorId: (firstMessage.author?.id ?? 0n).toString(),
-										serverId: firstMessage.message.serverId.toString(),
-										channelId: firstMessage.message.channelId.toString(),
-									}}
-								/>
-							</div>
-						)}
 					</aside>
-
-					{firstMessage && (
-						<TrackLoad
-							eventName="Message Page View"
-							eventData={{
-								server: {
-									id: headerData.server.discordId.toString(),
-									name: headerData.server.name,
-								},
-								channel: {
-									id: headerData.channel.id.toString(),
-									name: headerData.channel.name,
-									type: headerData.channel.type,
-									serverId: headerData.server.discordId.toString(),
-									inviteCode: headerData.channel.inviteCode,
-								},
-								thread: headerData.thread
-									? {
-											id: headerData.thread.id.toString(),
-											name: headerData.thread.name,
-											type: headerData.thread.type,
-										}
-									: null,
-								message: {
-									id: firstMessage.message.id.toString(),
-									authorId: (firstMessage.author?.id ?? 0n).toString(),
-									serverId: firstMessage.message.serverId.toString(),
-									channelId: firstMessage.message.channelId.toString(),
-								},
-							}}
-						/>
-					)}
 				</div>
 
 				{!tenant && (

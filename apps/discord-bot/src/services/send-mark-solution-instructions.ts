@@ -7,15 +7,10 @@ import {
 } from "discord.js";
 import { Effect } from "effect";
 import {
-	trackAskedQuestion,
-	trackMarkSolutionInstructionsSent,
-} from "../utils/analytics";
-import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	makeDismissButton,
 	makeSimilarThreadsButton,
 } from "../utils/discord-components";
-import { catchAllSilentWithReport } from "../utils/error-reporting";
 
 export class SendMarkSolutionInstructionsError extends Error {
 	constructor(
@@ -42,81 +37,6 @@ export type ChannelWithFlags = {
 		inviteCode?: string;
 	} | null;
 };
-
-export function trackQuestionAsked(
-	thread: ThreadChannel,
-	channelSettings: ChannelWithFlags | null,
-	threadOwner: GuildMember,
-	question: Message | null,
-) {
-	return Effect.gen(function* () {
-		if (!channelSettings?.flags) {
-			return;
-		}
-
-		if (
-			!channelSettings.flags.indexingEnabled &&
-			!channelSettings.flags.markSolutionEnabled
-		) {
-			return;
-		}
-
-		const database = yield* Database;
-
-		const serverData = yield* database.private.servers.getServerByDiscordId({
-			discordId: BigInt(thread.guildId),
-		});
-
-		if (!serverData) {
-			return;
-		}
-
-		const preferencesData =
-			yield* database.private.server_preferences.getServerPreferencesByServerId(
-				{
-					serverId: BigInt(thread.guildId),
-				},
-			);
-
-		const server = {
-			discordId: serverData.discordId.toString(),
-			name: serverData.name,
-		};
-
-		const serverPreferences = preferencesData
-			? {
-					readTheRulesConsentEnabled:
-						preferencesData.readTheRulesConsentEnabled,
-				}
-			: undefined;
-
-		yield* catchAllSilentWithReport(
-			trackAskedQuestion(
-				thread,
-				channelSettings,
-				threadOwner,
-				server,
-				serverPreferences,
-				question,
-			),
-		);
-	}).pipe(
-		Effect.withSpan("mark_solution.track_question_asked", {
-			attributes: {
-				"thread.id": thread.id,
-				"thread.guild_id": thread.guildId,
-				"thread_owner.id": threadOwner.id,
-				has_question: question ? "true" : "false",
-				indexing_enabled: channelSettings?.flags?.indexingEnabled
-					? "true"
-					: "false",
-				mark_solution_enabled: channelSettings?.flags?.markSolutionEnabled
-					? "true"
-					: "false",
-			},
-		}),
-	);
-}
 
 export function handleSendMarkSolutionInstructions(
 	thread: ThreadChannel,
@@ -147,25 +67,6 @@ export function handleSendMarkSolutionInstructions(
 		if (!serverData) {
 			return;
 		}
-
-		const preferencesData =
-			yield* database.private.server_preferences.getServerPreferencesByServerId(
-				{
-					serverId: BigInt(thread.guildId),
-				},
-			);
-
-		const server = {
-			discordId: serverData.discordId.toString(),
-			name: serverData.name,
-		};
-
-		const serverPreferences = preferencesData
-			? {
-					readTheRulesConsentEnabled:
-						preferencesData.readTheRulesConsentEnabled,
-				}
-			: undefined;
 
 		const embed = new EmbedBuilder()
 			.setDescription(
@@ -201,17 +102,6 @@ export function handleSendMarkSolutionInstructions(
 				);
 			},
 		});
-
-		yield* catchAllSilentWithReport(
-			trackMarkSolutionInstructionsSent(
-				thread,
-				channelSettings,
-				threadOwner,
-				server,
-				serverPreferences,
-				question,
-			),
-		);
 
 		console.log(
 			`Sent mark solution instructions to thread ${thread.id} (owner: ${threadOwner.id})`,
