@@ -14,11 +14,6 @@ import { registerCommands } from "../commands/register";
 import { SUPER_USER_ID } from "../constants/super-user";
 import { Discord } from "../core/discord-service";
 import { activeGuilds, syncOperations } from "../metrics";
-import {
-	registerServerGroup,
-	trackServerJoin,
-	trackServerLeave,
-} from "../utils/analytics";
 import { isAllowedRootOrCategoryChannel } from "../utils/conversions";
 import { leaveServerIfNecessary } from "../utils/denylist";
 import {
@@ -191,13 +186,6 @@ export function syncGuild(guild: Guild) {
 			yield* database.private.servers.upsertServer(aoServerData);
 
 		if (isNew) {
-			yield* catchAllSilentWithReport(
-				registerServerGroup({
-					"Server Id": guild.id,
-					"Server Name": guild.name,
-				}),
-			);
-
 			yield* database.private.server_preferences.updateServerPreferences({
 				serverId: BigInt(guild.id),
 				preferences: {},
@@ -326,9 +314,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 				// handler means the guild is available in the database.
 				yield* syncGuild(guild);
 				yield* Effect.forkDaemon(
-					catchAllSilentWithReport(trackServerJoin(guild)),
-				);
-				yield* Effect.forkDaemon(
 					catchAllSilentWithReport(notifySuperUserOfServerJoin(guild)),
 				);
 				yield* Effect.forkDaemon(
@@ -385,7 +370,6 @@ export const ServerParityLayer = Layer.scopedDiscard(
 						kickedTime: Date.now(),
 					},
 				});
-				yield* catchAllSilentWithReport(trackServerLeave(guild));
 				yield* discord
 					.callClient(async () => {
 						const superUser = await guild.client.users.fetch(SUPER_USER_ID);

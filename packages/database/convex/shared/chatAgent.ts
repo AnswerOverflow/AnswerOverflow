@@ -2,8 +2,6 @@ import { Agent, type AgentComponent } from "@packages/agent";
 import { gateway } from "ai";
 import { defaultModelId, getModelById, type ModelId } from "./models";
 
-type GatewayModel = ReturnType<typeof gateway>;
-
 function createInstructions(modelName: string) {
 	return `You are AnswerOverflow's AI assistant, helping users find answers from Discord community discussions.
 
@@ -222,38 +220,15 @@ ${fileContextSection}${serverContextSection}
 - Always respond in the language the original prompt was sent in`;
 }
 
-export type TracingOptions = {
-	wrapModel: (
-		model: GatewayModel,
-		options: {
-			traceId: string;
-			distinctId?: string;
-			properties?: Record<string, unknown>;
-		},
-	) => GatewayModel;
-	traceId: string;
-	distinctId?: string;
-	properties?: Record<string, unknown>;
-};
-
 export function createChatAgent(
 	component: AgentComponent,
 	modelId: ModelId = defaultModelId,
-	tracing?: TracingOptions,
 ) {
 	const model = getModelById(modelId);
 	const gatewayId = model?.gatewayId ?? "anthropic/claude-sonnet-4-20250514";
 	const modelName = model?.name ?? "Unknown Model";
 
-	let languageModel: GatewayModel = gateway(gatewayId);
-
-	if (tracing) {
-		languageModel = tracing.wrapModel(languageModel, {
-			traceId: tracing.traceId,
-			distinctId: tracing.distinctId,
-			properties: tracing.properties,
-		});
-	}
+	const languageModel = gateway(gatewayId);
 
 	return new Agent(component, {
 		name: "AnswerOverflow Assistant",

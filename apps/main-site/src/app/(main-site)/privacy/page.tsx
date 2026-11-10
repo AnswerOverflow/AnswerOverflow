@@ -252,19 +252,6 @@ export default function PrivacyPolicyPage() {
 					content based on preferences you have specified. Please refer to our
 					Cookie Policy for more information.
 				</p>
-				<p>
-					AnswerOverflow uses PostHog as a provider for its cookies. PostHog is
-					GDPR and CCPA compliant and is responsible for their own data
-					breaches. See their privacy policy{" "}
-					<a
-						href="https://posthog.com/docs/privacy"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						here
-					</a>
-					.
-				</p>
 
 				<h2>Business transfers</h2>
 				<p>

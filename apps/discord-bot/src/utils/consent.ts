@@ -1,6 +1,16 @@
 import { Database } from "@packages/database/database";
 import { Effect } from "effect";
 
+export const ConsentSource = {
+	ForumPostGuidelines: "forum-post-guidelines",
+	ReadTheRules: "read-the-rules",
+	ManageAccountMenu: "manage-account-menu",
+	MarkSolutionResponse: "mark-solution-response",
+	ManuallyPostedPrompt: "manually-posted-prompt",
+} as const;
+
+export type ConsentSource = (typeof ConsentSource)[keyof typeof ConsentSource];
+
 export function grantPublicDisplayConsent(userId: bigint, serverId: bigint) {
 	return Effect.gen(function* () {
 		const database = yield* Database;

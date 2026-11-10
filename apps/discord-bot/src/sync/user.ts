@@ -5,13 +5,9 @@ import type { GuildMember, PartialUser, User } from "discord.js";
 import { Console, Data, Duration, Effect, Equal, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed, syncOperations } from "../metrics";
-import { trackUserJoinedServer, trackUserLeftServer } from "../utils/analytics";
 import { createBatchedQueue } from "../utils/batched-queue";
 import { toAODiscordAccount } from "../utils/conversions";
-import {
-	catchAllSilentWithReport,
-	catchAllWithReport,
-} from "../utils/error-reporting";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 const BATCH_CONFIG = {
 	maxBatchSize: process.env.NODE_ENV === "production" ? 10 : 1,
@@ -254,36 +250,6 @@ export const UserParityLayer = Layer.scopedDiscard(
 				if (didSyncSettings) {
 					yield* Metric.increment(syncOperations);
 				}
-
-				const serverData = yield* database.private.servers.getServerByDiscordId(
-					{
-						discordId: BigInt(member.guild.id),
-					},
-				);
-				if (!serverData) return;
-
-				const preferencesData =
-					yield* database.private.server_preferences.getServerPreferencesByServerId(
-						{
-							serverId: BigInt(member.guild.id),
-						},
-					);
-
-				yield* catchAllSilentWithReport(
-					trackUserJoinedServer(
-						member,
-						{
-							discordId: serverData.discordId.toString(),
-							name: serverData.name,
-						},
-						preferencesData
-							? {
-									readTheRulesConsentEnabled:
-										preferencesData.readTheRulesConsentEnabled,
-								}
-							: undefined,
-					),
-				);
 			}).pipe(
 				Effect.withSpan("event.guild_member_add"),
 				catchAllWithReport((error) =>
@@ -346,36 +312,6 @@ export const UserParityLayer = Layer.scopedDiscard(
 				if (didDeleteSettings) {
 					yield* Metric.increment(syncOperations);
 				}
-
-				const serverData = yield* database.private.servers.getServerByDiscordId(
-					{
-						discordId: BigInt(member.guild.id),
-					},
-				);
-				if (!serverData) return;
-
-				const preferencesData =
-					yield* database.private.server_preferences.getServerPreferencesByServerId(
-						{
-							serverId: BigInt(member.guild.id),
-						},
-					);
-
-				yield* catchAllSilentWithReport(
-					trackUserLeftServer(
-						member,
-						{
-							discordId: serverData.discordId.toString(),
-							name: serverData.name,
-						},
-						preferencesData
-							? {
-									readTheRulesConsentEnabled:
-										preferencesData.readTheRulesConsentEnabled,
-								}
-							: undefined,
-					),
-				);
 			}).pipe(
 				Effect.withSpan("event.guild_member_remove"),
 				catchAllWithReport((error) =>

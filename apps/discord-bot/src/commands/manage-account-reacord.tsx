@@ -1,4 +1,3 @@
-import { PostHogCaptureClientLayer } from "@packages/database/analytics/server/capture-client";
 import { Database } from "@packages/database/database";
 import {
 	ActionRow,
@@ -12,13 +11,12 @@ import {
 	useAtomValue,
 	useInstance,
 } from "@packages/reacord";
-import type { ChatInputCommandInteraction, GuildMember } from "discord.js";
+import type { ChatInputCommandInteraction } from "discord.js";
 import { MessageFlags } from "discord.js";
 import { Data, Duration, Effect, Layer, Metric } from "effect";
 import { atomRuntime } from "../core/atom-runtime";
 import { Discord } from "../core/discord-service";
 import { commandExecuted } from "../metrics";
-import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 import {
 	catchAllDefectWithReport,
 	catchAllSilentWithReport,
@@ -43,7 +41,6 @@ type ManageAccountState = {
 type ManageAccountInput = {
 	userId: bigint;
 	serverId: bigint;
-	guildMember?: GuildMember;
 };
 
 type ConsentInput = ManageAccountInput & {
@@ -117,15 +114,6 @@ const toggleConsentEffect = (input: ConsentInput) =>
 		yield* database.private.user_server_settings.upsertUserServerSettings({
 			settings: updatedSettings,
 		});
-
-		if (input.enable && input.guildMember) {
-			yield* catchAllSilentWithReport(
-				trackUserGrantConsent(
-					input.guildMember,
-					ConsentSource.ManageAccountMenu,
-				).pipe(Effect.provide(PostHogCaptureClientLayer)),
-			);
-		}
 
 		return { canPubliclyDisplayMessages: input.enable };
 	});
@@ -211,14 +199,12 @@ const toggleIgnoreAtom = atomRuntime.fn<IgnoreInput>()(toggleIgnoreEffect);
 type ManageAccountProps = {
 	userId: string;
 	serverId: string;
-	guildMember?: GuildMember;
 	initialState: ManageAccountState;
 };
 
 function ManageAccountUI({
 	userId,
 	serverId,
-	guildMember,
 	initialState,
 }: ManageAccountProps) {
 	const accountStateResult = useAtomValue(
@@ -278,7 +264,6 @@ function ManageAccountUI({
 							triggerToggleIgnore({
 								userId: userIdBigInt,
 								serverId: serverIdBigInt,
-								guildMember,
 								ignore: false,
 							});
 						}}
@@ -321,7 +306,6 @@ function ManageAccountUI({
 							triggerToggleConsent({
 								userId: userIdBigInt,
 								serverId: serverIdBigInt,
-								guildMember,
 								enable: false,
 							});
 						}}
@@ -335,7 +319,6 @@ function ManageAccountUI({
 							triggerToggleConsent({
 								userId: userIdBigInt,
 								serverId: serverIdBigInt,
-								guildMember,
 								enable: true,
 							});
 						}}
@@ -350,7 +333,6 @@ function ManageAccountUI({
 							triggerToggleIndexing({
 								userId: userIdBigInt,
 								serverId: serverIdBigInt,
-								guildMember,
 								disable: false,
 							});
 						}}
@@ -364,7 +346,6 @@ function ManageAccountUI({
 							triggerToggleIndexing({
 								userId: userIdBigInt,
 								serverId: serverIdBigInt,
-								guildMember,
 								disable: true,
 							});
 						}}
@@ -378,7 +359,6 @@ function ManageAccountUI({
 						triggerToggleIgnore({
 							userId: userIdBigInt,
 							serverId: serverIdBigInt,
-							guildMember,
 							ignore: true,
 						});
 					}}
@@ -465,18 +445,11 @@ export const handleManageAccountCommand = Effect.fn("manage_account_command")(
 			isIgnoredAccount: ignoredAccount !== null,
 		};
 
-		const member = interaction.member;
-		const guildMember =
-			member instanceof Object && "id" in member
-				? (member as GuildMember)
-				: undefined;
-
 		yield* reacord.reply(
 			interaction,
 			<ManageAccountUI
 				userId={interaction.user.id}
 				serverId={server.discordId.toString()}
-				guildMember={guildMember}
 				initialState={initialState}
 			/>,
 		);

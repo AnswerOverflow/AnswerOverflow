@@ -3,12 +3,8 @@ import type { GuildMember, PartialGuildMember } from "discord.js";
 import { Console, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed } from "../metrics";
-import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
-import {
-	catchAllSilentWithReport,
-	catchAllWithReport,
-} from "../utils/error-reporting";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 export const handleReadTheRulesConsent = Effect.fn(
 	"event.read_the_rules_consent",
@@ -63,9 +59,6 @@ export const handleReadTheRulesConsent = Effect.fn(
 	);
 
 	if (granted) {
-		yield* catchAllSilentWithReport(
-			trackUserGrantConsent(newMember, ConsentSource.ReadTheRules),
-		);
 		yield* Console.log(
 			`Granted read the rules consent for user ${newMember.user.id} in server ${server.discordId}`,
 		);

@@ -1,4 +1,3 @@
-import { PostHogCaptureClientLayer } from "@packages/database/analytics/server/capture-client";
 import { Database } from "@packages/database/database";
 import { Storage } from "@packages/database/storage";
 import {
@@ -38,13 +37,6 @@ import {
 	githubIssuesCreated,
 	githubIssuesFailed,
 } from "../metrics";
-import {
-	trackGitHubIssueAIExtraction,
-	trackGitHubIssueCommandUsed,
-	trackGitHubIssueCreated,
-	trackGitHubIssueCreationFailed,
-	trackGitHubIssueRateLimited,
-} from "../utils/analytics";
 import {
 	catchAllDefectWithReport,
 	catchAllSilentWithReport,
@@ -387,19 +379,6 @@ const createIssueEffect = (input: CreateIssueInput) =>
 				"github.error_code": result.code,
 				"github.error_message": result.error,
 			});
-			yield* trackGitHubIssueCreationFailed({
-				userId: input.discordUserId,
-				guildId: input.originalGuildId,
-				channelId: input.originalChannelId,
-				messageId: input.originalMessageId,
-				errorType: result.code,
-				errorMessage: result.error,
-				repoOwner: input.repo.owner,
-				repoName: input.repo.name,
-			}).pipe(
-				Effect.provide(PostHogCaptureClientLayer),
-				Effect.catchAll(() => Effect.void),
-			);
 
 			if (
 				result.code === "NOT_LINKED" ||
@@ -420,21 +399,6 @@ const createIssueEffect = (input: CreateIssueInput) =>
 			"github.issue_number": result.issue.number,
 			"github.issue_url": result.issue.url,
 		});
-		yield* trackGitHubIssueCreated({
-			userId: input.discordUserId,
-			guildId: input.originalGuildId,
-			channelId: input.originalChannelId,
-			messageId: input.originalMessageId,
-			threadId: input.originalThreadId,
-			repoOwner: input.repo.owner,
-			repoName: input.repo.name,
-			issueNumber: result.issue.number,
-			issueUrl: result.issue.url,
-			issuesInBatch: 1,
-		}).pipe(
-			Effect.provide(PostHogCaptureClientLayer),
-			Effect.catchAll(() => Effect.void),
-		);
 
 		return {
 			issueUrl: result.issue.url,
@@ -810,13 +774,6 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 	const database = yield* Database;
 	const reacord = yield* Reacord;
 
-	yield* trackGitHubIssueCommandUsed({
-		userId: interaction.user.id,
-		guildId: interaction.guildId ?? "unknown",
-		channelId: interaction.channelId ?? "unknown",
-		messageId: interaction.targetId,
-	}).pipe(Effect.catchAll(() => Effect.void));
-
 	const targetMessage = yield* discord
 		.callClient(() => interaction.channel?.messages.fetch(interaction.targetId))
 		.pipe(Effect.withSpan("fetch_target_message"));
@@ -896,12 +853,6 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 			"rate_limit.hit": true,
 			"rate_limit.retry_after_seconds": retrySeconds,
 		});
-		yield* trackGitHubIssueRateLimited({
-			userId: interaction.user.id,
-			guildId: interaction.guildId ?? "unknown",
-			rateLimitType: "ai_extraction",
-			retryAfterSeconds: retrySeconds,
-		}).pipe(Effect.catchAll(() => Effect.void));
 		yield* discord.callClient(() =>
 			interaction.editReply({
 				content: `You're using this too quickly. Please try again in ${retrySeconds} seconds.`,
@@ -939,16 +890,6 @@ export const handleConvertToGitHubIssueCommand = Effect.fn(
 		"ai.used_fallback": usedFallback,
 		"ai.extraction_duration_ms": aiExtractionDuration,
 	});
-
-	yield* trackGitHubIssueAIExtraction({
-		userId: interaction.user.id,
-		guildId: interaction.guildId ?? "unknown",
-		channelId: interaction.channelId ?? "unknown",
-		messageId: interaction.targetId,
-		issuesExtracted: extractedIssues.length,
-		usedFallback,
-		messageLength: targetMessage.content.length,
-	}).pipe(Effect.catchAll(() => Effect.void));
 
 	const commandDuration = Date.now() - commandStartTime;
 	yield* Metric.update(githubIssueCommandDuration, commandDuration);

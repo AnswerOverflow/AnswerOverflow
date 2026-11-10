@@ -4,10 +4,7 @@ import { Discord } from "../core/discord-service";
 import { eventsProcessed } from "../metrics";
 import { isAllowedThreadChannel } from "../utils/conversions";
 import { catchAllWithReport } from "../utils/error-reporting";
-import {
-	handleSendMarkSolutionInstructions,
-	trackQuestionAsked,
-} from "./send-mark-solution-instructions";
+import { handleSendMarkSolutionInstructions } from "./send-mark-solution-instructions";
 
 export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 	Effect.gen(function* () {
@@ -40,6 +37,16 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 					return;
 				}
 
+				if (!parentChannel.flags?.sendMarkSolutionInstructionsInNewThreads) {
+					return;
+				}
+
+				const excludedTagIds = ["1456027795842011240", "1456027945692041501"];
+				const threadTags = "appliedTags" in thread ? thread.appliedTags : [];
+				if (threadTags.some((tagId) => excludedTagIds.includes(tagId))) {
+					return;
+				}
+
 				const firstMessage = yield* discord.callClient(() =>
 					thread.fetchStarterMessage(),
 				);
@@ -57,23 +64,6 @@ export const SendMarkSolutionInstructionsHandlerLayer = Layer.scopedDiscard(
 				);
 
 				if (!questionAsker) {
-					return;
-				}
-
-				yield* trackQuestionAsked(
-					thread,
-					parentChannel,
-					questionAsker,
-					firstMessage ?? null,
-				);
-
-				if (!parentChannel.flags?.sendMarkSolutionInstructionsInNewThreads) {
-					return;
-				}
-
-				const excludedTagIds = ["1456027795842011240", "1456027945692041501"];
-				const threadTags = "appliedTags" in thread ? thread.appliedTags : [];
-				if (threadTags.some((tagId) => excludedTagIds.includes(tagId))) {
 					return;
 				}
 

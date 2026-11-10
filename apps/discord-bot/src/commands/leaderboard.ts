@@ -11,11 +11,6 @@ import {
 import { Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { commandExecuted } from "../metrics";
-import { trackLeaderboardViewed } from "../utils/analytics";
-import {
-	catchAllSilentWithReport,
-	catchAllSucceedNullWithReport,
-} from "../utils/error-reporting";
 
 const medalMap = new Map<number, string>([
 	[0, ":first_place:"],
@@ -116,16 +111,6 @@ export const handleLeaderboardCommand = Effect.fn("leaderboard_command")(
 						makeDismissButton(interaction.user.id),
 					),
 				];
-
-		const guild = interaction.guild;
-		if (guild) {
-			const member = yield* catchAllSucceedNullWithReport(
-				discord.callClient(() => guild.members.fetch(interaction.user.id)),
-			);
-			if (member) {
-				yield* catchAllSilentWithReport(trackLeaderboardViewed(member));
-			}
-		}
 
 		yield* discord.callClient(() =>
 			interaction.editReply({

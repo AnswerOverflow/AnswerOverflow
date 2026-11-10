@@ -46,11 +46,6 @@ export const FUNCTION_TYPE_MAP = {
   "dashboard_queries.getIndexedMessageCount": "query",
   "dashboard_queries.getUserServersForDropdown": "query",
   "dashboard.getDashboardRolesForServer": "action",
-  "dashboard.getPageViewsForServer": "action",
-  "dashboard.getQuestionsAndAnswers": "action",
-  "dashboard.getServerInvitesClicked": "action",
-  "dashboard.getTopPagesForServer": "action",
-  "dashboard.getTopQuestionSolversForServer": "action",
   "dashboard.getUserServers": "action",
   "dashboard.trackBotAddClick": "action",
   "discord_accounts.deleteDiscordAccount": "mutation",
@@ -158,7 +153,7 @@ export const NAMESPACE_STRUCTURE = {
 
 export const AUTHENTICATED_NAMESPACE_STRUCTURE = {
   "admin": [],
-  "dashboard": ["getDashboardRolesForServer","getPageViewsForServer","getQuestionsAndAnswers","getServerInvitesClicked","getTopPagesForServer","getTopQuestionSolversForServer","getUserServers","trackBotAddClick"],
+  "dashboard": ["getDashboardRolesForServer","getUserServers","trackBotAddClick"],
   "dashboard_mutations": ["generateBotCustomizationUploadUrl","updateBotCustomization","updateChannelSettingsFlags","updateChannelSolutionTag","updateChannelTagsToRemoveOnSolve","updateCustomDomain","updateServerPreferencesFlags"],
   "dashboard_queries": ["getDashboardData","getIndexedMessageCount","getUserServersForDropdown"],
   "discord_token": [],

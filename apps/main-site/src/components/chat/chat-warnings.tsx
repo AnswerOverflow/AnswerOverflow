@@ -1,6 +1,5 @@
 "use client";
 
-import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { Button } from "@packages/ui/components/button";
 import { useUserSubscription } from "@packages/ui/hooks/use-user-subscription";
 import { AlertCircle as AlertCircleIcon, LockIcon } from "lucide-react";
@@ -38,7 +37,6 @@ export function RateLimitWarning({
 	plan?: "FREE" | "PRO";
 }) {
 	const { startCheckout, isCheckoutLoading } = useUserSubscription();
-	const posthog = usePostHog();
 
 	const showUpgrade = !isAnonymous && plan === "FREE";
 
@@ -48,11 +46,6 @@ export function RateLimitWarning({
 			: `${remaining} message${remaining === 1 ? "" : "s"} remaining.${resetsAt ? ` Resets in ${formatTimeUntilReset(resetsAt)}.` : ""}`;
 
 	const handleCheckoutClick = () => {
-		trackEvent(
-			"Chat Checkout Started",
-			{ plan: "PRO", priceAmount: 500, currentPlan: plan ?? "FREE" },
-			posthog,
-		);
 		startCheckout();
 	};
 

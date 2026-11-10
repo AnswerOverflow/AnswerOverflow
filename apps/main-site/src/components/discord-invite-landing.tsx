@@ -1,6 +1,5 @@
 "use client";
 
-import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,
@@ -17,7 +16,6 @@ import { useState } from "react";
 
 type DiscordInviteLandingProps = {
 	inviteCode: string;
-	guildId: string;
 	guildName: string;
 	guildIconUrl: string | null;
 	guildDescription: string | null;
@@ -34,14 +32,12 @@ They've got an about page to learn more & it's free to use: https://answeroverfl
 
 export function DiscordInviteLanding({
 	inviteCode,
-	guildId,
 	guildName,
 	guildIconUrl,
 	guildDescription,
 	memberCount,
 	onlineCount,
 }: DiscordInviteLandingProps) {
-	const posthog = usePostHog();
 	const discordInviteUrl = `https://discord.com/invite/${inviteCode}`;
 
 	const [copied, setCopied] = useState(false);
@@ -49,22 +45,9 @@ export function DiscordInviteLanding({
 	const [inviteMessage, setInviteMessage] = useState(defaultMessage);
 
 	const handleCopy = async () => {
-		trackEvent(
-			"Invite Page Copy Message",
-			{ serverName: guildName, guildId },
-			posthog,
-		);
 		await navigator.clipboard.writeText(inviteMessage);
 		setCopied(true);
 		setTimeout(() => setCopied(false), 2000);
-	};
-
-	const handleJoinDiscord = () => {
-		trackEvent(
-			"Invite Page Join Discord",
-			{ serverName: guildName, guildId, inviteUrl: discordInviteUrl },
-			posthog,
-		);
 	};
 
 	return (
@@ -118,7 +101,6 @@ export function DiscordInviteLanding({
 							href={discordInviteUrl}
 							target="_blank"
 							rel="noopener noreferrer"
-							onClick={handleJoinDiscord}
 						>
 							<DiscordIcon className="size-4" />
 							Join {guildName} on Discord

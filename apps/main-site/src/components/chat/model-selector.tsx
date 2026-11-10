@@ -25,12 +25,10 @@ import { useState } from "react";
 export function ModelSelector({
 	selectedModel,
 	onSelectModel,
-	onModelChange,
 	compact = false,
 }: {
 	selectedModel: string;
 	onSelectModel: (modelId: string) => void;
-	onModelChange?: (modelId: string, previousModelId: string) => void;
 	compact?: boolean;
 }) {
 	const [open, setOpen] = useState(false);
@@ -61,9 +59,6 @@ export function ModelSelector({
 										<CommandItem
 											key={m.id}
 											onSelect={() => {
-												if (m.id !== selectedModel) {
-													onModelChange?.(m.id, selectedModel);
-												}
 												onSelectModel(m.id);
 												setOpen(false);
 											}}

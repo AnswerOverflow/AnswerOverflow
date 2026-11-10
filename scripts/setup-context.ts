@@ -32,8 +32,6 @@ const REPOS = [
 	},
 	{ name: "ai-elements", url: "https://github.com/vercel/ai-elements.git" },
 	{ name: "vercel-ai", url: "https://github.com/vercel/ai.git" },
-	{ name: "posthog-com", url: "https://github.com/PostHog/posthog.com.git" },
-	{ name: "posthog", url: "https://github.com/PostHog/posthog.git" },
 ];
 
 async function main() {

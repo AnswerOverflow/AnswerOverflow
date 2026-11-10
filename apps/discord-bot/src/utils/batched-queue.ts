@@ -1,4 +1,3 @@
-import { captureEffectCause } from "@packages/observability/sentry";
 import {
 	Chunk,
 	type Duration,
@@ -32,11 +31,7 @@ export function createBatchedQueue<A, E, R>(options: {
 					.process(Chunk.toArray(chunk))
 					.pipe(
 						Effect.catchAllCause((cause) =>
-							Effect.sync(() => captureEffectCause(cause)).pipe(
-								Effect.andThen(
-									Effect.logError("Batch processing failed", cause),
-								),
-							),
+							Effect.logError("Batch processing failed", cause),
 						),
 					),
 			),

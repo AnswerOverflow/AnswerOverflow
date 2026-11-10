@@ -52,8 +52,6 @@ export function ChatMessages({
 						key={message.key}
 						message={message}
 						isLastMessage={message.key === lastMessageKey}
-						threadId={chat.currentThreadId ?? null}
-						onCopyMessage={chat.handleCopyMessage}
 						agentStatus={chat.agentStatus}
 					/>
 				))}

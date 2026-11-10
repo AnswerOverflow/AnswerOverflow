@@ -36,7 +36,7 @@ async function hashApiKey(key: string): Promise<string> {
 }
 
 describe("api.messages.updateSolution", () => {
-	it.scoped("returns tracking payload and ignores idempotent replays", () =>
+	it.scoped("sets the solution and ignores idempotent replays", () =>
 		Effect.gen(function* () {
 			const database = yield* Database;
 			const convexClient = yield* ConvexClientTest;
@@ -157,12 +157,7 @@ describe("api.messages.updateSolution", () => {
 				}),
 			);
 
-			expect(firstResult).not.toBeNull();
-			expect(firstResult?.channel.id).toBe(forum.id.toString());
-			expect(firstResult?.thread.id).toBe(thread.id.toString());
-			expect(firstResult?.questionSolver.id).toBe(answerAuthor.id.toString());
-			expect(firstResult?.markAsSolver.id).toBe(apiCaller.id.toString());
-			expect(firstResult?.accountId).toBe(answerAuthor.id.toString());
+			expect(firstResult).toBeNull();
 
 			const storedAnswer = yield* database.private.messages.getMessageById(
 				{ id: answer.id },
@@ -179,6 +174,12 @@ describe("api.messages.updateSolution", () => {
 			);
 
 			expect(secondResult).toBeNull();
+
+			const replayedAnswer = yield* database.private.messages.getMessageById(
+				{ id: answer.id },
+				{ subscribe: false },
+			);
+			expect(replayedAnswer?.questionId).toBe(question.id);
 		}).pipe(Effect.provide(DatabaseTestLayer)),
 	);
 });

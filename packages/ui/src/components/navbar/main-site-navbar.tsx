@@ -5,7 +5,6 @@ import { AnswerOverflowLogo } from "../answer-overflow-logo";
 import { useSession } from "../convex-client-provider";
 import { Link } from "../link";
 import { LinkButton } from "../link-button";
-import { FeedbackButton } from "./feedback-button";
 import { GitHubStarButton } from "./github-star-button";
 import { NavbarBase } from "./navbar-base";
 import { UserSection } from "./user-section";
@@ -39,9 +38,6 @@ export function MainSiteNavbar({
 			</LinkButton>
 			<div className="hidden md:block">
 				<GitHubStarButton starCount={githubStars ?? null} />
-			</div>
-			<div className="hidden md:block">
-				<FeedbackButton />
 			</div>
 			{!session?.user && (
 				<LinkButton

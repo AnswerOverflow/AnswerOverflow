@@ -1,6 +1,5 @@
 import type { Server } from "@packages/database/convex/schema";
 import { Database } from "@packages/database/database";
-import { SessionRecording } from "@packages/ui/analytics/client";
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -51,11 +50,8 @@ async function AboutPageLoader() {
 
 export default function AboutPage() {
 	return (
-		<>
-			<SessionRecording />
-			<Suspense fallback={<AboutPageSkeleton />}>
-				<AboutPageLoader />
-			</Suspense>
-		</>
+		<Suspense fallback={<AboutPageSkeleton />}>
+			<AboutPageLoader />
+		</Suspense>
 	);
 }

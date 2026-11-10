@@ -1,9 +1,5 @@
-import { PostHogCaptureClientLayer } from "@packages/database/analytics/server/capture-client";
-import { track } from "@packages/database/analytics/server/tracking";
 import { api } from "@packages/database/convex/_generated/api";
-import type { SolvedQuestionTrackingPayload } from "@packages/database/convex/api/messages";
 import { ConvexHttpClient } from "convex/browser";
-import { Effect } from "effect";
 
 function getConvexClient() {
 	return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -13,19 +9,6 @@ type MarkSolutionResult =
 	| { success: true }
 	| { success: false; status: 400 | 401 | 403 | 404 | 500; error: string };
 
-async function trackSolvedQuestionFromApi(
-	payload: SolvedQuestionTrackingPayload,
-) {
-	const { timeToSolveInMs, ...props } = payload;
-
-	await Effect.runPromise(
-		track("Solved Question", {
-			...props,
-			"Time To Solve In Ms": timeToSolveInMs,
-		}).pipe(Effect.provide(PostHogCaptureClientLayer)),
-	);
-}
-
 export async function handleMarkSolution(args: {
 	messageId: string;
 	solutionId: string | null;
@@ -34,25 +17,11 @@ export async function handleMarkSolution(args: {
 	const client = getConvexClient();
 
 	try {
-		const trackingPayload = await client.mutation(
-			api.api.messages.updateSolution,
-			{
-				messageId: BigInt(args.messageId),
-				solutionId: args.solutionId ? BigInt(args.solutionId) : null,
-				apiKey: args.apiKey,
-			},
-		);
-
-		if (trackingPayload) {
-			try {
-				await trackSolvedQuestionFromApi(trackingPayload);
-			} catch (trackingError) {
-				console.error(
-					"Error tracking solved question analytics:",
-					trackingError,
-				);
-			}
-		}
+		await client.mutation(api.api.messages.updateSolution, {
+			messageId: BigInt(args.messageId),
+			solutionId: args.solutionId ? BigInt(args.solutionId) : null,
+			apiKey: args.apiKey,
+		});
 
 		return { success: true };
 	} catch (error) {

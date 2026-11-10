@@ -14,7 +14,6 @@ import { useSession } from "@packages/ui/components/convex-client-provider";
 import { Link } from "@packages/ui/components/link";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQueryWithStatus } from "@packages/ui/hooks/use-query-with-status";
-import * as Sentry from "@sentry/nextjs";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { useAction } from "convex/react";
 import { useRouter } from "next/navigation";
@@ -100,7 +99,7 @@ export default function OnboardingPage() {
 		try {
 			await trackBotAddClick({ serverId: BigInt(discordId) });
 		} catch (error) {
-			Sentry.captureException(error);
+			console.error("Failed to record bot add click:", error);
 		}
 
 		const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${discordClientId}&permissions=328565083201&scope=bot+applications.commands&guild_id=${discordId}&disable_guild_select=true`;

@@ -20,13 +20,11 @@ import {
 } from "effect";
 import { Discord } from "../core/discord-service";
 import { commandExecuted } from "../metrics";
-import { trackQuickActionCommandSent } from "../utils/analytics";
 import {
 	ANSWER_OVERFLOW_BLUE_HEX,
 	makeDismissButton,
 } from "../utils/discord-components";
 import {
-	catchAllSilentWithReport,
 	catchAllSucceedNullWithReport,
 	catchAllWithReport,
 } from "../utils/error-reporting";
@@ -195,12 +193,6 @@ export const handleQuickActionCommand = Effect.fn("interaction.quick_action")(
 				components: [dismissRow],
 			}),
 		);
-
-		if (requestorAsMember) {
-			yield* catchAllSilentWithReport(
-				trackQuickActionCommandSent(requestorAsMember),
-			);
-		}
 
 		yield* discord.callClient(() => interaction.deleteReply());
 	},

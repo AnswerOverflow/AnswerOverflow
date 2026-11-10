@@ -1,6 +1,5 @@
 "use client";
 
-import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { Button } from "@packages/ui/components/button";
 import { Code } from "@packages/ui/components/code";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@packages/ui/components/dialog";
 import { ModelContextProtocol } from "@packages/ui/components/icons/mcp";
 import { Input } from "@packages/ui/components/input";
+import { Link } from "@packages/ui/components/link";
 import {
 	Select,
 	SelectContent,
@@ -21,7 +21,6 @@ import {
 	SelectValue,
 } from "@packages/ui/components/select";
 import { useTenant } from "@packages/ui/components/tenant-context";
-import { TrackLink } from "@packages/ui/components/track-link";
 import { cn } from "@packages/ui/lib/utils";
 import { getTenantCanonicalUrl } from "@packages/ui/utils/links";
 import { Check, Copy, Heart } from "lucide-react";
@@ -38,19 +37,12 @@ const BOWIE_IMAGES = [
 	"https://cdn.answeroverflow.com/1486155058285379784/HENxNsRb0AAfnGN.png",
 ];
 
-export function CopyButton({
-	text,
-	onCopy,
-}: {
-	text: string;
-	onCopy?: () => void;
-}) {
+export function CopyButton({ text }: { text: string }) {
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = async () => {
 		await navigator.clipboard.writeText(text);
 		setCopied(true);
-		onCopy?.();
 		setTimeout(() => setCopied(false), 2000);
 	};
 
@@ -75,7 +67,6 @@ export function ProviderSelector({
 	mcpUrl: string;
 	serverName: string;
 }) {
-	const posthog = usePostHog();
 	const [selectedProvider, setSelectedProvider] = useQueryState("provider", {
 		defaultValue: "claude-code",
 	});
@@ -85,15 +76,6 @@ export function ProviderSelector({
 
 	const handleProviderChange = (value: string) => {
 		setSelectedProvider(value);
-		trackEvent("MCP Provider Select", { provider: value }, posthog);
-	};
-
-	const handleInstallCopy = () => {
-		trackEvent(
-			"MCP Install Copy Click",
-			{ provider: selectedProvider, url: mcpUrl },
-			posthog,
-		);
 	};
 
 	return (
@@ -130,7 +112,6 @@ export function ProviderSelector({
 					<Code
 						code={config.content}
 						language={config.type === "json" ? "json" : "bash"}
-						onCopy={handleInstallCopy}
 					/>
 				</div>
 			)}
@@ -145,20 +126,6 @@ export function MCPInstallForm({
 	mcpUrl: string;
 	serverName: string;
 }) {
-	const posthog = usePostHog();
-
-	const handleUrlCopy = () => {
-		trackEvent("MCP URL Copy Click", { url: mcpUrl }, posthog);
-	};
-
-	const handleAddMcpCopy = () => {
-		trackEvent(
-			"MCP Install Copy Click",
-			{ provider: "add-mcp", url: mcpUrl },
-			posthog,
-		);
-	};
-
 	return (
 		<div className="space-y-4 min-w-0">
 			<div className="min-w-0">
@@ -169,7 +136,6 @@ export function MCPInstallForm({
 				<Code
 					code={`npx add-mcp ${mcpUrl} --name ${serverName}`}
 					language="bash"
-					onCopy={handleAddMcpCopy}
 				/>
 			</div>
 
@@ -181,7 +147,7 @@ export function MCPInstallForm({
 						readOnly
 						className="font-mono text-sm min-w-0"
 					/>
-					<CopyButton text={mcpUrl} onCopy={handleUrlCopy} />
+					<CopyButton text={mcpUrl} />
 				</div>
 			</div>
 
@@ -305,13 +271,8 @@ export function ResourcesSidebar({
 			<nav className="space-y-0.5">
 				<MCPServerResource />
 				{sponsorUrl && (
-					<TrackLink
+					<Link
 						href={sponsorUrl}
-						eventName="Sponsor Link Click"
-						eventData={{
-							url: sponsorUrl,
-							type: isGitHubSponsor ? "github" : "other",
-						}}
 						className={cn(
 							"flex items-center gap-2 py-1.5 rounded text-sm transition-colors w-full",
 							"text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -319,7 +280,7 @@ export function ResourcesSidebar({
 					>
 						<Heart className="size-4 shrink-0 opacity-60" />
 						<span className="truncate">{sponsorLabel}</span>
-					</TrackLink>
+					</Link>
 				)}
 			</nav>
 		</div>

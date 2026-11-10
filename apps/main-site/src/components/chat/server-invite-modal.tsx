@@ -1,6 +1,5 @@
 "use client";
 
-import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import { Button } from "@packages/ui/components/button";
 import {
 	Dialog,
@@ -34,26 +33,14 @@ export function ServerInviteModal({
 	serverName,
 	discordInviteUrl,
 }: ServerInviteModalProps) {
-	const posthog = usePostHog();
 	const [copied, setCopied] = useState(false);
 	const defaultMessage = getServerMessage(serverName);
 	const [inviteMessage, setInviteMessage] = useState(defaultMessage);
 
 	const handleCopy = async () => {
-		trackEvent("Chat Discord CTA Copy Message", { serverName }, posthog);
 		await navigator.clipboard.writeText(inviteMessage);
 		setCopied(true);
 		setTimeout(() => setCopied(false), 2000);
-	};
-
-	const handleJoinDiscord = () => {
-		if (discordInviteUrl) {
-			trackEvent(
-				"Chat Discord CTA Join",
-				{ serverName, inviteUrl: discordInviteUrl },
-				posthog,
-			);
-		}
 	};
 
 	return (
@@ -98,7 +85,6 @@ export function ServerInviteModal({
 									href={discordInviteUrl}
 									target="_blank"
 									rel="noopener noreferrer"
-									onClick={handleJoinDiscord}
 								>
 									<DiscordIcon className="size-4 mr-2" />
 									Join Discord

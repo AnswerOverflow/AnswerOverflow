@@ -3,11 +3,7 @@ import { Message, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { Console, Effect, Layer, Metric } from "effect";
 import { Discord, UnknownDiscordError } from "../core/discord-service";
 import { eventsProcessed } from "../metrics";
-import { trackDismissButtonClicked } from "../utils/analytics";
-import {
-	catchAllSilentWithReport,
-	catchAllWithReport,
-} from "../utils/error-reporting";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 const DISMISS_ACTION_PREFIX = "dismiss";
 const DISMISS_OVERRIDE_PERMISSIONS = [
@@ -112,10 +108,6 @@ export const handleDismissButtonInteraction = Effect.fn(
 	if (!(messageToDismiss instanceof Message)) {
 		return yield* Effect.fail(new Error("Message not found"));
 	}
-
-	yield* catchAllSilentWithReport(
-		trackDismissButtonClicked(dismisser, messageToDismiss),
-	);
 
 	yield* handleDismissMessage({
 		messageToDismiss: messageToDismiss,

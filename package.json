@@ -6,7 +6,6 @@
 		"setup:context": "bun scripts/setup-context.ts",
 		"ci": "bun run lint && bun run typecheck && bun run test",
 		"dev": "turbo run dev",
-		"dev:with:dbs": "bun scripts/start-dbs.ts && turbo run dev",
 		"build": "turbo run build",
 		"typecheck": "turbo run typecheck --filter='!@packages/convex-test' --filter='!@packages/agent'",
 		"typecheck:slow": "turbo run typecheck:slow --filter='!@packages/convex-test'",
@@ -98,8 +97,6 @@
 	},
 	"overrides": {
 		"@modelcontextprotocol/sdk": "1.17.5",
-		"import-in-the-middle": "^2.0.0",
-		"require-in-the-middle": "^8.0.1",
 		"effect": "^3.20.0",
 		"@effect/platform": "^0.93.6",
 		"@ai-sdk/provider-utils": "4.0.2",

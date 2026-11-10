@@ -1,5 +1,5 @@
 import { Database } from "@packages/database/database";
-import type { ButtonInteraction, GuildMember } from "discord.js";
+import type { ButtonInteraction } from "discord.js";
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -15,10 +15,6 @@ import {
 } from "../commands/feedback";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed } from "../metrics";
-import {
-	trackSimilarThreadSolvedClicked,
-	trackSimilarThreadsButtonClicked,
-} from "../utils/analytics";
 import {
 	SIMILAR_THREAD_SOLVED_ACTION_PREFIX,
 	SIMILAR_THREADS_ACTION_PREFIX,
@@ -254,15 +250,6 @@ export const handleSimilarThreadsButtonInteraction = Effect.fn(
 			components: [...rows, feedbackRow],
 		}),
 	);
-
-	const member = interaction.member;
-	if (member && "user" in member) {
-		yield* trackSimilarThreadsButtonClicked(
-			member as GuildMember,
-			thread,
-			threadCount,
-		);
-	}
 });
 
 export const handleSimilarThreadSolvedButtonInteraction = Effect.fn(
@@ -323,15 +310,6 @@ export const handleSimilarThreadSolvedButtonInteraction = Effect.fn(
 				"Thanks! I've posted a message in the thread linking to the solution.",
 		}),
 	);
-
-	const member = interaction.member;
-	if (member && "user" in member) {
-		yield* trackSimilarThreadSolvedClicked(
-			member as GuildMember,
-			sourceThread,
-			similarThreadId,
-		);
-	}
 });
 
 export const SimilarThreadsButtonHandlerLayer = Layer.scopedDiscard(

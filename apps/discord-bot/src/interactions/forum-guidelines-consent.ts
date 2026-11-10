@@ -4,12 +4,8 @@ import { ChannelType } from "discord.js";
 import { Console, Effect, Layer, Metric } from "effect";
 import { Discord } from "../core/discord-service";
 import { eventsProcessed } from "../metrics";
-import { ConsentSource, trackUserGrantConsent } from "../utils/analytics";
 import { grantPublicDisplayConsent, isAccountIgnored } from "../utils/consent";
-import {
-	catchAllSilentWithReport,
-	catchAllWithReport,
-} from "../utils/error-reporting";
+import { catchAllWithReport } from "../utils/error-reporting";
 
 export const handleForumGuidelinesConsent = Effect.fn(
 	"event.forum_guidelines_consent",
@@ -74,12 +70,6 @@ export const handleForumGuidelinesConsent = Effect.fn(
 	);
 
 	if (granted) {
-		const member = message.member;
-		if (member) {
-			yield* catchAllSilentWithReport(
-				trackUserGrantConsent(member, ConsentSource.ForumPostGuidelines),
-			);
-		}
 		yield* Console.log(
 			`Granted forum guidelines consent for user ${message.author.id} in server ${server.discordId}`,
 		);

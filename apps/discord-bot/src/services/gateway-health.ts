@@ -1,7 +1,3 @@
-import {
-	captureException,
-	captureMessage,
-} from "@packages/observability/sentry";
 import { Status } from "discord.js";
 import { Console, Duration, Effect, Layer, Ref, Schedule } from "effect";
 import { DiscordClient } from "../core/discord-client-service";
@@ -18,12 +14,10 @@ const startGatewayMonitoring = Effect.gen(function* () {
 	client.on("shardDisconnect", (closeEvent, shardId) => {
 		const message = `Shard ${shardId} disconnected with code ${closeEvent.code} reason: ${closeEvent.reason || "none"}`;
 		console.error(`[GatewayHealth] ${message}`);
-		captureMessage(message, "error");
 	});
 
 	client.on("shardReconnecting", (shardId) => {
 		console.warn(`[GatewayHealth] Shard ${shardId} reconnecting...`);
-		captureMessage(`Shard ${shardId} reconnecting`, "warning");
 	});
 
 	client.on("shardResume", (shardId, replayedEvents) => {
@@ -35,18 +29,11 @@ const startGatewayMonitoring = Effect.gen(function* () {
 	client.on("shardError", (error, shardId) => {
 		const message = `Shard ${shardId} error: ${error.message}`;
 		console.error(`[GatewayHealth] ${message}`);
-		captureException(error, {
-			tags: { discord_event: "shardError", shard_id: String(shardId) },
-		});
 	});
 
 	client.on("invalidated", () => {
 		console.error(
 			"[GatewayHealth] Client session invalidated! Bot will be non-functional.",
-		);
-		captureMessage(
-			"Discord client session invalidated - bot non-functional",
-			"error",
 		);
 		process.exit(1);
 	});
@@ -110,10 +97,6 @@ const startHealthCheck = Effect.gen(function* () {
 				yield* Console.log(
 					`Gateway connection recovered after ${String(failures)} failed checks, ${String(silenceCount)} silence checks (ping: ${String(wsPing)}ms)`,
 				);
-				captureMessage(
-					`Gateway recovered after ${String(failures)} failed health checks, ${String(silenceCount)} silence checks`,
-					"info",
-				);
 			}
 			yield* Ref.set(consecutiveFailures, 0);
 			yield* Ref.set(consecutiveEventSilence, 0);
@@ -134,7 +117,6 @@ const startHealthCheck = Effect.gen(function* () {
 			if (newFailures >= maxConsecutiveFailures) {
 				const message = `Gateway dead for ${String(Duration.toMillis(GATEWAY_DEATH_TIMEOUT) / 1000)}s (${String(newFailures)} consecutive failures). Status: ${statusName}, Ping: ${String(wsPing)}ms. Forcing restart.`;
 				console.error(`[GatewayHealth] ${message}`);
-				captureMessage(message, "error");
 
 				try {
 					yield* discord.callClient(() => client.destroy());
@@ -161,7 +143,6 @@ const startHealthCheck = Effect.gen(function* () {
 			if (newSilenceCount >= maxEventSilenceChecks) {
 				const message = `Gateway zombie - no events received for ${String(silenceDurationSec)}s despite appearing healthy (status=${statusName}, ping=${String(wsPing)}ms). Forcing restart.`;
 				console.error(`[GatewayHealth] ${message}`);
-				captureMessage(message, "error");
 
 				try {
 					yield* discord.callClient(() => client.destroy());

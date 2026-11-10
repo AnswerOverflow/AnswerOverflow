@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@packages/database/convex/_generated/api";
-import { SessionRecording } from "@packages/ui/analytics/client";
 import { useSession } from "@packages/ui/components/convex-client-provider";
 import {
 	DashboardNavbar,
@@ -78,17 +77,11 @@ export default function DashboardLayout({
 	}
 
 	if (hideNavbar) {
-		return (
-			<>
-				<SessionRecording />
-				{children}
-			</>
-		);
+		return children;
 	}
 
 	return (
 		<DashboardNavbar serverSelect={serverSelectProps}>
-			<SessionRecording />
 			{children}
 		</DashboardNavbar>
 	);

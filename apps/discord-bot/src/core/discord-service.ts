@@ -1,10 +1,4 @@
 import {
-	captureEffectCause,
-	captureException,
-	captureMessage,
-	setTag,
-} from "@packages/observability/sentry";
-import {
 	type ActivityType,
 	ChannelType,
 	type Client,
@@ -88,18 +82,11 @@ export const createDiscordService = Effect.gen(function* () {
 
 	const setupErrorListeners = () => {
 		client.on("error", (error) => {
-			captureException(error, { tags: { discord_event: "error" } });
-		});
-
-		client.on("shardError", (error, shardId) => {
-			captureException(error, {
-				tags: { discord_event: "shardError", shard_id: String(shardId) },
-			});
+			console.error("[Discord] Client error:", error);
 		});
 
 		client.on("warn", (message) => {
-			captureMessage(message, "warning");
-			setTag("discord_event", "warn");
+			console.warn(`[Discord] ${message}`);
 		});
 	};
 
@@ -132,11 +119,7 @@ export const createDiscordService = Effect.gen(function* () {
 
 				const handlerEffect = Effect.scoped(handler(...args)).pipe(
 					Effect.tapErrorCause((cause) =>
-						Effect.sync(() => {
-							captureEffectCause(cause, {
-								tags: { discord_event: eventKey },
-							});
-						}),
+						Effect.logError(`Discord event handler failed: ${eventKey}`, cause),
 					),
 				);
 

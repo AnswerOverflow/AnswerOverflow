@@ -7,7 +7,6 @@ import {
 import { api } from "@packages/database/convex/_generated/api";
 import type { AgentStatus } from "@packages/database/convex/schema";
 import { defaultModelId, getModelById } from "@packages/database/models";
-import { trackEvent, usePostHog } from "@packages/ui/analytics/client";
 import {
 	useAuthClient,
 	useSession,
@@ -42,7 +41,6 @@ export function useChatState({
 	const session = useSession({ allowAnonymous: true });
 	const isAuthenticated = !!session?.data;
 	const authClient = useAuthClient();
-	const posthog = usePostHog();
 
 	const [input, setInput] = useState(initialInput ?? "");
 	const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(
@@ -168,11 +166,6 @@ export function useChatState({
 	const showEmptyState = !currentThreadId && !hasMessages;
 
 	const handleSignIn = async () => {
-		trackEvent(
-			"Chat Sign In Click",
-			{ location: "rate_limit_warning" },
-			posthog,
-		);
 		await authClient.signIn.social({
 			provider: "discord",
 			callbackURL: window.location.href,
@@ -188,18 +181,6 @@ export function useChatState({
 		if (isNewThread) {
 			setOptimisticUserMessage(text);
 		}
-
-		trackEvent(
-			"Chat Message Sent",
-			{
-				threadId: currentThreadId ?? null,
-				repoOwner: effectiveRepo?.owner ?? null,
-				repoName: effectiveRepo?.repo ?? null,
-				modelId: model,
-				isNewThread,
-			},
-			posthog,
-		);
 
 		const { threadId, messageId } = await sendMessage({
 			threadId: currentThreadId,
@@ -235,20 +216,10 @@ export function useChatState({
 				serverContext: effectiveServerContext,
 				promptMessageId: messageId,
 				modelId: model,
-				userId: session?.data?.user?.id,
-				userPlan: rateLimitStatus?.plan,
 			});
 		} catch (error) {
 			console.error("streamChat error:", error);
 		}
-	};
-
-	const handleCopyMessage = (threadId: string | null) => {
-		trackEvent("Chat Copy Message Click", { threadId }, posthog);
-	};
-
-	const handleModelChange = (modelId: string, previousModelId: string) => {
-		trackEvent("Chat Model Changed", { modelId, previousModelId }, posthog);
 	};
 
 	const isSubmitDisabled =
@@ -308,8 +279,6 @@ export function useChatState({
 
 		handleSignIn,
 		handleSubmit,
-		handleCopyMessage,
-		handleModelChange,
 		reset,
 	};
 }
