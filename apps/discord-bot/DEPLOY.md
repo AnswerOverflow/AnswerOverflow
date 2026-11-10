@@ -20,13 +20,8 @@ directory is the repository root, as daemons require.
 | `BACKEND_ACCESS_TOKEN` | Sensitive |
 | `PUBLIC_BACKEND_ACCESS_TOKEN` | Sensitive |
 | `AI_GATEWAY_API_KEY` | Sensitive |
-| `AXIOM_API_TOKEN` | Sensitive |
-| `POSTHOG_PERSONAL_API_KEY` | Sensitive |
-| `SENTRY_DSN` | Sensitive |
 | `NEXT_PUBLIC_CONVEX_URL` | Plain |
 | `NEXT_PUBLIC_BASE_URL` | Plain |
-| `NEXT_PUBLIC_POSTHOG_TOKEN` | Plain |
-| `POSTHOG_PROJECT_ID` | Plain |
 | `BUCKET_NAME` | Plain |
 | `AWS_ROLE_ARN` | Plain; the S3 role below |
 | `AWS_REGION` | Plain; `us-east-1` |
