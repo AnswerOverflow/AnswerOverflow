@@ -85,23 +85,20 @@ const nextConfig: NextConfig = {
 			},
 			{
 				source: "/sitemap-:path",
-				destination:
-					"https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path",
+				destination: "https://cdn.answeroverflow.com/sitemaps/sitemap-:path",
 			},
 			{
 				source: "/sitemap.xml",
-				destination:
-					"https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap.xml",
+				destination: "https://cdn.answeroverflow.com/sitemaps/sitemap.xml",
 			},
 			{
 				source: "/sitemap:path",
-				destination:
-					"https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/sitemap-:path",
+				destination: "https://cdn.answeroverflow.com/sitemaps/sitemap-:path",
 			},
 			{
 				source: "/c/:serverId/sitemap.xml",
 				destination:
-					"https://answer-overflow-discord-attachments.s3.amazonaws.com/sitemaps/servers/:serverId.xml",
+					"https://cdn.answeroverflow.com/sitemaps/servers-v2/:serverId.xml",
 			},
 			{
 				source: `/api/${process.env.NEXT_PUBLIC_ANALYTICS_PATH ?? "a"}/static/:path*`,
@@ -118,6 +115,23 @@ const nextConfig: NextConfig = {
 			? undefined
 			: "https://www.answeroverflow.com/",
 	skipTrailingSlashRedirect: true,
+	headers: async () => {
+		// Thread pages render the same HTML for every visitor, and each render
+		// costs several Convex queries plus a search. Let the Cloudflare edge
+		// in front of the site keep them. Only Cloudflare reads this header;
+		// the zone's cache rule decides which statuses are cacheable.
+		const threadPageCache = [
+			{
+				key: "Cloudflare-CDN-Cache-Control",
+				value:
+					"public, max-age=21600, stale-while-revalidate=604800, stale-if-error=2592000",
+			},
+		];
+		return [
+			{ source: "/m/:messageId", headers: threadPageCache },
+			{ source: "/:subpath/m/:messageId", headers: threadPageCache },
+		];
+	},
 	redirects: async () => {
 		return [
 			{
