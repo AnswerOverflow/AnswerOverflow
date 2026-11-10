@@ -19,7 +19,9 @@ import {
 } from "../utils/error-reporting";
 
 const SITEMAP_CONFIG = {
-	cronExpression: "0 4 * * *",
+	// Weekly: a full rebuild walks every thread of every server, which was the
+	// largest Convex database-read cost when it ran daily.
+	cronExpression: "0 4 * * 0",
 	cronTimezone: "America/Los_Angeles",
 	threadsPerChunk: 10000,
 	serverProcessDelay: Duration.seconds(1),
