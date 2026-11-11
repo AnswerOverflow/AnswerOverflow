@@ -78,6 +78,7 @@ import type * as shared_dataAccess from "../shared/dataAccess.js";
 import type * as shared_github from "../shared/github.js";
 import type * as shared_guildManagerPermissions from "../shared/guildManagerPermissions.js";
 import type * as shared_index from "../shared/index.js";
+import type * as shared_mediaUrl from "../shared/mediaUrl.js";
 import type * as shared_mentions from "../shared/mentions.js";
 import type * as shared_messagePrivacy from "../shared/messagePrivacy.js";
 import type * as shared_messages from "../shared/messages.js";
@@ -175,6 +176,7 @@ declare const fullApi: ApiFromModules<{
   "shared/github": typeof shared_github;
   "shared/guildManagerPermissions": typeof shared_guildManagerPermissions;
   "shared/index": typeof shared_index;
+  "shared/mediaUrl": typeof shared_mediaUrl;
   "shared/mentions": typeof shared_mentions;
   "shared/messagePrivacy": typeof shared_messagePrivacy;
   "shared/messages": typeof shared_messages;
