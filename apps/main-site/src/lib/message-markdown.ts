@@ -1,5 +1,6 @@
 import { isImageAttachment } from "@packages/ui/utils/attachments";
 import { encodeCursor } from "@packages/ui/utils/cursor";
+import { hasRenderableContent, MessageType } from "@packages/ui/utils/discord";
 import { getDate } from "@packages/ui/utils/snowflake";
 import type {
 	MessagePageHeaderData,
@@ -66,6 +67,7 @@ function formatReply(
 }
 
 const HIDDEN_AUTHOR_IDS = [958907348389339146n];
+const HIDDEN_MESSAGE_TYPES = [MessageType.ThreadStarterMessage];
 
 export function buildMessageMarkdown(data: {
 	headerData: MessagePageHeaderData;
@@ -115,14 +117,17 @@ export function buildMessageMarkdown(data: {
 		lines.push("---");
 	}
 
-	if (replies.page.length > 0) {
+	const filteredReplies = replies.page.filter(
+		(r) =>
+			!HIDDEN_AUTHOR_IDS.includes(r.message.authorId) &&
+			!HIDDEN_MESSAGE_TYPES.includes(r.message.type ?? 0) &&
+			hasRenderableContent(r),
+	);
+
+	if (filteredReplies.length > 0) {
 		lines.push("");
 		lines.push("## Replies");
 		lines.push("");
-
-		const filteredReplies = replies.page.filter(
-			(r) => !HIDDEN_AUTHOR_IDS.includes(r.message.authorId),
-		);
 
 		for (let i = 0; i < filteredReplies.length; i++) {
 			const reply = filteredReplies[i];
