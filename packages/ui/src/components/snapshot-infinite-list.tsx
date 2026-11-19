@@ -9,7 +9,8 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { Virtuoso } from "react-virtuoso";
+import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
+import { resolveScrollTarget } from "../utils/scroll-target";
 
 type SnapshotPage<Item> = {
 	page: Array<Item>;
@@ -33,7 +34,21 @@ type SnapshotInfiniteListProps<Item> = {
 	itemClassName?: string;
 	initialData?: SnapshotPage<Item>;
 	filterResults?: (items: Array<Item>) => Array<Item>;
+	/** Stable id per item, required for `registerScroller` to find an item. */
+	getItemId?: (item: Item) => string;
+	/**
+	 * Hands the caller a function that scrolls an item into view by id, loading
+	 * further pages until the item is found. Returns a cleanup function.
+	 */
+	registerScroller?: (scroller: (itemId: string) => boolean) => () => void;
+	/**
+	 * Called once the scrolled-to item has rendered. Return false to be called
+	 * again on the next frame, e.g. while waiting for the element to mount.
+	 */
+	onScrolledToItem?: (itemId: string) => boolean;
 };
+
+const SCROLL_RENDER_ATTEMPTS = 30;
 
 function LoadingSkeletons({
 	count,
@@ -64,8 +79,13 @@ export function SnapshotInfiniteList<Item>({
 	itemClassName = "mb-4",
 	initialData,
 	filterResults,
+	getItemId,
+	registerScroller,
+	onScrolledToItem,
 }: SnapshotInfiniteListProps<Item>) {
 	const generationRef = useRef(0);
+	const virtuosoRef = useRef<VirtuosoHandle>(null);
+	const pendingScrollIdRef = useRef<string | null>(null);
 	const lastLoadedLength = useRef(0);
 	const [pages, setPages] = useState<Array<SnapshotPage<Item>>>(() =>
 		initialData ? [initialData] : [],
@@ -188,6 +208,93 @@ export function SnapshotInfiniteList<Item>({
 		[canLoadMore, continueCursor, fetchPage, pageSize, results],
 	);
 
+	const loadNextPage = useEffectEvent(() => {
+		if (!canLoadMore || continueCursor === null) {
+			return;
+		}
+		setIsLoadingMore(true);
+		void fetchPage({
+			cursor: continueCursor,
+			numItems: pageSize,
+			append: true,
+			generation: generationRef.current,
+		});
+	});
+
+	const scrollToItemIndex = useEffectEvent((index: number, itemId: string) => {
+		virtuosoRef.current?.scrollToIndex({
+			index,
+			align: "center",
+			behavior: "auto",
+		});
+		if (!onScrolledToItem) {
+			return;
+		}
+		// The item mounts a frame or two after Virtuoso scrolls to it.
+		let attempts = SCROLL_RENDER_ATTEMPTS;
+		const tick = () => {
+			if (onScrolledToItem(itemId) || attempts-- <= 0) {
+				return;
+			}
+			requestAnimationFrame(tick);
+		};
+		requestAnimationFrame(tick);
+	});
+
+	const scrollToItem = useEffectEvent((itemId: string) => {
+		if (!getItemId) {
+			return false;
+		}
+		const resolution = resolveScrollTarget({
+			items: results,
+			getItemId,
+			targetId: itemId,
+			isDone,
+		});
+		if (resolution.type === "scroll") {
+			pendingScrollIdRef.current = null;
+			scrollToItemIndex(resolution.index, itemId);
+			return true;
+		}
+		if (resolution.type === "unreachable") {
+			return false;
+		}
+		// Not paged in yet, keep loading until it shows up.
+		pendingScrollIdRef.current = itemId;
+		loadNextPage();
+		return true;
+	});
+
+	useEffect(() => {
+		if (!registerScroller) {
+			return;
+		}
+		return registerScroller(scrollToItem);
+	}, [registerScroller]);
+
+	useEffect(() => {
+		const pending = pendingScrollIdRef.current;
+		if (pending === null || !getItemId) {
+			return;
+		}
+		const resolution = resolveScrollTarget({
+			items: results,
+			getItemId,
+			targetId: pending,
+			isDone,
+		});
+		if (resolution.type === "scroll") {
+			pendingScrollIdRef.current = null;
+			scrollToItemIndex(resolution.index, pending);
+			return;
+		}
+		if (resolution.type === "unreachable") {
+			pendingScrollIdRef.current = null;
+			return;
+		}
+		loadNextPage();
+	}, [results, isDone, getItemId]);
+
 	if (error) {
 		throw error;
 	}
@@ -219,6 +326,7 @@ export function SnapshotInfiniteList<Item>({
 
 	return (
 		<Virtuoso
+			ref={virtuosoRef}
 			useWindowScroll
 			data={results}
 			className={className}

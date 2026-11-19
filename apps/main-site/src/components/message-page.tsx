@@ -7,7 +7,11 @@ import { FormattedNumber } from "@packages/ui/components/formatted-number";
 import { JumpToSolution } from "@packages/ui/components/jump-to-solution";
 import { Link } from "@packages/ui/components/link";
 import { MessageBody } from "@packages/ui/components/message-body";
-import { MessageResultPageProvider } from "@packages/ui/components/message-result-page-context";
+import {
+	highlightMessage,
+	MessageResultPageProvider,
+	useMessageResultPageContext,
+} from "@packages/ui/components/message-result-page-context";
 import { Separator } from "@packages/ui/components/separator";
 import { ServerIcon } from "@packages/ui/components/server-icon";
 import { ServerInviteJoinButton } from "@packages/ui/components/server-invite";
@@ -33,7 +37,7 @@ import type { FunctionReturnType } from "convex/server";
 import { CheckCircle2, MessageSquare } from "lucide-react";
 import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { CrawlablePaginationNav } from "@/components/crawlable-pagination-nav";
 import { FloatingAskInput } from "@/components/floating-ask-input";
 import { JsonLdScript } from "@/components/json-ld-script";
@@ -170,6 +174,7 @@ export function MessageContent(props: {
 				m.message.id !== firstMessage?.message.id,
 		);
 	const convex = useConvex();
+	const { registerMessageScroller } = useMessageResultPageContext();
 	const loadMessagesPage = useCallback(
 		({ cursor, numItems }: { cursor: string | null; numItems: number }) =>
 			convex.query(api.public.messages.getMessages, {
@@ -222,6 +227,9 @@ export function MessageContent(props: {
 					initialLoaderCount={3}
 					loader={<ReplyMessageSkeleton />}
 					filterResults={filterMessages}
+					getItemId={(message) => message.message.id.toString()}
+					registerScroller={registerMessageScroller}
+					onScrolledToItem={highlightMessage}
 					emptyState={
 						<div className="text-center py-8 text-muted-foreground">
 							No replies yet
@@ -335,6 +343,8 @@ export function RepliesSection(props: {
 			}
 		: undefined;
 
+	const { registerMessageScroller } = useMessageResultPageContext();
+
 	return (
 		<>
 			<div className="rounded-md">
@@ -346,6 +356,9 @@ export function RepliesSection(props: {
 						loader={<ReplyMessageSkeleton />}
 						initialData={filteredInitialData}
 						filterResults={filterMessages}
+						getItemId={(message) => message.message.id.toString()}
+						registerScroller={registerMessageScroller}
+						onScrolledToItem={highlightMessage}
 						// biome-ignore lint/complexity/noUselessFragments: needed for now
 						emptyState={<></>}
 						footer={
@@ -396,15 +409,6 @@ export function MessagePage(props: {
 
 	const tenant = useTenant();
 	const [focusMessageId] = useQueryState("focus");
-
-	useEffect(() => {
-		if (focusMessageId) {
-			const element = document.getElementById(`message-${focusMessageId}`);
-			if (element) {
-				element.scrollIntoView({ behavior: "instant", block: "center" });
-			}
-		}
-	}, [focusMessageId]);
 
 	const rootMessageDeleted = headerData.firstMessage === null;
 	const firstMessage = headerData.firstMessage;
@@ -519,7 +523,7 @@ export function MessagePage(props: {
 			: null;
 
 	return (
-		<MessageResultPageProvider>
+		<MessageResultPageProvider focusMessageId={focusMessageId}>
 			<div className="mx-auto pt-2 pb-16">
 				{jsonLdData && (
 					<JsonLdScript data={jsonLdData} scriptKey="message-jsonld" />
